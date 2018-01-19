@@ -21,6 +21,7 @@ DyDNS.ModErr="This service has been added/modified and therefore you must save y
 DyDNS.UpFErr="Update failed.  Ensure your configuration is valid and that you are connected to the internet.";
 DyDNS.UpOK="Update successful.";
 DyDNS.UpSrvErr="Could not update service class.";
+DyDNS.NoScriptErr="You need to install an additional package to use this provider!";
 
 //ddns_edit.sh
 DyDNS.EDSect="Edit Dynamic DNS Service";

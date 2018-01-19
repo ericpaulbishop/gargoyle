@@ -22,6 +22,12 @@
 		echo "updateTimes[\"$update\"] = " $(cat /var/last_ddns_updates/$update) ";"
 	done
 
+	echo "extScripts = new Array();"
+	external_scripts=$(ls /usr/lib/ddns-gargoyle 2&>1)
+	for script in $external_scripts ; do
+		echo "extScripts.push(\""$script"\");"
+	done
+
 %>
 //-->
 </script>
@@ -35,6 +41,7 @@
 			</div>
 			<div class="panel-body">
 				<span id="add_ddns_label"><p><%~ AddDy %>:</p></span>
+				<div id="ddns_no_script" class="alert alert-danger" role="alert" style="display: none;"><%~ NoScriptErr %></div>
 				<div class="row form-group">
 					<label class="col-xs-5" for="ddns_provider" id="ddns_provider_label"><%~ SvPro %>:</label>
 					<span class="col-xs-7"><select class="form-control" id="ddns_provider" onchange="setProvider()"></select></span>
