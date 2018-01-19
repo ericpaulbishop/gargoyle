@@ -819,7 +819,7 @@ function forceUpdateForRow()
 			{
 				var responseLines=req.responseText.split(/[\r\n]+/);
 				setControlsEnabled(true);
-				if(responseLines[0] == "0")
+				if(responseLines[0].match(/0/))
 				{
 					alert(DyDNS.UpFErr);
 				}
