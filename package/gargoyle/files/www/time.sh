@@ -32,7 +32,7 @@
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ Section %></h3>
 			</div>
-				<div class="panel-body">
+			<div class="panel-body">
 				<div class="row form-group">
 					<label class="col-xs-5" id="current_time_label" for="current_time"><%~ CurrTime %>:</label>
 					<span class="col-xs-7" id="current_time"></span>

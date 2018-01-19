@@ -23,7 +23,7 @@
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ IdSect %></h3>
 			</div>
-				<div class="panel-body">
+			<div class="panel-body">
 				<div class="row form-group">
 					<label class="col-xs-5" for="hostname" id="hostname_label"><%~ HsNm %></label>
 					<span class="col-xs-7"><input type="text" id="hostname" class="form-control" onkeyup="proofreadLengthRange(this,1,999)"  size="35" maxlength="25"/></span>

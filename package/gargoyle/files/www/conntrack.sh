@@ -33,7 +33,7 @@
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ CCSect %></h3>
 			</div>
-				<div class="panel-body">
+			<div class="panel-body">
 				<div class="row form-group">
 					<label class="col-xs-5" for="refresh_rate"><%~ RRate %>:</label>
 					<span class="col-xs-7">

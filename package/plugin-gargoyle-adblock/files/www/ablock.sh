@@ -27,7 +27,7 @@
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ Adblock %></h3>
 			</div>
-				<div class="panel-body">
+			<div class="panel-body">
 				<div class="row form-group">
 					<span class="col-xs-1"><input id="adblock_enable" type="checkbox" /></span>
 					<label class="col-xs-11" id="adblock_enable_label" for="adblock_enable"><%~ ADBLOCKEn %></label>

@@ -18,7 +18,7 @@
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ CSect %></h3>
 			</div>
-				<div class="panel-body">
+			<div class="panel-body">
 				<p><span class="contributer">Eric Bishop (<a href="http://gargoyle-router.com">gargoyle-router.com</a>):</span> <%~ EBishop %></p>
 
 				<p><span class="contributer">Paul Bixel:</span> <%~ PBixel %></p>
@@ -55,7 +55,7 @@
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ LSect %></h3>
 			</div>
-				<div class="panel-body">
+			<div class="panel-body">
 				<h3>Gargoyle is copyright &copy; 2008-2016 by Eric Bishop</h3>
 
 				<p>Gargoyle is free software; you can redistribute it and/or modify it under the terms of the

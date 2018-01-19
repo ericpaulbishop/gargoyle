@@ -42,7 +42,7 @@
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ Services %></h3>
 			</div>
-				<div class="panel-body">
+			<div class="panel-body">
 				<div id="initd_table_container" class="table-responsive"></div>
 			</div>
 		</div>

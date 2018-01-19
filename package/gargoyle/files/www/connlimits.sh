@@ -35,7 +35,7 @@
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ CLSect %></h3>
 			</div>
-				<div class="panel-body">
+			<div class="panel-body">
 				<div class="row form-group">
 					<label class="col-xs-5" for="max_connections" id="max_connections_label"><%~ MaxC %>:</label>
 					<span class="col-xs-7">

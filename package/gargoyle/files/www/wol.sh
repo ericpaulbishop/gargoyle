@@ -38,7 +38,7 @@ var arpLines;
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ WLSect %></h3>
 			</div>
-				<div class="panel-body">
+			<div class="panel-body">
 				<div id="wol_table_container" class="table-responsive"></div>
 
 				<div id="wol_help">
