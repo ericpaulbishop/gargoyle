@@ -567,6 +567,15 @@ function setProvider(controlDocument)
 	}
 	if(provider != null) //should NEVER be null, but test just in case
 	{
+		var ext_script = provider["external_script"];
+		controlDocument.getElementById("ddns_no_script").style.display="none";
+		if(ext_script != "")
+		{
+			if(extScripts.indexOf(ext_script) == -1)
+			{
+				controlDocument.getElementById("ddns_no_script").style.display="block";
+			}
+		}
 		var variables = provider["variables"];
 		var variableNames = provider["variable_names"];
 		var newElements = new Array();
@@ -728,6 +737,7 @@ function parseProviderData()
 			provider["optional_variables"] = [];
 			provider["optional_variable_names"] = [];
 			provider["boolean_variables"] = [];
+			provider["external_script"] = "";
 
 			line = "";
 			providerLineIndex++;
@@ -758,6 +768,11 @@ function parseProviderData()
 				{
 					variablePart = (line.match(/ariables[\t ]+(.*)$/))[1];
 					provider["boolean_variables"] = variablePart.split(/[\t ]+/);
+				}
+				else if(line.match(/^[\t ]*external_script[\t ]+/))
+				{
+					variablePart = (line.match(/script[\t ]+(.*)$/))[1];
+					provider["external_script"] = variablePart;
 				}
 				providerLineIndex++;
 			}
@@ -804,7 +819,7 @@ function forceUpdateForRow()
 			{
 				var responseLines=req.responseText.split(/[\r\n]+/);
 				setControlsEnabled(true);
-				if(responseLines[0] == "0")
+				if(responseLines[0].match(/0/))
 				{
 					alert(DyDNS.UpFErr);
 				}
