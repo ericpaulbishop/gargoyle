@@ -71,7 +71,7 @@ var passInvalid = false;
 
 <div class="row">
 	<div class="col-lg-12">
-		<div class="panel panel-primary">
+		<div class="panel panel-default">
 			<div class="panel-body">
 				<div class="row form-group">
 					<label class="sr-only" for="password" id="password_label"><%~ EAdmP %></label>
@@ -87,7 +87,7 @@ var passInvalid = false;
 
 <div class="row">
 	<div class="col-lg-4">
-		<div id="current_time" class="panel panel-info">
+		<div id="current_time" class="panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ CTime %></h3>
 			</div>
@@ -99,7 +99,7 @@ var passInvalid = false;
 	</div>
 
 	<div class="col-lg-4">
-		<div id="current_ip" class="panel panel-info">
+		<div id="current_ip" class="panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ CIP %></h3>
 			</div>
@@ -112,7 +112,7 @@ var passInvalid = false;
 </div>
 <div class="row">
 	<div class="col-lg-4">
-		<div id="local_quotas" class="panel panel-info" style="display:none">
+		<div id="local_quotas" class="panel panel-default" style="display:none">
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ YQot %></h3>
 			</div>
@@ -121,7 +121,7 @@ var passInvalid = false;
 	</div>
 
 	<div class="col-lg-4">
-		<div id="global_quotas" class="panel panel-info" style="display:none">
+		<div id="global_quotas" class="panel panel-default" style="display:none">
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ NQot %></h3>
 			</div>
