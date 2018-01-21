@@ -25,15 +25,15 @@ set_version_variables()
 {
 
 	#openwrt branch
-	branch_name="Chaos Calmer"
-	branch_id="chaos_calmer"
-	packages_branch="for-15.05"
+	branch_name="Re-merge"
+	branch_id="master"
+	packages_branch="packages"
 
 
 	# set precise commit in repo to use 
 	# you can set this to an alternate commit 
 	# or empty to checkout latest 
-	openwrt_commit="e6fbf31baae41b618ff333f3ae55ff032333bd6a"
+	openwrt_commit="36f1978a701cc76b2cd2e4c73ce5f2d5d68c4c51"
 	openwrt_abbrev_commit=$( echo "$openwrt_commit" | cut -b 1-7 )
 	
 
@@ -471,7 +471,7 @@ if [ ! -d "$openwrt_src_dir" ] ; then
 	echo "fetching openwrt source"
 	rm -rf "$branch_name" "$branch_id"
 
-	git clone  https://github.com/openwrt/$branch_id.git "$openwrt_src_dir"
+	git clone  https://github.com/openwrt/openwrt.git "$openwrt_src_dir"
 
 	if [ ! -d "$openwrt_src_dir" ] ; then
 		echo "ERROR: could not download source, exiting"
@@ -595,7 +595,7 @@ for target in $targets ; do
 	if [ "$target" = "custom" ] ; then
 		if [ ! -d "$openwrt_package_dir" ] ; then
 			
-			git clone https://github.com/openwrt/packages.git "$openwrt_package_dir"
+			git clone https://github.com/openwrt/"$packages_branch".git "$openwrt_package_dir"
 			cd "$openwrt_package_dir"
 			if [ -n "$packages_branch" ] ; then
 				git checkout "$packages_branch"

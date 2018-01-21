@@ -1,8 +1,0 @@
---- a/package/system/opkg/files/opkg.conf	2011-07-05 12:21:07.058893966 -0400
-+++ b/package/system/opkg/files/opkg.conf	2011-07-05 12:59:45.805329997 -0400
-@@ -1,4 +1,5 @@
-+src/gz gargoyle http://www.gargoyle-router.com/packages/gargoyle-1.10/%T
- dest root /
- dest ram /tmp
- lists_dir ext /var/opkg-lists
- option overlay_root /overlay
