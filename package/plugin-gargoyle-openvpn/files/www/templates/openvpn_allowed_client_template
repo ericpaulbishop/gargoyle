@@ -41,8 +41,10 @@
 	<span style="clear:both"></span>
 </div>
 <div id="openvpn_allowed_client_prefer_vpngateway_container" class="row form-group" >
-	<label class="col-xs-5" id='openvpn_allowed_client_prefer_vpngateway_label' for='openvpn_allowed_client_prefer_vpngateway'><%~ PrefVPNGtwy %>:</label>
-	<span class="col-xs-7"><input type="checkbox" id="openvpn_allowed_client_prefer_vpngateway"></span>
+	<span class="col-xs-12">
+		<input type="checkbox" id="openvpn_allowed_client_prefer_vpngateway">
+		<label id='openvpn_allowed_client_prefer_vpngateway_label' for='openvpn_allowed_client_prefer_vpngateway'><%~ PrefVPNGtwy %></label>
+	</span>
 </div>
 
 <input class="form-control" style="display:none" id="openvpn_allowed_client_initial_id" />
