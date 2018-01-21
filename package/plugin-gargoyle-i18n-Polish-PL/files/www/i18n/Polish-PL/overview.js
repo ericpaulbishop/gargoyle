@@ -21,6 +21,7 @@ ovwS.CPUAvg="Średnie obciążenie CPU";
 ovwS.Uptm="Czas pracy";
 ovwS.CDaT="Bieżąca data i czas";
 ovwS.BrIPA="Adres IP Mostu";
+ovwS.BrRIP="Adres IP Przekaźnika";
 ovwS.BrNMsk="Maska podsieci Mostu";
 ovwS.BrMAdd="Adres MAC Mostu";
 ovwS.LGtwy="Adres IP bramy LAN";
