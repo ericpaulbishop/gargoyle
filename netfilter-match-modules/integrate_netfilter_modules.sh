@@ -128,7 +128,12 @@ KERNEL_PATCHVER_NAME:=$(shell echo "$(KERNEL_PATCHVER)" | sed 's/ /\./g' |  sed 
 
 GENERIC_PLATFORM_DIR := $(TOPDIR)/target/linux/generic
 PLATFORM_DIR:=$(TOPDIR)/target/linux/$(BOARD)
+
+GENERIC_BACKPORT_PATCH_DIR := $(GENERIC_PLATFORM_DIR)/backport-$(KERNEL_NAME)
+GENERIC_PENDING_PATCH_DIR := $(GENERIC_PLATFORM_DIR)/pending-$(KERNEL_NAME)
+GENERIC_HACK_PATCH_DIR := $(GENERIC_PLATFORM_DIR)/hack-$(KERNEL_NAME)
 GENERIC_PATCH_DIR := $(GENERIC_PLATFORM_DIR)/patches-$(KERNEL_NAME)
+
 GENERIC_FILES_DIR := $(GENERIC_PLATFORM_DIR)/files
 GENERIC_LINUX_CONFIG:=$(firstword $(wildcard $(GENERIC_PLATFORM_DIR)/config-$(KERNEL_PATCHVER_NAME) $(GENERIC_PLATFORM_DIR)/config-default))
 PATCH_DIR := $(PLATFORM_DIR)/patches$(shell [ -d "$(PLATFORM_DIR)/patches-$(KERNEL_PATCHVER_NAME)" ] && printf -- "-$(KERNEL_PATCHVER_NAME)" || true )
@@ -166,10 +171,18 @@ all:
 		$(CP) $(FILES_DIR)/* $(LINUX_DIR)/; \
 		find $(LINUX_DIR)/ -name \*.rej | xargs rm -f; \
 	fi
+
+	if [ -d "$(GENERIC_BACKPORT_PATCH_DIR)" ] ; then $(SCRIPT_DIR)/patch-kernel.sh linux $(GENERIC_BACKPORT_PATCH_DIR) ; fi
+	if [ -d "$(GENERIC_PENDING_PATCH_DIR)" ] ; then $(SCRIPT_DIR)/patch-kernel.sh linux $(GENERIC_PENDING_PATCH_DIR) ; fi
+	if [ -d "$(GENERIC_HACK_PATCH_DIR)" ] ; then $(SCRIPT_DIR)/patch-kernel.sh linux $(GENERIC_HACK_PATCH_DIR) ; fi
 	if [ -d "$(GENERIC_PATCH_DIR)" ] ; then $(SCRIPT_DIR)/patch-kernel.sh linux $(GENERIC_PATCH_DIR) ; fi
 	if [ -d "$(PATCH_DIR)" ] ; then $(SCRIPT_DIR)/patch-kernel.sh linux $(PATCH_DIR) ; fi
 	mkdir -p "$(GENERIC_PATCH_DIR)"
 	mkdir -p "$(PATCH_DIR)"
+
+	echo $(GENERIC_BACKPORT_PATCH_DIR) > generic-backport-patch-dir
+	echo $(GENERIC_PENDING_PATCH_DIR) > generic-pending-patch-dir
+	echo $(GENERIC_HACK_PATCH_DIR) > generic-hack-patch-dir
 	echo $(GENERIC_PATCH_DIR) > generic-patch-dir
 	echo $(GENERIC_LINUX_CONFIG) > generic-config-file
 	echo $(PATCH_DIR) > patch-dir
@@ -187,12 +200,16 @@ EOF
 	package_include_line_num=$(cat package/network/utils/iptables/Makefile | egrep -n "include.*package.mk" | sed 's/:.*$//g' )
 	head -n $package_include_line_num package/network/utils/iptables/Makefile | awk ' { if( ( $0 !~ /^include/ ) && ($0 !~ /^#/ )){ print $0 ; }} ' >> nf-patch-build/iptables-download-make
 
+	echo '' >> nf-patch-build/iptables-download-make
+	echo 'include $(TOPDIR)/include/download.mk' >> nf-patch-build/iptables-download-make
+	echo '' >> nf-patch-build/iptables-download-make
+	
 
 	echo 'all:' >> nf-patch-build/iptables-download-make
 	echo '	if [ ! -e "$(DL_DIR)/$(PKG_SOURCE)" ] ; then  TOPDIR="$(TOPDIR)" $(SCRIPT_DIR)/download.pl $(DL_DIR) $(PKG_SOURCE) $(PKG_MD5SUM)  $(PKG_SOURCE)  $(PKG_SOURCE_URL) ; fi ; ' >> nf-patch-build/iptables-download-make
 	echo '	cp $(DL_DIR)/$(PKG_SOURCE) . ' >>nf-patch-build/iptables-download-make
-	echo '	tar xjf $(PKG_SOURCE)' >>nf-patch-build/iptables-download-make
-	echo '	rm *.bz2' >>nf-patch-build/iptables-download-make
+	echo '	tar xf $(PKG_SOURCE)' >>nf-patch-build/iptables-download-make
+	echo '	rm -rf *.bz2 *.xz' >>nf-patch-build/iptables-download-make
 	echo '	mv iptables* iptables' >>nf-patch-build/iptables-download-make
 	echo '	$(SCRIPT_DIR)/patch-kernel.sh iptables $(TOPDIR)/package/network/utils/iptables/patches/' >>nf-patch-build/iptables-download-make
 	echo '	echo $(TOPDIR)/package/network/utils/iptables/patches/ > iptables-patch-dir' >>nf-patch-build/iptables-download-make
@@ -221,12 +238,12 @@ if [ "$patch_kernel" = 1 ] ; then
 
 
 	generic_config_file=$(cat generic-config-file)
-	generic_patch_dir=$(cat generic-patch-dir)
+	#generic_patch_dir=$(cat generic-hack-patch-dir)
 	config_file=$(cat config-file)
 	patch_dir=$(cat patch-dir)
 	iptables_patch_dir=$(cat iptables-patch-dir)
 	
-	mkdir -p "$generic_patch_dir"
+	#mkdir -p "$generic_patch_dir"
 	mkdir -p "$iptables_patch_dir"
 	mkdir -p "$patch_dir"
 fi
@@ -360,5 +377,5 @@ fi
 #cleanup
 cd ..
 
-rm -rf nf-patch-build
+#rm -rf nf-patch-build
 
