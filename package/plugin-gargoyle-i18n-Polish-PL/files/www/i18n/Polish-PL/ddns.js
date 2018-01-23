@@ -21,6 +21,7 @@ DyDNS.ModErr="Serwis został dodany lub zmodyfikowany. Zmiany muszą zostać zap
 DyDNS.UpFErr="Błąd aktualizacji. Upewnij się, że Twoja konfiguracja jest poprawna i jest połączenie do internetu.";
 DyDNS.UpOK="Aktualizacja zakończona powodzeniem.";
 DyDNS.UpSrvErr="Nie można zaktualizować klasy serwisu.";
+DyDNS.NoScriptErr="Aby skorzystać z tego dostawcy, musisz zainstalować dodatkowy pakiet!";
 
 //ddns_edit.sh
 DyDNS.EDSect="Edycja usługi Dynamiczny DNS";

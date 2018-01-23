@@ -123,8 +123,10 @@ for (etherIndex in etherData)
 			</div>
 			<div class="panel-body">
 				<div id="block_mismatches_container" class="row form-group">
-					<span class="col-xs-1"><input type="checkbox" id="block_mismatches" /></span>
-					<label class="col-xs-11" id="block_mismatch_label" for="block_mismatches"><%~ BlckM %></label>
+					<span class="col-xs-12">
+						<input type="checkbox" id="block_mismatches" />
+						<label id="block_mismatch_label" for="block_mismatches"><%~ BlckM %></label>
+					</span>
 				</div>
 
 				<div id="staticip_add_heading_container" class="row form-group">

@@ -18,8 +18,10 @@
 			</div>
 			<div class="panel-body">
 				<div class="row form-group">
-					<span class="col-xs-1"><input type='checkbox' id='ping_watchdog_enable' onchange="unlockFields();"/></span>
-					<label class="col-xs-11" for='ping_watchdog_enable' id='ping_watchdog_enable_label'><%~ EnbP %></label>
+					<span class="col-xs-12">
+						<input type='checkbox' id='ping_watchdog_enable' onchange="unlockFields();"/>
+						<label for='ping_watchdog_enable' id='ping_watchdog_enable_label'><%~ EnbP %></label>
+					</span>
 				</div>
 
 				<div class="row form-group">

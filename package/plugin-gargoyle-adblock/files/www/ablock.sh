@@ -29,8 +29,10 @@
 			</div>
 			<div class="panel-body">
 				<div class="row form-group">
-					<span class="col-xs-1"><input id="adblock_enable" type="checkbox" /></span>
-					<label class="col-xs-11" id="adblock_enable_label" for="adblock_enable"><%~ ADBLOCKEn %></label>
+					<span class="col-xs-12">
+						<input id="adblock_enable" type="checkbox" />
+						<label id="adblock_enable_label" for="adblock_enable"><%~ ADBLOCKEn %></label>
+					</span>
 				</div>
 
 				<div class="row form-group">
@@ -42,8 +44,10 @@
 				</div>
 
 				<div class="row form-group">
-					<label id="adblock_transparent_label" class="col-xs-5" for="adblock_transparent"><%~ ADBLOCKTrans %>:</label>
-					<span class="col-xs-7"><input id="adblock_transparent" type="checkbox" /></span>
+					<span class="col-xs-12">
+						<input id="adblock_transparent" type="checkbox" />
+						<label id="adblock_transparent_label" for="adblock_transparent"><%~ ADBLOCKTrans %></label>
+					</span>
 				</div>
 
 				<div id="adblock_help" class="row">
@@ -56,8 +60,10 @@
 				<div class="internal_divider"></div>
 
 				<div class="row form-group">
-					<label class="col-xs-5" id="adblock_exempten_label" for="adblock_exempten"><%~ ADBLOCKExemptEn %>:</label>
-					<span class="col-xs-7"><input id="adblock_exempten" type="checkbox" /></span>
+					<span class="col-xs-12">
+						<input id="adblock_exempten" type="checkbox" />
+						<label id="adblock_exempten_label" for="adblock_exempten"><%~ ADBLOCKExemptEn %>:</label>
+					</span>
 				</div>
 
 				<div class="form-group">

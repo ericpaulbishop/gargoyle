@@ -33,8 +33,10 @@
 
 			<div class="panel-body">
 				<div class="row form-group">
-					<span class="col-xs-1"><input type="checkbox" id="webmon_enabled" class="" onclick="setWebmonEnabled()" /></span>
-					<label class="col-xs-11" id="webmon_enabled_label" for="webmon_enabled"><%~ EMon %></label>
+					<span class="col-xs-12">
+						<input type="checkbox" id="webmon_enabled" onclick="setWebmonEnabled()" />
+						<label id="webmon_enabled_label" for="webmon_enabled"><%~ EMon %></label>
+					</span>
 				</div>
 
 				<div>
