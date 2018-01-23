@@ -2433,11 +2433,11 @@ static struct nf_sockopt_ops ipt_bandwidth_sockopts =
 static struct xt_match bandwidth_match __read_mostly = 
 {
 	.name		= "bandwidth",
-	.match		= &match,
+	.match		= match,
 	.family		= AF_INET,
 	.matchsize	= sizeof(struct ipt_bandwidth_info),
-	.checkentry	= &checkentry,
-	.destroy	= &destroy,
+	.checkentry	= checkentry,
+	.destroy	= destroy,
 	.me		= THIS_MODULE,
 };
 

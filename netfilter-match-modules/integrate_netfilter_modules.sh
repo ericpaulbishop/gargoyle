@@ -177,7 +177,6 @@ all:
 	if [ -d "$(GENERIC_HACK_PATCH_DIR)" ] ; then $(SCRIPT_DIR)/patch-kernel.sh linux $(GENERIC_HACK_PATCH_DIR) ; fi
 	if [ -d "$(GENERIC_PATCH_DIR)" ] ; then $(SCRIPT_DIR)/patch-kernel.sh linux $(GENERIC_PATCH_DIR) ; fi
 	if [ -d "$(PATCH_DIR)" ] ; then $(SCRIPT_DIR)/patch-kernel.sh linux $(PATCH_DIR) ; fi
-	mkdir -p "$(GENERIC_PATCH_DIR)"
 	mkdir -p "$(PATCH_DIR)"
 
 	echo $(GENERIC_BACKPORT_PATCH_DIR) > generic-backport-patch-dir
@@ -238,12 +237,10 @@ if [ "$patch_kernel" = 1 ] ; then
 
 
 	generic_config_file=$(cat generic-config-file)
-	#generic_patch_dir=$(cat generic-hack-patch-dir)
 	config_file=$(cat config-file)
 	patch_dir=$(cat patch-dir)
 	iptables_patch_dir=$(cat iptables-patch-dir)
 	
-	#mkdir -p "$generic_patch_dir"
 	mkdir -p "$iptables_patch_dir"
 	mkdir -p "$patch_dir"
 fi
@@ -377,5 +374,5 @@ fi
 #cleanup
 cd ..
 
-#rm -rf nf-patch-build
+rm -rf nf-patch-build
 
