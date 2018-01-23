@@ -66,8 +66,10 @@ for (etherIndex in etherData)
 			</div>
 			<div class="panel-body">
 				<div class="row form-group" id="dhcp_enabled_container">
-					<span class="col-xs-1"><input type="checkbox" id="dhcp_enabled" onclick="setEnabled(this.checked)" /></span>
-					<label class="col-xs-11" id="dhcp_enabled_label" for="dhcp_enabled"><%~ SrvE %></label>
+					<span class="col-xs-12">
+ 						<input type="checkbox" id="dhcp_enabled" onclick="setEnabled(this.checked)" />
+ 						<label id="dhcp_enabled_label" for="dhcp_enabled"><%~ dhcp.SrvE %></label>
+ 					</span>
 				</div>
 
 				<div id="dhcp_range_container" class="row form-group">
