@@ -274,9 +274,13 @@ num_build_thread_str=""
 if [ "$num_build_threads" = "single" ] ; then
 	num_build_threads="1"
 	num_build_thread_str="-j1"
-elif [ "$num_build_threads" = "" ] || [ "$num_build_threads" = "auto" ] ; then
-	num_build_threads="auto"
+elif [ "$num_build_threads" = "" ] || [ "$num_build_threads" = "unspecified" ] ; then
+	num_build_threads="unspecified"
 	num_build_thread_str=""
+elif [ "$num_build_threads" = "auto" ] ; then
+	num_cores=$(grep -c "^processor" /proc/cpuinfo 2>/dev/null)
+	if [ -z "$num_cores" ] ; then num_cores=1 ; fi
+	num_build_threads=$(($num_cores + 2)) # more threads than cores, since each thread will sometimes block for i/o
 elif [ "$num_build_threads" -lt 1 ] ; then
 	num_build_threads="1"
 	num_build_thread_str="-j1"

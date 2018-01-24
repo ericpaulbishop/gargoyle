@@ -281,7 +281,7 @@ static int  my_check_inverse(const char option[], int* invert, int *my_optind, i
 static void param_problem_exit_error(char* msg)
 {
 	#ifdef xtables_error
-		xtables_error(PARAMETER_PROBLEM, msg);
+		xtables_error(PARAMETER_PROBLEM, "%s", msg);
 	#else
 		exit_error(PARAMETER_PROBLEM, msg);
 	#endif
