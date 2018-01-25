@@ -135,6 +135,7 @@ static void alarm_triggered(int sig);
 	
 	#ifdef USE_MBEDTLS	
 	
+		#define mbedtls_time_t     time_t
 		#include <mbedtls/net.h>
 		#include <mbedtls/ssl.h>
 		#include <mbedtls/certs.h>
@@ -143,7 +144,6 @@ static void alarm_triggered(int sig);
 		#include <mbedtls/error.h>
 		#include <mbedtls/version.h>
 		#include <mbedtls/entropy.h>
-
 
 		static const int default_ciphersuites[] =
 		{
@@ -1405,6 +1405,7 @@ static void* initialize_connection_https(char* host, int port)
 		#ifdef USE_MBEDTLS
 			if(ewget_urandom_init() > 0)
 			{
+				mbedtls_ssl_config conf;
 				ssl = (SSL*)malloc(sizeof(SSL));
 				memset(ssl, 0, sizeof(SSL));
 				
@@ -1414,21 +1415,27 @@ static void* initialize_connection_https(char* host, int port)
 
 
 
-				if(mbedtls_ssl_init(ssl) == 0)
-				{
-					mbedtls_ssl_conf_endpoint(ssl, MBEDTLS_SSL_IS_CLIENT);
-					mbedtls_ssl_conf_authmode(ssl, MBEDTLS_SSL_VERIFY_NONE);
-					mbedtls_ssl_conf_rng(ssl, ewget_urandom, NULL);
-					mbedtls_ssl_conf_own_cert(ssl, &(ctx->ssl_client_cert), &(ctx->key)); 
-					mbedtls_ssl_conf_ciphersuites(ssl, default_ciphersuites);
+				/* if(mbedtls_ssl_init(ssl) == 0) */
+				mbedtls_ssl_init(ssl);
+				mbedtls_ssl_config_defaults( &conf,
+					MBEDTLS_SSL_IS_CLIENT,
+					MBEDTLS_SSL_TRANSPORT_STREAM,
+					MBEDTLS_SSL_PRESET_DEFAULT );
 
-					ctx->socket = socket;
-					mbedtls_ssl_set_bio(ssl, net_recv, &(ctx->socket), net_send, &(ctx->socket));
-				
-					mbedtls_ssl_session_reset(ssl);
-					initialized = mbedtls_ssl_handshake(ssl);
+				mbedtls_ssl_conf_endpoint(&conf, MBEDTLS_SSL_IS_CLIENT);
+				mbedtls_ssl_conf_authmode(&conf, MBEDTLS_SSL_VERIFY_NONE);
+				mbedtls_ssl_conf_rng(&conf, ewget_urandom, NULL);
+				mbedtls_ssl_conf_own_cert(&conf, &(ctx->ssl_client_cert), &(ctx->key)); 
+				mbedtls_ssl_conf_ciphersuites(&conf, default_ciphersuites);
+				mbedtls_ssl_setup( ssl, &conf );
+
+				ctx->socket = socket;
+				mbedtls_ssl_set_bio(ssl, &(ctx->socket), mbedtls_net_send, mbedtls_net_recv, NULL);
+			
+				mbedtls_ssl_session_reset(ssl);
+				initialized = mbedtls_ssl_handshake(ssl);
 					
-				}
+				
 			}
 		#endif
 

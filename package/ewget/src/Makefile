@@ -29,7 +29,7 @@ ifeq ($(RANLIB),)
 endif
 
 
-CFLAGS:=$(CFLAGS) -Os 
+CFLAGS:=$(CFLAGS) -Os
 
 WARNING_FLAGS=-Wall -Wstrict-prototypes -pedantic
 MINIMAL_WARNING_FLAGS=-Wall -Wstrict-prototypes
@@ -47,6 +47,7 @@ else
   SHLIB_FILE=libewget.$(SHLIB_EXT).$(VERSION)
   SHLIB_FLAGS=-shared -Wl,-soname,$(SHLIB_FILE)
 endif
+
 
 
 LIBS:=
