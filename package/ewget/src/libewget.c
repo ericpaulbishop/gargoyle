@@ -133,76 +133,76 @@ static void alarm_triggered(int sig);
 		#endif
 	#endif
 	
-	#ifdef USE_POLARSSL	
+	#ifdef USE_MBEDTLS	
 	
-		#include <polarssl/net.h>
-		#include <polarssl/ssl.h>
-		#include <polarssl/certs.h>
-		#include <polarssl/x509.h>
-		#include <polarssl/rsa.h>
-		#include <polarssl/error.h>
-		#include <polarssl/version.h>
-		#include <polarssl/entropy.h>
+		#include <mbedtls/net.h>
+		#include <mbedtls/ssl.h>
+		#include <mbedtls/certs.h>
+		#include <mbedtls/x509.h>
+		#include <mbedtls/rsa.h>
+		#include <mbedtls/error.h>
+		#include <mbedtls/version.h>
+		#include <mbedtls/entropy.h>
 
 
 		static const int default_ciphersuites[] =
 		{
-			#if defined(POLARSSL_AES_C)
-			#if defined(POLARSSL_SHA2_C)
-			    TLS_RSA_WITH_AES_256_CBC_SHA256,
-			#endif /* POLARSSL_SHA2_C */
-			#if defined(POLARSSL_GCM_C) && defined(POLARSSL_SHA4_C)
-			    TLS_RSA_WITH_AES_256_GCM_SHA384,
-			#endif /* POLARSSL_SHA2_C */
-			    TLS_RSA_WITH_AES_256_CBC_SHA,
+			#if defined(MBEDTLS_AES_C)
+			#if defined(MBEDTLS_SHA2_C)
+			    MBEDTLS_TLS_RSA_WITH_AES_256_CBC_SHA256,
+			#endif /* MBEDTLS_SHA2_C */
+			#if defined(MBEDTLS_GCM_C) && defined(MBEDTLS_SHA4_C)
+			    MBEDTLS_TLS_RSA_WITH_AES_256_GCM_SHA384,
+			#endif /* MBEDTLS_SHA2_C */
+			    MBEDTLS_TLS_RSA_WITH_AES_256_CBC_SHA,
 			#endif
-			#if defined(POLARSSL_CAMELLIA_C)
-			#if defined(POLARSSL_SHA2_C)
-			    TLS_RSA_WITH_CAMELLIA_256_CBC_SHA256,
-			#endif /* POLARSSL_SHA2_C */
-			    TLS_RSA_WITH_CAMELLIA_256_CBC_SHA,
+			#if defined(MBEDTLS_CAMELLIA_C)
+			#if defined(MBEDTLS_SHA2_C)
+			    MBEDTLS_TLS_RSA_WITH_CAMELLIA_256_CBC_SHA256,
+			#endif /* MBEDTLS_SHA2_C */
+			    MBEDTLS_TLS_RSA_WITH_CAMELLIA_256_CBC_SHA,
 			#endif
-			#if defined(POLARSSL_AES_C)
-			#if defined(POLARSSL_SHA2_C)
-			    TLS_RSA_WITH_AES_128_CBC_SHA256,
-			#endif /* POLARSSL_SHA2_C */
-			#if defined(POLARSSL_GCM_C) && defined(POLARSSL_SHA2_C)
-			    TLS_RSA_WITH_AES_128_GCM_SHA256,
-			#endif /* POLARSSL_SHA2_C */
-			    TLS_RSA_WITH_AES_128_CBC_SHA,
+			#if defined(MBEDTLS_AES_C)
+			#if defined(MBEDTLS_SHA2_C)
+			    MBEDTLS_TLS_RSA_WITH_AES_128_CBC_SHA256,
+			#endif /* MBEDTLS_SHA2_C */
+			#if defined(MBEDTLS_GCM_C) && defined(MBEDTLS_SHA2_C)
+			    MBEDTLS_TLS_RSA_WITH_AES_128_GCM_SHA256,
+			#endif /* MBEDTLS_SHA2_C */
+			    MBEDTLS_TLS_RSA_WITH_AES_128_CBC_SHA,
 			#endif
-			#if defined(POLARSSL_CAMELLIA_C)
-			#if defined(POLARSSL_SHA2_C)
-			    TLS_RSA_WITH_CAMELLIA_128_CBC_SHA256,
-			#endif /* POLARSSL_SHA2_C */
-			    TLS_RSA_WITH_CAMELLIA_128_CBC_SHA,
+			#if defined(MBEDTLS_CAMELLIA_C)
+			#if defined(MBEDTLS_SHA2_C)
+			    MBEDTLS_TLS_RSA_WITH_CAMELLIA_128_CBC_SHA256,
+			#endif /* MBEDTLS_SHA2_C */
+			    MBEDTLS_TLS_RSA_WITH_CAMELLIA_128_CBC_SHA,
 			#endif
-			#if defined(POLARSSL_DES_C)
-			    TLS_RSA_WITH_3DES_EDE_CBC_SHA,
+			#if defined(MBEDTLS_DES_C)
+			    MBEDTLS_TLS_RSA_WITH_3DES_EDE_CBC_SHA,
 			#endif
-			#if defined(POLARSSL_ARC4_C)
-			    TLS_RSA_WITH_RC4_128_SHA,
-			    TLS_RSA_WITH_RC4_128_MD5,
+			#if defined(MBEDTLS_ARC4_C)
+			    MBEDTLS_TLS_RSA_WITH_RC4_128_SHA,
+			    MBEDTLS_TLS_RSA_WITH_RC4_128_MD5,
 			#endif
 			    0
 		};
 
 
-		typedef ssl_context SSL;
+		typedef mbedtls_ssl_context SSL;
 		typedef struct pctx
 		{
 			int socket;
-			x509_crt ssl_client_cert;
-			pk_context key;
-			ssl_session ssl_client_session;
+			mbedtls_x509_crt ssl_client_cert;
+			mbedtls_pk_context key;
+			mbedtls_ssl_session ssl_client_session;
 
 		} SSL_CTX;
 		
-		static void SSL_free( SSL* ssl ) { ssl_free(ssl); free(ssl); }
+		static void SSL_free( SSL* ssl ) { mbedtls_ssl_free(ssl); free(ssl); }
 		static void SSL_CTX_free(SSL_CTX* ctx) { free(ctx) ; }
 
-		static int SSL_read( SSL* ssl, char *buf, size_t len ) { return ssl_read(ssl, (unsigned char*)buf, len); }
-		static int SSL_write( SSL* ssl, char *buf, size_t len ) { return ssl_write(ssl, (unsigned char*)buf, len); }
+		static int SSL_read( SSL* ssl, char *buf, size_t len ) { return mbedtls_ssl_read(ssl, (unsigned char*)buf, len); }
+		static int SSL_write( SSL* ssl, char *buf, size_t len ) { return mbedtls_ssl_write(ssl, (unsigned char*)buf, len); }
 
 	#endif
 	
@@ -1337,7 +1337,7 @@ static void destroy_connection_http(void* connection_data)
 
 #ifdef HAVE_SSL
 
-#ifdef USE_POLARSSL
+#ifdef USE_MBEDTLS
 
 static int urandom_fd = -1;
 static int ewget_urandom_init(void)
@@ -1358,7 +1358,7 @@ static int ewget_urandom_init(void)
 static int ewget_urandom(void *ctx, unsigned char *out, size_t len)
 {
 	if (read(urandom_fd, out, len) < 0)
-		return POLARSSL_ERR_ENTROPY_SOURCE_FAILED;
+		return MBEDTLS_ERR_ENTROPY_SOURCE_FAILED;
 
 	return 0;
 }
@@ -1402,7 +1402,7 @@ static void* initialize_connection_https(char* host, int port)
 			/* would check cert here if we were doing it */
 		#endif
 
-		#ifdef USE_POLARSSL
+		#ifdef USE_MBEDTLS
 			if(ewget_urandom_init() > 0)
 			{
 				ssl = (SSL*)malloc(sizeof(SSL));
@@ -1410,23 +1410,23 @@ static void* initialize_connection_https(char* host, int port)
 				
 				ctx = (SSL_CTX*)malloc(sizeof(SSL_CTX));	
 				memset(ctx, 0, sizeof(SSL_CTX));
-				pk_init(&ctx->key);
+				mbedtls_pk_init(&ctx->key);
 
 
 
-				if(ssl_init(ssl) == 0)
+				if(mbedtls_ssl_init(ssl) == 0)
 				{
-					ssl_set_endpoint(ssl, SSL_IS_CLIENT);
-					ssl_set_authmode(ssl, SSL_VERIFY_NONE);
-					ssl_set_rng(ssl, ewget_urandom, NULL);
-					ssl_set_own_cert(ssl, &(ctx->ssl_client_cert), &(ctx->key)); 
-					ssl_set_ciphersuites(ssl, default_ciphersuites);
+					mbedtls_ssl_conf_endpoint(ssl, MBEDTLS_SSL_IS_CLIENT);
+					mbedtls_ssl_conf_authmode(ssl, MBEDTLS_SSL_VERIFY_NONE);
+					mbedtls_ssl_conf_rng(ssl, ewget_urandom, NULL);
+					mbedtls_ssl_conf_own_cert(ssl, &(ctx->ssl_client_cert), &(ctx->key)); 
+					mbedtls_ssl_conf_ciphersuites(ssl, default_ciphersuites);
 
 					ctx->socket = socket;
-					ssl_set_bio(ssl, net_recv, &(ctx->socket), net_send, &(ctx->socket));
+					mbedtls_ssl_set_bio(ssl, net_recv, &(ctx->socket), net_send, &(ctx->socket));
 				
-					ssl_session_reset(ssl);
-					initialized = ssl_handshake(ssl);
+					mbedtls_ssl_session_reset(ssl);
+					initialized = mbedtls_ssl_handshake(ssl);
 					
 				}
 			}
