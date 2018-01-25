@@ -19,7 +19,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
 */
-
+#define _GNU_SOURCE 1
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -61,13 +61,18 @@
 //RTNL_FAMILY_MAX to tell us that we are linking against a version of iproute2 
 //after then and define dump_filter and talk accordingly.
 #ifdef RTNL_FAMILY_MAX
-#define dump_filter(a,b,c) rtnl_dump_filter(a,b,c)
-#define talk(a,b,c,d,e) rtnl_talk(a,b,c,d,e)
+  #define dump_filter(a,b,c) rtnl_dump_filter(a,b,c)
+  #ifdef IFLA_STATS_RTA
+    #define talk(a,b,c,d) rtnl_talk(a,b,c,d)
+  #else
+    #define talk(a,b,c,d,e) rtnl_talk(a,b,c,d,e)
+  #endif
 #else
 #define dump_filter(a,b,c) rtnl_dump_filter(a,b,c,NULL,NULL)
 #define talk(a,b,c,d,e) rtnl_talk(a,b,c,d,e,NULL,NULL)
 #endif
 
+#define MIN(a,b) (((a)<(b))?(a):(b))
 
 /* use_names is required when linking to tc_util.o */
 bool use_names = false;
@@ -630,7 +635,7 @@ int tc_class_modify(__u32 rate)
     }
 
 
-    if (talk(&rth, &req.n, 0, 0, NULL) < 0)
+    if (talk(&rth, &req.n, NULL, 0) < 0)
         return 2;
 
     return 0;
@@ -855,14 +860,14 @@ int main(int argc, char *argv[])
         signal( SIGUSR2, SIG_IGN );
         signal( SIGHUP,  SIG_IGN );
         signal( SIGTSTP, SIG_IGN );
-        signal( SIGPIPE, (__sighandler_t) finish );
-        signal( SIGSEGV, (__sighandler_t) finish );
-        signal( SIGILL, (__sighandler_t) finish );
-        signal( SIGFPE, (__sighandler_t) finish );
-        signal( SIGSYS, (__sighandler_t) finish );
-        signal( SIGURG, (__sighandler_t) finish );
-        signal( SIGTTIN, (__sighandler_t) finish );
-        signal( SIGTTOU, (__sighandler_t) finish );
+        signal( SIGPIPE, (sighandler_t) finish );
+        signal( SIGSEGV, (sighandler_t) finish );
+        signal( SIGILL, (sighandler_t) finish );
+        signal( SIGFPE, (sighandler_t) finish );
+        signal( SIGSYS, (sighandler_t) finish );
+        signal( SIGURG, (sighandler_t) finish );
+        signal( SIGTTIN, (sighandler_t) finish );
+        signal( SIGTTOU, (sighandler_t) finish );
 
     	//daemonize();
         if ( daemon( 0, 0) < 0 )
@@ -876,10 +881,10 @@ int main(int argc, char *argv[])
     }
 
     //SIGTERM is what we expect to kill us.
-    signal( SIGTERM, (__sighandler_t) finish );
+    signal( SIGTERM, (sighandler_t) finish );
 
     //SIGUSR1 resets the link speed.
-    signal( SIGUSR1, (__sighandler_t) resetsig );
+    signal( SIGUSR1, (sighandler_t) resetsig );
 
     //Create the status file and ping socket
     //These are called here because the above daemon() call closes
@@ -916,10 +921,10 @@ int main(int argc, char *argv[])
         }
 
         //Ctrl-C terminates       
-        signal( SIGINT, (__sighandler_t) finish );
+        signal( SIGINT, (sighandler_t) finish );
 
         //Close terminal terminates       
-        signal( SIGHUP, (__sighandler_t) finish );
+        signal( SIGHUP, (sighandler_t) finish );
 
         setlinebuf( stdout );
 
