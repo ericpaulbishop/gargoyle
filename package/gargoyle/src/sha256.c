@@ -28,6 +28,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <unistd.h>
+#include <stdint.h>
 
 #include "sha256.h"
 
@@ -65,7 +66,7 @@ extern	"C" {
 /*
  * Constants used in each of the SHA-256 rounds.
  */
-static u_int32_t const K[64] = {
+static uint32_t const K[64] = {
 	0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5,
 	0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
 	0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3,
@@ -92,9 +93,9 @@ static u_int32_t const K[64] = {
 typedef struct _tagSHA256Context
 {
 	unsigned char	input[64];
-	u_int32_t		inputLen;
-	u_int32_t		A, B, C, D, E, F, G, H;
-	u_int64_t		totalLen;
+	uint32_t		inputLen;
+	uint32_t		A, B, C, D, E, F, G, H;
+	uint64_t		totalLen;
 
 } SHA256Context;
 
@@ -119,18 +120,18 @@ void SHA256Init(SHA256Context *sha)
  */
 static void ProcessBlock(SHA256Context *sha, const unsigned char *block)
 {
-	u_int32_t W[64];
-	u_int32_t a, b, c, d, e, f, g, h;
-	u_int32_t temp, temp2;
+	uint32_t W[64];
+	uint32_t a, b, c, d, e, f, g, h;
+	uint32_t temp, temp2;
 	int t;
 
 	/* Unpack the block into 64 32-bit words */
 	for(t = 0; t < 16; ++t)
 	{
-		W[t] = (((u_int32_t)(block[t * 4 + 0])) << 24) |
-		       (((u_int32_t)(block[t * 4 + 1])) << 16) |
-		       (((u_int32_t)(block[t * 4 + 2])) <<  8) |
-		        ((u_int32_t)(block[t * 4 + 3]));
+		W[t] = (((uint32_t)(block[t * 4 + 0])) << 24) |
+		       (((uint32_t)(block[t * 4 + 1])) << 16) |
+		       (((uint32_t)(block[t * 4 + 2])) <<  8) |
+		        ((uint32_t)(block[t * 4 + 3]));
 	}
 	for(t = 16; t < 64; ++t)
 	{
@@ -174,7 +175,7 @@ static void ProcessBlock(SHA256Context *sha, const unsigned char *block)
 	sha->H = TRUNCLONG(sha->H + h);
 
 	/* Clear the temporary state */
-	DoMemZero(W, sizeof(u_int32_t) * 64);
+	DoMemZero(W, sizeof(uint32_t) * 64);
 	a = b = c = d = e = f = g = h = temp = temp2 = 0;
 }
 
@@ -183,7 +184,7 @@ void SHA256Data(SHA256Context *sha, const void *buffer, unsigned long len)
 	unsigned long templen;
 
 	/* Add to the total length of the input stream */
-	sha->totalLen += (u_int64_t)len;
+	sha->totalLen += (uint64_t)len;
 
 	/* Copy the blocks into the input buffer and process them */
 	while(len > 0)
@@ -217,7 +218,7 @@ void SHA256Data(SHA256Context *sha, const void *buffer, unsigned long len)
 /*
  * Write a 32-bit big-endian long value to a buffer.
  */
-static void WriteLong(unsigned char *buf, u_int32_t value)
+static void WriteLong(unsigned char *buf, uint32_t value)
 {
 	buf[0] = (unsigned char)(value >> 24);
 	buf[1] = (unsigned char)(value >> 16);
@@ -227,7 +228,7 @@ static void WriteLong(unsigned char *buf, u_int32_t value)
 
 void SHA256Finalize(SHA256Context *sha, unsigned char hash[SHA256_HASH_SIZE])
 {
-	u_int64_t totalBits;
+	uint64_t totalBits;
 
 	/* Compute the final hash if necessary */
 	if(hash)
@@ -254,8 +255,8 @@ void SHA256Finalize(SHA256Context *sha, unsigned char hash[SHA256_HASH_SIZE])
 			sha->input[(sha->inputLen)++] = (unsigned char)0x00;
 		}
 		totalBits = (sha->totalLen << 3);
-		WriteLong(sha->input + 56, (u_int32_t)(totalBits >> 32));
-		WriteLong(sha->input + 60, (u_int32_t)totalBits);
+		WriteLong(sha->input + 56, (uint32_t)(totalBits >> 32));
+		WriteLong(sha->input + 60, (uint32_t)totalBits);
 		ProcessBlock(sha, sha->input);
 
 		/* Write the final hash value to the supplied buffer */
