@@ -2427,18 +2427,7 @@ function confirmPassword(confirmText, validatedFunc, invalidFunc)
 		}
 		catch(e){}
 	}
-	try
-	{
-		xCoor = window.screenX + 225;
-		yCoor = window.screenY+ 225;
-	}
-	catch(e)
-	{
-		xCoor = window.left + 225;
-		yCoor = window.top + 225;
-	}
-	var wlocation = "password_confirm.sh";
-	confirmWindow = window.open(wlocation, "password", "width=560,height=260,left=" + xCoor + ",top=" + yCoor );
+	confirmWindow = openPopupWindow("password_confirm.sh", "password", 560, 260);
 
 	var okButton = createInput("button", confirmWindow.document);
 	var cancelButton = createInput("button", confirmWindow.document);
@@ -2489,7 +2478,6 @@ function confirmPassword(confirmText, validatedFunc, invalidFunc)
 					runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 
 				}
-				confirmWindow.moveTo(xCoor,yCoor);
 				confirmWindow.focus();
 				updateDone = true;
 			}
@@ -2980,3 +2968,10 @@ function sidebar()
 	}
 }
 
+function openPopupWindow(url, name, width, height)
+{
+	var xCoor = (window.outerWidth - width)/2;
+	var yCoor = (window.outerHeight - height)/2;
+
+	return window.open(url, name, "width=" + width + ",height=" + height + ",left=" + xCoor + ",top=" + yCoor);
+}

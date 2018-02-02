@@ -1154,19 +1154,7 @@ function editQuota()
 	}
 
 
-	try
-	{
-		xCoor = window.screenX + 225;
-		yCoor = window.screenY+ 225;
-	}
-	catch(e)
-	{
-		xCoor = window.left + 225;
-		yCoor = window.top + 225;
-	}
-
-
-	editQuotaWindow = window.open("quotas_edit.sh", "edit", "width=560,height=600,left=" + xCoor + ",top=" + yCoor );
+	editQuotaWindow = openPopupWindow("quotas_edit.sh", "edit", 560, 600);
 
 	var saveButton = createInput("button", editQuotaWindow.document);
 	var closeButton = createInput("button", editQuotaWindow.document);
@@ -1249,7 +1237,6 @@ function editQuota()
 						editQuotaWindow.close();
 					}
 				}
-				editQuotaWindow.moveTo(xCoor,yCoor);
 				editQuotaWindow.focus();
 				updateDone = true;
 

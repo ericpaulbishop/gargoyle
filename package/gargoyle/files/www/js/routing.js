@@ -266,19 +266,7 @@ function editStaticRoute()
 	}
 
 
-	try
-	{
-		xCoor = window.screenX + 225;
-		yCoor = window.screenY+ 225;
-	}
-	catch(e)
-	{
-		xCoor = window.left + 225;
-		yCoor = window.top + 225;
-	}
-
-
-	editStaticWindow = window.open("static_route_edit.sh", "edit", "width=560,height=180,left=" + xCoor + ",top=" + yCoor );
+	editStaticWindow = openPopupWindow("static_route_edit.sh", "edit", 560, 180);
 
 	saveButton = createInput("button", editStaticWindow.document);
 	closeButton = createInput("button", editStaticWindow.document);
@@ -335,7 +323,6 @@ function editStaticRoute()
 						editStaticWindow.close();
 					}
 				}
-				editStaticWindow.moveTo(xCoor,yCoor);
 				editStaticWindow.focus();
 				updateDone = true;
 			}

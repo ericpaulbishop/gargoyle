@@ -1293,19 +1293,7 @@ function editAc()
 	}
 
 	
-	try
-	{
-		xCoor = window.screenX + 225;
-		yCoor = window.screenY+ 225;
-	}
-	catch(e)
-	{
-		xCoor = window.left + 225;
-		yCoor = window.top + 225;
-	}
-
-
-	editAcWindow = window.open("openvpn_allowed_client_edit.sh", "edit", "width=560,height=600,left=" + xCoor + ",top=" + yCoor );
+	editAcWindow = openPopupWindow("openvpn_allowed_client_edit.sh", "edit", 560, 600);
 	
 	var saveButton = createInput("button", editAcWindow.document);
 	var closeButton = createInput("button", editAcWindow.document);
@@ -1399,7 +1387,6 @@ function editAc()
 						editAcWindow.close();
 					}
 				}
-				editAcWindow.moveTo(xCoor,yCoor);
 				editAcWindow.focus();
 				updateDone = true;
 				

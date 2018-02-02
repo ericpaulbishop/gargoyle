@@ -851,21 +851,8 @@ function editServiceTableRow()
 		catch(e){}
 	}
 
-	var xCoor;
-	var yCoor;
-	try
-	{
-		xCoor = window.screenX + 225;
-		yCoor = window.screenY+ 225;
-	}
-	catch(e)
-	{
-		xCoor = window.left + 225;
-		yCoor = window.top + 225;
-	}
-
 	//editServiceWindow is global so we can close it above if it is left open
-	editServiceWindow = window.open("ddns_edit_service.sh", "edit", "width=560,height=510,left=" + xCoor + ",top=" + yCoor );
+	editServiceWindow = openPopupWindow("ddns_edit_service.sh", "edit", 560, 510);
 
 	var saveButton = createInput("button", editServiceWindow.document);
 	var closeButton = createInput("button", editServiceWindow.document);
@@ -942,7 +929,6 @@ function editServiceTableRow()
 					}
 				}
 
-				editServiceWindow.moveTo(xCoor,yCoor);
 				editServiceWindow.focus();
 				update_done = true;
 			}

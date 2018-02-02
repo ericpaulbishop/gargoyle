@@ -305,19 +305,8 @@ function editRule()
 	}
 
 
-	try
-	{
-		xCoor = window.screenX + 225;
-		yCoor = window.screenY+ 225;
-	}
-	catch(e)
-	{
-		xCoor = window.left + 225;
-		yCoor = window.top + 225;
-	}
-
-
-	editRuleWindow = window.open(editRuleType == "restriction_rule" ? "restriction_edit_rule.sh" : "whitelist_edit_rule.sh", "edit", "width=560,height=600,left=" + xCoor + ",top=" + yCoor );
+	editRuleType = editRuleType == "restriction_rule" ? "restriction_edit_rule.sh" : "whitelist_edit_rule.sh";
+	editRuleWindow = openPopupWindow(editRuleType, "edit", 560, 600);
 
 	saveButton = createInput("button", editRuleWindow.document);
 	closeButton = createInput("button", editRuleWindow.document);
@@ -364,7 +353,6 @@ function editRule()
 					}
 
 				}
-				editRuleWindow.moveTo(xCoor,yCoor);
 				editRuleWindow.focus();
 				updateDone = true;
 

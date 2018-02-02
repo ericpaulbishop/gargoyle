@@ -463,19 +463,7 @@ function editUser()
 	}
 
 
-	try
-	{
-		xCoor = window.screenX + 225;
-		yCoor = window.screenY+ 225;
-	}
-	catch(e)
-	{
-		xCoor = window.left + 225;
-		yCoor = window.top + 225;
-	}
-
-
-	editUserWindow = window.open("share_user_edit.sh", "edit", "width=560,height=230,left=" + xCoor + ",top=" + yCoor );
+	editUserWindow = openPopupWindow("share_user_edit.sh", "edit", 560, 230);
 	var okButton = createInput("button", editUserWindow.document);
 	var cancelButton = createInput("button", editUserWindow.document);
 
@@ -530,7 +518,6 @@ function editUser()
 						editUserWindow.close();
 					}
 				}
-				editUserWindow.moveTo(xCoor,yCoor);
 				editUserWindow.focus();
 				updateDone = true;
 			}
@@ -1268,19 +1255,7 @@ function editShare()
 	}
 
 
-	try
-	{
-		xCoor = window.screenX + 225;
-		yCoor = window.screenY+ 225;
-	}
-	catch(e)
-	{
-		xCoor = window.left + 225;
-		yCoor = window.top + 225;
-	}
-
-
-	editShareWindow = window.open("usb_storage_edit.sh", "edit", "width=650,height=600,left=" + xCoor + ",top=" + yCoor );
+	editShareWindow = openPopupWindow("usb_storage_edit.sh", "edit", 650, 600);
 
 	var saveButton = createInput("button", editShareWindow.document);
 	var closeButton = createInput("button", editShareWindow.document);
@@ -1358,7 +1333,6 @@ function editShare()
 						editShareWindow.close();
 					}
 				}
-				editShareWindow.moveTo(xCoor,yCoor);
 				editShareWindow.focus();
 			}
 		}

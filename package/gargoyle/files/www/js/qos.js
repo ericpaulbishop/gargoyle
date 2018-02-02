@@ -869,19 +869,8 @@ function editRuleTableRow()
 	}
 
 
-	try
-	{
-		xCoor = window.screenX + 225;
-		yCoor = window.screenY+ 225;
-	}
-	catch(e)
-	{
-		xCoor = window.left + 225;
-		yCoor = window.top + 225;
-	}
+	editRuleWindow = openPopupWindow("qos_edit_rule.sh", "test", 560, 530);
 
-
-	editRuleWindow = window.open("qos_edit_rule.sh", "test", "width=560,height=530,left=" + xCoor + ",top=" + yCoor );
 	try
 	{
 
@@ -1013,7 +1002,6 @@ function editRuleTableRow()
 						editRuleWindow.close();
 					}
 				}
-				editRuleWindow.moveTo(xCoor,yCoor);
 				editRuleWindow.focus();
 				update_done = true;
 			}
@@ -1088,19 +1076,7 @@ function editClassTableRow()
 	}
 
 
-	try
-	{
-		xCoor = window.screenX + 225;
-		yCoor = window.screenY+ 225;
-	}
-	catch(e)
-	{
-		xCoor = window.left + 225;
-		yCoor = window.top + 225;
-	}
-
-
-	editClassWindow = window.open("qos_edit_class.sh", "test", "width=560,height=500,left=" + xCoor + ",top=" + yCoor );
+	editClassWindow = openPopupWindow("qos_edit_class.sh", "test", 560, 500);
 	try
 	{
 		saveButton = editClassWindow.document.createElement('input');
@@ -1257,7 +1233,6 @@ function editClassTableRow()
 					}
 				}
 
-				editClassWindow.moveTo(xCoor,yCoor);
 				editClassWindow.focus();
 				update_done = true;
 			}

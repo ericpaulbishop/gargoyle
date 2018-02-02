@@ -636,20 +636,8 @@ function editForward(isSingle, triggerElement)
 	}
 
 
-	try
-	{
-		xCoor = window.screenX + 225;
-		yCoor = window.screenY+ 225;
-	}
-	catch(e)
-	{
-		xCoor = window.left + 225;
-		yCoor = window.top + 225;
-	}
-
-
 	var editLocation = isSingle ? "single_forward_edit.sh" : "multi_forward_edit.sh";
-	editForwardWindow = window.open(editLocation, "edit", "width=560,height=220,left=" + xCoor + ",top=" + yCoor );
+	editForwardWindow = openPopupWindow(editLocation, "edit", 560, 220);
 
 	saveButton = createInput("button", editForwardWindow.document);
 	closeButton = createInput("button", editForwardWindow.document);
@@ -729,7 +717,6 @@ function editForward(isSingle, triggerElement)
 						editForwardWindow.close();
 					}
 				}
-				editForwardWindow.moveTo(xCoor,yCoor);
 				editForwardWindow.focus();
 				updateDone = true;
 			}

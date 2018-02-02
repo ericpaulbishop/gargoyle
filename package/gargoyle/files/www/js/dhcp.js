@@ -392,18 +392,7 @@ function editStatic()
 		catch(e){}
 	}
 
-	try
-	{
-		xCoor = window.screenX + 225;
-		yCoor = window.screenY+ 225;
-	}
-	catch(e)
-	{
-		xCoor = window.left + 225;
-		yCoor = window.top + 225;
-	}
-
-	editStaticWindow = window.open("static_ip_edit.sh", "edit", "width=560,height=220,left=" + xCoor + ",top=" + yCoor );
+	editStaticWindow = openPopupWindow("static_ip_edit.sh", "edit", 560, 220);
 
 	saveButton = createInput("button", editStaticWindow.document);
 	closeButton = createInput("button", editStaticWindow.document);
@@ -454,7 +443,6 @@ function editStatic()
 
 					}
 				}
-				editStaticWindow.moveTo(xCoor,yCoor);
 				editStaticWindow.focus();
 				updateDone = true;
 			}
