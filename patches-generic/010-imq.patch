@@ -1801,17 +1801,14 @@
  # ipopt
  
  $(eval $(call nf_add,IPT_IPOPT,CONFIG_NETFILTER_XT_MATCH_DSCP, $(P_XT)xt_dscp))
---- a/target/linux/generic/config-3.18	2015-07-21 12:50:21.319810482 -0400
-+++ b/target/linux/generic/config-3.18	2015-08-16 13:53:29.466745444 -0400
-@@ -4634,6 +4634,11 @@
- # CONFIG_ZLIB_INFLATE is not set
- # CONFIG_ZNET is not set
+--- a/target/linux/generic/config-4.9	2015-07-21 12:50:21.319810482 -0400
++++ b/target/linux/generic/config-4.9	2015-08-16 13:53:29.466745444 -0400
+@@ -5315,3 +5315,8 @@
  # CONFIG_ZPOOL is not set
+ # CONFIG_ZRAM is not set
+ # CONFIG_ZSMALLOC is not set
 +CONFIG_IMQ_NUM_DEVS=2
 +# CONFIG_IMQ_BEHAVIOR_AA is not set
 +# CONFIG_IMQ_BEHAVIOR_AB is not set
 +CONFIG_IMQ_BEHAVIOR_BA=y
 +# CONFIG_IMQ_BEHAVIOR_BB is not set
- CONFIG_ZONE_DMA=y
- CONFIG_ZONE_DMA_FLAG=1
- # CONFIG_ZRAM is not set
