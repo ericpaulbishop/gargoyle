@@ -73,8 +73,7 @@ define Package/gpkg/install
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
 	$(CP) ./files/gpkg-uci-defaults $(1)/etc/uci-defaults
 	$(CP) ./files/opkg.gpkg.tmp $(1)/etc/
-
-	$(VERSION_SED)                              $(1)/etc/opkg.gpkg.tmp
+	$(VERSION_SED_SCRIPT)                       $(1)/etc/opkg.gpkg.tmp
 	$(SED) 's,%G,$(GARGOYLE_PACKAGE_VERSION),g' $(1)/etc/opkg.gpkg.tmp
 	$(SED) 's,%F,$(GARGOYLE_PROFILE),g' $(1)/etc/opkg.gpkg.tmp
 
