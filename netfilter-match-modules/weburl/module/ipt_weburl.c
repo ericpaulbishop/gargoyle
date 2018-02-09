@@ -426,11 +426,10 @@ int https_match(const struct ipt_weburl_info* info, const unsigned char* packet_
 				}
 			}
 			break;
-		
 	}
 
-	/* 
-	 * If invert flag is set, return true if it didn't match 
+	/*
+	 * If invert flag is set, return true if it didn't match
 	 */
 	test = info->invert ? !test : test;
 
