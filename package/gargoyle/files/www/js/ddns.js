@@ -693,8 +693,8 @@ function createEnabledCheckbox()
 function createEditButton()
 {
 	editButton = createInput("button");
-	editButton.value = UI.Edit;
-	editButton.className="btn btn-default";
+	editButton.textContent = UI.Edit;
+	editButton.className = "btn btn-default btn-edit";
 	editButton.onclick = editServiceTableRow;
 	return editButton;
 }
@@ -702,8 +702,8 @@ function createEditButton()
 function createForceUpdateButton()
 {
 	updateButton = createInput("button");
-	updateButton.value = DyDNS.ForceU;
-	updateButton.className="btn btn-default";
+	updateButton.textContent = DyDNS.ForceU;
+	updateButton.className = "btn btn-default btn-update";
 	updateButton.onclick = forceUpdateForRow;
 	return updateButton;
 }
@@ -856,9 +856,9 @@ function editServiceTableRow()
 
 	var saveButton = createInput("button", editServiceWindow.document);
 	var closeButton = createInput("button", editServiceWindow.document);
-	saveButton.value = UI.CApplyChanges;
-	saveButton.className = "btn btn-default";
-	closeButton.value = UI.CDiscardChanges;
+	saveButton.textContent = UI.CApplyChanges;
+	saveButton.className = "btn btn-primary";
+	closeButton.textContent = UI.CDiscardChanges;
 	closeButton.className = "btn btn-warning";
 
 	//load provider data for this row

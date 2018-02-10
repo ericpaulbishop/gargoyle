@@ -2446,10 +2446,10 @@ function confirmPassword(confirmText, validatedFunc, invalidFunc)
 	var okButton = createInput("button", confirmWindow.document);
 	var cancelButton = createInput("button", confirmWindow.document);
 
-	okButton.value         = UI.OK;
-	okButton.className     = "btn btn-default";
-	cancelButton.value     = UI.Cancel;
-	cancelButton.className = "btn btn-default";
+	okButton.textContent   = UI.OK;
+	okButton.className     = "btn btn-primary";
+	cancelButton.textContent = UI.Cancel;
+	cancelButton.className = "btn btn-warning";
 
 
 	runOnEditorLoaded = function ()
@@ -2775,7 +2775,7 @@ function query(queryHeader, queryText, buttonNameList, continueFunction )
 	for(bIndex=0; bIndex < buttonNameList.length ; bIndex++)
 	{
 		b           = createInput("button", document);
-		b.value     = buttonNameList[bIndex];
+		b.textContent = buttonNameList[bIndex];
 		b.className = "btn btn-default"
 		b.onclick   = function()
 		{

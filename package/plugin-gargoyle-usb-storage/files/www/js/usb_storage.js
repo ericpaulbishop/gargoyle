@@ -467,10 +467,10 @@ function editUser()
 	var okButton = createInput("button", editUserWindow.document);
 	var cancelButton = createInput("button", editUserWindow.document);
 
-	okButton.value         = usbSStr.ChPass;
-	okButton.className     = "btn btn-default";
-	cancelButton.value     = UI.Cancel;
-	cancelButton.className = "btn btn-default";
+	okButton.textContent   = usbSStr.ChPass;
+	okButton.className     = "btn btn-primary";
+	cancelButton.textContent = UI.Cancel;
+	cancelButton.className = "btn btn-warning";
 
 
 	editShareUserRow=this.parentNode.parentNode;
@@ -1213,8 +1213,8 @@ function setSharePaths(controlDocument)
 function createEditButton( editFunction )
 {
 	editButton = createInput("button");
-	editButton.value = UI.Edit;
-	editButton.className="btn btn-default";
+	editButton.textContent = UI.Edit;
+	editButton.className = "btn btn-default btn-edit";
 	editButton.onclick = editFunction;
 	editButton.disabled  = false ;
 
@@ -1259,10 +1259,10 @@ function editShare()
 
 	var saveButton = createInput("button", editShareWindow.document);
 	var closeButton = createInput("button", editShareWindow.document);
-	saveButton.value = UI.CApplyChanges;
-	saveButton.className = "btn btn-default btn-lg";
-	closeButton.value = UI.CDiscardChanges;
-	closeButton.className = "btn btn-default btn-lg";
+	saveButton.textContent = UI.CApplyChanges;
+	saveButton.className = "btn btn-primary";
+	closeButton.textContent = UI.CDiscardChanges;
+	closeButton.className = "btn btn-warning";
 
 	editRow=this.parentNode.parentNode;
 	editName=editRow.childNodes[0].firstChild.data;

@@ -847,8 +847,8 @@ function removeServiceClassCallback(table, row)
 function createRuleTableEditButton()
 {
 	editRuleButton = createInput("button");
-	editRuleButton.value = UI.Edit;
-	editRuleButton.className="btn btn-default";
+	editRuleButton.textContent = UI.Edit;
+	editRuleButton.className = "btn btn-default btn-edit";
 	editRuleButton.onclick = editRuleTableRow;
 
 	return editRuleButton;
@@ -884,9 +884,9 @@ function editRuleTableRow()
 		saveButton = editRuleWindow.createElement('<button type="button"></button>');
 		closeButton = editRuleWindow.createElement('<button type="button"></button>');
 	}
-	saveButton.value = UI.CApplyChanges;
-	saveButton.className = "btn btn-default";
-	closeButton.value = UI.CDiscardChanges;
+	saveButton.textContent = UI.CApplyChanges;
+	saveButton.className = "btn btn-primary";
+	closeButton.textContent = UI.CDiscardChanges;
 	closeButton.className = "btn btn-warning";
 
 
@@ -1021,13 +1021,13 @@ function createRuleTableCommentButton(commentStr)
 	commentRuleSpan.className="popup";
 
 	commentRuleButton = createInput("button");
-	commentRuleButton.value = "?";
-	commentRuleButton.className="btn btn-default";
+	commentRuleButton.textContent = "?";
+	commentRuleButton.className = "btn btn-default btn-comment";
 	commentRuleButton.onclick = doRuleTableComment;
 	if (commentStr == "")
 	{
 		commentRuleButton.disabled = true;
-		commentRuleButton.value = "N/A"
+		commentRuleButton.textContent = "N/A"
 	}
 
 	commentSpan = document.createElement("span");
@@ -1050,8 +1050,8 @@ function doRuleTableComment()
 function createClassTableEditButton(rowIndex)
 {
 	editClassButton = createInput("button");
-	editClassButton.value = UI.Edit;
-	editClassButton.className="btn btn-default";
+	editClassButton.textContent = UI.Edit;
+	editClassButton.className = "btn btn-default btn-edit";
 	editClassButton.onclick = editClassTableRow;
 	editClassButton.id = "" + rowIndex;
 
@@ -1090,9 +1090,9 @@ function editClassTableRow()
 		closeButton = editClassWindow.createElement('<button type="button"></button>');
 	}
 
-	saveButton.value = UI.CApplyChanges;
-	saveButton.className = "btn btn-default";
-	closeButton.value = UI.CDiscardChanges;
+	saveButton.textContent = UI.CApplyChanges;
+	saveButton.className = "btn btn-primary";
+	closeButton.textContent = UI.CDiscardChanges;
 	closeButton.className = "btn btn-warning";
 
 	editClassWindowRow=this.parentNode.parentNode;

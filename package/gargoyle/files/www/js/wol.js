@@ -82,7 +82,7 @@ function getHostname(ip)
 function createWakeUpButton()
 {
 	var WakeUpButton = createInput("button");
-	WakeUpButton.value = wolS.WkUp;
+	WakeUpButton.textContent = wolS.WkUp;
 	WakeUpButton.className="btn btn-default";
 	WakeUpButton.onclick = wakeHost;
 	return WakeUpButton;

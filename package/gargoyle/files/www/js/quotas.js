@@ -1097,8 +1097,8 @@ function createEnabledCheckbox(enabled)
 function createEditButton(enabled)
 {
 	editButton = createInput("button");
-	editButton.value = UI.Edit;
-	editButton.className="btn btn-default";
+	editButton.textContent = UI.Edit;
+	editButton.className = "btn btn-default btn-edit";
 	editButton.onclick = editQuota;
 
 	setElementEnabled(editButton, enabled);
@@ -1157,9 +1157,9 @@ function editQuota()
 
 	var saveButton = createInput("button", editQuotaWindow.document);
 	var closeButton = createInput("button", editQuotaWindow.document);
-	saveButton.value = UI.CApplyChanges;
-	saveButton.className = "btn btn-default";
-	closeButton.value = UI.CDiscardChanges;
+	saveButton.textContent = UI.CApplyChanges;
+	saveButton.className = "btn btn-primary";
+	closeButton.textContent = UI.CDiscardChanges;
 	closeButton.className = "btn btn-warning";
 
 	var editRow=this.parentNode.parentNode;

@@ -729,10 +729,10 @@ function createAllowedClientControls(haveDownload)
 
 	var enabledCheck = createInput("checkbox")
 	enabledCheck.onclick = toggleAcEnabled;
-	var downloadButtonMulti = haveDownload ? createButton(ovpnS.Dload, "btn btn-default", downloadAcMulti, false) : createButton(ovpnS.Dload, "btn btn-default disabled", function(){ return; }, true ) ;
-	var downloadButtonSingle = haveDownload ? createButton(ovpnS.Dload, "btn btn-default", downloadAcSingle, false) : createButton(ovpnS.Dload, "btn btn-default disabled", function(){ return; }, true ) ;
+	var downloadButtonMulti = haveDownload ? createButton(ovpnS.Dload, "btn-download", downloadAcMulti, false) : createButton(ovpnS.Dload, "btn-download disabled", function(){ return; }, true ) ;
+	var downloadButtonSingle = haveDownload ? createButton(ovpnS.Dload, "btn-download", downloadAcSingle, false) : createButton(ovpnS.Dload, "btn-download disabled", function(){ return; }, true ) ;
 
-	var editButton     = createButton(UI.Edit,     "btn btn-default", editAc, false)
+	var editButton = createButton(UI.Edit, "btn-edit", editAc, false)
 
 	return [enabledCheck, downloadButtonMulti, downloadButtonSingle, editButton]
 }
@@ -740,8 +740,8 @@ function createAllowedClientControls(haveDownload)
 function createButton(text, cssClass, actionFunction, disabled)
 {
 	var button = createInput("button")
-	button.value = text
-	button.className=cssClass
+	button.textContent = text
+	button.className = "btn btn-default " + cssClass
 	button.onclick = actionFunction
 	button.disabled = disabled
 	return button;
@@ -1297,10 +1297,10 @@ function editAc()
 	
 	var saveButton = createInput("button", editAcWindow.document);
 	var closeButton = createInput("button", editAcWindow.document);
-	saveButton.value = UI.CApplyChanges;
-	saveButton.className = "btn btn-default btn-lg";
-	closeButton.value = UI.CDiscardChanges;
-	closeButton.className = "btn btn-default btn-lg";
+	saveButton.textContent = UI.CApplyChanges;
+	saveButton.className = "btn btn-primary";
+	closeButton.textContent = UI.CDiscardChanges;
+	closeButton.className = "btn btn-warning";
 
 	var editRow=this.parentNode.parentNode;
 	var editId = editRow.childNodes[1].firstChild.id;
