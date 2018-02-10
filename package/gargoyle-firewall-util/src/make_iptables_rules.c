@@ -546,6 +546,7 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 		push_list(all_rules, dynamic_strcat(2, rule_prefix, " -p tcp -m weburl --contains  http -j CONNMARK --set-mark 0xFF000000/0xFF000000" ));
 		push_list(all_rules, dynamic_strcat(2, rule_prefix, " -p tcp --dport 80 -m connmark ! --mark 0xFF000000/0xFF000000 -j ACCEPT " ));
 		push_list(all_rules, dynamic_strcat(2, rule_prefix, " -p tcp --dport 443 -m connmark ! --mark 0xFF000000/0xFF000000 -j ACCEPT " ));
+		push_list(all_rules, dynamic_strcat(2, rule_prefix,  " -p tcp -m connmark --mark 0xFF000000/0xFF000000 -j REJECT --reject-with tcp-reset" ));
 		push_list(all_rules, dynamic_strcat(2, rule_prefix,  " -j CONNMARK --set-mark 0x0/0xFF000000" ));
 	}
 
