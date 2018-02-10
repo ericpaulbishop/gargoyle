@@ -68,7 +68,7 @@
 							</div>
 
 							<div id="plugin_root_change_container" class="row form-group" style="display:none" >
-								<span class="col-xs-12"><button class="btn btn-warning" onclick="changePluginRoot()" /><%~ Chroot %></button></span>
+								<span class="col-xs-12"><button class="btn btn-default" onclick="changePluginRoot()"><%~ Chroot %></button></span>
 							</div>
 						</div>
 					</div>
@@ -92,7 +92,7 @@
 							<span class="col-xs-7"><input type="text" id="add_source_url" class="form-control" /></span>
 						</div>
 
-						<button id="add_source_button" class="btn btn-info" onclick="addPluginSource()" /><%~ APSrc %></button>
+						<button id="add_source_button" class="btn btn-default" onclick="addPluginSource()"><%~ APSrc %></button>
 					</div>
 				</div>
 			</div>
@@ -109,7 +109,7 @@
 
 			<div class="panel-body">
 				<div class="row form-group">
-					<span class="col-xs-12"><button id="update_button" class="btn btn-info btn-lg" onclick="updatePackagesList()" /><%~ RfshP %></button></span>
+					<span class="col-xs-12"><button id="update_button" class="btn btn-primary btn-lg" onclick="updatePackagesList()"><%~ RfshP %></button></span>
 				</div>
 
 				<div class="row form-group">

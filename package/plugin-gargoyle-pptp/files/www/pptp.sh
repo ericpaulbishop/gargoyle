@@ -51,7 +51,7 @@
 
 			<div class="panel-body">
 				<div class="row form-group">
-					<span class="col-xs-12"><button id="pptp_reconnect_button" class="btn btn-primary" onclick="pptpReconnect()"><%~ ReCnt %></span>
+					<span class="col-xs-12"><button id="pptp_reconnect_button" class="btn btn-default" onclick="pptpReconnect()"><%~ ReCnt %></span>
 				</div>
 
 				<div id='pptp_server_container' class="row form-group">
@@ -75,7 +75,7 @@
 
 <div id="bottom_button_container" class="panel panel-default">
 	<button id="save_button" class="btn btn-primary btn-lg" onclick="saveChanges()"><%~ SaveChanges %></button>
-	<button id="reset_button" class="btn btn-danger btn-lg" onclick="resetData()"><%~ Reset %></button>
+	<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
 </div>
 
 <script>

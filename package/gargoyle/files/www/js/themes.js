@@ -13,7 +13,7 @@ function createUseButton()
 {
 	var useButton = createInput("button");
 	useButton.textContent = UI.Select;
-	useButton.className="btn btn-default";
+	useButton.className = "btn btn-default btn-select";
 	useButton.onclick = useTheme;
 	return useButton;
 }

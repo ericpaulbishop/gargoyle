@@ -224,7 +224,7 @@
 				</div>
 
 				<div class="form-group">
-					<button id="bwcustSaveChanges" class="btn btn-danger btn-lg" onclick="bwcustSaveChanges()" disabled="true"><%~ SaveChanges %></button>
+					<button id="bwcustSaveChanges" class="btn btn-primary btn-lg" onclick="bwcustSaveChanges()" disabled="true"><%~ SaveChanges %></button>
 				</div>
 			</div>
 		</div>
@@ -242,7 +242,7 @@
 				</div>
 				<br/>
 				<div class="form-group">
-					<button id="download_data_button" class="btn btn-info btn-lg" onclick="window.location='bandwidth.csv';"><%~ DNow %></button>
+					<button id="download_data_button" class="btn btn-success btn-lg" onclick="window.location='bandwidth.csv';"><%~ DNow %></button>
 				</div>
 			</div>
 		</div>

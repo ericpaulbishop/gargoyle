@@ -83,7 +83,7 @@ function createWakeUpButton()
 {
 	var WakeUpButton = createInput("button");
 	WakeUpButton.textContent = wolS.WkUp;
-	WakeUpButton.className="btn btn-default";
+	WakeUpButton.className = "btn btn-default btn-wakeup";
 	WakeUpButton.onclick = wakeHost;
 	return WakeUpButton;
 }

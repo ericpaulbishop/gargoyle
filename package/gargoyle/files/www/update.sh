@@ -59,7 +59,7 @@
 							<input id="upgrade_arch" name="arch" type="hidden" value="" />
 
 							<div class="row form-group">
-								<span class="col-xs-12"><button id="upgrade_button" class="btn btn-primary btn-lg" onclick="doUpgrade()"><%~ Upgrade %></button></span>
+								<span class="col-xs-12"><button id="upgrade_button" class="btn btn-danger btn-lg" onclick="doUpgrade()"><%~ Upgrade %></button></span>
 							</div>
 						</form>
 					</div>

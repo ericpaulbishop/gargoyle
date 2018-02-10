@@ -64,7 +64,7 @@
 						<div class="row form-group">
 							<span class="col-xs-12">
 								<input type="text" id="add_ip" onkeyup="proofreadMultipleIps(this)" size="30" />
-								<button class="btn btn-info" id="add_ip_button" onclick="addAddressesToTable(document, 'add_ip', 'ip_table_container', 'ip_table', false, 3, 1, 250)" /><%~ Add %></button>
+								<button class="btn btn-default" id="add_ip_button" onclick="addAddressesToTable(document, 'add_ip', 'ip_table_container', 'ip_table', false, 3, 1, 250)"><%~ Add %></button>
 							</span>
 							<em class="col-xs-12"><%~ SpcIP %></em>
 						</div>
@@ -77,7 +77,7 @@
 				<div id="bottom_button_container">
 					<button id="save_button" class="btn btn-primary btn-lg" onclick="saveChanges()"><%~ SaveChanges %></button>
 					<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
-					<button id="clear_history" class="btn btn-danger btn-lg" onclick="clearHistory()"/><%~ Clear %></button>
+					<button id="clear_history" class="btn btn-danger btn-lg" onclick="clearHistory()"><%~ Clear %></button>
 				</div>
 			</div>
 		</div>
@@ -142,8 +142,8 @@
 				</div>
 
 				<div>
-					<button id="download_domain_button" class="btn btn-info btn-lg" onclick="window.location='webmon_domains.csv';"/><%~ VSit %></button>
-					<button id="download_search_button" class="btn btn-info btn-lg" onclick="window.location='webmon_searches.csv';"/><%~ SRqst %></button>
+					<button id="download_domain_button" class="btn btn-info btn-lg" onclick="window.location='webmon_domains.csv';"><%~ VSit %></button>
+					<button id="download_search_button" class="btn btn-info btn-lg" onclick="window.location='webmon_searches.csv';"><%~ SRqst %></button>
 				</div>
 			</div>
 		</div>

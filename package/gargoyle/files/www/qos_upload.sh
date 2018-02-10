@@ -278,7 +278,7 @@
 </div>
 
 <div id="bottom_button_container" class="panel panel-default">
-	<button id="save_button" class="btn btn-info btn-lg" onclick="saveChanges()"><%~ SaveChanges %></button>
+	<button id="save_button" class="btn btn-primary btn-lg" onclick="saveChanges()"><%~ SaveChanges %></button>
 	<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
 </div>
 <span id="update_container"><%~ WaitSettings %></span>
