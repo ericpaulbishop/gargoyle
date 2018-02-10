@@ -265,8 +265,7 @@ function setRowClasses(table, enabled)
 			cellContent=cells[cellIndex].firstChild;
 			if(cellContent.type == "button" )
 			{
-				cellContent.disabled = (enabled == false);
-				cellContent.className = (enabled == false) ? "btn btn-default disabled" : "btn btn-default";
+				setElementEnabled(cellContent, enabled);
 			}
 		}
 		rowIndex++;

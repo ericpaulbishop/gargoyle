@@ -1009,8 +1009,7 @@ function setElementEnabled(element, enabled, defaultValue)
 		}
 		else if(element.type == "button")
 		{
-			var activeClassName = element.className.replace(/_button.*$/, "_button");
-			element.className=activeClassName;
+			element.classList.remove("disabled");
 		}
 	}
 	else
@@ -1029,8 +1028,7 @@ function setElementEnabled(element, enabled, defaultValue)
 		}
 		else if(element.type == "button")
 		{
-			var activeClassName = element.className.replace(/_button.*$/, "_button");
-			element.className= activeClassName + " disabled";
+			element.classList.add("disabled");
 		}
 		else if(element.type == "file")
 		{

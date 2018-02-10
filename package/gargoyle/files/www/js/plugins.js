@@ -343,8 +343,7 @@ function resetData()
 				button.value = UI.Uninstall;
 				if( pkgData["Install-Destination"] == "root" )
 				{
-					button.disabled = true;
-					button.className = "btn btn-default disabled"
+					setElementEnabled(button, false);
 				}
 				else
 				{
@@ -360,8 +359,7 @@ function resetData()
 				}
 				else
 				{
-					button.disabled = true;
-					button.className = "btn btn-default disabled"
+					setElementEnabled(button, false);
 				}
 			}
 

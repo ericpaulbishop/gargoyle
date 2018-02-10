@@ -255,8 +255,7 @@ function createEditButton(enabled, ruleType, rulePrefix)
 	editButton.className="btn btn-default";
 	editButton.onclick = editRule;
 
-	editButton.className = enabled ? "btn btn-default" : "btn btn-default disabled" ;
-	editButton.disabled  = enabled ? false : true;
+	setElementEnabled(editButton, enabled);
 
 	return editButton;
 }
@@ -266,8 +265,8 @@ function setRowEnabled()
 	enabledRow=this.parentNode.parentNode;
 	enabledId = this.id;
 
-	enabledRow.childNodes[2].firstChild.disabled  = this.checked ? false : true;
-	enabledRow.childNodes[2].firstChild.className = this.checked ? "btn btn-default" : "btn btn-default disabled" ;
+	var row = enabledRow.childNodes[2].firstChild;
+	setElementEnabled(row, enabled);
 
 	uci.set(pkg, enabledId, "enabled", enabled);
 }

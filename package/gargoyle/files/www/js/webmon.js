@@ -260,8 +260,7 @@ function setWebmonEnabled()
 		element.style.color = !enabled ? "#AAAAAA" : "#000000";
 	}
 	var addButton = document.getElementById('add_ip_button');
-	addButton.className = enabled ? "btn btn-default" : "btn btn-default disabled";
-	addButton.disabled = !enabled;
+	setElementEnabled(addButton, enabled);
 
 	addIpTable = document.getElementById('ip_table_container').firstChild;
 	if(addIpTable != null)

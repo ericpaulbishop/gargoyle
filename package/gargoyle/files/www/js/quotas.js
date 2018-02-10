@@ -1101,8 +1101,7 @@ function createEditButton(enabled)
 	editButton.className="btn btn-default";
 	editButton.onclick = editQuota;
 
-	editButton.className = enabled ? "btn btn-default" : "btn btn-default disabled" ;
-	editButton.disabled  = enabled ? false : true;
+	setElementEnabled(editButton, enabled);
 
 	return editButton;
 }
@@ -1111,8 +1110,8 @@ function setRowEnabled()
 	enabled= this.checked ? "1" : "0";
 	enabledRow=this.parentNode.parentNode;
 
-	enabledRow.childNodes[rowCheckIndex+1].firstChild.disabled  = this.checked ? false : true;
-	enabledRow.childNodes[rowCheckIndex+1].firstChild.className = this.checked ? "btn btn-default" : "btn btn-default disabled" ;
+	var row = enabledRow.childNodes[rowCheckIndex+1].firstChild;
+	setElementEnabled(row, enabled);
 
 	var idStr = this.id;
 	var ids = idStr.split(/\./);

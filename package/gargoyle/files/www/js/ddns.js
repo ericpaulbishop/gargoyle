@@ -217,8 +217,8 @@ function resetData()
 		enabledCheckbox.id = section;
 		ddnsTableData.push( [domain, lastUpdate, enabledCheckbox, createEditButton(), createForceUpdateButton()]);
 
-		ddnsTableData[ ddnsTableData.length-1][4].disabled = enabledCheckbox.checked ? false : true;
-		ddnsTableData[ ddnsTableData.length-1][4].className = enabledCheckbox.checked ? "btn btn-default" : "btn btn-default disabled" ;
+		var row = ddnsTableData[ddnsTableData.length-1][4];
+		setElementEnabled(row, enabledCheckbox.checked);
 		ddnsEnabledData.push(enabledCheckbox.checked);
  	}
 	var ddnsTable=createTable(columnNames, ddnsTableData, "ddns_table", true, false, removeServiceProviderCallback);
@@ -714,8 +714,8 @@ function setRowEnabled()
 	var enabledRow=this.parentNode.parentNode;
 	var enabledDomain = enabledRow.firstChild.firstChild.data;
 
-	enabledRow.childNodes[4].firstChild.disabled   = this.checked ? false : true;
-	enabledRow.childNodes[4].firstChild.className = this.checked ? "btn btn-default" : "btn btn-default disabled" ;
+	var row = enabledRow.childNodes[4].firstChild;
+	setElementEnabled(row, enabled);
 
 	var section = enabledRow.childNodes[2].firstChild.id;
 	uci.set("ddns_gargoyle", section, "enabled", enabled);
