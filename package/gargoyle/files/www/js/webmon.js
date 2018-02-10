@@ -106,6 +106,12 @@ function saveChanges()
 
 function clearHistory()
 {
+	var confirmClear = window.confirm(UI.Clear+"?");
+	if(!confirmClear)
+	{
+		return;
+	}
+
 	if(updateInProgress)
 	{
 		return;

@@ -425,9 +425,13 @@ function installPackage()
 
 function uninstallPackage()
 {
-	var pkg = this.parentNode.parentNode.firstChild.firstChild.id;
-	var cmd = [ "sh /usr/lib/gargoyle/remove_gargoyle_package.sh " + pkg ];
-	execute(cmd);
+	var confirmUninstall = window.confirm(UI.Uninstall+"?");
+	if(confirmUninstall)
+	{
+		var pkg = this.parentNode.parentNode.firstChild.firstChild.id;
+		var cmd = [ "sh /usr/lib/gargoyle/remove_gargoyle_package.sh " + pkg ];
+		execute(cmd);
+	}
 }
 
 function updatePackagesList()
