@@ -874,15 +874,15 @@ function editRuleTableRow()
 	try
 	{
 
-		saveButton = editRuleWindow.document.createElement('input');
+		saveButton = editRuleWindow.document.createElement('button');
 		saveButton.type= 'button';
-		closeButton = editRuleWindow.document.createElement('input');
+		closeButton = editRuleWindow.document.createElement('button');
 		closeButton.type= 'button';
 	}
 	catch(e)
 	{
-		saveButton = editRuleWindow.createElement('<input type="button" />');
-		closeButton = editRuleWindow.createElement('<input type="button" />');
+		saveButton = editRuleWindow.createElement('<button type="button"></button>');
+		closeButton = editRuleWindow.createElement('<button type="button"></button>');
 	}
 	saveButton.value = UI.CApplyChanges;
 	saveButton.className = "btn btn-default";
@@ -1079,15 +1079,15 @@ function editClassTableRow()
 	editClassWindow = openPopupWindow("qos_edit_class.sh", "test", 560, 500);
 	try
 	{
-		saveButton = editClassWindow.document.createElement('input');
+		saveButton = editClassWindow.document.createElement('button');
 		saveButton.type= 'button';
-		closeButton = editClassWindow.document.createElement('input');
+		closeButton = editClassWindow.document.createElement('button');
 		closeButton.type= 'button';
 	}
 	catch(e)
 	{
-		saveButton = editClassWindow.createElement('<input type="button" />');
-		closeButton = editClassWindow.createElement('<input type="button" />');
+		saveButton = editClassWindow.createElement('<button type="button"></button>');
+		closeButton = editClassWindow.createElement('<button type="button"></button>');
 	}
 
 	saveButton.value = UI.CApplyChanges;

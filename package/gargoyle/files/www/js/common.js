@@ -689,14 +689,30 @@ function setChildText(parentId, text, color, isBold, fontSize, controlDocument)
 function createInput(type, controlDocument)
 {
 	controlDocument = controlDocument == null ? document : controlDocument;
-	try
+
+	if(type == "button")
 	{
-		inp = controlDocument.createElement('input');
-		inp.type = type;
+		try
+		{
+			inp = controlDocument.createElement('button');
+			inp.type = type;
+		}
+		catch(e)
+		{
+			inp = controlDocument.createElement('<button type="button"></button>');
+		}
 	}
-	catch(e)
+	else
 	{
-		inp = controlDocument.createElement('<input type="' + type + '" />');
+		try
+		{
+			inp = controlDocument.createElement('input');
+			inp.type = type;
+		}
+		catch(e)
+		{
+			inp = controlDocument.createElement('<input type="' + type + '" />');
+		}
 	}
 	return inp;
 }
