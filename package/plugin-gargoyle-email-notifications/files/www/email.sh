@@ -163,10 +163,10 @@ for (tab_idx in cron_data) {
 					<label class="col-xs-5 col-sm-3" id="bandwidthIntervalLabel" for="bandwidthIntervalSelect"><%~ email.BandwidthInterval %></label>
 					<span class="col-xs-7 col-sm-9">
 						<select id="bandwidthIntervalSelect" class="form-control" disabled>
-							<option value="minutes"><%~ email.minutes %></option>
-							<option value="quarter hours"><%~ email.quarterhours %></option>
-							<option value="hours"><%~ email.hours %></option>
-							<option value="days"><%~ email.days %></option>
+							<option value="minute"><%~ email.minutes %></option>
+							<option value="900"><%~ email.quarterhours %></option>
+							<option value="hour"><%~ email.hours %></option>
+							<option value="day"><%~ email.days %></option>
 						</select>
 					</span>
 	

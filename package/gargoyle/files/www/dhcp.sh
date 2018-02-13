@@ -16,7 +16,7 @@
 	echo "var dhcpEnabled = true;"
 	echo "var subnet=\"$subnet\";"
 	echo "var dhcpSection = getDhcpSection(uciOriginal);"
-
+	
 	echo "var hostData = new Array();"
 	if [ -e /etc/hosts ] ; then
 		awk ' $0 ~ /^[\t ]*[0-9]/ {print "hostData.push([\""$1"\",\""$2"\"]);"};' /etc/hosts
@@ -61,12 +61,15 @@ for (etherIndex in etherData)
 <div class="row">
 	<div class="col-lg-6">
 		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ dhcp.DHCPstp %></h3>
+			</div>
 			<div class="panel-body">
 				<div class="row form-group" id="dhcp_enabled_container">
 					<span class="col-xs-12">
-						<input type="checkbox" id="dhcp_enabled" onclick="setEnabled(this.checked)" />
-						<label id="dhcp_enabled_label" for="dhcp_enabled"><%~ dhcp.SrvE %></label>
-					</span>
+ 						<input type="checkbox" id="dhcp_enabled" onclick="setEnabled(this.checked)" />
+ 						<label id="dhcp_enabled_label" for="dhcp_enabled"><%~ dhcp.SrvE %></label>
+ 					</span>
 				</div>
 
 				<div id="dhcp_range_container" class="row form-group">
@@ -89,14 +92,26 @@ for (etherIndex in etherData)
 					</span>
 				</div>
 
+				<div id="alt_gateway_check_container" class="row form-group">
+					<span class="col-xs-1"><input type="checkbox" id="dhcp_use_alt_gateway" onclick="enableAssociatedField(this, 'alt_gateway', defaultAltGateway)"/></span>
+					<label class="col-xs-7" for="dhcp_use_alt_gateway" id="dhcp_alt_gateway_label"><%~ UseAltGW %>:</label>
+				</div>
+				<div id="alt_gateway_container" class="row form-group">
+					<label class="col-xs-5" for="alt_gateway" id="alt_gateway_label"><%~ AltGW %>:</label>
+					<span class="col-xs-7">
+						<% echo -n "$subnet" %>
+						<input type="text" class="form-control" id="alt_gateway" onkeyup="proofreadNumeric(this)" size="5" maxlength="3" />
+					</span>
+				</div>
+				
 				<div id="dhcp_lease_container" class="row form-group">
 					<label class="col-xs-5" for="dhcp_lease" id="dhcp_lease_label"><%~ LsTm %>:</label>
 					<span class="col-xs-7">
-						<input type="text" class="form-control" onkeyup="proofreadNumeric(this)" id="dhcp_lease" size="5" maxlength="4" />
-						<em>(<%~ hours %>)</em>
+						<input type="text" class="form-control" onkeyup="proofreadNumeric(this)" id="dhcp_lease" size="5" maxlength="5" />
+						<em>(<%~ minutes %>)</em>
 					</span>
 				</div>
-
+				
 			</div>
 		</div>
 	</div>
