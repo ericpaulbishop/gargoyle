@@ -35,8 +35,8 @@ function init(evt)
 		themeFontFamily = bodyStyle.fontFamily;
 	}
 
-	var graphRightCoor=Math.floor(rightCoor*85/100);
-	var graphBottomCoor=Math.floor(bottomCoor*85/100);
+	var graphRightCoor=Math.floor(rightCoor*(85/100));
+	var graphBottomCoor=Math.floor(bottomCoor*(85/100));
 	var graphHeight = (graphBottomCoor-topCoor)+1;
 
 	var scaleFraction = 1;
@@ -71,8 +71,8 @@ function plotAll(pointSets, numDisplayIntervals, intervalLength, lastIntervalSta
 		tzMinutes = parseInt(tzm);
 	}
 
-	var graphRightCoor=Math.floor(rightCoor*85/100);
-	var graphBottomCoor=Math.floor(bottomCoor*85/100);
+	var graphRightCoor=Math.floor(rightCoor*(85/100));
+	var graphBottomCoor=Math.floor(bottomCoor*(85/100));
 	var graphHeight = (graphBottomCoor-topCoor)+1;
 	var graphWidth = (graphRightCoor-leftCoor)+1;
 

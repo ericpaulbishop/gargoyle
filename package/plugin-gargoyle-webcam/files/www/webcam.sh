@@ -50,13 +50,17 @@ var webcams = [];
 
 			<div class="panel-body">
 				<div class="row form-group">
-					<span class="col-xs-1"><input id="webcam_enable" type="checkbox" onchange='updateWebcamWanAccess()'/></span>
-					<label class="col-xs-11" id="webcam_enable_label" for="webcam_enable"><%~ EnWebC %></label>
+					<span class="col-xs-12">
+						<input id="webcam_enable" type="checkbox" onchange='updateWebcamWanAccess()'/>
+						<label id="webcam_enable_label" for="webcam_enable"><%~ EnWebC %></label>
+					</span>
 				</div>
 
 				<div class="row form-group">
-					<label class="col-xs-5" id="webcam_wan_access_label" for="webcam_wan_access"><%~ EnRAWebC %>:</label>
-					<span class="col-xs-7"><input id="webcam_wan_access" type="checkbox"/></span>
+					<span class="col-xs-12">
+						<input id="webcam_wan_access" type="checkbox"/>
+						<label id="webcam_wan_access_label" for="webcam_wan_access"><%~ EnRAWebC %>:</label>
+					</span>
 				</div>
 
 				<div class="row form-group">
@@ -75,8 +79,10 @@ var webcams = [];
 				</div>
 
 				<div class="row form-group">
-					<label class="col-xs-5" id="webcam_yuv_label" for="webcam_yuv"><%~ WebCYUYV %>:</label>
-					<span class="col-xs-7"><input id="webcam_yuv" type="checkbox"/></span>
+					<span class="col-xs-12">
+						<input id="webcam_yuv" type="checkbox"/>
+						<label id="webcam_yuv_label" for="webcam_yuv"><%~ WebCYUYV %>:</label>
+					</span>
 				</div>
 
 				<div class="row form-group">

@@ -104,11 +104,13 @@
 				<div class="row">
 					<div class="col-lg-12">
 						<div class="row form-group">
-							<span class="col-xs-1"><input type="checkbox" id="use_high_res_15m" onclick="highResChanged()"></span>
-							<label class="col-xs-11" id="use_high_res_15m_label" for="use_high_res_15m"><%~ HRInf %></label>
-							<span class="col-xs-11 col-xs-offset-1"><em><%~ HRWrn %></em></span>
+							<span class="col-xs-12">
+								<input type="checkbox" id="use_high_res_15m" onclick="highResChanged()">
+								<label id="use_high_res_15m_label" for="use_high_res_15m"><%~ HRInf %></label>
+								<span class="col-xs-12"><em><%~ HRWrn %></em></span>
+							</span>
 						</div>
-						<span class="col-xs-12"><br /><%~ UsInf %><br /><%~ LclTrff %></span>
+						<span class="alert alert-warning col-xs-12" role="alert"><%~ UsInf %><br /><%~ LclTrff %></span>
 					</div>
 				</div>
 
@@ -185,7 +187,45 @@
 				<div class="form-group">
 					<button id="delete_data_button" class="btn btn-danger btn-lg" onclick="deleteData();"><%~ DelD %></button>
 				</div>
+			</div>
+		</div>
+	</div>
+	<div class="col-lg-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ BMonSet %></h3>
+			</div>
+			<div id="custom_bwmon_settings" class="panel-body">
+				<div class="row form-group">
+					<span class="col-xs-12">
+						<input type="checkbox" id="enable_custom_bwmon" onclick="setCustBWMonVisibility()">
+						<label id="enable_custom_bwmon_label" for="enable_custom_bwmon"><%~ EnCustBMon %></label>
+					</span>
+				</div>
 
+				<div class="row form-group">
+					<label class="col-xs-5" for="custom_time_frame" id="custom_time_frame_label"><%~ BMonIntvl %>:</label>
+					<span class="col-xs-7">
+						<select id="custom_time_frame" class="form-control" disabled="true">
+							<option value="1"><%~ mnths %></option>
+						</select>
+					</span>
+				</div>
+
+				<div class="row form-group">
+					<label class="col-xs-5" for="custom_reset_day" id="custom_reset_day_label"><%~ BMonReset %>:</label>
+					<span class="col-xs-7">
+						<select id="custom_reset_day" class="form-control" onchange="setCustBWMonVisibility()"></select>
+					</span>
+				</div>
+
+				<div class="row form-group">
+					<span class="alert alert-danger col-xs-12" role="alert"><%~ CustBMonWarn %></span>
+				</div>
+
+				<div class="form-group">
+					<button id="bwcustSaveChanges" class="btn btn-danger btn-lg" onclick="bwcustSaveChanges()" disabled="true"><%~ SaveChanges %></button>
+				</div>
 			</div>
 		</div>
 	</div>

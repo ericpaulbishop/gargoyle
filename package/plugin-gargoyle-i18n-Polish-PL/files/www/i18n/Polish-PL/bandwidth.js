@@ -31,6 +31,16 @@ bndwS.DSep="Dane są rozdzielone przecinkami";
 bndwS.DFmt="[Kierunek],[Długość przedziału],[Zapisane przedziały],[IP],[Start przedziału],[Koniec przedziału],[Zużytych bajtów]";
 bndwS.DNow="Pobierz";
 bndwS.expd="rozwiń";
+bndwS.BMonSet="Własne ustawienia monitora zużycia";
+bndwS.EnCustBMon="Włącz własny monitor zużycia";
+bndwS.CustBMonWarn="Zmiana jakichkolwiek ustawień spowoduje USUNIĘCIE poprzednio zapisanej historii własnego monitora zużycia. NIE wpłynie to na historię domyślnych monitorów pasma.";
+bndwS.BMonIntvl="Okres monitorowania";
+bndwS.BMonReset="Dzień resetu monitora";
+bndwS.LD1s="";
+bndwS.LD2s="";
+bndwS.LD3s="";
+bndwS.Digs="";
+bndwS.CustBMon="(własne)";
 
 //javascript
 bndwS.UpCl="Klasa wysyłania:";

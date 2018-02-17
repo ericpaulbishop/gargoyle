@@ -17,6 +17,7 @@
 				<h3 class="panel-title"><%~ ddns.EDSect %></h3>
 			</div>
 			<div class="panel-body">
+				<div id="ddns_no_script" class="alert alert-danger" role="alert" style="display: none;"><%~ NoScriptErr %></div>
 				<div class="row form-group">
 					<label class="col-xs-5" for="ddns_provider" id="ddns_provider_label"><%~ SvPro %>:</label>
 					<span class="col-xs-7" id="ddns_provider_text"></span>

@@ -1231,6 +1231,7 @@ CONFIG_PACKAGE_wireless-tools=y
 CONFIG_PACKAGE_gargoyle=y
 CONFIG_PACKAGE_gargoyle-i18n=y
 CONFIG_PACKAGE_plugin-gargoyle-adblock=m
+# CONFIG_PACKAGE_plugin-gargoyle-ddns-cloudflare is not set
 # CONFIG_PACKAGE_plugin-gargoyle-email-notifications is not set
 CONFIG_PACKAGE_plugin-gargoyle-email-notifications-nossl=m
 # CONFIG_PACKAGE_plugin-gargoyle-i18n-Arabic-AR is not set

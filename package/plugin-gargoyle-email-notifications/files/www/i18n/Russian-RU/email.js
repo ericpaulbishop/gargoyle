@@ -1,11 +1,11 @@
-/*
- * UTF-8 (with BOM) English-EN text strings for email.sh html elements
+﻿/*
+ * UTF-8 (with BOM) Russian-RU text strings for email.sh html elements
  */
 
 email.Time="Настройки времени";
 email.TPer="Периодичность таймера";
 email.DataSettings="Содержимое письма";
-email.NoTm="Отклюить таймер";
+email.NoTm="Отключить таймер";
 email.Dly="Ежедневно";
 email.Wkd="Будни + Субб./Воскр.";
 email.Wkly="Еженедельно";
@@ -67,7 +67,7 @@ email.receiverError="Адрес получателя не корректен.";
 email.portError="Введите корректный номер порта.";
 email.testEmailSuccess="Письмо успешно отправленно.";
 email.testEmailFail="Что-то пошло не так. Ответ:\n";
-email.testEmail="Тестовое письмоо отправляется...";
+email.testEmail="Тестовое письмо отправляется...";
 email.encryptionTypeError="Выберите тип шифрования.";
 email.noDataSelected="Выберите отправляемые данные.";
 email.countError="Выберите количество отправляемых записей.";

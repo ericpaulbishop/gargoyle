@@ -2,13 +2,13 @@
  * UTF-8 (with BOM) Russian-RU text strings for overview.sh html elements
  */
 
-ovwS.mDevice="Yстройствo";
+ovwS.mDevice="Устройствo";
 ovwS.mWAN="WAN";
 ovwS.mLAN="LAN";
-ovwS.mWireless="беспроводной";
+ovwS.mWireless="Беспроводная сеть";
 ovwS.mTime="Время";
 ovwS.mServices="Сервисы";
-ovwS.mBridge="мост";
+ovwS.mBridge="Мост";
 ovwS.Sts="Состояние устройства";
 ovwS.DNam="Имя устройства";
 ovwS.GVer="Версия Gargoyle";
@@ -21,6 +21,7 @@ ovwS.CPUAvg="Средние значения загрузки ЦПУ";
 ovwS.Uptm="Время работы";
 ovwS.CDaT="Текущая дата и время";
 ovwS.BrIPA="IP-адрес моста";
+ovwS.BrRIP="IP-адрес ретранслятора";
 ovwS.BrNMsk="Маска подсети моста";
 ovwS.BrMAdd="MAC-адрес моста";
 ovwS.LGtwy="IP-адрес шлюза локальной сети";
@@ -41,8 +42,11 @@ ovwS.WlMAdd="MAC-адрес WiFi";
 ovwS.APID="Имя (SSID) точки доступа";
 ovwS.F5GID="Имя (SSID) точки доступа 5ГГц";
 ovwS.IDJoin="Имя (SSID) объедененное с клиентским";
-ovwS.QUp="QoS Отдано";
-ovwS.QDwn="QoS Скачано";
+ovwS.QUp="QoS (отправка)";
+ovwS.QDwn="QoS (приём)";
+ovwS.TEMPcpu="Темперература ЦПУ";
+ovwS.TEMPmem="Температура оперативной памяти";
+ovwS.TEMPwifi="Температура Wifi-модуля";
 
 //javascript
 ovwS.AcPt="Точка доступа";

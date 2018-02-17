@@ -12,7 +12,7 @@ var thmS=new Object(); //part of i18n
 function createUseButton()
 {
 	var useButton = createInput("button");
-	useButton.value = UI.Select;
+	useButton.textContent = UI.Select;
 	useButton.className="btn btn-default";
 	useButton.onclick = useTheme;
 	return useButton;

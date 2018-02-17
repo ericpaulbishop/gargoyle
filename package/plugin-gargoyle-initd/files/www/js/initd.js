@@ -74,7 +74,7 @@ function createEnabledCheckbox()
 function createStartButton()
 {
 	var startButton = createInput("button");
-	startButton.value = "Start";
+	startButton.textContent = "Start";
 	startButton.className="btn btn-primary";
 	startButton.onclick = startService;
 	return startButton;
@@ -83,7 +83,7 @@ function createStartButton()
 function createResetButton()
 {
 	var restartButton = createInput("button");
-	restartButton.value = "Restart";
+	restartButton.textContent = "Restart";
 	restartButton.className="btn btn-warning";
 	restartButton.onclick = restartService;
 	return restartButton;
@@ -92,7 +92,7 @@ function createResetButton()
 function createStopButton()
 {
 	var stopButton = createInput("button");
-	stopButton.value = "Stop";
+	stopButton.textContent = "Stop";
 	stopButton.className="btn btn-danger";
 	stopButton.onclick = stopService;
 	return stopButton;

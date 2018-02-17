@@ -615,8 +615,8 @@ function setDmzEnabled()
 function createEditButton(isSingle)
 {
 	var editButton = createInput("button");
-	editButton.value = UI.Edit;
-	editButton.className="btn btn-default";
+	editButton.textContent = UI.Edit;
+	editButton.className = "btn btn-default btn-edit";
 	editButton.onclick = isSingle ? function(){ editForward(true, this); } : function(){ editForward(false, this); } ;
 	return editButton;
 }
@@ -636,26 +636,14 @@ function editForward(isSingle, triggerElement)
 	}
 
 
-	try
-	{
-		xCoor = window.screenX + 225;
-		yCoor = window.screenY+ 225;
-	}
-	catch(e)
-	{
-		xCoor = window.left + 225;
-		yCoor = window.top + 225;
-	}
-
-
 	var editLocation = isSingle ? "single_forward_edit.sh" : "multi_forward_edit.sh";
-	editForwardWindow = window.open(editLocation, "edit", "width=560,height=220,left=" + xCoor + ",top=" + yCoor );
+	editForwardWindow = openPopupWindow(editLocation, "edit", 560, 220);
 
 	saveButton = createInput("button", editForwardWindow.document);
 	closeButton = createInput("button", editForwardWindow.document);
-	saveButton.value = UI.CApplyChanges;
-	saveButton.className = "btn btn-default";
-	closeButton.value = UI.CDiscardChanges;
+	saveButton.textContent = UI.CApplyChanges;
+	saveButton.className = "btn btn-primary";
+	closeButton.textContent = UI.CDiscardChanges;
 	closeButton.className = "btn btn-warning";
 
 	editRow=triggerElement.parentNode.parentNode;
@@ -729,7 +717,6 @@ function editForward(isSingle, triggerElement)
 						editForwardWindow.close();
 					}
 				}
-				editForwardWindow.moveTo(xCoor,yCoor);
 				editForwardWindow.focus();
 				updateDone = true;
 			}

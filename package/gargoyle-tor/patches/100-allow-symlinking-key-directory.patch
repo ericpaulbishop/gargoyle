@@ -1,0 +1,25 @@
+--- a/src/common/util.c	2017-07-26 12:53:38.000000000 -0400
++++ b/src/common/util.c	2017-11-09 11:34:07.558858111 -0500
+@@ -123,6 +123,10 @@
+  #define DMALLOC_FN_ARGS
+ #endif
+ 
++#define O_NOFOLLOW 0
++
++
++
+ /** Allocate a chunk of <b>size</b> bytes of memory, and return a pointer to
+  * result.  On error, log and terminate the process.  (Same as malloc(size),
+  * but never returns NULL.)
+--- a/src/common/sandbox.c	2017-07-27 08:23:37.000000000 -0400
++++ b/src/common/sandbox.c	2017-11-09 11:33:21.206847584 -0500
+@@ -83,6 +83,9 @@
+ #include <execinfo.h>
+ #endif
+ 
++
++#define O_NOFOLLOW 0
++
+ /**
+  * Linux 32 bit definitions
+  */

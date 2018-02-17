@@ -124,8 +124,10 @@
 				</div>
 
 				<div class="row form-group">
-					<span class="col-xs-1"><input type="checkbox" id="disable_web_password"/></span>
-					<label class="col-xs-11" id="disable_web_password_label" for="disable_web_password"><%~ DisablePassword %> <em>(<%~ warning %>)</em></label>
+					<span class="col-xs-12">
+						<input type="checkbox" id="disable_web_password"/>
+						<label id="disable_web_password_label" for="disable_web_password"><%~ DisablePassword %> <em>(<%~ warning %>)</em></label>
+					</span>
 				</div>
 			</div>
 		</div>
@@ -144,8 +146,10 @@
 				</div>
 
 				<div class="row form-group" id="remote_ssh_enabled_container">
-					<span class="col-xs-1"><input type="checkbox" id="remote_ssh_enabled" onclick="updateVisibility()"/></span>
-					<label class="col-xs-11" id="remote_ssh_enabled_label" for="remote_ssh_enabled"><%~ EnableRemoteAccess %></label>
+					<span class="col-xs-12">
+						<input type="checkbox" id="remote_ssh_enabled" onclick="updateVisibility()"/>
+						<label id="remote_ssh_enabled_label" for="remote_ssh_enabled"><%~ EnableRemoteAccess %></label>
+					</span>
 				</div>
 
 				<div class="row form-group" id="remote_ssh_port_container">
@@ -169,8 +173,10 @@
 
 				<div style="display: block;" id="internal_divider1" class="internal_divider"></div>
 				<div class="row form-group" id="pwd_enabled_container">
-					<span class="col-xs-1"><input type="checkbox" id="pwd_auth_enabled" /></span>
-					<label class="col-xs-11" id="pwd_auth_label" for="pwd_auth_enabled"><%~ SSHEnablePwd %></label>
+					<span class="col-xs-12">
+						<input type="checkbox" id="pwd_auth_enabled" />
+						<label id="pwd_auth_label" for="pwd_auth_enabled"><%~ SSHEnablePwd %></label>
+					</span>
 				</div>
 
 				<div style="display: block;" id="internal_divider2" class="internal_divider"></div>

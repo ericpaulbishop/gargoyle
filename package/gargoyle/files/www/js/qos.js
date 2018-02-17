@@ -847,8 +847,8 @@ function removeServiceClassCallback(table, row)
 function createRuleTableEditButton()
 {
 	editRuleButton = createInput("button");
-	editRuleButton.value = UI.Edit;
-	editRuleButton.className="btn btn-default";
+	editRuleButton.textContent = UI.Edit;
+	editRuleButton.className = "btn btn-default btn-edit";
 	editRuleButton.onclick = editRuleTableRow;
 
 	return editRuleButton;
@@ -869,35 +869,24 @@ function editRuleTableRow()
 	}
 
 
-	try
-	{
-		xCoor = window.screenX + 225;
-		yCoor = window.screenY+ 225;
-	}
-	catch(e)
-	{
-		xCoor = window.left + 225;
-		yCoor = window.top + 225;
-	}
+	editRuleWindow = openPopupWindow("qos_edit_rule.sh", "test", 560, 530);
 
-
-	editRuleWindow = window.open("qos_edit_rule.sh", "test", "width=560,height=530,left=" + xCoor + ",top=" + yCoor );
 	try
 	{
 
-		saveButton = editRuleWindow.document.createElement('input');
+		saveButton = editRuleWindow.document.createElement('button');
 		saveButton.type= 'button';
-		closeButton = editRuleWindow.document.createElement('input');
+		closeButton = editRuleWindow.document.createElement('button');
 		closeButton.type= 'button';
 	}
 	catch(e)
 	{
-		saveButton = editRuleWindow.createElement('<input type="button" />');
-		closeButton = editRuleWindow.createElement('<input type="button" />');
+		saveButton = editRuleWindow.createElement('<button type="button"></button>');
+		closeButton = editRuleWindow.createElement('<button type="button"></button>');
 	}
-	saveButton.value = UI.CApplyChanges;
-	saveButton.className = "btn btn-default";
-	closeButton.value = UI.CDiscardChanges;
+	saveButton.textContent = UI.CApplyChanges;
+	saveButton.className = "btn btn-primary";
+	closeButton.textContent = UI.CDiscardChanges;
 	closeButton.className = "btn btn-warning";
 
 
@@ -1013,7 +1002,6 @@ function editRuleTableRow()
 						editRuleWindow.close();
 					}
 				}
-				editRuleWindow.moveTo(xCoor,yCoor);
 				editRuleWindow.focus();
 				update_done = true;
 			}
@@ -1033,13 +1021,13 @@ function createRuleTableCommentButton(commentStr)
 	commentRuleSpan.className="popup";
 
 	commentRuleButton = createInput("button");
-	commentRuleButton.value = "?";
-	commentRuleButton.className="btn btn-default";
+	commentRuleButton.textContent = "?";
+	commentRuleButton.className = "btn btn-default btn-comment";
 	commentRuleButton.onclick = doRuleTableComment;
 	if (commentStr == "")
 	{
 		commentRuleButton.disabled = true;
-		commentRuleButton.value = "N/A"
+		commentRuleButton.textContent = "N/A"
 	}
 
 	commentSpan = document.createElement("span");
@@ -1062,8 +1050,8 @@ function doRuleTableComment()
 function createClassTableEditButton(rowIndex)
 {
 	editClassButton = createInput("button");
-	editClassButton.value = UI.Edit;
-	editClassButton.className="btn btn-default";
+	editClassButton.textContent = UI.Edit;
+	editClassButton.className = "btn btn-default btn-edit";
 	editClassButton.onclick = editClassTableRow;
 	editClassButton.id = "" + rowIndex;
 
@@ -1088,35 +1076,23 @@ function editClassTableRow()
 	}
 
 
+	editClassWindow = openPopupWindow("qos_edit_class.sh", "test", 560, 500);
 	try
 	{
-		xCoor = window.screenX + 225;
-		yCoor = window.screenY+ 225;
-	}
-	catch(e)
-	{
-		xCoor = window.left + 225;
-		yCoor = window.top + 225;
-	}
-
-
-	editClassWindow = window.open("qos_edit_class.sh", "test", "width=560,height=500,left=" + xCoor + ",top=" + yCoor );
-	try
-	{
-		saveButton = editClassWindow.document.createElement('input');
+		saveButton = editClassWindow.document.createElement('button');
 		saveButton.type= 'button';
-		closeButton = editClassWindow.document.createElement('input');
+		closeButton = editClassWindow.document.createElement('button');
 		closeButton.type= 'button';
 	}
 	catch(e)
 	{
-		saveButton = editClassWindow.createElement('<input type="button" />');
-		closeButton = editClassWindow.createElement('<input type="button" />');
+		saveButton = editClassWindow.createElement('<button type="button"></button>');
+		closeButton = editClassWindow.createElement('<button type="button"></button>');
 	}
 
-	saveButton.value = UI.CApplyChanges;
-	saveButton.className = "btn btn-default";
-	closeButton.value = UI.CDiscardChanges;
+	saveButton.textContent = UI.CApplyChanges;
+	saveButton.className = "btn btn-primary";
+	closeButton.textContent = UI.CDiscardChanges;
 	closeButton.className = "btn btn-warning";
 
 	editClassWindowRow=this.parentNode.parentNode;
@@ -1257,7 +1233,6 @@ function editClassTableRow()
 					}
 				}
 
-				editClassWindow.moveTo(xCoor,yCoor);
 				editClassWindow.focus();
 				update_done = true;
 			}

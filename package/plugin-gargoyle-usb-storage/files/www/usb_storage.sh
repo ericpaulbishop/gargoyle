@@ -72,14 +72,18 @@
 
 			<div class="panel-body">
 				<div id='ftp_wan_access_container' class="row form-group">
-					<span class="col-xs-1"><input type='checkbox' id='ftp_wan_access' onclick='updateWanFtpVisibility()'/></span>
-					<label class="col-xs-11" id='ftp_wan_access_label' for='ftp_wan_access'><%~ WFTP %></label>
+					<span class="col-xs-12">
+						<input type='checkbox' id='ftp_wan_access' onclick='updateWanFtpVisibility()'/>
+						<label id='ftp_wan_access_label' for='ftp_wan_access'><%~ WFTP %></label>
+					</span>
 				</div>
 
 				<div id='ftp_pasv_container' class="row form-group">
-					<span class="col-xs-1"><input type='checkbox' id='ftp_wan_pasv' onclick='updateWanFtpVisibility()'/></span>
-					<span class="col-xs-11">
-						<label id='ftp_wan_access_label' for='ftp_wan_pasv'><%~ WpFTP %></label>&nbsp;
+					<span class="col-xs-5">
+						<input type='checkbox' id='ftp_wan_pasv' onclick='updateWanFtpVisibility()'/>
+						<label id='ftp_wan_access_label' for='ftp_wan_pasv'><%~ WpFTP %></label>
+					</span>
+					<span class="col-xs-7">
 						<input class="form-control" type="text" size='7' maxLength='5' onkeyup='proofreadPort(this)' id='pasv_min_port' />&nbsp;-&nbsp;
 						<input class="form-control" type="text" size='7' maxLength='5' onkeyup='proofreadPort(this)' id='pasv_max_port' />
 					</span>
@@ -93,7 +97,7 @@
 				</div>
 
 				<div id="user_container" class="row form-group">
-					<label class="col-xs-12" id="cifs_user_label"><%~ CFUsr %>:</label>
+					<span class="col-xs-12" id="cifs_user_label" style="text-decoration:underline"><%~ CFUsr %>:</span>
 					<label class="col-xs-5" id="user_label" for="new_user"><%~ NewU %>:</label>
 					<span class="col-xs-7"><input id="new_user" class="form-control" type="text"/></span>
 				</div>
@@ -119,22 +123,28 @@
 				</div>
 
 				<div id="sharing_add_controls_container" class="row form-group">
-					<%in templates/usb_storage_template %>
 					<span class="col-xs-12">
+						<%in templates/usb_storage_template %>
 						<button id="add_share_button" class="btn btn-default" onclick="addNewShare()"><%~ ADsk %></button>
 					</span>
 				</div>
 				<div class="internal_divider"></div>
 
 				<div id="sharing_current_heading_container" class="row form-group">
-					<span class="col-xs-12" style="text-decoration:underline"><%~ CShare %>:</span>
+					<span class="col-xs-12">
+						<span style="text-decoration:underline"><%~ CShare %>:</span>
+						<div id="sharing_mount_table_container" class="table-responsive"></div>
+					</span>
 				</div>
-				<div id="sharing_mount_table_container" class="table-responsive"></div>
 
 				<div class="internal_divider"></div>
 
-				<button id="save_button" class="btn btn-primary btn-lg" onclick="saveChanges()"><%~ SaveChanges %></button>
-				<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
+				<div class="row form-group">
+					<span class="col-xs-12">
+						<button id="save_button" class="btn btn-primary btn-lg" onclick="saveChanges()"><%~ SaveChanges %></button>
+						<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
+					</span>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -147,8 +157,12 @@
 
 			<div class="panel-body">
 				<div class="row form-group">
-					<span class="col-xs-12"><button id="unmount_usb_button" class="btn btn-warning btn-lg" onclick="unmountAllUsb()"><%~ UmntB %></button></span>
-					<span class="col-xs-12 alert alert-warning"><em><%~ UmntWarn %></em></span>
+					<span class="col-xs-12">
+						<div class="alert alert-warning"><em><%~ UmntWarn %></em></div>
+					</span>
+					<span class="col-xs-12">
+						<button id="unmount_usb_button" class="btn btn-warning btn-lg" onclick="unmountAllUsb()"><%~ UmntB %></button>
+					</span>
 				</div>
 			</div>
 		</div>
@@ -158,18 +172,17 @@
 <div class="row">
 	<div id="disk_format" class="col-lg-6">
 		<div class="panel panel-default">
-			<div class="panel-heading">
+ 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ FDisk %></h3>
 			</div>
 
 			<div class="panel-body">
 				<div id="no_unmounted_drives" class="row form-group">
-					<em><span class="col-xs-12"><%~ NoUmntDev %></span></em>
+					<span class="col-xs-12">
+						<div class="alert alert-warning"><em><%~ NoUmntDev %></em></div>
+					</span>
 				</div>
 
-				<div id="format_warning" class="row form-group">
-					<em><span class="col-xs-12 alert alert-danger"><%~ FmtWarn %></span></em>
-				</div>
 
 				<div id="format_disk_select_container" class="row form-group">
 					<label class="col-xs-5" id="format_disk_select_label" for="format_disk_select"><%~ DskForm %>:</label>
@@ -193,15 +206,25 @@
 				</div>
 
 				<div id="extroot_container" class="row form-group">
-					<span class="col-xs-1"><input type="checkbox" id="extroot" name="extroot"/></span>
-					<label class="col-xs-11" id="extroot_label" for="extroot" style="vertical-align:middle"><%~ MExtr %></label>
-					<div class="col-xs-12 alert alert-warning">
-						<em><%~ ExtrWarn %></em>
-					</div>
+					<span class="col-xs-12">
+						<input type="checkbox" id="extroot" name="extroot"/>
+						<label id="extroot_label" for="extroot" style="vertical-align:middle"><%~ MExtr %></label>
+					</span>
+					<span class="col-xs-12">
+						<div class="alert alert-warning"><em><%~ ExtrWarn %></em></div>
+					</span>
+				</div>
+
+				<div id="format_warning" class="row form-group">
+					<span class="col-xs-12">
+						<div class="alert alert-danger"><em><%~ FmtWarn %></em></div>
+					</span>
 				</div>
 
 				<div id="usb_format_button_container" class="row form-group">
-					<span class="col-xs-12"><button id="usb_format_button" class="btn btn-danger btn-lg" onclick="formatDiskRequested()"><%~ FmtNow %></button></span>
+					<span class="col-xs-12">
+						<button id="usb_format_button" class="btn btn-danger btn-lg" onclick="formatDiskRequested()"><%~ FmtNow %></button>
+					</span>
 				</div>
 			</div>
 		</div>
@@ -215,8 +238,12 @@
 
 			<div class="panel-body">
 				<div class="row form-group">
-					<span class="col-xs-12"><button id="extroot_button" class="btn btn-danger btn-lg" onclick="disableExtroot();"><%~ ExtrOff %></button></span>
-					<span class="col-xs-12 alert alert-warning"><em><%~ ExtDt %> <strong><span id="extroot_drive"></span></strong>.</em></span>
+					<span class="col-xs-12">
+						<button id="extroot_button" class="btn btn-danger btn-lg" onclick="disableExtroot();"><%~ ExtrOff %></button>
+					</span>
+					<span class="col-xs-12">
+						<div class="alert alert-warning"><em><%~ ExtDt %> <strong><span id="extroot_drive"></span></strong>.</em></div>
+					</span>
 				</div>
 			</div>
 		</div>
@@ -225,7 +252,6 @@
 
 <iframe id="reboot_test" onload="reloadPage()" style="display:none"></iframe>
 
-<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id='output'></textarea> -->
 
 <script>
 <!--

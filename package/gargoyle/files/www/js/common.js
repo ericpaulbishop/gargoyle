@@ -689,14 +689,30 @@ function setChildText(parentId, text, color, isBold, fontSize, controlDocument)
 function createInput(type, controlDocument)
 {
 	controlDocument = controlDocument == null ? document : controlDocument;
-	try
+
+	if(type == "button")
 	{
-		inp = controlDocument.createElement('input');
-		inp.type = type;
+		try
+		{
+			inp = controlDocument.createElement('button');
+			inp.type = type;
+		}
+		catch(e)
+		{
+			inp = controlDocument.createElement('<button type="button"></button>');
+		}
 	}
-	catch(e)
+	else
 	{
-		inp = controlDocument.createElement('<input type="' + type + '" />');
+		try
+		{
+			inp = controlDocument.createElement('input');
+			inp.type = type;
+		}
+		catch(e)
+		{
+			inp = controlDocument.createElement('<input type="' + type + '" />');
+		}
 	}
 	return inp;
 }
@@ -993,8 +1009,7 @@ function setElementEnabled(element, enabled, defaultValue)
 		}
 		else if(element.type == "button")
 		{
-			var activeClassName = element.className.replace(/_button.*$/, "_button");
-			element.className=activeClassName;
+			element.classList.remove("disabled");
 		}
 	}
 	else
@@ -1013,8 +1028,7 @@ function setElementEnabled(element, enabled, defaultValue)
 		}
 		else if(element.type == "button")
 		{
-			var activeClassName = element.className.replace(/_button.*$/, "_button");
-			element.className= activeClassName + " disabled";
+			element.classList.add("disabled");
 		}
 		else if(element.type == "file")
 		{
@@ -1136,6 +1150,22 @@ function removeOptionFromSelectElement(selectId, optionText, controlDocument)
 	for(optionIndex = 0; optionIndex < selectElement.options.length && (!selectionFound); optionIndex++)
 	{
 		selectionFound = (selectElement.options[optionIndex].text == optionText);
+		if(selectionFound)
+		{
+			selectElement.remove(optionIndex);
+		}
+	}
+}
+
+function removeOptionFromSelectElementByValue(selectId, optionValue, controlDocument)
+{
+	controlDocument = controlDocument == null ? document : controlDocument;
+
+	selectElement = controlDocument.getElementById(selectId);
+	selectionFound = false;
+	for(optionIndex = 0; optionIndex < selectElement.options.length && (!selectionFound); optionIndex++)
+	{
+		selectionFound = (selectElement.options[optionIndex].value == optionValue);
 		if(selectionFound)
 		{
 			selectElement.remove(optionIndex);
@@ -2411,26 +2441,15 @@ function confirmPassword(confirmText, validatedFunc, invalidFunc)
 		}
 		catch(e){}
 	}
-	try
-	{
-		xCoor = window.screenX + 225;
-		yCoor = window.screenY+ 225;
-	}
-	catch(e)
-	{
-		xCoor = window.left + 225;
-		yCoor = window.top + 225;
-	}
-	var wlocation = "password_confirm.sh";
-	confirmWindow = window.open(wlocation, "password", "width=560,height=260,left=" + xCoor + ",top=" + yCoor );
+	confirmWindow = openPopupWindow("password_confirm.sh", "password", 560, 260);
 
 	var okButton = createInput("button", confirmWindow.document);
 	var cancelButton = createInput("button", confirmWindow.document);
 
-	okButton.value         = UI.OK;
-	okButton.className     = "btn btn-default";
-	cancelButton.value     = UI.Cancel;
-	cancelButton.className = "btn btn-default";
+	okButton.textContent   = UI.OK;
+	okButton.className     = "btn btn-primary";
+	cancelButton.textContent = UI.Cancel;
+	cancelButton.className = "btn btn-warning";
 
 
 	runOnEditorLoaded = function ()
@@ -2473,7 +2492,6 @@ function confirmPassword(confirmText, validatedFunc, invalidFunc)
 					runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 
 				}
-				confirmWindow.moveTo(xCoor,yCoor);
 				confirmWindow.focus();
 				updateDone = true;
 			}
@@ -2757,7 +2775,7 @@ function query(queryHeader, queryText, buttonNameList, continueFunction )
 	for(bIndex=0; bIndex < buttonNameList.length ; bIndex++)
 	{
 		b           = createInput("button", document);
-		b.value     = buttonNameList[bIndex];
+		b.textContent = buttonNameList[bIndex];
 		b.className = "btn btn-default"
 		b.onclick   = function()
 		{
@@ -2965,4 +2983,10 @@ function sidebar()
 	}
 }
 
+function openPopupWindow(url, name, width, height)
+{
+	var xCoor = (window.outerWidth - width)/2;
+	var yCoor = (window.outerHeight - height)/2;
 
+	return window.open(url, name, "width=" + width + ",height=" + height + ",left=" + xCoor + ",top=" + yCoor);
+}

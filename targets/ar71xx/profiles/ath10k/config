@@ -1394,6 +1394,7 @@ CONFIG_PACKAGE_wireless-tools=y
 CONFIG_PACKAGE_gargoyle=y
 CONFIG_PACKAGE_gargoyle-i18n=y
 CONFIG_PACKAGE_plugin-gargoyle-adblock=m
+CONFIG_PACKAGE_plugin-gargoyle-ddns-cloudflare=m
 CONFIG_PACKAGE_plugin-gargoyle-email-notifications=m
 CONFIG_PACKAGE_plugin-gargoyle-email-notifications-nossl=m
 CONFIG_PACKAGE_plugin-gargoyle-i18n-Arabic-AR=m
@@ -2127,7 +2128,7 @@ CONFIG_PACKAGE_libblkid=y
 CONFIG_PACKAGE_libblobmsg-json=y
 # CONFIG_PACKAGE_libcharset is not set
 # CONFIG_PACKAGE_libconfig is not set
-# CONFIG_PACKAGE_libcurl is not set
+CONFIG_PACKAGE_libcurl=m
 # CONFIG_PACKAGE_libelf1 is not set
 CONFIG_PACKAGE_libericstools=y
 CONFIG_PACKAGE_libevent2=y
@@ -2219,7 +2220,7 @@ CONFIG_PACKAGE_minidlna=m
 #
 # File Transfer
 #
-# CONFIG_PACKAGE_curl is not set
+CONFIG_PACKAGE_curl=m
 CONFIG_PACKAGE_vsftpd=y
 
 #
