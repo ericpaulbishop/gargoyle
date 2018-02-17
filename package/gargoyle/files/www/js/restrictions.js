@@ -304,8 +304,8 @@ function editRule()
 	}
 
 
-	editRuleType = editRuleType == "restriction_rule" ? "restriction_edit_rule.sh" : "whitelist_edit_rule.sh";
-	editRuleWindow = openPopupWindow(editRuleType, "edit", 560, 600);
+	var editRuleWinType = editRuleType == "restriction_rule" ? "restriction_edit_rule.sh" : "whitelist_edit_rule.sh";
+	editRuleWindow = openPopupWindow(editRuleWinType, "edit", 560, 600);
 
 	saveButton = createInput("button", editRuleWindow.document);
 	closeButton = createInput("button", editRuleWindow.document);
