@@ -66,7 +66,7 @@
 				</div>
 
 				<div class="row form-group">
-					<span class="col-xs-12"><button id="add_service_button" class="btn btn-default" onclick="addDdnsService()"><%~ AddDDNS %></button></span>
+					<span class="col-xs-12"><button id="add_service_button" class="btn btn-default btn-add" onclick="addDdnsService()"><%~ AddDDNS %></button></span>
 				</div>
 
 				<div class="row form-group">

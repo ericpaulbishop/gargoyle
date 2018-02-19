@@ -191,7 +191,7 @@
 					<label class="col-xs-5"><%~ SSHName %>:</label>
 					<span class="col-xs-7">
 						<input type="text" id="public_key_name" name="public_key_name" value="" class="form-control" />
-						<button class="btn btn-default" id="add_key" name="add_key" onclick="addKey()"><%~ Add %></button>
+						<button class="btn btn-default btn-add" id="add_key" name="add_key" onclick="addKey()"><%~ Add %></button>
 					</span>
 				</div>
 

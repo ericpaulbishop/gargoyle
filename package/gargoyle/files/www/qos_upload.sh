@@ -172,7 +172,7 @@
 					</div>
 
 					<div id="add_rule_container" class="row form-group">
-						<span class="col-xs-12"><button id="add_rule_button" class="btn btn-default" onclick="addClassificationRule()" ><%~ AddRule %></button></span>
+						<span class="col-xs-12"><button id="add_rule_button" class="btn btn-default btn-add" onclick="addClassificationRule()" ><%~ AddRule %></button></span>
 					</div>
 				</div>
 			</div>
@@ -269,7 +269,7 @@
 					</div>
 
 					<div class="row form-group" id="add_class_container">
-						<span class="col-xs-12"><button id="add_class_button" class="btn btn-default" onclick="addServiceClass()"><%~ AddSvcCls %></button></span>
+						<span class="col-xs-12"><button id="add_class_button" class="btn btn-default btn-add" onclick="addServiceClass()"><%~ AddSvcCls %></button></span>
 					</div>
 				</div>
 			</div>

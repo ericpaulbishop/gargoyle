@@ -29,7 +29,7 @@
 					<span class="col-xs-12">
 						<span id="add_rule_label" style="text-decoration:underline" ><%~ NRRule %>:</span>
 						<%in templates/restriction_template %>
-						<button id="add_restriction_button" class="btn btn-default" onclick="addNewRule('restriction_rule', 'rule_')"><%~ ANRule %></button>
+						<button id="add_restriction_button" class="btn btn-default btn-add" onclick="addNewRule('restriction_rule', 'rule_')"><%~ ANRule %></button>
 					</span>
 				</div>
 
@@ -54,7 +54,7 @@
 					<span class="col-xs-12">
 						<span id="add_exception_label" style="text-decoration:underline"><%~ NExcp %>:</span>
 						<%in templates/whitelist_template %>
-						<button id="add_restriction_button" class="btn btn-default" onclick="addNewRule('whitelist_rule', 'exception_')"><%~ ANRule %></button>
+						<button id="add_restriction_button" class="btn btn-default btn-add" onclick="addNewRule('whitelist_rule', 'exception_')"><%~ ANRule %></button>
 					</span>
 				</div>
 
