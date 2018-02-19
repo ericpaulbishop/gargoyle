@@ -9,6 +9,6 @@
 						<td><input type='text' id='add_host' size='15' class='form-control' /></td>
 						<td><input type='text' id='add_mac' size='20' onkeyup='proofreadMac(this)' maxLength='17' class='form-control' /></td>
 						<td><input type='text' id='add_ip' size='20' onkeyup='proofreadIp(this)' maxLength='15' class='form-control' /></td>
-						<td><button type='button' id='add_button' class='btn btn-default' onclick='addStatic()'><%~ Add %></button></td>
+						<td><button type='button' id='add_button' class='btn btn-default btn-add' onclick='addStatic()'><%~ Add %></button></td>
 					</tr>
 				</table>

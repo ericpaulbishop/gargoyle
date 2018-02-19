@@ -18,7 +18,7 @@
 	<div class="col-xs-offset-5 col-xs-7" id="exception_applies_to_table_container"></div>
 	<div class="col-xs-offset-5 col-xs-7">
 		<input type='text' id='exception_applies_to_addr' size='30' onkeyup='proofreadMultipleIpsOrMacs(this)' class='form-control' />
-		<button type="button" class="btn btn-default" id="exception_add_applies_to_addr" onclick='addAddressesToTable(document,"exception_applies_to_addr","exception_applies_to_table_container","exception_applies_to_table",true)'><%~ Add %></button>
+		<button type="button" class="btn btn-default btn-add" id="exception_add_applies_to_addr" onclick='addAddressesToTable(document,"exception_applies_to_addr","exception_applies_to_table_container","exception_applies_to_table",true)'><%~ Add %></button>
 	</div>
 	<div class="col-xs-offset-5 col-xs-7">
 		<em><%~ HstAddr %></em>
@@ -86,7 +86,7 @@
 		<div class="col-xs-offset-5 col-xs-7" id="exception_remote_ip_table_container"></div>
 		<div class="col-xs-offset-5 col-xs-7">
 			<input type='text' id='exception_remote_ip' size='30' onkeyup='proofreadMultipleIps(this)' class='form-control' />
-			<button type="button" class="btn btn-default" id="exception_add_remote_ip" onclick='addAddressesToTable(document,"exception_remote_ip","exception_remote_ip_table_container","exception_remote_ip_table",false)'><%~ Add %></button>
+			<button type="button" class="btn btn-default btn-add" id="exception_add_remote_ip" onclick='addAddressesToTable(document,"exception_remote_ip","exception_remote_ip_table_container","exception_remote_ip_table",false)'><%~ Add %></button>
 		</div>
 	</div>
 
@@ -188,7 +188,7 @@
 				<option value="url_domain_regex"><%~ DmRgx %>:</option>
 			</select>
 			<input type='text' id='exception_url_match' size='30' class='form-control' />
-			<button type="button" class="btn btn-default" id="exception_add_url_match" onclick='addUrlToTable(document, "exception_url_match", "exception_url_match_type", "exception_url_match_table_container", "exception_url_match_table")'><%~ Add %></button>
+			<button type="button" class="btn btn-default btn-add" id="exception_add_url_match" onclick='addUrlToTable(document, "exception_url_match", "exception_url_match_type", "exception_url_match_table_container", "exception_url_match_table")'><%~ Add %></button>
 		</div>
 	</div>
 </div>
