@@ -29,6 +29,9 @@
 <div class="row">
 	<div class="col-lg-6">
 		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ Section %></h3>
+			</div>
 			<div class="panel-body">
 				<div class="row form-group">
 					<label class="col-xs-5" id="current_time_label" for="current_time"><%~ CurrTime %>:</label>
