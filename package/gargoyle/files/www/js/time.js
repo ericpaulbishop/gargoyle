@@ -217,9 +217,9 @@ function timezoneChanged()
 	definitionTimezones = timezoneData[3];
 
 	newTimezoneDefinition = getSelectedValue("timezone");
-	if( getSelectedValue("region") == timezoneRegions[ definitionTimezones[previousTimezoneDefinition] ])
+	if(timezoneRegions[definitionTimezones[newTimezoneDefinition]] != timezoneRegions[definitionTimezones[previousTimezoneDefinition]])
 	{
-		setSelectedValue("region", timezoneRegions[ definitionTimezones[newTimezoneDefinition] ]);
+		setSelectedValue("region", timezoneRegions[definitionTimezones[newTimezoneDefinition]]);
 		updateServerList();
 	}
 
