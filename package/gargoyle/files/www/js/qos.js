@@ -1026,7 +1026,7 @@ function createRuleTableCommentButton(commentStr)
 	commentRuleButton.onclick = doRuleTableComment;
 	if (commentStr == "")
 	{
-		commentRuleButton.disabled = true;
+		setElementEnabled(commentRuleButton, false);
 		commentRuleButton.textContent = "N/A"
 	}
 
