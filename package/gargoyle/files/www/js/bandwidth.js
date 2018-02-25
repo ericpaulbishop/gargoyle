@@ -864,7 +864,7 @@ function expand(name)
 		expWindow = null;
 	}
 
-	expWindow = openPopupWindow("bandwidth_expand.sh", name + " " + bndwS.BPlot, 730, 630);
+	expWindow = openPopupWindow("bandwidth_expand.sh", name + " " + bndwS.BPlot, 830, 650);
 	expandedWindows[name] = expWindow;
 
 	var runOnWindowLoad = function(name)

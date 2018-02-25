@@ -8,7 +8,10 @@
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
 	gargoyle_header_footer -m -c "internal.css" -j gargoyle_header_footer -m -c "internal.css"
 %>
-	<strong><span id="plot_title" style="margin-left:10px;"></span></strong>
+	<strong><span id="plot_title" class="col-xs-12"></span></strong>
+	<label class="col-xs-4" id="plot1_title"><%~ Plot %> 1</label>
+	<label class="col-xs-4" id="plot2_title"><%~ Plot %> 2</label>
+	<label class="col-xs-4" id="plot3_title"><%~ Plot %> 3</label>
 	<embed id="bandwidth_plot" style="margin-left:10px; margin-right:10px; width:800px; height:600px;" src="bandwidth.svg"  type="image/svg+xml" pluginspage="http://www.adobe.com/svg/viewer/install/"></embed>
 
 </body>
