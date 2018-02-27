@@ -35,7 +35,7 @@ function init(evt)
 		themeFontFamily = bodyStyle.fontFamily;
 		for(var x = 1; x < 4; x++)
 		{
-			var titleEl = window.parent.getElementById("plot" + x + "_title");
+			var titleEl = window.parent.document.getElementById("plot" + x + "_title");
 			if(titleEl != null)
 			{
 				var titleColour = window.getComputedStyle(titleEl).color;
