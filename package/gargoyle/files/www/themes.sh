@@ -36,7 +36,6 @@
 	</div>
 </div>
 
-<span id="update_container" ><%~ WaitSettings %></span>
 
 <script>
 <!--

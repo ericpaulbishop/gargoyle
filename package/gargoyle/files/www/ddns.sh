@@ -92,7 +92,6 @@
 	<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
 </div>
 
-<span id="update_container" ><%~ WaitSettings %></span>
 
 
 <script>
