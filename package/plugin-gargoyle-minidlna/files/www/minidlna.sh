@@ -77,7 +77,7 @@
 					</div>
 
 					<div class="row form-group">
-						<span class="col-xs-12"><button id="add_share_button" class="btn btn-default" onclick="addNewMediaDir()"><%~ Add %></button></span>
+						<span class="col-xs-12"><button id="add_share_button" class="btn btn-default btn-add" onclick="addNewMediaDir()"><%~ Add %></button></span>
 					</div>
 				</div>
 

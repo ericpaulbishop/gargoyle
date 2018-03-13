@@ -92,7 +92,7 @@
 							<span class="col-xs-7"><input type="text" id="add_source_url" class="form-control" /></span>
 						</div>
 
-						<button id="add_source_button" class="btn btn-default" onclick="addPluginSource()"><%~ APSrc %></button>
+						<button id="add_source_button" class="btn btn-default btn-add" onclick="addPluginSource()"><%~ APSrc %></button>
 					</div>
 				</div>
 			</div>

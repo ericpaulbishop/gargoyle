@@ -154,7 +154,6 @@ for (etherIndex in etherData)
 	<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
 </div>
 
-<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id="output"></textarea> -->
 
 <script>
 <!--

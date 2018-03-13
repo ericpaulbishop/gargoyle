@@ -66,7 +66,7 @@
 				</div>
 
 				<div class="row form-group">
-					<span class="col-xs-12"><button id="add_service_button" class="btn btn-default" onclick="addDdnsService()"><%~ AddDDNS %></button></span>
+					<span class="col-xs-12"><button id="add_service_button" class="btn btn-default btn-add" onclick="addDdnsService()"><%~ AddDDNS %></button></span>
 				</div>
 
 				<div class="row form-group">
@@ -92,9 +92,7 @@
 	<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
 </div>
 
-<span id="update_container" ><%~ WaitSettings %></span>
 
-<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id="output"></textarea> -->
 
 <script>
 <!--

@@ -40,7 +40,7 @@
 					<span class="col-xs-12">
 						<span id="add_quota_label" style="text-decoration:underline"><%~ AddQuota %>:</span>
 						<%in templates/quotas_template %>
-						<button id="add_quota_button" class="btn btn-default" onclick="addNewQuota()"><%~ AddQuota %></button>
+						<button id="add_quota_button" class="btn btn-default btn-add" onclick="addNewQuota()"><%~ AddQuota %></button>
 					</span>
 				</div>
 
@@ -61,7 +61,6 @@
 	<button id="save_button" class="btn btn-primary btn-lg" onclick="saveChanges()"><%~ SaveChanges %></button>
 	<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
 </div>
-<span id="update_container" ><%~ WaitSettings %></span>
 
 
 <script>
