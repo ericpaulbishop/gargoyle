@@ -110,7 +110,7 @@ legend
 	{
 		padding: 0px 75px !important;
 	}
-	ul.sidebar-list.active
+	li.active>ul.sidebar-list
 	{
 		position: relative !important;
 		top: 0 !important;
@@ -676,7 +676,7 @@ ul.nav.sidebar
 	margin: 0;
 	list-style-type: none;
 }
-ul.sidebar-list.active
+li.active>ul.sidebar-list
 {
 	margin: 0;
 	position: absolute;
