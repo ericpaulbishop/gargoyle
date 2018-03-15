@@ -31,13 +31,25 @@ define Package/vsftpd/conffiles
 /etc/vsftpd.conf.template
 endef
 
+ifneq ($(CONFIG_USE_MUSL),)
+  NLSSTRING:=-lcrypt
+else
+  NLSSTRING:=-lcrypt -lnsl
+endif
+
+TARGET_CFLAGS += -D_GNU_SOURCE -include fcntl.h
+
+
+
 define Build/Compile
+	$(SED) 's/-lcrypt -lnsl/$(NLSSTRING)/' $(PKG_BUILD_DIR)/Makefile
 	$(MAKE) -C $(PKG_BUILD_DIR) \
 		CC="$(TARGET_CC)" \
-		CFLAGS="$(TARGET_CFLAGS)" \
+		CFLAGS="$(TARGET_CFLAGS) $(TARGET_CPPFLAGS)" \
 		LDFLAGS="$(TARGET_LDFLAGS)" \
 		vsftpd
 endef
+
 
 define Package/vsftpd/install
 	$(INSTALL_DIR) $(1)/usr/sbin

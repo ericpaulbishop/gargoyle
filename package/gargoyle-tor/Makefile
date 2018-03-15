@@ -138,6 +138,7 @@ define Package/gargoyle-tor/Default
   SECTION:=net
   CATEGORY:=Network
   URL:=https://www.torproject.org/
+  USERID:=tor=52:tor=52
 endef
 
 define Package/gargoyle-tor/Default/description
@@ -157,7 +158,7 @@ endef
 define Package/gargoyle-tor
 $(call Package/gargoyle-tor/Default)
   TITLE:=An anonymous Internet communication system
-  DEPENDS:=+obfsproxy +libevent2 +libopenssl +libpthread +librt +ipset +kmod-ipt-ipset +gargoyle-firewall-util 
+  DEPENDS:=+obfsproxy +libevent2 +libopenssl +libpthread +librt +zlib +libcap +ipset +kmod-ipt-ipset +gargoyle-firewall-util 
 endef
 
 define Package/gargoyle-tor-geoip
