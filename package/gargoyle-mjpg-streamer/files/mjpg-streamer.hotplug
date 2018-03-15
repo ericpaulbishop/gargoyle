@@ -1,10 +1,10 @@
 case "$ACTION" in
 	add)
-	        # start process
+		# start process
 		/etc/init.d/mjpg-streamer start
-	        ;;
+		;;
 	remove)
-	        # stop process
+		# stop process
 		/etc/init.d/mjpg-streamer stop
-	        ;;
+		;;
 esac
