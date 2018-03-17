@@ -1,0 +1,12 @@
+--- a/target/linux/ar71xx/image/legacy.mk	2018-03-13 11:01:52.331066147 -0400
++++ b/target/linux/ar71xx/image/legacy.mk	2018-03-17 00:33:24.755555556 -0400
+@@ -835,7 +839,8 @@
+ 			-k $(KDIR_TMP)/vmlinux-$(2).uImage \
+ 			-r $(KDIR)/root.$(1) \
+ 			-o $(call imgname,$(1),$(2))-factory.img; \
+-	fi
++	fi ; \
++	echo ""
+ endef
+ 
+ 
