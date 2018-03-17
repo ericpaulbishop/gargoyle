@@ -2878,7 +2878,7 @@ CONFIG_DRIVER_11W_SUPPORT=y
 # CONFIG_PACKAGE_wpa-supplicant-p2p is not set
 CONFIG_PACKAGE_wpad=y
 # CONFIG_PACKAGE_wpad-mesh is not set
-CONFIG_PACKAGE_wpad-mini=y
+# CONFIG_PACKAGE_wpad-mini is not set
 # CONFIG_PACKAGE_wpan-tools is not set
 CONFIG_PACKAGE_wwan=y
 
