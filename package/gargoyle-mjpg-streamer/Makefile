@@ -5,16 +5,16 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=mjpg-streamer
+PKG_NAME:=gargoyle-mjpg-streamer
 PKG_REV:=182
 PKG_VERSION:=r$(PKG_REV)
 PKG_RELEASE:=10
 PKG_MAINTAINER:=Roger D <rogerdammit@gmail.com>, \
 		Ted Hess <thess@kitschensync.net>
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).1.tar.xz
+PKG_SOURCE:=mjpg-streamer-$(PKG_VERSION).1.tar.xz
 PKG_SOURCE_URL:=https://svn.code.sf.net/p/mjpg-streamer/code/mjpg-streamer-experimental
-PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
+PKG_SOURCE_SUBDIR:=mjpg-streamer-$(PKG_VERSION)
 PKG_SOURCE_VERSION:=$(PKG_REV)
 PKG_SOURCE_PROTO:=svn
 PKG_MIRROR_HASH:=ccff417d0a34f7cee12c7984f77788267b1da0f2a7d849bc1b2e3614e670078b
@@ -26,7 +26,7 @@ include $(INCLUDE_DIR)/package.mk
 
 PKG_BUILD_DEPENDS:=MJPG_STREAMER_V4L2:libv4l
 
-define Package/mjpg-streamer
+define Package/gargoyle-mjpg-streamer
   SECTION:=multimedia
   CATEGORY:=Multimedia
   TITLE:=MJPG-streamer
@@ -35,17 +35,17 @@ define Package/mjpg-streamer
   MENU:=1
 endef
 
-define Package/mjpg-streamer/description
+define Package/gargoyle-mjpg-streamer/description
  Streaming application for Linux-UVC compatible webcams
 endef
 
-define Package/mjpg-streamer/config
+define Package/gargoyle-mjpg-streamer/config
   source "$(SOURCE)/Config.in"
 endef
 
 EXTRA_CFLAGS += $(TARGET_CPPFLAGS) $(TARGET_LDFLAGS)
 
-define Package/mjpg-streamer/conffiles
+define Package/gargoyle-mjpg-streamer/conffiles
 /etc/config/mjpg-streamer
 endef
 
@@ -80,7 +80,7 @@ ifeq ($(CONFIG_MJPG_STREAMER_V4L2),y)
     TARGET_LDFLAGS+= -lv4l2
 endif
 
-define Package/mjpg-streamer/install
+define Package/gargoyle-mjpg-streamer/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/mjpg_streamer $(1)/usr/bin/
 	$(INSTALL_DIR) $(1)/etc/config
@@ -113,4 +113,4 @@ ifeq ($(CONFIG_MJPG_STREAMER_OUTPUT_HTTP),y)
 endif
 endef
 
-$(eval $(call BuildPackage,mjpg-streamer))
+$(eval $(call BuildPackage,gargoyle-mjpg-streamer))
