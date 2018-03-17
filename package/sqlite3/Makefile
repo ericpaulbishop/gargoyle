@@ -20,7 +20,7 @@ PKG_LICENSE:=PUBLICDOMAIN
 PKG_LICENSE_FILES:=
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-autoconf-$(PKG_VERSION)
-PKG_BUILD_DEPENDS:=libncurses libreadline
+PKG_BUILD_DEPENDS:=ncurses readline
 
 PKG_FIXUP:=autoreconf
 
