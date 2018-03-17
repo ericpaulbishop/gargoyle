@@ -641,6 +641,14 @@ for target in $targets ; do
 	rm .ver
 	mv .vermake "$top_dir/$target-src/package/gargoyle/Makefile"
 
+	#make prerequisites (mostly just mkhash we are interested in)
+	make prereq >/dev/null 2>&1
+	if [ -x "$top_dir/$target-src/staging_dir/host/bin/mkhash" ] ; then
+		export PATH=$PATH:"$top_dir/$target-src/staging_dir/host/bin"
+	else
+		echo "Couldn't find mkhash"
+	fi
+
 	#build, if verbosity is 0 dump most output to /dev/null, otherwise dump everything
 	if [ "$verbosity" = "0" ] ; then
 		scripts/patch-kernel.sh . "$patches_dir/" >/dev/null 2>&1

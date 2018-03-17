@@ -159,7 +159,7 @@ endef
 
 
 all:
-	if [ ! -e "$(DL_DIR)/$(LINUX_SOURCE)" ] ; then TOPDIR="$(TOPDIR)"  $(SCRIPT_DIR)/download.pl $(DL_DIR) $(LINUX_SOURCE) $(LINUX_KERNEL_MD5SUM) $(LINUX_SOURCE) $(LINUX_SITE) ; fi ; 
+	if [ ! -e "$(DL_DIR)/$(LINUX_SOURCE)" ] ; then TOPDIR="$(TOPDIR)"  $(SCRIPT_DIR)/download.pl $(DL_DIR) $(LINUX_SOURCE) $(LINUX_KERNEL_HASH) $(LINUX_SOURCE) $(LINUX_SITE) ; fi ; 
 	cp $(DL_DIR)/$(LINUX_SOURCE) . 
 	rm -rf linux linux-$(LINUX_VERSION)
 	tar xfJ $(LINUX_SOURCE)
@@ -205,7 +205,7 @@ EOF
 	
 
 	echo 'all:' >> nf-patch-build/iptables-download-make
-	echo '	if [ ! -e "$(DL_DIR)/$(PKG_SOURCE)" ] ; then  TOPDIR="$(TOPDIR)" $(SCRIPT_DIR)/download.pl $(DL_DIR) $(PKG_SOURCE) $(PKG_MD5SUM)  $(PKG_SOURCE)  $(PKG_SOURCE_URL) ; fi ; ' >> nf-patch-build/iptables-download-make
+	echo '	if [ ! -e "$(DL_DIR)/$(PKG_SOURCE)" ] ; then  TOPDIR="$(TOPDIR)" $(SCRIPT_DIR)/download.pl $(DL_DIR) $(PKG_SOURCE) $(PKG_MIRROR_HASH)  $(PKG_SOURCE)  $(PKG_SOURCE_URL) ; fi ; ' >> nf-patch-build/iptables-download-make
 	echo '	cp $(DL_DIR)/$(PKG_SOURCE) . ' >>nf-patch-build/iptables-download-make
 	echo '	tar xf $(PKG_SOURCE)' >>nf-patch-build/iptables-download-make
 	echo '	rm -rf *.bz2 *.xz' >>nf-patch-build/iptables-download-make
