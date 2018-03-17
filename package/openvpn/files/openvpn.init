@@ -13,6 +13,9 @@ PROG=/usr/sbin/openvpn
 LIST_SEP="
 "
 
+UCI_STARTED=
+UCI_DISABLED=
+
 append_param() {
 	local s="$1"
 	local v="$2"
@@ -29,7 +32,7 @@ append_bools() {
 	local p; local v; local s="$1"; shift
 	for p in $*; do
 		config_get_bool v "$s" "$p"
-		[ "$v" == 1 ] && append_param "$s" "$p" && echo >> "/var/etc/openvpn-$s.conf"
+		[ "$v" = 1 ] && append_param "$s" "$p" && echo >> "/var/etc/openvpn-$s.conf"
 	done
 }
 
@@ -39,7 +42,8 @@ append_params() {
 		config_get v "$s" "$p"
 		IFS="$LIST_SEP"
 		for v in $v; do
-			[ -n "$v" ] && append_param "$s" "$p" && echo " $v" >> "/var/etc/openvpn-$s.conf"
+			[ -n "$v" ] && [ "$p" != "push" ] && append_param "$s" "$p" && echo " $v" >> "/var/etc/openvpn-$s.conf"
+			[ -n "$v" ] && [ "$p" == "push" ] && append_param "$s" "$p" && echo " \"$v\"" >> "/var/etc/openvpn-$s.conf"
 		done
 		unset IFS
 	done
@@ -56,70 +60,97 @@ openvpn_add_instance() {
 	local dir="$2"
 	local conf="$3"
 
-	procd_open_instance
+	procd_open_instance "$name"
 	procd_set_param command "$PROG"	\
 		--syslog "openvpn($name)" \
+		--status "/var/run/openvpn.$name.status" \
 		--cd "$dir" \
 		--config "$conf"
 	procd_set_param file "$dir/$conf"
+	procd_set_param respawn
+	procd_append_param respawn 3600
+	procd_append_param respawn 5
+	procd_append_param respawn -1
 	procd_close_instance
 }
 
 start_instance() {
 	local s="$1"
 
-	section_enabled "$s" || return 1
-
 	config_get config "$s" config
+	config="${config:+$(readlink -f "$config")}"
+
+	section_enabled "$s" || {
+		append UCI_DISABLED "$config" "$LIST_SEP"
+		return 1
+	}
 
 	[ ! -d "/var/run" ] && mkdir -p "/var/run"
 
 	if [ ! -z "$config" ]; then
-		openvpn_add_instance "$s" "$(dirname "$config")" "$(basename "$config")"
+		append UCI_STARTED "$config" "$LIST_SEP"
+		openvpn_add_instance "$s" "${config%/*}" "$config"
 		return
 	fi
 
 	[ ! -d "/var/etc" ] && mkdir -p "/var/etc"
 	[ -f "/var/etc/openvpn-$s.conf" ] && rm "/var/etc/openvpn-$s.conf"
 
-	# append flags
-	append_bools "$s" \
-		auth_nocache auth_retry auth_user_pass_optional bind ccd_exclusive client client_cert_not_required \
-		client_to_client comp_noadapt disable \
-		disable_occ down_pre duplicate_cn fast_io float http_proxy_retry \
-		ifconfig_noexec ifconfig_nowarn ifconfig_pool_linear management_forget_disconnect management_hold \
-		management_query_passwords management_signal mktun mlock mtu_test multihome mute_replay_warnings \
-		nobind no_iv no_name_remapping no_replay opt_verify passtos persist_key persist_local_ip \
-		persist_remote_ip persist_tun ping_timer_rem pull push_reset \
-		remote_random rmtun route_noexec route_nopull single_session socks_proxy_retry \
-		suppress_timestamps tcp_nodelay test_crypto tls_client tls_exit tls_server \
-		tun_ipv6 up_delay up_restart username_as_common_name
-
-	# append params
-	append_params "$s" \
-		cd askpass auth auth_user_pass auth_user_pass_verify bcast_buffers ca cert \
-		chroot cipher client_config_dir client_connect client_disconnect comp_lzo connect_freq \
-		connect_retry connect_timeout connect_retry_max crl_verify dev dev_node dev_type dh \
-		echo engine explicit_exit_notify fragment group hand_window hash_size \
-		http_proxy http_proxy_option http_proxy_timeout ifconfig ifconfig_pool \
-		ifconfig_pool_persist ifconfig_push inactive ipchange iroute keepalive \
-		key key_method keysize learn_address link_mtu lladdr local log log_append \
-		lport management management_log_cache max_clients \
-		max_routes_per_client mode mssfix mtu_disc mute nice ns_cert_type ping \
-		ping_exit ping_restart pkcs12 plugin port port_share prng proto rcvbuf \
-		redirect_gateway remap_usr1 remote remote_cert_eku remote_cert_ku remote_cert_tls \
-		reneg_bytes reneg_pkts reneg_sec \
-		replay_persist replay_window resolv_retry route route_delay route_gateway \
-		route_metric route_up rport script_security secret server server_bridge setenv shaper sndbuf \
-		socks_proxy status status_version syslog tcp_queue_limit tls_auth \
-		tls_cipher tls_remote tls_timeout tls_verify tmp_dir topology tran_window \
-		tun_mtu tun_mtu_extra txqueuelen user verb down push up \
-		ifconfig_ipv6 route_ipv6 server_ipv6 ifconfig_ipv6_pool ifconfig_ipv6_push iroute_ipv6
+	append_bools "$s" $OPENVPN_BOOLS
+	append_params "$s" $OPENVPN_PARAMS
 
 	openvpn_add_instance "$s" "/var/etc" "openvpn-$s.conf"
 }
 
 start_service() {
+	local instance="$1"
+	local instance_found=0
+
+	config_cb() {
+		local type="$1"
+		local name="$2"
+		if [ "$type" = "openvpn" ]; then
+			if [ -n "$instance" -a "$instance" = "$name" ]; then
+				instance_found=1
+			fi
+		fi
+	}
+
+	. /usr/share/openvpn/openvpn.options
 	config_load 'openvpn'
-	config_foreach start_instance 'openvpn'
+
+	if [ -n "$instance" ]; then
+		[ "$instance_found" -gt 0 ] || return
+		start_instance "$instance"
+	else
+		config_foreach start_instance 'openvpn'
+
+		############################################################################################
+		#### Not used or wanted in Gargoyle, need to allow unused configs in openvpn directory
+		####
+		#### Disabling the code below is the only reason why we don't use default OpenVPN package
+		############################################################################################
+		# local path name
+		# for path in /etc/openvpn/*.conf; do
+		#	if [ -f "$path" ]; then
+		#		name="${path##*/}"; name="${name%.conf}"
+		#
+		#		# don't start configs again that are already started by uci
+		#		if echo "$UCI_STARTED" | grep -qxF "$path"; then
+		#			continue
+		#
+		#		# don't start configs which are set to disabled in uci
+		#		elif echo "$UCI_DISABLED" | grep -qxF "$path"; then
+		#			logger -t openvpn "$name.conf is disabled in /etc/config/openvpn"
+		#			continue
+		#		fi
+		#
+		#		openvpn_add_instance "$name" "${path%/*}" "$path"
+		#	fi
+		# done
+	fi
+}
+
+service_triggers() {
+	procd_add_reload_trigger openvpn
 }
