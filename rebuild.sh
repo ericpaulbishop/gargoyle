@@ -601,7 +601,8 @@ for target in $targets ; do
 		else
 			profile_images=$(cat "$targets_dir/$target/profiles/$default_profile/profile_images" 2>/dev/null)
 			for pi in $profile_images ; do
-				candidates=$(find "bin/targets/$arch/" 2>/dev/null | grep "$pi" )
+				escaped_pi=$(echo $pi | sed 's/-/\\-/g')
+				candidates=$(find "bin/targets/$arch/" 2>/dev/null | grep "$escaped_pi" )
 				for c in $candidates ; do
 					if [ ! -d "$c" ] ; then
 						newname=$(echo "$c" | sed 's/^.*\///g' | sed "s/openwrt/gargoyle_$lower_short_gargoyle_version/g")
@@ -701,7 +702,8 @@ for target in $targets ; do
 			arch=$(ls bin/targets)
 			profile_images=$(cat $targets_dir/$target/profiles/$profile_name/profile_images 2>/dev/null)
 			for pi in $profile_images ; do
-				candidates=$(find "bin/targets/$arch/" 2>/dev/null | grep "$pi" )
+				escaped_pi=$(echo $pi | sed 's/-/\\-/g')
+				candidates=$(find "bin/targets/$arch/" 2>/dev/null | grep "$escaped_pi" )
 				for c in $candidates ; do
 					if [ ! -d "$c" ] ; then
 						newname=$(echo "$c" | sed 's/^.*\///g' | sed "s/openwrt/gargoyle_$lower_short_gargoyle_version/g")
