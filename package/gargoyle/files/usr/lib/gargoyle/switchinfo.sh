@@ -6,17 +6,9 @@
 
 [ -e /sbin/swconfig ] || exit 0
 
-board=""
-if [ -e /lib/ar71xx.sh ]; then
-	. /lib/ar71xx.sh
-	board=$(ar71xx_board_name)
-elif [ -e /lib/mvebu.sh ]; then
-	. /lib/mvebu.sh
-	board=$(mvebu_board_name)
-elif [ -e /lib/ramips.sh ]; then
-	. /lib/ramips.sh
-	board=$(ramips_board_name)
-fi
+target=$(grep "DISTRIB_TARGET" /etc/openwrt_release | sed 's/^.*='\''//' | cut -d\/ -f1)
+. "/lib/$target.sh"
+board=$(cat /tmp/sysinfo/board_name)
 
 # PORTS="LAN1 LAN2 LAN3 LAN4"
 
