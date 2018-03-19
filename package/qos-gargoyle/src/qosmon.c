@@ -63,13 +63,13 @@
 #ifdef RTNL_FAMILY_MAX
   #define dump_filter(a,b,c) rtnl_dump_filter(a,b,c)
   #ifdef IFLA_STATS_RTA
-    #define talk(a,b,c,d) rtnl_talk(a,b,c,d)
+    #define talk(a,b,c) rtnl_talk(a,b,c)
   #else
-    #define talk(a,b,c,d,e) rtnl_talk(a,b,c,d,e)
+    #define talk(a,b,c,d,e) rtnl_talk(a,b,c,NULL,NULL)
   #endif
 #else
 #define dump_filter(a,b,c) rtnl_dump_filter(a,b,c,NULL,NULL)
-#define talk(a,b,c,d,e) rtnl_talk(a,b,c,d,e,NULL,NULL)
+#define talk(a,b,c,d,e) rtnl_talk(a,b,c,NULL,NULL,NULL,NULL)
 #endif
 
 #define MIN(a,b) (((a)<(b))?(a):(b))
@@ -635,7 +635,7 @@ int tc_class_modify(__u32 rate)
     }
 
 
-    if (talk(&rth, &req.n, NULL, 0) < 0)
+    if (talk(&rth, &req.n, NULL) < 0)
         return 2;
 
     return 0;
