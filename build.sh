@@ -710,27 +710,27 @@ for target in $targets ; do
 	#copy images to images/target directory
 	mkdir -p "$top_dir/images/$target"
 	arch=$(ls bin)
-	image_files=$(ls bin/$arch/ 2>/dev/null)
+	image_files=$(find "bin/targets/$arch/" 2>/dev/null)
 	if [ ! -e "$targets_dir/$target/profiles/$default_profile/profile_images"  ]  ; then 
 		for imf in $image_files ; do
-			if [ ! -d "bin/$arch/$imf" ] ; then
-				newname=$(echo "$imf" | sed "s/openwrt/gargoyle_$lower_short_gargoyle_version/g")
-				cp "bin/$arch/$imf" "$top_dir/images/$target/$newname"
+			if [ ! -d "$imf" ] ; then
+				newname=$(echo "$imf" | sed 's/^.*\///g' | sed "s/openwrt/gargoyle_$lower_short_gargoyle_version/g")
+				cp "$imf" "$top_dir/images/$target/$newname"
 				if [ "$distribution" = "true" ] ; then
-					cp "bin/$arch/$imf" "$top_dir/Distribution/Images/$target-$default_profile/$newname"
+					cp "$imf" "$top_dir/Distribution/Images/$target-$default_profile/$newname"
 				fi
 			fi
 		done
 	else
 		profile_images=$(cat "$targets_dir/$target/profiles/$default_profile/profile_images" 2>/dev/null)
 		for pi in $profile_images ; do
-			candidates=$(ls "bin/$arch/"*"$pi"* 2>/dev/null | sed 's/^.*\///g')
+			candidates=$(find "bin/targets/$arch/" 2>/dev/null | grep "$pi" )
 			for c in $candidates ; do
-				if [ ! -d "bin/$arch/$c" ] ; then
-					newname=$(echo "$c" | sed "s/openwrt/gargoyle_$lower_short_gargoyle_version/g")
-					cp "bin/$arch/$c" "$top_dir/images/$target/$newname"
+				if [ ! -d "$c" ] ; then
+					newname=$(echo "$c" | sed 's/^.*\///g' | sed "s/openwrt/gargoyle_$lower_short_gargoyle_version/g")
+					cp "$c" "$top_dir/images/$target/$newname"
 					if [ "$distribution" = "true" ] ; then
-						cp "bin/$arch/$c" "$top_dir/Distribution/Images/$target-$default_profile/$newname"
+						cp "$c" "$top_dir/Distribution/Images/$target-$default_profile/$newname"
 					fi
 				fi
 			done
@@ -794,9 +794,8 @@ for target in $targets ; do
 			make $num_build_thread_str V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$profile_name"
 		fi
 
-
 		#if we didn't build anything, die horribly
-		image_files=$(ls "bin/$arch/" 2>/dev/null)	
+		image_files=$(find "bin/targets/$arch/" 2>/dev/null)
 		if [ -z "$image_files" ] ; then
 			exit
 		fi
@@ -827,16 +826,17 @@ for target in $targets ; do
 		#copy relevant images for which this profile applies
 		profile_images=$(cat "$targets_dir/$target/profiles/$profile_name/profile_images" 2>/dev/null)
 		for pi in $profile_images ; do
-			candidates=$(ls "bin/$arch/"*"$pi"* 2>/dev/null | sed 's/^.*\///g')
+			candidates=$(find "bin/targets/$arch/" 2>/dev/null | grep "$pi" )
 			for c in $candidates ; do
-				if [ ! -d "bin/$arch/$c" ] ; then
-					newname=$(echo "$c" | sed "s/openwrt/gargoyle_$lower_short_gargoyle_version/g")
-					cp "bin/$arch/$c" "$top_dir/images/$target/$newname"
+				if [ ! -d "$c" ] ; then
+					newname=$(echo "$c" | sed 's/^.*\///g' | sed "s/openwrt/gargoyle_$lower_short_gargoyle_version/g")
+					cp "$c" "$top_dir/images/$target/$newname"
 					if [ "$distribution" = "true" ] ; then
-						cp "bin/$arch/$c" "$top_dir/Distribution/Images/$target-$profile_name/$newname"
+						cp "$c" "$top_dir/Distribution/Images/$target-$default_profile/$newname"
 					fi
 				fi
 			done
+
 		done
 		if [ "$distribution" = "true" ] ; then
 			#Generate licenses file for each profile
