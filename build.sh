@@ -709,7 +709,7 @@ for target in $targets ; do
 	
 	#copy images to images/target directory
 	mkdir -p "$top_dir/images/$target"
-	arch=$(ls bin)
+	arch=$(ls bin/targets)
 	image_files=$(find "bin/targets/$arch/" 2>/dev/null)
 	if [ ! -e "$targets_dir/$target/profiles/$default_profile/profile_images"  ]  ; then 
 		for imf in $image_files ; do
@@ -802,7 +802,6 @@ for target in $targets ; do
 
 		#copy packages to build/target directory
 		mkdir -p "$top_dir/built/$target/$profile_name"
-		arch=$(ls bin)
 		package_base_dir=$(find bin -name "base")
 		package_files=$(find "$package_base_dir" -name "*.ipk")
 		index_files=$(find "$package_base_dir" -name "Packa*")
@@ -824,6 +823,7 @@ for target in $targets ; do
 
 
 		#copy relevant images for which this profile applies
+		arch=$(ls bin/targets)
 		profile_images=$(cat "$targets_dir/$target/profiles/$profile_name/profile_images" 2>/dev/null)
 		for pi in $profile_images ; do
 			candidates=$(find "bin/targets/$arch/" 2>/dev/null | grep "$pi" )
