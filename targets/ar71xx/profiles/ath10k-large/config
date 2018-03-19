@@ -1676,7 +1676,7 @@ CONFIG_PACKAGE_ddns-gargoyle=y
 # CONFIG_PACKAGE_aircard-pcmcia-firmware is not set
 # CONFIG_PACKAGE_ar3k-firmware is not set
 CONFIG_PACKAGE_ath10k-firmware-qca4019=y
-CONFIG_PACKAGE_ath10k-firmware-qca6174=y
+CONFIG_PACKAGE_ath10k-firmware-qca6174=m
 CONFIG_PACKAGE_ath10k-firmware-qca9887=y
 # CONFIG_PACKAGE_ath10k-firmware-qca9887-ct is not set
 CONFIG_PACKAGE_ath10k-firmware-qca9888=y
