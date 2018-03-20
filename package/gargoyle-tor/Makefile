@@ -120,13 +120,13 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=gargoyle-tor
-PKG_VERSION:=0.3.1.7
+PKG_VERSION:=0.3.2.10
 PKG_RELEASE:=1
 
 PKG_SOURCE:=tor-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://www.torproject.org/dist \
 	https://archive.torproject.org/tor-package-archive
-PKG_MD5SUM:=ec7c9f588c9e1a42c09bcc097a1e55eb
+PKG_MD5SUM:=a8b8b3db93f87a5c061109dbd8cd5309
 PKG_INSTALL:=1
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/tor-$(PKG_VERSION)
@@ -178,12 +178,32 @@ CONFIGURE_ARGS += \
 	--disable-gcc-hardening \
 	--disable-asciidoc
 
+CONFIGURE_ARGS += \
+	--with-libevent-dir="$(STAGING_DIR)/usr" \
+	--with-ssl-dir="$(STAGING_DIR)/usr" \
+	--with-openssl-dir="$(STAGING_DIR)/usr" \
+	--with-zlib-dir="$(STAGING_DIR)/usr" \
+	--disable-asciidoc \
+	--disable-seccomp \
+	--disable-libscrypt \
+	--disable-unittests \
+	--disable-largefile \
+	--with-tor-user=tor \
+	--with-tor-group=tor
+
+EXTRA_CFLAGS += -std=gnu99
+
+ifneq ($(CONFIG_SSP_SUPPORT),y)
+	CONFIGURE_ARGS += \
+		--disable-gcc-hardening
+else
+	EXTRA_CFLAGS += -fPIC
+endif
+
+
 CONFIGURE_VARS += \
 	CROSS_COMPILE="yes"
 
-# pass CFLAGS again to override -O2 set by configure
-MAKE_FLAGS += \
-	CFLAGS="$(TARGET_CFLAGS) -fPIC -std=gnu99"
 
 define Package/gargoyle-tor/install
 	$(INSTALL_DIR)  $(1)/usr/sbin
