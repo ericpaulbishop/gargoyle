@@ -119,10 +119,10 @@
 					<label class="col-xs-5" for='openvpn_server_cipher' id='openvpn_server_cipher_label'><%~ OCiph %>:</label>
 					<span class="col-xs-7">
 						<select class="form-control" id='openvpn_server_cipher'>
-							<option value='BF-CBC:128'>Blowfish-CBC 128bit</option>
-							<option value='BF-CBC:256'>Blowfish-CBC 256bit</option>
 							<option value='AES-128-CBC'>AES-CBC 128bit</option>
 							<option value='AES-256-CBC'>AES-CBC 256bit</option>
+							<option value='AES-128-GCM'>AES-GCM 128bit</option>
+							<option value='AES-256-GCM'>AES-GCM 256bit</option>
 						</select>
 					</span>
 				</div>
@@ -302,7 +302,6 @@
 
 						<div id='openvpn_client_cipher_other_container' class="row form-group">
 							<span class="col-xs-7 col-xs-offset-5"><input type='text' class="form-control" onkeyup="updateClientConfigTextFromControls()" id="openvpn_client_cipher_other" />&nbsp;<em><%~ Cphr %></em></span>
-							<span class="col-xs-7 col-xs-offset-5"><input type='text' class="form-control" onkeyup="updateClientConfigTextFromControls()" id="openvpn_client_key_other" />&nbsp;<em><%~ Keyopt %></em></span>
 						</div>
 
 						<div id='openvpn_client_block_nonovpn_container' class="row form-group">

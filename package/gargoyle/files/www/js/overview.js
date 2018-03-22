@@ -243,6 +243,8 @@ function resetData()
 		{
 			portsTableData.push( [ ports[idx][0], ports[idx][1] ] );
 		}
+		var tableSortFun = function(a,b){ return a[0] == b[0] ? 0 : (a[0] < b[0] ? -1 : 1); }
+		portsTableData.sort(tableSortFun);
 
 		var portsTable=createTable(portsColumns, portsTableData, 'ports_table', false, false);
 		var tableContainer = document.getElementById('ports_table_container');
