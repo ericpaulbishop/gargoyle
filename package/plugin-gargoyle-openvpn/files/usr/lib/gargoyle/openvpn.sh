@@ -117,17 +117,14 @@ create_server_conf()
 	if [ "$openvpn_protocol" = "tcp" ] ; then openvpn_protocol="tcp-server" ; fi
 
 	openvpn_cipher="$7"
-	if [ -z "$openvpn_cipher" ] ; then openvpn_cipher="BF-CBC" ; fi
-	openvpn_keysize="$8"
-	if [ -z "$openvpn_keysize" ] && [ "$openvpn_cipher" = "BF-CBC" ] ; then openvpn_keysize="128" ; fi
-	if [ -n "$openvpn_keysize" ] ; then openvpn_keysize="keysize               $openvpn_keysize" ; fi
+	if [ -z "$openvpn_cipher" ] ; then openvpn_cipher="AES-256-CBC" ; fi
 
 
-	openvpn_client_to_client=$(load_def "$9" "client-to-client" "false")
-	openvpn_duplicate_cn=$(load_def "${10}" "duplicate-cn" "false")
-	openvpn_pool="${11}"
-	openvpn_redirect_gateway=$(load_def "${12}" "push \"redirect-gateway def1\"" "true")
-	openvpn_regenerate_cert="${13}"
+	openvpn_client_to_client=$(load_def "$8" "client-to-client" "false")
+	openvpn_duplicate_cn=$(load_def "${9}" "duplicate-cn" "false")
+	openvpn_pool="${10}"
+	openvpn_redirect_gateway=$(load_def "${11}" "push \"redirect-gateway def1\"" "true")
+	openvpn_regenerate_cert="${12}"
 
 	if [ -n "$openvpn_pool" ] ; then
 		openvpn_pool="ifconfig-pool $openvpn_pool"
@@ -218,7 +215,6 @@ $openvpn_duplicate_cn
 $openvpn_pool
 
 cipher                $openvpn_cipher
-$openvpn_keysize
 
 dev                   tun
 keepalive             25 180
@@ -282,12 +278,9 @@ create_allowed_client_conf()
 	openvpn_port=$(     awk ' $1 ~ /port/      { print $2 } ' /etc/openvpn/server.conf )
 	openvpn_netmask=$(  awk ' $1 ~ /ifconfig/  { print $3 } ' /etc/openvpn/server.conf )
 	openvpn_cipher=$(   awk ' $1 ~ /cipher/    { print $2 } ' /etc/openvpn/server.conf )
-	openvpn_keysize=$(  awk ' $1 ~ /keysize/   { print $2 } ' /etc/openvpn/server.conf )
 	if [ "$openvpn_protocol" = "tcp-server" ] ; then
 		openvpn_protocol="tcp-client"
 	fi
-	if [ -z "$openvpn_keysize" ] && [ "$openvpn_cipher" = "BF-CBC" ] ; then openvpn_keysize="128" ; fi
-	if [ -n "$openvpn_keysize" ] ; then openvpn_keysize="keysize               $openvpn_keysize" ; fi
 
 	
 	openvpn_regenerate_cert="$6"
@@ -408,7 +401,6 @@ topology        subnet
 verb            3
 
 cipher          $openvpn_cipher
-$openvpn_keysize
 
 ca              ca.crt
 cert            $openvpn_client_id.crt
@@ -641,7 +633,7 @@ regenerate_server_and_allowed_clients_from_uci()
 	. /lib/functions.sh
 	config_load "openvpn_gargoyle"
 	
-	server_vars="internal_ip internal_mask port proto cipher keysize client_to_client duplicate_cn redirect_gateway subnet_access regenerate_credentials subnet_ip subnet_mask pool"
+	server_vars="internal_ip internal_mask port proto cipher client_to_client duplicate_cn redirect_gateway subnet_access regenerate_credentials subnet_ip subnet_mask pool"
 	for var in $server_vars ; do
 		config_get "$var" "server" "$var"
 	done
@@ -655,7 +647,6 @@ regenerate_server_and_allowed_clients_from_uci()
 				"$subnet_mask"             \
 				"$proto"                   \
 				"$cipher"                  \
-				"$keysize"                 \
 				"$client_to_client"        \
 				"$duplicate_cn"            \
 				"$pool"                    \
