@@ -44,7 +44,7 @@ CONFIG_TARGET_ar71xx=y
 # CONFIG_TARGET_uml is not set
 # CONFIG_TARGET_zynq is not set
 # CONFIG_TARGET_x86 is not set
-CONFIG_TARGET_ar71xx_generic=y
+# CONFIG_TARGET_ar71xx_generic is not set
 # CONFIG_TARGET_ar71xx_tiny is not set
 CONFIG_TARGET_ar71xx_nand=y
 # CONFIG_TARGET_ar71xx_mikrotik is not set
