@@ -427,12 +427,17 @@ function saveChanges()
 
 			//use altroot?
 			var useAltRoot = document.getElementById("lan_dns_altroot").checked;
-			uci.remove("dhcp", uciOriginal.getAllSectionsOfType("dhcp", "dnsmasq").shift(), "server");
-			if(useAltRoot)
+			var dnsmasqSection = uciOriginal.getAllSectionsOfType("dhcp", "dnsmasq").shift();
+			var currentAltServers = uci.remove("dhcp", dnsmasqSection, "server");
+			var rebindServers     = uci.remove("dhcp", dnsmasqSection, "rebind_domain");
+			var altServerDefs     = getAltServerDefs(currentAltServers, useAltRoot)
+			if(altServerDefs[0].length > 0)
 			{
-				var dnsmasqSection = uciOriginal.getAllSectionsOfType("dhcp", "dnsmasq").shift();
 				uci.createListOption("dhcp", dnsmasqSection, "server", true);
-				uci.set("dhcp", dnsmasqSection, "server", getAltServerDefs());
+				uci.createListOption("dhcp", dnsmasqSection, "rebind_domain", true);
+				uci.set("dhcp", dnsmasqSection, "server", altServerDefs[0]);
+				uci.set("dhcp", dnsmasqSection, "rebind_domain", altServerDefs[1]);
+
 			}
 
 			//force clients to use router DNS?
@@ -3406,9 +3411,40 @@ function singleEthernetPort()
 	return defaultWanIf == "" || defaultWanIf == defaultLanIf;
 }
 
-function getAltServerDefs()
+// if there are server defs other than alt defs leave them alone
+// this is necessary for handling .onion domains if the tor plugin is installed
+function getAltServerDefs(currentAltDefs, altDefsEnabled)
 {
-	var defs = [];
+
+	var defs = []
+	var domains = []
+
+	var definedTlds = {}
+	var setTlds = {}
+	var tldLists = [ncTlds, onTlds]
+	var tli
+	var cadi
+	for(tli=0; tli < tldLists.length; tli++)
+	{
+		var tlds = tldLists[tli]
+		var ti
+		for(ti=0; ti< tlds.length; ti++)
+		{
+			definedTlds[ tlds[ti] ] = 1
+		}
+	}
+	for(cadi=0; cadi < currentAltDefs.length; cadi++)
+	{
+		var def = currentAltDefs[cadi]
+		var defTld = def.replace(/^\//, "").replace(/\/.*$/, "")
+		if( definedTlds[defTld] == null )
+		{
+			defs.push(def)
+			domains.push(defTld)
+		}
+	}
+
+
 	function addDefsForAlt(tlds, dns)
 	{
 		var ti;
@@ -3419,13 +3455,20 @@ function getAltServerDefs()
 			for(di=0; di< dns.length; di++)
 			{
 				defs.push( "/" + t + "/" + dns[di] );
+				if(setTlds[t] == null)
+				{
+					domains.push(t)
+					setTlds[t] = t
+				}
 			}
 		}
 	}
-	addDefsForAlt(ncTlds, ncDns);
-	addDefsForAlt(onTlds, onDns);
-
-	return defs;
+	if(altDefsEnabled)
+	{
+		addDefsForAlt(ncTlds, ncDns);
+		addDefsForAlt(onTlds, onDns);
+	}
+	return [ defs, domains ];
 }
 
 function set3GDevice(device)
