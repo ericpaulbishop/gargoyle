@@ -111,7 +111,7 @@
 					<span class="col-xs-7"><input id="user_pass_confirm" class="form-control" type="password"/></span>
 				</div>
 				<div id="user_pass_container" class="row form-group">
-					<span class="col-xs-12"><button id="add_user" class="btn btn-default" onclick="addUser()"><%~ AddU %></button></span>
+					<span class="col-xs-12"><button id="add_user" class="btn btn-default btn-add" onclick="addUser()"><%~ AddU %></button></span>
 				</div>
 
 				<div style="margin-bottom:20px;" class="row form-group">
@@ -125,7 +125,7 @@
 				<div id="sharing_add_controls_container" class="row form-group">
 					<span class="col-xs-12">
 						<%in templates/usb_storage_template %>
-						<button id="add_share_button" class="btn btn-default" onclick="addNewShare()"><%~ ADsk %></button>
+						<button id="add_share_button" class="btn btn-default btn-add" onclick="addNewShare()"><%~ ADsk %></button>
 					</span>
 				</div>
 				<div class="internal_divider"></div>

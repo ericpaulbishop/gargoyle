@@ -692,10 +692,10 @@ function createAllowedClientControls(haveDownload)
 
 	var enabledCheck = createInput("checkbox")
 	enabledCheck.onclick = toggleAcEnabled;
-	var downloadButtonMulti = haveDownload ? createButton(ovpnS.Dload, "btn btn-default", downloadAcMulti, false) : createButton(ovpnS.Dload, "btn btn-default disabled", function(){ return; }, true ) ;
-	var downloadButtonSingle = haveDownload ? createButton(ovpnS.Dload, "btn btn-default", downloadAcSingle, false) : createButton(ovpnS.Dload, "btn btn-default disabled", function(){ return; }, true ) ;
+	var downloadButtonMulti = haveDownload ? createButton(ovpnS.Dload, "btn-download", downloadAcMulti, false) : createButton(ovpnS.Dload, "btn-download disabled", function(){ return; }, true ) ;
+	var downloadButtonSingle = haveDownload ? createButton(ovpnS.Dload, "btn-download", downloadAcSingle, false) : createButton(ovpnS.Dload, "btn-download disabled", function(){ return; }, true ) ;
 
-	var editButton     = createButton(UI.Edit,     "btn btn-default", editAc, false)
+	var editButton = createButton(UI.Edit, "btn-edit", editAc, false)
 
 	return [enabledCheck, downloadButtonMulti, downloadButtonSingle, editButton]
 }
@@ -703,8 +703,8 @@ function createAllowedClientControls(haveDownload)
 function createButton(text, cssClass, actionFunction, disabled)
 {
 	var button = createInput("button")
-	button.value = text
-	button.className=cssClass
+	button.textContent = text
+	button.className = "btn btn-default " + cssClass
 	button.onclick = actionFunction
 	button.disabled = disabled
 	return button;
@@ -1256,26 +1256,14 @@ function editAc()
 	}
 
 	
-	try
-	{
-		xCoor = window.screenX + 225;
-		yCoor = window.screenY+ 225;
-	}
-	catch(e)
-	{
-		xCoor = window.left + 225;
-		yCoor = window.top + 225;
-	}
-
-
-	editAcWindow = window.open("openvpn_allowed_client_edit.sh", "edit", "width=560,height=600,left=" + xCoor + ",top=" + yCoor );
+	editAcWindow = openPopupWindow("openvpn_allowed_client_edit.sh", "edit", 560, 600);
 	
 	var saveButton = createInput("button", editAcWindow.document);
 	var closeButton = createInput("button", editAcWindow.document);
-	saveButton.value = UI.CApplyChanges;
-	saveButton.className = "btn btn-default btn-lg";
-	closeButton.value = UI.CDiscardChanges;
-	closeButton.className = "btn btn-default btn-lg";
+	saveButton.textContent = UI.CApplyChanges;
+	saveButton.className = "btn btn-primary";
+	closeButton.textContent = UI.CDiscardChanges;
+	closeButton.className = "btn btn-warning";
 
 	var editRow=this.parentNode.parentNode;
 	var editId = editRow.childNodes[1].firstChild.id;
@@ -1362,7 +1350,6 @@ function editAc()
 						editAcWindow.close();
 					}
 				}
-				editAcWindow.moveTo(xCoor,yCoor);
 				editAcWindow.focus();
 				updateDone = true;
 				

@@ -23,7 +23,10 @@
 <h1 class="page-header"><%~ ablock.Adblock %></h1>
 <div class="row">
 	<div class="col-lg-6">
-		<div class="panel panel-default">
+		<div class="panel panel-default"> 
+			<div class="panel-heading"> 
+				<h3 class="panel-title"><%~ Adblock %></h3> 
+			</div> 
 			<div class="panel-body">
 				<div class="row form-group">
 					<span class="col-xs-12">
@@ -33,7 +36,7 @@
 				</div>
 
 				<div class="row form-group">
-					<span class="col-xs-offset-5 col-xs-7"><button id="adblock_update" class="btn btn-primary" onclick='adblockUpdate()'><%~ ADBLOCKupdate %></button></span>
+					<span class="col-xs-offset-5 col-xs-7"><button id="adblock_update" class="btn btn-default" onclick='adblockUpdate()'><%~ ADBLOCKupdate %></button></span>
 					<span class="col-xs-offset-5 col-xs-7">
 						<label id="adblock_lastrun"><%~ ADBLOCKLstrn %>: </label>
 						<label id="adblock_lastrunval"></label>
@@ -91,12 +94,12 @@
 				</div>
 				<div class="row form-group">
 					<span class="col-xs-10"><select id="adblock_blocklist_list" multiple class="form-control" style="min-height:300px;width:100%;"></select></span>
-					<span class="col-xs-2"><input type="button" value="-->" id="adblock_transfer_button" class="btn btn-warning btn-lg" onclick="transferwhiteList();" /></span>
+					<span class="col-xs-2"><input type="button" value="-->" id="adblock_transfer_button" class="btn btn-default" onclick="transferwhiteList();" /></span>
 				</div>
 				<div class="row form-group">
 					<span class="col-xs-12">
 						<input id="adblock_blocklist_search" class="form-control" type="text" />
-						<button class="btn btn-primary" onclick="searchBlocklist();"><%~ ADBLOCKSearch %></button>
+						<button class="btn btn-default" onclick="searchBlocklist();"><%~ ADBLOCKSearch %></button>
 					</span>
 				</div>
 				<div id="adblock_help2" class="row">
@@ -136,7 +139,7 @@
 				<div class="row form-group">
 					<span class="col-xs-12">
 						<input id="adblock_blacklist_add" class="form-control" type="text" />
-						<button class="btn btn-primary" onclick="addBlacklist();"><%~ ADBLOCKBlackadd %></button>
+						<button class="btn btn-default" onclick="addBlacklist();"><%~ ADBLOCKBlackadd %></button>
 					</span>
 				</div>
 			</div>

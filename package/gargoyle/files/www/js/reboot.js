@@ -11,6 +11,12 @@ var toggleReload = false;
 
 function reboot()
 {
+	var confirmReboot = window.confirm(UI.Reboot+"?");
+	if(!confirmReboot)
+	{
+		return;
+	}
+
 	setControlsEnabled(false, true, rbS.SysR);
 
 	var commands = "\nsh /usr/lib/gargoyle/reboot.sh\n";

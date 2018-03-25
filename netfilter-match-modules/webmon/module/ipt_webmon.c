@@ -1,4 +1,4 @@
-/*  webmon --	A netfilter module to match URLs in HTTP requests 
+/*  webmon --	A netfilter module to match URLs in HTTP(S) requests
  *  		This module can match using string match or regular expressions
  *  		Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
  *
@@ -48,7 +48,7 @@
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Eric Bishop");
-MODULE_DESCRIPTION("Monitor URL in HTTP Requests, designed for use with Gargoyle web interface (www.gargoyle-router.com)");
+MODULE_DESCRIPTION("Monitor URL in HTTP(S) Requests, designed for use with Gargoyle web interface (www.gargoyle-router.com)");
 
 #define NIPQUAD(addr) \
 	((unsigned char *)&addr)[0], \
@@ -502,6 +502,87 @@ static void extract_url(const unsigned char* packet_data, int packet_length, cha
 	}
 }
 
+static void extract_url_https(const unsigned char* packet_data, int packet_length, char* domain)
+{
+	//TLSv1.2 Record Layer - All calculations based on this
+	//We want to abuse the SNI (Server Name Indication) extension to harvest likely URLs
+	//Content Type = 0x16 (22) is a "Handshake", HandShake Type 0x01 (1) is a "Client Hello"
+	int x, packet_limit;
+	unsigned short cslen, ext_type, ext_len, maxextlen;
+	unsigned char conttype, hndshktype, sidlen, cmplen;
+	unsigned char* packet_ptr;
+
+	domain[0] = '\0';
+	packet_ptr = packet_data;
+
+	if (packet_length < 43)
+	{
+		/*printk("Packet less than 43 bytes, exiting\n");*/
+		return;
+	}
+	conttype = packet_data[0];
+	hndshktype = packet_data[5];
+	sidlen = packet_data[43];
+	/*printk("conttype=%d, hndshktype=%d, sidlen=%d ",conttype,hndshktype,sidlen);*/
+	if(conttype != 22)
+	{
+		/*printk("conttype not 22, exiting\n");*/
+		return;
+	}
+	if(hndshktype != 1)
+	{
+		/*printk("hndshktype not 1, exiting\n");*/
+		return;		//We aren't in a Client Hello
+	}
+
+	packet_ptr = packet_data + 1 + 43 + sidlen;		//Skip to Cipher Suites Length
+	cslen = ntohs(*(unsigned short*)packet_ptr);	//Length of Cipher Suites (2 byte)
+	packet_ptr = packet_ptr + 2 + cslen;	//Skip to Compression Methods
+	cmplen = *packet_ptr;	//Length of Compression Methods (1 byte)
+	packet_ptr = packet_ptr + 1 + cmplen;	//Skip to Extensions Length **IMPORTANT**
+	maxextlen = ntohs(*(unsigned short*)packet_ptr);	//Length of extensions (2 byte)
+	packet_ptr = packet_ptr + 2;	//Skip to beginning of first extension and start looping
+	ext_type = 1;
+	/*printk("cslen=%d, cmplen=%d, maxextlen=%d, pktlen=%d,ptrpos=%d\n",cslen,cmplen,maxextlen,packet_length,packet_ptr - packet_data);*/
+	//Limit the pointer bounds to the smaller of either the extensions length or the packet length
+	packet_limit = ((packet_ptr - packet_data) + maxextlen) < packet_length ? ((packet_ptr - packet_data) + maxextlen) : packet_length;
+
+	//Extension Type and Extension Length are both 2 byte. SNI Extension is "0"
+	while(((packet_ptr - packet_data) < packet_limit) && (ext_type != 0))
+	{
+		ext_type = ntohs(*(unsigned short*)packet_ptr);
+		packet_ptr = packet_ptr + 2;
+		ext_len = ntohs(*(unsigned short*)packet_ptr);
+		packet_ptr = packet_ptr + 2;
+		/*printk("ext_type=%d, ext_len=%d\n",ext_type,ext_len);*/
+		if(ext_type == 0)
+		{
+			unsigned short snilen;
+			/*printk("FOUND SNI EXT\n");*/
+			packet_ptr = packet_ptr + 3;	//Skip to length of SNI
+			snilen = ntohs(*(unsigned short*)packet_ptr);
+			/*printk("snilen=%d\n",snilen);*/
+			packet_ptr = packet_ptr + 2;	//Skip to beginning of SNI
+			if((((packet_ptr - packet_data) + snilen) < packet_limit) && (snilen > 0))
+			{
+				/*printk("FOUND SNI\n");*/
+				snilen = snilen < 625 ? snilen : 624; // prevent overflow
+				memcpy(domain, packet_ptr, snilen);
+				domain[snilen] = '\0';
+				for(x=0; domain[x] != '\0'; x++)
+				{
+					domain[x] = (char)tolower(domain[x]);
+				}
+				/*printk("sni=%s\n",domain);*/
+			}
+		}
+		else
+		{
+			packet_ptr = packet_ptr + ext_len;
+		}
+	}
+}
+
 #ifdef CONFIG_PROC_FS
 
 static void *webmon_proc_start(struct seq_file *seq, loff_t *loff_pos)
@@ -781,7 +862,7 @@ static bool match(const struct sk_buff *skb, struct xt_action_param *par)
 			{
 				char domain[650];
 				char path[650];
-				char domain_key[700];	
+				char domain_key[700];
 				unsigned char save = info->exclude_type == WEBMON_EXCLUDE ? 1 : 0;
 				uint32_t ip_index;
 
@@ -1047,6 +1128,55 @@ static bool match(const struct sk_buff *skb, struct xt_action_param *par)
 					}
 				}
 			}
+			else if ((unsigned short)ntohs(tcp_hdr->dest) == 443)	// broad assumption that traffic on 443 is HTTPS. make effort to return fast as soon as we know we are wrong to not slow down processing
+			{
+				char domain[650];
+				char domain_key[700];
+				unsigned char save = info->exclude_type == WEBMON_EXCLUDE ? 1 : 0;
+				uint32_t ip_index;
+
+				for(ip_index = 0; ip_index < info->num_exclude_ips; ip_index++)
+				{
+					if( (info->exclude_ips)[ip_index] == iph->saddr )
+					{
+						save = info->exclude_type == WEBMON_EXCLUDE ? 0 : 1;
+					}
+				}
+				for(ip_index=0; ip_index < info->num_exclude_ranges; ip_index++)
+				{
+					struct ipt_webmon_ip_range r = (info->exclude_ranges)[ip_index];
+					if( (unsigned long)ntohl( r.start) <= (unsigned long)ntohl(iph->saddr) && (unsigned long)ntohl(r.end) >= (unsigned long)ntohl(iph->saddr) )
+					{
+						save = info->exclude_type == WEBMON_EXCLUDE ? 0 : 1;
+					}
+				}
+
+
+				if(save)
+				{
+					extract_url_https(payload, payload_length, domain);
+
+					sprintf(domain_key, STRIP"@%s", NIPQUAD(iph->saddr), domain);
+
+					if(strlen(domain) > 0)
+					{
+						spin_lock_bh(&webmon_lock);
+
+						if(get_string_map_element(domain_map, domain_key))
+						{
+							//update time
+							update_queue_node_time( (queue_node*)get_map_element(domain_map, domain_key), recent_domains );
+						}
+						else
+						{
+							//add
+							add_queue_node(iph->saddr, domain, recent_domains, domain_map, domain_key, max_domain_queue_length );
+						}
+
+						spin_unlock_bh(&webmon_lock);
+					}
+				}
+			}
 		}
 	}
 	
@@ -1187,5 +1317,3 @@ static void __exit fini(void)
 
 module_init(init);
 module_exit(fini);
-
-

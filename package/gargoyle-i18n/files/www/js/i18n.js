@@ -83,8 +83,8 @@ function createInstallButton(type)
 	if (type == 1)
 	{
 		inButton.style.marginLeft = "0px";
-		inButton.value = UI.Install;
-		inButton.className="btn btn-default";
+		inButton.textContent = UI.Install;
+		inButton.className = "btn btn-default btn-install";
 		inButton.onclick = installLang;
 	}
 	else

@@ -55,7 +55,7 @@
 			<option value="R/O"><%~ AROn %></option>
 			<option value="R/W"><%~ ARWr %></option>
 		</select>
-		<button class="btn btn-default" id="add_user_access" onclick='addUserAccess()'><%~ Add %></button>
+		<button class="btn btn-default btn-add" id="add_user_access" onclick='addUserAccess()'><%~ Add %></button>
 	</span>
 	<div id="user_access_table_container" class="col-xs-offset-5 col-xs-7"></div>
 </div>
@@ -83,7 +83,7 @@
 <div id="nfs_ip_container" class="row form-group">
 	<span class="col-xs-offset-5 col-xs-7">
 		<input type='text' id='nfs_ip' size='30' onkeyup='proofreadIpRange(this)' class="form-control" />
-		<button class="btn btn-default" id="add_nfs_ip" onclick='addAddressesToTable(document,"nfs_ip","nfs_ip_table_container","nfs_ip_table",false, 2, true, "")'><%~ Add %></button>
+		<button class="btn btn-default btn-add" id="add_nfs_ip" onclick='addAddressesToTable(document,"nfs_ip","nfs_ip_table_container","nfs_ip_table",false, 2, true, "")'><%~ Add %></button>
 	</span>
 	<span class="col-xs-offset-5 col-xs-7"><em><%~ IPSub %></em></span>
 	<div id="nfs_ip_table_container" class="col-xs-offset-5 col-xs-7"></div>

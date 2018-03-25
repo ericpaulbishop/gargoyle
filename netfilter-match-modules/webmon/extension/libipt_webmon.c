@@ -1,4 +1,4 @@
-/*  webmon --	An iptables extension to match URLs in HTTP requests 
+/*  webmon --	An iptables extension to match URLs in HTTP(S) requests
  *  		This module can match using string match or regular expressions
  *  		Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
  *

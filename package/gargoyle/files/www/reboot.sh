@@ -111,7 +111,6 @@
 
 <iframe id="reboot_test" onload="reloadPage()" style="display:none" ></iframe>
 
-<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id="output"></textarea> -->
 
 <script>
 	resetData();

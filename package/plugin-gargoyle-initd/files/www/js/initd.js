@@ -74,17 +74,17 @@ function createEnabledCheckbox()
 function createStartButton()
 {
 	var startButton = createInput("button");
-	startButton.value = "Start";
-	startButton.className="btn btn-primary";
+	startButton.textContent = "Start";
+	startButton.className = "btn btn-default btn-start";
 	startButton.onclick = startService;
 	return startButton;
 }
 
-function createResetButton()
+function createRestartButton()
 {
 	var restartButton = createInput("button");
-	restartButton.value = "Restart";
-	restartButton.className="btn btn-warning";
+	restartButton.textContent = "Restart";
+	restartButton.className = "btn btn-default btn-restart";
 	restartButton.onclick = restartService;
 	return restartButton;
 }
@@ -92,8 +92,8 @@ function createResetButton()
 function createStopButton()
 {
 	var stopButton = createInput("button");
-	stopButton.value = "Stop";
-	stopButton.className="btn btn-danger";
+	stopButton.textContent = "Stop";
+	stopButton.className = "btn btn-default btn-stop";
 	stopButton.onclick = stopService;
 	return stopButton;
 }
@@ -121,7 +121,7 @@ function resetData()
 		enabledCheckbox.id = service;
 		serviceIds.push(enabledCheckbox.id);
 
-		initdTableData.push([service, enabledCheckbox, createStartButton(), createResetButton(), createStopButton() ]);
+		initdTableData.push([service, enabledCheckbox, createStartButton(), createRestartButton(), createStopButton() ]);
 	}
 
 	var initdTable = createTable(columnNames, initdTableData, "initd_table", false, false);

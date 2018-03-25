@@ -251,12 +251,11 @@ function createEnabledCheckbox(enabled)
 function createEditButton(enabled, ruleType, rulePrefix)
 {
 	editButton = createInput("button");
-	editButton.value = UI.Edit;
-	editButton.className="btn btn-default";
+	editButton.textContent = UI.Edit;
+	editButton.className = "btn btn-default btn-edit";
 	editButton.onclick = editRule;
 
-	editButton.className = enabled ? "btn btn-default" : "btn btn-default disabled" ;
-	editButton.disabled  = enabled ? false : true;
+	setElementEnabled(editButton, enabled);
 
 	return editButton;
 }
@@ -266,8 +265,8 @@ function setRowEnabled()
 	enabledRow=this.parentNode.parentNode;
 	enabledId = this.id;
 
-	enabledRow.childNodes[2].firstChild.disabled  = this.checked ? false : true;
-	enabledRow.childNodes[2].firstChild.className = this.checked ? "btn btn-default" : "btn btn-default disabled" ;
+	var row = enabledRow.childNodes[2].firstChild;
+	setElementEnabled(row, enabled);
 
 	uci.set(pkg, enabledId, "enabled", enabled);
 }
@@ -305,25 +304,14 @@ function editRule()
 	}
 
 
-	try
-	{
-		xCoor = window.screenX + 225;
-		yCoor = window.screenY+ 225;
-	}
-	catch(e)
-	{
-		xCoor = window.left + 225;
-		yCoor = window.top + 225;
-	}
-
-
-	editRuleWindow = window.open(editRuleType == "restriction_rule" ? "restriction_edit_rule.sh" : "whitelist_edit_rule.sh", "edit", "width=560,height=600,left=" + xCoor + ",top=" + yCoor );
+	var editRuleWinType = editRuleType == "restriction_rule" ? "restriction_edit_rule.sh" : "whitelist_edit_rule.sh";
+	editRuleWindow = openPopupWindow(editRuleWinType, "edit", 560, 600);
 
 	saveButton = createInput("button", editRuleWindow.document);
 	closeButton = createInput("button", editRuleWindow.document);
-	saveButton.value = UI.CApplyChanges;
-	saveButton.className = "btn btn-default";
-	closeButton.value = UI.CDiscardChanges;
+	saveButton.textContent = UI.CApplyChanges;
+	saveButton.className = "btn btn-primary";
+	closeButton.textContent = UI.CDiscardChanges;
 	closeButton.className = "btn btn-warning";
 
 	editRuleSectionId = editRow.childNodes[1].firstChild.id;
@@ -364,7 +352,6 @@ function editRule()
 					}
 
 				}
-				editRuleWindow.moveTo(xCoor,yCoor);
 				editRuleWindow.focus();
 				updateDone = true;
 

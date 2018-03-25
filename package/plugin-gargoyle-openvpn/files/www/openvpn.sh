@@ -190,7 +190,7 @@
 				<div class="row form-group">
 					<div class="col-xs-12"><%in /www/templates/openvpn_allowed_client_template %></div>
 					<div class="col-xs-12">
-						<button id='openvpn_allowed_client_add' class='btn btn-default' onclick='addAc()'><%~ Add %></button>
+						<button id='openvpn_allowed_client_add' class='btn btn-default btn-add' onclick='addAc()'><%~ Add %></button>
 					</div>
 				</div>
 			</div>

@@ -64,6 +64,7 @@ ovpnS.TAKey="Chave TLS-Auth";
 ovpnS.TADir="Direção TLS-Auth";
 ovpnS.Clnt="Cliente";
 ovpnS.Symm="Omitido (Simétrico)";
+ovpnS.PrefVPNGtwy="Utilizar <i>vpn_gateway</i>";
 
 //javascript
 ovpnS.CryptoWaitMsg="A configuração do Servidor OpenVPN levará cerca de 5-10 minutos para gerar os parâmetros criptográficos necessários. \n\nDeseja continuar?";

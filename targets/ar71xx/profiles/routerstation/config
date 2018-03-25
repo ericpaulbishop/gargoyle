@@ -1626,6 +1626,7 @@ CONFIG_PACKAGE_plugin-gargoyle-theme-Gargoyle-Modern=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-by-matei=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-dark-one=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-demantoid=m
+CONFIG_PACKAGE_plugin-gargoyle-theme-flat-blue=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-green=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-horchata=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-light=m

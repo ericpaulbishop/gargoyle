@@ -122,8 +122,8 @@ function saveChanges()
 function createEditButton()
 {
 	var editButton = createInput("button");
-	editButton.value = UI.Edit;
-	editButton.className="btn btn-default";
+	editButton.textContent = UI.Edit;
+	editButton.className = "btn btn-default btn-edit";
 	editButton.onclick = editStatic;
 	return editButton;
 }
@@ -392,24 +392,13 @@ function editStatic()
 		catch(e){}
 	}
 
-	try
-	{
-		xCoor = window.screenX + 225;
-		yCoor = window.screenY+ 225;
-	}
-	catch(e)
-	{
-		xCoor = window.left + 225;
-		yCoor = window.top + 225;
-	}
-
-	editStaticWindow = window.open("static_ip_edit.sh", "edit", "width=560,height=220,left=" + xCoor + ",top=" + yCoor );
+	editStaticWindow = openPopupWindow("static_ip_edit.sh", "edit", 560, 220);
 
 	saveButton = createInput("button", editStaticWindow.document);
 	closeButton = createInput("button", editStaticWindow.document);
-	saveButton.value = UI.CApplyChanges;
-	saveButton.className = "btn btn-default";
-	closeButton.value = UI.CDiscardChanges;
+	saveButton.textContent = UI.CApplyChanges;
+	saveButton.className = "btn btn-primary";
+	closeButton.textContent = UI.CDiscardChanges;
 	closeButton.className = "btn btn-warning";
 
 	editRow=this.parentNode.parentNode;
@@ -454,7 +443,6 @@ function editStatic()
 
 					}
 				}
-				editStaticWindow.moveTo(xCoor,yCoor);
 				editStaticWindow.focus();
 				updateDone = true;
 			}

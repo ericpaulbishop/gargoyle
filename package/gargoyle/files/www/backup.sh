@@ -17,7 +17,7 @@
 			</div>
 			<div id="backup_section" class="panel-body">
 				<div class="row form-group">
-					<span class="col-xs-12"><button id="backup_button" class="btn btn-info btn-lg" onclick="getBackup()"><%~ GetBackup %></button></span>
+					<span class="col-xs-12"><button id="backup_button" class="btn btn-success btn-lg" onclick="getBackup()"><%~ GetBackup %></button></span>
 				</div>
 			</div>
 		</div>
