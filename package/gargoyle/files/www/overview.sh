@@ -147,7 +147,7 @@
 			</div>
 
 			<div class="panel-body">
-				<ul class="list-group">
+				<ul id="lan_list_group" class="list-group">
 					<li class="list-group-item"><span class="list-group-item-title"><%~ LIPA %>:</span><span id="lan_ip"></span></li>
 					<li class="list-group-item"><span class="list-group-item-title"><%~ LNmsk %>:</span><span id="lan_mask"></span></li>
 					<li class="list-group-item"><span class="list-group-item-title"><%~ LMAdd %>:</span><span id="lan_mac"></span></li>
