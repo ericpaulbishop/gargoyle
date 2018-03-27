@@ -21,6 +21,7 @@
    Scott G. Miller's sha1.c
 */
 
+
 #include "bbtargz.h"
 
 #include <stddef.h>
@@ -29,7 +30,6 @@
 #if USE_UNLOCKED_IO
 #include "unlocked-io.h"
 #endif
-
 
 
 
@@ -84,11 +84,6 @@ char *strchrnul(const char *s, int c);
 # define sha256_buffer __sha256_buffer
 #endif
 
-
-
-
-
-
 #ifdef WORDS_BIGENDIAN
 #define SWAP(n) (n)
 #else
@@ -125,21 +120,6 @@ void sha256_init_ctx(struct sha256_ctx *ctx)
 	ctx->buflen = 0;
 }
 
-void sha224_init_ctx(struct sha256_ctx *ctx)
-{
-	ctx->state[0] = 0xc1059ed8UL;
-	ctx->state[1] = 0x367cd507UL;
-	ctx->state[2] = 0x3070dd17UL;
-	ctx->state[3] = 0xf70e5939UL;
-	ctx->state[4] = 0xffc00b31UL;
-	ctx->state[5] = 0x68581511UL;
-	ctx->state[6] = 0x64f98fa7UL;
-	ctx->state[7] = 0xbefa4fa4UL;
-
-	ctx->total[0] = ctx->total[1] = 0;
-	ctx->buflen = 0;
-}
-
 /* Put result from CTX in first 32 bytes following RESBUF.  The result
    must be in little endian byte order.
 
@@ -150,16 +130,6 @@ void *sha256_read_ctx(const struct sha256_ctx *ctx, void *resbuf)
 	int i;
 
 	for (i = 0; i < 8; i++)
-		((uint32_t *) resbuf)[i] = SWAP(ctx->state[i]);
-
-	return resbuf;
-}
-
-void *sha224_read_ctx(const struct sha256_ctx *ctx, void *resbuf)
-{
-	int i;
-
-	for (i = 0; i < 7; i++)
 		((uint32_t *) resbuf)[i] = SWAP(ctx->state[i]);
 
 	return resbuf;
@@ -196,12 +166,6 @@ void *sha256_finish_ctx(struct sha256_ctx *ctx, void *resbuf)
 {
 	sha256_conclude_ctx(ctx);
 	return sha256_read_ctx(ctx, resbuf);
-}
-
-void *sha224_finish_ctx(struct sha256_ctx *ctx, void *resbuf)
-{
-	sha256_conclude_ctx(ctx);
-	return sha224_read_ctx(ctx, resbuf);
 }
 
 /* Compute SHA256 message digest for bytes read from STREAM.  The
@@ -266,66 +230,6 @@ process_partial_block:;
 	return 0;
 }
 
-/* FIXME: Avoid code duplication */
-int sha224_stream(FILE * stream, void *resblock)
-{
-	struct sha256_ctx ctx;
-	char buffer[BLOCKSIZE + 72];
-	size_t sum;
-
-	/* Initialize the computation context.  */
-	sha224_init_ctx(&ctx);
-
-	/* Iterate over full file contents.  */
-	while (1) {
-		/* We read the file in blocks of BLOCKSIZE bytes.  One call of the
-		   computation function processes the whole buffer so that with the
-		   next round of the loop another block can be read.  */
-		size_t n;
-		sum = 0;
-
-		/* Read block.  Take care for partial reads.  */
-		while (1) {
-			n = fread(buffer + sum, 1, BLOCKSIZE - sum, stream);
-
-			sum += n;
-
-			if (sum == BLOCKSIZE)
-				break;
-
-			if (n == 0) {
-				/* Check for the error flag IFF N == 0, so that we don't
-				   exit the loop after a partial read due to e.g., EAGAIN
-				   or EWOULDBLOCK.  */
-				if (ferror(stream))
-					return 1;
-				goto process_partial_block;
-			}
-
-			/* We've read at least one byte, so ignore errors.  But always
-			   check for EOF, since feof may be true even though N > 0.
-			   Otherwise, we could end up calling fread after EOF.  */
-			if (feof(stream))
-				goto process_partial_block;
-		}
-
-		/* Process buffer with BLOCKSIZE bytes.  Note that
-		   BLOCKSIZE % 64 == 0
-		 */
-		sha256_process_block(buffer, BLOCKSIZE, &ctx);
-	}
-
-process_partial_block:;
-
-	/* Process any remaining bytes.  */
-	if (sum > 0)
-		sha256_process_bytes(buffer, sum, &ctx);
-
-	/* Construct result in desired memory.  */
-	sha224_finish_ctx(&ctx, resblock);
-	return 0;
-}
-
 /* Compute SHA512 message digest for LEN bytes beginning at BUFFER.  The
    result is always in little endian byte order, so that a byte-wise
    output yields to the wanted ASCII representation of the message
@@ -342,20 +246,6 @@ void *sha256_buffer(const char *buffer, size_t len, void *resblock)
 
 	/* Put result in desired memory area.  */
 	return sha256_finish_ctx(&ctx, resblock);
-}
-
-void *sha224_buffer(const char *buffer, size_t len, void *resblock)
-{
-	struct sha256_ctx ctx;
-
-	/* Initialize the computation context.  */
-	sha224_init_ctx(&ctx);
-
-	/* Process whole buffer but last len % 64 bytes.  */
-	sha256_process_bytes(buffer, len, &ctx);
-
-	/* Put result in desired memory area.  */
-	return sha224_finish_ctx(&ctx, resblock);
 }
 
 void
