@@ -49,7 +49,7 @@ list* parse_quoted_list(char* list_str, char quote_char, char escape_char, char 
 int truncate_if_starts_with(char* test_str, char* prefix);
 
 char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingress, char* target, char* target_options);
-int compute_multi_rules(char** def, list* multi_rules, char** single_check, int never_single, char* rule_prefix, char* test_prefix1, char* test_prefix2, int is_negation, int mask_byte_index, char* proto, int requires_proto, int quoted_args);
+int compute_multi_rules(char** def, list* multi_rules, char** single_check, int never_single, char* rule_prefix, char* test_prefix1, char* test_prefix2, int is_negation1, int is_negation2, int mask_byte_index, char* proto, int requires_proto, int quoted_args);
 
 int main(int argc, char **argv)
 {
@@ -251,7 +251,8 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 	
 	char* url_match_vars[] = { "url_contains", "url_regex", "url_exact", "url_domain_contains", "url_domain_regex", "url_domain_exact" };
 	char* url_neg_match_vars[] = { "not_url_contains", "not_url_regex", "not_url_exact", "not_url_domain_contains", "not_url_domain_regex", "not_url_domain_exact" };
-	char* url_prefixes[] = { " -m weburl --contains ", " -m weburl --contains_regex ", " -m weburl --matches_exactly ",  " -m weburl --domain_only --contains ", " -m weburl --domain_only --contains_regex ", " -m weburl --domain_only --matches_exactly " };
+	char* url_prefixes1[] = { " -m weburl ", " -m weburl ", " -m weburl ",  " -m weburl --domain_only ", " -m weburl --domain_only ", " -m weburl --domain_only " };
+	char* url_prefixes2[] = { " --contains ", " --contains_regex ", " --matches_exactly ",  " --contains ", " --contains_regex ", " --matches_exactly " };
 	list* url_lists[6];
 	int url_var_index=0;
 	int url_rule_count=0;
@@ -284,7 +285,7 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 			{
 				unsigned long num_vals;
 				char** url_def = (char**)get_list_values(url_list, &num_vals);
-				compute_multi_rules( url_def, multi_rules, &single_check, url_is_multi, rule_prefix, url_prefixes[url_var_index], "",  url_is_negated, mask_byte_index, proto, include_proto, 1 );
+				compute_multi_rules( url_def, multi_rules, &single_check, url_is_multi, rule_prefix, url_prefixes1[url_var_index], url_prefixes2[url_var_index], 0, url_is_negated, mask_byte_index, proto, include_proto, 1 );
 				free(url_def);
 			}
 		}
@@ -300,7 +301,7 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 	mark_def = mark_def == NULL ? get_map_element(rule_def, "not_mark") : mark_def;
 	mark_is_negated = mark_def == NULL ? 0 : mark_is_negated;
 	/* we can't do single negation with mark match, so always add seperate multi-match if mark is negated */
-	int mark_is_multi = compute_multi_rules(mark_def, multi_rules, &single_check, mark_is_negated, rule_prefix, " -m mark ", " --mark ", mark_is_negated, mask_byte_index, proto, include_proto, 0) == 2;
+	int mark_is_multi = compute_multi_rules(mark_def, multi_rules, &single_check, mark_is_negated, rule_prefix, " -m mark ", " --mark ", mark_is_negated, 0, mask_byte_index, proto, include_proto, 0) == 2;
 	push_list(initial_mask_list, (void*)&mark_is_negated);
 	push_list(final_mask_list, (void*)&mark_is_multi);
 	mask_byte_index++;	
@@ -310,7 +311,7 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 	int connmark_is_negated = connmark_def == NULL ? 1 : 0;
 	connmark_def = connmark_def == NULL ? get_map_element(rule_def, "not_connmark") : connmark_def;
 	connmark_is_negated = connmark_def == NULL ? 0 : connmark_is_negated;
-	int connmark_is_multi = compute_multi_rules(connmark_def, multi_rules, &single_check, 0, rule_prefix, " -m connmark ", " --mark ", connmark_is_negated, mask_byte_index, proto, include_proto, 0) == 2;
+	int connmark_is_multi = compute_multi_rules(connmark_def, multi_rules, &single_check, 0, rule_prefix, " -m connmark ", " --mark ", connmark_is_negated, 0, mask_byte_index, proto, include_proto, 0) == 2;
 	push_list(initial_mask_list, (void*)&connmark_is_negated);
 	push_list(final_mask_list, (void*)&connmark_is_multi);
 	mask_byte_index++;	
@@ -366,7 +367,7 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 				{
 					if(test_list[0] != NULL)
 					{
-						compute_multi_rules(test_list, multi_rules, &single_check, is_multi, rule_prefix, addr_prefix1[addr_index][test_list_index], addr_prefix2[addr_index][test_list_index],is_negated, mask_byte_index, proto, include_proto, 0);
+						compute_multi_rules(test_list, multi_rules, &single_check, is_multi, rule_prefix, addr_prefix1[addr_index][test_list_index], addr_prefix2[addr_index][test_list_index],is_negated, 0, mask_byte_index, proto, include_proto, 0);
 					}
 				}
 			}
@@ -383,7 +384,7 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 	int sport_is_negated = sport_def == NULL ? 1 : 0;
 	sport_def = sport_def == NULL ? get_map_element(rule_def, (is_ingress ? "not_remote_port" : "not_local_port")) : sport_def;
 	sport_is_negated = sport_def == NULL ? 0 : sport_is_negated;
-	int sport_is_multi = compute_multi_rules(sport_def, multi_rules, &single_check, 0, rule_prefix, " --sport ", "", sport_is_negated, mask_byte_index, proto, 1, 0) == 2;
+	int sport_is_multi = compute_multi_rules(sport_def, multi_rules, &single_check, 0, rule_prefix, " --sport ", "", sport_is_negated, 0, mask_byte_index, proto, 1, 0) == 2;
 	push_list(initial_mask_list, (void*)&sport_is_negated);
 	push_list(final_mask_list, (void*)&sport_is_multi);
 	mask_byte_index++;
@@ -393,7 +394,7 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 	int dport_is_negated = dport_def == NULL ? 1 : 0;
 	dport_def = dport_def == NULL ? get_map_element(rule_def, (is_ingress ? "not_local_port" : "not_remote_port")) : dport_def;
 	dport_is_negated = dport_def == NULL ? 0 : dport_is_negated;
-	int dport_is_multi = compute_multi_rules(dport_def, multi_rules, &single_check, 0, rule_prefix, " --dport ", "", dport_is_negated, mask_byte_index, proto, 1, 0) == 2;
+	int dport_is_multi = compute_multi_rules(dport_def, multi_rules, &single_check, 0, rule_prefix, " --dport ", "", dport_is_negated, 0, mask_byte_index, proto, 1, 0) == 2;
 	push_list(initial_mask_list, (void*)&dport_is_negated);
 	push_list(final_mask_list, (void*)&dport_is_multi);
 	mask_byte_index++;
@@ -412,7 +413,7 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 		{
 			char* dummy_multi[] = { single_check, NULL };
 			int requires_proto = strcmp(proto, "both") == 0 && sport_def == NULL && dport_def == NULL ? 0 : 1;
-			compute_multi_rules(dummy_multi, multi_rules, &single_check, 1, rule_prefix, " ", "", 0, mask_byte_index, proto, requires_proto, 0);
+			compute_multi_rules(dummy_multi, multi_rules, &single_check, 1, rule_prefix, " ", "", 0, 0, mask_byte_index, proto, requires_proto, 0);
 			mask_byte_index++;
 		}
 	
@@ -544,6 +545,8 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 	{
 		push_list(all_rules, dynamic_strcat(2, rule_prefix, " -p tcp -m weburl --contains  http -j CONNMARK --set-mark 0xFF000000/0xFF000000" ));
 		push_list(all_rules, dynamic_strcat(2, rule_prefix, " -p tcp --dport 80 -m connmark ! --mark 0xFF000000/0xFF000000 -j ACCEPT " ));
+		push_list(all_rules, dynamic_strcat(2, rule_prefix, " -p tcp --dport 443 -m connmark ! --mark 0xFF000000/0xFF000000 -j ACCEPT " ));
+		push_list(all_rules, dynamic_strcat(2, rule_prefix,  " -p tcp -m connmark --mark 0xFF000000/0xFF000000 -j REJECT --reject-with tcp-reset" ));
 		push_list(all_rules, dynamic_strcat(2, rule_prefix,  " -j CONNMARK --set-mark 0x0/0xFF000000" ));
 	}
 
@@ -555,9 +558,14 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 
 
 /* returns 0 if no rules found, 1 if one rule found AND included in single_check, otherwise 2 */
-int compute_multi_rules(char** def, list* multi_rules, char** single_check, int never_single, char* rule_prefix, char* test_prefix1, char* test_prefix2, int is_negation, int mask_byte_index, char* proto, int requires_proto, int quoted_args)
+int compute_multi_rules(char** def, list* multi_rules, char** single_check, int never_single, char* rule_prefix, char* test_prefix1, char* test_prefix2, int is_negation1, int is_negation2, int mask_byte_index, char* proto, int requires_proto, int quoted_args)
 {
 	int parse_type = 0;
+	int is_negation = 0;
+	if(is_negation1 == 1 || is_negation2 == 1)
+	{
+		is_negation = 1;
+	}
 	if(def != NULL)
 	{
 		int num_rules; 
@@ -565,7 +573,7 @@ int compute_multi_rules(char** def, list* multi_rules, char** single_check, int 
 		if(num_rules == 1 && !never_single)
 		{
 			parse_type = 1;
-			char* tmp = dynamic_strcat(7, (is_negation ? " ! " : " "), test_prefix1, " ", test_prefix2, (quoted_args ? " \"" : " "), def[0], (quoted_args ? "\" " : " ") );
+			char* tmp = dynamic_strcat(7, (is_negation1 ? " ! " : " "), test_prefix1, (is_negation2 ? " ! " : " "), test_prefix2, (quoted_args ? " \"" : " "), def[0], (quoted_args ? "\" " : " ") );
 			dcat_and_free(&tmp, single_check, 1, 1 );
 		}
 		else

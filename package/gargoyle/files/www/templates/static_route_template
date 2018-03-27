@@ -9,6 +9,6 @@
 						<td><input type='text' id='add_dest' size='26' onkeyup='proofreadRouteIp(this)' maxLength='35' class='form-control' /></td>
 						<td><select id='add_iface' class='form-control'><option value="wan">WAN</option><option value="lan">LAN</option></select></td>
 						<td><input type='text' id='add_gateway' size='20' onkeyup='proofreadGatewayIp(this)' maxLength='15' class='form-control' /></td>
-						<td><button type='button' id='add_button' class='btn btn-default' onclick='addStaticRoute()'><%~ Add %></button></td>
+						<td><button type='button' id='add_button' class='btn btn-default btn-add' onclick='addStaticRoute()'><%~ Add %></button></td>
 					</tr>
 				</table>

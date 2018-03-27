@@ -41,7 +41,7 @@
 		<div style="padding:0px;margin-top:0px;margin-bottom:0px">
 			<span class="col-xs-offset-5 col-xs-7">
 				<input type='text' id='add_ip' onkeyup='proofreadMultipleIps(this)' style="width:250px;" class='form-control' />
-				<button type="button" class="btn btn-default" id="add_ip_button" onclick='addAddressesToTable(document,"add_ip","quota_ip_table_container","quota_ip_table",false,3,true,250)'><%~ Add %></button>
+				<button type="button" class="btn btn-default btn-add" id="add_ip_button" onclick='addAddressesToTable(document,"add_ip","quota_ip_table_container","quota_ip_table",false,3,true,250)'><%~ Add %></button>
 			</span>
 		</div>
 		<div style="padding:0px;margin-top:0px;margin-bottom:5px;">

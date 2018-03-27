@@ -33,6 +33,17 @@ function init(evt)
 		var bodyStyle = window.getComputedStyle(window.parent.document.body);
 		themeColor = bodyStyle.color;
 		themeFontFamily = bodyStyle.fontFamily;
+		for(var x = 1; x < 4; x++)
+		{
+			var titleEl = window.parent.document.getElementById("plot" + x + "_title");
+			if(titleEl != null)
+			{
+				var titleColour = window.getComputedStyle(titleEl).color;
+				var plot = svgDoc.getElementById("plot" + x);
+				plot.style.stroke = titleColour;
+				plot.style.fill = titleColour;
+			}
+		}
 	}
 
 	var graphRightCoor=Math.floor(rightCoor*(85/100));

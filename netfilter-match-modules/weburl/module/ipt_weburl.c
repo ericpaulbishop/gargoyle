@@ -1,4 +1,4 @@
-/*  weburl --	A netfilter module to match URLs in HTTP requests 
+/*  weburl --	A netfilter module to match URLs in HTTP(S) requests
  *  		This module can match using string match or regular expressions
  *  		Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
  *
@@ -46,7 +46,7 @@
 
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Eric Bishop");
-MODULE_DESCRIPTION("Match URL in HTTP requests, designed for use with Gargoyle web interface (www.gargoyle-router.com)");
+MODULE_DESCRIPTION("Match URL in HTTP(S) requests, designed for use with Gargoyle web interface (www.gargoyle-router.com)");
 
 string_map* compiled_map = NULL;
 
@@ -142,116 +142,135 @@ int do_match_test(unsigned char match_type,  const char* reference, char* query)
 int http_match(const struct ipt_weburl_info* info, const unsigned char* packet_data, int packet_length)
 {
 	int test = 0; 
-	
-	/* first test if we're dealing with a web page request */
-	if(strnicmp((char*)packet_data, "GET ", 4) == 0 || strnicmp(  (char*)packet_data, "POST ", 5) == 0 || strnicmp((char*)packet_data, "HEAD ", 5) == 0)
+
+	/* printk("found a http web page request\n"); */
+	char path[625] = "";
+	char host[625] = "";
+	int path_start_index;
+	int path_end_index;
+	int last_header_index;
+	char last_two_buf[2];
+	int end_found;
+	char* host_match;
+	char* test_prefixes[6];
+	int prefix_index;
+
+	/* get path portion of URL */
+	path_start_index = (int)(strstr((char*)packet_data, " ") - (char*)packet_data);
+	while( packet_data[path_start_index] == ' ')
 	{
-		/* printk("found a  web page request\n"); */
-		char path[625] = "";
-		char host[625] = "";
-		int path_start_index;
-		int path_end_index;
-		int last_header_index;
-		char last_two_buf[2];
-		int end_found;
-		char* host_match;
-		char* test_prefixes[6];
-		int prefix_index;
+		path_start_index++;
+	}
+	path_end_index= (int)(strstr( (char*)(packet_data+path_start_index), " ") -  (char*)packet_data);
+	if(path_end_index > 0) 
+	{
+		int path_length = path_end_index-path_start_index;
+		path_length = path_length < 625 ? path_length : 624; /* prevent overflow */
+		memcpy(path, packet_data+path_start_index, path_length);
+		path[ path_length] = '\0';
+	}
 	
-		/* get path portion of URL */
-		path_start_index = (int)(strstr((char*)packet_data, " ") - (char*)packet_data);
-		while( packet_data[path_start_index] == ' ')
+	/* get header length */
+	last_header_index = 2;
+	memcpy(last_two_buf,(char*)packet_data, 2);
+	end_found = 0;
+	while(end_found == 0 && last_header_index < packet_length)
+	{
+		char next = (char)packet_data[last_header_index];
+		if(next == '\n')
 		{
-			path_start_index++;
+			end_found = last_two_buf[1] == '\n' || (last_two_buf[0] == '\n' && last_two_buf[1] == '\r') ? 1 : 0;
 		}
-		path_end_index= (int)(strstr( (char*)(packet_data+path_start_index), " ") -  (char*)packet_data);
-		if(path_end_index > 0) 
+		if(end_found == 0)
 		{
-			int path_length = path_end_index-path_start_index;
-			path_length = path_length < 625 ? path_length : 624; /* prevent overflow */
-			memcpy(path, packet_data+path_start_index, path_length);
-			path[ path_length] = '\0';
+			last_two_buf[0] = last_two_buf[1];
+			last_two_buf[1] = next;
+			last_header_index++;
 		}
-		
-		/* get header length */
-		last_header_index = 2;
-		memcpy(last_two_buf,(char*)packet_data, 2);
-		end_found = 0;
-		while(end_found == 0 && last_header_index < packet_length)
-		{
-			char next = (char)packet_data[last_header_index];
-			if(next == '\n')
-			{
-				end_found = last_two_buf[1] == '\n' || (last_two_buf[0] == '\n' && last_two_buf[1] == '\r') ? 1 : 0;
-			}
-			if(end_found == 0)
-			{
-				last_two_buf[0] = last_two_buf[1];
-				last_two_buf[1] = next;
-				last_header_index++;
-			}
-		}
-		
-		/* get host portion of URL */
-		host_match = strnistr( (char*)packet_data, "Host:", last_header_index);
-		if(host_match != NULL)
-		{
-			int host_end_index;
-			host_match = host_match + 5; /* character after "Host:" */
-			while(host_match[0] == ' ')
-			{
-				host_match = host_match+1;
-			}
-			
-			host_end_index = 0;
-			while(	host_match[host_end_index] != '\n' && 
-				host_match[host_end_index] != '\r' && 
-				host_match[host_end_index] != ' ' && 
-				host_match[host_end_index] != ':' && 
-				((char*)host_match - (char*)packet_data)+host_end_index < last_header_index 
-				)
-			{
-				host_end_index++;
-			}
-			memcpy(host, host_match, host_end_index);
-			host_end_index = host_end_index < 625 ? host_end_index : 624; /* prevent overflow */
-			host[host_end_index] = '\0';
-
-			
-		}
+	}
 	
-		/* printk("host = \"%s\", path =\"%s\"\n", host, path); */
-		
-
-		switch(info->match_part)
+	/* get host portion of URL */
+	host_match = strnistr( (char*)packet_data, "Host:", last_header_index);
+	if(host_match != NULL)
+	{
+		int host_end_index;
+		host_match = host_match + 5; /* character after "Host:" */
+		while(host_match[0] == ' ')
 		{
-			case WEBURL_DOMAIN_PART:
-				test = do_match_test(info->match_type, info->test_str, host);
-				if(!test && strstr(host, "www.") == host)
-				{
-					test = do_match_test(info->match_type, info->test_str, ((char*)host+4) );	
-				}
-				break;
-			case WEBURL_PATH_PART:
-				test = do_match_test(info->match_type, info->test_str, path);
-				if( !test && path[0] == '/' )
-				{
-					test = do_match_test(info->match_type, info->test_str, ((char*)path+1) );
-				}
-				break;
-			case WEBURL_ALL_PART:
-				
-				test_prefixes[0] = "http://";
-				test_prefixes[1] = "";
-				test_prefixes[2] = NULL;
+			host_match = host_match+1;
+		}
+		
+		host_end_index = 0;
+		while(	host_match[host_end_index] != '\n' && 
+			host_match[host_end_index] != '\r' && 
+			host_match[host_end_index] != ' ' && 
+			host_match[host_end_index] != ':' && 
+			((char*)host_match - (char*)packet_data)+host_end_index < last_header_index 
+			)
+		{
+			host_end_index++;
+		}
+		memcpy(host, host_match, host_end_index);
+		host_end_index = host_end_index < 625 ? host_end_index : 624; /* prevent overflow */
+		host[host_end_index] = '\0';
 
+		
+	}
+
+	/* printk("host = \"%s\", path =\"%s\"\n", host, path); */
+	
+
+	switch(info->match_part)
+	{
+		case WEBURL_DOMAIN_PART:
+			test = do_match_test(info->match_type, info->test_str, host);
+			if(!test && strstr(host, "www.") == host)
+			{
+				test = do_match_test(info->match_type, info->test_str, ((char*)host+4) );	
+			}
+			break;
+		case WEBURL_PATH_PART:
+			test = do_match_test(info->match_type, info->test_str, path);
+			if( !test && path[0] == '/' )
+			{
+				test = do_match_test(info->match_type, info->test_str, ((char*)path+1) );
+			}
+			break;
+		case WEBURL_ALL_PART:
+			
+			test_prefixes[0] = "http://";
+			test_prefixes[1] = "";
+			test_prefixes[2] = NULL;
+
+			
+			for(prefix_index=0; test_prefixes[prefix_index] != NULL && test == 0; prefix_index++)
+			{
+				char test_url[1250];
+				test_url[0] = '\0';
+				strcat(test_url, test_prefixes[prefix_index]);
+				strcat(test_url, host);
+				if(strcmp(path, "/") != 0)
+				{
+					strcat(test_url, path);
+				}
+				test = do_match_test(info->match_type, info->test_str, test_url);
+				if(!test && strcmp(path, "/") == 0)
+				{
+					strcat(test_url, path);
+					test = do_match_test(info->match_type, info->test_str, test_url);
+				}
 				
+				/* printk("test_url = \"%s\", test=%d\n", test_url, test); */
+			}
+			if(!test && strstr(host, "www.") == host)
+			{
+				char* www_host = ((char*)host+4);
 				for(prefix_index=0; test_prefixes[prefix_index] != NULL && test == 0; prefix_index++)
 				{
 					char test_url[1250];
 					test_url[0] = '\0';
 					strcat(test_url, test_prefixes[prefix_index]);
-					strcat(test_url, host);
+					strcat(test_url, www_host);
 					if(strcmp(path, "/") != 0)
 					{
 						strcat(test_url, path);
@@ -262,43 +281,157 @@ int http_match(const struct ipt_weburl_info* info, const unsigned char* packet_d
 						strcat(test_url, path);
 						test = do_match_test(info->match_type, info->test_str, test_url);
 					}
-					
+				
 					/* printk("test_url = \"%s\", test=%d\n", test_url, test); */
 				}
-				if(!test && strstr(host, "www.") == host)
-				{
-					char* www_host = ((char*)host+4);
-					for(prefix_index=0; test_prefixes[prefix_index] != NULL && test == 0; prefix_index++)
-					{
-						char test_url[1250];
-						test_url[0] = '\0';
-						strcat(test_url, test_prefixes[prefix_index]);
-						strcat(test_url, www_host);
-						if(strcmp(path, "/") != 0)
-						{
-							strcat(test_url, path);
-						}
-						test = do_match_test(info->match_type, info->test_str, test_url);
-						if(!test && strcmp(path, "/") == 0)
-						{
-							strcat(test_url, path);
-							test = do_match_test(info->match_type, info->test_str, test_url);
-						}
-					
-						/* printk("test_url = \"%s\", test=%d\n", test_url, test); */
-					}
-				}
-				break;
-			
-		}		
+			}
+			break;
+		
+	}		
 
 
-		/* 
-		 * If invert flag is set, return true if this IS a web request, but it didn't match 
-		 * Always return false for non-web requests
-		 */
-		test = info->invert ? !test : test;
+	/* 
+	 * If invert flag is set, return true if it didn't match 
+	 */
+	test = info->invert ? !test : test;
+
+	return test;
+}
+
+int https_match(const struct ipt_weburl_info* info, const unsigned char* packet_data, int packet_length)
+{
+	int test = 0;
+
+	/* printk("found a https web page request\n"); */
+	char host[625] = "";
+	char* test_prefixes[6];
+	int prefix_index, x, packet_limit;
+	unsigned short cslen, ext_type, ext_len, maxextlen;
+	unsigned char conttype, hndshktype, sidlen, cmplen;
+	unsigned char* packet_ptr;
+
+	host[0] = '\0';
+	packet_ptr = packet_data;
+
+	if (packet_length < 43)
+	{
+		/*printk("Packet less than 43 bytes, exiting\n");*/
+		return test;
 	}
+	conttype = packet_data[0];
+	hndshktype = packet_data[5];
+	sidlen = packet_data[43];
+	/*printk("conttype=%d, hndshktype=%d, sidlen=%d ",conttype,hndshktype,sidlen);*/
+	if(conttype != 22)
+	{
+		/*printk("conttype not 22, exiting\n");*/
+		return test;
+	}
+	if(hndshktype != 1)
+	{
+		/*printk("hndshktype not 1, exiting\n");*/
+		return test;		//We aren't in a Client Hello
+	}
+
+	packet_ptr = packet_data + 1 + 43 + sidlen;		//Skip to Cipher Suites Length
+	cslen = ntohs(*(unsigned short*)packet_ptr);	//Length of Cipher Suites (2 byte)
+	packet_ptr = packet_ptr + 2 + cslen;	//Skip to Compression Methods
+	cmplen = *packet_ptr;	//Length of Compression Methods (1 byte)
+	packet_ptr = packet_ptr + 1 + cmplen;	//Skip to Extensions Length **IMPORTANT**
+	maxextlen = ntohs(*(unsigned short*)packet_ptr);	//Length of extensions (2 byte)
+	packet_ptr = packet_ptr + 2;	//Skip to beginning of first extension and start looping
+	ext_type = 1;
+	/*printk("cslen=%d, cmplen=%d, maxextlen=%d, pktlen=%d,ptrpos=%d\n",cslen,cmplen,maxextlen,packet_length,packet_ptr - packet_data);*/
+	//Limit the pointer bounds to the smaller of either the extensions length or the packet length
+	packet_limit = ((packet_ptr - packet_data) + maxextlen) < packet_length ? ((packet_ptr - packet_data) + maxextlen) : packet_length;
+
+	//Extension Type and Extension Length are both 2 byte. SNI Extension is "0"
+	while(((packet_ptr - packet_data) < packet_limit) && (ext_type != 0))
+	{
+		ext_type = ntohs(*(unsigned short*)packet_ptr);
+		packet_ptr = packet_ptr + 2;
+		ext_len = ntohs(*(unsigned short*)packet_ptr);
+		packet_ptr = packet_ptr + 2;
+		/*printk("ext_type=%d, ext_len=%d\n",ext_type,ext_len);*/
+		if(ext_type == 0)
+		{
+			unsigned short snilen;
+			/*printk("FOUND SNI EXT\n");*/
+			packet_ptr = packet_ptr + 3;	//Skip to length of SNI
+			snilen = ntohs(*(unsigned short*)packet_ptr);
+			/*printk("snilen=%d\n",snilen);*/
+			packet_ptr = packet_ptr + 2;	//Skip to beginning of SNI
+			if((((packet_ptr - packet_data) + snilen) < packet_limit) && (snilen > 0))
+			{
+				/*printk("FOUND SNI\n");*/
+				snilen = snilen < 625 ? snilen : 624; // prevent overflow
+				memcpy(host, packet_ptr, snilen);
+				host[snilen] = '\0';
+				for(x=0; host[x] != '\0'; x++)
+				{
+					host[x] = (char)tolower(host[x]);
+				}
+				/*printk("sni=%s\n",host);*/
+			}
+		}
+		else
+		{
+			packet_ptr = packet_ptr + ext_len;
+		}
+	}
+
+	/* printk("host = \"%s\"\n", host); */
+
+	switch(info->match_part)
+	{
+		case WEBURL_DOMAIN_PART:
+			test = do_match_test(info->match_type, info->test_str, host);
+			if(!test && strstr(host, "www.") == host)
+			{
+				test = do_match_test(info->match_type, info->test_str, ((char*)host+4) );
+			}
+			break;
+		case WEBURL_PATH_PART:
+			test = 0;	//we will never have a Path for HTTPS
+			break;
+		case WEBURL_ALL_PART:
+			test_prefixes[0] = "https://";
+			test_prefixes[1] = "";
+			test_prefixes[2] = NULL;
+
+			for(prefix_index=0; test_prefixes[prefix_index] != NULL && test == 0; prefix_index++)
+			{
+				char test_url[1250];
+				test_url[0] = '\0';
+				strcat(test_url, test_prefixes[prefix_index]);
+				strcat(test_url, host);
+
+				test = do_match_test(info->match_type, info->test_str, test_url);
+
+				/* printk("test_url = \"%s\", test=%d\n", test_url, test); */
+			}
+			if(!test && strstr(host, "www.") == host)
+			{
+				char* www_host = ((char*)host+4);
+				for(prefix_index=0; test_prefixes[prefix_index] != NULL && test == 0; prefix_index++)
+				{
+					char test_url[1250];
+					test_url[0] = '\0';
+					strcat(test_url, test_prefixes[prefix_index]);
+					strcat(test_url, www_host);
+
+					test = do_match_test(info->match_type, info->test_str, test_url);
+
+					/* printk("test_url = \"%s\", test=%d\n", test_url, test); */
+				}
+			}
+			break;
+	}
+
+	/*
+	 * If invert flag is set, return true if it didn't match
+	 */
+	test = info->invert ? !test : test;
 
 	return test;
 }
@@ -344,7 +477,14 @@ static bool match(const struct sk_buff *skb, struct xt_action_param *par)
 		/* if payload length <= 10 bytes don't bother doing a check, otherwise check for match */
 		if(payload_length > 10)
 		{
-			test = http_match(info, payload, payload_length);
+			if(strnicmp((char*)payload, "GET ", 4) == 0 || strnicmp(  (char*)payload, "POST ", 5) == 0 || strnicmp((char*)payload, "HEAD ", 5) == 0)
+			{
+				test = http_match(info, payload, payload_length);
+			}
+			else if ((unsigned short)ntohs(tcp_hdr->dest) == 443)
+			{
+				test = https_match(info, payload, payload_length);
+			}
 		}
 	}
 	
@@ -395,4 +535,3 @@ static void __exit fini(void)
 
 module_init(init);
 module_exit(fini);
-

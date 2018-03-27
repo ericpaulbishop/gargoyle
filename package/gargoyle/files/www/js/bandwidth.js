@@ -864,17 +864,7 @@ function expand(name)
 		expWindow = null;
 	}
 
-	try
-	{
-		xCoor = window.screenX + 225;
-		yCoor = window.screenY+ 225;
-	}
-	catch(e)
-	{
-		xCoor = window.left + 225;
-		yCoor = window.top + 225;
-	}
-	expWindow= window.open("bandwidth_expand.sh", name + " "+bndwS.BPlot, "width=850,height=650,left=" + xCoor + ",top=" + yCoor );
+	expWindow = openPopupWindow("bandwidth_expand.sh", name + " " + bndwS.BPlot, 830, 650);
 	expandedWindows[name] = expWindow;
 
 	var runOnWindowLoad = function(name)

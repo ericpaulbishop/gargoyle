@@ -119,8 +119,8 @@ function addTableRow(table, rowData, rowsAreRemovable, rowsAreMovable, rowRemove
 	if(rowsAreRemovable)
 	{
 		cellContent = createInput("button", controlDocument);
-		cellContent.value = UI.Remove;
-		cellContent.className="btn btn-default";
+		cellContent.textContent = UI.Remove;
+		cellContent.className = "btn btn-default btn-remove";
 		cellContent.onclick= function() { row = this.parentNode.parentNode; table=row.parentNode.parentNode; removeThisCellsRow(this); rowRemoveCallback(table,row); };
 		cell = controlDocument.createElement('td');
 		cell.className=table.id + '_column_' + cellIndex;
@@ -131,8 +131,8 @@ function addTableRow(table, rowData, rowsAreRemovable, rowsAreMovable, rowRemove
 	if(rowsAreMovable)
 	{
 		cellContent = createInput("button", controlDocument);
-		cellContent.value = String.fromCharCode(8593);
-		cellContent.className="btn btn-default";
+		cellContent.textContent = String.fromCharCode(8593);
+		cellContent.className = "btn btn-default btn-move-up";
 		cellContent.onclick= function() { moveThisCellsRowUp(this); rowMoveCallback(this, "up"); };
 		cell = controlDocument.createElement('td');
 		cell.className=table.id + '_column_' + cellIndex;
@@ -141,8 +141,8 @@ function addTableRow(table, rowData, rowsAreRemovable, rowsAreMovable, rowRemove
 		cellIndex++;
 
 		cellContent = createInput("button", controlDocument);
-		cellContent.value = String.fromCharCode(8595);
-		cellContent.className="btn btn-default";
+		cellContent.textContent = String.fromCharCode(8595);
+		cellContent.className = "btn btn-default btn-move-down";
 		cellContent.onclick= function() { moveThisCellsRowDown(this); rowMoveCallback(this, "down"); };
 		cell = controlDocument.createElement('td');
 		cell.className=table.id + '_column_' + cellIndex;
@@ -265,8 +265,7 @@ function setRowClasses(table, enabled)
 			cellContent=cells[cellIndex].firstChild;
 			if(cellContent.type == "button" )
 			{
-				cellContent.disabled = (enabled == false);
-				cellContent.className = (enabled == false) ? "btn btn-default disabled" : "btn btn-default";
+				setElementEnabled(cellContent, enabled);
 			}
 		}
 		rowIndex++;

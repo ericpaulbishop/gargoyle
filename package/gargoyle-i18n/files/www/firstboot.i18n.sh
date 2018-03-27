@@ -81,7 +81,7 @@
 							</div>
 							<div>
 								<span>
-									<button id="upload_lang_button" class="btn btn-primary" onclick="do_get_lfile()">Upload ⇧</button>
+									<button id="upload_lang_button" class="btn btn-default" onclick="do_get_lfile()">Upload ⇧</button>
 								</span>
 							</div>
 							<input id="lfile_fname" type="hidden" name="fname" value="" />
@@ -95,7 +95,7 @@
 	</div>
 </div>
 <div id="bottom_button_container" class="panel panel-default">
-	<button id="save_button" class="btn btn-info btn-lg" onclick="setInitialSettings()"><%~ SSet %></button>
+	<button id="save_button" class="btn btn-primary btn-lg" onclick="setInitialSettings()"><%~ SSet %></button>
 </div>
 
 <script>
