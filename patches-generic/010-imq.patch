@@ -1,6 +1,6 @@
 --- /dev/null	2018-01-18 19:46:43.065606386 -0500
 +++ ar71xx-src/target/linux/generic/hack-4.9/690-imq.patch	2017-10-09 23:03:58.745843367 -0400
-@@ -0,0 +1,2063 @@
+@@ -0,0 +1,2065 @@
 +diff --git a/drivers/net/Kconfig b/drivers/net/Kconfig
 +index 95c32f2..93fada5 100644
 +--- a/drivers/net/Kconfig
@@ -148,7 +148,7 @@
 +index 0000000..bc3b997
 +--- /dev/null
 ++++ b/drivers/net/imq.c
-+@@ -0,0 +1,1252 @@
++@@ -0,0 +1,1254 @@
 ++/*
 ++ *             Pseudo-driver for the intermediate queue device.
 ++ *
@@ -1391,6 +1391,8 @@
 ++module_param(numdevs, int, 0);
 ++module_param(numqueues, int, 0);
 ++module_param(imq_dev_accurate_stats, int, 0);
+++module_param(hook_chains, charp, 0);
+++module_param(hook_tables, charp, 0);
 ++MODULE_PARM_DESC(numdevs, "number of IMQ devices (how many imq* devices will be created)");
 ++MODULE_PARM_DESC(numqueues, "number of queues per IMQ device");
 ++MODULE_PARM_DESC(imq_dev_accurate_stats, "Notify if need the accurate imq device stats");
