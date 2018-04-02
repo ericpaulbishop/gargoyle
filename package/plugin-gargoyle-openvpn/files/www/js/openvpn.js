@@ -868,7 +868,7 @@ function setRemoteNames( controlDocument, selectedRemote)
 	for(ddi=0; ddi < definedDdns.length; ddi++)
 	{
 		var enabled = uciOriginal.get("ddns_gargoyle", definedDdns[ddi], "enabled")
-		var domain  = uciOriginal.get("ddns_gargoyle", definedDdns[ddi], "domain")
+		var domain  = uciOriginal.get("ddns_gargoyle", definedDdns[ddi], "domain").replace("@",".")
 		if( (enabled != "0" && enabled != "false") && domain != "")
 		{
 			names.push(ovpnS.DDNS+": " + domain)
