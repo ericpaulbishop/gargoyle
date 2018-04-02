@@ -2761,7 +2761,7 @@ function query(queryHeader, queryText, buttonNameList, continueFunction )
 	wmOldTop    = document.getElementById("wait_msg").style.top
 	document.getElementById("wait_msg").style.background="white"
 	document.getElementById("wait_msg").style.width="585px"
-	document.getElementById("wait_msg").style.height="500px"
+	document.getElementById("wait_msg").style.height="auto"
 	setControlsEnabled(false,false)
 	document.getElementById("wait_msg").style.top="20px"
 
@@ -2776,7 +2776,9 @@ function query(queryHeader, queryText, buttonNameList, continueFunction )
 	{
 		b           = createInput("button", document);
 		b.textContent = buttonNameList[bIndex];
+		b.value = buttonNameList[bIndex];
 		b.className = "btn btn-default"
+		b.style = "margin-bottom: 5px;";
 		b.onclick   = function()
 		{
 			document.getElementById("wait_msg").removeChild(queryFieldset)
