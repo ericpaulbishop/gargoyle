@@ -139,8 +139,6 @@ char *deb_extract(const char *package_filename, FILE *out_stream,
 		const char *filename, int *err);
 
 extern int unzip(FILE *l_in_file, FILE *l_out_file);
-extern int gz_close(int gunzip_pid);
-extern FILE *gz_open(FILE *compressed_file, int *pid);
 
 int make_directory (const char *path, long mode, int flags);
 
