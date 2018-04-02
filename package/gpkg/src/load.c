@@ -781,7 +781,7 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 		char* file_path = (char*)shift_list(file_list);
 		FILE* data_file = NULL;
 		FILE* raw_file = NULL;
-		int gz_pid = -1;
+		struct gzip_handle zh;
 		
 		data_file = fopen(file_path, "r");
 	       	if(data_file != NULL)
@@ -794,7 +794,7 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 			if( data_file != NULL && byte1 == 0x1f && byte2 == 0x8b )
 			{
 				raw_file = data_file;
-				data_file = gz_open(raw_file, &gz_pid);
+				data_file = gzip_fdopen(&zh, file_path);
 			}
 		}
 		if(data_file == NULL)
@@ -969,7 +969,7 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 		if(raw_file != NULL)
 		{
 			fclose(raw_file);
-			gz_close(gz_pid);
+			gzip_close(&zh);
 		}
 		free(file_path);
 	}
