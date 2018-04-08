@@ -17,7 +17,7 @@ define Package/ddns-gargoyle/Default
 endef
 
 define Package/ddns-gargoyle
-	$(call Package/ddns-scripts/Default)
+	$(call Package/ddns-gargoyle/Default)
 	DEPENDS:=+libericstools +ewget
 	TITLE:=Dynamic DNS daemon for use with Gargoyle Web Interface
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
@@ -30,7 +30,7 @@ define Package/ddns-gargoyle/description
 endef
 
 define Package/plugin-gargoyle-ddns-cloudflare
-	$(call Package/ddns-scripts/Default)
+	$(call Package/ddns-gargoyle/Default)
 	TITLE:=Dynamic DNS daemon extension for Cloudflare
 	MAINTAINER:=Michael Gray <support@lantisproject.com>
 	DEPENDS:=+ddns-gargoyle +curl +ca-certificates-combined
