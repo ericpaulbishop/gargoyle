@@ -3580,3 +3580,23 @@ function getRandomMac()
 	return macPairs.join(":");
 
 }
+
+function parseCountry(countryLines)
+{
+	countryName = [];
+
+	for(lineIndex = 0; lineIndex < countryLines.length; lineIndex++)
+	{
+		line = countryLines[lineIndex];
+		if(!line.match(/^[\t]*#/) && line.length > 0)
+		{
+			splitLine = line.split(/[\t]+/);
+			name = stripQuotes(splitLine.pop());
+			code = stripQuotes(splitLine.pop());
+
+			countryName[code] = name;
+		}
+	}
+
+	return countryName;
+}

@@ -73,6 +73,13 @@
 	else
 		echo "cdcif = \"$cdcif\";"
 	fi
+
+	echo "var countryLines = new Array();"
+	if [ -e ./data/countrylist.txt ] ; then
+		awk '{gsub(/"/, "\\\""); print "countryLines.push(\""$0"\");"}' ./data/countrylist.txt	
+	fi
+	echo "var countryData = parseCountry(countryLines);"
+
 %>
 var timezoneOffset = (parseInt(timezoneOffStr.substr(0,3),10)*60+parseInt(timezoneOffStr.substr(3,2),10))*60;
 
@@ -773,6 +780,15 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 						</div>
 						<div id="mac_table_container" class="form-group second_row_right_column"></div>
 
+					</div>
+				</div>
+
+				<div id="wireless_country_container" class="row form-group">
+					<label class="col-xs-5" for="wireless_country"><%~ WifiCountry %>:</label>
+					<div class="col-xs-7">
+						<select class="form-control" id="wireless_country">
+							<option value="00"><%~ World %></option>
+						</select>
 					</div>
 				</div>
 
