@@ -1281,6 +1281,7 @@ function setWifiVisibility()
 			'wifi_txpower_5ghz_container',
 			'mac_enabled_container',
 			'mac_filter_container',
+			'wireless_country_container',
 
 
 			'wifi_ssid1_container',
@@ -1351,13 +1352,15 @@ function setWifiVisibility()
 	var p2 = e2.match(/psk/) || e2.match(/WPA/) ? 1 : 0;
 	var w2 = e2.match(/wep/) || e2.match(/WEP/) ? 1 : 0;
 
+	var wc = checkWifiCountryVisibility();
+
 	var wifiVisibilities = new Array();
-	wifiVisibilities['ap']       = [1,1,gw,g,ae,aw,a,1,mf,   1,a,1,0,a,1,1,1,p1,w1,r1,r1,   gns,gng,gna,gn,gn,gn,gp1,gw1,gns,   0,0,  0,0,0,0,0,0,0,0,0,0,0,0 ];
-	wifiVisibilities['ap+wds']   = [1,1,gw,g,ae,aw,a,1,mf,   1,0,1,0,0,1,1,1,p1,w1,r1,r1,   gns,gng,gna,gn,gn,gn,gp1,gw1,gns,   b,b,  0,0,0,0,0,0,0,0,0,0,0,0 ];
-	wifiVisibilities['sta']      = [1,1,gw,g,ae,aw,a,1,mf,   0,0,0,0,0,0,0,0,0,0,0,0,       0,0,0,0,0,0,0,0,0,                  0,0,  0,0,0,1,g,0,a,0,1,0,p2,w2];
-	wifiVisibilities['ap+sta']   = [1,1,gw,g,ae,aw,a,1,mf,   1,a,1,0,a,1,1,1,p1,w1,r1,r1,   gns,gng,gna,gn,gn,gn,gp1,gw1,gns,   0,0,  1,0,0,1,g,0,a,a,1,0,p2,w2];
-	wifiVisibilities['adhoc']    = [1,1,gw,g,ae,aw,a,1,mf,   0,0,0,0,0,0,0,0,0,0,0,0,       0,0,0,0,0,0,0,0,0,                  0,0,  0,0,0,1,g,0,a,0,1,0,p2,w2];
-	wifiVisibilities['disabled'] = [0,0,0,0,0,0,0,0,0,       0,0,0,0,0,0,0,0,0,0,0,0,       0,0,0,0,0,0,0,0,0,                  0,0,  0,0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['ap']       = [1,1,gw,g,ae,aw,a,1,mf,wc,   1,a,1,0,a,1,1,1,p1,w1,r1,r1,   gns,gng,gna,gn,gn,gn,gp1,gw1,gns,   0,0,  0,0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['ap+wds']   = [1,1,gw,g,ae,aw,a,1,mf,wc,   1,0,1,0,0,1,1,1,p1,w1,r1,r1,   gns,gng,gna,gn,gn,gn,gp1,gw1,gns,   b,b,  0,0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['sta']      = [1,1,gw,g,ae,aw,a,1,mf,wc,   0,0,0,0,0,0,0,0,0,0,0,0,       0,0,0,0,0,0,0,0,0,                  0,0,  0,0,0,1,g,0,a,0,1,0,p2,w2];
+	wifiVisibilities['ap+sta']   = [1,1,gw,g,ae,aw,a,1,mf,wc,   1,a,1,0,a,1,1,1,p1,w1,r1,r1,   gns,gng,gna,gn,gn,gn,gp1,gw1,gns,   0,0,  1,0,0,1,g,0,a,a,1,0,p2,w2];
+	wifiVisibilities['adhoc']    = [1,1,gw,g,ae,aw,a,1,mf,wc,   0,0,0,0,0,0,0,0,0,0,0,0,       0,0,0,0,0,0,0,0,0,                  0,0,  0,0,0,1,g,0,a,0,1,0,p2,w2];
+	wifiVisibilities['disabled'] = [0,0,0,0,0,0,0,0,0,0,       0,0,0,0,0,0,0,0,0,0,0,0,       0,0,0,0,0,0,0,0,0,                  0,0,  0,0,0,0,0,0,0,0,0,0,0,0 ];
 
 	var wifiVisibility = wifiVisibilities[ wifiMode ];
 	setVisibility(wifiIds, wifiVisibility);
@@ -3599,4 +3602,29 @@ function parseCountry(countryLines)
 	}
 
 	return countryName;
+}
+function checkWifiCountryVisibility()
+{
+	if(typeof geo_countrycode === "undefined" || geo_countrycode === null)
+	{
+		return false;
+	}
+	else if(uciOriginal.get("wireless",uciWirelessDevs[0], "country") != "")
+	{
+		var selOpt = countryName[geo_countrycode];
+		if(selOpt == "")
+		{
+			return false;
+		}
+		else
+		{
+			addOptionToSelectElement("wireless_country", selOpt, geo_countrycode);
+		}
+	}
+	if(document.getElementById("wireless_country").length == 1)
+	{
+		return false;
+	}
+
+	return true;
 }
