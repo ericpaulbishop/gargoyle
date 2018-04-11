@@ -385,6 +385,14 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					</span>
 				</div>
 
+				<div id="bridge_wireless_country_container" class="row form-group">
+					<label class="col-xs-5" for="bridge_wireless_country"><%~ WifiCountry %>:</label>
+					<div class="col-xs-7">
+						<select class="form-control" id="bridge_wireless_country" onchange="syncWifiCountrySelection(this)">
+							<option value="00"><%~ World %></option>
+						</select>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -786,7 +794,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="wireless_country_container" class="row form-group">
 					<label class="col-xs-5" for="wireless_country"><%~ WifiCountry %>:</label>
 					<div class="col-xs-7">
-						<select class="form-control" id="wireless_country">
+						<select class="form-control" id="wireless_country" onchange="syncWifiCountrySelection(this)">
 							<option value="00"><%~ World %></option>
 						</select>
 					</div>

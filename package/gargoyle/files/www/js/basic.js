@@ -1434,6 +1434,8 @@ function setBridgeVisibility()
 		}
 
 		setSsidVisibility("bridge_list_ssid");
+
+		document.getElementById("bridge_wireless_country_container").style.display = checkWifiCountryVisibility() ? "block" : "none";
 	}
 
 	var allowedbridgemodes = [];
@@ -3618,7 +3620,12 @@ function checkWifiCountryVisibility()
 		}
 		else
 		{
+			removeAllOptionsFromSelectElement(document.getElementById("wireless_country"));
+			removeAllOptionsFromSelectElement(document.getElementById("bridge_wireless_country"));
+			addOptionToSelectElement("wireless_country", countryName["00"], "00");
+			addOptionToSelectElement("bridge_wireless_country", countryName["00"], "00");
 			addOptionToSelectElement("wireless_country", selOpt, geo_countrycode);
+			addOptionToSelectElement("bridge_wireless_country", selOpt, geo_countrycode);
 		}
 	}
 	if(document.getElementById("wireless_country").length == 1)
@@ -3627,4 +3634,17 @@ function checkWifiCountryVisibility()
 	}
 
 	return true;
+}
+
+function syncWifiCountrySelection(elSelected)
+{
+	var selIdx = elSelected.selectedIndex;
+	if(elSelected.id == "bridge_wireless_country")
+	{
+		document.getElementById("wireless_country").selectedIndex = selIdx;
+	}
+	else
+	{
+		document.getElementById("bridge_wireless_country").selectedIndex = selIdx;
+	}
 }
