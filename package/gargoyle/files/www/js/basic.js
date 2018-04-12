@@ -3618,7 +3618,7 @@ function checkWifiCountryVisibility()
 		{
 			return false;
 		}
-		else
+		else if(document.getElementById("wireless_country").length == 1)
 		{
 			removeAllOptionsFromSelectElement(document.getElementById("wireless_country"));
 			removeAllOptionsFromSelectElement(document.getElementById("bridge_wireless_country"));
