@@ -867,6 +867,15 @@ function saveChanges()
 
 		}
 
+		//set wifi country
+		if(document.getElementById("wireless_country_container").style.display == "block")
+		{
+			for(x = 0; x < uciWirelessDevs.length; x++)
+			{
+				uci.set("wireless",uciWirelessDevs[x],"country",document.getElementById("wireless_country").value);
+			}
+		}
+
 		//set lan dns from table
 		//this code is the same for both router & bridge
 		//we set from lan table, but we keep bridge & lan dns tables synchronized
