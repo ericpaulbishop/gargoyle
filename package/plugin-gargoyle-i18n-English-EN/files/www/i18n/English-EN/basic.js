@@ -114,6 +114,8 @@ basicS.Rndm="Random";
 basicS.BcsID="Broadcast SSID";
 basicS.WlIso="Wireless Client Isolation";
 basicS.DPing="Drop Ping From WAN Side";
+basicS.WifiCountry="Country";
+basicS.WifiCountryWarning="Gargoyle has attempted to determine your geographical region. If this is not correct, it is strongly recommended to leave this setting as <i>World (Default)</i>.<br>Setting this value incorrectly may lead to you violating regulatory standards in your region. If in doubt, choose <i>World (Default)</i> which is legal in all regions.<br>By setting your country correctly, you may be allowed to use additional channels, higher transmit power or wider channel widths.<br><br>Note: You may only change this setting once.";
 
 //javascript
 basicS.WaitRb="Please Wait While Settings Are Applied And Device Is Restarted";
