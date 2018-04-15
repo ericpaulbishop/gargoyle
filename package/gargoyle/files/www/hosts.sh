@@ -84,6 +84,20 @@ var currentTime;
 			</div>
 		</div>
 	</div>
+
+	<div class="col-lg-12">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ ConClientWifi %></h3>
+			</div>
+
+			<div class="panel-body">
+				<div id="client_wifi_data" class="form-group form-inline">
+					<div id="client_wifi_table_container" class="table-responsive"></div>
+				</div>
+			</div>
+		</div>
+	</div>
 </div>
 
 <div class="row">

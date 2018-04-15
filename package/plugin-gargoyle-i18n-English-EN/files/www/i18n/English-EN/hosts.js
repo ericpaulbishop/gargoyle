@@ -7,6 +7,7 @@ hostsStr.RefreshR="Refresh Rate";
 hostsStr.RInfo="This specifies how frequently data on this page is reloaded";
 hostsStr.CurrLeases="Current DHCP Leases";
 hostsStr.ConWifiHosts="Connected Wireless Hosts";
+hostsStr.ConClientWifi="Client Wireless Connections";
 hostsStr.ActiveHosts="Hosts With Active Connections";
 
 //javascript

@@ -72,7 +72,7 @@ function resetVariables()
 			tableContainer.removeChild(tableContainer.firstChild);
 		}
 		tableContainer.appendChild(table);
-        reregisterTableSort('lease_table', 's', 'p', 's', 's');
+        	reregisterTableSort('lease_table', 's', 'p', 's', 's');
 	}
 	else
 	{
@@ -82,31 +82,52 @@ function resetVariables()
 	var arpHash = parseArp(arpLines, dhcpLeaseLines);
 
 	var apFound = false;
+	var staFound = false;
 	var wifiIfs = uciOriginal.getAllSectionsOfType("wireless", "wifi-iface");
 	var ifIndex = 0;
 	for(ifIndex = 0; ifIndex < wifiIfs.length; ifIndex++)
 	{
 		apFound = uciOriginal.get("wireless", wifiIfs[ifIndex], "mode") == "ap" ? true : apFound;
+		staFound = uciOriginal.get("wireless", wifiIfs[ifIndex], "mode") == "sta" ? true : staFound;
 	}
 	var wifiDevs = uciOriginal.getAllSectionsOfType("wireless", "wifi-device");
 	apFound = apFound && (uciOriginal.get("wireless", wifiDevs[0], "disabled") != "1");
+	staFound = staFound && (uciOriginal.get("wireless", wifiDevs[0], "disabled") != "1");
 
 	if(apFound)
 	{
 		document.getElementById("wifi_data").style.display="block";
 		var columnNames=[UI.HsNm, hostsStr.HostIP, hostsStr.HostMAC, hostsStr.Band, "TX "+hostsStr.Bitrate, "RX "+hostsStr.Bitrate, hostsStr.Signal ];
-		var table = createTable(columnNames, parseWifi(arpHash, wirelessDriver, wifiLines), "wifi_table", false, false);
+		var table = createTable(columnNames, parseWifi(arpHash, wirelessDriver, wifiLines, "AP"), "wifi_table", false, false);
 		var tableContainer = document.getElementById('wifi_table_container');
 		if(tableContainer.firstChild != null)
 		{
 			tableContainer.removeChild(tableContainer.firstChild);
 		}
 		tableContainer.appendChild(table);
-        reregisterTableSort('wifi_table', 's', 'p', 's', 's');
+        	reregisterTableSort('wifi_table', 's', 'p', 's', 's');
 	}
 	else
 	{
 		document.getElementById("wifi_data").style.display="none";
+	}
+
+	if(staFound)
+	{
+		document.getElementById("client_wifi_data").style.display="block";
+		var columnNames=["AP SSID", "AP IP", "AP MAC", hostsStr.Band, "TX "+hostsStr.Bitrate, "RX "+hostsStr.Bitrate, hostsStr.Signal ];
+		var table = createTable(columnNames, parseWifi(arpHash, wirelessDriver, wifiLines, "STA"), "client_wifi_table", false, false);
+		var tableContainer = document.getElementById('client_wifi_table_container');
+		if(tableContainer.firstChild != null)
+		{
+			tableContainer.removeChild(tableContainer.firstChild);
+		}
+		tableContainer.appendChild(table);
+        	reregisterTableSort('client_wifi_table', 's', 'p', 's', 's');
+	}
+	else
+	{
+		document.getElementById("client_wifi_data").style.display="none";
 	}
 
 	var columnNames=[UI.HsNm, hostsStr.HostIP, hostsStr.HostMAC, hostsStr.ActiveConx, hostsStr.RecentConx, hostsStr.UDPConx];
@@ -117,7 +138,7 @@ function resetVariables()
 		tableContainer.removeChild(tableContainer.firstChild);
 	}
 	tableContainer.appendChild(table);
-    reregisterTableSort('active_table', 's', 'p', 's', 'i', 'i', 'i');
+	reregisterTableSort('active_table', 's', 'p', 's', 'i', 'i', 'i');
 }
 
 
@@ -194,7 +215,7 @@ function sort2dStrArr(arr, testIndex)
 	arr.sort(str2dSort);
 }
 
-function parseWifi(arpHash, wirelessDriver, lines)
+function parseWifi(arpHash, wirelessDriver, lines, apsta)
 {
 	if(wirelessDriver == "" || lines.length == 0) { return []; }
 
@@ -214,7 +235,7 @@ function parseWifi(arpHash, wirelessDriver, lines)
 		var macBitSig =	[
 				[whost[1], "0", "0"],
 		    [whost[0], whost[3], whost[5]],
-				[whost[0], whost[2], whost[1], whost[3], whost[4]]
+				[whost[0], whost[2], whost[1], whost[3], whost[4], whost[5]]
 				];
 		var mbs = wirelessDriver == "broadcom" ? macBitSig[0] : ( wirelessDriver == "atheros" ? macBitSig[1] : macBitSig[2] );
 		mbs[0] = (mbs[0]).toUpperCase();
@@ -232,9 +253,24 @@ function parseWifi(arpHash, wirelessDriver, lines)
 		sigSpan.style.color = color;
 		mbs[2] = sigSpan;
 
-
-		var ip = arpHash[ mbs[0] ] == null ? UI.unk : arpHash[ mbs[0] ] ;
-		var hostname = getHostname(ip);
+		if(apsta == "AP")
+		{
+			var ip = arpHash[ mbs[0] ] == null ? UI.unk : arpHash[ mbs[0] ] ;
+			var hostname = getHostname(ip);
+		}
+		else if(apsta == "STA")
+		{
+			var ip = UI.unk;
+			if(mbs.length > 3)
+			{
+				var hostname = mbs[5] == "" ? "-" : mbs[5];
+			}
+			else
+			{
+				var hostname = getHostName(ip);
+			}
+		}
+		
 		if(mbs.length > 3)
 		{
 			mbs[3] = mbs[3] + " Mbps";
