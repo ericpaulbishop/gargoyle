@@ -7,6 +7,7 @@
  */
 
 var hostsStr=new Object(); //part of i18n
+var basicS=new Object();
 
 var TSort_Data = new Array ('lease_table', 's', 'p', 's', 's');
 tsRegister();
@@ -116,7 +117,7 @@ function resetVariables()
 	{
 		document.getElementById("client_wifi_data").style.display="block";
 		var columnNames=["AP SSID", "AP IP", "AP MAC", hostsStr.Band, "TX "+hostsStr.Bitrate, "RX "+hostsStr.Bitrate, hostsStr.Signal ];
-		var table = createTable(columnNames, parseWifi(arpHash, wirelessDriver, wifiLines, "STA"), "client_wifi_table", false, false);
+		var table = createTable(columnNames, parseWifi(arpHash, wirelessDriver, wifiClientLines, "STA"), "client_wifi_table", false, false);
 		var tableContainer = document.getElementById('client_wifi_table_container');
 		if(tableContainer.firstChild != null)
 		{
@@ -219,6 +220,27 @@ function parseWifi(arpHash, wirelessDriver, lines, apsta)
 {
 	if(wirelessDriver == "" || lines.length == 0) { return []; }
 
+	//Mapping of WLANs to ESSIDs and MACs
+	var wifLines = wlanLines.slice(0);
+	for(x = 0; x < wifLines.length; x++)
+	{
+		wifLines[x] = wifLines[x].split(/[\t ]+/);
+		var allWifiIfaceSections = uciOriginal.getAllSectionsOfType("wireless","wifi-iface");
+		for(wsecIndex = 0; wsecIndex < allWifiIfaceSections.length; wsecIndex++)
+		{
+			var sec = allWifiIfaceSections[wsecIndex];
+			if((uciOriginal.get("wireless",sec,"is_guest_network") == "1") && (uciOriginal.get("wireless",sec,"macaddr").toLowerCase() == wifLines[x][2].toLowerCase()))
+			{
+				wifLines[x].push("guest");
+				break;
+			}
+			else if(wsecIndex == allWifiIfaceSections.length-1)
+			{
+				wifLines[x].push("not guest");
+			}
+		}
+	}
+
 	//Host IP, Host MAC
 	var wifiTableData = [];
 	var lineIndex = 0;
@@ -263,17 +285,29 @@ function parseWifi(arpHash, wirelessDriver, lines, apsta)
 			var ip = UI.unk;
 			if(mbs.length > 3)
 			{
-				var hostname = mbs[5] == "" ? "-" : mbs[5];
+				for(x = 0; x < wifLines.length; x++)
+				{
+					if(wifLines[x][0] == mbs[5])
+					{
+						var hostname = wifLines[x][1];
+					}
+				}
 			}
 			else
 			{
-				var hostname = getHostName(ip);
+				var hostname = getHostname(ip);
 			}
 		}
-		
 		if(mbs.length > 3)
 		{
 			mbs[3] = mbs[3] + " Mbps";
+			for(x = 0; x < wifLines.length; x++)
+			{
+				if(mbs[5] == wifLines[x][0] && wifLines[x][3] == "guest")
+				{
+					mbs[4] = mbs[4] + " (" + basicS.GNet + ")";
+				}
+			}
 			wifiTableData.push( [ hostname, ip, mbs[0], mbs[4], mbs[1], mbs[3], mbs[2] ] );
 		}
 		else
