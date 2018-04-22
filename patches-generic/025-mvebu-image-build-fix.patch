@@ -1,0 +1,12 @@
+--- ar71xx-src/target/linux/mvebu/image/Makefile	2018-03-18 19:31:29.846127462 -0400
++++ mvebu-src/target/linux/mvebu/image/Makefile	2018-04-22 19:26:47.741722364 -0400
+@@ -73,7 +73,8 @@
+ 	$(TAR) -c -T /dev/null -f $@
+ 	rm -rf $(dir $(IMAGE_KERNEL))boot
+ 	mkdir -p $(dir $(IMAGE_KERNEL))boot/boot/
+-	cp $(KDIR)/zImage-initramfs $(dir $(IMAGE_KERNEL))boot/boot/zImage
++	if [ -e $(KDIR)/tmp/zImage-initramfs ] ; then cp $(KDIR)/tmp/zImage-initramfs $(dir $(IMAGE_KERNEL))boot/boot/zImage ; fi
++	if [ -e $(KDIR)/zImage-initramfs ] ; then cp $(KDIR)/zImage-initramfs $(dir $(IMAGE_KERNEL))boot/boot/zImage ; fi
+ 	cp $(DTS_DIR)/$(DEVICE_DTS).dtb $(dir $(IMAGE_KERNEL))boot/boot/dtb
+ 	$(TAR) -rp --numeric-owner --owner=0 --group=0 --sort=name \
+ 		$(if $(SOURCE_DATE_EPOCH),--mtime="@$(SOURCE_DATE_EPOCH)") \
