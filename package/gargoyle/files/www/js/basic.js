@@ -867,6 +867,15 @@ function saveChanges()
 
 		}
 
+		//set wifi country
+		if(document.getElementById("wireless_country_container").style.display == "block")
+		{
+			for(x = 0; x < uciWirelessDevs.length; x++)
+			{
+				uci.set("wireless",uciWirelessDevs[x],"country",document.getElementById("wireless_country").value);
+			}
+		}
+
 		//set lan dns from table
 		//this code is the same for both router & bridge
 		//we set from lan table, but we keep bridge & lan dns tables synchronized
@@ -1281,6 +1290,7 @@ function setWifiVisibility()
 			'wifi_txpower_5ghz_container',
 			'mac_enabled_container',
 			'mac_filter_container',
+			'wireless_country_container',
 
 
 			'wifi_ssid1_container',
@@ -1351,13 +1361,15 @@ function setWifiVisibility()
 	var p2 = e2.match(/psk/) || e2.match(/WPA/) ? 1 : 0;
 	var w2 = e2.match(/wep/) || e2.match(/WEP/) ? 1 : 0;
 
+	var wc = checkWifiCountryVisibility();
+
 	var wifiVisibilities = new Array();
-	wifiVisibilities['ap']       = [1,1,gw,g,ae,aw,a,1,mf,   1,a,1,0,a,1,1,1,p1,w1,r1,r1,   gns,gng,gna,gn,gn,gn,gp1,gw1,gns,   0,0,  0,0,0,0,0,0,0,0,0,0,0,0 ];
-	wifiVisibilities['ap+wds']   = [1,1,gw,g,ae,aw,a,1,mf,   1,0,1,0,0,1,1,1,p1,w1,r1,r1,   gns,gng,gna,gn,gn,gn,gp1,gw1,gns,   b,b,  0,0,0,0,0,0,0,0,0,0,0,0 ];
-	wifiVisibilities['sta']      = [1,1,gw,g,ae,aw,a,1,mf,   0,0,0,0,0,0,0,0,0,0,0,0,       0,0,0,0,0,0,0,0,0,                  0,0,  0,0,0,1,g,0,a,0,1,0,p2,w2];
-	wifiVisibilities['ap+sta']   = [1,1,gw,g,ae,aw,a,1,mf,   1,a,1,0,a,1,1,1,p1,w1,r1,r1,   gns,gng,gna,gn,gn,gn,gp1,gw1,gns,   0,0,  1,0,0,1,g,0,a,a,1,0,p2,w2];
-	wifiVisibilities['adhoc']    = [1,1,gw,g,ae,aw,a,1,mf,   0,0,0,0,0,0,0,0,0,0,0,0,       0,0,0,0,0,0,0,0,0,                  0,0,  0,0,0,1,g,0,a,0,1,0,p2,w2];
-	wifiVisibilities['disabled'] = [0,0,0,0,0,0,0,0,0,       0,0,0,0,0,0,0,0,0,0,0,0,       0,0,0,0,0,0,0,0,0,                  0,0,  0,0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['ap']       = [1,1,gw,g,ae,aw,a,1,mf,wc,   1,a,1,0,a,1,1,1,p1,w1,r1,r1,   gns,gng,gna,gn,gn,gn,gp1,gw1,gns,   0,0,  0,0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['ap+wds']   = [1,1,gw,g,ae,aw,a,1,mf,wc,   1,0,1,0,0,1,1,1,p1,w1,r1,r1,   gns,gng,gna,gn,gn,gn,gp1,gw1,gns,   b,b,  0,0,0,0,0,0,0,0,0,0,0,0 ];
+	wifiVisibilities['sta']      = [1,1,gw,g,ae,aw,a,1,mf,wc,   0,0,0,0,0,0,0,0,0,0,0,0,       0,0,0,0,0,0,0,0,0,                  0,0,  0,0,0,1,g,0,a,0,1,0,p2,w2];
+	wifiVisibilities['ap+sta']   = [1,1,gw,g,ae,aw,a,1,mf,wc,   1,a,1,0,a,1,1,1,p1,w1,r1,r1,   gns,gng,gna,gn,gn,gn,gp1,gw1,gns,   0,0,  1,0,0,1,g,0,a,a,1,0,p2,w2];
+	wifiVisibilities['adhoc']    = [1,1,gw,g,ae,aw,a,1,mf,wc,   0,0,0,0,0,0,0,0,0,0,0,0,       0,0,0,0,0,0,0,0,0,                  0,0,  0,0,0,1,g,0,a,0,1,0,p2,w2];
+	wifiVisibilities['disabled'] = [0,0,0,0,0,0,0,0,0,0,       0,0,0,0,0,0,0,0,0,0,0,0,       0,0,0,0,0,0,0,0,0,                  0,0,  0,0,0,0,0,0,0,0,0,0,0,0 ];
 
 	var wifiVisibility = wifiVisibilities[ wifiMode ];
 	setVisibility(wifiIds, wifiVisibility);
@@ -1431,6 +1443,8 @@ function setBridgeVisibility()
 		}
 
 		setSsidVisibility("bridge_list_ssid");
+
+		document.getElementById("bridge_wireless_country_container").style.display = checkWifiCountryVisibility() ? "block" : "none";
 	}
 
 	var allowedbridgemodes = [];
@@ -3579,4 +3593,67 @@ function getRandomMac()
 	}
 	return macPairs.join(":");
 
+}
+
+function parseCountry(countryLines)
+{
+	countryName = [];
+
+	for(lineIndex = 0; lineIndex < countryLines.length; lineIndex++)
+	{
+		line = countryLines[lineIndex];
+		if(!line.match(/^[\t]*#/) && line.length > 0)
+		{
+			splitLine = line.split(/[\t]+/);
+			name = stripQuotes(splitLine.pop());
+			code = stripQuotes(splitLine.pop());
+
+			countryName[code] = name;
+		}
+	}
+
+	return countryName;
+}
+function checkWifiCountryVisibility()
+{
+	if(typeof geo_countrycode === "undefined" || geo_countrycode === null)
+	{
+		return false;
+	}
+	else if(uciOriginal.get("wireless",uciWirelessDevs[0], "country") != "")
+	{
+		var selOpt = countryName[geo_countrycode];
+		if(selOpt == "")
+		{
+			return false;
+		}
+		else if(document.getElementById("wireless_country").length == 1)
+		{
+			removeAllOptionsFromSelectElement(document.getElementById("wireless_country"));
+			removeAllOptionsFromSelectElement(document.getElementById("bridge_wireless_country"));
+			addOptionToSelectElement("wireless_country", countryName["00"], "00");
+			addOptionToSelectElement("bridge_wireless_country", countryName["00"], "00");
+			addOptionToSelectElement("wireless_country", selOpt, geo_countrycode);
+			addOptionToSelectElement("bridge_wireless_country", selOpt, geo_countrycode);
+		}
+	}
+	if(document.getElementById("wireless_country").length == 1)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+function syncWifiCountrySelection(elSelected)
+{
+	var selIdx = elSelected.selectedIndex;
+	if(elSelected.id == "bridge_wireless_country")
+	{
+		document.getElementById("wireless_country").selectedIndex = selIdx;
+	}
+	else
+	{
+		document.getElementById("bridge_wireless_country").selectedIndex = selIdx;
+	}
 }
