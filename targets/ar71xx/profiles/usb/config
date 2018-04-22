@@ -3020,3 +3020,4 @@ CONFIG_PACKAGE_iptables-mod-conntrack-label=y
 CONFIG_PACKAGE_kmod-ipt-conntrack-label=y
 CONFIG_PACKAGE_libcomerr=y
 CONFIG_PACKAGE_libss=y
+CONFIG_PACKAGE_gargoyle-ip-query=y
