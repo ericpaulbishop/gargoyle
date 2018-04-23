@@ -1422,7 +1422,7 @@ CONFIG_PACKAGE_plugin-gargoyle-theme-Gargoyle-Modern=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-by-matei=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-dark-one=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-demantoid=m
-# CONFIG_PACKAGE_plugin-gargoyle-theme-flat-blue is not set
+CONFIG_PACKAGE_plugin-gargoyle-theme-flat-blue=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-green=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-horchata=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-light=m
@@ -1461,7 +1461,7 @@ CONFIG_PACKAGE_u-boot-clearfog=y
 # Extra packages
 #
 CONFIG_PACKAGE_ddns-gargoyle=y
-# CONFIG_PACKAGE_plugin-gargoyle-ddns-cloudflare is not set
+CONFIG_PACKAGE_plugin-gargoyle-ddns-cloudflare=m
 
 #
 # Firmware
@@ -2279,7 +2279,7 @@ CONFIG_PACKAGE_libblobmsg-json=y
 CONFIG_PACKAGE_libcap=y
 # CONFIG_PACKAGE_libcharset is not set
 # CONFIG_PACKAGE_libconfig is not set
-# CONFIG_PACKAGE_libcurl is not set
+CONFIG_PACKAGE_libcurl=m
 # CONFIG_PACKAGE_libelf1 is not set
 CONFIG_PACKAGE_libcomerr=y
 CONFIG_PACKAGE_libericstools=y
@@ -2402,7 +2402,7 @@ CONFIG_PACKAGE_minidlna=y
 #
 # File Transfer
 #
-# CONFIG_PACKAGE_curl is not set
+CONFIG_PACKAGE_curl=m
 CONFIG_PACKAGE_vsftpd=y
 
 #
