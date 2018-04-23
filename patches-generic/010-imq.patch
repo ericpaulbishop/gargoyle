@@ -2353,7 +2353,7 @@
 ++
 ++static nf_hookfn imq_nf_hook;
 ++
-++/*
+++ 
 ++static struct nf_hook_ops imq_ops[] = {
 ++	{
 ++	// imq_ingress_ipv4 
@@ -2402,7 +2402,7 @@
 ++	},
 ++#endif
 ++};
-++*/
+++ 
 ++
 ++
 ++
@@ -3403,7 +3403,7 @@
 ++				(hook_list[hook_list_length]).pf = PF_INET;
 ++				(hook_list[hook_list_length]).hooknum = chain_id;
 ++				(hook_list[hook_list_length]).priority = table_id;
-++				err = nf_register_hook( (hook_list + hook_list_length) );
+++				err = nf_register_net_hook(&init_net, (hook_list + hook_list_length) );
 ++				hook_list_length++;
 ++
 ++				#if defined(CONFIG_IPV6) || defined(CONFIG_IPV6_MODULE)
@@ -3429,7 +3429,7 @@
 ++					(hook_list[hook_list_length]).pf = PF_INET6;
 ++					(hook_list[hook_list_length]).hooknum = chain_id;
 ++					(hook_list[hook_list_length]).priority = table_id;
-++					nf_register_hook( (hook_list + hook_list_length) );
+++					nf_register_net_hook(&init_net, (hook_list + hook_list_length) );
 ++					hook_list_length++;
 ++				#endif
 ++
@@ -3619,7 +3619,7 @@
 ++	int hook_index = 0;
 ++	for(hook_index = 0; hook_index < hook_list_length; hook_index++)
 ++	{
-++		nf_unregister_hook( (hook_list+hook_index) );
+++		nf_unregister_net_hook(&init_net, (hook_list+hook_index) );
 ++	}
 ++
 ++
@@ -4436,3 +4436,14 @@
 + /*
 +  * Transmit possibly several skbs, and handle the return status as
 +  * required. Owning running seqcount bit guarantees that
+--- a/target/linux/generic/config-4.14	2015-07-21 12:50:21.319810482 -0400
++++ b/target/linux/generic/config-4.14	2015-08-16 13:53:29.466745444 -0400
+@@ -5315,3 +5315,8 @@
+ # CONFIG_ZRAM is not set
+ # CONFIG_ZSMALLOC is not set
+ # CONFIG_ZX_TDM is not set
++CONFIG_IMQ_NUM_DEVS=2
++# CONFIG_IMQ_BEHAVIOR_AA is not set
++# CONFIG_IMQ_BEHAVIOR_AB is not set
++CONFIG_IMQ_BEHAVIOR_BA=y
++# CONFIG_IMQ_BEHAVIOR_BB is not set
