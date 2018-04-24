@@ -2305,10 +2305,10 @@
 +# CONFIG_IMQ_BEHAVIOR_BB is not set
 --- /dev/null	2018-03-30 15:39:24.291451107 -0400
 +++ mvebu-src/target/linux/generic/hack-4.14/690-imq.patch	2018-04-23 09:47:51.224309863 -0400
-@@ -0,0 +1,2130 @@
+@@ -0,0 +1,2132 @@
 +--- /dev/null	2018-03-30 15:39:24.291451107 -0400
 ++++ b/drivers/net/imq.c	2018-04-22 23:31:48.755977808 -0400
-+@@ -0,0 +1,1353 @@
++@@ -0,0 +1,1355 @@
 ++/*
 ++ *             Pseudo-driver for the intermediate queue device.
 ++ *
@@ -3650,6 +3650,8 @@
 ++module_param(numdevs, int, 0);
 ++module_param(numqueues, int, 0);
 ++module_param(imq_dev_accurate_stats, int, 0);
+++module_param(hook_chains, charp, 0);
+++module_param(hook_tables, charp, 0);
 ++MODULE_PARM_DESC(numdevs, "number of IMQ devices (how many imq* devices will be created)");
 ++MODULE_PARM_DESC(numqueues, "number of queues per IMQ device");
 ++MODULE_PARM_DESC(imq_dev_accurate_stats, "Notify if need the accurate imq device stats");
