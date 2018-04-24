@@ -3620,7 +3620,7 @@ function checkWifiCountryVisibility()
 	{
 		return false;
 	}
-	else if(uciOriginal.get("wireless",uciWirelessDevs[0], "country") != "")
+	else if(uciOriginal.get("wireless",uciWirelessDevs[0], "country") == "")
 	{
 		var selOpt = countryName[geo_countrycode];
 		if(selOpt == "")
