@@ -145,12 +145,15 @@ int main(int argc, char** argv)
 		country_code = get_geo_from_ip(ip);
 	}
 	
-	if((strcmp(ip, "NO-CONN") == 0) || (strcmp(country_code, "NO-CONN") == 0))
+	if(ip != NULL && country_code != NULL)
 	{
-		free_if_not_null(ip);
-		free_if_not_null(country_code);
-		ip = NULL;
-		country_code = NULL;
+		if((strcmp(ip, "NO-CONN") == 0) || (strcmp(country_code, "NO-CONN") == 0))
+		{
+			free_if_not_null(ip);
+			free_if_not_null(country_code);
+			ip = NULL;
+			country_code = NULL;
+		}
 	}
 	
 	if(strcmp(return_format, "HR") == 0)
