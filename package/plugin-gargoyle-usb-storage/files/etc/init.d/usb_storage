@@ -51,7 +51,7 @@ do_start()
 		uci commit
 	fi
 
-	local drives="$(blkid | grep UUID | sed -r 's#^/dev/(.+):.+UUID="([^"]+)".*$#/dev/\1:\2#g' | grep -v ubi )"
+	local drives="$(blkid | grep UUID | grep -v ubi | sed -r 's#^/dev/(.+):.+UUID="([^"]+)".*$#/dev/\1:\2#g')"
 
 	echo "$drives" >/tmp/drives_found.txt
 	date >>/tmp/drives_found.txt
