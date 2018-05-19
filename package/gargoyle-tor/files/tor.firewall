@@ -168,7 +168,7 @@ initialize()
 			
 			uci del_list dhcp.@dnsmasq[0].rebind_domain='.onion'			
 			cur_onion_server=$( uci get dhcp.@dnsmasq[0].server | grep -o "\/.onion\/[0-9\.#]*" )
-			client_listen_ip=$(uci -P /var/state get network.$client_zone.ipaddr 2>/dev/null)
+			client_listen_ip=$(uci -P /var/state get network.$zone.ipaddr 2>/dev/null)
 			if [ -n "$cur_onion_server" ] ; then
 				uci del_list dhcp.@dnsmasq[0].server="$cur_onion_server"
 			fi
