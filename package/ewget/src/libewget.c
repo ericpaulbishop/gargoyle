@@ -192,6 +192,7 @@ static void alarm_triggered(int sig);
 		typedef struct pctx
 		{
 			int socket;
+			mbedtls_ssl_config conf;
 			mbedtls_x509_crt ssl_client_cert;
 			mbedtls_pk_context key;
 			mbedtls_ssl_session ssl_client_session;
@@ -1365,6 +1366,7 @@ static int ewget_urandom(void *ctx, unsigned char *out, size_t len)
 #endif
 
 
+
 static void* initialize_connection_https(char* host, int port)
 {
 	ssl_connection_data* connection_data = NULL;
@@ -1405,7 +1407,6 @@ static void* initialize_connection_https(char* host, int port)
 		#ifdef USE_MBEDTLS
 			if(ewget_urandom_init() > 0)
 			{
-				mbedtls_ssl_config conf;
 				ssl = (SSL*)malloc(sizeof(SSL));
 				memset(ssl, 0, sizeof(SSL));
 				
@@ -1414,27 +1415,26 @@ static void* initialize_connection_https(char* host, int port)
 				mbedtls_pk_init(&ctx->key);
 
 
-
 				/* if(mbedtls_ssl_init(ssl) == 0) */
 				mbedtls_ssl_init(ssl);
-				mbedtls_ssl_config_defaults( &conf,
+				mbedtls_ssl_config_init(&(ctx->conf));
+				mbedtls_ssl_config_defaults( &(ctx->conf),
 					MBEDTLS_SSL_IS_CLIENT,
 					MBEDTLS_SSL_TRANSPORT_STREAM,
 					MBEDTLS_SSL_PRESET_DEFAULT );
-
-				mbedtls_ssl_conf_endpoint(&conf, MBEDTLS_SSL_IS_CLIENT);
-				mbedtls_ssl_conf_authmode(&conf, MBEDTLS_SSL_VERIFY_NONE);
-				mbedtls_ssl_conf_rng(&conf, ewget_urandom, NULL);
-				mbedtls_ssl_conf_own_cert(&conf, &(ctx->ssl_client_cert), &(ctx->key)); 
-				mbedtls_ssl_conf_ciphersuites(&conf, default_ciphersuites);
-				mbedtls_ssl_setup( ssl, &conf );
-
+				
+				mbedtls_ssl_conf_endpoint(&(ctx->conf), MBEDTLS_SSL_IS_CLIENT);
+				mbedtls_ssl_conf_authmode(&(ctx->conf), MBEDTLS_SSL_VERIFY_NONE);
+				mbedtls_ssl_conf_rng(&(ctx->conf), ewget_urandom, NULL);
+				mbedtls_ssl_conf_own_cert(&(ctx->conf), &(ctx->ssl_client_cert), &(ctx->key)); 
+				mbedtls_ssl_conf_ciphersuites(&(ctx->conf), default_ciphersuites);
+				mbedtls_ssl_setup( ssl, &(ctx->conf) );
+				
 				ctx->socket = socket;
 				mbedtls_ssl_set_bio(ssl, &(ctx->socket), mbedtls_net_send, mbedtls_net_recv, NULL);
 			
 				mbedtls_ssl_session_reset(ssl);
 				initialized = mbedtls_ssl_handshake(ssl);
-					
 				
 			}
 		#endif
@@ -1505,13 +1505,12 @@ static int read_https(void* connection_data, char* read_buffer, int read_length)
 	ssl_connection_data *cd = (ssl_connection_data*)connection_data;
 	int bytes_read = -1;
 	
-
+	
 	alarm_socket = cd->socket;	
 	signal(SIGALRM, alarm_triggered );
 	alarm(__ewget_timeout_seconds);
 	bytes_read = SSL_read(cd->ssl, read_buffer, read_length);
 	alarm(0);
-
 
 	return bytes_read;
 
