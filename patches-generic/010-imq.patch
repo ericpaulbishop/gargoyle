@@ -2303,12 +2303,23 @@
 +# CONFIG_IMQ_BEHAVIOR_AB is not set
 +CONFIG_IMQ_BEHAVIOR_BA=y
 +# CONFIG_IMQ_BEHAVIOR_BB is not set
+--- a/target/linux/generic/config-4.14	2015-07-21 12:50:21.319810482 -0400
++++ b/target/linux/generic/config-4.14	2015-08-16 13:53:29.466745444 -0400
+@@ -5315,3 +5315,8 @@
+ # CONFIG_ZRAM is not set
+ # CONFIG_ZSMALLOC is not set
+ # CONFIG_ZX_TDM is not set
++CONFIG_IMQ_NUM_DEVS=2
++# CONFIG_IMQ_BEHAVIOR_AA is not set
++# CONFIG_IMQ_BEHAVIOR_AB is not set
++CONFIG_IMQ_BEHAVIOR_BA=y
++# CONFIG_IMQ_BEHAVIOR_BB is not set
 --- /dev/null	2018-03-30 15:39:24.291451107 -0400
-+++ mvebu-src/target/linux/generic/hack-4.14/690-imq.patch	2018-04-23 09:47:51.224309863 -0400
-@@ -0,0 +1,2132 @@
++++ b/target/linux/generic/hack-4.14/690-imq.patch	2018-05-20 12:11:47.889353738 -0400
+@@ -0,0 +1,2151 @@
 +--- /dev/null	2018-03-30 15:39:24.291451107 -0400
-++++ b/drivers/net/imq.c	2018-04-22 23:31:48.755977808 -0400
-+@@ -0,0 +1,1355 @@
+++++ b/drivers/net/imq.c	2018-05-20 11:10:23.471713282 -0400
++@@ -0,0 +1,1374 @@
 ++/*
 ++ *             Pseudo-driver for the intermediate queue device.
 ++ *
@@ -2353,7 +2364,7 @@
 ++
 ++static nf_hookfn imq_nf_hook;
 ++
-++ 
+++/* 
 ++static struct nf_hook_ops imq_ops[] = {
 ++	{
 ++	// imq_ingress_ipv4 
@@ -2402,7 +2413,7 @@
 ++	},
 ++#endif
 ++};
-++ 
+++*/
 ++
 ++
 ++
@@ -3105,25 +3116,6 @@
 ++	.outfn = imq_nf_queue,
 ++};
 ++
-++static int __net_init imq_nf_register(struct net *net)
-++{
-++	return nf_register_net_hooks(net, imq_ops,
-++				    ARRAY_SIZE(imq_ops));
-++};
-++
-++static void __net_exit imq_nf_unregister(struct net *net)
-++{
-++	nf_unregister_net_hooks(net, imq_ops,
-++			    ARRAY_SIZE(imq_ops));
-++};
-++
-++static struct pernet_operations imq_net_ops = {
-++	.init		= imq_nf_register,
-++	.exit		= imq_nf_unregister,
-++};
-++
-++
-++
 ++
 ++
 ++
@@ -3316,10 +3308,9 @@
 ++static struct nf_hook_ops* hook_list = NULL;
 ++static int hook_list_length = 0;
 ++
-++
-++
-++static int __init imq_init_hooks(void)
+++static int __net_init imq_nf_register(struct net *net)
 ++{
+++
 ++	/* int ret; */
 ++	char separators[4] = {',', ' ', '\t', '\0' };
 ++	unsigned long num_chains;
@@ -3327,8 +3318,6 @@
 ++	char** chain_list = split_on_separators(hook_chains, separators, 3, -1, 0, &num_chains);
 ++	char** table_list = split_on_separators(hook_tables, separators, 3, -1, 0, &num_tables);
 ++	int hook_index = 0;
-++
-++	nf_register_queue_imq_handler(&imq_nfqh);
 ++
 ++	hook_list_length = 0;
 ++	if(num_chains != num_tables)
@@ -3403,7 +3392,7 @@
 ++				(hook_list[hook_list_length]).pf = PF_INET;
 ++				(hook_list[hook_list_length]).hooknum = chain_id;
 ++				(hook_list[hook_list_length]).priority = table_id;
-++				err = nf_register_net_hook(&init_net, (hook_list + hook_list_length) );
+++				err = nf_register_net_hook(net, (hook_list + hook_list_length) );
 ++				hook_list_length++;
 ++
 ++				#if defined(CONFIG_IPV6) || defined(CONFIG_IPV6_MODULE)
@@ -3429,7 +3418,7 @@
 ++					(hook_list[hook_list_length]).pf = PF_INET6;
 ++					(hook_list[hook_list_length]).hooknum = chain_id;
 ++					(hook_list[hook_list_length]).priority = table_id;
-++					nf_register_net_hook(&init_net, (hook_list + hook_list_length) );
+++					nf_register_net_hook(net, (hook_list + hook_list_length) );
 ++					hook_list_length++;
 ++				#endif
 ++
@@ -3455,6 +3444,22 @@
 ++
 ++	return 0;
 ++
+++/*
+++	return nf_register_net_hooks(net, imq_ops,
+++				    ARRAY_SIZE(imq_ops));
+++
+++*/
+++
+++};
+++
+++
+++static int __init imq_init_hooks(void)
+++{
+++
+++	nf_register_queue_imq_handler(&imq_nfqh);
+++
+++	return imq_nf_register(&init_net);
+++
 ++
 ++	/*
 ++	int ret ;
@@ -3467,6 +3472,31 @@
 ++	return ret;
 ++	*/
 ++}
+++static void __net_exit imq_nf_unregister(struct net *net)
+++{
+++	int hook_index = 0;
+++	for(hook_index = 0; hook_index < hook_list_length; hook_index++)
+++	{
+++		nf_unregister_net_hook(net, (hook_list+hook_index) );
+++	}
+++
+++	/*
+++	nf_unregister_net_hooks(net, imq_ops,
+++			    ARRAY_SIZE(imq_ops));
+++	*/
+++
+++};
+++
+++
+++
+++static struct pernet_operations imq_net_ops = {
+++	.init		= imq_nf_register,
+++	.exit		= imq_nf_unregister,
+++};
+++
+++
+++
+++
 ++
 ++
 ++
@@ -4438,14 +4468,3 @@
 + /*
 +  * Transmit possibly several skbs, and handle the return status as
 +  * required. Owning running seqcount bit guarantees that
---- a/target/linux/generic/config-4.14	2015-07-21 12:50:21.319810482 -0400
-+++ b/target/linux/generic/config-4.14	2015-08-16 13:53:29.466745444 -0400
-@@ -5315,3 +5315,8 @@
- # CONFIG_ZRAM is not set
- # CONFIG_ZSMALLOC is not set
- # CONFIG_ZX_TDM is not set
-+CONFIG_IMQ_NUM_DEVS=2
-+# CONFIG_IMQ_BEHAVIOR_AA is not set
-+# CONFIG_IMQ_BEHAVIOR_AB is not set
-+CONFIG_IMQ_BEHAVIOR_BA=y
-+# CONFIG_IMQ_BEHAVIOR_BB is not set
