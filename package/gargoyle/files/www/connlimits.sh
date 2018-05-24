@@ -32,6 +32,9 @@
 <div class="row">
 	<div class="col-lg-6">
 		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ CLSect %></h3>
+			</div>
 			<div class="panel-body">
 				<div class="row form-group">
 					<label class="col-xs-5" for="max_connections" id="max_connections_label"><%~ MaxC %>:</label>
@@ -60,10 +63,9 @@
 </div>
 <div id="bottom_button_container" class="panel panel-default">
 	<button id="save_button" class="btn btn-primary btn-lg" onclick="saveChanges()"><%~ SaveChanges %></button>
-	<button id="reset_button" class="btn btn-danger btn-lg" onclick="resetData()"><%~ Reset %></button>
+	<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
 </div>
 
-<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id="output"></textarea> -->
 
 <script>
 <!--

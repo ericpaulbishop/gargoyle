@@ -380,6 +380,38 @@ select.select_disabled
 {
 	color: #aaa
 }
+input[type="radio"],
+input[type="checkbox"]
+{
+	vertical-align: text-bottom;
+}
+input[type="radio"] + label,
+input[type="checkbox"] + label
+{
+	vertical-align: initial !important;
+	display: inline;
+}
+input[type="radio"]:enabled + label:hover,
+input[type="checkbox"]:enabled + label:hover
+{
+	cursor: pointer;
+}
+/* Disable Controls / Block events  */
+#rule_app_protocol_label,
+#rule_app_protocol_type,
+#exception_app_protocol_label,
+#exception_app_protocol_type,
+#use_app_protocol:enabled,
+#app_protocol_label,
+#app_protocol
+{
+	pointer-events: none;
+	touch-action: none;
+	user-select: none;
+	opacity: 0.5;
+	border-color: #ccc;
+	box-shadow: none;
+}
 #bottom_button_container
 {
 	margin-top: 10px;

@@ -217,8 +217,8 @@ function resetData()
 		enabledCheckbox.id = section;
 		ddnsTableData.push( [domain, lastUpdate, enabledCheckbox, createEditButton(), createForceUpdateButton()]);
 
-		ddnsTableData[ ddnsTableData.length-1][4].disabled = enabledCheckbox.checked ? false : true;
-		ddnsTableData[ ddnsTableData.length-1][4].className = enabledCheckbox.checked ? "btn btn-default" : "btn btn-default disabled" ;
+		var row = ddnsTableData[ddnsTableData.length-1][4];
+		setElementEnabled(row, enabledCheckbox.checked);
 		ddnsEnabledData.push(enabledCheckbox.checked);
  	}
 	var ddnsTable=createTable(columnNames, ddnsTableData, "ddns_table", true, false, removeServiceProviderCallback);
@@ -567,6 +567,15 @@ function setProvider(controlDocument)
 	}
 	if(provider != null) //should NEVER be null, but test just in case
 	{
+		var ext_script = provider["external_script"];
+		controlDocument.getElementById("ddns_no_script").style.display="none";
+		if(ext_script != "")
+		{
+			if(extScripts.indexOf(ext_script) == -1)
+			{
+				controlDocument.getElementById("ddns_no_script").style.display="block";
+			}
+		}
 		var variables = provider["variables"];
 		var variableNames = provider["variable_names"];
 		var newElements = new Array();
@@ -684,8 +693,8 @@ function createEnabledCheckbox()
 function createEditButton()
 {
 	editButton = createInput("button");
-	editButton.value = UI.Edit;
-	editButton.className="btn btn-default";
+	editButton.textContent = UI.Edit;
+	editButton.className = "btn btn-default btn-edit";
 	editButton.onclick = editServiceTableRow;
 	return editButton;
 }
@@ -693,8 +702,8 @@ function createEditButton()
 function createForceUpdateButton()
 {
 	updateButton = createInput("button");
-	updateButton.value = DyDNS.ForceU;
-	updateButton.className="btn btn-default";
+	updateButton.textContent = DyDNS.ForceU;
+	updateButton.className = "btn btn-default btn-update";
 	updateButton.onclick = forceUpdateForRow;
 	return updateButton;
 }
@@ -705,8 +714,8 @@ function setRowEnabled()
 	var enabledRow=this.parentNode.parentNode;
 	var enabledDomain = enabledRow.firstChild.firstChild.data;
 
-	enabledRow.childNodes[4].firstChild.disabled   = this.checked ? false : true;
-	enabledRow.childNodes[4].firstChild.className = this.checked ? "btn btn-default" : "btn btn-default disabled" ;
+	var row = enabledRow.childNodes[4].firstChild;
+	setElementEnabled(row, enabled);
 
 	var section = enabledRow.childNodes[2].firstChild.id;
 	uci.set("ddns_gargoyle", section, "enabled", enabled);
@@ -728,6 +737,7 @@ function parseProviderData()
 			provider["optional_variables"] = [];
 			provider["optional_variable_names"] = [];
 			provider["boolean_variables"] = [];
+			provider["external_script"] = "";
 
 			line = "";
 			providerLineIndex++;
@@ -758,6 +768,11 @@ function parseProviderData()
 				{
 					variablePart = (line.match(/ariables[\t ]+(.*)$/))[1];
 					provider["boolean_variables"] = variablePart.split(/[\t ]+/);
+				}
+				else if(line.match(/^[\t ]*external_script[\t ]+/))
+				{
+					variablePart = (line.match(/script[\t ]+(.*)$/))[1];
+					provider["external_script"] = variablePart;
 				}
 				providerLineIndex++;
 			}
@@ -804,7 +819,7 @@ function forceUpdateForRow()
 			{
 				var responseLines=req.responseText.split(/[\r\n]+/);
 				setControlsEnabled(true);
-				if(responseLines[0] == "0")
+				if(responseLines[0].match(/0/))
 				{
 					alert(DyDNS.UpFErr);
 				}
@@ -836,27 +851,14 @@ function editServiceTableRow()
 		catch(e){}
 	}
 
-	var xCoor;
-	var yCoor;
-	try
-	{
-		xCoor = window.screenX + 225;
-		yCoor = window.screenY+ 225;
-	}
-	catch(e)
-	{
-		xCoor = window.left + 225;
-		yCoor = window.top + 225;
-	}
-
 	//editServiceWindow is global so we can close it above if it is left open
-	editServiceWindow = window.open("ddns_edit_service.sh", "edit", "width=560,height=510,left=" + xCoor + ",top=" + yCoor );
+	editServiceWindow = openPopupWindow("ddns_edit_service.sh", "edit", 560, 510);
 
 	var saveButton = createInput("button", editServiceWindow.document);
 	var closeButton = createInput("button", editServiceWindow.document);
-	saveButton.value = UI.CApplyChanges;
-	saveButton.className = "btn btn-default";
-	closeButton.value = UI.CDiscardChanges;
+	saveButton.textContent = UI.CApplyChanges;
+	saveButton.className = "btn btn-primary";
+	closeButton.textContent = UI.CDiscardChanges;
 	closeButton.className = "btn btn-warning";
 
 	//load provider data for this row
@@ -927,7 +929,6 @@ function editServiceTableRow()
 					}
 				}
 
-				editServiceWindow.moveTo(xCoor,yCoor);
 				editServiceWindow.focus();
 				update_done = true;
 			}

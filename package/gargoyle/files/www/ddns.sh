@@ -22,6 +22,12 @@
 		echo "updateTimes[\"$update\"] = " $(cat /var/last_ddns_updates/$update) ";"
 	done
 
+	echo "extScripts = new Array();"
+	external_scripts=$(ls /usr/lib/ddns-gargoyle 2&>1)
+	for script in $external_scripts ; do
+		echo "extScripts.push(\""$script"\");"
+	done
+
 %>
 //-->
 </script>
@@ -35,6 +41,7 @@
 			</div>
 			<div class="panel-body">
 				<span id="add_ddns_label"><p><%~ AddDy %>:</p></span>
+				<div id="ddns_no_script" class="alert alert-danger" role="alert" style="display: none;"><%~ NoScriptErr %></div>
 				<div class="row form-group">
 					<label class="col-xs-5" for="ddns_provider" id="ddns_provider_label"><%~ SvPro %>:</label>
 					<span class="col-xs-7"><select class="form-control" id="ddns_provider" onchange="setProvider()"></select></span>
@@ -59,7 +66,7 @@
 				</div>
 
 				<div class="row form-group">
-					<span class="col-xs-12"><button id="add_service_button" class="btn btn-info" onclick="addDdnsService()"><%~ AddDDNS %></button></span>
+					<span class="col-xs-12"><button id="add_service_button" class="btn btn-default btn-add" onclick="addDdnsService()"><%~ AddDDNS %></button></span>
 				</div>
 
 				<div class="row form-group">
@@ -82,12 +89,10 @@
 
 <div id="bottom_button_container" class="panel panel-default">
 	<button id="save_button" class="btn btn-primary btn-lg" onclick="saveChanges()"><%~ SaveChanges %></button>
-	<button id="reset_button" class="btn btn-danger btn-lg" onclick="resetData()"><%~ Reset %></button>
+	<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
 </div>
 
-<span id="update_container" ><%~ WaitSettings %></span>
 
-<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id="output"></textarea> -->
 
 <script>
 <!--

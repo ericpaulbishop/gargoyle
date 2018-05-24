@@ -88,7 +88,7 @@ struct sockaddr_in whereto;/* Who to ping */
 int datalen=64-8;   /* How much data */
 
 const char usage[] =
-"Gargoyle active congestion controller version 2.2\n\n"
+"Gargoyle active congestion controller version 2.3\n\n"
 "Usage:  qosmon [options] pingtime pingtarget bandwidth [pinglimit]\n" 
 "              pingtime   - The ping interval the monitor will use when active in ms.\n"
 "              pingtarget - The URL or IP address of the target host for the monitor.\n"
@@ -96,7 +96,8 @@ const char usage[] =
 "              pinglimit  - Optional pinglimit to use for control, otherwise measured.\n"
 "              Options:\n"
 "                     -b  - Run in the background\n"
-"                     -a  - Add entitlement to pinglimt, enable auto ACTIVE/MINRTT mode switching.\n";
+"                     -a  - Add entitlement to pinglimt, enable auto ACTIVE/MINRTT mode switching.\n\n"
+"        SIGUSR1 can be used to reset the link bandwidth at anytime.\n";
 
 char *hostname;
 char hnamebuf[MAXHOSTNAMELEN];
@@ -108,10 +109,12 @@ uint16_t nreceived = 0;      /* # of packets we got back */
 // For our digital filters we use Y = Y(-1) + alpha * (X - Y(-1))
 // where alpha = Sample_Period / (TC + Sample_Period)
 
-int fil_triptime;           //usec 
+int fil_triptime;           //Filter ping times in uS 
 int alpha;                  //Actually alpha * 1000
 int period;                 //PING period In milliseconds
 int rawfltime;              //Trip time in milliseconds
+int rawfltime_max;          //The maximum measured ping time we have seen in uS.
+char nopingresponse;        //Set to true when ping response is dropped.
 
 
 // Struct of data we keep on our classes
@@ -361,6 +364,9 @@ char pr_pack( void *buf, int cc, struct sockaddr_in *from )
 
     //If this was the most recent one we sent then update the rawfltime.
     rawfltime=triptime;
+
+    //Is this a new maximum?
+    if (rawfltime > rawfltime_max/1000) rawfltime_max = rawfltime*1000;
 
     //return 1 if we got a valid time.
     return 1;
@@ -654,13 +660,15 @@ void update_status( FILE* fd )
     fprintf(fd,"Fair Link limit: %d (kbps)\n",new_dbw_ul/1000);
     fprintf(fd,"Link load: %d (kbps)\n",dbw/1000);
 
-    if (pingon)
-        fprintf(fd,"Ping: %d (ms)\n",rawfltime);
+    if (pingon) {
+        if (nopingresponse) fprintf(fd,"Ping: Dropped, assume %d mS\n",rawfltime_max/1000);
+        else fprintf(fd,"Ping: %d (ms)\n",rawfltime);
+    }
     else
         fprintf(fd,"Ping: off\n");
 
-    fprintf(fd,"Filtered ping: %d (ms)\n",fil_triptime/1000);
-    fprintf(fd,"Ping time limit: %d (ms) [%d/%d]\n",plimit/1000,pinglimit/1000,(pinglimit+135*pinglimit_cl/100)/1000);
+    fprintf(fd,"Filtered/Max recent RTT: %d/%d (ms)\n",fil_triptime/1000,rawfltime_max/1000);
+    fprintf(fd,"RTT time limit: %d (ms) [%d/%d]\n",plimit/1000,pinglimit/1000,(pinglimit+135*pinglimit_cl/100)/1000);
     fprintf(fd,"Classes Active: %u\n",DCA);
 
     fprintf(fd,"Errors: (mismatch,errors,last err,selerr): %u,%u,%u,%i\n", cnt_mismatch, cnt_errorflg,last_errorflg,sel_err); 
@@ -717,6 +725,14 @@ void update_status( FILE* fd )
 #endif
 
 }
+
+/* v2.3 feature allows reseting the link limit to the initial value by sending the process SIGUSR1. */
+sig_atomic_t resetbw=1;
+void resetsig(int parm)
+{
+    resetbw=1;
+}
+
 
 /*
  *          M A I N
@@ -827,7 +843,7 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    //If running in the background fork()
+   //If running in the background fork()
     if (DEAMON) {
 
         /* Ignore most signals in background */  
@@ -861,6 +877,9 @@ int main(int argc, char *argv[])
 
     //SIGTERM is what we expect to kill us.
     signal( SIGTERM, (__sighandler_t) finish );
+
+    //SIGUSR1 resets the link speed.
+    signal( SIGUSR1, (__sighandler_t) resetsig );
 
     //Create the status file and ping socket
     //These are called here because the above daemon() call closes
@@ -913,8 +932,9 @@ int main(int argc, char *argv[])
     //Clear all initial stats.
     memset((void *)&dnstats,0,sizeof(dnstats));
 
-    //Initialize the fair linklimit to a reasonable number.
-    saved_realtime_limit=saved_active_limit=new_dbw_ul= DBW_UL * .9;
+    //Initialize the max ping to something reasonable.
+    //We will fix it later.
+    rawfltime_max = period*1000;
 
     while (!sigterm) {
         int len = sizeof (packet);
@@ -926,9 +946,10 @@ int main(int argc, char *argv[])
         FD_ZERO(&fdmask);
         FD_SET(s , &fdmask);
 
-        //This variable will be set in pr_pack() if we get a pong that matched
-        //our ping, but in case we don't get we initialize to the period.
-        rawfltime=period;
+        //rawfltime variable will be set in pr_pack() if we get a pong that matched
+        //our ping, but clearing it here will let us know we did not get a response to our
+        //ping.
+        rawfltime=0;
 
         //Send the next ping
         if (pingon) pinger();
@@ -938,19 +959,23 @@ int main(int argc, char *argv[])
         timeout.tv_usec = period*1000;
     
         //Need a loop here to clean out any old pongs that show up.
-        while  ( (sel_err=select(s+1, &fdmask, NULL, NULL, &timeout)) == 1 ) {
+        //select() returns 1 if there is data to read.
+        //                 0 if the time has expired.
+        //                -1 if a signal arrived. 
+        while  (sel_err=select(s+1, &fdmask, NULL, NULL, &timeout)) {
+
+              //Signal arrived, just loop and keep waiting.
+              if (sel_err == -1) continue;
         
-              //If we got here then data is waiting. try to read the whole packet
+              //If we got here then data must be waiting, try to read the whole packet
               if ( (cc=recvfrom(s,packet,len,0,(struct sockaddr *) &from, &fromlen)) < 0) {
                   continue;
               }
               
               //OK there is a whole packet, get it and record the triptime. 
               pr_pack( packet, cc, &from );      
-        }
 
-        //If select returns anything other than 1 or 0 then die.
-        if (sel_err) break;
+        }
 
         //Gather new statistics
         classptr=dnstats;
@@ -970,6 +995,22 @@ int main(int argc, char *argv[])
             qstate=QMON_CHK; 
             continue;
         }
+
+ 
+        //Initialize or reinitialize the fair linklimit.
+        if (resetbw) {
+           saved_realtime_limit=saved_active_limit=new_dbw_ul= DBW_UL * .9;
+           resetbw=0;
+        }
+
+        //Look at an ping response time we got.  If we did not get any then it most likely
+        //got dropped so use the maximum value that we have recently seen as we know the downlink
+        //queue must be at least this long.
+        if (!rawfltime) {
+           rawfltime = rawfltime_max/1000;
+           nopingresponse=1;
+        } else
+           nopingresponse=0;
 
         //Update the filtered ping response time based on what happened.
         //If we are not pinging then no change in the filtered value.
@@ -991,7 +1032,7 @@ int main(int argc, char *argv[])
                     //IDLE state otherwise automatically determine an appropriate 
                     //ping limit.
                     if ((pinglimit) && !(pingflags & ADDENTITLEMENT)) {
-                        dbw_ul=0;                     //Forces an update
+                        dbw_ul=0;                  //Forces an update in tc_class_modify()
                         tc_class_modify(new_dbw_ul); 
                         fil_triptime = rawfltime*1000;
                         qstate=QMON_IDLE;
@@ -1018,7 +1059,7 @@ int main(int argc, char *argv[])
                     qstate=QMON_IDLE;
                     tc_class_modify(new_dbw_ul);  //Restore reasonable bandwidth
 
-                    //If the user specified no limit then the RTT ping limit computed from what was
+                    //If the user specified no limit then the RTT ping limit is computed from what was
                     //entered on the command line.
                     if (pingflags & ADDENTITLEMENT) {
                         //Add what the user specified to the 110% of the measure ping time.
@@ -1032,6 +1073,9 @@ int main(int argc, char *argv[])
                     //Sanity Checks
                     if (pinglimit < 10000) pinglimit=10000;
                     if (pinglimit > 800000) pinglimit=800000;
+
+                    //Reasonable max ping. 
+                    rawfltime_max = 2*pinglimit;
                 }
                 break;
 
@@ -1150,10 +1194,9 @@ int main(int argc, char *argv[])
                    if (new_dbw_ul > DBW_UL) new_dbw_ul=DBW_UL;
 
                 } else {
+                //Positive error means we need to decrease the bandwidth.
 
-                   if (err > 2*plimit) err=2*plimit;
-
-                   new_dbw_ul = new_dbw_ul * (1.0 - 0.005*err*(float)period/(float)plimit/1000.0);
+                   new_dbw_ul = new_dbw_ul * (1.0 - 0.004*err*(float)period/(float)plimit/1000.0);
 
                    //Dynamic range is 1/.15 or 6.67 : 1.  
                    if (new_dbw_ul < DBW_UL*.15) new_dbw_ul=DBW_UL*.15;
@@ -1161,6 +1204,10 @@ int main(int argc, char *argv[])
 
                 //Modify parent download limit as needed.
                 tc_class_modify(new_dbw_ul);
+
+                //Keep downward pressure on rawfltime_max to keep it fresh.
+                if (rawfltime_max > plimit) rawfltime_max -= 100;
+
                 break;
                     
                       

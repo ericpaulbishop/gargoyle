@@ -1097,12 +1097,11 @@ function createEnabledCheckbox(enabled)
 function createEditButton(enabled)
 {
 	editButton = createInput("button");
-	editButton.value = UI.Edit;
-	editButton.className="btn btn-default";
+	editButton.textContent = UI.Edit;
+	editButton.className = "btn btn-default btn-edit";
 	editButton.onclick = editQuota;
 
-	editButton.className = enabled ? "btn btn-default" : "btn btn-default disabled" ;
-	editButton.disabled  = enabled ? false : true;
+	setElementEnabled(editButton, enabled);
 
 	return editButton;
 }
@@ -1111,8 +1110,8 @@ function setRowEnabled()
 	enabled= this.checked ? "1" : "0";
 	enabledRow=this.parentNode.parentNode;
 
-	enabledRow.childNodes[rowCheckIndex+1].firstChild.disabled  = this.checked ? false : true;
-	enabledRow.childNodes[rowCheckIndex+1].firstChild.className = this.checked ? "btn btn-default" : "btn btn-default disabled" ;
+	var row = enabledRow.childNodes[rowCheckIndex+1].firstChild;
+	setElementEnabled(row, enabled);
 
 	var idStr = this.id;
 	var ids = idStr.split(/\./);
@@ -1154,25 +1153,13 @@ function editQuota()
 	}
 
 
-	try
-	{
-		xCoor = window.screenX + 225;
-		yCoor = window.screenY+ 225;
-	}
-	catch(e)
-	{
-		xCoor = window.left + 225;
-		yCoor = window.top + 225;
-	}
-
-
-	editQuotaWindow = window.open("quotas_edit.sh", "edit", "width=560,height=600,left=" + xCoor + ",top=" + yCoor );
+	editQuotaWindow = openPopupWindow("quotas_edit.sh", "edit", 560, 600);
 
 	var saveButton = createInput("button", editQuotaWindow.document);
 	var closeButton = createInput("button", editQuotaWindow.document);
-	saveButton.value = UI.CApplyChanges;
-	saveButton.className = "btn btn-default";
-	closeButton.value = UI.CDiscardChanges;
+	saveButton.textContent = UI.CApplyChanges;
+	saveButton.className = "btn btn-primary";
+	closeButton.textContent = UI.CDiscardChanges;
 	closeButton.className = "btn btn-warning";
 
 	var editRow=this.parentNode.parentNode;
@@ -1249,7 +1236,6 @@ function editQuota()
 						editQuotaWindow.close();
 					}
 				}
-				editQuotaWindow.moveTo(xCoor,yCoor);
 				editQuotaWindow.focus();
 				updateDone = true;
 

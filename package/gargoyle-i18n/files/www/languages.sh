@@ -26,6 +26,9 @@
 <div class="row">
 	<div class="col-lg-12">
 		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ LMSect %></h3>
+			</div>
 			<div class="panel-body">
 				<span>
 					<img src="i18n/graphics/globe-and-flags.png"  width='80px' height='84px' />

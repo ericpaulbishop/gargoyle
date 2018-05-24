@@ -3,5 +3,5 @@
  */
 
 thmS.mTheme="Оформление";
-thmS.TMSect="Оформление";
+thmS.TMSect="Управление темами";
 thmS.Thm="Тема";

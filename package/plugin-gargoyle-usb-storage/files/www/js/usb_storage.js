@@ -463,26 +463,14 @@ function editUser()
 	}
 
 
-	try
-	{
-		xCoor = window.screenX + 225;
-		yCoor = window.screenY+ 225;
-	}
-	catch(e)
-	{
-		xCoor = window.left + 225;
-		yCoor = window.top + 225;
-	}
-
-
-	editUserWindow = window.open("share_user_edit.sh", "edit", "width=560,height=230,left=" + xCoor + ",top=" + yCoor );
+	editUserWindow = openPopupWindow("share_user_edit.sh", "edit", 560, 230);
 	var okButton = createInput("button", editUserWindow.document);
 	var cancelButton = createInput("button", editUserWindow.document);
 
-	okButton.value         = usbSStr.ChPass;
-	okButton.className     = "btn btn-default";
-	cancelButton.value     = UI.Cancel;
-	cancelButton.className = "btn btn-default";
+	okButton.textContent   = usbSStr.ChPass;
+	okButton.className     = "btn btn-primary";
+	cancelButton.textContent = UI.Cancel;
+	cancelButton.className = "btn btn-warning";
 
 
 	editShareUserRow=this.parentNode.parentNode;
@@ -530,7 +518,6 @@ function editUser()
 						editUserWindow.close();
 					}
 				}
-				editUserWindow.moveTo(xCoor,yCoor);
 				editUserWindow.focus();
 				updateDone = true;
 			}
@@ -1226,8 +1213,8 @@ function setSharePaths(controlDocument)
 function createEditButton( editFunction )
 {
 	editButton = createInput("button");
-	editButton.value = UI.Edit;
-	editButton.className="btn btn-default";
+	editButton.textContent = UI.Edit;
+	editButton.className = "btn btn-default btn-edit";
 	editButton.onclick = editFunction;
 	editButton.disabled  = false ;
 
@@ -1268,26 +1255,14 @@ function editShare()
 	}
 
 
-	try
-	{
-		xCoor = window.screenX + 225;
-		yCoor = window.screenY+ 225;
-	}
-	catch(e)
-	{
-		xCoor = window.left + 225;
-		yCoor = window.top + 225;
-	}
-
-
-	editShareWindow = window.open("usb_storage_edit.sh", "edit", "width=650,height=600,left=" + xCoor + ",top=" + yCoor );
+	editShareWindow = openPopupWindow("usb_storage_edit.sh", "edit", 650, 600);
 
 	var saveButton = createInput("button", editShareWindow.document);
 	var closeButton = createInput("button", editShareWindow.document);
-	saveButton.value = UI.CApplyChanges;
-	saveButton.className = "btn btn-default btn-lg";
-	closeButton.value = UI.CDiscardChanges;
-	closeButton.className = "btn btn-default btn-lg";
+	saveButton.textContent = UI.CApplyChanges;
+	saveButton.className = "btn btn-primary";
+	closeButton.textContent = UI.CDiscardChanges;
+	closeButton.className = "btn btn-warning";
 
 	editRow=this.parentNode.parentNode;
 	editName=editRow.childNodes[0].firstChild.data;
@@ -1358,7 +1333,6 @@ function editShare()
 						editShareWindow.close();
 					}
 				}
-				editShareWindow.moveTo(xCoor,yCoor);
 				editShareWindow.focus();
 			}
 		}

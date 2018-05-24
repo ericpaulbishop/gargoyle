@@ -63,8 +63,10 @@ for (etherIndex in etherData)
 		<div class="panel panel-default">
 			<div class="panel-body">
 				<div class="row form-group" id="dhcp_enabled_container">
-					<span class="col-xs-1"><input type="checkbox" id="dhcp_enabled" onclick="setEnabled(this.checked)" /></span>
-					<label class="col-xs-11" id="dhcp_enabled_label" for="dhcp_enabled"><%~ dhcp.SrvE %></label>
+					<span class="col-xs-12">
+						<input type="checkbox" id="dhcp_enabled" onclick="setEnabled(this.checked)" />
+						<label id="dhcp_enabled_label" for="dhcp_enabled"><%~ dhcp.SrvE %></label>
+					</span>
 				</div>
 
 				<div id="dhcp_range_container" class="row form-group">
@@ -108,8 +110,10 @@ for (etherIndex in etherData)
 			</div>
 			<div class="panel-body">
 				<div id="block_mismatches_container" class="row form-group">
-					<span class="col-xs-1"><input type="checkbox" id="block_mismatches" /></span>
-					<label class="col-xs-11" id="block_mismatch_label" for="block_mismatches"><%~ BlckM %></label>
+					<span class="col-xs-12">
+						<input type="checkbox" id="block_mismatches" />
+						<label id="block_mismatch_label" for="block_mismatches"><%~ BlckM %></label>
+					</span>
 				</div>
 
 				<div id="staticip_add_heading_container" class="row form-group">
@@ -147,10 +151,9 @@ for (etherIndex in etherData)
 
 <div id="bottom_button_container" class="panel panel-default">
 	<button id="save_button" class="btn btn-primary btn-lg" onclick="saveChanges()"><%~ SaveChanges %></button>
-	<button id="reset_button" class="btn btn-danger btn-lg" onclick="resetData()"><%~ Reset %></button>
+	<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
 </div>
 
-<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id="output"></textarea> -->
 
 <script>
 <!--

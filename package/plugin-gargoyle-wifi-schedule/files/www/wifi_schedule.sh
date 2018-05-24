@@ -52,8 +52,8 @@ for (tab_idx in cron_data) {
 				<div id="wifi_action" class="row form-group">
 					<label class="col-xs-5"><%~ StStR %></label>
 					<span class="col-xs-7">
-						<button class="btn btn-primary" id="wifi_up_button" onclick='GetWifiUpdate("up")'><%~ RadOn %></button>
-						<button class="btn btn-danger" id="wifi_down_button" onclick='GetWifiUpdate("down")'><%~ RadOf %></button>
+						<button class="btn btn-default" id="wifi_up_button" onclick='GetWifiUpdate("up")'><%~ RadOn %></button>
+						<button class="btn btn-default" id="wifi_down_button" onclick='GetWifiUpdate("down")'><%~ RadOf %></button>
 					</span>
 				</div>
 

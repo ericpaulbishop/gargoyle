@@ -33,8 +33,10 @@
 
 			<div class="panel-body">
 				<div class="row form-group">
-					<span class="col-xs-1"><input type="checkbox" id="webmon_enabled" class="" onclick="setWebmonEnabled()" /></span>
-					<label class="col-xs-11" id="webmon_enabled_label" for="webmon_enabled"><%~ EMon %></label>
+					<span class="col-xs-12">
+						<input type="checkbox" id="webmon_enabled" onclick="setWebmonEnabled()" />
+						<label id="webmon_enabled_label" for="webmon_enabled"><%~ EMon %></label>
+					</span>
 				</div>
 
 				<div>
@@ -62,7 +64,7 @@
 						<div class="row form-group">
 							<span class="col-xs-12">
 								<input type="text" id="add_ip" onkeyup="proofreadMultipleIps(this)" size="30" />
-								<button class="btn btn-info" id="add_ip_button" onclick="addAddressesToTable(document, 'add_ip', 'ip_table_container', 'ip_table', false, 3, 1, 250)" /><%~ Add %></button>
+								<button class="btn btn-default btn-add" id="add_ip_button" onclick="addAddressesToTable(document, 'add_ip', 'ip_table_container', 'ip_table', false, 3, 1, 250)"><%~ Add %></button>
 							</span>
 							<em class="col-xs-12"><%~ SpcIP %></em>
 						</div>
@@ -75,7 +77,7 @@
 				<div id="bottom_button_container">
 					<button id="save_button" class="btn btn-primary btn-lg" onclick="saveChanges()"><%~ SaveChanges %></button>
 					<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
-					<button id="clear_history" class="btn btn-danger btn-lg" onclick="clearHistory()"/><%~ Clear %></button>
+					<button id="clear_history" class="btn btn-danger btn-lg" onclick="clearHistory()"><%~ Clear %></button>
 				</div>
 			</div>
 		</div>
@@ -140,14 +142,13 @@
 				</div>
 
 				<div>
-					<button id="download_domain_button" class="btn btn-info btn-lg" onclick="window.location='webmon_domains.csv';"/><%~ VSit %></button>
-					<button id="download_search_button" class="btn btn-info btn-lg" onclick="window.location='webmon_searches.csv';"/><%~ SRqst %></button>
+					<button id="download_domain_button" class="btn btn-info btn-lg" onclick="window.location='webmon_domains.csv';"><%~ VSit %></button>
+					<button id="download_search_button" class="btn btn-info btn-lg" onclick="window.location='webmon_searches.csv';"><%~ SRqst %></button>
 				</div>
 			</div>
 		</div>
 	</div>
 </div>
-<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id="output"></textarea> -->
 
 <script>
 <!--

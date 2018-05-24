@@ -23,6 +23,9 @@
 <div id="upgrade_section" class="row">
 	<div class="col-lg-12">
 		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ UpFrm %></h3>
+			</div>
 			<div class="panel-body">
 				<div class="row form-group">
 					<div class="col-lg-12">
@@ -59,7 +62,7 @@
 							<input id="upgrade_arch" name="arch" type="hidden" value="" />
 
 							<div class="row form-group">
-								<span class="col-xs-12"><button id="upgrade_button" class="btn btn-primary btn-lg" onclick="doUpgrade()"><%~ Upgrade %></button></span>
+								<span class="col-xs-12"><button id="upgrade_button" class="btn btn-danger btn-lg" onclick="doUpgrade()"><%~ Upgrade %></button></span>
 							</div>
 						</form>
 					</div>

@@ -17,5 +17,5 @@ rtgS.Itfc="Rede";
 rtgS.Ntwk="Rede";
 rtgS.Gtwy="Gateway";
 rtgS.Mtrc="Métrica";
-rtgS.AErr="Não foi possível inserir linha.";
+rtgS.AErr="Não foi possível adicionar nova rota.";
 rtgS.SRErr="Não foi possível atualizar a rota.";

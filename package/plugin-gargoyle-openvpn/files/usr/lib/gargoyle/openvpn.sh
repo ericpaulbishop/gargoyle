@@ -209,6 +209,9 @@ tls-server
 ifconfig              $openvpn_server_internal_ip $openvpn_netmask
 topology              subnet
 client-config-dir     $OPENVPN_DIR/ccd
+script-security       2
+tls-verify	      "/usr/lib/gargoyle/ovpn-cn-check.sh /etc/openvpn/verified-userlist"
+crl-verify            $OPENVPN_DIR/crl.pem
 $openvpn_client_to_client
 
 $openvpn_duplicate_cn
@@ -337,20 +340,22 @@ EOF
 		cat << EOF >>vars
 export CA_EXPIRE=$EXPIRATION_MAX
 export KEY_EXPIRE=$EXPIRATION_MAX
-export KEY_EMAIL='$openvpn_client_id@$randomDomain.com'
-export KEY_EMAIL='$openvpn_client_id@$randomDomain.com'
+export KEY_EMAIL='$openvpn_client_id@$random_domain.com'
+export KEY_EMAIL='$openvpn_client_id@$random_domain.com'
 export KEY_CN='$openvpn_client_id'
 export KEY_NAME='$openvpn_client_id'
 EOF
 		. ./vars
 		./clean-all
-		cp "$OPENVPN_DIR/server.crt" "$OPENVPN_DIR/server.key" "$OPENVPN_DIR/ca.crt"  "$OPENVPN_DIR/ca.key" "$OPENVPN_DIR/dh1024.pem" ./keys/
+		cp "$OPENVPN_DIR/server.crt" "$OPENVPN_DIR/server.key" "$OPENVPN_DIR/ca.crt"  "$OPENVPN_DIR/ca.key" "$OPENVPN_DIR/dh1024.pem" "$OPENVPN_DIR/index.txt" "$OPENVPN_DIR/serial" ./keys/
 
 	
 		./pkitool "$openvpn_client_id"
+		$OPENSSL ca -gencrl -out keys/crl.pem -config "$KEY_CONFIG"
 
 		mkdir -p "$OPENVPN_DIR/client_conf/$openvpn_client_id"
 		cp "keys/$openvpn_client_id.crt" "keys/$openvpn_client_id.key" "$OPENVPN_DIR/ca.crt" "$OPENVPN_DIR/ta.key" "$client_conf_dir/"
+		cp "keys/index.txt" "keys/serial" "keys/crl.pem" "$OPENVPN_DIR/"
 		
 		if [ -n "$openvpn_client_local_subnet_ip" ] && [ -n "$openvpn_client_local_subnet_mask" ] ; then
 			echo "ipaddr    $openvpn_client_local_subnet_ip"    >'network'
@@ -485,8 +490,14 @@ update_routes()
 			# routes for client subnet
 			config_name=$( echo "$route_line" | sed 's/\"$//g' | sed 's/^.*\"//g')
 			for client_ccd_file in $(ls "$random_dir/ccd/"* 2>/dev/null) ; do
+				client_ccd_id=$(echo "$client_ccd_file" | sed -n -e 's/^.*ccd\///p')
+				vpn_gwy=$( uci get openvpn_gargoyle.$client_ccd_id.prefer_vpngateway 2&>1)
 				if [ "$random_dir/ccd/$config_name" != "$client_ccd_file" ] ; then
-					echo "push \"route $subnet_ip $subnet_mask $openvpn_server_internal_ip\"" >> "$client_ccd_file" 
+					if [ "$vpn_gwy" == "1" ] ; then
+						echo "push \"route $subnet_ip $subnet_mask vpn_gateway\"" >> "$client_ccd_file"
+					else
+						echo "push \"route $subnet_ip $subnet_mask $openvpn_server_internal_ip\"" >> "$client_ccd_file"
+					fi
 				fi
 			done
 			echo "route $subnet_ip $subnet_mask $openvpn_ip" >> "$random_dir/server.conf"
@@ -494,7 +505,13 @@ update_routes()
 		else
 			# routes for server subnet
 			for client_ccd_file in $(ls "$random_dir/ccd/"* 2>/dev/null) ; do
-				echo "push \"route $subnet_ip $subnet_mask $openvpn_ip\"" >> "$client_ccd_file" 
+				client_ccd_id=$(echo "$client_ccd_file" | sed -n -e 's/^.*ccd\///p')
+				vpn_gwy=$( uci get openvpn_gargoyle.$client_ccd_id.prefer_vpngateway 2&>1)
+				if [ "$vpn_gwy" == "1" ] ; then
+					echo "push \"route $subnet_ip $subnet_mask vpn_gateway\"" >> "$client_ccd_file"
+				else
+					echo "push \"route $subnet_ip $subnet_mask $openvpn_ip\"" >> "$client_ccd_file"
+				fi
 			done
 		fi
 	done
@@ -517,12 +534,53 @@ update_routes()
 remove_allowed_client()
 {
 	client_id="$1"
+	remove_client_from_userlist "$client_id"
+	revoke_client_certificate "$current_client"
 	rm -rf "$OPENVPN_DIR/client_conf/$current_client"
 	rm -rf "$OPENVPN_DIR/$current_client.crt"
 	rm -rf "$OPENVPN_DIR/route_data/$current_client"
 	rm -rf "$OPENVPN_DIR/ccd/$current_client"
 }
 
+revoke_client_certificate()
+{
+	random_dir_num=$(random_string)
+	random_dir="/tmp/ovpn-client-${random_dir_num}"
+	mkdir -p "$random_dir"
+	cd "$random_dir"
+	cp -r "$EASY_RSA_PATH/"* .
+	mkdir keys
+	. ./vars
+	./clean-all
+
+	cp "$OPENVPN_DIR/server.crt" "$OPENVPN_DIR/server.key" "$OPENVPN_DIR/ca.crt"  "$OPENVPN_DIR/ca.key" "$OPENVPN_DIR/dh1024.pem" "$OPENVPN_DIR/index.txt" "$OPENVPN_DIR/serial" "$OPENVPN_DIR/client_conf/$1/$1.crt" ./keys/
+
+	./revoke-full $1
+
+	cp "keys/index.txt" "keys/serial" "keys/crl.pem" "$OPENVPN_DIR/"
+
+	cd /tmp
+	rm -rf "$random_dir"
+}
+
+remove_client_from_userlist()
+{
+	touch "$OPENVPN_DIR/verified-userlist"
+	client_id="$1"
+	client_found=$(grep -w "^$client_id" "$OPENVPN_DIR/verified-userlist")
+	if [ -n $client_found ] ; then
+		grep -wv "^$client_id" "$OPENVPN_DIR/verified-userlist" > "$OPENVPN_DIR/vusrlst-temp"
+		mv "$OPENVPN_DIR/vusrlst-temp" "$OPENVPN_DIR/verified-userlist"
+	fi
+}
+
+add_client_to_userlist()
+{
+	touch "$OPENVPN_DIR/verified-userlist"
+	client_id="$1"
+	client_found=$(grep -w "^$client_id" "$OPENVPN_DIR/verified-userlist")
+	[ -z $client_found ] && echo $client_id >> "$OPENVPN_DIR/verified-userlist"
+}
 generate_test_configuration()
 {
 
@@ -569,8 +627,11 @@ regenerate_allowed_client_from_uci()
 	fi	
 	
 
-	if [ "$enabled" != "false" ] || [ "$enabled" != "0" ] ; then
+	if [ "$enabled" != "false" ] && [ "$enabled" != "0" ] ; then
 		create_allowed_client_conf "$id" "$remote" "$ip" "$subnet_ip" "$subnet_mask" "false" "$enabled"
+		add_client_to_userlist "$id"
+	else
+		remove_client_from_userlist "$id"
 	fi
 }
 

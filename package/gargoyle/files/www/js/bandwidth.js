@@ -103,6 +103,38 @@ function initializePlotsAndTable()
 
 	document.getElementById("use_high_res_15m").checked = uciOriginal.get("gargoyle", "bandwidth_display", "high_res_15m") == "1" ? true : false;
 
+	var bwUCIval = uciOriginal.get("gargoyle", "bandwidth_display", "custom_bwmon_enable");
+	var enable_custom_bwmon = (bwUCIval == "0") || (bwUCIval == "") ? 0 : 1;
+	document.getElementById("enable_custom_bwmon").checked = enable_custom_bwmon;
+	document.getElementById("custom_reset_day").disabled = enable_custom_bwmon ? false : true;
+	var vals = [];
+	var names = [];
+	var day=1;
+	for(day=1; day <= 28; day++)
+	{
+		var dayStr = "" + day;
+		var lastDigit = dayStr.substr( dayStr.length-1, 1);
+		var suffix=bndwS.Digs
+		if( day % 100  != 11 && lastDigit == "1")
+		{
+			suffix=bndwS.LD1s
+		}
+		if( day % 100 != 12 && lastDigit == "2")
+		{
+			suffix=bndwS.LD2s
+		}
+		if( day %100 != 13 && lastDigit == "3")
+		{
+			suffix=bndwS.LD3s
+		}
+		names.push(dayStr + suffix);
+		vals.push( (day-1) + "" );
+	}
+	setAllowableSelections("custom_reset_day", vals, names, document);
+	bwUCIval = uciOriginal.get("gargoyle", "bandwidth_display", "month_reset_day");
+	document.getElementById("custom_reset_day").value = bwUCIval == "" ? "0" : bwUCIval;
+	if(enable_custom_bwmon){addOptionToSelectElement("table_time_frame", bndwS.mnths + " " + bndwS.CustBMon, 6);}
+
 	var haveQosUpload = false;
 	var haveQosDownload = false;
 	var haveTor = false;
@@ -727,6 +759,8 @@ function updateBandwidthTable(tablePointSets, interval, tableLastTimePoint)
 	var rowIndex = 0;
 	var displayUnits = getSelectedValue("table_units");
 	var timePoint = tableLastTimePoint;
+	var custom_bwmon = document.getElementById("table_time_frame").value == 6 ? true : false;
+	var month_reset_day = uciOriginal.get("gargoyle", "bandwidth_display", "month_reset_day");
 	var nextDate = new Date();
 	nextDate.setTime(timePoint*1000);
 	nextDate.setUTCMinutes( nextDate.getUTCMinutes()+tzMinutes );
@@ -766,6 +800,19 @@ function updateBandwidthTable(tablePointSets, interval, tableLastTimePoint)
 		{
 			timeStr = monthNames[nextDate.getUTCMonth()] + " " + nextDate.getUTCDate();
 			nextDate.setUTCDate( nextDate.getUTCDate()-1);
+		}
+		else if(interval.match(/month/) && custom_bwmon)
+		{
+			if(nextDate.getUTCDate() <= month_reset_day)
+			{
+				timeStr = (month_reset_day - -1) + " " + monthNames[nextDate.getUTCMonth(nextDate.setUTCMonth(nextDate.getUTCMonth()-1))] + " " + nextDate.getUTCFullYear() + " - " + month_reset_day + " " + monthNames[nextDate.getUTCMonth(nextDate.setUTCMonth(nextDate.getUTCMonth()+1))] + " " + nextDate.getUTCFullYear();
+				nextDate.setUTCMonth(nextDate.getUTCMonth()-1);
+			}
+			else if(nextDate.getUTCDate() > month_reset_day)
+			{
+				timeStr = (month_reset_day - -1) + " " + monthNames[nextDate.getUTCMonth()] + " " + nextDate.getUTCFullYear() + " - " + month_reset_day + " " + monthNames[nextDate.getUTCMonth(nextDate.setUTCMonth(nextDate.getUTCMonth()+1))] + " " + nextDate.getUTCFullYear();
+				nextDate.setUTCMonth(nextDate.getUTCMonth()-2);
+			}
 		}
 		else if(interval.match(/month/))
 		{
@@ -817,17 +864,7 @@ function expand(name)
 		expWindow = null;
 	}
 
-	try
-	{
-		xCoor = window.screenX + 225;
-		yCoor = window.screenY+ 225;
-	}
-	catch(e)
-	{
-		xCoor = window.left + 225;
-		yCoor = window.top + 225;
-	}
-	expWindow= window.open("bandwidth_expand.sh", name + " "+bndwS.BPlot, "width=850,height=650,left=" + xCoor + ",top=" + yCoor );
+	expWindow = openPopupWindow("bandwidth_expand.sh", name + " " + bndwS.BPlot, 830, 650);
 	expandedWindows[name] = expWindow;
 
 	var runOnWindowLoad = function(name)
@@ -903,6 +940,67 @@ function deleteData()
 	{
 		if(req.readyState == 4)
 		{
+			setControlsEnabled(true);
+		}
+	}
+	var param = getParameterDefinition("commands", commands.join("\n"))  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
+}
+
+function setCustBWMonVisibility()
+{
+	var bwcustDisabled = document.getElementById("enable_custom_bwmon").checked == true ? false : true;
+	//document.getElementById("custom_time_frame").disabled = bwcustDisabled;	//Currently always disabled as we only want people to be able to set months
+	document.getElementById("custom_reset_day").disabled = bwcustDisabled;
+
+	checkCustBWMonChanges();
+}
+
+function checkCustBWMonChanges()
+{
+	var orig_bwcustStatus = uciOriginal.get("gargoyle","bandwidth_display","custom_bwmon_enable");
+	var orig_bwcustResetDay = uciOriginal.get("gargoyle","bandwidth_display","month_reset_day");
+
+	var bwcustStatus = document.getElementById("enable_custom_bwmon").checked == true ? 1 : 0;
+	var bwcustResetDay = document.getElementById("custom_reset_day").value;
+
+	if((orig_bwcustStatus != bwcustStatus) || (orig_bwcustResetDay != bwcustResetDay))
+	{
+		//We must have changed something, allow saving
+		document.getElementById("bwcustSaveChanges").disabled = false;
+	}
+	else
+	{
+		document.getElementById("bwcustSaveChanges").disabled = true;
+	}
+}
+
+function bwcustSaveChanges()
+{
+	if (confirm(bndwS.CustBMonWarn) == false)
+	{
+		return;
+	}
+
+	setControlsEnabled(false, true, UI.WaitSettings);
+
+	var bwcustStatus = document.getElementById("enable_custom_bwmon").checked == true ? 1 : 0;
+	var bwcustResetDay = document.getElementById("custom_reset_day").value;
+	bwcustResetDay = bwcustResetDay == "" ? "0" : bwcustResetDay;
+	var commands = [];
+	commands.push("uci set gargoyle.bandwidth_display.custom_bwmon_enable=" + bwcustStatus);
+	commands.push("uci set gargoyle.bandwidth_display.month_reset_day=" + bwcustResetDay);
+	commands.push("uci commit gargoyle");
+	commands.push("/etc/init.d/bwmon_gargoyle stop");
+	commands.push("rm /tmp/data/bwmon/bdist6* 2>/dev/null");
+	commands.push("rm /usr/data/bwmon/bdist6* 2>/dev/null");
+	commands.push("/etc/init.d/bwmon_gargoyle start");
+
+	var stateChangeFunction = function(req)
+	{
+		if(req.readyState == 4)
+		{
+			window.location = window.location;
 			setControlsEnabled(true);
 		}
 	}

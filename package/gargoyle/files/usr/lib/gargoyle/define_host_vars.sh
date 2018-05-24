@@ -20,7 +20,7 @@ elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" ] ; then
 	aps=$( iwinfo | grep ESSID | awk ' { print $1 ; } ' )
 	if [ -n "$aps" ] ; then
 		for ap in $aps ; do
-			hf=$( iwinfo $ap i | awk '/Channel:/ {if ($4 > 14) print "5GHz"; else print "2.4GHz";}' )
+			hf=$( iwinfo $ap i | grep -o "Channel:.*" | awk '{if ($2 > 14) print "5GHz"; else print "2.4GHz";}' )
 			iw $ap station dump | awk ' /^Station/ { printf "wifiLines.push(\""$2" " ;} /signal:/ {printf ""$2" "} /tx.*bitrate:/ {printf ""$3" "} /rx.*bitrate:/ {printf ""$3" "} /autho/ {print "'$hf'\");"}'
 		done
 	fi

@@ -13,7 +13,7 @@ define Package/plugin-gargoyle-spectrum-analyser/Default
 	CATEGORY:=Administration
 	SUBMENU:=Gargoyle Web Interface
 	TITLE:=Graphical WiFi scanning support for Gargoyle
-	MAINTAINER:=Michael Gray
+	MAINTAINER:=Michael Gray <support@lantisproject.com>
 	DEPENDS:=+gargoyle
 	PKGARCH:=all
 endef

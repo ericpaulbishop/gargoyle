@@ -61,7 +61,7 @@ restStr.PmUDP="Разрешить UDP";
 
 //javascript
 restStr.ARErr="Невозможно добавить правило.";
-restStr.IAErr="ОШИБКА: Указан неправильный адресс.";
+restStr.IAErr="ОШИБКА: Указан неправильный адрес.";
 restStr.UPrt="часть URL-адреса";
 restStr.MTyp="тип для сравнения";
 restStr.MTExp="текст для сравнения / выражение";

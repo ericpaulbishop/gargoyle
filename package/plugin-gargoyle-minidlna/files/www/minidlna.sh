@@ -26,8 +26,10 @@
 		<div class="panel panel-default">
 			<div class="panel-body">
 				<div class="row form-group">
-					<span class="col-xs-1"><input id="dlna_enable" type="checkbox" /></span>
-					<label class="col-xs-11" id="dlna_enable_label" for="dlna_enable"><%~ DLNAEn %></label>
+					<span class="col-xs-12">
+						<input id="dlna_enable" type="checkbox" />
+						<label id="dlna_enable_label" for="dlna_enable"><%~ DLNAEn %></label>
+					</span>
 				</div>
 
 				<div class="row form-group">
@@ -43,8 +45,10 @@
 				</div>
 
 				<div class="row form-group">
-					<span class="col-xs-1"><input id="dlna_strict" type="checkbox" /></span>
-					<label class="col-xs-11" id="dlna_strict_label" for="dlna_strict"><%~ DLNAStr %>:</label>
+					<span class="col-xs-12">
+						<input id="dlna_strict" type="checkbox" />
+						<label id="dlna_strict_label" for="dlna_strict"><%~ DLNAStr %></label>
+					</span>
 				</div>
 
 				<div class="internal_divider"></div>
@@ -73,7 +77,7 @@
 					</div>
 
 					<div class="row form-group">
-						<span class="col-xs-12"><button id="add_share_button" class="btn btn-default" onclick="addNewMediaDir()"><%~ Add %></button></span>
+						<span class="col-xs-12"><button id="add_share_button" class="btn btn-default btn-add" onclick="addNewMediaDir()"><%~ Add %></button></span>
 					</div>
 				</div>
 

@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <sys/wait.h>
 
 #include <unistd.h>
 #include <syslog.h>
@@ -73,6 +74,10 @@
 #define REQUEST_MSG_TYPE 	124
 #define RESPONSE_MSG_TYPE	136
 #define MAX_MSG_LINE 		250
+
+#define EXTERN_SCRIPT_DIR	"/usr/lib/ddns-gargoyle/"
+#define MAX_EXTERN_SCRIPT_PARAM_LENGTH	50
+#define EXTERN_SCRIPT_MANDATORY_PARAM_NUM	6
 
 
 #define MAX_LOOKUP_URL_LENGTH	65
@@ -118,6 +123,7 @@ typedef struct
 {
 	char* name;
 	char* url_template;	  	// contains vars that should be replaced, eg http://[USER]:[PASS]@dynservice.com
+	char* external_script;	// path (without /usr/lib/ddns-gargoyle/ start) to external script to process update
 	char** required_variables;	 	
 	char** optional_variables;
 	char** optional_variable_defaults;
@@ -185,6 +191,7 @@ char* do_line_substitution(char* line, string_map* variables, string_map* escape
 char *http_req_escape(char *unescaped);
 char *replace_str(char *s, char *old, char *new);
 
+char** get_args_from_config(ddns_service_provider* provider, ddns_service_config* config, char* ext_file, char* update_ip, char* current_ip, int force, int verbose);
 
 int do_single_update(ddns_service_config *service_config, string_map *service_providers, char* remote_ip, char* local_ip, int force_update, int verbose);
 char* lookup_domain_ip(char* url_str);
@@ -720,8 +727,6 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 	//we store times of last updates in a special directory
 	//if it doesn't exist, create it now
 	create_path(UPDATE_INFO_DIR, 0700);
-	
-
 
 
 
@@ -1261,13 +1266,12 @@ int create_path(const char *name, int mode)
 int do_single_update(ddns_service_config *service_config, string_map *service_providers, char* remote_ip, char* local_ip, int force_update, int verbose)
 {
 	int update_status = UPDATE_FAILED;
-	
+
 	ddns_service_provider* def =(ddns_service_provider*)get_map_element(service_providers, service_config->service_provider);
 	if(def != NULL) //should never be null since we check at program start, but double checking these things is often a good idea :-)
 	{
 		if(local_ip != NULL)
 		{
-			
 			if(verbose > 0 ){ printf("local ip = %s\n", local_ip); }
 			int do_update = 1;
 			if(force_update == 0)
@@ -1277,29 +1281,86 @@ int do_single_update(ddns_service_config *service_config, string_map *service_pr
 			if(do_update == 1)
 			{
 				if(verbose > 0 ){ printf("update needed or force requested, performing actual update\n"); }
-				char* url_str = do_url_substitution(def, service_config, local_ip);
-				if(verbose > 0) { printf("fetching: \"%s\"\n", url_str); }
-				http_response* page = get_url(url_str, NULL);
-				
-				if(page != NULL)
+				if(def->external_script != NULL)
 				{
-					if(verbose > 0 ){ printf("page not null\n"); }
-					if(verbose > 0 && page->header != NULL){ printf("page header:\n%s\n", page->header); }
-					if(page->data != NULL)
+					if(verbose > 0 ){ printf("External script defined. Starting alternate routine...\n"); }
+					char* filename = dynamic_strcat(2, EXTERN_SCRIPT_DIR, def->external_script);
+					if(verbose > 0 ){ printf("Script Filename %s\n",filename); }
+
+					char** args = get_args_from_config(def, service_config, filename, local_ip, remote_ip, force_update, verbose);
+
+					if(access(filename, F_OK ) != -1)
 					{
-						if(verbose > 0  ) { printf("page data:\n%s\n\n", page->data); }
-						if(def->success_regexp != NULL)
+						if(verbose > 0) { printf("Access to file OK!\nAllowing external script to takeover...\n"); }
+						//fork and wait for child to exit
+						pid_t pid;
+						pid = fork();
+						if(pid < 0) //return fail
 						{
-							update_status = regexec(def->success_regexp, page->data, 0, NULL, 0) == 0 ? UPDATE_SUCCESSFUL : UPDATE_FAILED; 
+							if(verbose > 0) { printf("Fork failed! Program is fubar\n"); }	//update failed
 						}
-						else if(def->failure_regexp != NULL)
+						else if(pid == 0)	// child
 						{
-							update_status = regexec(def->failure_regexp, page->data, 0, NULL, 0) == 0 ? UPDATE_FAILED : UPDATE_SUCCESSFUL;
+							//exec the script
+							execv(args[0], args);
+							//exec shouldn't return, so if we get past here we should exit poorly
+							if(verbose > 0) { printf("Exec returned something. Program is fubar\n"); }
+							perror("execv");
+							exit(1);	//since this is the child process we can kill it here
+						}
+						else //this is parent, wait for child to finish
+						{
+							int status;
+							if(verbose > 0) { printf("Child pid: %d\n",pid); }
+							if(waitpid(pid, &status, 0) == -1)
+							{
+								if(verbose > 0) { printf("Problem with waitpid(), failing\n"); }	//update failed
+							}
+							else if (WIFEXITED(status))
+							{
+								update_status = WEXITSTATUS(status);
+								if(verbose > 0) { printf("External script returned %d\n", update_status); }
+							}
+							else
+							{
+								if(verbose > 0) { printf("External script returned %d\n", WEXITSTATUS(status)); }
+								if(verbose > 0) { printf("External script didn't exit cleanly\n"); }	//update failed
+							}
 						}
 					}
-					free_http_response(page);
+					else
+					{
+						if(verbose > 0) { printf("External script doesn't exist: \"%s\"\n", filename); }	//update failed
+					}
+					free(filename);
+					free_null_terminated_string_array(args);
 				}
-				free(url_str);
+				else
+				{
+					char* url_str = do_url_substitution(def, service_config, local_ip);
+					if(verbose > 0) { printf("fetching: \"%s\"\n", url_str); }
+					http_response* page = get_url(url_str, NULL);
+
+					if(page != NULL)
+					{
+						if(verbose > 0 ){ printf("page not null\n"); }
+						if(verbose > 0 && page->header != NULL){ printf("page header:\n%s\n", page->header); }
+						if(page->data != NULL)
+						{
+							if(verbose > 0  ) { printf("page data:\n%s\n\n", page->data); }
+							if(def->success_regexp != NULL)
+							{
+								update_status = regexec(def->success_regexp, page->data, 0, NULL, 0) == 0 ? UPDATE_SUCCESSFUL : UPDATE_FAILED;
+							}
+							else if(def->failure_regexp != NULL)
+							{
+								update_status = regexec(def->failure_regexp, page->data, 0, NULL, 0) == 0 ? UPDATE_FAILED : UPDATE_SUCCESSFUL;
+							}
+						}
+						free_http_response(page);
+					}
+					free(url_str);
+				}
 			}
 			else
 			{
@@ -1310,7 +1371,52 @@ int do_single_update(ddns_service_config *service_config, string_map *service_pr
 	return update_status;
 }
 
+char** get_args_from_config(ddns_service_provider* provider, ddns_service_config* config, char* ext_file, char* update_ip, char* current_ip, int force, int verbose)
+{
+	/*
+	* Number of args is length of required variables + 6
+	* Always start with the "sh + script"
+	* We always end with LOCAL_IP, FORCE_UPDATE, VERBOSE (and NULL termination)
+	* External scripts should be written with this in mind
+	*/
+	int var_count = 0, tot_var_count = 0, var_index = 0, x = 0;
+	for(var_index=0; (provider->required_variables)[var_index] != NULL; var_index++)
+	{
+		var_count += 1;
+	}
+	if(verbose > 0 ){ printf("Variable count (from config): %d\n", var_count); }
+	tot_var_count = var_count + EXTERN_SCRIPT_MANDATORY_PARAM_NUM;
+	if(verbose > 0 ){ printf("Total Variable count: %d\n", tot_var_count); }
 
+	char** args = NULL;
+	args = (char**)malloc(tot_var_count*sizeof(char*));
+	args[0] = strdup("/bin/sh");
+	args[1] = strdup(ext_file);
+
+	for(var_index=0; var_index < var_count; var_index++)
+	{
+		char* var_name = (provider->required_variables)[var_index];
+		if(verbose > 0 ){ printf("Var name: %s; ",var_name); }
+		char* var_def = (char*)get_map_element(config->variable_definitions, var_name);
+		if(verbose > 0 ){ printf("Var def: %s\n",var_def); }
+		args[var_index+2] = strdup(var_def);
+	}
+
+	printf("Including mandatory variables (localip, force, verbose, arg terminator)\n");
+	args[var_index+2] = strdup(update_ip);
+	args[var_index+3] = (char*)malloc(2*sizeof(char));
+	sprintf(args[var_index+3], "%d", force);
+	args[var_index+4] = (char*)malloc(2*sizeof(char));
+	sprintf(args[var_index+4], "%d", verbose);
+	args[var_index+5] = NULL;
+
+	for(x=0; x < tot_var_count; x++)
+	{
+		if(verbose > 0 ){ printf("args[%d]: %s\n",x,args[x]); }
+	}
+
+	return args;
+}
 
 char* do_url_substitution(ddns_service_provider* provider, ddns_service_config* config, char* current_ip)
 {
@@ -1921,6 +2027,7 @@ string_map* load_service_providers(char* filename)
 			
 				//initialize values of service_provider to null values
 				service_provider->url_template = NULL;
+				service_provider->external_script = NULL;
 				service_provider->success_regexp = NULL;
 				service_provider->failure_regexp = NULL;
 				service_provider->required_variables = NULL;
@@ -1943,6 +2050,10 @@ string_map* load_service_providers(char* filename)
 						if(safe_strcmp(variable[0], "url_template") == 0 && variable[1] != NULL)
 						{
 							service_provider->url_template = variable[1];
+						}
+						else if(safe_strcmp(variable[0], "external_script") == 0 && variable[1] != NULL)
+						{
+							service_provider->external_script = variable[1];
 						}
 						else if(safe_strcmp(variable[0], "required_variables") == 0 && variable[1] != NULL)
 						{
@@ -2031,23 +2142,36 @@ string_map* load_service_providers(char* filename)
 				
 				//test if service_provider has all necessary components
 				if(	service_provider->url_template != NULL &&
+					service_provider->external_script != NULL
+				  )
+				{
+					fprintf(stderr, "WARNING: couldn't load service provider %s (url template AND external script mutually exclusive)\n", service_provider->name);
+					free_service_provider(service_provider);
+				}
+				else if(	service_provider->url_template != NULL &&
 					service_provider->required_variables != NULL &&
 					(service_provider->success_regexp != NULL || service_provider->failure_regexp != NULL)
 				  )
 				{
 					set_map_element(service_providers, service_provider->name, (void*)service_provider);
 				}
+				else if( service_provider->external_script != NULL &&
+					service_provider->required_variables != NULL
+				  )
+				{
+					set_map_element(service_providers, service_provider->name, (void*)service_provider);
+				}
 				else
 				{
-					if( service_provider->url_template == NULL)
+					if( service_provider->url_template == NULL && service_provider->external_script == NULL)
 					{
-						fprintf(stderr, "WARNING: couldn't load service provider %s (no url template)\n", service_provider->name);
+						fprintf(stderr, "WARNING: couldn't load service provider %s (no url template OR external script)\n", service_provider->name);
 					}
 					else if( service_provider->required_variables == NULL)
 					{
 						fprintf(stderr, "WARNING: couldn't load service provider %s (no required variables)\n", service_provider->name);
 					}
-					else if( service_provider->success_regexp == NULL && service_provider->failure_regexp == NULL)
+					else if( (service_provider->success_regexp == NULL && service_provider->failure_regexp == NULL) && service_provider->url_template != NULL)
 					{
 						fprintf(stderr, "WARNING: couldn't load service provider %s (no regular expression)\n", service_provider->name);
 					}
@@ -2111,5 +2235,4 @@ char** parse_variable_definition_line(char* line)
 	}
 	return variable_definition;
 }
-
 

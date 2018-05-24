@@ -31,6 +31,16 @@ bndwS.DSep="Os dados são separados por vírgulas";
 bndwS.DFmt="[Direção],[Tempo de Intervalo],[Intervalos Salvos],[Endereço IP],[Início de Intervalo],[Final de Intervalo],[Bytes Consumidos]";
 bndwS.DNow="Baixar Dados";
 bndwS.expd="expandir";
+bndwS.BMonSet="Opções do Monitor de Banda Personalizado";
+bndwS.EnCustBMon="Habilitar Monitor de Banda Personalizado";
+bndwS.CustBMonWarn="Qualquer alteração nas configurações do Monitor de Banda Personalizado apagará os dados monitorados até então. Os dados do Monitor de Banda padrão não serão afetados.";
+bndwS.BMonIntvl="Intervalo de Monitoração";
+bndwS.BMonReset="Dia de Renovação";
+bndwS.LD1s="";
+bndwS.LD2s="";
+bndwS.LD3s="";
+bndwS.Digs="";
+bndwS.CustBMon="(Personalizado)";
 
 //javascript
 bndwS.UpCl="Classe Upload";
@@ -39,7 +49,7 @@ bndwS.Time="Hora";
 bndwS.BPlot="Plotagem de Dados";
 bndwS.BUsag="Monitor de Banda";
 bndwS.RstGr="Atualizando gráficos…";
-bndwS.DelAD="Os dados monitorados serão apagados permanentemente, deseja continuar ?";
+bndwS.DelAD="Os dados monitorados serão apagados permanentemente. \n\nDeseja continuar?";
 bndwS.DelDW="Apagando dados…";
 
 //bandwidth_distribution.sh

@@ -1,5 +1,5 @@
 ﻿/*
- * UTF-8 (with BOM) Russian-RU text strings for webshell.sh html elements
+ * UTF-8 (with BOM) Russian-RU text strings for minidlna.sh html elements
  */
 
 dlna.DLNA="DLNA-сервер";
@@ -16,6 +16,7 @@ dlna.DLNAI="Изображения";
 dlna.DLNADrive="Диск";
 dlna.DLNAMFolder="Папка с данными";
 dlna.DLNAFolders="Список папок";
+dlna.RootD="Корневой диск";
 
 dlna.Totl="всего";
 dlna.Free="свободно";

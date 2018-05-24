@@ -124,8 +124,10 @@
 				</div>
 
 				<div class="row form-group">
-					<span class="col-xs-1"><input type="checkbox" id="disable_web_password"/></span>
-					<label class="col-xs-11" id="disable_web_password_label" for="disable_web_password"><%~ DisablePassword %> <em>(<%~ warning %>)</em></label>
+					<span class="col-xs-12">
+						<input type="checkbox" id="disable_web_password"/>
+						<label id="disable_web_password_label" for="disable_web_password"><%~ DisablePassword %> <em>(<%~ warning %>)</em></label>
+					</span>
 				</div>
 			</div>
 		</div>
@@ -144,8 +146,10 @@
 				</div>
 
 				<div class="row form-group" id="remote_ssh_enabled_container">
-					<span class="col-xs-1"><input type="checkbox" id="remote_ssh_enabled" onclick="updateVisibility()"/></span>
-					<label class="col-xs-11" id="remote_ssh_enabled_label" for="remote_ssh_enabled"><%~ EnableRemoteAccess %></label>
+					<span class="col-xs-12">
+						<input type="checkbox" id="remote_ssh_enabled" onclick="updateVisibility()"/>
+						<label id="remote_ssh_enabled_label" for="remote_ssh_enabled"><%~ EnableRemoteAccess %></label>
+					</span>
 				</div>
 
 				<div class="row form-group" id="remote_ssh_port_container">
@@ -169,8 +173,10 @@
 
 				<div style="display: block;" id="internal_divider1" class="internal_divider"></div>
 				<div class="row form-group" id="pwd_enabled_container">
-					<span class="col-xs-1"><input type="checkbox" id="pwd_auth_enabled" /></span>
-					<label class="col-xs-11" id="pwd_auth_label" for="pwd_auth_enabled"><%~ SSHEnablePwd %></label>
+					<span class="col-xs-12">
+						<input type="checkbox" id="pwd_auth_enabled" />
+						<label id="pwd_auth_label" for="pwd_auth_enabled"><%~ SSHEnablePwd %></label>
+					</span>
 				</div>
 
 				<div style="display: block;" id="internal_divider2" class="internal_divider"></div>
@@ -185,7 +191,7 @@
 					<label class="col-xs-5"><%~ SSHName %>:</label>
 					<span class="col-xs-7">
 						<input type="text" id="public_key_name" name="public_key_name" value="" class="form-control" />
-						<button class="btn btn-default" id="add_key" name="add_key" onclick="addKey()"><%~ Add %></button>
+						<button class="btn btn-default btn-add" id="add_key" name="add_key" onclick="addKey()"><%~ Add %></button>
 					</span>
 				</div>
 
@@ -211,13 +217,11 @@
 	</div>
 </div>
 <div id="bottom_button_container" class="panel panel-default">
-	<button id="save_button" class="btn btn-info btn-lg" onclick="saveChanges()"><%~ SaveChanges %></button>
+	<button id="save_button" class="btn btn-primary btn-lg" onclick="saveChanges()"><%~ SaveChanges %></button>
 	<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
 </div>
 
-<span id="update_container"><%~ WaitSettings %></span>
 
-<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id="output"></textarea> -->
 
 <script>
 <!--

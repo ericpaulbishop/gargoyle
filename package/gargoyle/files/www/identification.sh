@@ -20,6 +20,9 @@
 <div class="row">
 	<div class="col-lg-6">
 		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ IdSect %></h3>
+			</div>
 			<div class="panel-body">
 				<div class="row form-group">
 					<label class="col-xs-5" for="hostname" id="hostname_label"><%~ HsNm %></label>
@@ -39,10 +42,8 @@
 	<button id="save_button" class="btn btn-primary btn-lg" onclick="saveChanges()"><%~ SaveChanges %></button>
 	<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
 </div>
-<span id="update_container"><%~ WaitSettings %></span>
 
 
-<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id="output"></textarea> -->
 
 <script>
 <!--

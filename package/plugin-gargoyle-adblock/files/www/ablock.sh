@@ -23,15 +23,20 @@
 <h1 class="page-header"><%~ ablock.Adblock %></h1>
 <div class="row">
 	<div class="col-lg-6">
-		<div class="panel panel-default">
+		<div class="panel panel-default"> 
+			<div class="panel-heading"> 
+				<h3 class="panel-title"><%~ Adblock %></h3> 
+			</div> 
 			<div class="panel-body">
 				<div class="row form-group">
-					<span class="col-xs-1"><input id="adblock_enable" type="checkbox" /></span>
-					<label class="col-xs-11" id="adblock_enable_label" for="adblock_enable"><%~ ADBLOCKEn %></label>
+					<span class="col-xs-12">
+						<input id="adblock_enable" type="checkbox" />
+						<label id="adblock_enable_label" for="adblock_enable"><%~ ADBLOCKEn %></label>
+					</span>
 				</div>
 
 				<div class="row form-group">
-					<span class="col-xs-offset-5 col-xs-7"><button id="adblock_update" class="btn btn-primary" onclick='adblockUpdate()'><%~ ADBLOCKupdate %></button></span>
+					<span class="col-xs-offset-5 col-xs-7"><button id="adblock_update" class="btn btn-default" onclick='adblockUpdate()'><%~ ADBLOCKupdate %></button></span>
 					<span class="col-xs-offset-5 col-xs-7">
 						<label id="adblock_lastrun"><%~ ADBLOCKLstrn %>: </label>
 						<label id="adblock_lastrunval"></label>
@@ -39,8 +44,10 @@
 				</div>
 
 				<div class="row form-group">
-					<label id="adblock_transparent_label" class="col-xs-5" for="adblock_transparent"><%~ ADBLOCKTrans %>:</label>
-					<span class="col-xs-7"><input id="adblock_transparent" type="checkbox" /></span>
+					<span class="col-xs-12">
+						<input id="adblock_transparent" type="checkbox" />
+						<label id="adblock_transparent_label" for="adblock_transparent"><%~ ADBLOCKTrans %></label>
+					</span>
 				</div>
 
 				<div id="adblock_help" class="row">
@@ -53,8 +60,10 @@
 				<div class="internal_divider"></div>
 
 				<div class="row form-group">
-					<label class="col-xs-5" id="adblock_exempten_label" for="adblock_exempten"><%~ ADBLOCKExemptEn %>:</label>
-					<span class="col-xs-7"><input id="adblock_exempten" type="checkbox" /></span>
+					<span class="col-xs-12">
+						<input id="adblock_exempten" type="checkbox" />
+						<label id="adblock_exempten_label" for="adblock_exempten"><%~ ADBLOCKExemptEn %>:</label>
+					</span>
 				</div>
 
 				<div class="form-group">
@@ -85,12 +94,12 @@
 				</div>
 				<div class="row form-group">
 					<span class="col-xs-10"><select id="adblock_blocklist_list" multiple class="form-control" style="min-height:300px;width:100%;"></select></span>
-					<span class="col-xs-2"><input type="button" value="-->" id="adblock_transfer_button" class="btn btn-warning btn-lg" onclick="transferwhiteList();" /></span>
+					<span class="col-xs-2"><input type="button" value="-->" id="adblock_transfer_button" class="btn btn-default" onclick="transferwhiteList();" /></span>
 				</div>
 				<div class="row form-group">
 					<span class="col-xs-12">
 						<input id="adblock_blocklist_search" class="form-control" type="text" />
-						<button class="btn btn-primary" onclick="searchBlocklist();"><%~ ADBLOCKSearch %></button>
+						<button class="btn btn-default" onclick="searchBlocklist();"><%~ ADBLOCKSearch %></button>
 					</span>
 				</div>
 				<div id="adblock_help2" class="row">
@@ -130,7 +139,7 @@
 				<div class="row form-group">
 					<span class="col-xs-12">
 						<input id="adblock_blacklist_add" class="form-control" type="text" />
-						<button class="btn btn-primary" onclick="addBlacklist();"><%~ ADBLOCKBlackadd %></button>
+						<button class="btn btn-default" onclick="addBlacklist();"><%~ ADBLOCKBlackadd %></button>
 					</span>
 				</div>
 			</div>

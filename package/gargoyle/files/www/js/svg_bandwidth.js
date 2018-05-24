@@ -33,10 +33,21 @@ function init(evt)
 		var bodyStyle = window.getComputedStyle(window.parent.document.body);
 		themeColor = bodyStyle.color;
 		themeFontFamily = bodyStyle.fontFamily;
+		for(var x = 1; x < 4; x++)
+		{
+			var titleEl = window.parent.document.getElementById("plot" + x + "_title");
+			if(titleEl != null)
+			{
+				var titleColour = window.getComputedStyle(titleEl).color;
+				var plot = svgDoc.getElementById("plot" + x);
+				plot.style.stroke = titleColour;
+				plot.style.fill = titleColour;
+			}
+		}
 	}
 
-	var graphRightCoor=Math.floor(rightCoor*85/100);
-	var graphBottomCoor=Math.floor(bottomCoor*85/100);
+	var graphRightCoor=Math.floor(rightCoor*(85/100));
+	var graphBottomCoor=Math.floor(bottomCoor*(85/100));
 	var graphHeight = (graphBottomCoor-topCoor)+1;
 
 	var scaleFraction = 1;
@@ -71,8 +82,8 @@ function plotAll(pointSets, numDisplayIntervals, intervalLength, lastIntervalSta
 		tzMinutes = parseInt(tzm);
 	}
 
-	var graphRightCoor=Math.floor(rightCoor*85/100);
-	var graphBottomCoor=Math.floor(bottomCoor*85/100);
+	var graphRightCoor=Math.floor(rightCoor*(85/100));
+	var graphBottomCoor=Math.floor(bottomCoor*(85/100));
 	var graphHeight = (graphBottomCoor-topCoor)+1;
 	var graphWidth = (graphRightCoor-leftCoor)+1;
 

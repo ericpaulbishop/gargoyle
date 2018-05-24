@@ -83,8 +83,10 @@
 
 			<div class="panel-body">
 				<div id="upnp_enabled_container" class="row form-group">
-					<span class="col-xs-1"><input type="checkbox" id="upnp_enabled" onclick="setUpnpEnabled()" /></span>
-					<label class="col-xs-11" id="upnp_enabled_label" for="upnp_enabled"><%~ UPNAT_En %></label>
+					<span class="col-xs-12">
+						<input type="checkbox" id="upnp_enabled" onclick="setUpnpEnabled()" />
+						<label id="upnp_enabled_label" for="upnp_enabled"><%~ UPNAT_En %></label>
+					</span>
 				</div>
 
 				<div id="upnp_table_heading_container" class="row form-group">
@@ -129,8 +131,10 @@
 
 			<div class="panel-body">
 				<div id="dmz_enabled_container" class="row form-group">
-					<span class="col-xs-1"><input type="checkbox" id="dmz_enabled" onclick="setDmzEnabled()" /></span>
-					<label class="col-xs-11" id="dmz_enabled_label" for="dmz_enabled"><%~ UseDMZ %></label>
+					<span class="col-xs-12">
+						<input type="checkbox" id="dmz_enabled" onclick="setDmzEnabled()" />
+						<label id="dmz_enabled_label" for="dmz_enabled"><%~ UseDMZ %></label>
+					</span>
 				</div>
 
 				<div id="dmz_ip_container" class="row form-group">
@@ -146,9 +150,7 @@
 	<button id="save_button" class="btn btn-primary btn-lg" onclick="saveChanges()"><%~ SaveChanges %></button>
 	<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
 </div>
-<span id="update_container" ><%~ WaitSettings %></span>
 
-<!-- <br /><textarea style="margin-left:20px;" rows=30 cols=60 id="output"></textarea> -->
 
 <script>
 <!--

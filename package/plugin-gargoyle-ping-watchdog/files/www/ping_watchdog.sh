@@ -13,10 +13,15 @@
 <div id="log" class="row">
 	<div class="col-lg-6">
 		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ Pdog %></h3>
+			</div>
 			<div class="panel-body">
 				<div class="row form-group">
-					<span class="col-xs-1"><input type='checkbox' id='ping_watchdog_enable' onchange="unlockFields();"/></span>
-					<label class="col-xs-11" for='ping_watchdog_enable' id='ping_watchdog_enable_label'><%~ EnbP %></label>
+					<span class="col-xs-12">
+						<input type='checkbox' id='ping_watchdog_enable' onchange="unlockFields();"/>
+						<label for='ping_watchdog_enable' id='ping_watchdog_enable_label'><%~ EnbP %></label>
+					</span>
 				</div>
 
 				<div class="row form-group">
@@ -74,9 +79,8 @@
 
 <div id="bottom_button_container" class="panel panel-default">
 	<button id="save_button" class="btn btn-primary btn-lg" onclick="saveChanges()"><%~ SaveChanges %></button>
-	<button id="reset_button" class="btn btn-danger btn-lg" onclick="resetData()"><%~ Reset %></button>
+	<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
 </div>
-<span id="update_container"><%~ WaitSettings %></span>
 
 <script>
 <!--

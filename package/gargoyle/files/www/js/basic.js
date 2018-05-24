@@ -18,7 +18,7 @@ var openDnsFS = ["208.67.222.123", "208.67.220.123" ];
 var nortonCSA = ["199.85.126.10", "199.85.127.10" ];
 var nortonCSB = ["199.85.126.20", "199.85.127.20" ];
 var nortonCSC = ["199.85.126.30", "199.85.127.30" ];
-var quad9DNS = ["9.9.9.9" ];
+var quad9DNS = ["9.9.9.9", "149.112.112.112" ];
 
 var ncDns  = [ "178.32.31.41", "106.187.47.17", "176.58.118.172" ]
 var onDns  = [ "66.244.95.20", "95.211.32.162", "95.142.171.235" ]
@@ -492,7 +492,7 @@ function saveChanges()
 			var t=true;
 			var minutesToSeconds = function(value){return value*60;};
 			var lowerCase = function(value) { return value.toLowerCase(); }
-			var ifCustomMac = function(value){ return (document.getElementById('wan_use_mac').checked == true); };
+			var ifCustomMac = function(value){ return (document.getElementById('wan_use_mac').checked == true) || (defaultWanMac != currentWanMac); };
 			var ifCustomMtu = function(value){ return (document.getElementById('wan_use_mtu').checked == true &&  document.getElementById('wan_mtu').value != 1500);};
 			var ifHiddenChecked =  function(value) { return getSelectedValue('wifi_hidden') == "disabled" ? 1 : 0;}; //the label is for "broadcast", so disabled means it is hidden
 			var ifIsolateChecked = function(value) { return getSelectedValue('wifi_isolate') == "enabled" ? 1 : 0;};

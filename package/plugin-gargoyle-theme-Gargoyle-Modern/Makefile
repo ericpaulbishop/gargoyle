@@ -17,7 +17,7 @@ define Package/plugin-gargoyle-theme-Gargoyle-Modern
 	CATEGORY:=Administration
 	SUBMENU:=Gargoyle Web Interface
 	TITLE:=Modern Gargoyle Theme
-	MAINTAINER:=Michael Gray
+	MAINTAINER:=Michael Gray <support@lantisproject.com>
 	PKGARCH:=all
 endef
 
