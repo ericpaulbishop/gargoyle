@@ -25,15 +25,15 @@ set_version_variables()
 {
 
 	#openwrt branch
-	branch_name="Re-merge"
-	branch_id="master"
+	branch_name="18.06"
+	branch_id="openwrt-18.06"
 	packages_branch="packages"
 
 
 	# set precise commit in repo to use 
 	# you can set this to an alternate commit 
 	# or empty to checkout latest 
-	openwrt_commit="d11aa1d4af9dfe0c640f4e14307dcbedeb25a08c"
+	openwrt_commit="fa0275bd90ce913de57330c9abbe594703d589c6"
 	openwrt_abbrev_commit=$( echo "$openwrt_commit" | cut -b 1-7 )
 	
 
@@ -487,7 +487,6 @@ if [ ! -d "$openwrt_src_dir" ] ; then
 	fi
 
 	cd "$top_dir" 
-	mv "$branch_id" "$openwrt_src_dir"
 fi
 
 rm -rf "$openwrt_src_dir/dl" 

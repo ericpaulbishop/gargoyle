@@ -1557,7 +1557,7 @@ CONFIG_PACKAGE_firewall=y
 CONFIG_PACKAGE_fstools=y
 CONFIG_PACKAGE_fwtool=y
 CONFIG_PACKAGE_jsonfilter=y
-CONFIG_PACKAGE_lede-keyring=y
+CONFIG_PACKAGE_openwrt-keyring=y
 # CONFIG_PACKAGE_libatomic is not set
 CONFIG_PACKAGE_libc=y
 CONFIG_PACKAGE_libgcc=y
