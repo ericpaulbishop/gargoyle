@@ -20,4 +20,4 @@ upS.UErrBB="Firmwaren inneholder en bootloader. Ruteren din kan ikke bli oppgrad
 upS.brcmT="Firmwaren skal være en .bin eller en .trx fil";
 upS.ar71xxT="Firmwaren skal være en sysupgrade.bin fil";
 upS.othrT="Firmwaren skal være en kombinert .img file";
-upS.mvebu="Firmwaren skal være en sysupgrade.tar fil";
+upS.mvebu="Firmwaren skal være en sysupgrade.bin fil";

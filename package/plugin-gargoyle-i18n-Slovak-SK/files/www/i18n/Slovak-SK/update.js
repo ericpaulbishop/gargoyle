@@ -20,4 +20,4 @@ upS.UErrBB="Firmvér obsahuje zavádzač. Váš smerovač nemožno aktualizovať
 upS.brcmT="Firmvér by mal byť .bin alebo .trx súbor";
 upS.ar71xxT="Firmvér by mal byť sysupgrade.bin súbor";
 upS.othrT="Firmvér by mal byť kombinovaný .img súbor";
-upS.mvebu="Firmvér by mal byť sysupgrade.tar súbor";
+upS.mvebu="Firmvér by mal byť sysupgrade.bin súbor";

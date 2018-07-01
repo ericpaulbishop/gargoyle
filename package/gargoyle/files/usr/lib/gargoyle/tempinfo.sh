@@ -15,6 +15,7 @@ case "$tmodel" in
 "Linksys WRT1900ACv2" | \
 "Linksys WRT1900ACS" | \
 "Linksys WRT1200AC" | \
+"Linksys WRT32X" | \
 "Linksys WRT3200ACM")
 	TEMPCPU=$(cut -c1-2 /sys/class/hwmon/hwmon1/temp1_input);
 	TEMPMEM=$(cut -c1-2 /sys/class/hwmon/hwmon0/temp2_input);
