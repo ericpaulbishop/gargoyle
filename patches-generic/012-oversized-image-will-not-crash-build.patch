@@ -10,3 +10,27 @@
  endef
  
  
+--- a/target/linux/ar71xx/image/generic.mk
++++ b/target/linux/ar71xx/image/generic.mk
+@@ -33,13 +33,16 @@ define Build/mkwrggimg
+ endef
+ 
+ define Build/mkdapimg2
+-	$(STAGING_DIR_HOST)/bin/mkdapimg2 \
++	if [ -e "$@" ]; then \
++		$(STAGING_DIR_HOST)/bin/mkdapimg2 \
+ 		-i $@ -o $@.new \
+ 		-s $(DAP_SIGNATURE) \
+ 		-v $(VERSION_DIST)-$(firstword $(subst +, ,$(firstword $(subst -, ,$(REVISION))))) \
+-		-r Default \
+-		$(if $(1),-k $(1))
+-	mv $@.new $@
++		-r Default; \
++		$(if $(1),-k $(1)) \
++		mv $@.new $@; \
++	fi ; \
++	echo ""
+ endef
+ 
+ define Build/netgear-squashfs
+
