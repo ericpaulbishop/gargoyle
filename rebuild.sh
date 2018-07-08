@@ -521,6 +521,18 @@ for target in $targets ; do
 	
 		#copy this target configuration to build directory
 		cp "$targets_dir/$target/profiles/$default_profile/config" "$top_dir/${target}-src/.config"
+		#clean out old bin folder to prevent contamination between profiles
+		arch=$(ls "$top_dir/${target}-src/bin/targets")
+		profile_images=$(cat "$targets_dir/$target/profiles/$profile_name/profile_images" 2>/dev/null)
+		for pi in $profile_images ; do
+			escaped_pi=$(echo $pi | sed 's/-/\\-/g')
+			candidates=$(find "$top_dir/${target}-src/bin/targets/$arch/" 2>/dev/null | grep "$escaped_pi" )
+			for c in $candidates ; do
+				if [ ! -d "$c" ] ; then
+					rm "$c"
+				fi
+			done
+		done
 		
 		
 		[ ! -z $(which python 2>&1) ] && {
@@ -634,11 +646,22 @@ for target in $targets ; do
 		if [ "$target" != "custom" ] && [ -z "$specified_profile" ] ; then
 			other_profiles=$(ls "$targets_dir/$target/profiles" | grep -v "^$default_profile$" )
 		fi
-		for profile_name in $other_profiles ; do
 		
-
+		for profile_name in $other_profiles ; do
 			#copy profile config and rebuild
 			cp "$targets_dir/$target/profiles/$profile_name/config" .config
+			#clean out old bin folder to prevent contamination between profiles
+			arch=$(ls bin/targets)
+			profile_images=$(cat "$targets_dir/$target/profiles/$profile_name/profile_images" 2>/dev/null)
+			for pi in $profile_images ; do
+				escaped_pi=$(echo $pi | sed 's/-/\\-/g')
+				candidates=$(find "bin/targets/$arch/" 2>/dev/null | grep "$escaped_pi" )
+				for c in $candidates ; do
+					if [ ! -d "$c" ] ; then
+						rm "$c"
+					fi
+				done
+			done
 			
 			
 			[ ! -z $(which python 2>&1) ] && {
@@ -675,7 +698,7 @@ for target in $targets ; do
 
 
 			#if we didn't build anything, die horribly
-			image_files=$(ls "bin/$arch/" 2>/dev/null)	
+			image_files=$(ls "bin/targets/$arch/" 2>/dev/null)
 			if [ -z "$image_files" ] ; then
 				exit
 			fi
