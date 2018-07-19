@@ -6,7 +6,7 @@
 -eap300v2-squashfs-
 -esr900-squashfs-
 -gargoyle-pocket-router-v2-
--gl_ar150-squashfs-sysupgrade
+-gl-ar150-squashfs-sysupgrade
 -ja76pf2-kernel
 -ja76pf2-rootfs-squashfs
 -ja76pf2-squashfs
