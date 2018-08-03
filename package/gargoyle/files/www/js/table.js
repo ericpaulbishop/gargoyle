@@ -274,6 +274,150 @@ function setRowClasses(table, enabled)
 }
 
 
+function createTableFilter()
+{
+	var args = arguments[0];
+	var TFilter_Table = args[0];
+	var TFilter_Cols = args[1];
+	var TFilter_Store = args[2];
+	var TFilter_Focus = args[3];
+	
+	if((TFilter_Table == "") || (TFilter_Table == null))
+	{
+		return;
+	}
+
+	var table = document.getElementById(TFilter_Table);
+	var tableHeader = table.firstChild.nodeName == "THEAD" ? table.firstChild : null;
+	var headerRow = tableHeader.firstChild;
+	var numColsTab = headerRow.childElementCount;
+
+	var filterRow = document.createElement('tr');
+	filterRow.className = 'filter_row';
+	for(var x = 0;x < numColsTab;x++)
+	{
+		var filterCol = document.createElement('th');
+		var filterTxt = document.createElement('input');
+		if(TFilter_Cols.length == 0)
+		{
+			filterTxt.disabled = true;
+		}
+		else if(x <= TFilter_Cols.length)
+		{
+			filterTxt.disabled = !TFilter_Cols[x];
+		}
+		if(TFilter_Store.length == 0)
+		{
+			filterTxt.value = "";
+		}
+		else if(x <= TFilter_Store.length)
+		{
+			filterTxt.value = TFilter_Store[x];
+		}
+
+		filterTxt.onkeyup = function(){applyTableFilter(this.parentNode.parentNode.parentNode.parentNode.id);};
+
+		filterCol.appendChild(filterTxt);
+		filterRow.appendChild(filterCol);
+	}
+	
+	tableHeader.insertBefore(filterRow,headerRow);
+	applyTableFilter(TFilter_Table);
+	for(var x = 0; x < TFilter_Focus.length; x++)
+	{
+		if(TFilter_Focus[x] == true)
+		{
+			filterRow.children[x].firstChild.focus();
+		}
+	}
+}
+
+function storeTableFilter(tableID)
+{
+	if(tableID == null)
+	{
+		return;
+	}
+
+	var tableEl = document.getElementById(tableID);
+	var filterRow = tableEl.firstChild.firstChild;
+	if(filterRow.className == "filter_row")
+	{
+		for(var x = 0; x < filterRow.children.length; x++)
+		{
+			TFilter_Data[getTFilterIDX(tableID)][2][x] = filterRow.children[x].firstChild.value;
+			TFilter_Data[getTFilterIDX(tableID)][3][x] = document.activeElement === filterRow.children[x].firstChild ? true : false;
+		}
+	}
+
+	return;
+}
+
+function applyTableFilter(tableID)
+{
+	if(tableID == null)
+	{
+		return;
+	}
+
+	var TFilter_Data = [];
+
+	var tableEl = document.getElementById(tableID);
+	var filterRow = tableEl.firstChild.firstChild;
+	if(filterRow.className == "filter_row")
+	{
+		for(var x = 0; x < filterRow.children.length; x++)
+		{
+			TFilter_Data[x] = filterRow.children[x].firstChild.value.toUpperCase();
+		}
+	}
+
+	var tableBody = tableEl.lastChild;
+	for(var x = 0; x < tableBody.children.length; x++)
+	{
+		var rowEl = tableBody.children[x];
+		rowEl.style.display = "";
+		for(var y = 0; y < rowEl.children.length; y++)
+		{
+			if(TFilter_Data[y] != "")
+			{
+				testVar = rowEl.children[y].firstChild.innerHTML == undefined ? rowEl.children[y].firstChild.data : rowEl.children[y].firstChild.innerHTML;
+				if(testVar.toUpperCase().indexOf(TFilter_Data[y]) > -1)
+				{
+					rowEl.style.display = "";
+				}
+				else
+				{
+					rowEl.style.display = "none";
+					break;
+				}
+			}
+		}
+	}
+
+	return;
+}
+
+
+function getTFilterIDX(tableID)
+{
+	if(tableID == null)
+	{
+		return 0;
+	}
+
+	for(var x = 0; x < TFilter_Data.length; x++)
+	{
+		if(TFilter_Data[x][0] == tableID)
+		{
+			return x;
+		}
+	}
+
+	return 0;
+}
+
+
 
 function tableSanityCheck(table)
 {
