@@ -8,6 +8,7 @@
 var connTS=new Object(); //part of i18n
 
 var TSort_Data = new Array('connection_table', 's', 's', 'm', 's', 's');
+var TFilter_Data = [['connection_table', [true, true, false, true, true], [], []]];
 
 var updateInProgress;
 var timeSinceUpdate;
@@ -205,10 +206,12 @@ function updateConnectionTable()
 				var tableContainer = document.getElementById('connection_table_container');
 				if(tableContainer.firstChild != null)
 				{
+					storeTableFilter(TFilter_Data[getTFilterIDX('connection_table')][0]);
 					tableContainer.removeChild(tableContainer.firstChild);
 				}
 				tableContainer.appendChild(connTable);
 				reregisterTableSort('connection_table', 's', 's', 'm', 's', 's');
+				createTableFilter(TFilter_Data[getTFilterIDX('connection_table')]);
 
 				updateInProgress = false;
 			}
