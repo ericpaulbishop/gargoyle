@@ -342,6 +342,12 @@
 					</span>
 				</div>
 
+				<div class="row form-group">
+					<span class="col-xs-12">
+						<button id="reset_FLL" class="btn btn-default" onclick="resetFairLinkLimit()"><%~ resetFLL %></button>
+					</span>
+				</div>
+
 				<div id="qos_down_3" class="row form-group">
 					<span class="col-xs-12" id="qos_down_3_txt">
 						<%~ AbACC %>
