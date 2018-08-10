@@ -598,7 +598,7 @@ for target in $targets ; do
 	if [ "$target" = "custom" ] ; then
 		if [ ! -d "$openwrt_package_dir" ] ; then
 			
-			git clone https://github.com/openwrt/"$packages_branch".git "$openwrt_package_dir"
+			git clone https://github.com/openwrt/packages.git "$openwrt_package_dir"
 			cd "$openwrt_package_dir"
 			if [ -n "$packages_branch" ] ; then
 				git checkout "$packages_branch"
