@@ -276,11 +276,11 @@ function resetDisplayInterval()
 		var pieTotals = plotFunction(idList, [bndwS.Totl, bndwS.Dnld, bndwS.Upld ], getHostList(idList), data, 0, 9, resetColors);
 		resetColors = false;
 
-		//then update table, sorting ids alphabetically so order is consistant
+		//then update table, sorting ids by combined bw so it is easier to read
 		var sortedIdIndices = [];
 		var idIndex;
 		for(idIndex=0; idIndex < idList.length; idIndex++) { sortedIdIndices.push(idIndex) };
-		var idSort = function(a,b) { return idList[a] < idList[b] ? 1 : -1; }
+		var idSort = function(a,b) { return data[0][a] < data[0][b] ? 1 : -1; }
 		sortedIdIndices.sort( idSort );
 
 		var pieNames = [bndwS.Totl, bndwS.Down, bndwS.Up];
