@@ -1,8 +1,8 @@
-src/gz %d_%v_base %U/base
-src/gz %d_%v_management %U/management
-src/gz %d_%v_packages %U/packages
-src/gz %d_%v_routing %U/routing
-src/gz %d_%v_telephony %U/telephony
+src/gz %d_%v_base %U/packages/%A/base
+src/gz %d_%v_management %U/packages/%A/management
+src/gz %d_%v_packages %U/packages/%A/packages
+src/gz %d_%v_routing %U/packages/%A/routing
+src/gz %d_%v_telephony %U/packages/%A/telephony
 
 src/gz gargoyle http://www.gargoyle-router.com/packages/gargoyle-%G/%T/%F
 
