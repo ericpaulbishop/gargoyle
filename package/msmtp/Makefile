@@ -46,7 +46,7 @@ endef
 
 define Package/msmtp
 $(call Package/msmtp/Default)
-  DEPENDS+= +libopenssl +ca-bundle
+  DEPENDS+= +libopenssl +ca-certificates-combined
   TITLE+= (with SSL support)
   VARIANT:=ssl
 endef
