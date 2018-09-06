@@ -1,0 +1,11 @@
+--- a/package/utils/busybox/Config-defaults.in
++++ b/package/utils/busybox/Config-defaults.in
+@@ -645,7 +645,7 @@ config BUSYBOX_DEFAULT_MD5SUM
+ 	default y
+ config BUSYBOX_DEFAULT_SHA1SUM
+ 	bool
+-	default n
++	default y
+ config BUSYBOX_DEFAULT_SHA256SUM
+ 	bool
+ 	default y
