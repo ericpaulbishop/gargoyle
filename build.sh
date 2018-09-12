@@ -691,9 +691,10 @@ for target in $targets ; do
 		mkdir -p "$top_dir/Distribution/Images/$target-$default_profile"
 	fi
 
-	#copy packages to built/target directory
-	mkdir -p "$top_dir/built/$target/$default_profile"
-	package_base_dir=$(find bin -name "base")
+	#copy packages to build/target directory
+	pkg_arch=$(grep "CONFIG_TARGET_ARCH_PACKAGES" .config | sed 's/^.*="\(.*\)"/\1/g')
+	mkdir -p "$top_dir/built/$target/$profile_name"
+	package_base_dir=$(find "bin/packages/$pkg_arch" -name "base")
 	package_files=$(find "$package_base_dir" -name "*.ipk")
 	index_files=$(find "$package_base_dir" -name "Packa*")
 	if [ -n "$package_files" ] && [ -n "$index_files" ] ; then
@@ -812,8 +813,9 @@ for target in $targets ; do
 		fi
 
 		#copy packages to build/target directory
+		pkg_arch=$(grep "CONFIG_TARGET_ARCH_PACKAGES" .config | sed 's/^.*="\(.*\)"/\1/g')
 		mkdir -p "$top_dir/built/$target/$profile_name"
-		package_base_dir=$(find bin -name "base")
+		package_base_dir=$(find "bin/packages/$pkg_arch" -name "base")
 		package_files=$(find "$package_base_dir" -name "*.ipk")
 		index_files=$(find "$package_base_dir" -name "Packa*")
 		if [ -n "$package_files" ] && [ -n "$index_files" ] ; then
