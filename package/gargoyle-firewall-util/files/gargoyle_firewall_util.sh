@@ -620,8 +620,8 @@ isolate_guest_networks()
 
 					#Only allow DHCP/DNS access to router for anyone on guest network
 					ebtables -t filter -A INPUT -i "$lif" -p ARP -j ACCEPT
-					ebtables -t filter -A INPUT -i "$lif" -p IPV4 --ip-protocol UDP --ip-destination-port 53 -j ACCEPT
-					ebtables -t filter -A INPUT -i "$lif" -p IPV4 --ip-protocol UDP --ip-destination-port 67 -j ACCEPT
+					ebtables -t filter -A INPUT -i "$lif" -p IPV4 --ip-protocol udp --ip-destination-port 53 -j ACCEPT
+					ebtables -t filter -A INPUT -i "$lif" -p IPV4 --ip-protocol udp --ip-destination-port 67 -j ACCEPT
 					ebtables -t filter -A INPUT -i "$lif" -p IPV4 --ip-destination $lan_ip -j DROP
 
 				fi
