@@ -49,7 +49,7 @@ MODULE_DESCRIPTION("Match time ranges, designed for use with Gargoyle web interf
 extern struct timezone sys_tz;
 
 
-static bool match(const struct sk_buff *skb, const struct xt_action_param *par)
+static bool match(const struct sk_buff *skb, struct xt_action_param *par)
 {
 	const struct ipt_timerange_info *info = (const struct ipt_timerange_info*)(par->matchinfo);
 
@@ -120,10 +120,10 @@ static int checkentry(const struct xt_mtchk_param *par)
 static struct xt_match timerange_match  __read_mostly = 
 {
 	.name		= "timerange",
-	.match		= &match,
+	.match		= match,
 	.family		= AF_INET,
 	.matchsize	= sizeof(struct ipt_timerange_info),
-	.checkentry	= &checkentry,
+	.checkentry	= checkentry,
 	.me		= THIS_MODULE,
 };
 

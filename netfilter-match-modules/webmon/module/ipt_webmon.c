@@ -1243,11 +1243,11 @@ static struct xt_match webmon_match __read_mostly  =
 {
 
 	.name		= "webmon",
-	.match		= &match,
+	.match		= match,
 	.family		= AF_INET,
 	.matchsize	= sizeof(struct ipt_webmon_info),
-	.checkentry	= &checkentry,
-	.destroy	= &destroy,
+	.checkentry	= checkentry,
+	.destroy	= destroy,
 	.me		= THIS_MODULE,
 };
 

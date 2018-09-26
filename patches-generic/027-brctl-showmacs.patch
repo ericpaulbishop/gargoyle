@@ -1,9 +1,9 @@
---- /dev/null	2015-12-03 23:16:21.909635098 -0500
-+++ ar71xx-src/package/utils/busybox/patches/500-brctl-showmacs.patch	2015-12-23 14:22:20.632247844 -0500
-@@ -0,0 +1,111 @@
-+--- a/networking/brctl.c	2015-12-23 14:20:03.690461459 -0500
-++++ b/networking/brctl.c	2015-12-23 14:19:10.455322188 -0500
-+@@ -19,7 +19,8 @@
+--- /dev/null	2018-03-02 18:46:38.668019591 -0500
++++ b/package/utils/busybox/patches/700-brctl-showmacs.patch	2018-03-13 18:22:31.534553128 -0400
+@@ -0,0 +1,123 @@
++--- a/networking/brctl.c	2017-07-06 11:14:57.000000000 -0400
+++++ b/networking/brctl.c	2018-03-13 18:09:10.798080807 -0400
++@@ -49,7 +49,8 @@
 + //usage:       "Manage ethernet bridges\n"
 + //usage:     "\nCommands:"
 + //usage:	IF_FEATURE_BRCTL_SHOW(
@@ -13,7 +13,7 @@
 + //usage:	)
 + //usage:     "\n	addbr BRIDGE		Create BRIDGE"
 + //usage:     "\n	delbr BRIDGE		Delete BRIDGE"
-+@@ -91,7 +92,6 @@
++@@ -171,7 +172,6 @@
 + 
 + 	return jif/10000;
 + }
@@ -21,7 +21,7 @@
 + static void jiffies_to_tv(struct timeval *tv, unsigned long jiffies)
 + {
 + 	unsigned long long tvusec;
-+@@ -100,7 +100,7 @@
++@@ -180,7 +180,7 @@
 + 	tv->tv_sec = tvusec/1000000;
 + 	tv->tv_usec = tvusec - 1000000 * tv->tv_sec;
 + }
@@ -30,11 +30,23 @@
 + static unsigned long str_to_jiffies(const char *time_str)
 + {
 + 	struct timeval tv;
-+@@ -118,6 +118,14 @@
++@@ -198,6 +198,26 @@
 + }
 + #endif
 + 
 ++#if ENABLE_FEATURE_BRCTL_SHOW
+++
+++struct __fdb_entry {
+++	uint8_t mac_addr[6];
+++	uint8_t port_no;
+++	uint8_t is_local;
+++	uint32_t ageing_timer_value;
+++	uint8_t port_hi;
+++	uint8_t pad0;
+++	uint16_t unused;
+++};
+++
+++
 ++static int compare_fdbs(const void *l, const void *r) {
 ++	const struct __fdb_entry* fdb_l = l;
 ++	const struct __fdb_entry* fdb_r = r;
@@ -45,7 +57,7 @@
 + 
 + int brctl_main(int argc, char **argv) MAIN_EXTERNALLY_VISIBLE;
 + int brctl_main(int argc UNUSED_PARAM, char **argv)
-+@@ -129,7 +137,7 @@
++@@ -209,7 +229,7 @@
 + 		"setageing\0" "setfd\0" "sethello\0" "setmaxage\0"
 + 		"setpathcost\0" "setportprio\0" "setbridgeprio\0"
 + 	)
@@ -54,7 +66,7 @@
 + 
 + 	enum { ARG_addbr = 0, ARG_delbr, ARG_addif, ARG_delif
 + 		IF_FEATURE_BRCTL_FANCY(,
-+@@ -137,7 +145,7 @@
++@@ -217,7 +237,7 @@
 + 			ARG_setageing, ARG_setfd, ARG_sethello, ARG_setmaxage,
 + 			ARG_setpathcost, ARG_setportprio, ARG_setbridgeprio
 + 		)
@@ -63,7 +75,7 @@
 + 	};
 + 
 + 	int fd;
-+@@ -227,6 +235,48 @@
++@@ -307,6 +327,48 @@
 + 			goto done;
 + 		}
 + 

@@ -20,4 +20,4 @@ upS.UErrBB="O arquivo de firmware selecionado contém um bootloader. Seu roteado
 upS.brcmT="O arquivo de firmware precisa ser do tipo .bin ou .trx";
 upS.ar71xxT="O arquivo de firmware precisa ser do tipo sysupgrade.bin";
 upS.othrT="O arquivo de firmware precisa ser do tipo .img";
-upS.mvebu="O arquivo de firmware precisa ser do tipo sysupgrade.tar";
+upS.mvebu="O arquivo de firmware precisa ser do tipo sysupgrade.bin";

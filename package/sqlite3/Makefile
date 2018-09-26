@@ -8,18 +8,19 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=sqlite
-PKG_VERSION:=3081101
+PKG_VERSION:=3170000
 PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-autoconf-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=http://www.sqlite.org/2015/
-PKG_MD5SUM:=298c8d6af7ca314f68de92bc7a356cbe
+PKG_SOURCE_URL:=http://www.sqlite.org/2017/
+PKG_MD5SUM:=450a95a7bde697c9fe4de9ae2fffdcca
+PKG_HASH:=a4e485ad3a16e054765baf6371826b5000beed07e626510896069c0bf013874c
 
 PKG_LICENSE:=PUBLICDOMAIN
 PKG_LICENSE_FILES:=
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-autoconf-$(PKG_VERSION)
-PKG_BUILD_DEPENDS:=libncurses libreadline
+PKG_BUILD_DEPENDS:=ncurses readline
 
 PKG_FIXUP:=autoreconf
 
@@ -69,11 +70,14 @@ $(call Package/sqlite3/Default/description)
 endef
 
 TARGET_CFLAGS += $(FPIC) \
-	-DSQLITE_ENABLE_UNLOCK_NOTIFY \
+	-DSQLITE_ENABLE_UNLOCK_NOTIFY=1 \
+	-DHAVE_ISNAN=1 \
+	-DHAVE_MALLOC_USABLE_SIZE=1
 
 CONFIGURE_ARGS += \
 	--enable-shared \
 	--enable-static \
+	--disable-editline
 
 CONFIGURE_VARS += \
 	config_BUILD_CC="$(HOSTCC)" \

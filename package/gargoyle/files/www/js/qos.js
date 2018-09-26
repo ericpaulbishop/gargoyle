@@ -1411,3 +1411,19 @@ function updateqosmon()
 		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 	}
 }
+
+function resetFairLinkLimit()
+{
+	setControlsEnabled(false, true);
+	var commands = "kill -SIGUSR1 $(pidof qosmon)";
+	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash",document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+
+	var stateChangeFunction = function(req)
+	{
+		if(req.readyState == 4)
+		{
+			setControlsEnabled(true);
+		}
+	}
+	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
+}

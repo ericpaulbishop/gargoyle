@@ -509,10 +509,10 @@ static int checkentry(const struct xt_mtchk_param *par)
 static struct xt_match weburl_match  __read_mostly  = 
 {
 	.name		= "weburl",
-	.match		= &match,
+	.match		= match,
 	.family		= AF_INET,
 	.matchsize	= sizeof(struct ipt_weburl_info),
-	.checkentry	= &checkentry,
+	.checkentry	= checkentry,
 	.me		= THIS_MODULE,
 };
 

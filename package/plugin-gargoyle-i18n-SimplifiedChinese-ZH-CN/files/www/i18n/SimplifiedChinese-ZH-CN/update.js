@@ -20,4 +20,4 @@ upS.UErrBB="固件包含引导程序。你的路由器不能升级。";
 upS.brcmT="固件应该是一个.bin或.trx文件";
 upS.ar71xxT="固件应该是sysupgrade.bin的文件";
 upS.othrT="固件应该是一个组合的.img文件";
-upS.mvebu="固件应该是sysupgrade.tar的文件";
+upS.mvebu="固件应该是sysupgrade.bin的文件";

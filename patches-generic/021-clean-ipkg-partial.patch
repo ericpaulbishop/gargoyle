@@ -1,22 +1,18 @@
---- a/target/imagebuilder/files/Makefile	2014-11-08 12:48:51.636428286 -0500
-+++ b/target/imagebuilder/files/Makefile	2014-11-30 11:18:17.757952447 -0500
-@@ -151,6 +151,8 @@
- 	)
- 	rm -f $(TARGET_DIR)/usr/lib/opkg/info/*.postinst
- 	$(if $(CONFIG_CLEAN_IPKG),rm -rf $(TARGET_DIR)/usr/lib/opkg)
-+	$(if $(CONFIG_CLEAN_IPKG_PARTIAL),rm -rf $(TARGET_DIR)/usr/lib/opkg/info/*.postinst)
-+	$(if $(CONFIG_CLEAN_IPKG_PARTIAL),find $(TARGET_DIR)/usr/lib/opkg/info/* -name '*.control' -not -name 'plugin-gargoyle-*' | $(XARGS) rm -rf)
+--- a/include/rootfs.mk	2018-03-13 11:01:52.675072718 -0400
++++ b/include/rootfs.mk	2018-03-13 15:10:48.123732989 -0400
+@@ -55,6 +55,15 @@
+   endef
+ endif
  
- build_image: FORCE
- 	@echo
---- a/package/Makefile	2014-11-08 12:48:51.636428286 -0500
-+++ b/package/Makefile	2014-11-30 11:18:17.757952447 -0500
-@@ -118,6 +118,8 @@
- 	@-find $(TARGET_DIR) -name '.#*' | $(XARGS) rm -f
- 	rm -f $(TARGET_DIR)/usr/lib/opkg/info/*.postinst
- 	$(if $(CONFIG_CLEAN_IPKG),rm -rf $(TARGET_DIR)/usr/lib/opkg)
-+	$(if $(CONFIG_CLEAN_IPKG_PARTIAL),rm -rf $(TARGET_DIR)/usr/lib/opkg/info/*.postinst)
-+	$(if $(CONFIG_CLEAN_IPKG_PARTIAL),find $(TARGET_DIR)/usr/lib/opkg/info/* -name '*.control' -not -name 'plugin-gargoyle-*' | $(XARGS) rm -rf)
- 	$(call mklibs)
- 
- PASSOPT=""
++ifdef CONFIG_CLEAN_IPKG_PARTIAL
++  define clean_ipkg
++	-rm -rf $(1)/usr/lib/opkg/info/*.postinst)
++	-find $(1)/usr/lib/opkg/* -type f -and -not -name '*.control' -and -not -name 'plugin-gargoyle-*' | $(XARGS) rm -rf)
++	-sed -i -ne '/^Require-User: /p' $(1)/usr/lib/opkg/info/*.control
++	-find $(1)/usr/lib/opkg -empty | $(XARGS) rm -rf
++  endef
++endif
++
+ define prepare_rootfs
+ 	@if [ -d $(TOPDIR)/files ]; then \
+ 		$(call file_copy,$(TOPDIR)/files/.,$(1)); \

@@ -1,5 +1,6 @@
--mamba-squashfs
--cobra-squashfs
--caiman-squashfs
--shelby-squashfs
--rango-squashfs
+-wrt1900ac-squashfs
+-wrt1900acv2-squashfs
+-wrt1200ac-squashfs
+-wrt1900acs-squashfs
+-wrt3200acm-squashfs
+-wrt32x-squashfs

@@ -1,104 +1,83 @@
---- a/target/linux/ar71xx/generic/profiles/alfa.mk	2014-11-08 12:48:51.624428482 -0500
-+++ b/target/linux/ar71xx/generic/profiles/alfa.mk	2014-11-24 19:43:16.170793391 -0500
-@@ -30,17 +30,19 @@
- $(eval $(call Profile,HORNETUB))
+--- master-fd30187-bak/target/linux/ar71xx/base-files/lib/ar71xx.sh	2018-03-13 11:01:52.327066070 -0400
++++ master-fd30187/target/linux/ar71xx/base-files/lib/ar71xx.sh	2018-03-13 15:54:49.801191417 -0400
+@@ -703,7 +703,7 @@
+ 		local size="$(mtd_get_part_size 'firmware')"
  
- 
--define Profile/HORNETUBx2
--	NAME:=ALFA Network Hornet-UB-x2 board (16MB flash, 64MB ram)
--	PACKAGES:=kmod-usb-core kmod-usb2 kmod-ledtrig-usbdev
--endef
--
--define Profile/HORNETUBx2/Description
--	Package set optimized for the ALFA Network Hornet-UB board with 16MB
--	flash and 64MB ram.
--endef
- 
--$(eval $(call Profile,HORNETUBx2))
-+define Profile/GPRv2 
-+	NAME:=Gargoyle Pocket Router v2
-+	PACKAGES:=kmod-usb-core kmod-usb2 kmod-ledtrig-usbdev 
-+endef 
-+	 
-+define Profile/GPRv2/Description 
-+	Package set optimized for Gargoyle Pocket Router v2
-+	Based on ALFA Network Hornet-UB board with 16MB flash and 64MB ram. 
-+endef 
-+
-+$(eval $(call Profile,GPRv2))
-+
- 
- 
- define Profile/ALFANX
---- a/target/linux/ar71xx/image/Makefile	2014-11-08 12:48:51.628428417 -0500
-+++ b/target/linux/ar71xx/image/Makefile	2014-11-24 19:40:29.785430697 -0500
-@@ -901,7 +901,10 @@
- 
- alfa_ap96_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,256k(u-boot-env)ro,13312k(rootfs),2048k(kernel),512k(caldata)ro,15360k@0x80000(firmware)
- alfa_mtdlayout_8M=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env)ro,6144k(rootfs),1600k(kernel),64k(nvram),64k(art)ro,7744k@0x50000(firmware)
--alfa_mtdlayout_16M=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env)ro,15936k(firmware),64k(nvram),64k(art)ro
-+
-+alfa_mtdlayout_16M=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env)ro,14336k(rootfs),1600k(kernel),64k(nvram),64k(art)ro,15936k@0x50000(firmware)
-+tube2h_mtdlayout_16M=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env)ro,15936k(firmware),64k(nvram),64k(art)ro
-+
- all0258n_mtdlayout=mtdparts=spi0.0:256k(u-boot),64k(u-boot-env),6272k(firmware),1536k(failsafe),64k(art)
- all0315n_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,256k(u-boot-env),13568k(firmware),2048k(failsafe),256k(art)ro
- ap81_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env)ro,5120k(rootfs),2688k(kernel),64k(art)ro,7808k@0x50000(firmware)
-@@ -1813,11 +1816,15 @@
- $(eval $(call SingleProfile,AthLzma,64k,EWDORINAP,ew-dorin,EW-DORIN,ttyATH0,115200,$$(ew-dorin_mtdlayout_4M),KRuImage,65536))
- $(eval $(call SingleProfile,AthLzma,64k,EWDORINRT,ew-dorin-router,EW-DORIN-ROUTER,ttyATH0,115200,$$(ew-dorin_mtdlayout_4M),KRuImage,65536))
- $(eval $(call SingleProfile,AthLzma,64k,EWDORIN16M,ew-dorin-16M,EW-DORIN,ttyATH0,115200,$$(ew-dorin_mtdlayout_16M),KRuImage,65536))
--$(eval $(call SingleProfile,AthLzma,64k,HORNETUBx2,hornet-ub-x2,HORNET-UB,ttyATH0,115200,$$(alfa_mtdlayout_16M),KRuImage,65536))
-+
-+#$(eval $(call SingleProfile,AthLzma,64k,HORNETUBx2,hornet-ub-x2,HORNET-UB,ttyATH0,115200,$$(alfa_mtdlayout_16M),KRuImage,65536))
-+$(eval $(call SingleProfile,AthLzma,64k,GPRv2,gargoyle-pocket-router-v2,HORNET-UB,ttyATH0,115200,$$(alfa_mtdlayout_16M),RKuImage))
-+
-+
- $(eval $(call SingleProfile,AthLzma,64k,MR12,mr12,MR12,ttyS0,115200,$$(mr12_mtdlayout),RKuImage))
- $(eval $(call SingleProfile,AthLzma,64k,MR16,mr16,MR16,ttyS0,115200,$$(mr16_mtdlayout),RKuImage))
- $(eval $(call SingleProfile,AthLzma,64k,PB92,pb92,PB92,ttyS0,115200,$$(pb92_mtdlayout),KRuImage))
--$(eval $(call SingleProfile,AthLzma,64k,TUBE2H16M,tube2h-16M,TUBE2H,ttyATH0,115200,$$(alfa_mtdlayout_16M),KRuImage,65536))
-+$(eval $(call SingleProfile,AthLzma,64k,TUBE2H16M,tube2h-16M,TUBE2H,ttyATH0,115200,$$(tube2h_mtdlayout_16M),KRuImage,65536))
- $(eval $(call SingleProfile,AthLzma,64k,WLR8100,wlr8100,WLR8100,ttyS0,115200,$$(wlr8100_mtdlayout),KRuImage))
- $(eval $(call SingleProfile,AthLzma,64k,WPJ344_16M,wpj344-16M,WPJ344,ttyS0,115200,$$(wpj344_mtdlayout_16M),KRuImage,65536))
- $(eval $(call SingleProfile,AthLzma,64k,WPJ531_16M,wpj531-16M,WPJ531,ttyS0,115200,$$(wpj531_mtdlayout_16M),KRuImage,65536))
---- a/target/linux/ar71xx/base-files/lib/ar71xx.sh	2015-07-21 12:50:17.091881187 -0400
-+++ b/target/linux/ar71xx/base-files/lib/ar71xx.sh	2015-07-21 13:46:10.684378300 -0400
-@@ -469,7 +469,7 @@
- 		fi
- 
- 		if [ "x$size" = "x00f90000" ]; then
--			name="hornet-ub-x2"
-+			name="gargoyle-pocket-router-v2"
- 		fi
+ 		[ "$size" = "7929856" ] && name="hornet-ub"
+-		[ "$size" = "16318464" ] && name="hornet-ub-x2"
++		[ "$size" = "16318464" ] && name="gargoyle-pocket-router-v2"
  		;;
- 	*LS-SR71)
---- a/target/linux/ar71xx/base-files/lib/upgrade/platform.sh	2015-07-21 12:50:17.091881187 -0400
-+++ b/target/linux/ar71xx/base-files/lib/upgrade/platform.sh	2015-07-21 13:48:42.933857266 -0400
-@@ -184,6 +184,7 @@
- 	db120 | \
- 	f9k1115v2 |\
- 	hornet-ub | \
+ 	*"JA76PF")
+ 		name="ja76pf"
+--- master-fd30187-bak/target/linux/ar71xx/base-files/lib/upgrade/platform.sh	2018-03-13 11:01:52.327066070 -0400
++++ master-fd30187/target/linux/ar71xx/base-files/lib/upgrade/platform.sh	2018-03-13 15:51:13.756978212 -0400
+@@ -248,7 +248,6 @@
+ 	gl-mifi|\
+ 	gl-usb150|\
+ 	hiwifi-hc6361|\
+-	hornet-ub-x2|\
+ 	jwap230|\
+ 	lima|\
+ 	loco-m-xw|\
+@@ -324,6 +323,7 @@
+ 	dw33d|\
+ 	f9k1115v2|\
+ 	hornet-ub|\
 +	gargoyle-pocket-router-v2 | \
- 	mr12 | \
- 	mr16 | \
- 	wpj558 | \
-@@ -216,7 +217,6 @@
- 	ew-dorin | \
- 	ew-dorin-router | \
- 	hiwifi-hc6361 | \
--	hornet-ub-x2 | \
- 	mzk-w04nu | \
- 	mzk-w300nh | \
- 	tew-632brp | \
---- a/target/linux/ar71xx/base-files/etc/uci-defaults/01_leds	2015-07-21 12:50:17.091881187 -0400
-+++ b/target/linux/ar71xx/base-files/etc/uci-defaults/01_leds	2015-07-21 13:49:58.560604824 -0400
-@@ -171,7 +171,7 @@
+ 	mr12|\
+ 	mr16|\
+ 	zbt-we1526|\
+--- master-fd30187-bak/target/linux/ar71xx/base-files/etc/board.d/01_leds	2018-03-13 11:01:52.327066070 -0400
++++ master-fd30187/target/linux/ar71xx/base-files/etc/board.d/01_leds	2018-03-13 15:53:38.925126185 -0400
+@@ -445,7 +445,7 @@
+ 	ucidef_set_led_wlan "wlan" "WLAN" "hiwifi:blue:wlan-2p4" "phy0tpt"
  	;;
- 
- hornet-ub | \
+ hornet-ub|\
 -hornet-ub-x2)
 +gargoyle-pocket-router-v2)
  	ucidef_set_led_netdev "lan" "LAN" "alfa:blue:lan" "eth0"
  	ucidef_set_led_netdev "wan" "WAN" "alfa:blue:wan" "eth1"
  	ucidef_set_led_wlan "wlan" "WLAN" "alfa:blue:wlan" "phy0tpt"
+--- master-fd30187-bak/target/linux/ar71xx/base-files/etc/diag.sh	2018-03-13 11:01:52.327066070 -0400
++++ master-fd30187/target/linux/ar71xx/base-files/etc/diag.sh	2018-03-13 15:54:32.765176105 -0400
+@@ -222,7 +222,7 @@
+ 		status_led="hiwifi:blue:system"
+ 		;;
+ 	hornet-ub|\
+-	hornet-ub-x2)
++	gargoyle-pocket-router-v2)
+ 		status_led="alfa:blue:wps"
+ 		;;
+ 	ja76pf|\
+--- master-fd30187-bak/target/linux/ar71xx/image/legacy.mk	2018-03-13 11:01:52.331066147 -0400
++++ master-fd30187/target/linux/ar71xx/image/legacy.mk	2018-03-13 15:47:41.676715869 -0400
+@@ -224,7 +224,11 @@
+ alfa_ap120c_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env)ro,13312k(rootfs),1536k(kernel),1152k(unknown)ro,64k(art)ro;spi0.1:-(unknown)
+ alfa_ap96_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,256k(u-boot-env)ro,13312k(rootfs),2048k(kernel),512k(caldata)ro,15360k@0x80000(firmware)
+ alfa_mtdlayout_8M=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env)ro,6144k(rootfs),1600k(kernel),64k(nvram),64k(art)ro,7744k@0x50000(firmware)
+-alfa_mtdlayout_16M=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env)ro,15936k(firmware),64k(nvram),64k(art)ro
++
++
++alfa_mtdlayout_16M=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env)ro,14336k(rootfs),1600k(kernel),64k(nvram),64k(art)ro,15936k@0x50000(firmware)
++tube2h_mtdlayout_16M=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env)ro,15936k(firmware),64k(nvram),64k(art)ro
++
+ all0258n_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,64k(u-boot-env),6272k(firmware),1536k(failsafe),64k(art)ro
+ all0315n_mtdlayout=mtdparts=spi0.0:256k(u-boot)ro,256k(u-boot-env),13568k(firmware),2048k(failsafe),256k(art)ro
+ ap96_mtdlayout=mtdparts=spi0.0:192k(u-boot)ro,64k(u-boot-env)ro,6144k(rootfs),1728k(kernel),64k(art)ro,7872k@0x40000(firmware)
+@@ -894,8 +898,14 @@
+ $(eval $(call SingleProfile,AthLzma,64k,BXU2000N2,bxu2000n-2-a1,BXU2000n-2-A1,ttyS0,115200,$$(bxu2000n2_mtdlayout),RKuImage))
+ $(eval $(call SingleProfile,AthLzma,64k,CAP4200AG,cap4200ag,CAP4200AG,ttyS0,115200,$$(cap4200ag_mtdlayout),KRuImage))
+ $(eval $(call SingleProfile,AthLzma,64k,DB120,db120,DB120,ttyS0,115200,$$(db120_mtdlayout),RKuImage))
+-$(eval $(call SingleProfile,AthLzma,64k,HORNETUBx2,hornet-ub-x2,HORNET-UB,ttyATH0,115200,$$(alfa_mtdlayout_16M),KRuImage,65536))
+-$(eval $(call SingleProfile,AthLzma,64k,TUBE2H16M,tube2h-16M,TUBE2H,ttyATH0,115200,$$(alfa_mtdlayout_16M),KRuImage,65536))
++
++
++#$(eval $(call SingleProfile,AthLzma,64k,HORNETUBx2,hornet-ub-x2,HORNET-UB,ttyATH0,115200,$$(alfa_mtdlayout_16M),KRuImage,65536))
++#$(eval $(call SingleProfile,AthLzma,64k,TUBE2H16M,tube2h-16M,TUBE2H,ttyATH0,115200,$$(alfa_mtdlayout_16M),KRuImage,65536))
++
++$(eval $(call SingleProfile,AthLzma,64k,GPRv2,gargoyle-pocket-router-v2,HORNET-UB,ttyATH0,115200,$$(alfa_mtdlayout_16M),RKuImage))
++$(eval $(call SingleProfile,AthLzma,64k,TUBE2H16M,tube2h-16M,TUBE2H,ttyATH0,115200,$$(tube2h_mtdlayout_16M),KRuImage,65536))
++
+ 
+ $(eval $(call SingleProfile,Belkin,64k,F9K1115V2,f9k1115v2,F9K1115V2,ttyS0,115200,$$(f9k1115v2_mtdlayout),BR-6679BAC))
+ 

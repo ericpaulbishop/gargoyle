@@ -756,23 +756,34 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 	}
 	if(err == 0 && src_file_path == NULL)
 	{
-		//check md5sum
+		//check md5sum and sha256sum
 		char* md5sum = file_md5sum_alloc(pkg_dest);
 		char* expected_md5sum = (char*)get_string_map_element(install_pkg_data, "MD5Sum");
+		char* sha256sum = file_sha256sum_alloc(pkg_dest);
+		char* expected_sha256sum = (char*)get_string_map_element(install_pkg_data, "SHA256sum");
 		
 		//printf("md5sum         = %s\n", md5sum);
 		//printf("package md5sum = %s\n", (char*)get_string_map_element(install_pkg_data, "MD5Sum"));
+		//printf("sha256sum         = %s\n", sha256sum);
+		//printf("package sha256sum = %s\n", (char*)get_string_map_element(install_pkg_data, "SHA256sum"));
 
-		if(md5sum == NULL || expected_md5sum == NULL)
+		if((md5sum == NULL || expected_md5sum == NULL) && (sha256sum == NULL || expected_sha256sum == NULL))
 		{
-			fprintf(stderr, "ERROR: Expected MD5Sum for %s not specified, cannot verify package\n", pkg_name);
+			fprintf(stderr, "ERROR: Expected MD5/SHA256Sum for %s not specified, cannot verify package\n", pkg_name);
 			err = 1;
 		}
-		else if (safe_strcmp(md5sum, expected_md5sum) != 0)
+		else if ((md5sum != NULL && expected_md5sum != NULL) && (safe_strcmp(md5sum, expected_md5sum) != 0))
 		{
 			fprintf(stderr, "ERROR: MD5Sum mismatch for %s package\n", pkg_name);
 			fprintf(stderr, "       Expected:   %s\n", expected_md5sum);
 			fprintf(stderr, "       Downloaded: %s\n\n", md5sum);
+			err = 1;
+		}
+		else if ((sha256sum != NULL && expected_sha256sum != NULL) && (safe_strcmp(sha256sum, expected_sha256sum) != 0))
+		{
+			fprintf(stderr, "ERROR: SHA256Sum mismatch for %s package\n", pkg_name);
+			fprintf(stderr, "       Expected:   %s\n", expected_sha256sum);
+			fprintf(stderr, "       Downloaded: %s\n\n", sha256sum);
 			err = 1;
 		}
 		else
@@ -781,6 +792,7 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 		}
 		
 		if(md5sum != NULL) { free(md5sum); }
+		if(sha256sum != NULL) { free(sha256sum); }
 		
 	}
 	if(err == 0)

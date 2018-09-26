@@ -7,7 +7,7 @@
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
 
-	BACKUP="backup_"$(uci get -q system.@system[0].hostname | sed 's/ //g')"_"$(date +%Y%m%d_%H%M%S)".tar.gz"
+	BACKUP="backup_"$(uci -q get system.@system[0].hostname | sed 's/ //g')"_"$(date +%Y%m%d_%H%M%S)".tar.gz"
 	echo "Content-type: application/octet-stream"
 	echo "Content-disposition: attachment;filename=\"$BACKUP\""
 	echo ""

@@ -5,7 +5,7 @@ VERSION=1
 #for ssl, uncomment the (one and only one) ssl library to link with
 #USE_MATRIXSSL:=1
 #USE_CYASSL:=1
-#USE_POLARSSL:=1
+#USE_MBEDTLS:=1
 USE_OPENSSL:=1
 
 #uncomment to link dynamically to ericstools
@@ -29,7 +29,7 @@ ifeq ($(RANLIB),)
 endif
 
 
-CFLAGS:=$(CFLAGS) -Os 
+CFLAGS:=$(CFLAGS) -Os
 
 WARNING_FLAGS=-Wall -Wstrict-prototypes -pedantic
 MINIMAL_WARNING_FLAGS=-Wall -Wstrict-prototypes
@@ -49,15 +49,16 @@ else
 endif
 
 
+
 LIBS:=
 SSL_DEFS:=
 SSL_OBJ_DYN:=
 SSL_OBJ_STATIC:=
 
 
-ifeq ($(USE_POLARSSL), 1)
-	SSL_DEFS:= -DUSE_POLARSSL -DHAVE_SSL
-	LIBS:=$(LIBS) -lpolarssl
+ifeq ($(USE_MBEDTLS), 1)
+	SSL_DEFS:= -DUSE_MBEDTLS -DHAVE_SSL
+	LIBS:=$(LIBS) -lmbedtls
 	USE_MATRIXSSL=
 	USE_CYASSL=
 	USE_OPENSSL=
@@ -70,7 +71,7 @@ ifeq ($(USE_CYASSL), 1)
 	LIBS:=$(LIBS) -lcyassl -lm
 	USE_MATRIXSSL=
 	USE_OPENSSL=
-	USE_POLARSSL=
+	USE_MBEDTLS=
 endif
 ifeq ($(USE_MATRIXSSL), 1)
 	SSL_DEFS:= -DUSE_MATRIXSSL  -DHAVE_SSL 
@@ -79,7 +80,7 @@ ifeq ($(USE_MATRIXSSL), 1)
 	SSL_OBJ_STATIC=matrixssl_helper_static.o
 	USE_CYASSL=
 	USE_OPENSSL=
-	USE_POLARSSL=
+	USE_MBEDTLS=
 	
 endif
 ifeq ($(USE_OPENSSL), 1)
@@ -87,7 +88,7 @@ ifeq ($(USE_OPENSSL), 1)
 	LIBS:=$(LIBS) -lcrypto -lssl
 	USE_MATRIXSSL=
 	USE_CYASSL=
-	USE_POLARSSL=
+	USE_MBEDTLS=
 endif
 
 ifeq ($(USE_ERICSTOOLS), 1)

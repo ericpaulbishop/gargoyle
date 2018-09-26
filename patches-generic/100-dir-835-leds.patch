@@ -1,13 +1,13 @@
---- a/target/linux/ar71xx/base-files/etc/uci-defaults/01_leds	2015-08-17 15:05:37.786082500 +1000
-+++ b/target/linux/ar71xx/base-files/etc/uci-defaults/01_leds	2015-08-19 13:59:48.544426900 +1000
+--- a/target/linux/ar71xx/base-files/etc/board.d/01_leds	2015-08-17 15:05:37.786082500 +1000
++++ b/target/linux/ar71xx/base-files/etc/board.d/01_leds	2015-08-19 13:59:48.544426900 +1000
 @@ -150,6 +150,10 @@
- 	ucidef_set_led_wlan "wlan2g" "WLAN 2.4 GHz" "d-link:blue:wlan2g" "phy0tpt"
+ 	ucidef_set_led_wlan "wlan" "WLAN" "$board:blue:wlan" "phy0tpt"
  	;;
- 
 +dir-835-a1)
 +	ucidef_set_led_netdev "wan" "WAN" "d-link:amber:planet" "eth0.2"
 +	;;
 +
  gl-inet)
- 	ucidef_set_led_netdev "lan" "LAN" "gl-connect:green:lan" "eth1"
- 	ucidef_set_led_wlan "wlan" "WLAN" "gl-connect:red:wlan" "phy0tpt"
+ 	ucidef_set_led_netdev "lan" "LAN" "$board:green:lan" "eth1"
+ 	ucidef_set_led_wlan "wlan" "WLAN" "$board:red:wlan" "phy0tpt"
+ 	;;

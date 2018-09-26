@@ -93,7 +93,7 @@ function wakeHost()
 	getRow = this.parentNode.parentNode;
 
 	var mac = getRow.childNodes[2].firstChild.data;
-	var wakeHostCommand = [ "wol -i " + bcastIp + " " + mac ];
+	var wakeHostCommand = [ "etherwake -b -i br-lan " + mac ];
 
 	commands = wakeHostCommand.join("\n");
 	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));

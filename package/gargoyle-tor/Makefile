@@ -120,13 +120,13 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=gargoyle-tor
-PKG_VERSION:=0.3.1.7
+PKG_VERSION:=0.3.2.10
 PKG_RELEASE:=1
 
 PKG_SOURCE:=tor-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://www.torproject.org/dist \
 	https://archive.torproject.org/tor-package-archive
-PKG_MD5SUM:=ec7c9f588c9e1a42c09bcc097a1e55eb
+PKG_MD5SUM:=a8b8b3db93f87a5c061109dbd8cd5309
 PKG_INSTALL:=1
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/tor-$(PKG_VERSION)
@@ -138,6 +138,7 @@ define Package/gargoyle-tor/Default
   SECTION:=net
   CATEGORY:=Network
   URL:=https://www.torproject.org/
+  USERID:=tor=52:tor=52
 endef
 
 define Package/gargoyle-tor/Default/description
@@ -157,7 +158,7 @@ endef
 define Package/gargoyle-tor
 $(call Package/gargoyle-tor/Default)
   TITLE:=An anonymous Internet communication system
-  DEPENDS:=+obfsproxy +libevent2 +libopenssl +libpthread +librt +ipset +kmod-ipt-ipset +gargoyle-firewall-util 
+  DEPENDS:=+obfsproxy +libevent2 +libopenssl +libpthread +librt +zlib +libcap +ipset +kmod-ipt-ipset +gargoyle-firewall-util 
 endef
 
 define Package/gargoyle-tor-geoip
@@ -177,12 +178,32 @@ CONFIGURE_ARGS += \
 	--disable-gcc-hardening \
 	--disable-asciidoc
 
+CONFIGURE_ARGS += \
+	--with-libevent-dir="$(STAGING_DIR)/usr" \
+	--with-ssl-dir="$(STAGING_DIR)/usr" \
+	--with-openssl-dir="$(STAGING_DIR)/usr" \
+	--with-zlib-dir="$(STAGING_DIR)/usr" \
+	--disable-asciidoc \
+	--disable-seccomp \
+	--disable-libscrypt \
+	--disable-unittests \
+	--disable-largefile \
+	--with-tor-user=tor \
+	--with-tor-group=tor
+
+EXTRA_CFLAGS += -std=gnu99
+
+ifneq ($(CONFIG_SSP_SUPPORT),y)
+	CONFIGURE_ARGS += \
+		--disable-gcc-hardening
+else
+	EXTRA_CFLAGS += -fPIC
+endif
+
+
 CONFIGURE_VARS += \
 	CROSS_COMPILE="yes"
 
-# pass CFLAGS again to override -O2 set by configure
-MAKE_FLAGS += \
-	CFLAGS="$(TARGET_CFLAGS) -fPIC -std=gnu99"
 
 define Package/gargoyle-tor/install
 	$(INSTALL_DIR)  $(1)/usr/sbin
@@ -190,7 +211,6 @@ define Package/gargoyle-tor/install
 	$(INSTALL_DIR)  $(1)/etc/tor
 	$(INSTALL_DIR)  $(1)/etc/uci-defaults
 	$(INSTALL_DIR)  $(1)/etc/config
-	$(INSTALL_DIR)  $(1)/etc/l7-protocols
 	$(INSTALL_BIN)  $(PKG_INSTALL_DIR)/usr/bin/tor           $(1)/usr/sbin/tor
 	$(INSTALL_CONF) $(PKG_INSTALL_DIR)/etc/tor/torrc.sample  $(1)/etc/tor/torrc
 	$(INSTALL_BIN)  ./files/tor.init                         $(1)/etc/init.d/tor
@@ -199,7 +219,6 @@ define Package/gargoyle-tor/install
 	$(INSTALL_BIN)  ./files/update_tor_ipset                 $(1)/usr/sbin/update_tor_ipset
 
 	$(INSTALL_CONF) ./files/tor.config                       $(1)/etc/config/tor
-	$(INSTALL_CONF) ./files/oniondns.pat                     $(1)/etc/l7-protocols/oniondns.pat
 endef
 define Package/gargoyle-tor/postinst
 	if [ -z "$${IPKG_INSTROOT}" ] ; then 

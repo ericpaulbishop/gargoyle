@@ -219,7 +219,8 @@ function resetData()
 	else
 	{
 		document.getElementById("wan_container").style.display = "none";
-		document.getElementById("lan_container").style.display = "none";
+		//Show the LAN Port status, but nothing else, in bridge mode
+		document.getElementById("lan_list_group").style.display = "none";
 		document.getElementById("wifi_container").style.display = "none";
 
 		setChildText("bridge_ip", currentLanIp);
@@ -243,6 +244,8 @@ function resetData()
 		{
 			portsTableData.push( [ ports[idx][0], ports[idx][1] ] );
 		}
+		var tableSortFun = function(a,b){ return a[0] == b[0] ? 0 : (a[0] < b[0] ? -1 : 1); }
+		portsTableData.sort(tableSortFun);
 
 		var portsTable=createTable(portsColumns, portsTableData, 'ports_table', false, false);
 		var tableContainer = document.getElementById('ports_table_container');

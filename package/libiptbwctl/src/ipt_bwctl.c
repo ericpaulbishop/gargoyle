@@ -1018,12 +1018,13 @@ ip_bw* load_usage_from_file(char* in_file_path, unsigned long* num_ips, time_t* 
 		{
 			ip_bw next;
 			struct in_addr ipaddr;
-			int valid = inet_aton(data_parts[data_part_index], &ipaddr);
-			if(!valid)
+			if(data_part_index == 0)
 			{
 				sscanf(data_parts[data_part_index], "%ld", last_backup);
 				//printf("last_backup = %ld\n", *last_backup);
+				data_part_index++;
 			}
+			int valid = inet_aton(data_parts[data_part_index], &ipaddr);
 			data_part_index++;
 
 			if(valid && data_index < num_data_parts)

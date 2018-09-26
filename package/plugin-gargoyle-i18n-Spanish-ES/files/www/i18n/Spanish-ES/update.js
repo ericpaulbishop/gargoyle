@@ -20,4 +20,4 @@ upS.UErrBB="El firmware contiene un gestor de arranque. El router no se puede ac
 upS.brcmT="El firmware debe ser un archivo .bin o .trx";
 upS.ar71xxT="El firmware debe ser un archivo sysupgrade.bin";
 upS.othrT="El firmware debe ser un archivo .img combinado";
-upS.mvebu="El firmware debe ser un archivo sysupgrade.tar";
+upS.mvebu="El firmware debe ser un archivo sysupgrade.bin";

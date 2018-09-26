@@ -1,39 +1,85 @@
 #
-# Copyright (C) 2006-2011 OpenWrt.org
-# Copyright (C) 2013 Cezary Jackiewicz <cezary@eko.one.pl>
-#
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
 #
 
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=mjpg-streamer
-PKG_REV:=181
+PKG_NAME:=gargoyle-mjpg-streamer
+PKG_REV:=182
 PKG_VERSION:=r$(PKG_REV)
-PKG_RELEASE:=3
+PKG_RELEASE:=10
+PKG_MAINTAINER:=Roger D <rogerdammit@gmail.com>, \
+		Ted Hess <thess@kitschensync.net>
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
-PKG_SOURCE_URL:=https://svn.code.sf.net/p/mjpg-streamer/code/mjpg-streamer
-PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
+PKG_SOURCE:=mjpg-streamer-$(PKG_VERSION).1.tar.xz
+PKG_SOURCE_URL:=https://svn.code.sf.net/p/mjpg-streamer/code/mjpg-streamer-experimental
+PKG_SOURCE_SUBDIR:=mjpg-streamer-$(PKG_VERSION)
 PKG_SOURCE_VERSION:=$(PKG_REV)
 PKG_SOURCE_PROTO:=svn
+PKG_MIRROR_HASH:=ccff417d0a34f7cee12c7984f77788267b1da0f2a7d849bc1b2e3614e670078b
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_SOURCE_SUBDIR)
+
+PKG_LICENSE:=GPL-2.0
+PKG_LICENSE_FILES:=LICENSE
 
 include $(INCLUDE_DIR)/package.mk
+
+PKG_BUILD_DEPENDS:=MJPG_STREAMER_V4L2:libv4l
 
 define Package/gargoyle-mjpg-streamer
   SECTION:=multimedia
   CATEGORY:=Multimedia
-  TITLE:=MJPG-streamer (Gargoyle version)
-  DEPENDS:=+libpthread +libjpeg
+  TITLE:=MJPG-streamer
+  DEPENDS:=+libpthread +libjpeg +MJPG_STREAMER_V4L2:libv4l
   URL:=http://mjpg-streamer.wiki.sourceforge.net/
+  MENU:=1
 endef
 
 define Package/gargoyle-mjpg-streamer/description
-	Streaming application for Linux-UVC compatible webcams
+ Streaming application for Linux-UVC compatible webcams
+endef
+
+define Package/gargoyle-mjpg-streamer/config
+  source "$(SOURCE)/Config.in"
 endef
 
 EXTRA_CFLAGS += $(TARGET_CPPFLAGS) $(TARGET_LDFLAGS)
+
+define Package/gargoyle-mjpg-streamer/conffiles
+/etc/config/mjpg-streamer
+endef
+
+CAMBOZOLA:=cambozola-0.936.tar.gz
+
+# Distribution URL doesn't always have the correct version
+# Using the OpenWrt mirror provides a stable version
+#      orig-URL:=http://www.andywilcock.com/code/cambozola
+define Download/cambozola
+  URL:=http://mirror2.openwrt.org/sources
+  FILE:=$(CAMBOZOLA)
+  MD5SUM:=35c45188aa9635aef2b745c35c311396
+endef
+
+# Fetch latest cambozola that works with latest Java(s)
+# Yes, I know this is ugly
+define Build/Prepare
+    $(call Build/Prepare/Default)
+    ifeq ($(CONFIG_MJPG_STREAMER_WWW),y)
+	$(eval $(call Download,cambozola))
+	$(TAR) -xvf $(DL_DIR)/$(CAMBOZOLA) --strip=2 --wildcards \
+		-C $(PKG_BUILD_DIR)/www */dist/cambozola.jar
+    endif
+endef
+
+define Build/Configure
+    $(RM) $(PKG_BUILD_DIR)/plugins/input_uvc/uvcvideo.h
+endef
+
+ifeq ($(CONFIG_MJPG_STREAMER_V4L2),y)
+    TARGET_CFLAGS+= -DUSE_LIBV4L2
+    TARGET_LDFLAGS+= -lv4l2
+endif
 
 define Package/gargoyle-mjpg-streamer/install
 	$(INSTALL_DIR) $(1)/usr/bin
@@ -42,16 +88,30 @@ define Package/gargoyle-mjpg-streamer/install
 	$(CP) ./files/mjpg-streamer.config $(1)/etc/config/mjpg-streamer
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/mjpg-streamer.init $(1)/etc/init.d/mjpg-streamer
-	$(INSTALL_DIR) $(1)/usr/lib
-	$(CP) $(PKG_BUILD_DIR)/{input_uvc,output_http}.so $(1)/usr/lib
 	$(INSTALL_DIR) $(1)/etc/hotplug.d/usb
 	$(INSTALL_DATA) ./files/mjpg-streamer.hotplug $(1)/etc/hotplug.d/usb/20-mjpg-streamer
-	$(INSTALL_DIR) $(1)/usr/lib/mjpg-streamer/www
-	$(INSTALL_DATA) ./files/mjpg-streamer.index.html $(1)/usr/lib/mjpg-streamer/www/index.html
-endef
-
-define Package/gargoyle-mjpg-streamer/conffiles
-/etc/config/mjpg-streamer
+	$(INSTALL_DIR) $(1)/usr/lib
+ifeq ($(CONFIG_MJPG_STREAMER_INPUT_FILE),y)
+	$(CP) $(PKG_BUILD_DIR)/input_file.so $(1)/usr/lib
+endif
+ifeq ($(CONFIG_MJPG_STREAMER_INPUT_UVC),y)
+	$(CP) $(PKG_BUILD_DIR)/input_uvc.so $(1)/usr/lib
+endif
+ifeq ($(CONFIG_MJPG_STREAMER_INPUT_TESTPICTURE),y)
+	$(CP) $(PKG_BUILD_DIR)/input_testpicture.so $(1)/usr/lib
+endif
+ifeq ($(CONFIG_MJPG_STREAMER_OUTPUT_FILE),y)
+	$(CP) $(PKG_BUILD_DIR)/output_file.so $(1)/usr/lib
+endif
+ifeq ($(CONFIG_MJPG_STREAMER_OUTPUT_HTTP),y)
+	$(CP) $(PKG_BUILD_DIR)/output_http.so $(1)/usr/lib
+	$(INSTALL_DIR) $(1)/www/webcam
+    ifeq ($(CONFIG_MJPG_STREAMER_WWW),y)
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/www/* $(1)/www/webcam
+    else
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/www/stream_simple.html $(1)/www/webcam/index.html
+    endif
+endif
 endef
 
 $(eval $(call BuildPackage,gargoyle-mjpg-streamer))

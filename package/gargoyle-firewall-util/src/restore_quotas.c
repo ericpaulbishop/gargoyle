@@ -761,7 +761,7 @@ int main(int argc, char** argv)
 			}
 			if(cron_line_found)
 			{
-				fopen(crontab_file_path, "w");
+				crontab_file = fopen(crontab_file_path, "w");
 				for(line_index=0; line_index < num_lines; line_index++)
 				{
 					if(strcmp(cron_lines[line_index], crontab_line) != 0)

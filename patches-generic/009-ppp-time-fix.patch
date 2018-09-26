@@ -1,8 +1,8 @@
 --- /dev/null	2010-04-05 10:10:20.794553735 -0400
-+++ b/package/network/services/ppp/patches/510-better_compensate_time_change.patch	2010-04-22 14:55:22.000000000 -0400
++++ b/package/network/services/ppp/patches/590-better_compensate_time_change.patch	2010-04-22 14:55:22.000000000 -0400
 @@ -0,0 +1,155 @@
-+--- ppp-2.4.4/pppd/main.c	2010-04-22 14:48:55.000000000 -0400
-++++ ppp-new/pppd/main.c	2010-04-22 14:49:53.000000000 -0400
++--- a/pppd/main.c	2010-04-22 14:48:55.000000000 -0400
+++++ b/pppd/main.c	2010-04-22 14:49:53.000000000 -0400
 +@@ -228,7 +228,7 @@
 + 
 + /* Prototypes for procedures local to this file. */

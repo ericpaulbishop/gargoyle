@@ -1,7 +1,29 @@
---- a/package/network/services/relayd/files/relay.hotplug	2016-03-15 22:17:41.922342700 +1100
-+++ b/package/network/services/relayd/files/relay.hotplug	2016-03-15 22:22:46.192371400 +1100
-@@ -1,2 +1,13 @@
- #!/bin/sh
+--- a/package/network/services/relayd/Makefile	2018-03-13 11:01:52.719073558 -0400
++++ b/package/network/services/relayd/Makefile	2018-03-14 12:34:40.097347760 -0400
+@@ -37,6 +37,8 @@
+ 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/relayd $(1)/usr/sbin/relayd
+ 	$(INSTALL_DIR) $(1)/etc/init.d
+ 	$(INSTALL_BIN) ./files/relay.init $(1)/etc/init.d/relayd
++	$(INSTALL_DIR) $(1)/etc/hotplug.d/iface
++	$(INSTALL_DATA) ./files/relay.hotplug $(1)/etc/hotplug.d/iface/30-relay
+ endef
+ 
+ $(eval $(call BuildPackage,relayd))
+--- a/package/network/services/relayd/files/relay.init	2018-03-13 11:01:52.719073558 -0400
++++ b/package/network/services/relayd/files/relay.init	2018-03-14 12:32:42.665370896 -0400
+@@ -99,7 +99,7 @@
+ service_triggers()
+ {
+ 	procd_add_reload_trigger "network"
+-	procd_add_raw_trigger "interface.*" 2000 /etc/init.d/relayd reload
++	# procd_add_raw_trigger "interface.*" 2000 /etc/init.d/relayd reload
+ }
+ 
+ start_service() {
+--- /dev/null	2018-03-02 18:46:38.668019591 -0500
++++ b/package/network/services/relayd/files/relay.hotplug	2018-03-14 12:33:09.853365273 -0400
+@@ -0,0 +1,13 @@
++#!/bin/sh
 +#enable access from client network
 +[ "$INTERFACE" = wwan ] || exit 0
 +[ "$ACTION" = ifup -o "$ACTION" = ifupdate ] || exit 0
@@ -12,5 +34,5 @@
 +uci commit network
 +logger -t relayd "Assigning $ip to bridge interface"
 +
- /etc/init.d/relayd enabled && /etc/init.d/relayd start
++/etc/init.d/relayd enabled && /etc/init.d/relayd start
 +logger -t relayd "Reloading relayd due to $ACTION of $INTERFACE ($DEVICE)"

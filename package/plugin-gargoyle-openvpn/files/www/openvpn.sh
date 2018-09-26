@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "connection" -p "openvpn" -c "internal.css" -j "openvpn.js table.js" -z "openvpn.js" openvpn_gargoyle ddns_gargoyle uhttpd dropbear firewall tor gargoyle -i
+	gargoyle_header_footer -h -s "connection" -p "openvpn" -c "internal.css" -j "openvpn.js table.js" -z "openvpn.js" -i openvpn_gargoyle ddns_gargoyle uhttpd dropbear firewall tor gargoyle
 %>
 
 <script>
@@ -119,10 +119,10 @@
 					<label class="col-xs-5" for='openvpn_server_cipher' id='openvpn_server_cipher_label'><%~ OCiph %>:</label>
 					<span class="col-xs-7">
 						<select class="form-control" id='openvpn_server_cipher'>
-							<option value='BF-CBC:128'>Blowfish-CBC 128bit</option>
-							<option value='BF-CBC:256'>Blowfish-CBC 256bit</option>
 							<option value='AES-128-CBC'>AES-CBC 128bit</option>
 							<option value='AES-256-CBC'>AES-CBC 256bit</option>
+							<option value='AES-128-GCM'>AES-GCM 128bit</option>
+							<option value='AES-256-GCM'>AES-GCM 256bit</option>
 						</select>
 					</span>
 				</div>
@@ -302,7 +302,6 @@
 
 						<div id='openvpn_client_cipher_other_container' class="row form-group">
 							<span class="col-xs-7 col-xs-offset-5"><input type='text' class="form-control" onkeyup="updateClientConfigTextFromControls()" id="openvpn_client_cipher_other" />&nbsp;<em><%~ Cphr %></em></span>
-							<span class="col-xs-7 col-xs-offset-5"><input type='text' class="form-control" onkeyup="updateClientConfigTextFromControls()" id="openvpn_client_key_other" />&nbsp;<em><%~ Keyopt %></em></span>
 						</div>
 
 						<div id='openvpn_client_block_nonovpn_container' class="row form-group">

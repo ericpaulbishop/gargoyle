@@ -25,14 +25,6 @@ fi
 
 
 
-#button handlers
-cd /etc/rc.button
-for file in * ; do
-	if [ "$file" != "gargoyle_button_handler" ] ; then
-		rm "$file"
-		ln -s "gargoyle_button_handler" "$file"
-	fi
-done
 
 
 settings_not_preserved=$(uci get gargoyle.global.is_first_boot 2>/dev/null)
@@ -120,8 +112,39 @@ config_cb()
 }
 config_load "gargoyle"
 
+#buttons
+is_tplink_wr841_v9_v10_v11=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine/ {print $2}' /proc/cpuinfo | grep "TL\-WR841N\/ND v9")
+is_tplink_archer=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine/ {print $2}' /proc/cpuinfo | grep "TP-LINK Archer")
+keycode='wps'
+if [ -n "$is_tplink_wr841_v9_v10_v11" ] || [ -n "$is_tplink_archer" ] ; then
+	keycode='rfkill'
+fi
+uci set system.reboot_button=button
+uci set system.reboot_button.button="$keycode"
+uci set system.reboot_button.action='released'
+uci set system.reboot_button.handler='logger reboot ; /usr/lib/gargoyle/reboot.sh ;'
+uci set system.reboot_button.min='3'
+uci set system.reboot_button.max='90'
+uci set system.reset_button=button
+uci set system.reset_button.button='reset'
+uci set system.reset_button.action='released'
+uci set system.reset_button.handler='logger restore defaults ; /sbin/firstboot -y; reboot ;'
+uci set system.reset_button.min='3'
+uci set system.reset_button.max='90'
 
 
+
+
+#button handlers
+cd /etc/rc.button
+for file in * ; do
+	if [ "$file" != "gargoyle_button_handler" ] && [ "$file" != "failsafe" ] ; then
+		if [ "$file" != "rfkill" ] || [ "$keycode" = "rfkill" ] ; then
+			rm "$file"
+			ln -s "gargoyle_button_handler" "$file"
+		fi
+	fi
+done
 
 #save changes to uci
 uci commit
@@ -144,37 +167,4 @@ cat << EOF >/etc/sysupgrade.conf
 /etc/tor
 EOF
 
-#rfkill on GL-AR150
-is_ar150=$( cat /proc/cpuinfo | grep GL_ar150 )
-if [ -n "$is_ar150" ] ; then
-
-	mkdir -p '/etc/hotplug.d/button'
-	cat << 'EOF' > '/etc/hotplug.d/button/00-ar150-rfkill-switch'
-#!/bin/sh
-
-. /lib/functions.sh
-
-local rfkill_state=0
-
-wifi_rfkill_set() {
-	uci set wireless.$1.disabled=$rfkill_state
-}
-
-
-is_ar150=$( cat /proc/cpuinfo | grep GL_ar150 )
-if [ -n "$is_ar150" ] && [ "$BUTTON" = "BTN_8" ] ; then
-	if [ "$ACTION" = "released" ] ; then
-		rfkill_state=1
-		logger "taking down wifi in response to switch"
-	else
-		rfkill_state=0
-		logger "putting up wifi in response to switch"
-	fi
-	config_load wireless
-	config_foreach wifi_rfkill_set wifi-device
-	uci commit wireless
-	wifi up
-fi
-EOF
-fi
 

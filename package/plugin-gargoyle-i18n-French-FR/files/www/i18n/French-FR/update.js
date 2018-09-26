@@ -20,4 +20,4 @@ upS.UErrBB="Le firmware contient un bootloader. Votre routeur ne peut être mis 
 upS.brcmT="Le fichier du firmware doit être du type .bin ou .trx";
 upS.ar71xxT="Le firmware doit être un fichier sysupgrade.bin";
 upS.othrT="Le firmware doit être un fichier image combinée (combined .img)";
-upS.mvebu="Le firmware doit être un fichier sysupgrade.tar";
+upS.mvebu="Le firmware doit être un fichier sysupgrade.bin";

@@ -26,7 +26,7 @@ fi
 	<div id="openvpn_server_fieldset" class="col-lg-6">
 		<div class="panel panel-default">
 			<div class="panel-heading">
-				<h3 class="panel-title"<%~ openvpn.ConnOC %></h3>
+				<h3 class="panel-title"><%~ openvpn.ConnOC %></h3>
 			</div>
 
 			<div class="panel-body">

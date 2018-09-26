@@ -22,7 +22,7 @@ include $(INCLUDE_DIR)/package.mk
 define Package/ewget
 	SECTION:=net
 	CATEGORY:=Network
-	DEPENDS:=+libericstools +libpolarssl
+	DEPENDS:=+libericstools +libmbedtls
 	TITLE:=embedded wget
 	URL:=http://www.gargoyle-router.com
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
@@ -50,7 +50,7 @@ define Build/Compile
 		STAGING_DIR="$(STAGING_DIR)" \
 		CFLAGS="$(TARGET_CFLAGS) -I$(STAGING_DIR)/usr/include" \
 		LDFLAGS="$(TARGET_LDFLAGS) -L$(STAGING_DIR)/usr/lib" \
-		USE_POLARSSL="1" \
+		USE_MBEDTLS="1" \
 		USE_ERICSTOOLS="1" \
 		all
 	

@@ -1,0 +1,11 @@
+--- a/easy-rsa/2.0/openssl-1.0.0.cnf
++++ b/easy-rsa/2.0/openssl-1.0.0.cnf
+@@ -53,7 +53,7 @@ x509_extensions	= usr_cert		# The extent
+ # crl_extensions	= crl_ext
+ 
+ default_days	= 3650			# how long to certify for
+-default_crl_days= 30			# how long before next CRL
++default_crl_days= 3650			# how long before next CRL
+ default_md	= sha256		# use public key default MD
+ preserve	= no			# keep passed DN ordering
+ 

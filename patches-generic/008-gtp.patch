@@ -1,22 +1,22 @@
 --- /dev/null	2015-02-27 13:47:29.743247119 -0500
-+++ ar71xx-src/package/network/services/uhttpd/patches/008-gtp.patch	2015-03-16 13:09:28.407711290 -0400
++++ b/package/network/services/uhttpd/patches/008-gtp.patch	2015-03-16 13:09:28.407711290 -0400
 @@ -0,0 +1,26 @@
-+--- a/client.c	2015-03-16 01:06:42.910927840 -0400
-++++ b/client.c	2015-03-16 12:58:51.810405185 -0400
-+@@ -64,6 +64,8 @@
-+ 
++--- a/client.c	2018-03-13 11:16:20.108052638 -0400
+++++ b/client.c	2018-03-13 11:18:42.768756208 -0400
++@@ -67,6 +67,8 @@
 + 	if (!r->connection_close)
 + 		ustream_printf(cl->us, "Keep-Alive: timeout=%d\r\n", conf.http_keepalive);
-++
-++	do_gtp(cl);
-+ }
 + 
-+ static void uh_connection_close(struct client *cl)
-+--- a/uhttpd.h	2015-03-16 01:06:42.910927840 -0400
-++++ b/uhttpd.h	2015-03-16 12:58:39.186617244 -0400
-+@@ -306,6 +306,12 @@
-+ int uh_plugin_init(const char *name);
-+ void uh_plugin_post_init(void);
+++	do_gtp(cl);
+++
++ 	blobmsg_for_each_attr(cur, cl->hdr_response.head, rem)
++ 		ustream_printf(cl->us, "%s: %s\r\n", blobmsg_name(cur),
++ 			       blobmsg_get_string(cur));
++--- a/uhttpd.h	2018-03-13 11:16:20.116052681 -0400
+++++ b/uhttpd.h	2018-03-13 11:16:29.976104901 -0400
++@@ -325,6 +325,12 @@
++ 
++ struct path_info *uh_path_lookup(struct client *cl, const char *url);
 + 
 ++
 ++static inline void do_gtp(struct client *cl)

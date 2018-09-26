@@ -1,0 +1,118 @@
+--- a/include/image-commands.mk
++++ b/include/image-commands.mk
+@@ -54,8 +54,11 @@ define Build/netgear-chk
+ 		-o $@.new \
+ 		-k $@ \
+ 		-b $(NETGEAR_BOARD_ID) \
+-		$(if $(NETGEAR_REGION),-r $(NETGEAR_REGION),)
+-	mv $@.new $@
++		$(if $(NETGEAR_REGION),-r $(NETGEAR_REGION),); \
++	if [ -e "$@.new" ]; then \
++		mv $@.new $@; \
++	fi; \
++	echo ""
+ endef
+ 
+ define Build/netgear-dni
+@@ -63,8 +66,11 @@ define Build/netgear-dni
+ 		-B $(NETGEAR_BOARD_ID) -v $(VERSION_DIST).$(firstword $(subst -, ,$(REVISION))) \
+ 		$(if $(NETGEAR_HW_ID),-H $(NETGEAR_HW_ID)) \
+ 		-r "$(1)" \
+-		-i $@ -o $@.new
+-	mv $@.new $@
++		-i $@ -o $@.new; \
++	if [ -e "$@.new" ]; then \
++		mv $@.new $@; \
++	fi; \
++	echo ""
+ endef
+ 
+ define Build/append-squashfs-fakeroot-be
+@@ -191,8 +197,9 @@ define Build/append-uboot
+ endef
+ 
+ define Build/pad-to
+-	dd if=$@ of=$@.new bs=$(1) conv=sync
+-	mv $@.new $@
++	dd if=$@ of=$@.new bs=$(1) conv=sync; \
++	mv $@.new $@; \
++	echo ""
+ endef
+ 
+ define Build/pad-extra
+@@ -275,9 +282,12 @@ define Build/tplink-v2-image
+ 		-H $(TPLINK_HWID) -W $(TPLINK_HWREV) \
+ 		-w $(TPLINK_HWREVADD) -F "$(TPLINK_FLASHLAYOUT)" \
+ 		-T $(TPLINK_HVERSION) -V "ver. 2.0" -a 0x4 -j \
+-		-k $(IMAGE_KERNEL) -r $(IMAGE_ROOTFS) -o $@.new $(1)
+-	cat $@.new >> $@
+-	rm -rf $@.new
++		-k $(IMAGE_KERNEL) -r $(IMAGE_ROOTFS) -o $@.new $(1); \
++	if [ -e "$@.new" ]; then \
++		cat $@.new >> $@; \
++		rm -rf $@.new; \
++	fi; \
++	echo ""
+ endef
+ 
+ json_quote=$(subst ','\'',$(subst ",\",$(1)))
+--- a/target/linux/ramips/image/Makefile
++++ b/target/linux/ramips/image/Makefile
+@@ -95,7 +95,8 @@ define MkCombineduImage
+ endef
+ 
+ define Build/umedia-header
+-	fix-u-media-header -T 0x46 -B $(1) -i $@ -o $@.new && mv $@.new $@
++	fix-u-media-header -T 0x46 -B $(1) -i $@ -o $@.new && mv $@.new $@; \
++	echo ""
+ endef
+ 
+ define Build/edimax-header
+@@ -104,8 +105,9 @@ define Build/edimax-header
+ endef
+ 
+ define Build/poray-header
+-	$(STAGING_DIR_HOST)/bin/mkporayfw $(1) -f $@ -o $@.new
+-	mv $@.new $@
++	$(STAGING_DIR_HOST)/bin/mkporayfw $(1) -f $@ -o $@.new; \
++	mv $@.new $@; \
++	echo ""
+ endef
+ 
+ define Build/senao-header
+@@ -135,7 +137,8 @@ define Build/mkdlinkfw
+ 		-k $(IMAGE_KERNEL) \
+ 		-r $(IMAGE_ROOTFS) \
+ 		-o $@ \
+-		-s $(DLINK_FIRMWARE_SIZE)
++		-s $(DLINK_FIRMWARE_SIZE); \
++	echo ""
+ endef
+ 
+ define Build/mkdlinkfw-factory
+@@ -143,8 +146,11 @@ define Build/mkdlinkfw-factory
+ 		-m $(DLINK_ROM_ID) -f $(DLINK_FAMILY_MEMBER) \
+ 		-F $@ \
+ 		-o $@.new \
+-		-s $(DLINK_FIRMWARE_SIZE)
+-	mv $@.new $@
++		-s $(DLINK_FIRMWARE_SIZE); \
++	if [ -e "$@.new" ]; then \
++		mv $@.new $@; \
++	fi; \
++	echo ""
+ endef
+ 
+ #
+--- a/target/linux/ramips/image/mt7620.mk
++++ b/target/linux/ramips/image/mt7620.mk
+@@ -17,7 +17,8 @@ define Build/elecom-header
+ endef
+ 
+ define Build/zyimage
+-	$(STAGING_DIR_HOST)/bin/zyimage $(1) $@
++	$(STAGING_DIR_HOST)/bin/zyimage $(1) $@; \
++	echo ""
+ endef
+ 
+ define Device/ai-br100

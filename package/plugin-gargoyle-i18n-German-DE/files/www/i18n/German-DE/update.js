@@ -20,4 +20,4 @@ upS.UErrBB="Firmware enthält einen Bootloader. Ihr Router kann nicht aktualisie
 upS.brcmT="Firmware sollte eine .bin oder .trx Datei sein.";
 upS.ar71xxT="Firmware sollte ein sysupgrade.bin sein.";
 upS.othrT="Firmware sollte eine kombinierte .img Datei sein";
-upS.mvebu="Firmware sollte ein sysupgrade.tar sein.";
+upS.mvebu="Firmware sollte ein sysupgrade.bin sein.";

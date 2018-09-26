@@ -1,0 +1,36 @@
+--- a/target/linux/ar71xx/image/legacy.mk	2018-03-13 11:01:52.331066147 -0400
++++ b/target/linux/ar71xx/image/legacy.mk	2018-03-17 00:33:24.755555556 -0400
+@@ -835,7 +839,8 @@
+ 			-k $(KDIR_TMP)/vmlinux-$(2).uImage \
+ 			-r $(KDIR)/root.$(1) \
+ 			-o $(call imgname,$(1),$(2))-factory.img; \
+-	fi
++	fi ; \
++	echo ""
+ endef
+ 
+ 
+--- a/target/linux/ar71xx/image/generic.mk
++++ b/target/linux/ar71xx/image/generic.mk
+@@ -33,13 +33,16 @@ define Build/mkwrggimg
+ endef
+ 
+ define Build/mkdapimg2
+-	$(STAGING_DIR_HOST)/bin/mkdapimg2 \
++	if [ -e "$@" ]; then \
++		$(STAGING_DIR_HOST)/bin/mkdapimg2 \
+ 		-i $@ -o $@.new \
+ 		-s $(DAP_SIGNATURE) \
+ 		-v $(VERSION_DIST)-$(firstword $(subst +, ,$(firstword $(subst -, ,$(REVISION))))) \
+-		-r Default \
+-		$(if $(1),-k $(1))
+-	mv $@.new $@
++		-r Default; \
++		$(if $(1),-k $(1)) \
++		mv $@.new $@; \
++	fi ; \
++	echo ""
+ endef
+ 
+ define Build/netgear-squashfs
+

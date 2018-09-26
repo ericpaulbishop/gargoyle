@@ -150,7 +150,7 @@ function getWifiData()
 
 function parseWifiData(rawScanOutput)
 {
-	if((rawScanOutput != null) && (rawScanOutput.indexOf("\n") != 0) && (rawScanOutput.indexOf("\r") != 0))
+	if((rawScanOutput != null) && (rawScanOutput.indexOf("\n") != 0) && (rawScanOutput.indexOf("\r") != 0) && (rawScanOutput.match(/command failed: Resource busy/g) == null))
 	{
 		var parsed = [ [],[],[],[],[],[],[],[],[],[] ];
 		//var cells = rawScanOutput.split(/BSS [A-Fa-f0-9]{2}[:]/g);

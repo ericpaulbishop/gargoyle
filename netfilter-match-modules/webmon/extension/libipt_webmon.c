@@ -340,7 +340,7 @@ void _init(void)
 static void param_problem_exit_error(char* msg)
 {
 	#ifdef xtables_error
-		xtables_error(PARAMETER_PROBLEM, msg);
+		xtables_error(PARAMETER_PROBLEM, "%s", msg);
 	#else
 		exit_error(PARAMETER_PROBLEM, msg);
 	#endif

@@ -29,6 +29,8 @@
 #include <netdb.h>
 #include <string.h>
 #include <errno.h>
+#include <signal.h>
+#include <pthread.h>
 
 
 #ifndef FALSE
@@ -137,8 +139,6 @@ char *deb_extract(const char *package_filename, FILE *out_stream,
 		const char *filename, int *err);
 
 extern int unzip(FILE *l_in_file, FILE *l_out_file);
-extern int gz_close(int gunzip_pid);
-extern FILE *gz_open(FILE *compressed_file, int *pid);
 
 int make_directory (const char *path, long mode, int flags);
 
@@ -270,6 +270,119 @@ extern void *__md5_buffer (const char *buffer, size_t len,
 char *file_md5sum_alloc(const char *file_name);
 
 
+/* Declarations of functions and data types used for SHA256 and SHA224 sum
+   library functions.
+   Copyright (C) 2005, 2006 Free Software Foundation, Inc.
+
+   This program is free software; you can redistribute it and/or modify it
+   under the terms of the GNU General Public License as published by the
+   Free Software Foundation; either version 2, or (at your option) any
+   later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software Foundation,
+   Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  */
+
+/* Structure to save state of computation between the single steps.  */
+struct sha256_ctx {
+	uint32_t state[8];
+
+	uint32_t total[2];
+	uint32_t buflen;
+	uint32_t buffer[32];
+};
+
+/* Initialize structure containing state of computation. */
+extern void sha256_init_ctx(struct sha256_ctx *ctx);
+
+/* Starting with the result of former calls of this function (or the
+   initialization function update the context for the next LEN bytes
+   starting at BUFFER.
+   It is necessary that LEN is a multiple of 64!!! */
+extern void sha256_process_block(const void *buffer, size_t len,
+				 struct sha256_ctx *ctx);
+
+/* Starting with the result of former calls of this function (or the
+   initialization function update the context for the next LEN bytes
+   starting at BUFFER.
+   It is NOT required that LEN is a multiple of 64.  */
+extern void sha256_process_bytes(const void *buffer, size_t len,
+				 struct sha256_ctx *ctx);
+
+/* Process the remaining bytes in the buffer and put result from CTX
+   in first 32 (28) bytes following RESBUF.  The result is always in little
+   endian byte order, so that a byte-wise output yields to the wanted
+   ASCII representation of the message digest.
+
+   IMPORTANT: On some systems it is required that RESBUF be correctly
+   aligned for a 32 bits value.  */
+extern void *sha256_finish_ctx(struct sha256_ctx *ctx, void *resbuf);
+
+/* Put result from CTX in first 32 (28) bytes following RESBUF.  The result is
+   always in little endian byte order, so that a byte-wise output yields
+   to the wanted ASCII representation of the message digest.
+
+   IMPORTANT: On some systems it is required that RESBUF is correctly
+   aligned for a 32 bits value.  */
+extern void *sha256_read_ctx(const struct sha256_ctx *ctx, void *resbuf);
+
+/* Compute SHA256 (SHA224) message digest for bytes read from STREAM.  The
+   resulting message digest number will be written into the 32 (28) bytes
+   beginning at RESBLOCK.  */
+extern int sha256_stream(FILE * stream, void *resblock);
+
+/* Compute SHA256 (SHA224) message digest for LEN bytes beginning at BUFFER.  The
+   result is always in little endian byte order, so that a byte-wise
+   output yields to the wanted ASCII representation of the message
+   digest.  */
+extern void *sha256_buffer(const char *buffer, size_t len, void *resblock);
+
+char *file_sha256sum_alloc(const char *file_name);
+
+
+
+/*
+ *  Copyright (C) 2016 Jo-Philipp Wich <jo@mein.io>
+ *
+ *  Zlib decrompression utility routines.
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Library General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+
+struct gzip_handle {
+	FILE *file;
+	struct gzip_handle *gzip;
+
+	pid_t pid;
+	int rfd, wfd;
+	struct sigaction pipe_sa;
+	pthread_t thread;
+};
+
+int gzip_exec(struct gzip_handle *zh, const char *filename);
+ssize_t gzip_read(struct gzip_handle *zh, void *buf, ssize_t len);
+ssize_t gzip_copy(struct gzip_handle *zh, FILE * out, ssize_t len);
+int gzip_close(struct gzip_handle *zh);
+FILE *gzip_fdopen(struct gzip_handle *zh, const char *filename);
+
+#define gzip_seek(zh, len) gzip_copy(zh, NULL, len)
 
 
 #endif /* __BBTARGZ_H__ */
