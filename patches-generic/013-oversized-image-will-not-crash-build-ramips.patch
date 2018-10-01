@@ -80,7 +80,21 @@
  endef
  
  define Build/senao-header
-@@ -135,7 +137,8 @@ define Build/mkdlinkfw
+--- a/target/linux/ramips/image/Makefile
++++ b/target/linux/ramips/image/Makefile
+@@ -125,8 +125,9 @@ define Build/seama-seal
+ endef
+ 
+ define Build/wrg-header
+-	mkwrgimg -i $@ -d "/dev/mtdblock/2" -s $(1) -o $@.new
+-	mv $@.new $@
++	mkwrgimg -i $@ -d "/dev/mtdblock/2" -s $(1) -o $@.new; \
++	mv $@.new $@; \
++	echo ""
+ endef
+ 
+ # combine kernel and rootfs into one image
+@@ -137,7 +139,8 @@ define Build/mkdlinkfw
  		-k $(IMAGE_KERNEL) \
  		-r $(IMAGE_ROOTFS) \
  		-o $@ \
@@ -90,7 +104,7 @@
  endef
  
  define Build/mkdlinkfw-factory
-@@ -143,8 +146,11 @@ define Build/mkdlinkfw-factory
+@@ -145,8 +148,11 @@ define Build/mkdlinkfw-factory
  		-m $(DLINK_ROM_ID) -f $(DLINK_FAMILY_MEMBER) \
  		-F $@ \
  		-o $@.new \
@@ -116,3 +130,43 @@
  endef
  
  define Device/ai-br100
+--- a/target/linux/ramips/image/rt305x.mk
++++ b/target/linux/ramips/image/rt305x.mk
+@@ -2,18 +2,21 @@
+ # RT305X Profiles
+ #
+ define Build/buffalo-tftp-header
+-  ( \
++  if [ -e "$@" ]; then ( \
+     echo -n -e "# Airstation FirmWare\nrun u_fw\nreset\n\n" | \
+       dd bs=512 count=1 conv=sync; \
+     dd if=$@; \
+   ) > $@.tmp && \
+-  $(STAGING_DIR_HOST)/bin/buffalo-tftp -i $@.tmp -o $@.new
+-  mv $@.new $@
++  $(STAGING_DIR_HOST)/bin/buffalo-tftp -i $@.tmp -o $@.new; \
++  mv $@.new $@; \
++  fi ; \
++  echo ""
+ endef
+ 
+ define Build/dap-header
+-	$(STAGING_DIR_HOST)/bin/mkdapimg $(1) -i $@ -o $@.new
+-	mv $@.new $@
++	$(STAGING_DIR_HOST)/bin/mkdapimg $(1) -i $@ -o $@.new; \
++	mv $@.new $@; \
++	echo ""
+ endef
+ 
+ define Build/hilink-header
+@@ -22,8 +25,9 @@ define Build/hilink-header
+ endef
+ 
+ define Build/jcg-header
+-	$(STAGING_DIR_HOST)/bin/jcgimage -v $(1) -u $@ -o $@.new
+-	mv $@.new $@
++	$(STAGING_DIR_HOST)/bin/jcgimage -v $(1) -u $@ -o $@.new; \
++	mv $@.new $@; \
++	echo ""
+ endef
+
