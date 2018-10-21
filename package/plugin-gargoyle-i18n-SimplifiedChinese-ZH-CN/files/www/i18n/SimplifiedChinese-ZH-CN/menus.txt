@@ -17,7 +17,6 @@ gargoyle_display_status_qos="QoS分布";
 gargoyle_display_status_hosts="连接主机";
 gargoyle_display_status_connections="连接列表";
 gargoyle_display_connection="连接";
-gargoyle_display_connection_dyndns="动态域名";
 gargoyle_display_connection_dhcp="DHCP";
 gargoyle_display_connection_basic="基本设置";
 gargoyle_display_connection_routing="路由设置";
