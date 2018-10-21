@@ -16,8 +16,6 @@ config display display
 	option firewall_connlimits	'Connection Limits'
 	option firewall_restriction	'Restrictions'
 	option firewall_quotas		'Quotas'
-	option firewall_qosupload	'QoS (Upload)'
-	option firewall_qosdownload	'QoS (Download)'
 	option status			'Status'
 	option status_overview		'Overview'
 	option status_bandwidth		'Bandwidth Usage'
@@ -47,8 +45,6 @@ config scripts scripts
 	option firewall_connlimits	'connlimits.sh'
 	option firewall_restriction	'restriction.sh'
 	option firewall_quotas		'quotas.sh'
-	option firewall_qosupload	'qos_upload.sh'
-	option firewall_qosdownload	'qos_download.sh'
 	option status_overview		'overview.sh'
 	option status_bandwidth		'bandwidth.sh'
 	option status_bdist		'bandwidth_distribution.sh'
@@ -75,8 +71,6 @@ config 300 firewall
 	option connlimits	'115'
 	option restriction	'125'
 	option quotas		'175'
-	option qosupload	'200'
-	option qosdownload	'300'
 
 config 100 status
 	option overview		'100'

@@ -1,0 +1,13 @@
+#fallback is the string the web UI will use when the target language is not present
+
+fallback=QoS (Download)
+EN=QoS (Download)
+FR=QoS (Download)
+DE=QoS (Download)
+NO=QoS (Nedlasting)
+PL=QoS (pobieranie)
+BR=QoS Download
+RU=QoS (приём)
+ZH-CN=QoS（下载）
+SK=QoS (S»ahovanie)
+ES=QoS (Descarga)

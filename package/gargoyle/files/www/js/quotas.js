@@ -437,6 +437,20 @@ function setVisibility(controlDocument)
 		}
 		setAllowableSelections("quota_day", vals, names, controlDocument);
 	}
+
+	if(tcInstalled == "")
+	{
+		isHardCutoff = controlDocument.getElementById("quota_exceeded").value == "hard_cutoff" ? true : false;
+		controlDocument.getElementById("quotas_no_tc").style.display = isHardCutoff ? "none" : "block";
+		if(controlDocument.getElementById("add_quota_button") != null)
+		{
+			controlDocument.getElementById("add_quota_button").disabled = isHardCutoff ? false : true;
+		}
+		if(controlDocument.getElementById("quotas_edit_save_button") != null)
+		{
+			controlDocument.getElementById("quotas_edit_save_button").disabled = isHardCutoff ? false : true;
+		}
+	}
 }
 
 function getDaySeconds(offset)
@@ -1154,11 +1168,14 @@ function editQuota()
 
 
 	editQuotaWindow = openPopupWindow("quotas_edit.sh", "edit", 560, 600);
+	//pass in tc variable
+	editQuotaWindow.tcInstalled = tcInstalled;
 
 	var saveButton = createInput("button", editQuotaWindow.document);
 	var closeButton = createInput("button", editQuotaWindow.document);
 	saveButton.textContent = UI.CApplyChanges;
 	saveButton.className = "btn btn-primary";
+	saveButton.id = "quota_edit_save_button";
 	closeButton.textContent = UI.CDiscardChanges;
 	closeButton.className = "btn btn-warning";
 

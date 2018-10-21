@@ -25,6 +25,7 @@
 	}
 %>
 
+<div id="quotas_no_tc" class="alert alert-danger" role="alert" style="display: none;"><%~ NoTcErr %></div>
 <div class="row form-group">
 	<label class="col-xs-5" id="applies_to_label" for='applies_to_type'><%~ quotas.AppliesTo %>:</label>
 	<span class="col-xs-7">

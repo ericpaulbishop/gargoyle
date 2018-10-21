@@ -26,6 +26,7 @@ quotasStr.OneTimeQuotaError="You may have only one quota at a given time for hos
 quotasStr.OneNetworkQuotaError="You may have only one quota at a given time that applies to entire network";
 quotasStr.QuotaAddError="Could not add quota.";
 quotasStr.NA="NA"; //Not Applicable abbr
+quotasStr.NoTcErr="You need to install an additional package to use this option!";
 
 //template
 quotasStr.AppliesTo="Applies to";
