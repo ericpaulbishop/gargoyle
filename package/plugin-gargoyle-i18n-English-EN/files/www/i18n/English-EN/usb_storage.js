@@ -31,6 +31,7 @@ usbSStr.ExtrS="Extroot";
 usbSStr.ExtrOff="Disable External Root";
 usbSStr.ExtDt="External root detected on";
 usbSStr.ExtrWarn="When using an external root drive or <strong>extroot</strong> an external USB drive becomes the root drive on your router. This can enable a very large root drive, but if you remove the drive all configuration changes since the extroot was activated will be lost.";
+usbSStr.NoShareErr="You need to install an additional package to use shared disks!";
 
 //template
 usbSStr.Disk="Disk";

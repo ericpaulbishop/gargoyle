@@ -544,6 +544,8 @@ function resetData()
 	document.getElementById("shared_disks").style.display = storageDrives.length > 0 ? "block" : "none";
 	document.getElementById("disk_unmount").style.display = storageDrives.length > 0 ? "block" : "none";
 	document.getElementById("disk_format").style.display  = storageDrives.length > 0 || drivesWithNoMounts.length > 0 ? "block" : "none"
+	document.getElementById("save_button").disabled = fullVariant == "" ? true : false;
+	document.getElementById("usb_no_share").style.display = fullVariant == "" ? "block" : "none";
 
 
 	if(storageDrives.length > 0)

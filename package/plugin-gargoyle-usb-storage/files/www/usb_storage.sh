@@ -44,6 +44,8 @@
 	done
 	echo "var extroot_enabled=\""$(mount | grep "/dev/sd.*on /overlay" | wc -l)"\";"
 	echo "var extroot_drive=\""$(mount | awk '/\/dev\/sd.*on \/overlay/ {print $1}')"\";"
+
+	echo "var fullVariant=\""$(opkg list-installed 2>&1 | grep plugin-gargoyle-usb-storage-full)"\";"
 %>
 //-->
 </script>
@@ -63,8 +65,8 @@
 	</div>
 </div>
 
-<div id="shared_disks" class="row">
-	<div class="col-lg-6">
+<div class="row">
+	<div id="shared_disks" class="col-lg-6">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ SDisk %></h3>
