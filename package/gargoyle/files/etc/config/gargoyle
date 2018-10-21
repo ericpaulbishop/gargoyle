@@ -28,7 +28,6 @@ config display display
 	option status_hosts		'Connected Hosts'
 	option status_connections	'Connection List'
 	option connection		'Connection'
-	option connection_dyndns	'Dynamic DNS'
 	option connection_dhcp		'DHCP'
 	option connection_basic		'Basic'
 	option connection_routing	'Routing'
@@ -59,7 +58,6 @@ config scripts scripts
 	option status_qos		'qos_distribution.sh'
 	option status_hosts		'hosts.sh'
 	option status_connections	'conntrack.sh'
-	option connection_dyndns	'ddns.sh'
 	option connection_basic		'basic.sh'
 	option connection_dhcp		'dhcp.sh'
 	option connection_routing	'routing.sh'
@@ -93,7 +91,6 @@ config 100 status
 config 200 connection
 	option basic	'100'
 	option dhcp	'200'
-	option dyndns	'300'
 	option routing	'400'
 	option wol	'500'
 
@@ -116,5 +113,5 @@ config bandwidth_display bandwidth_display
 #	option plot3_type "none"
 
 config help help
-	option ddns_1		1
+#	option ddns_1		1
 
