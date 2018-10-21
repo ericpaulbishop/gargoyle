@@ -31,7 +31,7 @@ define Package/plugin-gargoyle-usb-storage/Default
 	DEPENDS+=+umbim +kmod-usb-net-cdc-mbim
 	DEPENDS+=+kmod-usb2 +kmod-usb-storage-uas +kmod-usb-net +kmod-usb-serial-option +kmod-usb-serial-qualcomm +kmod-usb-serial-wwan +kmod-usb-serial-sierrawireless
 	DEPENDS+=+kmod-usb-net-sierrawireless +e2fsprogs +kmod-usb-storage +kmod-usb-storage-extras +swap-utils +block-mount
-	DEPENDS+=+nfs-utils +badblocks +kmod-fs-ext4 +kmod-fs-msdos +kmod-fs-vfat +kmod-fs-hfsplus
+	DEPENDS+=+badblocks +kmod-fs-ext4 +kmod-fs-msdos +kmod-fs-vfat +kmod-fs-hfsplus
 	DEPENDS+=+kmod-nls-base +kmod-nls-cp1250 +kmod-nls-cp1251 +kmod-nls-cp437 +kmod-nls-cp775 +kmod-nls-cp850 
 	DEPENDS+=+kmod-nls-cp852 +kmod-nls-cp866 +kmod-nls-iso8859-1 +kmod-nls-iso8859-13 +kmod-nls-iso8859-15 
 	DEPENDS+=+kmod-nls-iso8859-2 +kmod-nls-koi8r +kmod-nls-utf8 +disktype +kmod-fuse +ntfs-3g
@@ -49,7 +49,7 @@ define Package/plugin-gargoyle-usb-storage-full
 $(call Package/plugin-gargoyle-usb-storage/Default)
 	TITLE+= (Full)
 	VARIANT:=full
-	DEPENDS+=+share-users +samba36-server +nfs-kernel-server +nfs-kernel-server-utils +vsftpd
+	DEPENDS+=+share-users +samba36-server +nfs-kernel-server +nfs-kernel-server-utils +nfs-utils +vsftpd
 endef
 
 define Package/plugin-gargoyle-usb-storage-noshare/description
