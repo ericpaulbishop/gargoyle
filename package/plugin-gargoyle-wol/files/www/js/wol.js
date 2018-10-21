@@ -26,8 +26,11 @@ function initWolTable()
 		var splitLine = nextLine.split(/[\t ]+/);
 		var mac = splitLine[3].toUpperCase();
 		var ip = splitLine[0];
-		dataList.push( [ getHostname(ip), ip, mac, createWakeUpButton() ] );
-		ipToHostAndMac[ip] = 1;
+		if(mac != "00:00:00:00:00:00")
+		{
+			dataList.push( [ getHostname(ip), ip, mac, createWakeUpButton() ] );
+			ipToHostAndMac[ip] = 1;
+		}
 	}
 
 	for(lineIndex=0; lineIndex < dhcpLeaseLines.length; lineIndex++)

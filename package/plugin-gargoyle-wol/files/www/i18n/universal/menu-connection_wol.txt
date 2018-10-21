@@ -1,0 +1,13 @@
+#fallback is the string the web UI will use when the target language is not present
+
+fallback=Wake on LAN
+EN=Wake on LAN
+FR=WakeOnLAN
+DE=Wake on LAN
+NO=Wake on LAN
+PL=Wake on LAN
+BR=Wake-on-LAN
+RU=Wake on LAN
+ZH-CN=局域网唤醒
+SK=Wake on LAN
+ES=Wake on LAN
