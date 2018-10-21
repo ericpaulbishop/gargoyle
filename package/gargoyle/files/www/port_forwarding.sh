@@ -82,6 +82,7 @@
 			</div>
 
 			<div class="panel-body">
+				<div id="upnp_no_miniupnpd" class="alert alert-danger" role="alert" style="display: none;"><%~ NoMiniupnpdErr %></div>
 				<div id="upnp_enabled_container" class="row form-group">
 					<span class="col-xs-12">
 						<input type="checkbox" id="upnp_enabled" onclick="setUpnpEnabled()" />
