@@ -21,7 +21,7 @@
 		echo "var fullQosEnabled = false;"
 	fi
 
-	echo "var tcInstalled=\""$(opkg list-installed 2>&1 | grep tc)"\";"
+	echo "var tcInstalled=\""$(opkg list-installed 2>&1 | grep "^tc")"\";"
 
 	print_quotas
 %>
