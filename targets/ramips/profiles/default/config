@@ -2667,6 +2667,7 @@ CONFIG_PACKAGE_usign=y
 CONFIG_PACKAGE_gargoyle=y
 CONFIG_PACKAGE_gargoyle-i18n=y
 CONFIG_PACKAGE_plugin-gargoyle-adblock=m
+CONFIG_PACKAGE_plugin-gargoyle-ddns=y
 CONFIG_PACKAGE_plugin-gargoyle-email-notifications=m
 CONFIG_PACKAGE_plugin-gargoyle-email-notifications-nossl=m
 CONFIG_PACKAGE_plugin-gargoyle-i18n-Arabic-AR=m
@@ -2686,6 +2687,7 @@ CONFIG_PACKAGE_plugin-gargoyle-minidlna=m
 CONFIG_PACKAGE_plugin-gargoyle-openvpn=m
 CONFIG_PACKAGE_plugin-gargoyle-ping-watchdog=m
 CONFIG_PACKAGE_plugin-gargoyle-pptp=m
+CONFIG_PACKAGE_plugin-gargoyle-qos=y
 CONFIG_PACKAGE_plugin-gargoyle-spectrum-analyser=m
 CONFIG_PACKAGE_plugin-gargoyle-spectrum-analyser-minimal=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-Gargoyle-Modern=m
@@ -2698,11 +2700,14 @@ CONFIG_PACKAGE_plugin-gargoyle-theme-horchata=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-light=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-xeye=m
 CONFIG_PACKAGE_plugin-gargoyle-tor=m
+CONFIG_PACKAGE_plugin-gargoyle-upnp=m
 CONFIG_PACKAGE_plugin-gargoyle-usb-printer=m
-CONFIG_PACKAGE_plugin-gargoyle-usb-storage=m
+CONFIG_PACKAGE_plugin-gargoyle-usb-storage-noshare=m
+CONFIG_PACKAGE_plugin-gargoyle-usb-storage-full=m
 CONFIG_PACKAGE_plugin-gargoyle-webcam=m
 CONFIG_PACKAGE_plugin-gargoyle-webshell=m
 CONFIG_PACKAGE_plugin-gargoyle-wifi-schedule=m
+CONFIG_PACKAGE_plugin-gargoyle-wol=y
 
 #
 # openwisp
@@ -3885,8 +3890,8 @@ CONFIG_PACKAGE_libxtables=y
 # SSL
 #
 # CONFIG_PACKAGE_libgnutls is not set
-CONFIG_PACKAGE_libmbedtls=y
-CONFIG_PACKAGE_libopenssl=m
+# CONFIG_PACKAGE_libmbedtls is not set
+CONFIG_PACKAGE_libopenssl=y
 CONFIG_OPENSSL_WITH_EC=y
 # CONFIG_OPENSSL_WITH_EC2M is not set
 # CONFIG_OPENSSL_WITH_SSL3 is not set
@@ -3924,9 +3929,9 @@ CONFIG_PACKAGE_libcurl=m
 #
 # SSL support
 #
-CONFIG_LIBCURL_MBEDTLS=y
+# CONFIG_LIBCURL_MBEDTLS is not set
 # CONFIG_LIBCURL_WOLFSSL is not set
-# CONFIG_LIBCURL_OPENSSL is not set
+CONFIG_LIBCURL_OPENSSL=y
 # CONFIG_LIBCURL_GNUTLS is not set
 # CONFIG_LIBCURL_NOSSL is not set
 
@@ -4052,8 +4057,8 @@ CONFIG_PACKAGE_libuclient=y
 # CONFIG_PACKAGE_libunwind is not set
 CONFIG_PACKAGE_libusb-1.0=m
 # CONFIG_PACKAGE_libusb-compat is not set
-CONFIG_PACKAGE_libustream-mbedtls=y
-# CONFIG_PACKAGE_libustream-openssl is not set
+# CONFIG_PACKAGE_libustream-mbedtls is not set
+CONFIG_PACKAGE_libustream-openssl=y
 # CONFIG_PACKAGE_libustream-wolfssl is not set
 CONFIG_PACKAGE_libuuid=m
 # CONFIG_PACKAGE_libv4l is not set
@@ -4281,7 +4286,7 @@ CONFIG_PACKAGE_iptables-mod-weburl=y
 # CONFIG_PACKAGE_iptaccount is not set
 # CONFIG_PACKAGE_iptgeoip is not set
 # CONFIG_PACKAGE_miniupnpc is not set
-# CONFIG_PACKAGE_miniupnpd is not set
+CONFIG_PACKAGE_miniupnpd=m
 # CONFIG_PACKAGE_nftables is not set
 # CONFIG_PACKAGE_shorewall is not set
 # CONFIG_PACKAGE_shorewall-core is not set
