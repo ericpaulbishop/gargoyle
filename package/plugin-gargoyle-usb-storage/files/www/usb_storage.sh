@@ -73,6 +73,7 @@
 			</div>
 
 			<div class="panel-body">
+				<div id="usb_no_share" class="alert alert-danger" role="alert" style="display: none;"><%~ NoShareErr %></div>
 				<div id='ftp_wan_access_container' class="row form-group">
 					<span class="col-xs-12">
 						<input type='checkbox' id='ftp_wan_access' onclick='updateWanFtpVisibility()'/>
