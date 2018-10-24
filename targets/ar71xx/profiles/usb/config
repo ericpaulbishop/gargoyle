@@ -1602,7 +1602,7 @@ CONFIG_PACKAGE_wireless-tools=y
 CONFIG_PACKAGE_gargoyle=y
 CONFIG_PACKAGE_gargoyle-i18n=y
 CONFIG_PACKAGE_plugin-gargoyle-adblock=m
-CONFIG_PACKAGE_plugin-gargoyle-ddns=y
+CONFIG_PACKAGE_plugin-gargoyle-ddns=m
 CONFIG_PACKAGE_plugin-gargoyle-email-notifications=m
 CONFIG_PACKAGE_plugin-gargoyle-email-notifications-nossl=m
 CONFIG_PACKAGE_plugin-gargoyle-i18n-Arabic-AR=m
@@ -1619,10 +1619,10 @@ CONFIG_PACKAGE_plugin-gargoyle-i18n-Spanish-ES=m
 CONFIG_PACKAGE_plugin-gargoyle-initd=m
 CONFIG_PACKAGE_plugin-gargoyle-logread=m
 CONFIG_PACKAGE_plugin-gargoyle-minidlna=m
-CONFIG_PACKAGE_plugin-gargoyle-openvpn=y
+CONFIG_PACKAGE_plugin-gargoyle-openvpn=m
 CONFIG_PACKAGE_plugin-gargoyle-ping-watchdog=m
 CONFIG_PACKAGE_plugin-gargoyle-pptp=m
-CONFIG_PACKAGE_plugin-gargoyle-qos=y
+CONFIG_PACKAGE_plugin-gargoyle-qos=m
 CONFIG_PACKAGE_plugin-gargoyle-spectrum-analyser=m
 CONFIG_PACKAGE_plugin-gargoyle-spectrum-analyser-minimal=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-Gargoyle-Modern=m
@@ -1635,14 +1635,14 @@ CONFIG_PACKAGE_plugin-gargoyle-theme-horchata=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-light=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-xeye=m
 CONFIG_PACKAGE_plugin-gargoyle-tor=m
-CONFIG_PACKAGE_plugin-gargoyle-upnp=y
-CONFIG_PACKAGE_plugin-gargoyle-usb-printer=y
+CONFIG_PACKAGE_plugin-gargoyle-upnp=m
+CONFIG_PACKAGE_plugin-gargoyle-usb-printer=m
+CONFIG_PACKAGE_plugin-gargoyle-usb-storage-full=m
 CONFIG_PACKAGE_plugin-gargoyle-usb-storage-noshare=y
-CONFIG_PACKAGE_plugin-gargoyle-usb-storage-full=y
 CONFIG_PACKAGE_plugin-gargoyle-webcam=m
 CONFIG_PACKAGE_plugin-gargoyle-webshell=m
 CONFIG_PACKAGE_plugin-gargoyle-wifi-schedule=m
-CONFIG_PACKAGE_plugin-gargoyle-wol=y
+CONFIG_PACKAGE_plugin-gargoyle-wol=m
 
 #
 # Boot Loaders
@@ -1670,7 +1670,7 @@ CONFIG_PACKAGE_u-boot-nbg460n_550n_550nh=y
 #
 # Extra packages
 #
-CONFIG_PACKAGE_ddns-gargoyle=y
+CONFIG_PACKAGE_ddns-gargoyle=m
 CONFIG_PACKAGE_plugin-gargoyle-ddns-cloudflare=m
 
 #
@@ -2558,7 +2558,7 @@ CONFIG_PACKAGE_libjpeg=m
 CONFIG_PACKAGE_libjson-c=y
 # CONFIG_PACKAGE_libltdl is not set
 # CONFIG_PACKAGE_liblua is not set
-CONFIG_PACKAGE_liblzo=y
+CONFIG_PACKAGE_liblzo=m
 # CONFIG_PACKAGE_libmatrixssl-nothread is not set
 CONFIG_PACKAGE_libmnl=y
 # CONFIG_PACKAGE_libmount is not set
@@ -2638,13 +2638,13 @@ CONFIG_PACKAGE_minidlna=m
 # File Transfer
 #
 CONFIG_PACKAGE_curl=m
-CONFIG_PACKAGE_vsftpd=y
+CONFIG_PACKAGE_vsftpd=m
 
 #
 # Filesystem
 #
-CONFIG_PACKAGE_nfs-kernel-server=y
-CONFIG_PACKAGE_nfs-kernel-server-utils=y
+CONFIG_PACKAGE_nfs-kernel-server=m
+CONFIG_PACKAGE_nfs-kernel-server-utils=m
 
 #
 # Firewall
@@ -2685,7 +2685,7 @@ CONFIG_PACKAGE_iptables-mod-timerange=y
 # CONFIG_PACKAGE_iptables-mod-ulog is not set
 CONFIG_PACKAGE_iptables-mod-webmon=y
 CONFIG_PACKAGE_iptables-mod-weburl=y
-CONFIG_PACKAGE_miniupnpd=y
+CONFIG_PACKAGE_miniupnpd=m
 # CONFIG_PACKAGE_nftables is not set
 
 #
@@ -2721,7 +2721,7 @@ CONFIG_PACKAGE_miniupnpd=y
 #
 # Printing
 #
-CONFIG_PACKAGE_p910nd=y
+CONFIG_PACKAGE_p910nd=m
 
 #
 # Routing and Redirection
@@ -2737,7 +2737,7 @@ CONFIG_PACKAGE_ip-full=y
 # CONFIG_PACKAGE_rdma is not set
 CONFIG_PACKAGE_relayd=y
 # CONFIG_PACKAGE_ss is not set
-CONFIG_PACKAGE_tc=y
+CONFIG_PACKAGE_tc=m
 
 #
 # THC-IPv6 attack and analyzing toolkit
@@ -2798,9 +2798,9 @@ CONFIG_PACKAGE_tc=y
 #
 # VPN
 #
-CONFIG_PACKAGE_openvpn-easy-rsa=y
+CONFIG_PACKAGE_openvpn-easy-rsa=m
 # CONFIG_PACKAGE_openvpn-nossl is not set
-CONFIG_PACKAGE_openvpn-openssl=y
+CONFIG_PACKAGE_openvpn-openssl=m
 CONFIG_OPENVPN_openssl_ENABLE_LZO=y
 # CONFIG_OPENVPN_openssl_ENABLE_X509_ALT_USERNAME is not set
 CONFIG_OPENVPN_openssl_ENABLE_SERVER=y
@@ -2893,10 +2893,10 @@ CONFIG_PACKAGE_ppp-mod-pptp=m
 # CONFIG_PACKAGE_pppdump is not set
 # CONFIG_PACKAGE_pppoe-discovery is not set
 # CONFIG_PACKAGE_pppstats is not set
-CONFIG_PACKAGE_qos-gargoyle=y
+CONFIG_PACKAGE_qos-gargoyle=m
 # CONFIG_PACKAGE_rssileds is not set
 # CONFIG_PACKAGE_samba36-client is not set
-CONFIG_PACKAGE_samba36-server=y
+CONFIG_PACKAGE_samba36-server=m
 CONFIG_PACKAGE_SAMBA_MAX_DEBUG_LEVEL=-1
 # CONFIG_PACKAGE_soloscli is not set
 # CONFIG_PACKAGE_tcpdump is not set
@@ -2911,7 +2911,7 @@ CONFIG_PACKAGE_umbim=y
 # CONFIG_PACKAGE_wget-default is not set
 # CONFIG_PACKAGE_wget-matrixssl is not set
 # CONFIG_PACKAGE_wget-nossl is not set
-CONFIG_PACKAGE_etherwake=y
+CONFIG_PACKAGE_etherwake=m
 # CONFIG_PACKAGE_wol is not set
 # CONFIG_PACKAGE_wpa-cli is not set
 # CONFIG_PACKAGE_wpa-supplicant is not set
@@ -2949,7 +2949,7 @@ CONFIG_PACKAGE_uboot-envtools=y
 # Compression
 #
 # CONFIG_PACKAGE_bzip2 is not set
-CONFIG_PACKAGE_zip=y
+CONFIG_PACKAGE_zip=m
 
 #
 # Disc
@@ -2992,7 +2992,7 @@ CONFIG_PACKAGE_e2fsprogs=y
 # CONFIG_PACKAGE_lsattr is not set
 # CONFIG_PACKAGE_mkdosfs is not set
 # CONFIG_PACKAGE_mkf2fs is not set
-CONFIG_PACKAGE_nfs-utils=y
+CONFIG_PACKAGE_nfs-utils=m
 CONFIG_PACKAGE_ntfs-3g=y
 # CONFIG_PACKAGE_NTFS-3G_USE_LIBFUSE is not set
 # CONFIG_PACKAGE_ntfs-3g-low is not set
@@ -3047,13 +3047,13 @@ CONFIG_PACKAGE_libjson-script=y
 # CONFIG_PACKAGE_mcookie is not set
 # CONFIG_PACKAGE_mount-utils is not set
 # CONFIG_PACKAGE_namei is not set
-CONFIG_PACKAGE_openssl-util=y
+CONFIG_PACKAGE_openssl-util=m
 # CONFIG_PACKAGE_opkg-more is not set
 # CONFIG_PACKAGE_owipcalc is not set
 # CONFIG_PACKAGE_parted is not set
 # CONFIG_PACKAGE_prlimit is not set
 # CONFIG_PACKAGE_rename is not set
-CONFIG_PACKAGE_share-users=y
+CONFIG_PACKAGE_share-users=m
 # CONFIG_PACKAGE_spidev-test is not set
 # CONFIG_PACKAGE_strace is not set
 # CONFIG_PACKAGE_strace_libunwind is not set
