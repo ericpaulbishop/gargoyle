@@ -334,7 +334,10 @@ function saveChanges()
 					else
 					{
 						var wdsCfgs = [ apcfg ]
-						//TODO: if dual band look at new control and set wdsCfgs from this if both are selected
+						if(dualBandSelected)
+						{
+							wdsCfgs.push(ap2cfg);
+						}
 
 						var wci;
 						for(wci=0; wci < wdsCfgs.length ; wci++)
