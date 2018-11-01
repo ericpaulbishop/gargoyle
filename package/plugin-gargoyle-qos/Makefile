@@ -70,7 +70,6 @@ define Package/plugin-gargoyle-qos/postinst
 		uci set gargoyle.display.firewall_qosdownload="$$menu_name"
 		uci set gargoyle.scripts.firewall_qosdownload="qos_download.sh"
 		uci set gargoyle.firewall.qosdownload="300"
-		uci commit
 		menu_name="QoS Distribution"
 		[ -n `which i18n` ] && {
 			mn=$$(i18n-menu gargoyle.display.status_qos)
