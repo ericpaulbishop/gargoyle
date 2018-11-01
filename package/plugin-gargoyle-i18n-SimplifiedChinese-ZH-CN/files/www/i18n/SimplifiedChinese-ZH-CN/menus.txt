@@ -11,7 +11,6 @@ gargoyle_display_status_bandwidth="流量统计";
 gargoyle_display_status_bdist="流量分布";
 gargoyle_display_status_webmon="Web监视";
 gargoyle_display_status_quotause="配额统计";
-gargoyle_display_status_qos="QoS分布";
 gargoyle_display_status_hosts="连接主机";
 gargoyle_display_status_connections="连接列表";
 gargoyle_display_connection="连接";

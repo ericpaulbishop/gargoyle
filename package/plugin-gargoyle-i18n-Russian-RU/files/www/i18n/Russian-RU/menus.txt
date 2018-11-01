@@ -11,7 +11,6 @@ gargoyle_display_status_bandwidth="Использование полосы пр�
 gargoyle_display_status_bdist="Распределение полосы пропускания"
 gargoyle_display_status_webmon="Мониторинг Интернета"
 gargoyle_display_status_quotause="Мониторинг квот"
-gargoyle_display_status_qos="Распределение QoS"
 gargoyle_display_status_hosts="Подключенные хосты"
 gargoyle_display_status_connections="Список подключений"
 gargoyle_display_connection="Подключение"

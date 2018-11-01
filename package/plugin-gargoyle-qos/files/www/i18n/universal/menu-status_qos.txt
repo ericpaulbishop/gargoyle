@@ -1,0 +1,13 @@
+#fallback is the string the web UI will use when the target language is not present
+
+fallback=QoS Distribution
+EN=QoS Distribution
+FR=QoS Distribution
+DE=QoS Distribution
+NO=QoS Fordeling
+PL=Podział QoS
+BR=Distribuição QoS
+RU=Распределение QoS
+ZH-CN=QoS分布
+SK=Distribúcia QoS
+ES=Distribución de QoS
