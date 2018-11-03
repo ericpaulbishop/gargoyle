@@ -3,9 +3,9 @@
 connection_menu_name="Wake On LAN"
 [ -x /usr/bin/i18n-menu ] && {
 	translation=$(i18n-menu gargoyle.display.connection_wol)
-	[ -n "$translation" ] && status_menu_name="$translation"
+	[ -n "$translation" ] && connection_menu_name="$translation"
 }
-uci set gargoyle.display.connection_wol="$status_menu_name"
+uci set gargoyle.display.connection_wol="$connection_menu_name"
 uci set gargoyle.scripts.connection_wol="wol.sh"
 uci set gargoyle.connection.wol="500"
 

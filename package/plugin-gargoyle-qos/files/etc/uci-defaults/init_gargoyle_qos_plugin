@@ -3,18 +3,18 @@
 firewall_menu_name="QoS (Upload)"
 [ -x /usr/bin/i18n-menu ] && {
 	translation=$(i18n-menu gargoyle.display.firewall_qosupload)
-	[ -n "$translation" ] && status_menu_name="$translation"
+	[ -n "$translation" ] && firewall_menu_name="$translation"
 }
-uci set gargoyle.display.firewall_qosupload="$status_menu_name"
+uci set gargoyle.display.firewall_qosupload="$firewall_menu_name"
 uci set gargoyle.scripts.firewall_qosupload="qos_upload.sh"
 uci set gargoyle.firewall.qosupload="200"
 		
 firewall_menu_name="QoS (Download)"
 [ -x /usr/bin/i18n-menu ] && {
 	translation=$(i18n-menu gargoyle.display.firewall_qosdownload)
-	[ -n "$translation" ] && status_menu_name="$translation"
+	[ -n "$translation" ] && firewall_menu_name="$translation"
 }		
-uci set gargoyle.display.firewall_qosdownload="$status_menu_name"
+uci set gargoyle.display.firewall_qosdownload="$firewall_menu_name"
 uci set gargoyle.scripts.firewall_qosdownload="qos_download.sh"
 uci set gargoyle.firewall.qosdownload="300"
 

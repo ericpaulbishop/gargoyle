@@ -3,9 +3,9 @@
 connection_menu_name="Dynamic DNS"
 [ -x /usr/bin/i18n-menu ] && {
 	translation=$(i18n-menu gargoyle.display.connection_dyndns)
-	[ -n "$translation" ] && status_menu_name="$translation"
+	[ -n "$translation" ] && connection_menu_name="$translation"
 }
-uci set gargoyle.display.connection_dyndns="$status_menu_name"
+uci set gargoyle.display.connection_dyndns="$connection_menu_name"
 uci set gargoyle.scripts.connection_dyndns="ddns.sh"
 uci set gargoyle.connection.dyndns="300"
 uci set gargoyle.help=help
