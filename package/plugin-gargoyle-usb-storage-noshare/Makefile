@@ -8,7 +8,7 @@
 
 include $(TOPDIR)/rules.mk
 
-PKG_NAME:=plugin_gargoyle_usb_storage
+PKG_NAME:=plugin_gargoyle_usb_storage_noshare
 PKG_VERSION:=$(GARGOYLE_VERSION)
 ifeq ($(GARGOYLE_VERSION),)
      PKG_VERSION:=1.0.0
@@ -20,11 +20,11 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/plugin-gargoyle-usb-storage/Default
+define Package/plugin-gargoyle-usb-storage-noshare
 	SECTION:=admin
 	CATEGORY:=Administration
 	SUBMENU:=Gargoyle Web Interface
-	TITLE:=USB Storage Support for Gargoyle
+	TITLE:=USB Storage Support for Gargoyle (No share)
 	DEPENDS:=+gargoyle +fdisk +blkid 
 	DEPENDS+=+libusb-1.0 +chat +kmod-usb-acm +kmod-usb-serial +comgt +comgt-ncm +usb-modeswitch
 	DEPENDS+=+kmod-usb-wdm +kmod-usb-net-qmi-wwan +uqmi +kmod-usb-net-cdc-ncm +kmod-usb-net-huawei-cdc-ncm +kmod-usb-net-cdc-ether +kmod-usb-net-rndis
@@ -39,30 +39,12 @@ define Package/plugin-gargoyle-usb-storage/Default
 	PKGARCH:=all
 endef
 
-define Package/plugin-gargoyle-usb-storage-noshare
-$(call Package/plugin-gargoyle-usb-storage/Default)
-	TITLE+= (No share)
-	VARIANT:=noshare
-endef
-
-define Package/plugin-gargoyle-usb-storage-full
-$(call Package/plugin-gargoyle-usb-storage/Default)
-	TITLE+= (Full)
-	VARIANT:=full
-	DEPENDS+=+share-users +samba36-server +nfs-kernel-server +nfs-kernel-server-utils +nfs-utils +vsftpd
-endef
-
 define Package/plugin-gargoyle-usb-storage-noshare/description
 	USB Storage Support for Gargoyle (without CIFS/FTP/SMB sharing)
 endef
 
-define Package/plugin-gargoyle-usb-storage-full/description
-	USB Storage Support for Gargoyle
-endef
-
 define Build/Prepare
 endef
-
 
 define Build/Configure
 endef
@@ -75,9 +57,4 @@ define Package/plugin-gargoyle-usb-storage-noshare/install
 	$(CP) ./files/* $(1)/
 endef
 
-define Package/plugin-gargoyle-usb-storage-full/install
-	$(INSTALL_DIR) $(1)
-endef
-
 $(eval $(call BuildPackage,plugin-gargoyle-usb-storage-noshare))
-$(eval $(call BuildPackage,plugin-gargoyle-usb-storage-full))
