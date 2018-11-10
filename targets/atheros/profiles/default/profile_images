@@ -1,6 +1,5 @@
--combined.squashfs.img
--squashfs.bin
--root.squashfs
--vmlinux.lzma
--vmlinux.gz
--vmlinux.elf
+-squashfs-rootfs.bin
+-squashfs-sysupgrade.bin
+-kernel.lzma
+-kernel.gz
+-kernel.elf
