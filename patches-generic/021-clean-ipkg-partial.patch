@@ -1,13 +1,12 @@
 --- a/include/rootfs.mk	2018-03-13 11:01:52.675072718 -0400
 +++ b/include/rootfs.mk	2018-03-13 15:10:48.123732989 -0400
-@@ -55,6 +55,15 @@
+@@ -55,6 +55,14 @@
    endef
  endif
  
 +ifdef CONFIG_CLEAN_IPKG_PARTIAL
 +  define clean_ipkg
-+	-rm -rf $(1)/usr/lib/opkg/info/*.postinst
-+	-find $(1)/usr/lib/opkg/* -type f -and -not -name '*.control' -and -not -name 'plugin-gargoyle-*' | $(XARGS) rm -rf
++	-find $(1)/usr/lib/opkg/info/* -type f -and -not -name '*.control' -and -not -name 'plugin-gargoyle-*' | $(XARGS) rm -rf
 +	-sed -i -ne '/^Require-User: /p' $(1)/usr/lib/opkg/info/*.control
 +	-find $(1)/usr/lib/opkg -empty | $(XARGS) rm -rf
 +  endef
