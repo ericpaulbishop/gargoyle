@@ -78,6 +78,17 @@ get_target_from_config()
 	cat .config | grep "^CONFIG_TARGET_BOARD=" | sed 's/\"$//g' | sed 's/^.*\"//g'
 }
 
+get_subtarget_from_config()
+{
+	config_file_path="$1"
+	cat .config | grep "^CONFIG_TARGET_SUBTARGET" | sed 's/^.*="\(.*\)"/\1/g'
+}
+
+get_pkg_arch_from_config()
+{
+	config_file_path="$1"
+	cat .config | grep "^CONFIG_TARGET_ARCH_PACKAGES" | sed 's/^.*="\(.*\)"/\1/g'
+}
 
 create_gargoyle_banner()
 {
@@ -692,13 +703,12 @@ for target in $targets ; do
 	fi
 
 	#copy packages to build/target directory
-	pkg_arch=$(grep "CONFIG_TARGET_ARCH_PACKAGES" .config | sed 's/^.*="\(.*\)"/\1/g')
+	pkg_arch=$(get_pkg_arch_from_config "./.config")
 	mkdir -p "$top_dir/built/$target/$profile_name"
 	package_base_dir=$(find "bin/packages/$pkg_arch" -name "base")
 	package_files=$(find "$package_base_dir" -name "*.ipk")
 	index_files=$(find "$package_base_dir" -name "Packa*")
 	if [ -n "$package_files" ] && [ -n "$index_files" ] ; then
-
 		for pf in $package_files ; do
 			cp "$pf" "$top_dir/built/$target/$default_profile/"
 		done
@@ -706,11 +716,25 @@ for target in $targets ; do
 			cp "$inf" "$top_dir/built/$target/$default_profile/"
 		done
 	fi
+	#copy build specific packages to build/target specific directory
+	subtarget_arch=$(get_subtarget_from_config "./.config")
+	mkdir -p "$top_dir/built/$target/$profile_name"_kernelspecific
+	package_base_dir=$(find "bin/targets/$target/$subtarget_arch" -name "packages")
+	package_files=$(find "$package_base_dir" -name "*.ipk")
+	index_files=$(find "$package_base_dir" -name "Packa*")
+	if [ -n "$package_files" ] && [ -n "$index_files" ] ; then
+		for pf in $package_files ; do
+			cp "$pf" "$top_dir/built/$target/$default_profile"_kernelspecific/
+		done
+		for inf in $index_files ; do
+			cp "$inf" "$top_dir/built/$target/$default_profile"_kernelspecific/
+		done
+	fi
 	
 	#copy images to images/target directory
 	mkdir -p "$top_dir/images/$target"
 	arch=$(ls bin/targets)
-	image_files=$(find "bin/targets/$arch/" 2>/dev/null)
+	image_files=$(find "bin/targets/$arch/$subtarget_arch" 2>/dev/null)
 	if [ ! -e "$targets_dir/$target/profiles/$default_profile/profile_images"  ]  ; then 
 		for imf in $image_files ; do
 			if [ ! -d "$imf" ] ; then
@@ -725,7 +749,7 @@ for target in $targets ; do
 		profile_images=$(cat "$targets_dir/$target/profiles/$default_profile/profile_images" 2>/dev/null)
 		for pi in $profile_images ; do
 			escaped_pi=$(echo $pi | sed 's/-/\\-/g')
-			candidates=$(find "bin/targets/$arch/" 2>/dev/null | grep "$escaped_pi" )
+			candidates=$(find "bin/targets/$arch/$subtarget_arch/" 2>/dev/null | grep "$escaped_pi" )
 			for c in $candidates ; do
 				if [ ! -d "$c" ] ; then
 					newname=$(echo "$c" | sed 's/^.*\///g' | sed "s/openwrt/gargoyle_$lower_short_gargoyle_version/g")
@@ -813,7 +837,7 @@ for target in $targets ; do
 		fi
 
 		#copy packages to build/target directory
-		pkg_arch=$(grep "CONFIG_TARGET_ARCH_PACKAGES" .config | sed 's/^.*="\(.*\)"/\1/g')
+		pkg_arch=$(get_pkg_arch_from_config "./.config")
 		mkdir -p "$top_dir/built/$target/$profile_name"
 		package_base_dir=$(find "bin/packages/$pkg_arch" -name "base")
 		package_files=$(find "$package_base_dir" -name "*.ipk")
@@ -826,7 +850,20 @@ for target in $targets ; do
 				cp "$inf" "$top_dir/built/$target/$profile_name/"
 			done
 		fi
-
+		#copy build specific packages to build/target specific directory
+		subtarget_arch=$(get_subtarget_from_config "./.config")
+		mkdir -p "$top_dir/built/$target/$profile_name"_kernelspecific
+		package_base_dir=$(find "bin/targets/$target/$subtarget_arch" -name "packages")
+		package_files=$(find "$package_base_dir" -name "*.ipk")
+		index_files=$(find "$package_base_dir" -name "Packa*")
+		if [ -n "$package_files" ] && [ -n "$index_files" ] ; then
+			for pf in $package_files ; do
+				cp "$pf" "$top_dir/built/$target/$profile_name"_kernelspecific/
+			done
+			for inf in $index_files ; do
+				cp "$inf" "$top_dir/built/$target/$profile_name"_kernelspecific/
+			done
+		fi
 
 
 	
@@ -840,7 +877,7 @@ for target in $targets ; do
 		profile_images=$(cat "$targets_dir/$target/profiles/$profile_name/profile_images" 2>/dev/null)
 		for pi in $profile_images ; do
 			escaped_pi=$(echo $pi | sed 's/-/\\-/g')
-			candidates=$(find "bin/targets/$arch/" 2>/dev/null | grep "$escaped_pi" )
+			candidates=$(find "bin/targets/$arch/$subtarget_arch/" 2>/dev/null | grep "$escaped_pi" )
 			for c in $candidates ; do
 				if [ ! -d "$c" ] ; then
 					newname=$(echo "$c" | sed 's/^.*\///g' | sed "s/openwrt/gargoyle_$lower_short_gargoyle_version/g")
