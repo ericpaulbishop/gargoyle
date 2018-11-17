@@ -717,9 +717,10 @@ for target in $targets ; do
 		done
 	fi
 	#copy build specific packages to build/target specific directory
+	openwrt_target=$(get_target_from_config "./.config")
 	subtarget_arch=$(get_subtarget_from_config "./.config")
 	mkdir -p "$top_dir/built/$target/$profile_name"_kernelspecific
-	package_base_dir=$(find "bin/targets/$target/$subtarget_arch" -name "packages")
+	package_base_dir=$(find "bin/targets/$openwrt_target/$subtarget_arch" -name "packages")
 	package_files=$(find "$package_base_dir" -name "*.ipk")
 	index_files=$(find "$package_base_dir" -name "Packa*")
 	if [ -n "$package_files" ] && [ -n "$index_files" ] ; then
@@ -851,9 +852,10 @@ for target in $targets ; do
 			done
 		fi
 		#copy build specific packages to build/target specific directory
+		openwrt_target=$(get_target_from_config "./.config")
 		subtarget_arch=$(get_subtarget_from_config "./.config")
 		mkdir -p "$top_dir/built/$target/$profile_name"_kernelspecific
-		package_base_dir=$(find "bin/targets/$target/$subtarget_arch" -name "packages")
+		package_base_dir=$(find "bin/targets/$openwrt_target/$subtarget_arch" -name "packages")
 		package_files=$(find "$package_base_dir" -name "*.ipk")
 		index_files=$(find "$package_base_dir" -name "Packa*")
 		if [ -n "$package_files" ] && [ -n "$index_files" ] ; then
