@@ -254,7 +254,7 @@ function parseWifi(arpHash, wirelessDriver, lines, apsta)
 				[whost[1], "0", "0"],
 				[whost[0], whost[2], whost[1], whost[3], whost[4], whost[5]]
 				];
-		var mbs = wirelessDriver == "broadcom" ? macBitSig[0] : macBitSig[1] );
+		var mbs = wirelessDriver == "broadcom" ? macBitSig[0] : macBitSig[1];
 		mbs[0] = (mbs[0]).toUpperCase();
 		mbs[1] = mbs[1] + " Mbps";
 
