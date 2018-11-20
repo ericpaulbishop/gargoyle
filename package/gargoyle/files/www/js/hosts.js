@@ -244,22 +244,17 @@ function parseWifi(arpHash, wirelessDriver, lines, apsta)
 	//Host IP, Host MAC
 	var wifiTableData = [];
 	var lineIndex = 0;
-	if(wirelessDriver == "atheros")
-	{
-		lines.shift();
-	}
 	for(lineIndex=0; lineIndex < lines.length; lineIndex++)
 	{
 		var nextLine = lines[lineIndex];
 		var whost = nextLine.split(/[\t ]+/);
 
-		//bcm=1, madwifi=2, mac80211=3
+		//bcm=1, mac80211=2
 		var macBitSig =	[
 				[whost[1], "0", "0"],
-		    [whost[0], whost[3], whost[5]],
 				[whost[0], whost[2], whost[1], whost[3], whost[4], whost[5]]
 				];
-		var mbs = wirelessDriver == "broadcom" ? macBitSig[0] : ( wirelessDriver == "atheros" ? macBitSig[1] : macBitSig[2] );
+		var mbs = wirelessDriver == "broadcom" ? macBitSig[0] : macBitSig[1] );
 		mbs[0] = (mbs[0]).toUpperCase();
 		mbs[1] = mbs[1] + " Mbps";
 

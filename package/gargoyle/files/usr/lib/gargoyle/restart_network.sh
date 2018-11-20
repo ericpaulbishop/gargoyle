@@ -41,37 +41,6 @@ if [ -n "$marv_switch" ] ; then
 	fi
 fi
 
-
-
-
-
-
-#make sure any atheros wireless interfaces are destroyed correctly
-#this didn't work for a while, but now that I've finally
-#gotten around to fixing it, the default seems to work too
-#include this here just to BE SURE
-aths=$(ifconfig | awk '$1 ~ /^ath/ { gsub(":", "", $1); print $1; }')
-if [ -n "$aths" ] ; then
-	killall wpa_supplicant 2>/dev/null
-	killall hostapd 2>/dev/null
-
-	for ath in $aths ; do
-		#reset txpower to max
-		iwconfig $ath txpower 18dBm
-		
-		#remove from bridge if necessary
-		brg=$(brctl show | grep "$ath" | awk '{ print $1 }')
-		#echo "brg=$brg"
-		if [ -n "$brg" ] ; then
-			#echo brctl delif "$brg" "$ath" 
-			brctl delif "$brg" "$ath" 
-		fi
-		ifconfig $ath down
-		wlanconfig $ath destroy
-	done
-fi
-
-
 /etc/init.d/network stop >/dev/null 2>&1
 
 # make SURE all interfaces are down

@@ -9,46 +9,6 @@
 	echo "Content-type: text/plain"
 	echo ""
 
-	scan_madwifi()
-	{
-		aths=$(iwconfig 2>/dev/null | grep -o "^ath..")
-		scanif=""
-		created=""
-		for ath in $aths ; do
-			if [ -z "$scanif" ] ; then 
-				test=$(iwconfig $ath | grep "anaged")
-				if [ -z "$test" ] ; then
-					test=$(iwconfig $ath | grep "aster")
-				fi
-				if [ -n "$test" ] ; then
-					scanif="$ath"
-				fi
-			fi
-		done
-
-		if [ -z "$scanif" ] ; then
-			created="ath0"
-			scanif=$created
-			wlanconfig $created create wlandev wifi0 wlanmode sta >/dev/null 2>&1
-		fi
-
-		is_up=$(ifconfig 2>/dev/null | grep $scanif)
-		if [ -z "$is_up" ] ; then
-			ifconfig $scanif up
-		fi
-		sleep 4
-
-
-		iwinfo $scanif scan  2>/dev/null
-
-		if [ -z "$is_up" ] ; then
-			ifconfig $scanif down 2>/dev/null
-		fi
-		if [ -n "$created" ] ; then
-			wlanconfig $created destroy 2>/dev/null
-		fi
-	}
-
 	scan_brcm()
 	{
 		if_exists=$(ifconfig | grep wl0)
@@ -121,8 +81,6 @@
 		scan_brcm
 	elif [ -e "/lib/wifi/mac80211.sh" ] ; then
 		scan_mac80211
-	elif [ -e "/lib/wifi/madwifi.sh" ] ; then
-		scan_madwifi
 	fi
 
 ?>

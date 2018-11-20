@@ -30,18 +30,6 @@ elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" ] ; then
 			iw $ap station dump | awk ' /^Station/ { printf "'$arrayname'.push(\""$2" " ;} /signal:/ {printf ""$2" "} /tx.*bitrate:/ {printf ""$3" "} /rx.*bitrate:/ {printf ""$3" "} /autho/ {print "'$hf' '$ap'\");"}'
 		done
 	fi
-elif [ -e /lib/wifi/madwifi.sh ] && [ -e "/sys/class/net/wifi0" ] ; then
-	echo "var wirelessDriver=\"atheros\";"
-	aths=$(iwconfig 2>/dev/null | grep ath | cut -f 1 -d" ")
-	modes=$(iwconfig 2>/dev/null | grep "ode:.a" | cut -f 2 -d":" | cut -f 1 -d" ")
-	ath_index=1
-	for ath in $aths ; do
-		mode=$(echo $modes | cut -f$ath_index -d" ")
-		if [ "$mode" = "Master" ] ; then
-			wlanconfig $ath list 2>/dev/null | awk '{print "wifiLines.push(\""$0"\");"}'
-		fi
-		ath_index=$(($ath_index+1))
-	done
 else
 	echo "var wirelessDriver=\"\";"
 fi

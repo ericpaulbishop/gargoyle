@@ -52,7 +52,7 @@ function saveChanges()
 
 		if(wifiDevG == "" && wirelessDriver != "")
 		{
-			wifiDevG = wirelessDriver == "broadcom" ? "wl0" : ( wirelessDriver == "atheros" ? "wifi0" : "radio0");
+			wifiDevG = wirelessDriver == "broadcom" ? "wl0" : "radio0";
 			preCommands = preCommands + "uci set wireless." + wifiDevG + "=wifi-device\n";
 			preCommands = preCommands + "uci set wireless." + wifiDevG + ".type=" + wirelessDriver + "\n";
 			preCommands = preCommands + "uci commit\n";
@@ -343,10 +343,6 @@ function saveChanges()
 						for(wci=0; wci < wdsCfgs.length ; wci++)
 						{
 							wcfg = wdsCfgs[wci];
-							if(wirelessDriver == "atheros")
-							{
-								uci.set("wireless", wcfg, "bssid", wdsList.join(" ").toLowerCase());
-							}
 							uci.set("wireless", wcfg, "wds", "1");
 						}
 					}
@@ -814,10 +810,10 @@ function saveChanges()
 						preCommands = preCommands + "\nuci set wireless." + section + "=wifi-iface\n";
 					}
 				}
-				else //atheros & mac80211 driver
+				else //mac80211 driver
 				{
 					var cfg = "cfg2";
-					if(wirelessDriver == "atheros" || (wirelessDriver == "mac80211" && getSelectedValue("bridge_repeater") =="enabled"))
+					if(getSelectedValue("bridge_repeater") =="enabled")
 					{
 						uci.set("wireless", cfg, "", "wifi-iface");
 						uci.set("wireless", cfg, "device", bridgeDev);
@@ -827,15 +823,7 @@ function saveChanges()
 						uci.set("wireless", cfg, "encryption", encryption);
 						if(encryption != "none") { uci.set("wireless", cfg, "key", key); }
 
-						if(wirelessDriver == "atheros" )
-						{
-							uci.set("wireless", cfg, "ssid", ssid);
-							uci.set("wireless", cfg, "bssid", wdsList.join(" ").toLowerCase() );
-						}
-						else
-						{
-							uci.set("wireless", cfg, "ssid", document.getElementById("bridge_broadcast_ssid").value);
-						}
+						uci.set("wireless", cfg, "ssid", document.getElementById("bridge_broadcast_ssid").value);
 						preCommands = preCommands + "\nuci set wireless." + cfg + "=wifi-iface\n";
 						cfg = "cfg3";
 					}
@@ -847,7 +835,6 @@ function saveChanges()
 					uci.set("wireless", cfg, "wds", "1");
 					uci.set("wireless", cfg, "ssid", ssid);
 					uci.set("wireless", cfg, "encryption", encryption);
-					if(wirelessDriver == "atheros"){  uci.set("wireless", cfg, "bssid", wdsList.join(" ").toLowerCase() ); }
 					if(encryption != "none")       {  uci.set("wireless", cfg, "key", key); }
 					preCommands = preCommands + "\nuci set wireless." + cfg + "=wifi-iface\n";
 				}
@@ -1350,7 +1337,7 @@ function setWifiVisibility()
 	var p1 = (e1 != 'none' && e1 != 'wep') ? 1 : 0;
 	var w1 = (e1 == 'wep') ? 1 : 0;
 	var r1 = (e1 == 'wpa' || e1 == 'wpa2') ? 1 : 0;
-	var gns = (wirelessDriver == "mac80211" && !isb43) || wirelessDriver == "atheros"; //drivers that support guest networks
+	var gns = (wirelessDriver == "mac80211" && !isb43); //drivers that support guest networks
 	var gn = getSelectedValue("wifi_guest_mode") != "disabled" ? 1 : 0;
 	var gng = getSelectedValue("wifi_guest_mode") == "24ghz" || getSelectedValue("wifi_guest_mode") == 'dual'  ? 1 : 0;
 	var gna = getSelectedValue("wifi_guest_mode") == "5ghz" || getSelectedValue("wifi_guest_mode") == 'dual' ? 1 : 0;
@@ -1548,13 +1535,6 @@ function resetData()
 		//no auto for brcm
 		removeChannels.push("auto");
 	}
-	else if(wirelessDriver == "atheros")
-	{
-		//atheros can't handle channels 12-14
-		removeChannels.push("12");
-		removeChannels.push("13");
-		removeChannels.push("14");
-	}
 	else if(wirelessDriver == "mac80211")
 	{
 		setAllowableSelections("bridge_channel", mac80211Channels["G"], mac80211Channels["G"], document);
@@ -1644,15 +1624,6 @@ function resetData()
 					}
 				}
 			}
-			else if(wirelessDriver == "atheros")
-			{
-				var bssids = uciOriginal.get("wireless", bridgeSection, "bssid").split(/[\t ]+/);
-				var bIndex;
-				for(bIndex = 0; bIndex < bssids.length; bIndex++)
-				{
-					bridgeWdsTableData.push([ bssids[bIndex].toUpperCase() ]);
-				}
-			}
 		}
 	}
 	else
@@ -1660,7 +1631,7 @@ function resetData()
 		setSelectedValue("bridge_mode", "client_bridge");
 		setSelectedValue("bridge_repeater", "enabled");
 		document.getElementById("bridge_ssid").value = "Gargoyle";
-		setSelectedValue("bridge_channel", wirelessDriver=="atheros"  ? "auto" : "5");
+		setSelectedValue("bridge_channel", "5");
 		setSelectedValue("bridge_encryption", "none");
 	}
 	var bridgeWdsMacTable=createTable([""], bridgeWdsTableData, "bridge_wds_mac_table", true, false);
@@ -2018,7 +1989,7 @@ function resetData()
 
 	var wirelessSections=[wifiDevG, wifiDevG, wifiDevA, wifiDevA, apgcfg, apacfg, apcfg, apcfg, apcfg,                                                                apgngcfg, apgngcfg, apgnacfg, apgnacfg, apgncfg, apgncfg, apgncfg,               apcfg, apcfg, othercfg, othercfg, othercfg, othercfg];
 	var wirelessOptions=['channel', 'channel', 'channel', 'channel', 'ssid', 'ssid', 'encryption', 'key', 'key',                                                    'ssid', 'macaddr', 'ssid', 'macaddr', 'encryption', 'key', 'key',                   'auth_server', 'auth_port', 'ssid', 'encryption', 'key','key'];
-	var wirelessParams=[wirelessDriver=="atheros" ? 'auto' : "5", wirelessDriver=="atheros" ? 'auto' : "5", "36","36", 'Gargoyle', default5ID, 'none','','',        'Guests', '', defaultGuest5ID, '', 'none', '', '',                                  '', '', 'ExistingWireless', 'none', '',''];
+	var wirelessParams=["5", "5", "36","36", 'Gargoyle', default5ID, 'none','','',        'Guests', '', defaultGuest5ID, '', 'none', '', '',                                  '', '', 'ExistingWireless', 'none', '',''];
 	var wirelessFunctions=[lsv, lsv, lsv, lsv, lv, lv, lsv, lv, lv,                                                                                                 lv, lv, lv, lv, lsv, lv, lv,                                                        lv, lv, lv, lsv, lv, lv];
 
 
@@ -2110,9 +2081,9 @@ function resetData()
 	else
 	{
 		/*
-		Atheros & MAC80211 have definitions in interface sections, broadcom in wifi-device section.
-		To keep consistency we apply first atheros mac filter defined (if any) to all sections
-		Granted, this means you can not use the enhanced atheros functionality of specifying mac
+		MAC80211 has definitions in interface sections, broadcom in wifi-device section.
+		To keep consistency we apply first MAC80211 mac filter defined (if any) to all sections
+		Granted, this means you can not use the enhanced MAC80211 functionality of specifying mac
 		filters on a per-interface basis.  However, I believe consistency is more important than
 		flexibility in this case.  The interface will seem to the user to be identical on all platforms
 		and that is my highest priority.
@@ -2183,8 +2154,7 @@ function resetData()
 	if(apcfg != "")
 	{
 		var sectionIndex=0;
-		var atherosFound = false;
-		for(sectionIndex=0; sectionIndex < allWirelessSections.length && (!atherosFound); sectionIndex++)
+		for(sectionIndex=0; sectionIndex < allWirelessSections.length; sectionIndex++)
 		{
 			if(wirelessDriver == "broadcom")
 			{
@@ -2192,20 +2162,6 @@ function resetData()
 				{
 					wifiWdsData.push( [ uciOriginal.get("wireless", allWirelessSections[sectionIndex], "bssid").toUpperCase()  ] );
 					setSelectedValue("wifi_mode", "ap+wds");
-				}
-			}
-			else if(wirelessDriver == "atheros")
-			{
-				if(uciOriginal.get("wireless", allWirelessSections[sectionIndex], "wds") == "1")
-				{
-					atherosFound = true;
-					var bSplit = uciOriginal.get("wireless", allWirelessSections[sectionIndex], "bssid").split(/[\t ]+/);;
-					var bIndex=0;
-					for(bIndex=0; bIndex < bSplit.length; bIndex++)
-					{
-						wifiWdsData.push( [ bSplit[bIndex].toUpperCase() ]);
-						setSelectedValue("wifi_mode", "ap+wds");
-					}
 				}
 			}
 		}
