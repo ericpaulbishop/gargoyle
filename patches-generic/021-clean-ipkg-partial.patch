@@ -15,3 +15,20 @@
  define prepare_rootfs
  	@if [ -d $(TOPDIR)/files ]; then \
  		$(call file_copy,$(TOPDIR)/files/.,$(1)); \
+--- a/config/Config-build.in
++++ b/config/Config-build.in
+@@ -68,6 +68,14 @@ menu "Global build settings"
+ 		  This removes all ipkg/opkg status data files from the target directory
+ 		  before building the root filesystem.
+ 
++	config CLEAN_IPKG_PARTIAL
++		bool
++		prompt "Partially remove ipkg/opkg status data files in final images"
++		default n
++		help
++		  This removes most ipkg/opkg status data files (excluding *.control and plugin-gargoyle-*) from
++		  the target directory before building the root filesystem.
++
+ 	config INCLUDE_CONFIG
+ 		bool "Include build configuration in firmware" if DEVEL
+ 		default n
