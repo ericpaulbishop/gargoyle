@@ -137,7 +137,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					<label class="col-xs-5" for="bridge_ip" id="bridge_ip_label"><%~ BrIP %>:</label>
 					<span class="col-xs-7">
 						<input type="text" class="form-control" name="bridge_ip" id="bridge_ip" onkeyup="proofreadIp(this)" size="20" maxlength="15" />
-						<em><%~ BrNote %></em>
+						<em id="bridge_note"><%~ BrNoteClient %></em>
 					</span>
 				</div>
 
