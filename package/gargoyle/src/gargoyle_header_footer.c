@@ -220,6 +220,8 @@ int main(int argc, char **argv)
 		char* fallback_lang = "";
 		char* active_lang = "";
 		char* test_theme = "";
+		char* selected_section_page = "";
+		char* page_subtitle = "";
 		char** translation_strings = NULL;
 
 
@@ -304,13 +306,19 @@ int main(int argc, char **argv)
 		}
 #endif
 
+		selected_section_page = dynamic_strcat(3, selected_section, "_", selected_page);
+		if(get_uci_option(ctx, &e, p, "gargoyle", "display", selected_section_page) == UCI_OK)
+		{
+			page_subtitle = dynamic_strcat(2, " - ", get_option_value_string(uci_to_option(e)));
+		}
+
 		printf("<!DOCTYPE html>\n"
 			   "<head>\n"
 			   "\t<meta charset=\"utf-8\">\n"
 			   "\t<meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\n"
 			   "\t<meta name=\"description\" content=\"Gargoyle Firmware Webgui for router management.\">\n"
 			   "\t<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n"
-			   "\t<title>%s</title>\n", translation_strings == NULL ? title : translation_strings[0]);
+			   "\t<title>%s%s</title>\n", translation_strings == NULL ? title : translation_strings[0], page_subtitle);
 		test_theme = dynamic_strcat(5, web_root, theme_root, "/", theme, "/images/favicon.png");
 		//if the theme includes this file, use it, otherwise fallback to default gargoyle file
 		if (path_exists(test_theme) == PATH_IS_REGULAR_FILE || path_exists(test_theme) == PATH_IS_SYMLINK)
@@ -321,6 +329,17 @@ int main(int argc, char **argv)
 		{
 			printf("\t<link rel=\"shortcut icon\" href=\"%s/Gargoyle/images/favicon.png\"/>\n", theme_root);
 		}
+		test_theme = dynamic_strcat(5, web_root, theme_root, "/", theme, "/bootstrap.min.css");
+		//if the theme includes this file, use it, otherwise fallback to default gargoyle file
+		if (path_exists(test_theme) == PATH_IS_REGULAR_FILE || path_exists(test_theme) == PATH_IS_SYMLINK)
+		{
+			printf("\t<link rel=\"stylesheet\" href=\"%s/%s/bootstrap.min.css?%s\">\n", theme_root, theme, gargoyle_version);
+		}
+		else
+		{
+			printf("\t<link rel=\"stylesheet\" href=\"%s/Gargoyle/bootstrap.min.css?%s\">\n", theme_root, gargoyle_version);
+		}
+
 		int css_index, js_index, lstr_js_index;
 		for(css_index=0; all_css[css_index] != NULL; css_index++)
 		{
@@ -335,6 +354,8 @@ int main(int argc, char **argv)
 				printf("\t<link rel=\"stylesheet\" href=\"%s/Gargoyle/%s?%s\"/>\n", theme_root, all_css[css_index], gargoyle_version);
 			}
 		}
+		//We won't test if this theme.css doesn't exist because each theme must now at a minimum include this file
+		printf("\t<link rel=\"stylesheet\" href=\"%s/%s/theme.css?%s\">\n", theme_root, theme, gargoyle_version);
 		for(js_index=0; all_js[js_index] != NULL; js_index++)
 		{
 			printf("\t<script src=\"%s/%s?%s\"></script>\n", js_root, all_js[js_index], gargoyle_version);
@@ -367,18 +388,6 @@ int main(int argc, char **argv)
 			printf("\t<script src=\"%s/%s/theme.js?%s\"></script>\n", theme_root, theme, gargoyle_version);
 		}
 
-		test_theme = dynamic_strcat(5, web_root, theme_root, "/", theme, "/bootstrap.min.css");
-		//if the theme includes this file, use it, otherwise fallback to default gargoyle file
-		if (path_exists(test_theme) == PATH_IS_REGULAR_FILE || path_exists(test_theme) == PATH_IS_SYMLINK)
-		{
-			printf("\t<link rel=\"stylesheet\" href=\"%s/%s/bootstrap.min.css?%s\">\n", theme_root, theme, gargoyle_version);
-		}
-		else
-		{
-			printf("\t<link rel=\"stylesheet\" href=\"%s/Gargoyle/bootstrap.min.css?%s\">\n", theme_root, gargoyle_version);
-		}
-		//We won't test if this theme.css doesn't exist because each theme must now at a minimum include this file
-		printf("\t<link rel=\"stylesheet\" href=\"%s/%s/theme.css?%s\">\n", theme_root, theme, gargoyle_version);
 		printf("</head>\n"
 			   "<body>\n");
 		if(display_type == HEADER)
