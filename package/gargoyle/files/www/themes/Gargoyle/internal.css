@@ -6,41 +6,17 @@
  * See http://gargoyle-router.com/faq.html#qfoss for more information
  */
 
-span#update-container
-{
-	display: none
-}
 .indent
 {
 	margin-left: 25px
 }
-.wideleftcolumn
-{
-	float: left;
-	margin: 0 5px 0 5px
-}
-.internal_divider
-{
-	margin: 20px 0 20px 5px;
-	border: 1px solid #888ab8
-}
-.internal_divider, .farrightcolumnonly, .wideleftcolumn, .indent, #plot1_control_column, #plot2_control_column, #plot3_control_column, .bandwidth_title_text
+.internal_divider, .indent, #plot1_control_column, #plot2_control_column, #plot3_control_column, .bandwidth_title_text
 {
 	display: block
 }
 .bottom_gap
 {
 	margin-bottom: 30px
-}
-.aligned_check_label, .aligned_check
-{
-	vertical-align: middle
-}
-.aligned_check
-{
-	padding: 0;
-	margin: 0;
-	overflow: hidden
 }
 #content
 {
@@ -63,12 +39,7 @@ p
 {
 	margin: 1em 0
 }
-table
-{
-	border-spacing: 0;
-	border-collapse: collapse
-}
-tr.table_row_add, tr.table_row_header, tr.table_row_header_disabled, tr.table_row_add_header,th
+tr.table_row_add, tr.table_row_add_header,th
 {
 	text-align: center;
 }
@@ -78,19 +49,6 @@ tr.table_row_add_header th
 	padding-left:3px;
 	padding-right:3px;
 }
-tr.table_row_header, tr.table_row_header_disabled
-{
-	border-bottom: 1px solid #000
-}
-th
-{
-	font-weight: normal;
-	font-style: italic
-}
-th, td
-{
-	padding: 0 5px
-}
 input.text_error
 {
 	color: red
@@ -99,30 +57,9 @@ input.text_disabled, select.select_disabled
 {
 	color: #aaa
 }
-#update_container, #bottom_button_container
+#bottom_button_container
 {
 	margin: 10px 0 0 10px
-}
-#update_container
-{
-	display: none
-}
-#plot1_title, #plot2_title, #plot3_title
-{
-	font-weight: bold;
-	text-decoration: underline
-}
-#plot1_title
-{
-	color: blue
-}
-#plot2_title
-{
-	color: red
-}
-#plot3_title
-{
-	color: green
 }
 .pseudo_link
 {
@@ -130,26 +67,6 @@ input.text_disabled, select.select_disabled
 	color: blue;
 	text-decoration: underline;
 	font-style: italic
-}
-.bandwidth_title_text
-{
-	font-family: verdana, arial, sans-serif;
-	margin-left: 0;
-	margin-bottom: 5px;
-	float: left;
-	text-align: left;
-	font-size: 14px;
-	color: #000
-}
-.plot_header
-{
-	font-family: verdana, arial, sans-serif;
-	font-size: 18px;
-	font-weight: bold;
-	color: #888ab8;
-	margin-left: 20px;
-	margin-top: 10px;
-	margin-bottom: 10px
 }
 .internal_divider
 {
@@ -170,10 +87,6 @@ input.text_disabled, select.select_disabled
 {
 	width: auto;
 	margin: 20px 5px 20px 5px;
-}
-.bottom_gap
-{
-	margin-bottom: 30px
 }
 .aligned_check_label
 {
@@ -196,33 +109,6 @@ input.text_disabled, select.select_disabled
 	border: 1px solid #000;
 	font-family: monospace;
 	padding: 5px
-}
-.contributer
-{
-	font-size: 115%;
-	font-weight: bold;
-	text-decoration: underline
-}
-p
-{
-	margin: 1em 0
-}
-table
-{
-	border-spacing: 0;
-	border-collapse: collapse
-}
-tr.table_row_add
-{
-	text-align: center
-}
-tr.table_row_header
-{
-	text-align: center
-}
-tr.table_row_header_disabled
-{
-	text-align: center
 }
 tr.odd
 {
@@ -254,131 +140,6 @@ td
 {
 	padding-left: 5px;
 	padding-right: 5px
-}
-input.default_button
-{
-	text-align: center;
-	background: url("images/default_button_gradient_normal.png") center top repeat-x;
-	border-bottom: 1px solid #737582;
-	border-right: 1px solid #737582;
-	border-left: 1px solid #fff;
-	border-top: 1px solid #fff;
-	color: #000;
-	margin: 5px;
-	cursor: pointer
-}
-input.default_button:hover
-{
-	background: url("images/default_button_gradient_pressed.png") center top repeat-x;
-	color: #555;
-	border-top: 1px solid #737582;
-	border-left: 1px solid #737582;
-	border-right: 1px solid #fff;
-	border-bottom: 1px solid #fff;
-	margin: 5px
-}
-input.default_button:active
-{
-	background: url("images/default_button_gradient_pressed.png") center top repeat-x;
-	color: #555;
-	border-top: 1px solid #737582;
-	border-left: 1px solid #737582;
-	border-right: 1px solid #fff;
-	border-bottom: 1px solid #fff;
-	margin: 5px
-}
-input.default_button_disabled
-{
-	text-align: center;
-	background: url("images/default_button_gradient_disabled.png") center top repeat-x;
-	border-bottom: 1px solid #737582;
-	border-right: 1px solid #737582;
-	border-left: 1px solid #fff;
-	border-top: 1px solid #fff;
-	color: gray;
-	margin: 5px;
-	cursor: auto
-}
-input.default_button_disabled:hover
-{
-	text-align: center;
-	background: url("images/default_button_gradient_disabled.png") center top repeat-x;
-	border-bottom: 1px solid #737582;
-	border-right: 1px solid #737582;
-	border-left: 1px solid #fff;
-	border-top: 1px solid #fff;
-	color: gray;
-	margin: 5px;
-	cursor: auto
-}
-input.big_button
-{
-	width: 187px;
-	height: 45px;
-	background: url("images/big_button_normal.png") center top no-repeat;
-	border: 0;
-	cursor: pointer;
-	font-weight: bold;
-	font-size: 16px;
-	color: #333
-}
-input.big_button:hover
-{
-	width: 187px;
-	height: 45px;
-	background: url("images/big_button_highlighted.png") center top no-repeat;
-	border: 0;
-	cursor: pointer;
-	font-weight: bold;
-	font-size: 16px;
-	color: #000
-}
-input.big_button:active
-{
-	width: 187px;
-	height: 45px;
-	background: url("images/big_button_pressed.png") center top no-repeat;
-	border: 0;
-	cursor: pointer;
-	font-weight: bold;
-	font-size: 16px;
-	color: #555
-}
-input.big_button_disabled
-{
-	text-align: center;
-	width: 187px;
-	height: 45px;
-	background: url("images/big_button_disabled.png") center top no-repeat;
-	border: 0;
-	font-weight: bold;
-	font-size: 16px;
-	color: gray;
-	cursor: auto
-}
-input.big_button_disabled:hover
-{
-	text-align: center;
-	width: 187px;
-	height: 45px;
-	background: url("images/big_button_disabled.png") center top no-repeat;
-	border: 0;
-	font-weight: bold;
-	font-size: 16px;
-	color: gray;
-	cursor: auto
-}
-input.text_error
-{
-	color: red
-}
-input.text_disabled
-{
-	color: #aaa
-}
-select.select_disabled
-{
-	color: #aaa
 }
 input[type="radio"],
 input[type="checkbox"]
@@ -412,50 +173,6 @@ input[type="checkbox"]:enabled + label:hover
 	border-color: #ccc;
 	box-shadow: none;
 }
-#bottom_button_container
-{
-	margin-top: 10px;
-	margin-left: 10px
-}
-#update_container
-{
-	margin-top: 10px;
-	margin-left: 10px;
-	display: none
-}
-input.bottom_button
-{
-	width: 187px;
-	height: 45px;
-	background: url("images/big_button_normal.png") center top no-repeat;
-	border: 0;
-	cursor: pointer;
-	font-weight: bold;
-	font-size: 16px;
-	color: #333
-}
-input.bottom_button:hover
-{
-	width: 187px;
-	height: 45px;
-	background: url("images/big_button_highlighted.png") center top no-repeat;
-	border: 0;
-	cursor: pointer;
-	font-weight: bold;
-	font-size: 16px;
-	color: #000
-}
-input.bottom_button:active
-{
-	width: 187px;
-	height: 45px;
-	background: url("images/big_button_pressed.png") center top no-repeat;
-	border: 0;
-	cursor: pointer;
-	font-weight: bold;
-	font-size: 16px;
-	color: #555
-}
 #plot1_title
 {
 	font-weight: bold;
@@ -474,13 +191,6 @@ input.bottom_button:active
 	text-decoration: underline;
 	color: green
 }
-.pseudo_link
-{
-	cursor: pointer;
-	color: blue;
-	text-decoration: underline;
-	font-style: italic
-}
 .bandwidth_title_text
 {
 	font-family: verdana, arial, sans-serif;
@@ -492,16 +202,6 @@ input.bottom_button:active
 	text-align: left;
 	font-size: 14px;
 	color: #000
-}
-.plot_header
-{
-	font-family: verdana, arial, sans-serif;
-	font-size: 18px;
-	font-weight: bold;
-	color: #888ab8;
-	margin-left: 20px;
-	margin-top: 10px;
-	margin-bottom: 10px
 }
 td.total_bandwidth_table_column_1
 {
