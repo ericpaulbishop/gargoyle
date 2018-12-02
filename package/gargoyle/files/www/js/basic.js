@@ -1435,6 +1435,8 @@ function setBridgeVisibility()
 		setSsidVisibility("bridge_list_ssid");
 
 		document.getElementById("bridge_wireless_country_container").style.display = checkWifiCountryVisibility() ? "block" : "none";
+
+		document.getElementById("bridge_note").innerHTML = bridgeMode == "wds" ? basicS.BrNoteWDS : basicS.BrNoteClient;
 	}
 
 	var allowedbridgemodes = [];
