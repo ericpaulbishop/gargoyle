@@ -93,7 +93,7 @@ struct sockaddr_in whereto;/* Who to ping */
 int datalen=64-8;   /* How much data */
 
 const char usage[] =
-"Gargoyle active congestion controller version 2.3\n\n"
+"Gargoyle active congestion controller version 2.4\n\n"
 "Usage:  qosmon [options] pingtime pingtarget bandwidth [pinglimit]\n" 
 "              pingtime   - The ping interval the monitor will use when active in ms.\n"
 "              pingtarget - The URL or IP address of the target host for the monitor.\n"
@@ -1084,15 +1084,21 @@ int main(int argc, char *argv[])
                 }
                 break;
 
-            // In the wait state we have a nearly idle link.
+            // In the idle state we have a nearly idle link.
             // In these cases it is not necessary to monitor delay times so the active
             // ping is disabled.
             case QMON_IDLE:
                 pingon=0;
 
-                //This limit should be the same as the dynamic range or we could get stuck
-                //in the IDLE state. 
-                if (dbw_fil < 0.15 * DBW_UL) break;
+                //Add a hysterisis band when going in/out of IDLE mode.
+				//to try and prevent getting stuck in IDLE mode at the edge of the dynamic range
+				//
+				//We exit idle mode when the link gets above 12% of the upper limit.
+				//We enter idle mode when we get below 10%. (2% hysterisis band).
+				//With this setup at 15% it would be possible to get stuck here since the dynamic limit
+				//can fall as low as 15% which would mean we might not be able to get above 15% to restart the ACTIVE mode.
+				//Hopefully we will always be able to get above 12% at least. 
+                if (dbw_fil < 0.12 * DBW_UL) break;
 
             // In the ACTIVE & REALTIME states we observe ping times as long as the
             // link remains active.  While we are observing we adjust the 
@@ -1127,11 +1133,11 @@ int main(int argc, char *argv[])
                 //additional time it will take our ping to pass through such a queue turns out to be the RTT. 
                 //But Barman et all, Globecomm2004 indicates that only 20-30% of this is really needed.  
                 //
-                //When we measured an RTT above that was to the ISPs gateway so we do not really know what the average 
+                //When we measured an RTT above that it was to the ISPs gateway so we do not really know what the average 
                 //RTT time to other IPs on the internet.  And since not all hosts respond the same anyway I doubt there
                 //is consistant RTT that we could use.
 				//	
-                //For ACTIVE mode on a 925kbps/450kbps link I measure the following 
+                //For ACTIVE mode on a 925kbps/450kbps link I measured the following 
                 //relationship between ping limit and throughput with large packets downloading.
                 //
                 //Ping Limit   Throughput   Percent
@@ -1156,7 +1162,7 @@ int main(int argc, char *argv[])
                 //what we have in RTT mode.  The packet delay was entered on the command line or zero if nothing was entered.
 
                 //I hope that this will work well for a broad range of users from satellite links with RTTs of 1 second or more
-                //or users with hot connections that have small queue upstream of them.
+                //to users with hot connections that have small queues upstream of them.
 
                 if ((RTDCA == 0) && (pingflags & ADDENTITLEMENT)) {
                     plimit=135*pinglimit_cl/100+pinglimit;

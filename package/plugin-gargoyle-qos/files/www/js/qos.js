@@ -1294,11 +1294,7 @@ function updatetc()
 		}
 		else
 		{
-			/*
-			 * NOTE: This NEEDS to be "currentWanName" variable NOT "currentWanIf" Variable!!!
-			 * If this doesn't work the problem is in gargoyle_header_footer utility, not here
-			 */
-			commands = commands + currentWanName;
+			commands = commands + "imq1";
 		}
 
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
@@ -1427,3 +1423,4 @@ function resetFairLinkLimit()
 	}
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 }
+
