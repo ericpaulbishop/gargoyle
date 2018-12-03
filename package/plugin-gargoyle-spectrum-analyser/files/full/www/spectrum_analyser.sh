@@ -8,7 +8,7 @@
 	# I'd also like to note and thank Mike Bostock for his work on D3.js which is the underlying
 	# graphing library in use for this plugin.
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "system" -p "spectrum_analyser" -c "internal.css" -j "table.js spectrum_analyser.js" -z "spectrum.js"
+	gargoyle_header_footer -h -s "system" -p "spectrum_analyser" -j "table.js spectrum_analyser.js" -z "spectrum.js"
 %>
 
 <script>

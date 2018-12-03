@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 
-	gargoyle_header_footer -h -s "" -p "" -c "internal.css" -j ""
+	gargoyle_header_footer -h -s "" -p "" -j ""
 %>
 
 <h1 class="page-header"><%~ AJAX %></h1>

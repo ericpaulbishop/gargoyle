@@ -8,7 +8,7 @@
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "system" -p "themes" -c "internal.css" -j "table.js themes.js" -z "themes.js" gargoyle
+	gargoyle_header_footer -h -s "system" -p "themes" -j "table.js themes.js" -z "themes.js" gargoyle
 %>
 
 <script>
