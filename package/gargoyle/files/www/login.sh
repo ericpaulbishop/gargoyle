@@ -39,7 +39,7 @@
 	fi
 
 
-	gargoyle_header_footer -h  -c "internal.css" -j "$js" -z "$js $lang_js" gargoyle
+	gargoyle_header_footer -h  -j "$js" -z "$js $lang_js" gargoyle
 %>
 
 

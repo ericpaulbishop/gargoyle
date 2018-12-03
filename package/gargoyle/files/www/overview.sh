@@ -7,7 +7,7 @@
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "status" -p "overview" -c "internal.css" -j "overview.js table.js" -z "overview.js" -i network wireless qos_gargoyle system gargoyle
+	gargoyle_header_footer -h -s "status" -p "overview" -j "overview.js table.js" -z "overview.js" -i network wireless qos_gargoyle system gargoyle
 %>
 
 <script>

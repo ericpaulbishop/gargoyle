@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "system" -p "access" -c "internal.css" -j "table.js access.js" -z "access.js" -i uhttpd dropbear gargoyle firewall network wireless
+	gargoyle_header_footer -h -s "system" -p "access" -j "table.js access.js" -z "access.js" -i uhttpd dropbear gargoyle firewall network wireless
 %>
 
 <script>

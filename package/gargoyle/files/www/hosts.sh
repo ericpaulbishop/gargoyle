@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "status" -p "hosts" -c "internal.css" -j "gs_sortable.js  common.js hosts.js table.js" -z "hosts.js basic.js" -i -n dhcp wireless
+	gargoyle_header_footer -h -s "status" -p "hosts" -j "gs_sortable.js  common.js hosts.js table.js" -z "hosts.js basic.js" -i -n dhcp wireless
 %>
 
 <script>
