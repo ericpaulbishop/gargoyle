@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "status" -p "connections" -j "gs_sortable.js common.js conntrack.js table.js" -z "conntrack.js" -i -n uhttpd firewall qos_gargoyle
+	gargoyle_header_footer -h -s "status" -p "connections" -j "gs_sortable.js common.js conntrack.js table.js" -z "conntrack.js" -i -n uhttpd firewall openvpn_gargoyle qos_gargoyle
 %>
 
 <script>
@@ -22,6 +22,11 @@
 	echo "var qosMarkList = [];"
 	if [ -e /etc/qos_class_marks ] ; then
 		awk '{ print "qosMarkList.push([\""$1"\",\""$2"\",\""$3"\",\""$4"\"]);" }' /etc/qos_class_marks
+	fi
+
+	echo "var ovpnStatusFileLines = [];"
+	if [ -e /etc/openvpn/current_status ] ; then
+		awk '{print "ovpnStatusFileLines.push(\""$0"\");" ; }' /etc/openvpn/current_status
 	fi
 %>
 //-->
