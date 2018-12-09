@@ -22,6 +22,8 @@ var qosUpMask = "";
 var qosDownMask = "";
 var markToQosClass = [];
 
+var ipToOVPNHostname = [];
+
 function initializeConnectionTable()
 {
 	httpsPort = getHttpsPort()
@@ -63,6 +65,40 @@ function initializeConnectionTable()
 		markToQosClass[ parseInt(qosMarkList[qmIndex][2]) ] = qosMarkList[qmIndex][1];
 	}
 
+	//Get local VPN IPs
+	var allowedClientSections = uciOriginal.getAllSectionsOfType("openvpn_gargoyle", "allowed_client");
+	var clientIndex=0;
+	for(clientIndex = 0; clientIndex < allowedClientSections.length; clientIndex++)
+	{
+		var section = allowedClientSections[clientIndex];
+		var vpnIP = uciOriginal.get("openvpn_gargoyle", section, "ip");
+		var hostName = uciOriginal.get("openvpn_gargoyle", section, "name");
+		if(vpnIP != "" && hostName != "")
+		{
+			ipToOVPNHostname[vpnIP] = "(VPN) " + hostName;
+		}
+	}
+
+	//Get remote VPN IPs (which could dynamically change, and we won't catch here)
+	while(ovpnStatusFileLines.length > 0 && ovpnStatusFileLines[0] != "OpenVPN CLIENT LIST")
+	{
+		ovpnStatusFileLines.shift() ; 
+	}
+	for(i=0; i<3; i++)
+	{
+		ovpnStatusFileLines.shift()
+	}
+	while(ovpnStatusFileLines.length > 0 && ovpnStatusFileLines[0] != "ROUTING TABLE" &&  ovpnStatusFileLines[0] != "GLOBAL STATS" && ovpnStatusFileLines[0] != "END")
+	{
+		var lineParts = ovpnStatusFileLines.shift().split(/,/);
+		var hostName = uciOriginal.get("openvpn_gargoyle", lineParts[0]) == "allowed_client" ? uciOriginal.get("openvpn_gargoyle", lineParts[0], "name") : lineParts[0];
+		vpnIP = lineParts[1].replace(/:.*$/, "");
+		if(vpnIP != "" && hostName != "")
+		{
+			ipToOVPNHostname[vpnIP] = "(VPN) " + hostName;
+		}
+	}
+
 	updateInProgress = false;
 	timeSinceUpdate = -5000;
 	setInterval("checkForRefresh()", 500);
@@ -85,14 +121,13 @@ function getHostDisplay(ip)
 {
 	var hostDisplay = getSelectedValue("host_display");
 	var host = ip;
-	if(hostDisplay == "hostname" && ipToHostname[ip] != null)
+	if(hostDisplay == "hostname" && (ipToHostname[ip] != null || ipToOVPNHostname[ip] != null))
 	{
-		host = ipToHostname[ip];
+		host = ipToHostname[ip] != null ? ipToHostname[ip] : ipToOVPNHostname[ip];
 		host = host.length < 25 ? host : host.substr(0,22)+"...";
 	}
 	return host;
 }
-
 
 function updateConnectionTable()
 {
@@ -148,6 +183,14 @@ function updateConnectionTable()
 							localPort = srcPort2;
 							WanIp = dstIp2;
 							WanPort = dstPort2;
+						//Openvpn connections. These only appear if Openvpn is active
+						} else if ((dstIp2.match(/10\.8\.0\..*/) != null) && (srcIp.match(/10\.8\.0\..*/) == null)) {
+							downloadBytes = bytes2;
+							uploadBytes = bytes;
+							localIp = srcIp;
+							localPort = srcPort;
+							WanIp = dstIp;
+							WanPort = dstPort;
 						} else {	// filter out LAN-LAN connections
 							wan_connection = false;
 						}
@@ -156,7 +199,7 @@ function updateConnectionTable()
 						{
 							var tableRow =[parseInt(uploadBytes) + parseInt(downloadBytes),
 								protocol,
-								textListToSpanElement([ getHostDisplay(WanIp) + ":" + WanPort, getHostDisplay(localIp) + ":" + localPort]),
+								textListToSpanElement([ getHostDisplay(localIp) + ":" + localPort, getHostDisplay(WanIp) + ":" + WanPort]),
 								textListToSpanElement([parseBytes(uploadBytes, bwUnits),parseBytes(downloadBytes, bwUnits)])
 								];
 							if(qosEnabled)

@@ -298,23 +298,15 @@ initialize_qos()
 	insmod imq numdevs=1 hook_chains="INPUT,FORWARD" hook_tables="mangle,mangle" >&- 2>&-
 	ip link set dev imq0 mtu 1500
 
+	# Make sure the other kernel modules we need are loaded
 	insmod cls_fw >&- 2>&-
 	insmod cls_flow >&- 2>&-
 	insmod sch_hfsc >&- 2>&-
 	insmod sch_sfq >&- 2>&-
 
-	#Set the atm parameters if pppoe is being used.
-	wan_proto=$(uci get network.wan.proto 2>/dev/null)
-	if [ "$wan_proto" = "pppoe" ] ; then
-		#On my PPPoE WAN link I see the following overhead
-		#MAC Header=14 & PPPoE=8 plus I read that an addition ATM=8 is added by the modem"
-		overhead="stab linklayer atm overhead 30 mtu 1492 tsize 128 "
-	#else
-		#Even for the ethernet cases I do not think the qdisc sees the MAC Header
-		#but for now leave this out.
-		#overhead="stab linklayer ethernet overhead 14 mpu 64"
-	fi
-
+	#Deciding how to set sfq_depth is not straight forward. Too high and we burn up RAM
+	#needlessly on low memory routers. Too low and our maximum bandwidth gets limited.
+	#
 	#On low memory routers we need to take it easy on how big the queues can get.
 	#When depth is limited to 32 maximum bandwidth through any class will be around 11Mbps.
 	#Otherwise it will be around 350Mbps.
@@ -325,15 +317,44 @@ initialize_qos()
 		sfq_depth="";
 	fi
 
+	$echo_off
 	#load upload variables
 	load_all_config_options "$config_file_name" "upload"
+	$echo_on
 	if [ -n "$total_bandwidth" ] ; then
 		total_upload_bandwidth="$total_bandwidth"
 	else
 		total_upload_bandwidth=-1
 	fi
-	
 	upload_default_class="$default_class"
+
+	#load download variables
+	total_bandwidth=""
+	default_class=""
+	$echo_off
+	load_all_config_options "$config_file_name" "download"
+	$echo_on
+	if [ -n "$total_bandwidth" ] ; then
+		total_download_bandwidth="$total_bandwidth"
+	else
+		total_download_bandwidth=-1
+	fi
+	download_default_class="$default_class"
+
+	#Since the introduction of ADSL IP Extensions its not so easy to tell if we have a DSL connection
+	#or not making it hard to set the stab parameters correctly.
+	#Stab parameters here are derived from tc-stab(8).html
+	overhead="stab linklayer atm overhead 32 mtu 2048 "
+
+	#It is now often difficult to tell if the overhead should be used or not because even DSL modems use DHCP or may
+	#not be in bridge mode. So I make the assumption that all connections with less than 3Mbps down or 1Mbps up
+	#are DSL regardless of the protocol selection type.
+	wan_proto=$(uci get network.wan.proto 2>/dev/null)
+	if [ "$wan_proto" != "pppoe" ] && [ "$total_upload_bandwidth" -ge 1100 ] && [ "$total_download_bandwidth" -ge 3100 ] ; then
+		overhead=""
+	fi
+
+	$echo_off
 
 	if [ $total_upload_bandwidth -ge 0 ] ; then
 
@@ -362,15 +383,17 @@ initialize_qos()
 		$echo_on
 		tc qdisc add dev $qos_interface root handle 1:0 hfsc default 1
 
-		# For the root qdisc, only ul is relevant, since there is no link sharing, and rt only applies to leaf qdiscs
+		# For the root qdisc, only ul and ls are relevant since rt only applies to leaf qdiscs
 		#
-		# A detailed explanation of how/why ls is being set is warranted here...
-		# This is being set to max bandwidth possible on a connection (right now that's about 1Gbit, we can increase later if necessary)
-		# Only ratio of child ls rates is important -- bounding is done by the ul parameter, since hfsc takes min of ls and ul
-		# This means we can just multiply percents by 10 in child nodes to get what ls curves for each should be
-		# Again, for ls the ratios matter, but the absolute values do not, provided that they are all < than the ul for either the
-		# child or any of the parent nodes
+		# A detailed explanation of how/why/what is being set is warranted here...
+		# Link Share bandwidths of the leaf nodes are all relative to their parents link share parameter and those of their
+		# fellow leaf nodes competing for shares. We set the root class link share to 1000Mbit as per unit bandwidth.
+		# Leaf nodes are then set with the respective percent of this per unit number.
 		#
+		# The actual maximum link speed is the lower of the ul and the ls and this is going to always be the ul parameter in our
+		# design.
+		#
+		# Again, for ls only the ratios matter, the absolute values do not.
 		tc class add dev $qos_interface parent 1:0 classid 1:1 hfsc ls rate 1000Mbit ul rate ${total_upload_bandwidth}kbit
 		$echo_off
 
@@ -385,45 +408,68 @@ initialize_qos()
 
 			class_mark_list="$class_mark_list$uclass_name:$next_classid "
 
+			$echo_on
 			uclass_def=$(eval echo "\$$uclass_name")
 
-			#% bandwidth at capacity for this class
+			#Bandwidth at capacity for this class
 			m2=$((  10 * $(echo $uclass_def | awk ' {print $1}' ) ))
 
 			#is there a minimum bandwidth specified in kbps?
 			min_bandwidth=$( echo $uclass_def | awk ' {print $3}' )
-			ll_str=""
 			if [ "$min_bandwidth" -gt 0 ] ; then
-				ll_str=" rt m1 $((2*$min_bandwidth))kbit d 20ms m2 ${min_bandwidth}kbit"
+				ll_str=" rt m1 $((2*$min_bandwidth))kbit d 2ms m2 ${min_bandwidth}kbit"
+			else
+				ll_str=""
 			fi
 
 			#is there an upper limit specified in kbps?
 			max_bandwidth=$( echo $uclass_def | awk ' {print $2}' )
-			ul_str=""
 			if [ "$max_bandwidth" -ge 0 ] ; then
 				ul_str=" ul m2 ${max_bandwidth}kbit"
 			else
-				max_bandwidth="$total_upload_bandwidth"
+				#Calculate from the class link share.
+				max_bandwidth=$(($m2*$total_upload_bandwidth/1000000))
+				ul_str=""
 			fi
 
-			#tbw is the Delay x Bandwidth product in bytes per second.  We do not actually know the packet
-			#delay so we make an estimate of 150ms here and hope for the best.  max_bandwidth is in kbps
-			#we multiply 150ms by 1000 below so the units work out.			
-			tbw=$(($max_bandwidth*150/8));
-			if [ "$tbw" -lt 3000 ] ; then
-				tbw=3000
+
+			# For leaf nodes in HFSC we calculate the latency as the time spent waiting to earn enough credit (credit_t) to
+			#get selected to send plus the time to transmit (tts). The maximum latency can be calculated as shown
+			#below assuming an MTU of 1500bytes and 8.2bits/byte including overhead.
+			#credit_t = $((1500*82/$max_bandwidth/10));
+			#tts = $((1500*82/$total_upload_bandwidth/10));
+
+			#tbw is the Delay x Bandwidth product in bytes. We do not actually know the packet
+			#delay so we make an estimate of 150ms here and hope for the best. max_bandwidth is in kbps
+			#we multiply 100ms by 1000 below so the units work out.
+			tbw=$(($max_bandwidth*100/8));
+			if [ "$tbw" -lt 6000 ] ; then
+				tbw=6000
 			fi
 
 			#We will use the SFQ qdisc with flow classifier.  The limit on the depth of our qdisc depends on the upper limit
 			#of the bandwidth allocated to this class.  To impliment per IP sharing of the class we use the flow classifier
 			#and the 'nfct-src' on the upload side and 'dst' on the download side.  I found a nice man page here
 			#https://arndtroide.homelinux.org/cgi-bin/man/man2html?tc-sfq+8
-			$echo_on
 			
 			#Add the leaf class
 			tc class add dev $qos_interface parent 1:1 classid 1:$next_class_index hfsc ls m2 ${m2}Mbit $ll_str $ul_str
-			#Add the qdisc to the leaf class, assuming average packet at 500 bytes.
-			tc qdisc add dev $qos_interface parent 1:$next_class_index handle $next_class_index:1 sfq headdrop limit $(($tbw/500)) $sfq_depth divisor 256  
+			#Add the qdisc to the leaf class, assuming average packet at 250 bytes.
+			tc qdisc add dev $qos_interface parent 1:$next_class_index handle $next_class_index:1 sfq headdrop limit $(($tbw/250)) $sfq_depth divisor 256
+
+			#
+			#Folks interested in experimenting with CoDEL can comment out the preceeding line and uncomment hte next line.
+			#This will work for the upload direction. Left to the student how to mod the download.
+			#As of Chaos Calmer there does not seem to be any benefit in changing SFQ to FQ_CODEL and some stability
+			#issues as well. Will re-evaluate once Openwrt 18.06 based Gargoyle is released.
+			#fq_codel parameters
+			#	limit - SFQ used 127 so i suggest the same here.
+			#	target - At and above 6Mbps = 5ms (min). At 100kbps = 100ms (max). Select accordingly
+			#	interval - 100ms, This is the default
+			#	flows - 255 (One for each IP)
+			#
+			#tc qdisc add dev $qos_interface parent 1:$next_class_index handle $next_class_index:1 fq_codel limit 127 target 5ms interval 100ms flows 255 quantum 1514
+
 			#Add a filter to the root class to direct packets to this leaf class according to the conntrack mark
 			tc filter add dev $qos_interface parent 1:0 protocol ip handle $next_classid fw flowid 1:$next_class_index
 			#Add a filter to the leaf class to define flows as being the source IP address.
@@ -462,22 +508,9 @@ initialize_qos()
 
 		# save current mark to connmark at end of chain
 		iptables -t mangle -A qos_egress -j CONNMARK --save-mark --mask $upload_mask
-
-		$echo_off
-
 	fi
 
 
-	#load download variables
-	total_bandwidth=""
-	default_class=""
-	load_all_config_options "$config_file_name" "download"
-	if [ -n "$total_bandwidth" ] ; then
-		total_download_bandwidth="$total_bandwidth"
-	else
-		total_download_bandwidth=-1
-	fi
-	download_default_class="$default_class"
 
 	#Only if both upload and download QoS are enabled can we enable Gargoyle active QoS monitor
 	if [ $total_download_bandwidth -eq 0 ] || [ $total_upload_bandwidth -eq 0 ] ; then
@@ -485,15 +518,17 @@ initialize_qos()
 	fi
 
 	if [ $total_download_bandwidth -ge 0 ] ; then
-		# Set up the InterMediate Queuing device (IMQ)
+		# Set up the InterMediate Queuing device (IMQ0) for ingress
 		ip link set imq0 up
 
-		# Attach ingress queuing discipline to IMQ interface
+		# Attach ingress queuing discipline to IMQ0 with temporary default
 		tc qdisc add dev imq0 root handle 1:0 hfsc default 1
 
-		tc class add dev imq0 parent 1:0 classid 1:1 hfsc ls rate 1000Mbit ul rate ${total_download_bandwidth}kbit
+		# For the root qdisc, only ul is relevant, since there is no link sharing, and rt only applies to leaf qdiscs
+		tc class add dev imq0 parent 1:0 classid 1:1 hfsc ls rate 1000Mbit ul m2 ${total_download_bandwidth}kbit
 
 		#load download classes
+		$echo_off
 		download_class_list=$(load_all_config_sections "$config_file_name" "download_class")
 		for dclass_name in $download_class_list ; do
 			percent_bandwidth=""
@@ -525,8 +560,7 @@ initialize_qos()
 		def_download_class=$next_classid
 
 		for dclass_name in $download_class_list ; do
-
-
+			$echo_on
 			class_mark_list="$class_mark_list$dclass_name:$next_classid  "
 			dclass_def=$(eval echo "\$$dclass_name")
 
@@ -537,23 +571,11 @@ initialize_qos()
 			#when it detects a class has become active that includes a two part service curve.
 			#So to trigger this behaviour we create two parts curves when minRTT is set. 
             
-			minRTT=$( echo $dclass_def | awk ' {print $4}' )
-			if [ "$minRTT" == "Yes" ] ; then
-				ll_str=" ls m1 ${m2}Mbit d 20ms m2 ${m2}Mbit"
-			else
-				ll_str=" ls m2 ${m2}Mbit"
-			fi
-
-			#is there a minimum bandwidth specified?
-			min_bandwidth=$( echo $dclass_def | awk ' {print $3}' )
-			rt_str=""
-			if [ "$min_bandwidth" -gt 0 ] ; then
-				if [ "$minRTT" == "Yes" ] ; then
-					rt_str=" rt m1 $((2*$min_bandwidth))kbit d 20ms m2 ${min_bandwidth}kbit"
-				else
-					rt_str=" rt m2 ${min_bandwidth}kbit"
-				fi
-			fi
+			#Calculations for the delay parameter. Assuming PKT is the packet size the best we
+			#could possibly do is PKT/total_download_bandwidth. If we do nothing we get the
+			#worst delay of PKT/$m2 (the class bandwidth). Since this class has minRTT set we
+			#are going to select the best case and allow up to one max size packet to go at the highest
+			#speed.
 
 			#is there an upper limit specified?
 			max_bandwidth=$( echo $dclass_def | awk ' {print $2}' )
@@ -564,15 +586,36 @@ initialize_qos()
 				max_bandwidth="$total_download_bandwidth"
 			fi
 
-			tbw=$(($max_bandwidth*150/8));
-			if [ "$tbw" -lt 5000 ] ; then
-				tbw=5000
+			#How about a link share in percent?
+			minRTT=$( echo $dclass_def | awk ' {print $4}' )
+			if [ "$minRTT" = "Yes" ] ; then
+				d1=$((15000/$max_bandwidth+1))
+				ll_str=" ls m1 $((2*$m2))Mbit d ${d1}ms m2 ${m2}Mbit"
+			else
+				ll_str=" ls m2 ${m2}Mbit"
 			fi
 
-			$echo_on
+			#is there a minimum bandwidth specified?
+			min_bandwidth=$( echo $dclass_def | awk ' {print $3}' )
+			rt_str=""
+			if [ "$min_bandwidth" -gt 0 ] ; then
+				if [ "$minRTT" = "Yes" ] ; then
+					d2=$((15000/$max_bandwidth+1))
+					rt_str=" rt m1 $(($max_bandwidth))kbit d ${d2}ms m2 ${min_bandwidth}kbit"
+				else
+					rt_str=" rt m2 ${min_bandwidth}kbit"
+				fi
+			fi
+
+
+			tbw=$(($max_bandwidth*100/8));
+			if [ "$tbw" -lt 10000 ] ; then
+				tbw=10000
+			fi
+
 			tc class add dev imq0 parent 1:1 classid 1:$next_class_index hfsc $rt_str $ll_str $ul_str
-			#Assume average download packet size is 1000 bytes.
-			tc qdisc add dev imq0 parent 1:$next_class_index handle $next_class_index:1 sfq headdrop limit $(($tbw/1000)) $sfq_depth divisor 256  
+			#Assume average download packet size is 250 bytes.
+			tc qdisc add dev imq0 parent 1:$next_class_index handle $next_class_index:1 sfq headdrop limit $(($tbw/250)) $sfq_depth divisor 256  
 			tc filter add dev imq0 parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index
 			tc filter add dev imq0 parent $next_class_index: handle 1 flow divisor 256 map key dst and 0xff
 			$echo_off
@@ -606,11 +649,11 @@ initialize_qos()
 		#set default class mark first in case we don't match anything
 		iptables -t mangle -I qos_ingress -j MARK --set-mark $def_download_class
 
-		#if we already set a mark in quota chain, we need to save that mark to the connmark, then return so it doesn't get over-written
+		#If we already set a mark in quota chain, we need to save that mark to the connmark, then return so it doesn't get over-written
 		iptables -t mangle -I qos_ingress -m mark ! --mark 0x0 -j RETURN
 		iptables -t mangle -I qos_ingress -m mark ! --mark 0x0 -j CONNMARK --save-mark --mask $download_mask
 
-		#make sure all packets get sent through IMQ
+		#Make sure all packets get sent through IMQ
 		iptables -t mangle -I qos_ingress -j IMQ --todev 0
 
 		#save current mark to connmark at end of chain
@@ -655,10 +698,9 @@ initialize_qos()
 			fi
 		fi
 
-
 		
-		#Ping responses for the ping target never go to the IMQ device.
-		iptables -t mangle -I qos_ingress -p icmp --icmp-type 0 -d $wan_ip -s $ptarget_ip -j RETURN
+		#Ping responses from the ping target never go to ingress QoS (IMQ0 device).
+		iptables -t mangle -I qos_ingress -p icmp --icmp-type 0 -s $ptarget_ip -j RETURN
 
 		#Make a class to handle the outgoing ping requests from the router.
 		#These pings 84 bytes each for ethernet plus 22 more for PPPoE connections, allowing a maximum rate of 200ms we get 2.6kbps
@@ -693,6 +735,7 @@ initialize_qos()
 
 define_interface()
 {
+	$echo_on
 	#Wait for up to 15 seconds for the wan interface to indicate it is up.
 	wait_sec=15
 	while [ -z $(uci -P /var/state get network.wan.up 2>/dev/null) ] && [ $wait_sec -gt 0 ] ; do
@@ -700,7 +743,7 @@ define_interface()
 		wait_sec=$(($wait_sec - 1))
 	done
 
-	#The interface name will depend on if pppoe is used or not.  If pppoe is used then 
+	#The wan interface name will depend on if pppoe is used or not.  If pppoe is used then
 	#the name we are looking for is in network.wan.ifname.  If there is nothing there
 	#use the device named by network.wan.device
 
@@ -709,9 +752,13 @@ define_interface()
 		qos_interface=$(uci -P /var/state get network.wan.device 2>/dev/null)
 	fi
 
+	#Determine our wan ip from the wan interface we detected.
 	wan_ip=$(ifconfig $qos_interface | sed -n 's/.*inet addr:\([0-9/.]*\).*/\1/p')
 	local_ip=$(ifconfig br-lan | sed -n 's/.*inet addr:\([0-9/.]*\).*/\1/p')
 
+	#Determine the VPN interface if there is one.
+	vpn_interface=$(uci -P /var/state get network.vpn.ifname 2>/dev/null)
+	$echo_off
 }
 
 stop()
@@ -731,6 +778,7 @@ stop()
 
 
 	$echo_on
+	#Delete the qdiscs we hung on the devices
 	for iface in $(tc qdisc show | grep hfsc | awk '{print $5}'); do
 		tc qdisc del dev "$iface" root
 	done
@@ -810,8 +858,6 @@ show()
 	tc -s class show dev imq0
 	tc -s filter show dev imq0
 	tc -s filter show dev imq0 parent 2:
-	
-
 }
 
 boot()
