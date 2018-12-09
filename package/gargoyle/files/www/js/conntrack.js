@@ -176,7 +176,6 @@ function updateConnectionTable()
 							localPort = srcPort;
 							WanIp = srcIp2;
 							WanPort = srcPort2;
-
 						} else if (dstIp == currentWanIp) {
 							downloadBytes = bytes;
 							uploadBytes = bytes2;
@@ -184,16 +183,6 @@ function updateConnectionTable()
 							localPort = srcPort2;
 							WanIp = dstIp2;
 							WanPort = dstPort2;
-
-						//OpenVPN connections.  These appear only if OpenVPN is active
-						} else if ((dstIp2.indexOf("10.8.0") != -1) && (srcIp.indexOf("10.8.0") == -1)) {
-							downloadBytes = bytes2;
-							uploadBytes = bytes;
-							localIp = srcIp;
-							localPort = srcPort;
-							WanIp = dstIp;
-							WanPort = dstPort;
-
 						} else {	// filter out LAN-LAN connections
 							wan_connection = false;
 						}
@@ -202,7 +191,7 @@ function updateConnectionTable()
 						{
 							var tableRow =[parseInt(uploadBytes) + parseInt(downloadBytes),
 								protocol,
-								textListToSpanElement([ getHostDisplay(localIp) + ":" + localPort, getHostDisplay(WanIp) + ":" + WanPort]),
+								textListToSpanElement([ getHostDisplay(WanIp) + ":" + WanPort, getHostDisplay(localIp) + ":" + localPort]),
 								textListToSpanElement([parseBytes(uploadBytes, bwUnits),parseBytes(downloadBytes, bwUnits)])
 								];
 							if(qosEnabled)
