@@ -390,8 +390,8 @@ initialize_qos()
 		# fellow leaf nodes competing for shares. We set the root class link share to 1000Mbit as per unit bandwidth.
 		# Leaf nodes are then set with the respective percent of this per unit number.
 		#
-		# The actual maximum link speed is the lower of the ul and hte ls and this is going to always be the ul parameter in our
-		# design
+		# The actual maximum link speed is the lower of the ul and the ls and this is going to always be the ul parameter in our
+		# design.
 		#
 		# Again, for ls only the ratios matter, the absolute values do not.
 		tc class add dev $qos_interface parent 1:0 classid 1:1 hfsc ls rate 1000Mbit ul rate ${total_upload_bandwidth}kbit
@@ -428,7 +428,7 @@ initialize_qos()
 				ul_str=" ul m2 ${max_bandwidth}kbit"
 			else
 				#Calculate from the class link share.
-				max_bandwidth=$(($m2*$total_upload_bandwidth)/1000000))
+				max_bandwidth=$(($m2*$total_upload_bandwidth/1000000))
 				ul_str=""
 			fi
 
@@ -458,7 +458,7 @@ initialize_qos()
 			tc qdisc add dev $qos_interface parent 1:$next_class_index handle $next_class_index:1 sfq headdrop limit $(($tbw/250)) $sfq_depth divisor 256
 
 			#
-			#Folks interested i nexperimenting with CoDEL can comment out the preceeding line and uncomment hte next line.
+			#Folks interested in experimenting with CoDEL can comment out the preceeding line and uncomment hte next line.
 			#This will work for the upload direction. Left to the student how to mod the download.
 			#As of Chaos Calmer there does not seem to be any benefit in changing SFQ to FQ_CODEL and some stability
 			#issues as well. Will re-evaluate once Openwrt 18.06 based Gargoyle is released.
@@ -573,9 +573,9 @@ initialize_qos()
             
 			#Calculations for the delay parameter. Assuming PKT is the packet size the best we
 			#could possibly do is PKT/total_download_bandwidth. If we do nothing we get the
-			#worst delay of PKT/$m2 (the class bandwidth). Sicne this class has minRTT set we
+			#worst delay of PKT/$m2 (the class bandwidth). Since this class has minRTT set we
 			#are going to select the best case and allow up to one max size packet to go at the highest
-			#speed
+			#speed.
 
 			#is there an upper limit specified?
 			max_bandwidth=$( echo $dclass_def | awk ' {print $2}' )
@@ -588,7 +588,7 @@ initialize_qos()
 
 			#How about a link share in percent?
 			minRTT=$( echo $dclass_def | awk ' {print $4}' )
-			if [ "$minRTT" == "Yes" ] ; then
+			if [ "$minRTT" = "Yes" ] ; then
 				d1=$((15000/$max_bandwidth+1))
 				ll_str=" ls m1 $((2*$m2))Mbit d ${d1}ms m2 ${m2}Mbit"
 			else
@@ -599,7 +599,7 @@ initialize_qos()
 			min_bandwidth=$( echo $dclass_def | awk ' {print $3}' )
 			rt_str=""
 			if [ "$min_bandwidth" -gt 0 ] ; then
-				if [ "$minRTT" == "Yes" ] ; then
+				if [ "$minRTT" = "Yes" ] ; then
 					d2=$((15000/$max_bandwidth+1))
 					rt_str=" rt m1 $(($max_bandwidth))kbit d ${d2}ms m2 ${min_bandwidth}kbit"
 				else
@@ -699,7 +699,7 @@ initialize_qos()
 		fi
 
 		
-		#Ping responses for the ping target never go to ingress QoS (IMQ0 device).
+		#Ping responses from the ping target never go to ingress QoS (IMQ0 device).
 		iptables -t mangle -I qos_ingress -p icmp --icmp-type 0 -s $ptarget_ip -j RETURN
 
 		#Make a class to handle the outgoing ping requests from the router.
