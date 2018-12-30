@@ -1,26 +1,27 @@
 --- a/package/base-files/files/lib/functions.sh
 +++ b/package/base-files/files/lib/functions.sh
-@@ -166,12 +166,17 @@ insert_modules() {
- default_prerm() {
+@@ -154,14 +154,17 @@ default_prerm() {
  	local root="${IPKG_INSTROOT}"
- 	local name
+ 	local pkgname="$(basename ${1%.*})"
+ 	local ret=0
 +	local pkg_prerm pkg_list
  
- 	name=$(basename ${1%.*})
--	[ -f "$root/usr/lib/opkg/info/${name}.prerm-pkg" ] && . "$root/usr/lib/opkg/info/${name}.prerm-pkg"
-+
+-	if [ -f "$root/usr/lib/opkg/info/${pkgname}.prerm-pkg" ]; then
+-		( . "$root/usr/lib/opkg/info/${pkgname}.prerm-pkg" )
 +	pkg_prerm="${1}-pkg"
-+	pkg_list=$( echo "${1}" | sed 's/prerm$/list/g')
-+	[ -f "$pkg_prerm" ] && . "$pkg_prerm"
-+
++	pkg_list=$(echo "${1}" | sed 's/prerm$/list/g')
++	if [ -f "$pkg_prerm" ]; then
++		( . "$pkg_prerm" )
+ 		ret=$?
+ 	fi
  
  	local shell="$(which bash)"
--	for i in `cat "$root/usr/lib/opkg/info/${name}.list" | grep "^/etc/init.d/"`; do
-+	for i in `cat "$pkg_list" | grep "^/etc/init.d/"`; do
+-	for i in $(grep -s "^/etc/init.d/" "$root/usr/lib/opkg/info/${pkgname}.list"); do
++	for i in $(grep -s "^/etc/init.d/" "${pkg_list}"); do
  		if [ -n "$root" ]; then
  			${shell:-/bin/sh} "$root/etc/rc.common" "$root$i" disable
  		else
-@@ -184,8 +189,8 @@ default_prerm() {
+@@ -176,8 +179,8 @@ default_prerm() {
  }
  
  add_group_and_user() {
@@ -31,44 +32,48 @@
  
  	if [ -n "$rusers" ]; then
  		local tuple oIFS="$IFS"
-@@ -223,10 +228,20 @@ default_postinst() {
+@@ -215,10 +218,19 @@ default_postinst() {
  	local pkgname="$(basename ${1%.*})"
  	local ret=0
  
 -	add_group_and_user "${pkgname}"
- 
--	if [ -f "$root/usr/lib/opkg/info/${pkgname}.postinst-pkg" ]; then
--		( . "$root/usr/lib/opkg/info/${pkgname}.postinst-pkg" )
 +	local pkg_postinst="${1}"-pkg
-+	local pkg_control=$( echo "${1}" | sed 's/postinst$/control/g')
-+	local pkg_list=$( echo "${1}" | sed 's/postinst$/list/g')
-+	if [ -n "${IPKG_INSTROOT}" ] ; then
-+		pkg_postinst="${IPKG_INSTROOT}/usr/lib/opkg/info/${pkgname}.postinst-pkg"
-+		pkg_control="${IPKG_INSTROOT}/usr/lib/opkg/info/${pkgname}.control"
-+		pkg_list="${IPKG_INSTROOT}/usr/lib/opkg/info/${pkgname}.list"
++	local pkg_control=$(echo "${1}" | sed 's/postinst$/control/g')
++	local pkg_list=$(echo "${1}" | sed 's/postinst$/list/g')
++	if [ -n "${root}" ] ; then
++		pkg_postinst="${root}/usr/lib/opkg/info/${pkgname}.postinst-pkg"
++		pkg_control="${root}/usr/lib/opkg/info/${pkgname}.control"
++		pkg_list="${root}/usr/lib/opkg/info/${pkgname}.list"
 +	fi
 +
 +	add_group_and_user "${pkg_control}"
-+
+ 
+-	if [ -f "$root/usr/lib/opkg/info/${pkgname}.postinst-pkg" ]; then
+-		( . "$root/usr/lib/opkg/info/${pkgname}.postinst-pkg" )
 +	if [ -f "$pkg_postinst" ]; then
 +		( . "$pkg_postinst" )
  		ret=$?
  	fi
  
-@@ -235,10 +250,10 @@ default_postinst() {
+@@ -227,14 +239,14 @@ default_postinst() {
  		rm -fR $root/rootfs-overlay/
+ 	fi
+ 
+-	if [ -z "$root" ] && grep -q -s "^/etc/modules.d/" "/usr/lib/opkg/info/${pkgname}.list"; then
++	if [ -z "$root" ] && grep -q -s "^/etc/modules.d/" "${pkg_list}"; then
+ 		kmodloader
  	fi
  
 -	if [ -z "$root" ] && grep -q -s "^/etc/uci-defaults/" "/usr/lib/opkg/info/${pkgname}.list"; then
 +	if [ -z "$root" ] && grep -q -s "^/etc/uci-defaults/" "${pkg_list}"; then
  		. /lib/functions/system.sh
  		[ -d /tmp/.uci ] || mkdir -p /tmp/.uci
--		for i in $(sed -ne 's!^/etc/uci-defaults/!!p' "/usr/lib/opkg/info/${pkgname}.list"); do (
-+		for i in $(sed -ne 's!^/etc/uci-defaults/!!p' "${pkg_list}"); do (
- 			cd /etc/uci-defaults
- 			[ -f "$i" ] && . "$i" && rm -f "$i"
- 		) done
-@@ -248,7 +263,7 @@ default_postinst() {
+-		for i in $(grep -s "^/etc/uci-defaults/" "/usr/lib/opkg/info/${pkgname}.list"); do
++		for i in $(grep -s "^/etc/uci-defaults/" "${pkg_list}"); do
+ 			( [ -f "$i" ] && cd "$(dirname $i)" && . "$i" ) && rm -f "$i"
+ 		done
+ 		uci commit
+@@ -243,7 +255,7 @@ default_postinst() {
  	[ -n "$root" ] || rm -f /tmp/luci-indexcache 2>/dev/null
  
  	local shell="$(which bash)"
