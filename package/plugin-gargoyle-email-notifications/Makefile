@@ -21,7 +21,7 @@ endef
 
 define Package/plugin-gargoyle-email-notifications
 $(call Package/plugin-gargoyle-email-notifications/Default)
-	DEPENDS:=gargoyle +msmtp +msmtp-mta +ca-certificates-combined
+	DEPENDS:=gargoyle +msmtp +msmtp-mta +ca-bundle
 	TITLE+= (with SSL support)
 	VARIANT:=ssl
 endef
