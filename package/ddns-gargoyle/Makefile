@@ -33,7 +33,7 @@ define Package/plugin-gargoyle-ddns-cloudflare
 	$(call Package/ddns-gargoyle/Default)
 	TITLE:=Dynamic DNS daemon extension for Cloudflare
 	MAINTAINER:=Michael Gray <support@lantisproject.com>
-	DEPENDS:=+ddns-gargoyle +curl +ca-certificates-combined
+	DEPENDS:=+ddns-gargoyle +curl
 endef
 
 define Package/plugin-gargoyle-ddns-cloudflare/description
