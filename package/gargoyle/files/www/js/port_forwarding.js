@@ -120,6 +120,7 @@ function saveChanges()
 			if(upnpdEnabled)
 			{
 				upnpStartCommands.push("/etc/init.d/miniupnpd enable");
+				uci.set("upnpd", "config", "enabled", "1");
 				uci.set("upnpd", "config", "enable_upnp", "1");
 				uci.set("upnpd", "config", "enable_natpmp", "1");
 				uci.set("upnpd", "config", "upload", document.getElementById("upnp_up").value);
@@ -127,6 +128,7 @@ function saveChanges()
 			}
 			else
 			{
+				uci.set("upnpd", "config", "enabled", "0");
 				uci.set("upnpd", "config", "enable_upnp", "0");
 				uci.set("upnpd", "config", "enable_natpmp", "0");
 				upnpStartCommands.push("/etc/init.d/miniupnpd disable");
