@@ -17,7 +17,7 @@
  
  	local shell="$(which bash)"
 -	for i in $(grep -s "^/etc/init.d/" "$root/usr/lib/opkg/info/${pkgname}.list"); do
-+	for i in $(grep -s "^/etc/init.d/" "${pkg_list}"); do
++	for i in $(grep -s "/etc/init.d/" "${pkg_list}"); do
  		if [ -n "$root" ]; then
  			${shell:-/bin/sh} "$root/etc/rc.common" "$root$i" disable
  		else
@@ -60,16 +60,16 @@
  	fi
  
 -	if [ -z "$root" ] && grep -q -s "^/etc/modules.d/" "/usr/lib/opkg/info/${pkgname}.list"; then
-+	if [ -z "$root" ] && grep -q -s "^/etc/modules.d/" "${pkg_list}"; then
++	if [ -z "$root" ] && grep -q -s "/etc/modules.d/" "${pkg_list}"; then
  		kmodloader
  	fi
  
 -	if [ -z "$root" ] && grep -q -s "^/etc/uci-defaults/" "/usr/lib/opkg/info/${pkgname}.list"; then
-+	if [ -z "$root" ] && grep -q -s "^/etc/uci-defaults/" "${pkg_list}"; then
++	if [ -z "$root" ] && grep -q -s "/etc/uci-defaults/" "${pkg_list}"; then
  		. /lib/functions/system.sh
  		[ -d /tmp/.uci ] || mkdir -p /tmp/.uci
 -		for i in $(grep -s "^/etc/uci-defaults/" "/usr/lib/opkg/info/${pkgname}.list"); do
-+		for i in $(grep -s "^/etc/uci-defaults/" "${pkg_list}"); do
++		for i in $(grep -s "/etc/uci-defaults/" "${pkg_list}"); do
  			( [ -f "$i" ] && cd "$(dirname $i)" && . "$i" ) && rm -f "$i"
  		done
  		uci commit
@@ -78,7 +78,7 @@
  
  	local shell="$(which bash)"
 -	for i in $(grep -s "^/etc/init.d/" "$root/usr/lib/opkg/info/${pkgname}.list"); do
-+	for i in $(grep -s "^/etc/init.d/" "${pkg_list}"); do
++	for i in $(grep -s "/etc/init.d/" "${pkg_list}"); do
  		if [ -n "$root" ]; then
  			${shell:-/bin/sh} "$root/etc/rc.common" "$root$i" enable
  		else
