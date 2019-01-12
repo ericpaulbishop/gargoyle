@@ -11,21 +11,13 @@
 # - check only on ifup (otherwise lease updates etc would cause
 #   miniupnpd state loss)
 
-[ ! "$ACTION" = "ifup" ] && service_check /usr/sbin/miniupnpd && exit 0
+[ "$ACTION" != "ifup" ] && service_check /usr/sbin/miniupnpd && exit 0
 
-local iface
-local ifname
-local tmpconf="/var/etc/miniupnpd.conf"
-local extiface=$(uci get upnpd.config.external_iface)
-local extzone=$(uci get upnpd.config.external_zone)
+tmpconf="/var/etc/miniupnpd.conf"
+extiface=$(uci get upnpd.config.external_iface)
+extzone=$(uci get upnpd.config.external_zone)
 
 . /lib/functions/network.sh
-
-for iface in $(uci get upnpd.config.internal_iface); do
-    network_get_device device $iface
-    [ "$DEVICE" = "$device" ] && /etc/init.d/miniupnpd restart && exit 0
-done
-
 
 if [ -z "$extiface" ] ; then
   # manual external zone (if dynamically find interfaces
@@ -37,5 +29,5 @@ if [ -z "$extiface" ] ; then
   [ -n "$extiface" ] || network_find_wan6 extiface
 fi
 
-[ -n "$ifname" ] || network_get_device ifname ${extiface}
-grep -q "ext_ifname=$ifname" $tmpconf || /etc/init.d/miniupnpd restart
+[ -n "$ifname" ] || network_get_device ifname "$extiface"
+grep -q "ext_ifname=$ifname" "$tmpconf" || /etc/init.d/miniupnpd restart
