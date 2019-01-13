@@ -2235,6 +2235,10 @@ function setChannel(selectElement)
 		setSelectedValue("wifi_channel2_5ghz",  selectedValue);
 		setSelectedValue("bridge_channel_5ghz", selectedValue);
 		updateTxPower("wifi_max_txpower_5ghz","wifi_txpower_5ghz", "A")
+		dfsChan = selectedValue >= 52 && selectedValue <= 144 ? true : false;
+		document.getElementById("wifi_channel1_5ghz_dfs").style.display = dfsChan == true ? "block" : "none";
+		document.getElementById("wifi_channel2_5ghz_dfs").style.display = dfsChan == true ? "block" : "none";
+		document.getElementById("bridge_channel_5ghz_dfs").style.display = dfsChan == true ? "block" : "none";
 	}
 	else
 	{
