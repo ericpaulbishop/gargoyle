@@ -32,7 +32,7 @@ $(cat /etc/openvpn/client_conf/$GET_id/$GET_id.crt)
 $(echo -e '</cert>\n<key>')
 $(cat /etc/openvpn/client_conf/$GET_id/$GET_id.key)
 $(echo -e '</key>\n')
- $keystring
+$(echo ' '$keystring)
 $(echo -e '<tls-auth>')
 $(cat /etc/openvpn/client_conf/$GET_id/ta.key)
 $(echo -e '</tls-auth>')
