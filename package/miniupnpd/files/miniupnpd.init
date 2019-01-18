@@ -1,25 +1,25 @@
 #!/bin/sh /etc/rc.common
 # Copyright (C) 2006-2014 OpenWrt.org
 
-START=95
+START=94
 STOP=15
 
 SERVICE_USE_PID=1
 
 upnpd_get_port_range() {
-	local _var="$1"; shift
-	local _val
+	local var="$1"; shift
+	local val
 
-	config_get _val "$@"
+	config_get val "$@"
 
-	case "$_val" in
+	case "$val" in
 		[0-9]*[:-][0-9]*)
-			export -n -- "${_var}_start=${_val%%[:-]*}"
-			export -n -- "${_var}_end=${_val##*[:-]}"
+			export -n -- "${var}_start=${val%%[:-]*}"
+			export -n -- "${var}_end=${val##*[:-]}"
 		;;
 		[0-9]*)
-			export -n -- "${_var}_start=$_val"
-			export -n -- "${_var}_end="
+			export -n -- "${var}_start=$val"
+			export -n -- "${var}_end="
 		;;
 	esac
 }
@@ -28,33 +28,31 @@ conf_rule_add() {
 	local cfg="$1"
 	local tmpconf="$2"
 	local action external_port_start external_port_end int_addr
-	local internal_port_start internal_port_end
+	local internal_port_start internal_port_end comment
 
-	config_get action "$cfg" action "deny"               # allow or deny
+	config_get action "$cfg" action "deny"                # allow or deny
 	upnpd_get_port_range "ext" "$cfg" ext_ports "0-65535" # external ports: x, x-y, x:y
 	config_get int_addr "$cfg" int_addr "0.0.0.0/0"       # ip or network and subnet mask (internal)
 	upnpd_get_port_range "int" "$cfg" int_ports "0-65535" # internal ports: x, x-y, x:y or range
+	config_get comment "$cfg" comment "ACL"		      # comment
 
 	# Make a single IP IP/32 so that miniupnpd.conf can use it.
-	case "$int_addr" in
-		*/*) ;;
-		*) int_addr="$int_addr/32" ;;
-	esac
+	[ "${int_addr%/*}" = "$int_addr" ] && int_addr="$int_addr/32"
 
-	echo "${action} ${ext_start}${ext_end:+-}${ext_end} ${int_addr} ${int_start}${int_end:+-}${int_end}" >>$tmpconf
+	echo "$action $ext_start${ext_end:+-}$ext_end $int_addr $int_start${int_end:+-}$int_end #$comment" >>$tmpconf
 }
 
 upnpd_write_bool() {
 	local opt="$1"
 	local def="${2:-0}"
-	local alt="$3"
+	local alt="${3:-$opt}"
 	local val
 
 	config_get_bool val config "$opt" "$def"
 	if [ "$val" -eq 0 ]; then
-		echo "${alt:-$opt}=no" >> $tmpconf
+		echo "$alt=no" >> $tmpconf
 	else
-		echo "${alt:-$opt}=yes" >> $tmpconf
+		echo "$alt=yes" >> $tmpconf
 	fi
 }
 
@@ -68,14 +66,18 @@ start() {
 	local extip port usesysuptime conffile serial_number model_number
 	local uuid notify_interval presentation_url enable_upnp
 	local upnp_lease_file clean_ruleset_threshold clean_ruleset_interval
-        local ipv6_listening_ip
+	local ipv6_listening_ip enabled
+
+	config_get_bool enabled config enabled 1
+
+	[ "$enabled" -eq 0 ] && return 1
 
 	config_get extiface config external_iface
 	config_get extzone config external_zone
 	config_get intiface config internal_iface
 	config_get extip config external_ip
 	config_get port config port 5000
-	config_get upload   config upload
+	config_get upload config upload
 	config_get download config download
 	config_get_bool logging config log_output 0
 	config_get conffile config config_file
@@ -89,11 +91,9 @@ start() {
 	config_get clean_ruleset_interval config clean_ruleset_interval
 	config_get ipv6_listening_ip config ipv6_listening_ip
 
-	local args
+	local args ifname
 
 	. /lib/functions/network.sh
-
-	local ifname
 
         # manual external interface overrides everything
         if [ -z "$extiface" ] ; then
@@ -106,7 +106,7 @@ start() {
             [ -n "$extiface" ] || network_find_wan6 extiface
         fi
 
-	[ -n "$ifname" ] || network_get_device ifname ${extiface}
+	[ -n "$ifname" ] || network_get_device ifname $extiface
 
 	if [ -n "$conffile" ]; then
 		args="-f $conffile"
@@ -137,6 +137,7 @@ start() {
 		upnpd_write_bool secure_mode 1
 		upnpd_write_bool pcp_allow_thirdparty 0
 		upnpd_write_bool system_uptime 1
+		upnpd_write_bool igdv1 0 force_igd_desc_v1
 
 		[ -n "$upnp_lease_file" ] && \
 			echo "lease_file=$upnp_lease_file" >>$tmpconf
@@ -176,13 +177,13 @@ start() {
 		[ -n "${model_number}" ] && \
 			echo "model_number=${model_number}" >>$tmpconf
 
-	    config_foreach conf_rule_add perm_rule "$tmpconf"
+		config_foreach conf_rule_add perm_rule "$tmpconf"
 	fi
 
 
 	if [ -n "$ifname" ]; then
 		# start firewall
-		iptables -L MINIUPNPD >/dev/null 2>/dev/null || fw3 reload
+		iptables -L MINIUPNPD >/dev/null 2>&1 || fw3 reload
 
 		if [ "$logging" = "1" ]; then
 			SERVICE_DAEMONIZE=1 \
@@ -200,9 +201,11 @@ stop() {
 	service_stop /usr/sbin/miniupnpd
 
 	iptables -t nat -F MINIUPNPD 2>/dev/null
+	iptables -t nat -F MINIUPNPD-POSTROUTING 2>/dev/null
 	iptables -t filter -F MINIUPNPD 2>/dev/null
 
         [ -x /usr/sbin/ip6tables ] && {
 	    ip6tables -t filter -F MINIUPNPD 2>/dev/null
         }
 }
+

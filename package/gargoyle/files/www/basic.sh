@@ -331,6 +331,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					<span class="col-xs-7">
 						<select id="bridge_channel_5ghz" class="form-control" onchange="setChannel(this)" ></select>
 					</span>
+					<span class="alert alert-warning col-xs-12" role="alert" id="bridge_channel_5ghz_dfs"><%~ DFSWarning %></span>
 				</div>
 
 				<div id="bridge_fixed_channel_container" class="row form-group">
@@ -868,6 +869,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="wifi_channel2_5ghz_container" class="row indent">
 					<label class="col-xs-5" for="wifi_channel2_5ghz" id="wifi_channel2_5ghz_label"><%~ WChn %>:</label>
 					<span class="col-xs-7"><select class="form-control" id="wifi_channel2_5ghz" onchange="setChannel(this)" ></select></span>
+					<span class="alert alert-warning col-xs-12" role="alert" id="wifi_channel2_5ghz_dfs"><%~ DFSWarning %></span>
 				</div>
 
 				<div id="wifi_encryption2_container" class="row indent">
@@ -952,6 +954,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					<span class="col-xs-7" >
 						<select class="form-control" id="wifi_channel1_5ghz" onchange="setChannel(this)" ></select>
 					</span>
+					<span class="alert alert-warning col-xs-12" role="alert" id="wifi_channel1_5ghz_dfs"><%~ DFSWarning %></span>
 				</div>
 
 				<div id="wifi_encryption1_container" class="row indent">
