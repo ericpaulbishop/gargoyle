@@ -491,7 +491,7 @@ for target in $targets ; do
 				fi
 			done
 			IFS="$IFS_ORIG"
-			cp -r "$package_dir/$gp" "$target-src/package"
+			cp -pr "$package_dir/$gp" "$target-src/package"
 		done
 	
 
