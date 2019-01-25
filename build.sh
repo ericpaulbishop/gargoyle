@@ -359,7 +359,7 @@ if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress
 			cd "$top_dir"
 			git clone git://github.com/nodejs/node.git
 			cd node
-			git checkout "$node_tag"
+			git checkout "$node_version_tag"
 			./configure 
 			make
 			mkdir bin
@@ -543,7 +543,7 @@ for target in $targets ; do
 			fi
 		done
 		IFS="$IFS_ORIG"
-		cp -r "$package_dir/$gp" "$target-src/package"
+		cp -pr "$package_dir/$gp" "$target-src/package"
 	done
 
 
