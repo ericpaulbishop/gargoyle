@@ -257,6 +257,8 @@ my $targetOrder =
 		"tl-wr842n-v1-squashfs-sysupgrade.bin",
 		"tl-wr842n-v2-squashfs-factory.bin",
 		"tl-wr842n-v2-squashfs-sysupgrade.bin",
+		"tl-wr842n-v3-squashfs-factory.bin",
+		"tl-wr842n-v3-squashfs-sysupgrade.bin",
 		"tl-wr941nd-v2-squashfs-factory.bin",
 		"tl-wr941nd-v2-squashfs-sysupgrade.bin",
 		"tl-wr941nd-v3-squashfs-factory.bin",
