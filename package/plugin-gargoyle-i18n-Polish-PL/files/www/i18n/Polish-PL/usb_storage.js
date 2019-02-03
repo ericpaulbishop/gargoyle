@@ -31,6 +31,7 @@ usbSStr.ExtrS="Extroot";
 usbSStr.ExtrOff="Wyłącz external root";
 usbSStr.ExtDt="External root jest na partycji";
 usbSStr.ExtrWarn="Użycie zewnętrznego nośnika USB jako external root lub <strong>extroot</strong> powoduje, że staje się on częścią pamięci wewnętrznej routera. Udostępnia to bardzo dużą powierzchnię nośnika dla systemu, ale jeżeli zostanie on usunięty to wszystkie zmiany i ustawienia w systemie mogą zostać utracone.";
+usbSStr.NoShareErr="Wymagana jest instalacja dodatkowego pakietu aby skorzystać z opcji współdzielenia dysków!";
 
 //template
 usbSStr.Disk="Dysk";

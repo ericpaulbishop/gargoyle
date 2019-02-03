@@ -26,6 +26,7 @@ quotasStr.OneTimeQuotaError="Można mieć tylko jeden limit w danym czasie dla u
 quotasStr.OneNetworkQuotaError="Można mieć tylko jeden limit w danym czasie który ma zastosowanie do całej sieci";
 quotasStr.QuotaAddError="Nie można dodać limitu.";
 quotasStr.NA="-";
+quotasStr.NoTcErr="Wymagana jest instalacja dodatkowego pakietu aby skorzystać z tej opcji!";
 
 //template
 quotasStr.AppliesTo="Ma zastosowanie do";

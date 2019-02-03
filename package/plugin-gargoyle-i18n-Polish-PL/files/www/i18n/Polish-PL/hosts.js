@@ -7,6 +7,7 @@ hostsStr.RefreshR="Czas odświeżania";
 hostsStr.RInfo="Określa jak często dane na tej stronie są odświeżane";
 hostsStr.CurrLeases="Bieżące dzierżawy DHCP";
 hostsStr.ConWifiHosts="Połączone urządzenia bezprzewodowe";
+hostsStr.ConClientWifi="Bezprzewodowe połączenie klienckie";
 hostsStr.ActiveHosts="Urządzenia z aktywnymi połączeniami";
 
 //javascript

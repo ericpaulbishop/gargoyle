@@ -2,7 +2,7 @@
  * UTF-8 (with BOM) Polish-PL text strings for i18n-firstoot.sh & languages.sh html elements
  */
 
-intS.LMSect="Menadżer języków";
+intS.LMSect="Menedżer języków";
 
 //i18n.js javascript
 intS.Lang="Język";

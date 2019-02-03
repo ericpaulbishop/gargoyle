@@ -3,5 +3,5 @@
  */
 
 thmS.mTheme="Motywy";
-thmS.TMSect="Menadżer motywów";
+thmS.TMSect="Menedżer motywów";
 thmS.Thm="Motywy";
