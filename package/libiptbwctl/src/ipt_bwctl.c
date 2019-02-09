@@ -364,7 +364,7 @@ static int get_bandwidth_data(char* id, unsigned char get_history, char* ip, uns
 	unsigned char buf[BANDWIDTH_QUERY_LENGTH];
 	memset(buf, '\0',  BANDWIDTH_QUERY_LENGTH);
 	int done = 0;
-    ip_bw_kernel_data* ip_bw_data = (ip_bw_kernel_data*)(buf);
+	ip_bw_kernel_data* ip_bw_data = (ip_bw_kernel_data*)(buf);
 
 	*data = NULL;
 	*num_ips = 0;
@@ -400,12 +400,12 @@ static int get_bandwidth_data(char* id, unsigned char get_history, char* ip, uns
 	unsigned char error = 0;
 	unsigned char data_initialized = 0;
 	uint32_t data_index = 0;
+	uint32_t next_request_index = 0;
+
 	while(!done && sockfd >= 0 && got_lock)
 	{
 		uint32_t size = BANDWIDTH_QUERY_LENGTH;
-	
 		getsockopt(sockfd, IPPROTO_IP, BANDWIDTH_GET, buf, &size);
-		
 		error = (unsigned char)buf[0];
 		if(error != 0)
 		{
@@ -433,6 +433,7 @@ static int get_bandwidth_data(char* id, unsigned char get_history, char* ip, uns
 					*data = (void*)malloc(sizeof(ip_bw)*(total_ips+1));
 					memset(*data, 0, sizeof(ip_bw)*(total_ips+1));
 				}
+				data_initialized = 1;
 			}
 
 			int response_index=0;
@@ -441,8 +442,26 @@ static int get_bandwidth_data(char* id, unsigned char get_history, char* ip, uns
 			{
 				parse_returned_ip_data(*data, &data_index, buf, &buffer_index, get_history, reset_interval, reset_time, is_constant_interval);
 			}
-			*request_index= *request_index + response_ips;
-			done = *request_index < total_ips ? 0 : 1;
+			next_request_index = next_request_index + response_ips;
+			done = next_request_index < total_ips ? 0 : 1;
+			if(!done)
+			{
+				memset(buf, '\0',  BANDWIDTH_QUERY_LENGTH);
+
+				if(strcmp(ip, "ALL") == 0)
+				{
+					*request_ip = 0;
+				}
+				else
+				{
+					struct in_addr addr;
+					inet_aton(ip, &addr);
+					*request_ip = (uint32_t)addr.s_addr;
+				}
+				*request_index = next_request_index;
+				*request_history = get_history;
+				sprintf(request_id, "%s", id);
+			}
 		}
 	}
 	if( (error != 0) && data_initialized)
@@ -467,6 +486,7 @@ static int get_bandwidth_data(char* id, unsigned char get_history, char* ip, uns
 	{
 		unlock();
 	}
+
 	return got_lock && (error == 0);
 }
 
