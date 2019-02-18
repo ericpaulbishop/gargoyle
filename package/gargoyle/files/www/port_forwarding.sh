@@ -13,12 +13,13 @@
 <!--
 <%
 	upnp_config_enabled=$(uci get upnpd.config.enabled 2>/dev/null)
+	have_miniupnpd=$(opkg list-installed | grep "miniupnpd" 2>/dev/null)
 	if [ -h /etc/rc.d/S94miniupnpd ] && [ -n "$upnp_config_enabled" ] && [ "$upnp_config_enabled" != "0" ] ; then
 		echo "var upnpdEnabled = true;"
 	else
 		echo "var upnpdEnabled = false;"
 	fi
-	if [ -z "$upnp_config_enabled" ] ; then
+	if [ -z "$have_miniupnpd" ] ; then
 		echo "var haveUpnpd = false;"
 	else
 		echo "var haveUpnpd = true;"
