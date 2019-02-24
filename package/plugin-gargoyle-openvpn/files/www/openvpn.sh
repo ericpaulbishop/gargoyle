@@ -291,10 +291,10 @@
 							<label class="col-xs-5" for='openvpn_client_cipher' id='openvpn_client_cipher_label'><%~ OCiph %>:</label>
 							<span class="col-xs-7">
 								<select class="form-control" id='openvpn_client_cipher' onchange="setClientVisibility(document);updateClientConfigTextFromControls();" >
-									<option value='BF-CBC:128'>Blowfish-CBC 128bit</option>
-									<option value='BF-CBC:256'>Blowfish-CBC 256bit</option>
 									<option value='AES-128-CBC'>AES-CBC 128bit</option>
 									<option value='AES-256-CBC'>AES-CBC 256bit</option>
+									<option value='AES-128-GCM'>AES-GCM 128bit</option>
+									<option value='AES-256-GCM'>AES-GCM 256bit</option>
 									<option value='other'><%~ Othr %></option>
 								</select>
 							</span>
