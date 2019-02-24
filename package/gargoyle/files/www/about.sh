@@ -56,7 +56,7 @@
 				<h3 class="panel-title"><%~ LSect %></h3>
 			</div>
 			<div class="panel-body">
-				<h3>Gargoyle is copyright &copy; 2008-2016 by Eric Bishop</h3>
+				<h3>Gargoyle is copyright &copy; 2008-%CURYEAR by Eric Bishop</h3>
 
 				<p>Gargoyle is free software; you can redistribute it and/or modify it under the terms of the
 				<a href="http://www.gnu.org/licenses/gpl-2.0.html">GNU General Public License version 2.0</a>

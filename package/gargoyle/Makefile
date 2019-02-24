@@ -68,6 +68,7 @@ define Package/gargoyle/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/gargoyle_header_footer $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/gargoyle_session_validator $(1)/usr/bin
+	$(SED) 's,%CURYEAR,$(shell date -u +%Y),g' $(1)/www/about.sh
 endef
 
 
