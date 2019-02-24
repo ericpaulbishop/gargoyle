@@ -204,7 +204,7 @@ function resetData()
 		var m = twod(lastDate.getMonth()+1);
 		var d = twod(lastDate.getDate());
 		var h = " " + lastDate.getHours() + ":" +  twod(lastDate.getMinutes())  + ":" + twod(lastDate.getSeconds());
-		var lastUpdate = (systemDateFormat == "" || systemDateFormat == "usa") ? m + "/" + d + h : d + "/" + m + h;
+		var lastUpdate = (systemDateFormat == "" || systemDateFormat == "usa" || systemDateFormat == "iso") ? m + "/" + d + h : d + "/" + m + h;
 		lastUpdate = systemDateFormat == "russia" ? d + "." + m + h : lastUpdate;
 		lastUpdate = systemDateFormat == "argentina" ? d + "/" + m + h : lastUpdate;
 		lastUpdate = systemDateFormat == "iso8601" ? m + "-" + d + h : lastUpdate;
