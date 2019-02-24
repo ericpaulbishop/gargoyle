@@ -208,6 +208,7 @@ function resetData()
 		lastUpdate = systemDateFormat == "russia" ? d + "." + m + h : lastUpdate;
 		lastUpdate = systemDateFormat == "argentina" ? d + "/" + m + h : lastUpdate;
 		lastUpdate = systemDateFormat == "iso8601" ? m + "-" + d + h : lastUpdate;
+		lastUpdate = systemDateFormat == "hungary" ? m + "." + d + h : lastUpdate;
 		lastUpdate =  updateTimes[section] == null ? UI.never : lastUpdate;
 
 

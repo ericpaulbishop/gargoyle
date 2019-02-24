@@ -53,6 +53,7 @@
 							<option value="russia">dd.mm.yyyy</option>
 							<option value="australia">dd/mm/yy</option>
 							<option value="argentina">dd/mm/yyyy</option>
+							<option value="hungary">yyyy.mm.dd</option>
 							<option value="iso">yyyy/mm/dd</option>
 							<option value="iso8601">yyyy-mm-dd</option>
 						</select>

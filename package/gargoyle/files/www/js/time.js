@@ -51,6 +51,7 @@ function saveChanges()
 		var formatStrings=[];
 		formatStrings["iso"]       = "\"+%Y/%m/%d %H:%M %Z\"";
 		formatStrings["iso8601"]   = "\"+%Y-%m-%d %H:%M %Z\"";
+		formatStrings["hungary"]   = "\"+%Y.%m.%d %H:%M %Z\"";
 		formatStrings["australia"] = "\"+%d/%m/%y %H:%M %Z\"";
 		formatStrings["usa"]       = "\"+%m/%d/%y %H:%M %Z\"";
 		formatStrings["russia"]    = "\"+%d.%m.%Y %H:%M %Z\"";

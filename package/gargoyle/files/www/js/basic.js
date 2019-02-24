@@ -1507,6 +1507,10 @@ function localdate(ldate)
 	{
 		ldateStr = y4 + "-" + m + "-" + d + h;
 	}
+	else if(systemDateFormat == "hungary")
+	{
+		ldateStr = y4 + "." + m + "." + d + h;
+	}
 	else if(systemDateFormat == "australia")
 	{
 		ldateStr = d + "/" + m + "/" + y2 + h;
