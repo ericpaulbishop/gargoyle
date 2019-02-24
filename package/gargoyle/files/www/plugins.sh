@@ -68,7 +68,8 @@
 							</div>
 
 							<div id="plugin_root_change_container" class="row form-group" style="display:none" >
-								<span class="col-xs-12"><button class="btn btn-default" onclick="changePluginRoot()"><%~ Chroot %></button></span>
+								<div class="alert alert-danger" role="alert" id="plugin_root_incompatible" style="display:none"><%~ Prootincompat %></div>
+								<span class="col-xs-12"><button class="btn btn-default" id="btn_plugin_root_change" onclick="changePluginRoot()"><%~ Chroot %></button></span>
 							</div>
 						</div>
 					</div>

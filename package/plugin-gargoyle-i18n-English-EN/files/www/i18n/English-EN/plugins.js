@@ -7,6 +7,7 @@ pgS.PgOpt="Plugin Options";
 pgS.PRoot="Plugin Root";
 pgS.RDrv="Root Drive";
 pgS.Chroot="Change Plugin Root";
+pgS.Prootincompat="This drive format cannot be used as a plugin root. You can change to a compatible format from the USB Storage plugin.";
 pgS.PgSrc="Plugin Sources";
 pgS.ANam="Add Name";
 pgS.Aurl="Add URL";
