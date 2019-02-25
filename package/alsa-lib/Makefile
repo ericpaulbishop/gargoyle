@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2006-2015 OpenWrt.org
+# Copyright (C) 2006-2016 OpenWrt.org
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -8,13 +8,14 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=alsa-lib
-PKG_VERSION:=1.0.29
+PKG_VERSION:=1.1.6
 PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
 PKG_SOURCE_URL:=ftp://ftp.alsa-project.org/pub/lib/ \
-		http://alsa.cybermirror.org/lib/
-PKG_MD5SUM:=de67e0eca72474d6b1121037dafe1024
+		http://distfiles.gentoo.org/distfiles/
+
+PKG_HASH:=5f2cd274b272cae0d0d111e8a9e363f08783329157e8dd68b3de0c096de6d724
 PKG_MAINTAINER:=Ted Hess <thess@kitschensync.net>, \
 		Peter Wagner <tripolar@gmx.at>
 
@@ -43,15 +44,12 @@ endef
 
 TARGET_CFLAGS += $(FPIC)
 
-define Build/Configure
-	$(call Build/Configure/Default, \
+CONFIGURE_ARGS+= \
 		--disable-python \
 		--disable-debug \
 		--without-debug \
 		$(SOFT_FLOAT_CONFIG_OPTION) \
-		--with-versioned=no \
-	)
-endef
+		--with-versioned=no
 
 define Build/InstallDev
 	$(INSTALL_DIR) $(1)/usr/include/
@@ -92,3 +90,4 @@ define Package/alsa-lib/install
 endef
 
 $(eval $(call BuildPackage,alsa-lib))
+
