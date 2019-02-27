@@ -367,7 +367,7 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 				{
 					if(test_list[0] != NULL)
 					{
-						compute_multi_rules(test_list, multi_rules, &single_check, is_multi, rule_prefix, addr_prefix1[addr_index][test_list_index], addr_prefix2[addr_index][test_list_index],is_negated, 0, mask_byte_index, proto, include_proto, 0);
+						compute_multi_rules(test_list, multi_rules, &single_check, is_multi, rule_prefix, addr_prefix1[addr_index][test_list_index], addr_prefix2[addr_index][test_list_index],(is_negated && (test_list_index != 1)), (is_negated && (test_list_index == 1)), mask_byte_index, proto, include_proto, 0);
 					}
 				}
 			}
