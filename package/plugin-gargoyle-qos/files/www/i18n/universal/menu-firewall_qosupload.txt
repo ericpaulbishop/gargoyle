@@ -11,3 +11,4 @@ RU=QoS (отправка)
 ZH-CN=QoS（上传）
 SK=QoS (Nahrávanie)
 ES=QoS (Subida)
+CS=QoS (Nahrávání)

@@ -6,7 +6,7 @@ rbS.RbSect="Restart";
 rbS.SchRb="Naplánovaný restart";
 rbS.NoSch="Žádný naplánovaný restart";
 rbS.RbSch="Naplánovaný restart";
-rbS.WillR="Router se restartuje";
+rbS.WillR="Směrovač se restartuje";
 rbS.EDay="Každý den";
 rbS.EWek="Každý týden";
 rbS.EMnh="Každý měsíc";
@@ -14,7 +14,7 @@ rbS.RDay="Den restartu";
 rbS.RHr="Hodina restartu";
 
 //javascript
-rbS.SysR="Router se restartuje";
+rbS.SysR="Směrovač se restartuje";
 rbS.Digs=".";
 rbS.LD1s=".";
 rbS.LD2s=".";

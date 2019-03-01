@@ -35,7 +35,7 @@ prtS.DupErr="Port(y) uvnitř rozsah je/jsou již přesměrovány";
 prtS.CopErr="Port je již přesměrován";
 prtS.UpErr="Nelze aktualizovat přesměrování portu.";
 prtS.Prot="Protokol";
-prtS.LHst="LAN hostitel";
+prtS.LHst="LAN host";
 prtS.Port="Port";
 
 //edit.sh pages

@@ -16,5 +16,5 @@ WebC.WebCPass="Heslo";
 WebC.PrevWebC="Náhled";
 WebC.WebCOpt="volitelný";
 
-WebC.ErrorPortWebC="Port serveru webcamery koliduje s";
+WebC.ErrorPortWebC="Port serveru webcamery koliduje s ";
 WebC.AvelAtWebC="Webkamera je dostupná na ";

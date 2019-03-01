@@ -9,3 +9,4 @@ ZH-CN=USB打印机
 RU=USB-принтер
 NO=USB Skriver
 BR=Impressora USB
+CS=USB tiskárna
