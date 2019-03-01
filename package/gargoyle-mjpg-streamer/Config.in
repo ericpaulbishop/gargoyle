@@ -2,7 +2,7 @@
 # Copyright (C) 2014 OpenWrt.org
 #
 
-if PACKAGE_mjpg-streamer
+if PACKAGE_gargoyle-mjpg-streamer
 
 config MJPG_STREAMER_V4L2
 	bool "Compile input_uvc with libv4l2 (camera controls)"
