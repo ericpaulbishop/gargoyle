@@ -2,7 +2,7 @@
  * UTF-8 (with BOM) Czech-CS text strings for backup.sh html elements
  */
 
-bkS.mBackup="Zálohování/Obnova";
+bkS.mBackup="Zálohování / Obnova";
 bkS.CurrC="Zálohování aktuální konfigurace";
 bkS.RestC="Obnovení ze zálohované konfigurace";
 bkS.DfltC="Obnovení výchozí konfigurace";

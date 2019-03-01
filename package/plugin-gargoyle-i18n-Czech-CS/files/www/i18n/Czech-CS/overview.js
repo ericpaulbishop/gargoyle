@@ -5,11 +5,11 @@
 ovwS.mDevice="Zařízení";
 ovwS.mWAN="WAN";
 ovwS.mLAN="LAN";
-ovwS.mWireless="Bezdrátový";
+ovwS.mWireless="Bezdrátová síť";
 ovwS.mTime="Čas";
 ovwS.mServices="Služby";
 ovwS.mBridge="Most";
-ovwS.Sts="Stav";
+ovwS.Sts="Přehled";
 ovwS.DNam="Název zařízení";
 ovwS.GVer="Verze Gargoyle";
 ovwS.Modl="Model";

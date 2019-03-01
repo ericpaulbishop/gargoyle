@@ -12,4 +12,4 @@ PL=Języki
 ZH-CN=语言
 RU=Языки
 NO=Språk
-
+CS=Jazyky

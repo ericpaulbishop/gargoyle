@@ -11,3 +11,4 @@ RU=Динамический DNS
 ZH-CN=动态域名
 SK=Dynamická DNS
 ES=DNS Dinámico
+CS=Dynamická DNS

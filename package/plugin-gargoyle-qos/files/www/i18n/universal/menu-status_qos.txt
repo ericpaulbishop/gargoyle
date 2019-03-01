@@ -11,3 +11,4 @@ RU=Распределение QoS
 ZH-CN=QoS分布
 SK=Distribúcia QoS
 ES=Distribución de QoS
+CS=Distribuce QoS

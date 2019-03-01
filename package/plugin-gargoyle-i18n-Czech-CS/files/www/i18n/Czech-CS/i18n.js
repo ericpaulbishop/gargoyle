@@ -2,7 +2,7 @@
  * UTF-8 (with BOM) Czech-CS text strings for i18n-firstoot.sh & languages.sh html elements
  */
 
-intS.LMSect="Správce jazyků";
+intS.LMSect="Jazyky";
 
 //i18n.js javascript
 intS.Lang="Jazyk";

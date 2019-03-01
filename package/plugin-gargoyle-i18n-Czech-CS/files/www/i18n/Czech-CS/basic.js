@@ -2,7 +2,7 @@
  * UTF-8 (with BOM) Czech-CS text strings for basic.sh html elements
  */
 
-basicS.mBasic="Základní konfigurace";
+basicS.mBasic="Základní nastavení";
 basicS.DCfgSect="Konfigurace zařízení";
 basicS.CfgDev="Konfigurovat zařízení jako";
 basicS.DvGtwy="Brána (standardní)";
@@ -68,7 +68,7 @@ basicS.FPngs="Neúspěšné ping-y před znovupřipojení";
 basicS.PngI="Ping Interval";
 basicS.Gtwy="Brána";
 basicS.Srvc="Služba";
-basicS.S4G3G2G="4G/3G/2G (auto)";
+basicS.S4G3G2G="4G/3G/2G(auto)";
 basicS.S3GPrfr="3G preferovaný";
 basicS.S2GPrfr="2G preferovaný";
 basicS.S3GOnly="Pouze 3G";
@@ -88,7 +88,7 @@ basicS.NrtnCSB="Norton ConnectSafe B";
 basicS.NrtnCSC="Norton ConnectSafe C";
 basicS.GooSrvs="Google DNS servery";
 basicS.Srvr="Server";
-basicS.SrvPt="Server Port";
+basicS.SrvPt="Port serveru";
 basicS.CstDSrv="Uživatelské DNS servery";
 basicS.Allow="Povolit";
 basicS.Rsln="Rozlišení";
@@ -116,7 +116,7 @@ basicS.BcsID="Vysílat SSID";
 basicS.WlIso="Izolace bezdrátového klienta";
 basicS.DPing="Zahodit ping z WAN";
 basicS.WifiCountry="Země";
-basicS.WifiCountryWarning="Gargoyle se pokoušel určit vaši geografickou oblast. Pokud to není správné, důrazně se doporučuje ponechat toto nastavení jako <i>Svět (výchozí)</i>.<br>Nastavení této hodnoty nesprávně může vést k porušení regulačních standardů ve vaší oblasti. V případě pochybností zvolte <i>Svět (výchozí)</i>, který je ve všech regionech legální.<br>Správným nastavením země můžete použít další kanály, vyšší vysílací výkon nebo širší šířky kanálů.<br><br>Poznámka: Toto nastavení můžete změnit pouze jednou.";
+basicS.WifiCountryWarning="Gargoyle se pokoušel určit vaši geografickou oblast. Pokud to není správně, důrazně se doporučuje ponechat toto nastavení jako <i>Svět (výchozí)</i>.<br>Nastavení této hodnoty nesprávně může vést k porušení regulačních standardů ve vaší oblasti. V případě pochybností zvolte <i>Svět (výchozí)</i>, který je ve všech regionech legální.<br>Správným nastavením země můžete použít další kanály, vyšší vysílací výkon nebo širší šířky kanálů.<br><br>Poznámka: Toto nastavení můžete změnit pouze jednou.";
 basicS.DFSWarning="Zvolený kanál je kanál <i>DFS (Dynamic Frequency Selection)</i>. Před vysláním musí Gargoyle nejprve skenovat po dobu 60 sekund signály z radarových zařízení zabývajících se touto frekvencí. Pokud se některé z nich objeví, Gargoyle se může rozhodnout, že bude vysílat na jiném kanále než ten, který jste vybrali, nebo že vůbec nebudete moci vysílat v závislosti na vašem konkrétním zařízení.</U>Gargoyle bude nadále monitorovat radarové impulsy během provozu a může kdykoli přepínat kanály nebo přestat vysílat.";
 
 //javascript
