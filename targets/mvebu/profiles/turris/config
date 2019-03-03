@@ -3581,7 +3581,7 @@ CONFIG_PACKAGE_iw=y
 CONFIG_PACKAGE_libipset=y
 CONFIG_PACKAGE_libiptbwctl=y
 # CONFIG_PACKAGE_map is not set
-CONFIG_PACKAGE_obfsproxy=y
+CONFIG_PACKAGE_obfsproxy-legacy=y
 # CONFIG_PACKAGE_odhcp6c is not set
 # CONFIG_PACKAGE_odhcpd is not set
 # CONFIG_PACKAGE_odhcpd-ipv6only is not set
