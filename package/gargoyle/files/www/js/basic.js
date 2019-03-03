@@ -428,8 +428,8 @@ function saveChanges()
 			var useAltRoot = document.getElementById("lan_dns_altroot").checked;
 			var dnsmasqSection = uciOriginal.getAllSectionsOfType("dhcp", "dnsmasq").shift();
 			var currentAltServers = uci.remove("dhcp", dnsmasqSection, "server");
-			var rebindServers     = uci.remove("dhcp", dnsmasqSection, "rebind_domain");
-			var altServerDefs     = getAltServerDefs(currentAltServers, useAltRoot)
+			var currentRebindServers = uci.remove("dhcp", dnsmasqSection, "rebind_domain");
+			var altServerDefs     = getAltServerDefs(currentAltServers, currentRebindServers, useAltRoot)
 			if(altServerDefs[0].length > 0)
 			{
 				uci.createListOption("dhcp", dnsmasqSection, "server", true);
@@ -3394,9 +3394,9 @@ function singleEthernetPort()
 	return defaultWanIf == "" || defaultWanIf == defaultLanIf;
 }
 
-// if there are server defs other than alt defs leave them alone
+// if there are server/rebind defs other than alt defs leave them alone
 // this is necessary for handling .onion domains if the tor plugin is installed
-function getAltServerDefs(currentAltDefs, altDefsEnabled)
+function getAltServerDefs(currentAltDefs, currentRebindServers, altDefsEnabled)
 {
 
 	var defs = []
@@ -3407,6 +3407,7 @@ function getAltServerDefs(currentAltDefs, altDefsEnabled)
 	var tldLists = [ncTlds, onTlds]
 	var tli
 	var cadi
+	var crsi
 	for(tli=0; tli < tldLists.length; tli++)
 	{
 		var tlds = tldLists[tli]
@@ -3423,10 +3424,16 @@ function getAltServerDefs(currentAltDefs, altDefsEnabled)
 		if( definedTlds[defTld] == null )
 		{
 			defs.push(def)
+		}
+	}
+	for(crsi=0; crsi < currentRebindServers.length; crsi++)
+	{
+		var defTld = currentRebindServers[crsi]
+		if( definedTlds[defTld] == null )
+		{
 			domains.push(defTld)
 		}
 	}
-
 
 	function addDefsForAlt(tlds, dns)
 	{
