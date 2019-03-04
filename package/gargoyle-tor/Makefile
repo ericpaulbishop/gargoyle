@@ -121,7 +121,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=gargoyle-tor
 PKG_VERSION:=0.3.2.10
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 PKG_SOURCE:=tor-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://www.torproject.org/dist \
@@ -158,7 +158,7 @@ endef
 define Package/gargoyle-tor
 $(call Package/gargoyle-tor/Default)
   TITLE:=An anonymous Internet communication system
-  DEPENDS:=+obfsproxy +libevent2 +libopenssl +libpthread +librt +zlib +libcap +ipset +kmod-ipt-ipset +gargoyle-firewall-util 
+  DEPENDS:=+obfsproxy-legacy +libevent2 +libopenssl +libpthread +librt +zlib +libcap +ipset +kmod-ipt-ipset +gargoyle-firewall-util
 endef
 
 define Package/gargoyle-tor-geoip

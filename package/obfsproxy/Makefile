@@ -18,7 +18,7 @@ PKG_SOURCE_SUBDIR:=obfsproxy-legacy
 include $(INCLUDE_DIR)/package.mk
 
 
-define Package/obfsproxy
+define Package/obfsproxy-legacy
 	TITLE:=Tor obfsproxy Plugin
 	SECTION:=net
 	CATEGORY:=Network
@@ -27,7 +27,7 @@ define Package/obfsproxy
 
 endef
 
-define Package/obfsproxy/Default/description
+define Package/obfsproxy-legacy/Default/description
 	obfsproxy is a tool that attempts to circumvent censorship, by transforming
 	the Tor traffic between the client and the bridge. This way, censors, who
 	usually monitor traffic between the client and the bridge, will see
@@ -47,11 +47,11 @@ CONFIGURE_VARS += \
 MAKE_FLAGS += \
 	CFLAGS="$(TARGET_CFLAGS)"
 
-define Package/obfsproxy/install
+define Package/obfsproxy-legacy/install
 	$(INSTALL_DIR) $(1)/usr/sbin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/obfsproxy $(1)/usr/sbin/
 endef
 
 
 
-$(eval $(call BuildPackage,obfsproxy))
+$(eval $(call BuildPackage,obfsproxy-legacy))

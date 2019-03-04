@@ -4443,7 +4443,7 @@ CONFIG_PACKAGE_libiptbwctl=y
 # CONFIG_PACKAGE_nlbwmon is not set
 # CONFIG_PACKAGE_noddos is not set
 # CONFIG_PACKAGE_nut is not set
-# CONFIG_PACKAGE_obfsproxy is not set
+# CONFIG_PACKAGE_obfsproxy-legacy is not set
 CONFIG_PACKAGE_odhcp6c=y
 CONFIG_PACKAGE_odhcp6c_ext_cer_id=0
 # CONFIG_PACKAGE_odhcpd is not set
