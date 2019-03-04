@@ -13,7 +13,7 @@ PKG_VERSION:=$(GARGOYLE_VERSION)
 ifeq ($(GARGOYLE_VERSION),)
      PKG_VERSION:=1.0.0
 endif
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
@@ -25,7 +25,7 @@ define Package/plugin-gargoyle-tor
 	CATEGORY:=Administration
 	SUBMENU:=Gargoyle Web Interface
 	TITLE:=Tor Anonymizer Support for Gargoyle
-	DEPENDS:=+gargoyle +gargoyle-tor +obfsproxy
+	DEPENDS:=+gargoyle +gargoyle-tor +obfsproxy-legacy
 	MAINTAINER:=Eric Bishop
 	PKGARCH:=all
 endef
