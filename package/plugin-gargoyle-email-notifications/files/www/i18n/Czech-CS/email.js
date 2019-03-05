@@ -37,7 +37,7 @@ email.quarterhours="čtvrt hodiny";
 email.hours="hodiny";
 email.days="dny";
 
-//javscript
+//javascript
 email.Smmy="Shrnutí";
 email.WeekA=["Neděle", "Pondělí", "Úterý", "Středa", "Čtvrtek", "Pátek", "Sobota"];
 email.WDayA=["Neděle", "Pondělí-Pátek", "Sobota"];
