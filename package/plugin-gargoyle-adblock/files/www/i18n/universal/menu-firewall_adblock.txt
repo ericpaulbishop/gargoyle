@@ -9,3 +9,4 @@ PL=Reklamy
 ZH-CN=广告过滤
 RU=Блокировщик рекламы
 NO=Ad blokk
+CS=Blokování reklam
