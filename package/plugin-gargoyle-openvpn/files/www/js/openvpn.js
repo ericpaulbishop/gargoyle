@@ -1065,6 +1065,11 @@ function setAcUciFromDocument(controlDocument, id)
 		uci.set(pkg, id, "subnet_ip",   subnetIp)
 		uci.set(pkg, id, "subnet_mask", subnetMask)
 	}
+	else
+	{
+		uci.remove(pkg, id, "subnet_ip")
+		uci.remove(pkg, id, "subnet_mask")
+	}
 	uci.set(pkg, id, "prefer_vpngateway", prefer_vpngateway)
 }
 
