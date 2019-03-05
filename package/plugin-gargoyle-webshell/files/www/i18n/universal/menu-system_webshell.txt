@@ -7,3 +7,4 @@ PL=Webshell
 RU=Коммандная строка
 NO=Webshell
 BR=Shell de Comando
+CS=Webshell
