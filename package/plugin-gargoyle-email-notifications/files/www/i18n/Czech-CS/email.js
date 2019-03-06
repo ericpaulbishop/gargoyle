@@ -1,0 +1,73 @@
+﻿/*
+ * UTF-8 (with BOM) Czech-CS text strings for email.sh html elements
+ */
+
+email.Time="Nastavení času";
+email.TPer="Časové období";
+email.DataSettings="Obsah e-mailu";
+email.NoTm="Zakázat časovač";
+email.dly="Denní";
+email.Wkd="Všední dny + sobota/neděle";
+email.Wkly="Týdenní";
+email.TInc="Přírůstek časovače";
+email.Test="Poslat zkušební e-mail";
+email.SmtpSettings="Nastavení SMTP";
+email.ServerIP="Adresa serveru:";
+email.ServerPort="Port serveru:";
+email.Sender="Odesílatel:";
+email.Receipment="Příjemce:";
+email.Auth="Autentizace SMTP:";
+email.Username="Uživatelské jméno:";
+email.Password="Heslo:";
+email.Emailsettings="Nastavení e-mailu";
+email.BandwidthInterval="Interval zobrazení:";
+email.recentWebsites="Nedávno navštívené weby";
+email.recentSearches="Nejnovější vyhledávací dotazy";
+email.Logs="Protokoly";
+email.DHCP="DHCP pronájmy";
+email.ARP="ARP tabulka";
+email.Bandwidth="Použití šířky pásma";
+email.Count="Počet řádků:";
+email.Encryption="Šifrování";
+email.Include="Zahrnout následující údaje do sestavy:";
+email.rvel="odhalit";
+email.None="Žádné";
+email.minutes="minuty";
+email.quarterhours="čtvrt hodiny";
+email.hours="hodiny";
+email.days="dny";
+
+//javascript
+email.Smmy="Shrnutí";
+email.WeekA=["Neděle", "Pondělí", "Úterý", "Středa", "Čtvrtek", "Pátek", "Sobota"];
+email.WDayA=["Neděle", "Pondělí-Pátek", "Sobota"];
+email.Warn="Varování";
+email.NextEv="Plán se projeví při příští události.";
+email.SelTM="Vybraný režim časovače";
+email.SumDis="zakázáno (bez rozvrhu).";
+email.SumDly="denní rozvrh (každý den je stejný).";
+email.SumSwS="Neděle/všední dny/Sobota (každý den v týdnu je stejný).";
+email.SumWky="týdenní plán (samostatný časovač pro každý den v týdnu, každý týden je stejný).";
+email.SumGo="E-mail bude odeslán";
+email.SumAt="v";
+email.actv="aktivní";
+email.schd="naplánováno";
+email.nscd="není naplánováno";
+email.STDly="Denní";
+email.STSunday="Neděle";
+email.STMonday="Pondělí";
+email.STTuesday="Úterý";
+email.STWednesday="Středa";
+email.STThursday="čtvrtek";
+email.STFriday="Pátek";
+email.STSaturday="Sobota";
+email.STMonFri="Pondělí až pátek";
+email.senderError="E-mailová adresa odesílatele se nezdá být správná.";
+email.receiverError="E-mailová adresa příjemce se nezdá být správná.";
+email.portError="Zadejte správné číslo portu.";
+email.testEmailSuccess="E-mail byl úspěšně odeslán.";
+email.testEmailFail="Něco se pokazilo. Odpověď:\n";
+email.testEmail="Odesílání zkušebních e-mailů ...";
+email.encryptionTypeError="Zvolte typ šifrování.";
+email.noDataSelected="Vyberte údaje, které chcete zahrnout.";
+email.countError="Zadejte počet položek, které chcete zahrnout.";

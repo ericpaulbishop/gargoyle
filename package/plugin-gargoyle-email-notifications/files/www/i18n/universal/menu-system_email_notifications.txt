@@ -11,3 +11,4 @@ SK=oznámenia e-mailom
 RU=Уведомления по Email
 NO=Varsel E-post
 ZH-CN=电子邮件
+CS=Oznámení e-mailem

@@ -6,3 +6,4 @@ PL=DLNA
 RU=DLNA-сервер
 NO=DLNA
 BR=Servidor DLNA
+CS=DLNA

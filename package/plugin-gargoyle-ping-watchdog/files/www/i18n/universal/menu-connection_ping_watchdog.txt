@@ -7,3 +7,4 @@ PL=Monitor połączenia
 ZH-CN=Ping守护进程
 RU=Контроль за соединением
 NO=Ping Vokter
+CS=Ping hlídací pes
