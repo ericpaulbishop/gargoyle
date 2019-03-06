@@ -162,20 +162,20 @@ if [ -z "$is_bridge" ] ; then
 	uci set gargoyle.firewall.restriction=125 2>/dev/null
 	uci set gargoyle.firewall.quotas=175 2>/dev/null
 else
-	uci del gargoyle.connection.dhcp 2>/dev/null
-	uci del gargoyle.firewall.portforwarding 2>/dev/null
-	uci del gargoyle.firewall.restriction 2>/dev/null
-	uci del gargoyle.firewall.quotas 2>/dev/null
+	uci -q del gargoyle.connection.dhcp
+	uci -q del gargoyle.firewall.portforwarding
+	uci -q del gargoyle.firewall.restriction
+	uci -q del gargoyle.firewall.quotas
 fi
 if [ -n "$qos_enabled" ] ; then
 	uci set gargoyle.status.qos=300 2>/dev/null
 else
-	uci del gargoyle.status.qos 2>/dev/null
+	uci -q del gargoyle.status.qos
 fi
 if [ -n "$quotas_active" ] ; then
 	uci set gargoyle.status.quotause=225 2>/dev/null
 else
-	uci del gargoyle.status.quotause 2>/dev/null
+	uci -q del gargoyle.status.quotause 2>/dev/null
 fi
 
 for qos_gargoyle_connbytes_rule in $(uci show qos_gargoyle | sed "/^qos_gargoyle\..*\.connbytes=[0-9]*$/!d; s#=.*##g"); do

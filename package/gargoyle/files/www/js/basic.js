@@ -116,10 +116,10 @@ function saveChanges()
 		var bridgeEnabledCommands = "";
 
 		//always remove bridge configs
-		preCommands = preCommands + "\nuci del network.bridgecfg\nuci commit\n";
+		preCommands = preCommands + "\nuci -q del network.bridgecfg\nuci commit\n";
 		uci.removeSection("network", "bridgecfg");
 		uciCompare.removeSection("network", "bridgecfg");
-		preCommands = preCommands + "\nuci del network.wwan\nuci commit\n";
+		preCommands = preCommands + "\nuci -q del network.wwan\nuci commit\n";
 		uci.removeSection("network", "wwan");
 		uciCompare.removeSection("network", "wwan");
 		uci.set("dhcp", "lan", "ignore", "0");
@@ -151,7 +151,7 @@ function saveChanges()
 			currentLanIp = document.getElementById("lan_ip").value;
 			if(getSelectedValue('wan_protocol') == 'none')
 			{
-				preCommands = preCommands + "\nuci del network.wan\nuci commit\n";
+				preCommands = preCommands + "\nuci -q del network.wan\nuci commit\n";
 				uci.removeSection("network", "wan");
 				uciCompare.removeSection("network", "wan");
 			}
@@ -444,7 +444,7 @@ function saveChanges()
 			var forceDNS = document.getElementById("lan_dns_force").checked ? "1" : "";
 			uciOriginal.set("firewall", firewallDefaultSections[0], "force_router_dns", forceDNS);
 			uci.set("firewall", firewallDefaultSections[0], "force_router_dns", forceDNS);
-			var fdCommand = forceDNS == "1" ?  "\nuci set firewall.@defaults[0].force_router_dns=1 \n" : "\nuci del firewall.@defaults[0].force_router_dns \n";
+			var fdCommand = forceDNS == "1" ?  "\nuci set firewall.@defaults[0].force_router_dns=1 \n" : "\nuci -q del firewall.@defaults[0].force_router_dns \n";
 			preCommands = preCommands + fdCommand ;
 
 			//is ping drop from WAN side?
@@ -693,7 +693,7 @@ function saveChanges()
 
 			currentLanIp = document.getElementById("bridge_ip").value;
 			//compute configuration  for bridge
-			preCommands = preCommands + "\nuci del network.wan\nuci commit\n";
+			preCommands = preCommands + "\nuci -q del network.wan\nuci commit\n";
 			uci.removeSection("network", "wan");
 			uciCompare.removeSection("network", "wan");
 
@@ -845,11 +845,11 @@ function saveChanges()
 			var bridgeCommandList = [];
 			bridgeCommandList.push("/etc/init.d/dnsmasq disable");
 			bridgeCommandList.push("/etc/init.d/miniupnpd disable");
-			bridgeCommandList.push("uci del gargoyle.connection.dhcp");
-			bridgeCommandList.push("uci del gargoyle.firewall.portforwarding");
-			bridgeCommandList.push("uci del gargoyle.firewall.restriction");
-			bridgeCommandList.push("uci del gargoyle.firewall.quotas");
-			bridgeCommandList.push("uci del gargoyle.firewall.portforwarding");
+			bridgeCommandList.push("uci -q del gargoyle.connection.dhcp");
+			bridgeCommandList.push("uci -q del gargoyle.firewall.portforwarding");
+			bridgeCommandList.push("uci -q del gargoyle.firewall.restriction");
+			bridgeCommandList.push("uci -q del gargoyle.firewall.quotas");
+			bridgeCommandList.push("uci -q del gargoyle.firewall.portforwarding");
 			bridgeCommandList.push("uci set qos_gargoyle.global.network=lan");
 
 			bridgeCommandList.push("uci commit");
