@@ -101,7 +101,7 @@ for (tab_idx in cron_data) {
 					<span class="col-xs-7 col-sm-9"><input type='text' class='form-control' id='sender' size='35' /></span>
 				</div>
 				<div class="row form-group">
-					<label class='col-xs-5 col-sm-3' for='receiver'><%~ email.Receipment %></label>
+					<label class='col-xs-5 col-sm-3' for='receiver'><%~ email.Recipient %></label>
 					<span class="col-xs-7 col-sm-9"><input type='text' class='form-control' id='receiver' size='35' /></span>
 				</div>
 				<div class="row form-group">
