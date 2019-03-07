@@ -3715,9 +3715,9 @@ CONFIG_PACKAGE_tc=y
 # VPN
 #
 CONFIG_PACKAGE_openvpn-easy-rsa=y
-# CONFIG_PACKAGE_openvpn-mbedtls is not set
-# CONFIG_PACKAGE_openvpn-nossl is not set
-CONFIG_PACKAGE_openvpn-openssl=y
+# CONFIG_PACKAGE_openvpn-gargoyle-mbedtls is not set
+# CONFIG_PACKAGE_openvpn-gargoyle-nossl is not set
+CONFIG_PACKAGE_openvpn-gargoyle-openssl=y
 CONFIG_OPENVPN_openssl_ENABLE_LZO=y
 CONFIG_OPENVPN_openssl_ENABLE_LZ4=y
 # CONFIG_OPENVPN_openssl_ENABLE_X509_ALT_USERNAME is not set
