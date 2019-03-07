@@ -1,4 +1,4 @@
-if PACKAGE_openvpn-mbedtls
+if PACKAGE_openvpn-gargoyle-mbedtls
 
 config OPENVPN_mbedtls_ENABLE_LZO
 	bool "Enable LZO compression support"

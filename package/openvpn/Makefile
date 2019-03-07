@@ -10,7 +10,7 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=openvpn
 
 PKG_VERSION:=2.4.4
-PKG_RELEASE:=2
+PKG_RELEASE:=3
 
 PKG_SOURCE_URL:=\
 	https://build.openvpn.net/downloads/releases/ \
@@ -45,17 +45,17 @@ else
 endif
 endef
 
-Package/openvpn-openssl=$(call Package/openvpn/Default,openssl,OpenSSL,+PACKAGE_openvpn-openssl:libopenssl)
-Package/openvpn-mbedtls=$(call Package/openvpn/Default,mbedtls,mbedTLS,+PACKAGE_openvpn-mbedtls:libmbedtls)
-Package/openvpn-nossl=$(call Package/openvpn/Default,nossl,plaintext (no SSL))
+Package/openvpn-gargoyle-openssl=$(call Package/openvpn/Default,openssl,OpenSSL,+PACKAGE_openvpn-gargoyle-openssl:libopenssl)
+Package/openvpn-gargoyle-mbedtls=$(call Package/openvpn/Default,mbedtls,mbedTLS,+PACKAGE_openvpn-gargoyle-mbedtls:libmbedtls)
+Package/openvpn-gargoyle-nossl=$(call Package/openvpn/Default,nossl,plaintext (no SSL))
 
 define Package/openvpn/config/Default
 	source "$(SOURCE)/Config-$(1).in"
 endef
 
-Package/openvpn-openssl/config=$(call Package/openvpn/config/Default,openssl)
-Package/openvpn-mbedtls/config=$(call Package/openvpn/config/Default,mbedtls)
-Package/openvpn-nossl/config=$(call Package/openvpn/config/Default,nossl)
+Package/openvpn-gargoyle-openssl/config=$(call Package/openvpn/config/Default,openssl)
+Package/openvpn-gargoyle-mbedtls/config=$(call Package/openvpn/config/Default,mbedtls)
+Package/openvpn-gargoyle-nossl/config=$(call Package/openvpn/config/Default,nossl)
 
 ifeq ($(BUILD_VARIANT),mbedtls)
 CONFIG_OPENVPN_MBEDTLS:=y
@@ -102,11 +102,11 @@ define Build/Configure
 	)
 endef
 
-define Package/openvpn-$(BUILD_VARIANT)/conffiles
+define Package/openvpn-gargoyle-$(BUILD_VARIANT)/conffiles
 /etc/config/openvpn
 endef
 
-define Package/openvpn-$(BUILD_VARIANT)/install
+define Package/openvpn-gargoyle-$(BUILD_VARIANT)/install
 	$(INSTALL_DIR) \
 		$(1)/usr/sbin \
 		$(1)/usr/share/openvpn \
@@ -134,6 +134,6 @@ define Package/openvpn-$(BUILD_VARIANT)/install
 		$(1)/lib/upgrade/keep.d/openvpn
 endef
 
-$(eval $(call BuildPackage,openvpn-openssl))
-$(eval $(call BuildPackage,openvpn-mbedtls))
-$(eval $(call BuildPackage,openvpn-nossl))
+$(eval $(call BuildPackage,openvpn-gargoyle-openssl))
+$(eval $(call BuildPackage,openvpn-gargoyle-mbedtls))
+$(eval $(call BuildPackage,openvpn-gargoyle-nossl))

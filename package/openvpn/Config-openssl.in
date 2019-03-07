@@ -1,4 +1,4 @@
-if PACKAGE_openvpn-openssl
+if PACKAGE_openvpn-gargoyle-openssl
 
 config OPENVPN_openssl_ENABLE_LZO
 	bool "Enable LZO compression support"

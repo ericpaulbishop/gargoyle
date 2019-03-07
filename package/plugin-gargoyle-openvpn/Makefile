@@ -13,7 +13,7 @@ PKG_VERSION:=$(GARGOYLE_VERSION)
 ifeq ($(GARGOYLE_VERSION),)
      PKG_VERSION:=1.0.0
 endif
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
@@ -25,7 +25,7 @@ define Package/plugin-gargoyle-openvpn
 	CATEGORY:=Administration
 	SUBMENU:=Gargoyle Web Interface
 	TITLE:=OpenVPN Support for Gargoyle
-	DEPENDS:=+gargoyle +openvpn-openssl +openvpn-easy-rsa +liblzo +zip
+	DEPENDS:=+gargoyle +openvpn-gargoyle-openssl +openvpn-easy-rsa +liblzo +zip
 	MAINTAINER:=Eric Bishop
 	PKGARCH:=all
 endef
