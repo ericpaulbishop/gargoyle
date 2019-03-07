@@ -53,7 +53,7 @@ char default_ip_lookup_url[][MAX_LOOKUP_URL_LENGTH] = {
 
 char default_geoip_lookup_url[][MAX_LOOKUP_URL_LENGTH] = {
 							"http://geoplugin.net/json.gp?ip=[[IP]]",
-							"http://geoip.nekudo.com/api/[[IP]]",
+//							"http://geoip.nekudo.com/api/[[IP]]",
 							"http://ip-api.com/json/[[IP]]",
 //							"https://tools.keycdn.com/geo.json?host=[[IP]]",
 							"http://api.geoiplookup.net/?query=[[IP]]",
