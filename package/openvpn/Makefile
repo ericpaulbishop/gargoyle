@@ -36,7 +36,7 @@ define Package/openvpn/Default
   URL:=http://openvpn.net
   SUBMENU:=VPN
   MENU:=1
-  DEPENDS:=+kmod-tun +OPENVPN_$(1)_ENABLE_LZO:liblzo +OPENVPN_$(1)_ENABLE_IPROUTE2:ip $(3)
+  DEPENDS:=+kmod-tun +OPENVPN_gargoyle_$(1)_ENABLE_LZO:liblzo +OPENVPN_gargoyle_$(1)_ENABLE_IPROUTE2:ip $(3)
   VARIANT:=$(1)
 ifeq ($(1),nossl)
   PROVIDES:=openvpn
@@ -58,13 +58,13 @@ Package/openvpn-gargoyle-mbedtls/config=$(call Package/openvpn/config/Default,mb
 Package/openvpn-gargoyle-nossl/config=$(call Package/openvpn/config/Default,nossl)
 
 ifeq ($(BUILD_VARIANT),mbedtls)
-CONFIG_OPENVPN_MBEDTLS:=y
+CONFIG_OPENVPN_gargoyle_MBEDTLS:=y
 endif
 ifeq ($(BUILD_VARIANT),openssl)
-CONFIG_OPENVPN_OPENSSL:=y
+CONFIG_OPENVPN_gargoyle_OPENSSL:=y
 endif
 ifeq ($(BUILD_VARIANT),nossl)
-CONFIG_OPENVPN_NOSSL:=y
+CONFIG_OPENVPN_gargoyle_NOSSL:=y
 endif
 
 CONFIGURE_VARS += \
@@ -78,27 +78,27 @@ TARGET_LDFLAGS += -Wl,--gc-sections
 
 define Build/Configure
 	$(call Build/Configure/Default, \
-		$(if $(CONFIG_OPENVPN_$(BUILD_VARIANT)_ENABLE_SMALL),--enable-small) \
+		$(if $(CONFIG_OPENVPN_gargoyle_$(BUILD_VARIANT)_ENABLE_SMALL),--enable-small) \
 		--disable-selinux \
 		--disable-systemd \
 		--disable-plugins \
 		--disable-debug \
 		--disable-pkcs11 \
-		$(if $(CONFIG_OPENVPN_$(BUILD_VARIANT)_ENABLE_LZO),--enable,--disable)-lzo \
-		$(if $(CONFIG_OPENVPN_$(BUILD_VARIANT)_ENABLE_LZ4),--enable,--disable)-lz4 \
-		$(if $(CONFIG_OPENVPN_$(BUILD_VARIANT)_ENABLE_X509_ALT_USERNAME),enable,disable-x509-alt-username)-ssl \
-		$(if $(CONFIG_OPENVPN_$(BUILD_VARIANT)_ENABLE_SERVER),--enable,--disable)-server \
-		$(if $(CONFIG_OPENVPN_$(BUILD_VARIANT)_ENABLE_MANAGEMENT),--enable,--disable)-management \
-		$(if $(CONFIG_OPENVPN_$(BUILD_VARIANT)_ENABLE_SOCKS),--enable,--disable)-socks \
-		$(if $(CONFIG_OPENVPN_$(BUILD_VARIANT)_ENABLE_HTTP),--enable,--disable)-http-proxy \
-		$(if $(CONFIG_OPENVPN_$(BUILD_VARIANT)_ENABLE_FRAGMENT),--enable,--disable)-fragment \
-		$(if $(CONFIG_OPENVPN_$(BUILD_VARIANT)_ENABLE_MULTIHOME),--enable,--disable)-multihome \
-		$(if $(CONFIG_OPENVPN_$(BUILD_VARIANT)_ENABLE_IPROUTE2),--enable,--disable)-iproute2 \
-		$(if $(CONFIG_OPENVPN_$(BUILD_VARIANT)_ENABLE_DEF_AUTH),--enable,--disable)-def-auth \
-		$(if $(CONFIG_OPENVPN_$(BUILD_VARIANT)_ENABLE_PF),--enable,--disable)-pf \
-		$(if $(CONFIG_OPENVPN_NOSSL),--disable-ssl --disable-crypto,--enable-ssl --enable-crypto) \
-		$(if $(CONFIG_OPENVPN_OPENSSL),--with-crypto-library=openssl) \
-		$(if $(CONFIG_OPENVPN_MBEDTLS),--with-crypto-library=mbedtls) \
+		$(if $(CONFIG_OPENVPN_gargoyle_$(BUILD_VARIANT)_ENABLE_LZO),--enable,--disable)-lzo \
+		$(if $(CONFIG_OPENVPN_gargoyle_$(BUILD_VARIANT)_ENABLE_LZ4),--enable,--disable)-lz4 \
+		$(if $(CONFIG_OPENVPN_gargoyle_$(BUILD_VARIANT)_ENABLE_X509_ALT_USERNAME),enable,disable-x509-alt-username)-ssl \
+		$(if $(CONFIG_OPENVPN_gargoyle_$(BUILD_VARIANT)_ENABLE_SERVER),--enable,--disable)-server \
+		$(if $(CONFIG_OPENVPN_gargoyle_$(BUILD_VARIANT)_ENABLE_MANAGEMENT),--enable,--disable)-management \
+		$(if $(CONFIG_OPENVPN_gargoyle_$(BUILD_VARIANT)_ENABLE_SOCKS),--enable,--disable)-socks \
+		$(if $(CONFIG_OPENVPN_gargoyle_$(BUILD_VARIANT)_ENABLE_HTTP),--enable,--disable)-http-proxy \
+		$(if $(CONFIG_OPENVPN_gargoyle_$(BUILD_VARIANT)_ENABLE_FRAGMENT),--enable,--disable)-fragment \
+		$(if $(CONFIG_OPENVPN_gargoyle_$(BUILD_VARIANT)_ENABLE_MULTIHOME),--enable,--disable)-multihome \
+		$(if $(CONFIG_OPENVPN_gargoyle_$(BUILD_VARIANT)_ENABLE_IPROUTE2),--enable,--disable)-iproute2 \
+		$(if $(CONFIG_OPENVPN_gargoyle_$(BUILD_VARIANT)_ENABLE_DEF_AUTH),--enable,--disable)-def-auth \
+		$(if $(CONFIG_OPENVPN_gargoyle_$(BUILD_VARIANT)_ENABLE_PF),--enable,--disable)-pf \
+		$(if $(CONFIG_OPENVPN_gargoyle_NOSSL),--disable-ssl --disable-crypto,--enable-ssl --enable-crypto) \
+		$(if $(CONFIG_OPENVPN_gargoyle_OPENSSL),--with-crypto-library=openssl) \
+		$(if $(CONFIG_OPENVPN_gargoyle_MBEDTLS),--with-crypto-library=mbedtls) \
 	)
 endef
 
