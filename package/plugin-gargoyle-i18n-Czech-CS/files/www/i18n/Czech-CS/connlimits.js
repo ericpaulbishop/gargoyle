@@ -3,7 +3,7 @@
  */
 
 connLS.CLSect="Limity připojení";
-connLS.MaxC="Max připojení";
-connLS.TTout="TCP Timeout";
-connLS.UTout="UDP Timeout";
-connLS.max="max";
+connLS.MaxC="Max. připojení";
+connLS.TTout="TCP časový limit";
+connLS.UTout="UDP časový limit";
+connLS.max="max.";
