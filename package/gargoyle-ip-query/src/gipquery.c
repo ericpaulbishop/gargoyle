@@ -55,8 +55,11 @@ char default_geoip_lookup_url[][MAX_LOOKUP_URL_LENGTH] = {
 							"http://geoplugin.net/json.gp?ip=[[IP]]",
 //							"http://geoip.nekudo.com/api/[[IP]]",
 							"http://ip-api.com/json/[[IP]]",
-//							"https://tools.keycdn.com/geo.json?host=[[IP]]",
+							"https://tools.keycdn.com/geo.json?host=[[IP]]",
 							"http://api.geoiplookup.net/?query=[[IP]]",
+							"https://get.geojs.io/v1/ip/geo/[[IP]].json",
+//							"https://freegeoip.app/json/[[IP]]",
+							"https://geoip-db.com/json/[[IP]]",
 							"\0"
 							};
 
@@ -290,7 +293,7 @@ char* get_geoip_from_url(char* url)
 		{
 			int status;
 			regex_t re;
-			if (regcomp(&re, "(country[cC]ode|country.*\"[cC]ode)(\":\"|>)([A-Z]{2})(\"|<)", REG_EXTENDED) == 0)
+			if (regcomp(&re, "(country_?[cC]ode)(\":\"|>)([A-Z]{2})(\"|<)", REG_EXTENDED) == 0)
 			{
 				regmatch_t m[5];
 				status = regexec(&re, page->data, (size_t) 5, m, 0);
