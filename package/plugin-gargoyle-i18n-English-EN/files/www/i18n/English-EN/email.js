@@ -37,7 +37,7 @@ email.quarterhours="quarter hours";
 email.hours="hours";
 email.days="days";
 
-//javscript
+//javascript
 email.Smmy="Summary";
 email.WeekA=["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 email.WDayA=["Sunday", "Monday-Friday", "Saturday"];
