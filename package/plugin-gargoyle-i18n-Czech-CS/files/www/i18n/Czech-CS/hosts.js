@@ -18,5 +18,5 @@ hostsStr.Bitrate="rychlost";
 hostsStr.Signal="Signál";
 hostsStr.ActiveConx="Aktivní TCP spoj";
 hostsStr.RecentConx="Nedávný TCP spoj";
-hostsStr.UDPConx="UDP spoj";
+hostsStr.UDPConx="Aktivní UDP spoj";
 hostsStr.Band="Pásmo";
