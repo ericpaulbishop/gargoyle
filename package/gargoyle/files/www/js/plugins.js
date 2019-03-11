@@ -117,7 +117,7 @@ function updatePluginRootDisplay()
 		}
 	}
 	document.getElementById("plugin_root_incompatible").style.display = newRootFormat.match(/FAT/gi) == null ? "none" : "block";
-	document.getElementById("btn_plugin_root_change").style.display = newRootFormat.match(/FAT/gi) == null ? "none" : "block";
+	document.getElementById("btn_plugin_root_change").style.display = newRootFormat.match(/FAT/gi) == null ? "block" : "none";
 }
 
 function changePluginRoot()
