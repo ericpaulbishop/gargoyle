@@ -25,6 +25,8 @@ var onDns  = [ "66.244.95.20", "95.211.32.162", "95.142.171.235" ]
 var ncTlds = [ ".bit" ];
 var onTlds = [ ".glue", ".parody", ".dyn", ".bbs", ".free", ".fur", ".geek", ".gopher", ".indy", ".ing", ".null", ".oss", ".micro" ];
 
+var wanMacLoc = "wan";
+
 function saveChanges()
 {
 	errorList = proofreadAll();
@@ -530,7 +532,13 @@ function saveChanges()
 					visibilityIds.push(inputIds[idIndex]+ "_container");
 				}
 
-				if(idIndex < 10 || idIndex > 28)
+				if(idIndex == 8)
+				{
+					pkgs.push('network');
+					sections.push(wanMacLoc);
+					uci.remove('network', wanMacLoc, options[idIndex]);
+				}
+				else if(idIndex < 10 || idIndex > 28)
 				{
 					pkgs.push('network');
 					sections.push('wan');
@@ -1533,6 +1541,7 @@ function localdate(ldate)
 
 function resetData()
 {
+	wanMacLoc = uciOriginal.get("network","wan_dev","macaddr") != "" ? "wan_dev" : wanMacLoc;
 	var removeChannels = [];
 	var hwAmode = "disabled";
 	var hwGmode = "disabled";
@@ -1656,9 +1665,9 @@ function resetData()
 		wanIsWireless = uciOriginal.get("network", "wan", "ifname") == wirelessIfs[wifIndex];
 	}
 
-	if(isBcm94704 && (!wanIsWireless) && uciOriginal.get("network", "wan", "macaddr") != "")
+	if(isBcm94704 && (!wanIsWireless) && uciOriginal.get("network", wanMacLoc, "macaddr") != "")
 	{
-		var currentMac = uciOriginal.get("network", "wan", "macaddr").toUpperCase();
+		var currentMac = uciOriginal.get("network", wanMacLoc, "macaddr").toUpperCase();
 		var currentStart = currentMac.substr(0, 15);
 		var currentEnd = currentMac.substr(15, 2);
 		var lanMacIndex=0;
@@ -1703,7 +1712,7 @@ function resetData()
 		networkPkgs.push('network');
 	}
 
-	networkSections = ['wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'lan', 'lan', 'lan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan'];
+	networkSections = ['wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', wanMacLoc, wanMacLoc, 'wan', 'wan', 'lan', 'lan', 'lan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan', 'wan'];
 	networkOptions  = ['username', 'password', 'demand', 'keepalive', 'keepalive', 'ipaddr', 'netmask', 'gateway', 'macaddr','macaddr', 'mtu', 'mtu', 'ipaddr', 'netmask', 'gateway', 'device', 'username', 'password', 'apn', 'pincode', 'service', 'mobile_isp'];
 
 	pppoeDemandParams = [5*60,1/60];
