@@ -944,6 +944,10 @@ void print_interface_vars(void)
                 {
                         uci_wan_mac=get_option_value_string(uci_to_option(e));
                 }
+                else if(get_uci_option(ctx, &e, p, "network", "wan_dev", "macaddr") == UCI_OK)
+                {
+                        uci_wan_mac=get_option_value_string(uci_to_option(e));
+                }
                 if(get_uci_option(ctx, &e, p, "network", "wan", "ifname") == UCI_OK)
                 {
                         uci_wan_if = get_option_value_string(uci_to_option(e));
