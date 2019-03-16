@@ -12,8 +12,8 @@
 <script>
 <!--
 <%
-	webmon_enabled=$(ls /etc/rc.d/*webmon_gargoyle* 2>/dev/null)
-	if [ -n "$webmon_enabled" ] ; then
+	webmon_enabled=$(uci get webmon_gargoyle.webmon.enabled 2>/dev/null)
+	if [ "$webmon_enabled" == "1" ] ; then
 		echo "var webmonEnabled=true;"
 	else
 		echo "var webmonEnabled=false;"

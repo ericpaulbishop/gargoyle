@@ -35,6 +35,9 @@ start()
 	config_get exclude_ips webmon exclude_ips
 	config_get include_ips webmon include_ips
 
+	config_get_bool enabled webmon 'enabled' '0'
+	[ "$enabled" -gt 0 ] || return
+
 	wan_if=$(uci -P "/var/state" get network.wan.ifname)
 	if [ -n "$wan_if" ] ; then
 		

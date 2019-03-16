@@ -41,6 +41,7 @@ function saveChanges()
 		var enabledCommand = "/etc/init.d/webmon_gargoyle " + (enabled ? "enable" : "disable") + "\n";
 		var startStopCommand = "/etc/init.d/webmon_gargoyle stop";
 		uci = uciOriginal.clone();
+		uci.set("webmon_gargoyle", "webmon", "enabled", (enabled ? "1" : "0"));
 		if(enabled)
 		{
 			uci.set("webmon_gargoyle", "webmon", "max_domains",  document.getElementById("num_domains").value );
