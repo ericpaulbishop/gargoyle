@@ -430,7 +430,7 @@ function resetData()
 	totalBandwidth = totalBandwidth == "" ? -1 : totalBandwidth;
 	document.getElementById("qos_enabled").checked = qosEnabled && totalBandwidth > 0;
 
-	defaultBandwidth = direction == "upload" ? 8*40 : 8*400;  //default upload bandwidth = 40 kilobytes/s, download = 400 kilobytes/s
+	defaultBandwidth = direction == "upload" ? 8*125 : 8*1250;  //default upload bandwidth = 125 kilobytes/s, download = 1250 kilobytes/s
 	document.getElementById("total_bandwidth").value = totalBandwidth > 0 ? totalBandwidth : defaultBandwidth;
 
 	directionRule  = direction + "_rule";
@@ -600,7 +600,7 @@ function setQosEnabled()
 
 	if(enabled && document.getElementById("total_bandwidth").value == "")
 	{
-		defaultBandwidth = direction == "upload" ? 8*40 : 8*400;  //default upload bandwidth = 40 kilobytes/s, download = 400 kilobytes/s
+		defaultBandwidth = direction == "upload" ? 8*125 : 8*1250;  //default upload bandwidth = 125 kilobytes/s, download = 1250 kilobytes/s
 		document.getElementById("total_bandwidth").value = totalBandwidth > 0 ? totalBandwidth : defaultBandwidth;
 	}
 
