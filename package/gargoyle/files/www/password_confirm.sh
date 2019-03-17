@@ -9,7 +9,6 @@
 	gargoyle_header_footer -m -c "common.css"
 %>
 
-<h1 class="page-header">Password</h1>
 <div id="edit_container" class="row">
 	<div class="col-lg-6">
 		<div class="panel panel-default">
