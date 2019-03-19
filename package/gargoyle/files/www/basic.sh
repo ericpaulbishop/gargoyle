@@ -631,9 +631,6 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 							<option value="opendns"><%~ OpnSrvs %></option>
 							<option value="google"><%~ GooSrvs %></option>
 							<option value="opendnsfs"><%~ OpnSrvsFS %></option>
-							<option value="nortoncsa"><%~ NrtnCSA %></option>
-							<option value="nortoncsb"><%~ NrtnCSB %></option>
-							<option value="nortoncsc"><%~ NrtnCSC %></option>
 							<option value="quad9"><%~ Quad9 %></option>
 							<option value="custom"><%~ CstDSrv %></option>
 						</select>
