@@ -223,7 +223,9 @@ function saveChanges()
 
 			if(currentModes.match(/ap/))
 			{
-
+				var macConflict = [];
+				macConflict.push(currentLanMac,defaultWanMac,currentWanMac,document.getElementById("wan_mac").value);
+				macConflict = macConflict.concat(currentWirelessMacs);
 				if(wifiGSelected)
 				{
 					apcfg = 'ap_g';
@@ -247,7 +249,23 @@ function saveChanges()
 						if (!distribTarget.match(/ramips/))
 						{
 							var mac = document.getElementById("wifi_guest_mac_g").value;
-							mac = mac == "" ? getRandomMac() : mac;
+							if(mac == "")
+							{
+								do
+								{
+									if(distribTarget.match(/mvebu/))
+									{
+										wmacIdx = wirelessIfs.indexOf(wifiDevG.replace("radio","wlan"));
+										ref = currentWirelessMacs[wmacIdx];
+										mac = getRandomMacWithMask(true,true,ref,"fd:ff:ff:ff:ff:f0");
+									}
+									else
+									{
+										mac = getRandomMac(true,true);
+									}
+								} while(macConflict.join(",").toLowerCase().split(",").indexOf(mac.toLowerCase()) != -1);
+							}
+							macConflict.push(mac);
 							uci.set("wireless", apgncfg, 'macaddr', mac);
 						}
 
@@ -276,7 +294,23 @@ function saveChanges()
 						uci.set('wireless', apgnacfg, 'is_guest_network', '1');
 
 					   	var mac = document.getElementById("wifi_guest_mac_a").value ;
-						mac = mac == "" ? getRandomMac() : mac;
+						if(mac == "")
+						{
+							do
+							{
+								if(distribTarget.match(/mvebu/))
+								{
+									wmacIdx = wirelessIfs.indexOf(wifiDevA.replace("radio","wlan"));
+									ref = currentWirelessMacs[wmacIdx];
+									mac = getRandomMacWithMask(true,true,ref,"fd:ff:ff:ff:ff:f0");
+								}
+								else
+								{
+									mac = getRandomMac(true,true);
+								}
+							} while(macConflict.join(",").toLowerCase().split(",").indexOf(mac.toLowerCase()) != -1);
+						}
+						macConflict.push(mac);
 						uci.set("wireless", apgnacfg, 'macaddr', mac);
 						preCommands = preCommands + "uci set wireless." + apgnacfg + "='wifi-iface' \n";
 					}
@@ -3527,22 +3561,27 @@ function randHexDigit()
 	return (Math.floor(Math.random()*16)).toString(16);
 }
 
-function getRandomMac()
+function getRandomMac(local,unicast)
 {
-	//for some reason, second hex digit NEEDS to be even, or hostapd won't accept mac
-	//Only the second digit has this limit, all the others can be anything
+	/*
+	 * Universally Administered Addresses (UAA) are defined by the manufacturer. Locally Administered Addresses (LAA) are defined by the network administrator.
+	 * In the case of a VAP (like the guest network) we should be using LAA.
+	 * This is controlled by the second least significant bit in the first octet: 0 = UAA, 1 = LAA.
+	 */
+	/*
+	 * Unicast and Multicast addresses are controlled by the least significant bit in the first octet: 0 = Unicast, 1 = Multicast
+	 * In all cases, we should be using Unicast, and hostapd won't start the interface if we try to use multicast
+	 */
+	
 	var macPairs = []
 	while(macPairs.length < 6 )
 	{
 		if(macPairs.length == 0)
 		{
 			var secondDigit = randHexDigit();
-			while(secondDigit == '1' || secondDigit == '3' || secondDigit == '5' || secondDigit == '7' || secondDigit == '9' || secondDigit == 'b' || secondDigit == 'd' || secondDigit == 'f' )
-			{
-				secondDigit = randHexDigit();
-			}
+			secondDigit = setNthBitToX(("0x"+secondDigit), 1, local ? 1 : 0);
+			secondDigit = setNthBitToX(("0x"+secondDigit), 0, unicast ? 0 : 1);
 			macPairs.push( randHexDigit() + secondDigit )
-
 		}
 		else
 		{
@@ -3550,7 +3589,68 @@ function getRandomMac()
 		}
 	}
 	return macPairs.join(":");
+}
 
+function getRandomMacWithMask(local,unicast,ref,mask)
+{
+	/*
+	 * Some devices use firmware level filtering for packets entering the interface, and won't work unless all MAC addresses on a particular interface
+	 * are within the same mask space.
+	 */
+	ref = ref.toLowerCase();
+	mask = mask.toLowerCase();
+	var retVal = ref;
+	
+	while(retVal == ref)
+	{
+		var macPairs = [];
+		var randMac = getRandomMac(local,unicast);
+		macPairs = randMac.split(":");
+		
+		if(ref == "00:00:00:00:00:00" || ref == "" || ref == null)
+		{
+			return randMac;
+		}
+		if(mask == "00:00:00:00:00:00" || mask == "" || mask == null)
+		{
+			mask = "fc:ff:ff:ff:ff:f0";
+		}
+		if(mask == "ff:ff:ff:ff:ff:ff")
+		{
+			return ref;
+		}
+		 
+		//Now force the mask bits onto the random MAC we generated
+		var refPairs = [];
+		var maskPairs = [];
+		refPairs = ref.split(":");
+		maskPairs = mask.split(":");
+		 
+		for(x = 0; x < 6; x++)
+		{
+			var macPair = "0x"+macPairs[x];
+			var refPair = "0x"+refPairs[x];
+			var maskPair = "0x"+maskPairs[x];
+			
+			for(y = 0; y < 8; y++)
+			{
+				if((maskPair & (1 << y)) != 0)
+				{
+					macPair = "0x"+setNthBitToX(macPair, y, (refPair >> y) & 1);
+				}
+			}
+			macPairs[x] = parseInt(macPair).toString(16);
+		}
+		retVal = macPairs.join(":");
+	}
+
+	return retVal;
+}
+
+function setNthBitToX(val, n, x)
+{
+	val = val & ~(1 << n) | (x << n);
+	return val.toString(16);
 }
 
 function parseCountry(countryLines)
