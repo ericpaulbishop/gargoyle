@@ -761,6 +761,7 @@ function updateBandwidthTable(tablePointSets, interval, tableLastTimePoint)
 	var timePoint = tableLastTimePoint;
 	var custom_bwmon = document.getElementById("table_time_frame").value == 6 ? true : false;
 	var month_reset_day = uciOriginal.get("gargoyle", "bandwidth_display", "month_reset_day");
+	var systemDateFormat = uciOriginal.get("gargoyle",  "global", "dateformat");
 	var nextDate = new Date();
 	nextDate.setTime(timePoint*1000);
 	nextDate.setUTCMinutes( nextDate.getUTCMinutes()+tzMinutes );
@@ -805,26 +806,54 @@ function updateBandwidthTable(tablePointSets, interval, tableLastTimePoint)
 		{
 			if(nextDate.getUTCDate() <= month_reset_day)
 			{
-				timeStr = (month_reset_day - -1) + " " + monthNames[nextDate.getUTCMonth(nextDate.setUTCMonth(nextDate.getUTCMonth()-1))] + " " + nextDate.getUTCFullYear() + " - " + month_reset_day + " " + monthNames[nextDate.getUTCMonth(nextDate.setUTCMonth(nextDate.getUTCMonth()+1))] + " " + nextDate.getUTCFullYear();
+				if(systemDateFormat == "hungary" || systemDateFormat == "iso" || systemDateFormat == "iso8601")
+				{
+					timeStr = nextDate.getUTCFullYear() + " " + monthNames[nextDate.getUTCMonth(nextDate.setUTCMonth(nextDate.getUTCMonth()-1))] + " " + (month_reset_day - -1) + " - " + nextDate.getUTCFullYear() + " " + monthNames[nextDate.getUTCMonth(nextDate.setUTCMonth(nextDate.getUTCMonth()+1))] + " " + month_reset_day;
+				}
+				else
+				{
+					timeStr = (month_reset_day - -1) + " " + monthNames[nextDate.getUTCMonth(nextDate.setUTCMonth(nextDate.getUTCMonth()-1))] + " " + nextDate.getUTCFullYear() + " - " + month_reset_day + " " + monthNames[nextDate.getUTCMonth(nextDate.setUTCMonth(nextDate.getUTCMonth()+1))] + " " + nextDate.getUTCFullYear();
+				}
 				nextDate.setUTCMonth(nextDate.getUTCMonth()-1);
 			}
 			else if(nextDate.getUTCDate() > month_reset_day)
 			{
-				timeStr = (month_reset_day - -1) + " " + monthNames[nextDate.getUTCMonth()] + " " + nextDate.getUTCFullYear() + " - " + month_reset_day + " " + monthNames[nextDate.getUTCMonth(nextDate.setUTCMonth(nextDate.getUTCMonth()+1))] + " " + nextDate.getUTCFullYear();
+				if(systemDateFormat == "hungary" || systemDateFormat == "iso" || systemDateFormat == "iso8601")
+				{
+					timeStr = nextDate.getUTCFullYear() + " " + monthNames[nextDate.getUTCMonth()] + " " + (month_reset_day - -1) + " - " + nextDate.getUTCFullYear() + " " + monthNames[nextDate.getUTCMonth(nextDate.setUTCMonth(nextDate.getUTCMonth()+1))] + " " + month_reset_day;
+				}
+				else
+				{
+					timeStr = (month_reset_day - -1) + " " + monthNames[nextDate.getUTCMonth()] + " " + nextDate.getUTCFullYear() + " - " + month_reset_day + " " + monthNames[nextDate.getUTCMonth(nextDate.setUTCMonth(nextDate.getUTCMonth()+1))] + " " + nextDate.getUTCFullYear();
+				}
 				nextDate.setUTCMonth(nextDate.getUTCMonth()-2);
 			}
 		}
 		else if(interval.match(/month/))
 		{
 			//nextDate.setDate(2) //set second day of month, so when DST shifts hour back in November we don't push it back to previous month
-			timeStr = monthNames[nextDate.getUTCMonth()] + " " + nextDate.getUTCFullYear();
+			if(systemDateFormat == "hungary" || systemDateFormat == "iso" || systemDateFormat == "iso8601")
+			{
+				timeStr = nextDate.getUTCFullYear() + " " + monthNames[nextDate.getUTCMonth()];
+			}
+			else
+			{
+				timeStr = monthNames[nextDate.getUTCMonth()] + " " + nextDate.getUTCFullYear();
+			}
 			nextDate.setUTCMonth( nextDate.getUTCMonth()-1);
 		}
 		else if(!isNaN(parseInt(interval)))
 		{
 			if(parseInt(interval) >= 28*24*60*60)
 			{
-				timeStr = monthNames[nextDate.getUTCMonth()] + " " + nextDate.getUTCFullYear() + " " + twod(nextDate.getUTCHours()) + ":" + twod(nextDate.getUTCMinutes());
+				if(systemDateFormat == "hungary" || systemDateFormat == "iso" || systemDateFormat == "iso8601")
+				{
+					timeStr = nextDate.getUTCFullYear() + " " + monthNames[nextDate.getUTCMonth()] + " " + twod(nextDate.getUTCHours()) + ":" + twod(nextDate.getUTCMinutes());
+				}
+				else
+				{
+					timeStr = monthNames[nextDate.getUTCMonth()] + " " + nextDate.getUTCFullYear() + " " + twod(nextDate.getUTCHours()) + ":" + twod(nextDate.getUTCMinutes());
+				}
 			}
 			else if(parseInt(interval) >= 24*60*60)
 			{
