@@ -3639,7 +3639,7 @@ function getRandomMacWithMask(local,unicast,ref,mask)
 					macPair = "0x"+setNthBitToX(macPair, y, (refPair >> y) & 1);
 				}
 			}
-			macPairs[x] = parseInt(macPair).toString(16);
+			macPairs[x] = ("0" + parseInt(macPair).toString(16)).slice(-2);
 		}
 		retVal = macPairs.join(":");
 	}
