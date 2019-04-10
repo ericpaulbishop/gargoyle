@@ -764,7 +764,7 @@ function updateBandwidthTable(tablePointSets, interval, tableLastTimePoint)
 	var nextDate = new Date();
 	nextDate.setTime(timePoint*1000);
 	nextDate.setUTCMinutes( nextDate.getUTCMinutes()+tzMinutes );
-	if((parseInt(interval) == "NaN") && (interval.match(/month/) || interval.match(/day/)))
+	if((isNaN(parseInt(interval))) && (interval.match(/month/) || interval.match(/day/)))
 	{
 		// When interval is month or day, the transition is always at beginning of day/month, so adding just a few hours will never change the day or month
 		// However, when an hour gets subtracted for DST, there are problems.
@@ -820,7 +820,7 @@ function updateBandwidthTable(tablePointSets, interval, tableLastTimePoint)
 			timeStr = monthNames[nextDate.getUTCMonth()] + " " + nextDate.getUTCFullYear();
 			nextDate.setUTCMonth( nextDate.getUTCMonth()-1);
 		}
-		else if(parseInt(interval) != "NaN")
+		else if(!isNaN(parseInt(interval)))
 		{
 			if(parseInt(interval) >= 28*24*60*60)
 			{
