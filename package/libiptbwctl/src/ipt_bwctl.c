@@ -1332,18 +1332,17 @@ int get_minutes_west(time_t now)
 void set_kernel_timezone(void)
 {
 	time_t now;
-	struct timeval tv;
-	struct timezone old_tz;
-	struct timezone new_tz;
+	struct timezone tz;
+
+	/* Workaround warp_clock on first invocation */
+	memset(&tz, 0, sizeof(tz));
+	syscall(SYS_settimeofday, NULL, &tz);
+	memset(&tz, 0, sizeof(tz));
 
 	time(&now);
-	new_tz.tz_minuteswest = get_minutes_west(now);
-	new_tz.tz_dsttime = 0;
-
-	/* Get tv to pass to settimeofday(2) to be sure we avoid hour-sized warp */
-	/* (see gettimeofday(2) man page, or /usr/src/linux/kernel/time.c) */
-	gettimeofday(&tv, &old_tz);
+	tz.tz_minuteswest = get_minutes_west(now);
+	tz.tz_dsttime = 0;
 
 	/* set timezone */
-	settimeofday(&tv, &new_tz);
+	syscall(SYS_settimeofday, NULL, &tz);
 }
