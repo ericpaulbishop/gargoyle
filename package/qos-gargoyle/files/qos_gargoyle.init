@@ -757,7 +757,7 @@ define_interface()
 	local_ip=$(ifconfig br-lan | sed -n 's/.*inet addr:\([0-9/.]*\).*/\1/p')
 
 	#Determine the VPN interface if there is one.
-	vpn_interface=$(uci -P /var/state get network.vpn.ifname 2>/dev/null)
+	vpn_interface=$(uci -P /var/state get firewall.vpn_zone.device 2>/dev/null)
 	$echo_off
 }
 

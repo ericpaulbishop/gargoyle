@@ -28,15 +28,9 @@ function saveChanges()
 		{
 			if(enabled)
 			{
-				uci.set("network", "vpn", "",             "interface")
-				uci.set("network", "vpn", "ifname",       "tun0")
-				uci.set("network", "vpn", "proto",        "none")
-				uci.set("network", "vpn", "defaultroute", "0")
-				uci.set("network", "vpn", "peerdns",      "0")
-
 				uci.set("firewall", "vpn_zone", "",        "zone")
 				uci.set("firewall", "vpn_zone", "name",    "vpn")
-				uci.set("firewall", "vpn_zone", "network", "vpn")
+				uci.set("firewall", "vpn_zone", "device", "tun0")
 				uci.set("firewall", "vpn_zone", "input",   "ACCEPT")
 				uci.set("firewall", "vpn_zone", "output",  "ACCEPT")
 				uci.set("firewall", "vpn_zone", "forward", "ACCEPT")

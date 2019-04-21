@@ -139,7 +139,7 @@ initialize()
 		local_openvpn_port=$(netstat -u -t -p -a -e -n 2>/dev/null | awk ' $0 ~/openvpn/ { gsub(/^.*:/, "", $4) ; print $4 ; } ')
 		openvpn_proto=$(netstat -u -t -p -a -e -n 2>/dev/null | awk ' $0 ~/openvpn/ { print $1 ; } ')
 		wan_if=$(uci -P /var/state get network.wan.ifname 2>/dev/null)
-		vpn_if=$(uci -P /var/state get network.vpn.ifname 2>/dev/null)
+		vpn_if=$(uci -P /var/state get firewall.vpn_zone.device 2>/dev/null)
 		if [ -n "$local_openvpn_port" ] &&  [ -n "$openvpn_proto" ] && [ -n "$wan_if" ] && [ -n "$vpn_if" ]  ; then
 
 			# create openvpn bandwidth monitor chains
