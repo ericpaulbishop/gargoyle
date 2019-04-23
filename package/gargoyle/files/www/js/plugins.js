@@ -424,7 +424,7 @@ function resetData()
 		}
 	}
 
-	document.getElementById("wan-warn").style.display = currentWanIp=="" ? "inline" : "none";
+	document.getElementById("wan-warn").style.display = connectivity == "" ? "block" : "none";
 }
 
 function installPackage()

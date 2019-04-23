@@ -39,7 +39,9 @@
 	echo "var storageDrives = [];"
 	awk '{ print "storageDrives.push([\""$1"\",\""$2"\",\""$3"\",\""$4"\", \""$5"\", \""$6"\"]);" }' /tmp/mounted_usb_storage.tab 2>/dev/null
 
-    du -s $plugin_root_dest | awk '{ print "var pluginRootSize="$1*1000";" }' 2>/dev/null
+	du -s $plugin_root_dest | awk '{ print "var pluginRootSize="$1*1000";" }' 2>/dev/null
+
+	echo "var connectivity = \""$(traceroute -n -I -w 1 -q 2 -m6 8.8.8.8 2>&1 | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}.*ms' | grep -vE '^(192\.168|10\.|172\.1[6789]\.|172\.2[0-9]\.|172\.3[01]\.|0\.0\.0\.0|127\.|255\.)')"\";"
 %>
 
 </script>
