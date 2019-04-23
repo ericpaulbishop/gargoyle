@@ -74,13 +74,11 @@ function saveChanges()
 			}
 			else
 			{
-				uci.removeSection("network",  "vpn")
 				uci.removeSection("firewall", "vpn_zone")
 				uci.removeSection("firewall", "lan_vpn_forwarding")
 				uci.removeSection("firewall", "vpn_lan_forwarding")
 				uci.removeSection("firewall", "vpn_wan_forwarding")
 				uci.removeSection("firewall", "ra_openvpn")
-
 			}
 		}
 
