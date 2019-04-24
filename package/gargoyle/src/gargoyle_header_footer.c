@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <mntent.h>
 
 #include <arpa/inet.h>
 #include <netinet/in.h>
@@ -57,6 +58,7 @@ string_map* get_hostnames(void);
 char* get_option_value_string(struct uci_option* uopt);
 int get_uci_option(struct uci_context* ctx, struct uci_element** e, struct uci_package *p, char* package_name, char* section_name, char* option_name);
 char** ParseGHF_TranslationStrings(char* web_root, char* active_lang, char* fallback_lang);
+bool is_unusable_overlayfs(void);
 
 
 
@@ -75,6 +77,7 @@ int main(int argc, char **argv)
 	char* desc = "Router Management Utility";
 	char* dname = "Device Name";
 	char* wait_txt = "Please Wait While Settings Are Applied";
+	char* unusable_overlay = "Router storage full (read only) or is mounted in volatile storage (RAM). It will not function correctly, or will revert to a previous state after rebooting. Restore default configuration or flash new firmware (without preserving settings).";
 	char** package_variables_to_load = NULL;
 	int c;
 
@@ -430,7 +433,8 @@ int main(int argc, char **argv)
 				   "\t\t\t\t\t</div>\n"//container-fluid end
 				   "\t\t\t\t</div>\n"//topnavbar end
 				   "\t\t\t\t<div class=\"row\">\n"
-				   "\t\t\t\t\t<div class=\"col-lg-12\">\n");
+				   "\t\t\t\t\t<div class=\"col-lg-12\">\n"
+				   "\t\t\t\t\t\t<div class=\"alert alert-danger\" style=\"display:%s;\">%s</div>\n",is_unusable_overlayfs() ? "block" : "none", translation_strings == NULL ? unusable_overlay : translation_strings[4]);
 		}
 
 		printf("<script>\n");
@@ -1509,6 +1513,30 @@ string_map* get_hostnames(void)
 
 }
 
+bool is_unusable_overlayfs(void)
+{
+	FILE* procmounts = setmntent("/proc/mounts", "r");
+	if(!procmounts)
+	{
+		return false;
+	}
+	struct mntent* mnt_p;
+	
+	while (mnt_p = getmntent(procmounts))
+	{
+		if(strstr(mnt_p->mnt_fsname, "overlayfs") != NULL)
+		{
+			if(strstr(mnt_p->mnt_fsname, "/tmp/root") != NULL || strstr(mnt_p->mnt_opts, "ro,") != NULL)
+			{
+				endmntent(procmounts);
+				return true;
+			}
+		}
+	}
+	endmntent(procmounts);
+	return false;
+}
+
 
 
 #ifdef UCI_OLD_VERSION //valid for uci version 0.3.3 for kamikaze 7.09
@@ -1605,12 +1633,13 @@ char** ParseGHF_TranslationStrings(char* web_root, char* active_lang, char* fall
         return NULL;
 #else
         unsigned char ghf_idx=0;
-        char** GHFstrings = (char**)calloc(5, sizeof(char*));         //4 strings + emptyval
+        char** GHFstrings = (char**)calloc(6, sizeof(char*));         //5 strings + emptyval
         //same order as in file:
         //index=0: ghf.title="Gargoyle Router Management Utility";
         //index=1: ghf.desc="Router<br/>Management<br/>Utility";
         //index=2: ghf.devn="Device Name";
         //index=3: ghf.waits="Please Wait While Settings Are Applied";
+	//index=4: ghf.badoverlay="Router storage full (read only) or is mounted in volatile storage (RAM). It will not function correctly, or will revert to a previous state after rebooting. Restore default configuration or flash new firmware (without preserving settings).";
         char* ghfs_path = dynamic_strcat(4, web_root, "/i18n/", active_lang, "/ghf.js");
 
         if (path_exists(ghfs_path) == PATH_IS_REGULAR_FILE || path_exists(ghfs_path) == PATH_IS_SYMLINK )
@@ -1625,7 +1654,7 @@ char** ParseGHF_TranslationStrings(char* web_root, char* active_lang, char* fall
                         for (ghf_line=0; ghf_line < num_lines; ghf_line++)
                         {
                                 char* this_line = ghf_js_lines[ghf_line];
-                                unsigned char idx, start_str, end_str = 0;
+                                unsigned short idx, start_str, end_str = 0;
 
                                 for (idx=0; idx < strlen(this_line); idx++)
                                 {
