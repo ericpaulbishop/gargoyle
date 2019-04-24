@@ -4,4 +4,4 @@ ghf.title="Gargoyle Router Management Utility";
 ghf.desc="Router Management Utility";
 ghf.devn="Nazwa";
 ghf.waits="Proszę czekać na wprowadzenie zmian";
-ghf.badoverlay="Router storage full (read only) or is mounted in volatile storage (RAM). It will not function correctly, or will revert to a previous state after rebooting. Restore default configuration or flash new firmware (without preserving settings).";
+ghf.badoverlay="Pamięć flash routera jest zapełniona (zamontowania w trybie tylko do odczytu) lub tymczasowo wykorzystywana jest pamięć RAM. Router nie będzie działać poprawnie lub powróci do stanu poprzedniego po ponownym uruchomieniu. Przywróć domyślną konfigurację lub wgraj nowe oprogramowanie (bez zachowania ustawień).";
