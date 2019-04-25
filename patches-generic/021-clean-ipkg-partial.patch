@@ -7,7 +7,7 @@
 +ifdef CONFIG_CLEAN_IPKG_PARTIAL
 +  define clean_ipkg
 +	-find $(1)/usr/lib/opkg/info/* -type f -and -not -name '*.control' -and -not -name 'plugin-gargoyle-*' | $(XARGS) rm -rf
-+	-sed -i -ne '/^Require-User: /p' $(1)/usr/lib/opkg/info/*.control
++	-find $(1)/usr/lib/opkg/info/* -type f -and -name '*.control' -and -not -name 'plugin-gargoyle-*' | $(XARGS) sed -i -ne '/^Require-User: /p'
 +	-find $(1)/usr/lib/opkg -empty | $(XARGS) rm -rf
 +  endef
 +endif
