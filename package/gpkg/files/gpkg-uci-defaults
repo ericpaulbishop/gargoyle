@@ -13,12 +13,12 @@ else
 		echo "dest plugin_root $plugin_root" >>/etc/opkg.conf
 	fi
 
-	openwrt_branch=$(cat /etc/openwrt_release | grep DISTRIB_CODENAME | sed   's/^[^\"]*\"//g; s/\".*$//g')
-	new_openwrt_branch_def=$( cat $gpkg_conf_template | grep -e "^src\/gz[\t ]*$openwrt_branch[\t ]")
-	new_gargoyle_branch_def=$(cat $gpkg_conf_template | grep -e "^src\/gz[\t ]*gargoyle[\t ]")
+	openwrt_branch=$(cat /etc/openwrt_release | grep DISTRIB_RELEASE | sed "s/^[^']*'//g; s/'.*$//g")
+	new_openwrt_branch_def=$(cat $gpkg_conf_template | grep -e "^src\/gz[\t ]*openwrt_${openwrt_branch}_")
+	new_gargoyle_branch_def=$(cat $gpkg_conf_template | grep -e "^src\/gz[\t ]*gargoyle.*[\t ]")
 	if [ -n "$new_openwrt_branch_def" ] && [ -n  "$new_gargoyle_branch_def" ] ; then
-		sed -i '/src\/gz[\t ]*'"$openwrt_branch"'[\t ]/d'  /etc/opkg.conf
-		sed -i '/src\/gz[\t ]*gargoyle[\t ]/d'             /etc/opkg.conf
+		sed -i '/src\/gz[\t ]*'"openwrt_$openwrt_branch"'_/d'  /etc/opkg.conf
+		sed -i '/src\/gz[\t ]*gargoyle.*[\t ]/d'             /etc/opkg.conf
 		echo "$new_openwrt_branch_def"                  >> /etc/opkg.conf
 		echo "$new_gargoyle_branch_def"                 >> /etc/opkg.conf
 	fi
