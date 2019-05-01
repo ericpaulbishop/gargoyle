@@ -34,7 +34,6 @@
 #include <errno.h>
 #include <sys/sem.h> 
 #include <sys/time.h>
-#include <sys/syscall.h>
 #define BANDWIDTH_QUERY_LENGTH		16384
 
 /* socket id parameters (for userspace i/o) */
