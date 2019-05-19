@@ -78,7 +78,7 @@ The forums: [Gargoyle-Router Forums](https://www.gargoyle-router.com/phpbb/index
 
 ## Contributing
 
-Please read CONTRIBUTING.md (coming soon) for details on our code of conduct, and the process for submitting pull requests to us.
+Please read [CONTRIBUTING.md](https://github.com/ericpaulbishop/gargoyle/blob/master/CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
 
 ## Reporting an issue or bug
 
