@@ -1,6 +1,6 @@
 --- a/dev/null
 +++ b/target/linux/generic/hack-4.14/690-imq.patch
-@@ -0,0 +1,2151 @@
+@@ -0,0 +1,2044 @@
 +--- a/drivers/net/Kconfig	2018-04-22 23:17:57.583718674 -0400
 ++++ b/drivers/net/Kconfig	2018-04-22 23:20:39.331768961 -0400
 +@@ -277,6 +277,125 @@
@@ -141,7 +141,7 @@
 + obj-$(CONFIG_MII) += mii.o
 +--- /dev/null	2018-03-30 15:39:24.291451107 -0400
 ++++ b/drivers/net/imq.c	2018-05-20 11:10:23.471713282 -0400
-+@@ -0,0 +1,1374 @@
++@@ -0,0 +1,1268 @@
 ++/*
 ++ *             Pseudo-driver for the intermediate queue device.
 ++ *
@@ -186,8 +186,7 @@
 ++
 ++static nf_hookfn imq_nf_hook;
 ++
-++/* 
-++static struct nf_hook_ops imq_ops[] = {
+++/*static struct nf_hook_ops imq_ops[] = {
 ++	{
 ++	// imq_ingress_ipv4 
 ++		.hook		= imq_nf_hook,
@@ -234,30 +233,7 @@
 ++#endif
 ++	},
 ++#endif
-++};
-++*/
-++
-++
-++
-++
-++
-++
-++
-++
-++
-++
-++
-++
-++
-++
-++
-++
-++
-++
-++
-++
-++
-++
+++};*/
 ++
 ++#if defined(CONFIG_IMQ_NUM_DEVS)
 ++static int numdevs = CONFIG_IMQ_NUM_DEVS;
@@ -938,16 +914,6 @@
 ++	.outfn = imq_nf_queue,
 ++};
 ++
-++
-++
-++
-++
-++
-++
-++
-++
-++
-++
 ++static inline char *kernel_strdup(const char *str)
 ++{
 ++	char *tmp;
@@ -1122,8 +1088,6 @@
 ++	#define DEFAULT_POST_TABLE "mangle"
 ++#endif
 ++
-++
-++
 ++static char* hook_chains = "PREROUTING,POSTROUTING";
 ++static char* hook_tables = DEFAULT_PRE_TABLE","DEFAULT_POST_TABLE;
 ++
@@ -1132,8 +1096,7 @@
 ++
 ++static int __net_init imq_nf_register(struct net *net)
 ++{
-++
-++	/* int ret; */
+++	int ret;
 ++	char separators[4] = {',', ' ', '\t', '\0' };
 ++	unsigned long num_chains;
 ++	unsigned long num_tables;
@@ -1210,11 +1173,10 @@
 ++					table_id = NF_IP_PRI_FILTER+1;
 ++				}
 ++				(hook_list[hook_list_length]).hook = imq_nf_hook;
-++				/* (hook_list[hook_list_length]).owner = THIS_MODULE; */
 ++				(hook_list[hook_list_length]).pf = PF_INET;
 ++				(hook_list[hook_list_length]).hooknum = chain_id;
 ++				(hook_list[hook_list_length]).priority = table_id;
-++				err = nf_register_net_hook(net, (hook_list + hook_list_length) );
+++				printk(KERN_INFO "\tIMQv4: Hooking IMQ after %s on %s, pf=%d, hooknum=%d, priority=%d\n", table, chain, (hook_list[hook_list_length]).pf, (hook_list[hook_list_length]).hooknum, (hook_list[hook_list_length]).priority);
 ++				hook_list_length++;
 ++
 ++				#if defined(CONFIG_IPV6) || defined(CONFIG_IPV6_MODULE)
@@ -1236,24 +1198,12 @@
 ++					}
 ++
 ++					(hook_list[hook_list_length]).hook = imq_nf_hook;
-++					/* (hook_list[hook_list_length]).owner = THIS_MODULE; */
 ++					(hook_list[hook_list_length]).pf = PF_INET6;
 ++					(hook_list[hook_list_length]).hooknum = chain_id;
 ++					(hook_list[hook_list_length]).priority = table_id;
-++					nf_register_net_hook(net, (hook_list + hook_list_length) );
+++					printk(KERN_INFO "\tIMQv6: Hooking IMQ after %s on %s, pf=%d, hooknum=%d, priority=%d\n", table, chain, (hook_list[hook_list_length]).pf, (hook_list[hook_list_length]).hooknum, (hook_list[hook_list_length]).priority);
 ++					hook_list_length++;
 ++				#endif
-++
-++
-++				if(err)
-++				{
-++					printk(KERN_INFO "\tError hooking IMQ after %s on %s\n", table, chain);
-++				}
-++				else
-++				{
-++					printk(KERN_INFO "\tHooked IMQ after %s on %s\n", table, chain);
-++				}
-++
 ++			}
 ++		}
 ++		if(valid == 0)
@@ -1264,78 +1214,33 @@
 ++	free_null_terminated_string_array(chain_list);
 ++	free_null_terminated_string_array(table_list);
 ++
-++	return 0;
-++
-++/*
-++	return nf_register_net_hooks(net, imq_ops,
-++				    ARRAY_SIZE(imq_ops));
-++
-++*/
-++
+++	return nf_register_net_hooks(net, hook_list,
+++				    hook_list_length);
 ++};
 ++
 ++
-++static int __init imq_init_hooks(void)
-++{
-++
-++	nf_register_queue_imq_handler(&imq_nfqh);
-++
-++	return imq_nf_register(&init_net);
-++
-++
-++	/*
-++	int ret ;
-++	nf_register_queue_imq_handler(&imq_nfqh);
-++
-++	ret = nf_register_hooks(imq_ops, ARRAY_SIZE(imq_ops));
-++	if (ret < 0)
-++		nf_unregister_queue_imq_handler();
-++
-++	return ret;
-++	*/
-++}
 ++static void __net_exit imq_nf_unregister(struct net *net)
 ++{
-++	int hook_index = 0;
-++	for(hook_index = 0; hook_index < hook_list_length; hook_index++)
-++	{
-++		nf_unregister_net_hook(net, (hook_list+hook_index) );
-++	}
-++
-++	/*
-++	nf_unregister_net_hooks(net, imq_ops,
-++			    ARRAY_SIZE(imq_ops));
-++	*/
-++
+++	nf_unregister_net_hooks(net, hook_list,
+++			    hook_list_length);
 ++};
-++
-++
 ++
 ++static struct pernet_operations imq_net_ops = {
 ++	.init		= imq_nf_register,
 ++	.exit		= imq_nf_unregister,
 ++};
 ++
+++static int __net_init imq_init_hooks(void)
+++{
+++	int ret ;
+++	nf_register_queue_imq_handler(&imq_nfqh);
 ++
+++	ret = register_pernet_subsys(&imq_net_ops);
+++	if (ret < 0)
+++		nf_unregister_queue_imq_handler();
 ++
-++
-++
-++
-++
-++
-++
-++
-++
-++
-++
-++
-++
-++
-++
-++
-++
-++
-++
+++	return ret;
+++}
 ++
 ++#ifdef CONFIG_LOCKDEP
 ++	static struct lock_class_key imq_netdev_addr_lock_key;
@@ -1450,7 +1355,7 @@
 ++
 ++	pr_info("IMQ driver loaded successfully. (numdevs = %d, numqueues = %d, imq_dev_accurate_stats = %d)\n",
 ++		numdevs, numqueues, imq_dev_accurate_stats);
-++
+++/*
 ++#if defined(CONFIG_IMQ_BEHAVIOR_BA) || defined(CONFIG_IMQ_BEHAVIOR_BB)
 ++	pr_info("\tHooking IMQ before NAT on PREROUTING.\n");
 ++#else
@@ -1461,26 +1366,17 @@
 ++#else
 ++	pr_info("\tHooking IMQ after NAT on POSTROUTING.\n");
 ++#endif
-++
+++*/
 ++	return 0;
 ++}
 ++
 ++static void __exit imq_unhook(void)
 ++{
-++
-++	int hook_index = 0;
-++	for(hook_index = 0; hook_index < hook_list_length; hook_index++)
-++	{
-++		nf_unregister_net_hook(&init_net, (hook_list+hook_index) );
-++	}
-++
-++
 ++	unregister_pernet_subsys(&imq_net_ops);
 ++	nf_unregister_queue_imq_handler();
 ++
 ++	kfree(hook_list);
 ++	hook_list_length = 0;
-++
 ++}
 ++
 ++static void __exit imq_cleanup_devs(void)
@@ -1509,8 +1405,6 @@
 ++MODULE_PARM_DESC(imq_dev_accurate_stats, "Notify if need the accurate imq device stats");
 ++MODULE_PARM_DESC(hook_chains, "netfilter chains in which to insert hooks to IMQ");
 ++MODULE_PARM_DESC(hook_tables, "netfilter tables after which to insert hooks to IMQ");
-++
-++
 ++
 ++MODULE_AUTHOR("https://github.com/imq/linuximq");
 ++MODULE_DESCRIPTION("Pseudo-driver for the intermediate queue device. See https://github.com/imq/linuximq/wiki for more information.");
@@ -2001,7 +1895,7 @@
 + /* return EBUSY when somebody else is registered, return EEXIST if the
 +  * same handler is registered, return 0 in case of success. */
 + void nf_register_queue_handler(struct net *net, const struct nf_queue_handler *qh)
-+@@ -144,16 +161,30 @@
++@@ -144,16 +161,29 @@
 + 
 + static int __nf_queue(struct sk_buff *skb, const struct nf_hook_state *state,
 + 		      const struct nf_hook_entries *entries,
@@ -2029,7 +1923,6 @@
 ++	} else {
 ++		qh = rcu_dereference(net->nf.queue_handler);
 ++	}
-++
 ++
 + 	if (!qh) {
 + 		status = -ESRCH;
