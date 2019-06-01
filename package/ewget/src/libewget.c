@@ -1395,12 +1395,6 @@ static void* initialize_connection_https(char* host, int port)
     			ssl = SSL_new(ctx);
 			SSL_set_fd(ssl, socket);
 			initialized = SSL_connect(ssl);
-			if(initialized < 0)
-			{
-				close(socket);
-				SSL_free(ssl);
-				SSL_CTX_free(ctx);
-			}
 			/* would check cert here if we were doing it */
 		#endif
 
@@ -1455,12 +1449,6 @@ static void* initialize_connection_https(char* host, int port)
     			ssl = SSL_new(ctx);
 			SSL_set_fd(ssl, socket);
 			initialized = SSL_connect(ssl);
-			if(initialized < 0)
-			{
-				close(socket);
-				SSL_free(ssl);
-				SSL_CTX_free(ctx);
-			}
 		#endif
 
 		#ifdef USE_MATRIXSSL
