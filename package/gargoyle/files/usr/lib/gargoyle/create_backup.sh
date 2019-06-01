@@ -1,7 +1,7 @@
-# This program is copyright © 2008 Eric Bishop and is distributed under the terms of the GNU GPL 
-# version 2.0 with a special clarification/exception that permits adapting the program to 
+# This program is copyright Â© 2008 Eric Bishop and is distributed under the terms of the GNU GPL
+# version 2.0 with a special clarification/exception that permits adapting the program to
 # configure proprietary "back end" software provided that all modifications to the web interface
-# itself remain covered by the GPL. 
+# itself remain covered by the GPL.
 # See http://gargoyle-router.com/faq.html#qfoss for more information
 
 
@@ -18,7 +18,7 @@ if [ -n "$webmon_enabled" ] ; then
 	/etc/init.d/webmon_gargoyle stop
 fi
 
-backup_locations='/etc/passwd /etc/shadow /etc/config /etc/rc.d /etc/TZ /etc/firewall.user /etc/ethers /etc/hosts /etc/webmon_ips /etc/crontabs /etc/dropbear /etc/samba/smbpasswd /tmp/data /usr/data '
+backup_locations='/etc/passwd /etc/shadow /etc/config /etc/rc.d /etc/TZ /etc/firewall.user /etc/ethers /etc/hosts /etc/webmon_ips /etc/crontabs /etc/dropbear /etc/samba/smbpasswd /tmp/data /usr/data /etc/openvpn '
 existing_locations=""
 for bl in $backup_locations ; do
 	if [ -e "$bl" ] ; then
