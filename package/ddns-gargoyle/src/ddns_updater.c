@@ -85,30 +85,33 @@
 int daemon_pid_file;
 
 char default_ip_lookup_url_data[][MAX_LOOKUP_URL_LENGTH] = {
-							"http://checkmyip.com",
 							"http://www.ipchicken.com",
 							"http://www.tracemyip.org",
 							"http://checkip.dyndns.org",
-							"http://checkip.org", 
-							"http://www.ip-address.org",
-							"http://my-ip-address.com",
-							"http://www.selfseo.com/what_is_my_ip.php",
-							"http://aruljohn.com",
+							"http://checkip.org",
+							"https://aruljohn.com",
 							"http://www.lawrencegoetz.com/programs/ipinfo/",
 							"http://myipinfo.net",
-							"http://www.ip-1.com/",
 							"http://www.myipnumber.com",
-							"http://www.dslreports.com/whois",
+							"http://www.dslreports.com/whatismyip",
+							"https://api.ipify.org",
+							"https://api.myip.com",
+							"http://bot.whatismyipaddress.com",
+							"https://api.my-ip.io/ip",
+							"https://ip.seeip.org",
+							"https://ifconfig.co/ip",
+							"https://ipapi.co/ip",
+							"https://api.ip.sb/ip",
 							"\0"
 							};
 
 #define MAX_USER_AGENT_LENGTH	125
 char user_agents[][MAX_USER_AGENT_LENGTH] = {
 						"Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0)",        //IE 8, Windows
-						"Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.2; .NET CLR 1.1.4322)",  //IE 7, Windows
-						"Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0",         //IE 9, Windows
-						"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_4) AppleWebKit/536.5 (KHTML, like Gecko) Chrome/19.0.1084.46 Safari/536.5", //Chrome, Mac
-						"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_7_4) AppleWebKit/536.25 (KHTML, like Gecko) Version/6.0 Safari/536.25",       //Safari 6, Mac
+						"Mozilla/5.0 (compatible; MSIE 10.0; Windows NT 6.1; Trident/6.0)",        //IE 10, Windows
+						"Mozilla/5.0 (Windows NT 10.0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.71 Safari/537.36 Edge/12.0",        //Edge 12, Windows
+						"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2227.1 Safari/537.36", //Chrome, Mac
+						"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_3) AppleWebKit/537.75.14 (KHTML, like Gecko) Version/7.0.3 Safari/7046A194A",       //Safari 7, Mac
 						"\0"
 						};
 
