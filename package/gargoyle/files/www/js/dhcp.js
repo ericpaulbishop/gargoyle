@@ -124,7 +124,7 @@ function createEditButton()
 	var editButton = createInput("button");
 	editButton.textContent = UI.Edit;
 	editButton.className = "btn btn-default btn-edit";
-	editButton.onclick = editStatic;
+	editButton.onclick = editStaticModal;
 	return editButton;
 }
 
@@ -231,22 +231,6 @@ function resetHostnameMacList()
 
 }
 
-
-
-function staticFromConnected()
-{
-	var selectedVal = getSelectedValue("static_from_connected");
-	if(selectedVal != "none")
-	{
-		var host = (selectedVal.split(/,/))[0];
-		var mac  = (selectedVal.split(/,/))[1];
-		document.getElementById("add_host").value = host;
-		document.getElementById("add_mac").value  = mac;
-		setSelectedValue("static_from_connected", "none");
-	}
-}
-
-
 function setEnabled(enabled)
 {
 	var ids=['dhcp_start', 'dhcp_end', 'dhcp_lease', 'block_mismatches', 'add_host', 'add_mac', 'add_ip', 'add_button'];
@@ -267,7 +251,7 @@ function setEnabled(enabled)
 
 function addStatic()
 {
-	errors = proofreadStatic(document);
+	errors = proofreadStatic();
 	if(errors.length > 0)
 	{
 		alert(errors.join("\n") + "\n\n" + dhcpS.AErr);
@@ -287,23 +271,21 @@ function addStatic()
 		staticIpTable = document.getElementById('staticip_table_container').firstChild;
 		addTableRow(staticIpTable,values, true, false, resetHostnameMacList);
 		resetHostnameMacList();
+		closeModalWindow('static_ip_modal');
 	}
 }
 
-function proofreadStatic(controlDocument, tableDocument, excludeRow)
+function proofreadStatic(excludeRow)
 {
-	controlDocument = controlDocument == null ? document : controlDocument;
-	tableDocument = tableDocument == null ? document : tableDocument;
-
 	addIds=['add_mac', 'add_ip'];
 	labelIds= ['add_mac_label', 'add_ip_label'];
 	functions = [validateMac, validateIP];
 	returnCodes = [0,0];
 	visibilityIds=addIds;
-	errors = proofreadFields(addIds, labelIds, functions, returnCodes, visibilityIds, controlDocument);
+	errors = proofreadFields(addIds, labelIds, functions, returnCodes, visibilityIds, document);
 	if(errors.length == 0)
 	{
-		var staticIpTable = tableDocument.getElementById('staticip_table_container').firstChild;
+		var staticIpTable = document.getElementById('staticip_table_container').firstChild;
 		var currentData = getTableDataArray(staticIpTable, true, false);
 		var rowDataIndex = 0;
 		for (rowDataIndex=0; rowDataIndex < currentData.length ; rowDataIndex++)
@@ -311,15 +293,15 @@ function proofreadStatic(controlDocument, tableDocument, excludeRow)
 			if(staticIpTable.rows[rowDataIndex+1] != excludeRow)
 			{
 				rowData = currentData[rowDataIndex];
-				if(rowData[0] != '' && rowData[0] != '-' && rowData[0] == controlDocument.getElementById('add_host').value)
+				if(rowData[0] != '' && rowData[0] != '-' && rowData[0] == document.getElementById('add_host').value)
 				{
 					errors.push(dhcpS.dHErr);
 				}
-				if(rowData[1] == controlDocument.getElementById('add_mac').value)
+				if(rowData[1] == document.getElementById('add_mac').value)
 				{
 					errors.push(dhcpS.dMErr);
 				}
-				if(rowData[2] == controlDocument.getElementById('add_ip').value)
+				if(rowData[2] == document.getElementById('add_ip').value)
 				{
 					errors.push(dhcpS.dIPErr);
 				}
@@ -331,7 +313,7 @@ function proofreadStatic(controlDocument, tableDocument, excludeRow)
 		var dhcpSection = getDhcpSection(uciOriginal);
 		var mask = uciOriginal.get("network", "lan", "netmask");
 		var ip = uciOriginal.get("network", "lan", "ipaddr");
-		var testIp = controlDocument.getElementById('add_ip').value;
+		var testIp = document.getElementById('add_ip').value;
 		var testEnd = parseInt( (testIp.split("."))[3] );
 
 		if(!rangeInSubnet(mask, ip, testEnd, testEnd))
@@ -378,79 +360,69 @@ function proofreadAll()
 	return errors;
 }
 
-function editStatic()
+function editStatic(editRow)
 {
-	if( typeof(editStaticWindow) != "undefined" )
+	var errors = proofreadStatic(editRow);
+	if(errors.length > 0)
 	{
-		//opera keeps object around after
-		//window is closed, so we need to deal
-		//with error condition
-		try
-		{
-			editStaticWindow.close();
-		}
-		catch(e){}
+		alert(errors.join("\n") + "\n"+dhcpS.upErr);
+	}
+	else
+	{
+		//update document with new data
+		editRow.childNodes[0].firstChild.data = document.getElementById("add_host").value;
+		editRow.childNodes[1].firstChild.data = document.getElementById("add_mac").value;
+		editRow.childNodes[2].firstChild.data = document.getElementById("add_ip").value;
+
+		closeModalWindow('static_ip_modal');
+
+		resetHostnameMacList();
+	}
+}
+
+function addStaticModal()
+{
+	modalButtons = [
+		{"title" : UI.Add, "classes" : "btn btn-primary", "function" : addStatic},
+		"defaultDismiss"
+	];
+
+	var host = "";
+	var mac = "";
+	var selectedVal = getSelectedValue("static_from_connected");
+	if(selectedVal != "none")
+	{
+		host = (selectedVal.split(/,/))[0];
+		mac  = (selectedVal.split(/,/))[1];
+		setSelectedValue("static_from_connected", "none");
 	}
 
-	editStaticWindow = openPopupWindow("static_ip_edit.sh", "edit", 560, 220);
+	modalElements = [
+		{"id" : "add_host", "value" : host},
+		{"id" : "add_mac", "value" : mac},
+		{"id" : "add_ip", "value" : ""}
+	];
+	modalPrepare('static_ip_modal', dhcpS.AdSIP, modalElements, modalButtons);
+	openModalWindow('static_ip_modal');
+}
 
-	saveButton = createInput("button", editStaticWindow.document);
-	closeButton = createInput("button", editStaticWindow.document);
-	saveButton.textContent = UI.CApplyChanges;
-	saveButton.className = "btn btn-primary";
-	closeButton.textContent = UI.CDiscardChanges;
-	closeButton.className = "btn btn-warning";
-
+function editStaticModal()
+{
 	editRow=this.parentNode.parentNode;
+	modalButtons = [
+		{"title" : UI.CApplyChanges, "classes" : "btn btn-primary", "function" : function(){editStatic(editRow);}},
+		"defaultDiscard"
+	];
 
-	runOnEditorLoaded = function ()
-	{
-		updateDone=false;
-		if(editStaticWindow.document != null)
-		{
-			if(editStaticWindow.document.getElementById("bottom_button_container") != null)
-			{
-				editStaticWindow.document.getElementById("bottom_button_container").appendChild(saveButton);
-				editStaticWindow.document.getElementById("bottom_button_container").appendChild(closeButton);
+	host = editRow.childNodes[0].firstChild.data;
+	mac  = editRow.childNodes[1].firstChild.data;
+	ip   = editRow.childNodes[2].firstChild.data;
 
-				//set edit values
-				editStaticWindow.document.getElementById("add_host").value = editRow.childNodes[0].firstChild.data;
-				editStaticWindow.document.getElementById("add_mac").value  = editRow.childNodes[1].firstChild.data;
-				editStaticWindow.document.getElementById("add_ip").value   = editRow.childNodes[2].firstChild.data;
-				editStaticWindow.document.getElementById("add_button").style.display="none";
-				closeButton.onclick = function()
-				{
-					editStaticWindow.close();
-				}
-				saveButton.onclick = function()
-				{
-					// error checking goes here
-					var errors = proofreadStatic(editStaticWindow.document, document, editRow);
-					if(errors.length > 0)
-					{
-						alert(errors.join("\n") + "\n"+dhcpS.upErr);
-					}
-					else
-					{
-						//update document with new data
-						editRow.childNodes[0].firstChild.data = editStaticWindow.document.getElementById("add_host").value;
-						editRow.childNodes[1].firstChild.data = editStaticWindow.document.getElementById("add_mac").value;
-						editRow.childNodes[2].firstChild.data = editStaticWindow.document.getElementById("add_ip").value;
-
-						editStaticWindow.close();
-
-						resetHostnameMacList();
-
-					}
-				}
-				editStaticWindow.focus();
-				updateDone = true;
-			}
-		}
-		if(!updateDone)
-		{
-			setTimeout( "runOnEditorLoaded()", 250);
-		}
-	}
-	runOnEditorLoaded();
+	modalElements = [
+		{"id" : "add_host", "value" : host},
+		{"id" : "add_mac", "value" : mac},
+		{"id" : "add_ip", "value" : ip}
+	];
+	modalPrepare('static_ip_modal', dhcpS.ESIP, modalElements, modalButtons);
+	openModalWindow('static_ip_modal');
 }

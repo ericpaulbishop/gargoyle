@@ -2992,3 +2992,61 @@ function openPopupWindow(url, name, width, height)
 
 	return window.open(url, name, "width=" + width + ",height=" + height + ",left=" + xCoor + ",top=" + yCoor);
 }
+
+function openModalWindow(name)
+{
+	var modal = document.getElementById(name);
+	modal.classList.remove("hidden");
+}
+
+function closeModalWindow(name)
+{
+	var modal = document.getElementById(name);
+	modal.classList.add("hidden");
+}
+
+function modalPrepare(modalID, title, elements, buttons)
+{
+	defaultDismiss = document.createElement("button");
+	defaultDismiss.onclick = function(){closeModalWindow(modalID);};
+	defaultDismiss.className = "btn btn-warning";
+	defaultDismiss.innerText = UI.Cancel;
+	defaultDiscard = defaultDismiss;
+	defaultDiscard.innerText = UI.CDiscardChanges;
+
+	titleEl = document.getElementById("modal-title");
+	if(titleEl) { titleEl.innerHTML = title; }
+
+	btnContainer = document.getElementById("modal_button_container");
+	while(btnContainer.children.length > 0)
+	{
+		btnContainer.removeChild(btnContainer.children[0]);
+	}
+
+	elements.forEach(function(element) {
+		inputEl = document.getElementById(element.id);
+		if(inputEl)
+		{
+			inputEl.value = element.value;
+		}
+	});
+
+	buttons.forEach(function(button) {
+		if(button == "defaultDismiss")
+		{
+			btnContainer.appendChild(defaultDismiss);
+		}
+		else if(button == "defaultDiscard")
+		{
+			btnContainer.appendChild(defaultDiscard);
+		}
+		else
+		{
+			btnEl = document.createElement("button");
+			btnEl.className = button.classes;
+			btnEl.onclick = button.function;
+			btnEl.innerText = button.title;
+			btnContainer.appendChild(btnEl);
+		}
+	});
+}

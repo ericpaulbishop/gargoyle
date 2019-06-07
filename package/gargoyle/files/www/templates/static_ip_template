@@ -1,14 +1,12 @@
-				<table>
-					<tr class='table_row_add_header'>
-						<th><label id='add_host_label' for='add_host'><%~ HsNm %></label><br><em>(<%~ dhcp.opt %>)</em></th>
-						<th><label id='add_mac_label' for='add_mac'>MAC</label></th>
-						<th><label id='add_ip_label' for='add_ip'>IP</label></th>
-						<th></th>
-					</tr>
-					<tr class='table_row_add'>
-						<td><input type='text' id='add_host' size='15' class='form-control' /></td>
-						<td><input type='text' id='add_mac' size='20' onkeyup='proofreadMac(this)' maxLength='17' class='form-control' /></td>
-						<td><input type='text' id='add_ip' size='20' onkeyup='proofreadIp(this)' maxLength='15' class='form-control' /></td>
-						<td><button type='button' id='add_button' class='btn btn-default btn-add' onclick='addStatic()'><%~ Add %></button></td>
-					</tr>
-				</table>
+				<div class="row form-group">
+					<label class="col-xs-5" id='add_host_label' for='add_host'><%~ HsNm %> <em>(<%~ dhcp.opt %>)</em></label>
+					<span class="col-xs-7"><input type='text' id='add_host' class='form-control' /></span>
+				</div>
+				<div class="row form-group">
+					<label class="col-xs-5" id='add_mac_label' for='add_mac'>MAC</label>
+					<span class="col-xs-7"><input type='text' id='add_mac' onkeyup='proofreadMac(this)' maxLength='17' class='form-control' /></span>
+				</div>
+				<div class="row form-group">
+					<label class="col-xs-5" id='add_ip_label' for='add_ip'>IP</label>
+					<span class="col-xs-7"><input type='text' id='add_ip' onkeyup='proofreadIp(this)' maxLength='15' class='form-control' /></span>
+				</div>

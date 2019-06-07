@@ -121,15 +121,14 @@ for (etherIndex in etherData)
 				</div>
 
 				<div class="row form-group">
-					<div class="col-xs-12 table-responsive" id="staticip_add_container">
-						<%in templates/static_ip_template %>
-					</div>
 					<div>
 						<span class="col-xs-12">
-							<select id="static_from_connected" class="form-control" onchange="staticFromConnected()">
+							<select id="static_from_connected" class="form-control">
 								<option value="none"><%~ SelH %></option>
 							</select>
+							<em>(<%~ opt %>)</em>
 						</span>
+						<span class="col-xs-12"><button id="add_button" class="btn btn-default btn-add" onclick="addStaticModal()"><%~ Add %></button></span>
 					</div>
 				</div>
 
@@ -154,6 +153,20 @@ for (etherIndex in etherData)
 	<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
 </div>
 
+<div class="modal hidden" tabindex="-1" role="dialog" id="static_ip_modal">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 id="modal-title" class="panel-title"><%~ dhcp.AdSIP %></h3>
+			</div>
+			<div class="modal-body">
+				<%in templates/static_ip_template %>
+			</div>
+			<div class="modal-footer" id="modal_button_container">
+			</div>
+		</div>
+	</div>
+</div>
 
 <script>
 <!--
