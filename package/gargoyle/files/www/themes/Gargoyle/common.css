@@ -1284,3 +1284,15 @@ td.bandwidth_table_column_4
 {
 	clear: both;
 }
+.fade
+{
+	display: none;
+	opacity: 0;
+	-webkit-transition: opacity .15s linear;
+	transition: opacity .15s linear;
+}
+.fade.in
+{
+	display: block;
+	opacity: 1;
+}

@@ -2996,13 +2996,13 @@ function openPopupWindow(url, name, width, height)
 function openModalWindow(name)
 {
 	var modal = document.getElementById(name);
-	modal.classList.remove("hidden");
+	modal.classList.add("in");
 }
 
 function closeModalWindow(name)
 {
 	var modal = document.getElementById(name);
-	modal.classList.add("hidden");
+	modal.classList.remove("in");
 }
 
 function modalPrepare(modalID, title, elements, buttons)
@@ -3027,7 +3027,14 @@ function modalPrepare(modalID, title, elements, buttons)
 		inputEl = document.getElementById(element.id);
 		if(inputEl)
 		{
-			inputEl.value = element.value;
+			if(element.value !== undefined)
+			{
+				inputEl.value = element.value;
+			}
+			if(element.disable !== undefined)
+			{
+				inputEl.disabled = element.disable;
+			}
 		}
 	});
 
