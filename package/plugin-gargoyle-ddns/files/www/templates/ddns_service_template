@@ -1,0 +1,31 @@
+				<div id="ddns_no_script" class="alert alert-danger" role="alert" style="display: none;"><%~ NoScriptErr %></div>
+				<div class="row form-group">
+					<label class="col-xs-5" for="ddns_provider" id="ddns_provider_label"><%~ SvPro %>:</label>
+					<span class="col-xs-7"><select class="form-control" id="ddns_provider" onchange="setProvider()"></select></span>
+				</div>
+
+				<div id="ddns_variable_container"></div>
+
+				<div class="row form-group">
+					<label class="col-xs-5" for="ddns_check" id="ddns_check_label"><%~ ChItv %>:</label>
+					<span class="col-xs-7">
+						<input type="text" class="form-control" id="ddns_check"  size="8" onkeyup="proofreadNumeric(this)"/>
+						<em><%~ minutes %></em>
+					</span>
+				</div>
+
+				<div class="row form-group">
+					<label class="col-xs-5" for="ddns_force" id="ddns_force_label"><%~ FUItv %>:</label>
+					<span class="col-xs-7">
+						<input type="text" class="form-control" id="ddns_force"  size="8" onkeyup="proofreadNumeric(this)"/>
+						<em><%~ days %></em>
+					</span>
+				</div>
+
+				<div class="row form-group">
+					<span class="col-xs-12" id="ddns_1_txt">
+						<p><%~ HelpCI %></p>
+						<p><%~ HelpFI %></p>
+					</span>
+					<span class="col-xs-12"><a onclick="setDescriptionVisibility('ddns_1')"  id="ddns_1_ref" href="#ddns_1"><%~ Hide %></a></span>
+				</div>

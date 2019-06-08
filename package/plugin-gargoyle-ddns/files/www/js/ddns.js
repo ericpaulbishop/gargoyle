@@ -78,7 +78,7 @@ function saveChangesPart2(response)
 					resettingAfterFailedUpdate=true;
 					// set parameters in form to that of failed section, so they can
 					// be edited/corrected
-					setDocumentFromUci(uci, "ddns_gargoyle", failedName, document);
+					setDocumentFromUci(uci, "ddns_gargoyle", failedName);
 
 					found = true;
 					failedDomain = uci.get("ddns_gargoyle", failedName, "domain");
@@ -174,7 +174,7 @@ function resetData()
 
 	if(!resettingAfterFailedUpdate)
 	{
-		setDocumentFromUci( new UCIContainer(), "", "", document);
+		setDocumentFromUci( new UCIContainer(), "", "");
 	}
 	resettingAfterFailedUpdate = false;
 
@@ -241,7 +241,7 @@ function resetData()
 
 function addDdnsService()
 {
-	var errorList = proofreadServiceProvider(document);
+	var errorList = proofreadServiceProvider();
 	if(errorList.length > 0)
 	{
 		errorString = errorList.join("\n") + "\n\n"+UI.ErrChanges;
@@ -274,10 +274,12 @@ function addDdnsService()
 		var ddnsTable = document.getElementById('ddns_table_container').firstChild;
 		addTableRow(ddnsTable, newTableRow, true, false, removeServiceProviderCallback);
 
-		setDocumentFromUci( new UCIContainer(), "", "", document);
+		setDocumentFromUci( new UCIContainer(), "", "");
 
 		newSections.push(section);
 		updatedSections.push(section);
+
+		closeModalWindow("ddns_service_modal");
 	}
 }
 function removeServiceProviderCallback(table, row)
@@ -286,7 +288,7 @@ function removeServiceProviderCallback(table, row)
 	uci.removeSection("ddns_gargoyle", section);
 }
 
-function proofreadServiceProvider(controlDocument)
+function proofreadServiceProvider()
 {
 	var ddnsIds = ['ddns_check', 'ddns_force'];
 	var labelIds= ['ddns_check_label', 'ddns_force_label'];
@@ -299,13 +301,13 @@ function proofreadServiceProvider(controlDocument)
 
 
 	var providerName;
-	if(controlDocument.getElementById("ddns_provider_text") != null)
+	if(document.getElementById("ddns_provider_text") != null)
 	{
-		providerName = controlDocument.getElementById("ddns_provider_text").firstChild.data;
+		providerName = document.getElementById("ddns_provider_text").firstChild.data;
 	}
 	else
 	{
-		providerName = getSelectedValue("ddns_provider", controlDocument);
+		providerName = getSelectedValue("ddns_provider", document);
 	}
 	var provider = null;
 	for(providerIndex=0; providerIndex < serviceProviders.length && provider == null; providerIndex++)
@@ -339,7 +341,7 @@ function proofreadServiceProvider(controlDocument)
 	{
 		if(allBooleanVariables[ optionalVariables[variableIndex] ] != 1)
 		{
-			if( controlDocument.getElementById( optionalVariables[variableIndex] + "_enabled" ).checked )
+			if( document.getElementById( optionalVariables[variableIndex] + "_enabled" ).checked )
 			{
 				ddnsIds.push( optionalVariables[variableIndex] );
 				labelIds.push( optionalVariables[variableIndex] + "_label" );
@@ -351,7 +353,7 @@ function proofreadServiceProvider(controlDocument)
 
 
 
-	var errors = proofreadFields(ddnsIds, labelIds, functions, returnCodes, ddnsIds, controlDocument);
+	var errors = proofreadFields(ddnsIds, labelIds, functions, returnCodes, ddnsIds, document);
 
 
 	//we don't have a proofread functions on provider elements
@@ -360,16 +362,16 @@ function proofreadServiceProvider(controlDocument)
 	{
 		if(allBooleanVariables[ variables[variableIndex] ] != 1)
 		{
-			controlDocument.getElementById( variables[variableIndex] ).className="";
+			document.getElementById( variables[variableIndex] ).className="";
 		}
 	}
 	for(variableIndex=0; variableIndex < optionalVariables.length; variableIndex++)
 	{
 		if(allBooleanVariables[ optionalVariables[variableIndex] ] != 1)
 		{
-			if( controlDocument.getElementById( optionalVariables[variableIndex] + "_enabled" ).checked )
+			if( document.getElementById( optionalVariables[variableIndex] + "_enabled" ).checked )
 			{
-				controlDocument.getElementById( optionalVariables[variableIndex] ).className="";
+				document.getElementById( optionalVariables[variableIndex] ).className="";
 			}
 		}
 	}
@@ -380,9 +382,9 @@ function proofreadServiceProvider(controlDocument)
 	if(errors.length == 0)
 	{
 		var domain;
-		if( controlDocument.getElementById("domain") != null)
+		if( document.getElementById("domain") != null)
 		{
-			domain = controlDocument.getElementById("domain").value;
+			domain = document.getElementById("domain").value;
 		}
 		else
 		{
@@ -406,21 +408,16 @@ function proofreadServiceProvider(controlDocument)
 }
 
 
-function setUciFromDocument(dstUci, pkg, section, controlDocument)
+function setUciFromDocument(dstUci, pkg, section)
 {
-	if(controlDocument == null)
-	{
-		controlDocument = document;
-	}
-
 	var providerName;
-	if(controlDocument.getElementById("ddns_provider_text") != null)
+	if(document.getElementById("ddns_provider_text") != null)
 	{
-		providerName = controlDocument.getElementById("ddns_provider_text").firstChild.data;
+		providerName = document.getElementById("ddns_provider_text").firstChild.data;
 	}
 	else
 	{
-		providerName = getSelectedValue("ddns_provider", controlDocument);
+		providerName = getSelectedValue("ddns_provider", document);
 	}
 
 	dstUci.removeSection("ddns_gargoyle", section);
@@ -428,9 +425,9 @@ function setUciFromDocument(dstUci, pkg, section, controlDocument)
 	dstUci.set("ddns_gargoyle", section, "enabled", "1");
 	dstUci.set("ddns_gargoyle", section, "service_provider", providerName);
 	dstUci.set("ddns_gargoyle", section, "ip_source", "internet");
-	dstUci.set("ddns_gargoyle", section, "force_interval", controlDocument.getElementById("ddns_force").value  );
+	dstUci.set("ddns_gargoyle", section, "force_interval", document.getElementById("ddns_force").value  );
 	dstUci.set("ddns_gargoyle", section, "force_unit", "days");
-	dstUci.set("ddns_gargoyle", section, "check_interval", controlDocument.getElementById("ddns_check").value );
+	dstUci.set("ddns_gargoyle", section, "check_interval", document.getElementById("ddns_check").value );
 	dstUci.set("ddns_gargoyle", section, "check_unit", "minutes");
 
 	var provider = null;
@@ -454,7 +451,7 @@ function setUciFromDocument(dstUci, pkg, section, controlDocument)
 
 	for(variableIndex=0; variableIndex < variables.length; variableIndex++)
 	{
-		var el = controlDocument.getElementById(variables[variableIndex]);
+		var el = document.getElementById(variables[variableIndex]);
 		var value = allBooleanVariables[ el.id ] != 1 ? el.value : (el.checked ? "1" : "0");
 		if(value != "")
 		{
@@ -463,10 +460,10 @@ function setUciFromDocument(dstUci, pkg, section, controlDocument)
 	}
 	for(variableIndex=0; variableIndex < optionalVariables.length; variableIndex++)
 	{
-		var el = controlDocument.getElementById(optionalVariables[variableIndex]);
+		var el = document.getElementById(optionalVariables[variableIndex]);
 		if( allBooleanVariables[ el.id ] != 1)
 		{
-			if(controlDocument.getElementById( el.id + "_enabled").checked)
+			if(document.getElementById( el.id + "_enabled").checked)
 			{
 				dstUci.set("ddns_gargoyle", section, el.id, el.value);
 			}
@@ -479,23 +476,18 @@ function setUciFromDocument(dstUci, pkg, section, controlDocument)
 }
 
 
-function setDocumentFromUci(srcUci, pkg, section, controlDocument)
+function setDocumentFromUci(srcUci, pkg, section)
 {
-	if(controlDocument == null)
-	{
-		controlDocument = document;
-	}
-
 	var providerName = srcUci.get(pkg, section, "service_provider");
-	if(controlDocument.getElementById("ddns_provider_text") != null)
+	if(document.getElementById("ddns_provider_text") != null)
 	{
-		controlDocument.getElementById("ddns_provider_text").appendChild( controlDocument.createTextNode(providerName));
+		document.getElementById("ddns_provider_text").appendChild(document.createTextNode(providerName));
 	}
 	else
 	{
-		setSelectedValue("ddns_provider", providerName, controlDocument);
+		setSelectedValue("ddns_provider", providerName, document);
 	}
-	var provider = setProvider(controlDocument);
+	var provider = setProvider();
 	var variables = provider["variables"];
 	var optionalVariables = provider["optional_variables"];
 	var allBooleanVariables = [];
@@ -506,7 +498,7 @@ function setDocumentFromUci(srcUci, pkg, section, controlDocument)
 	}
 	for(variableIndex = 0; variableIndex < variables.length; variableIndex++)
 	{
-		var el = controlDocument.getElementById( variables[variableIndex] );
+		var el = document.getElementById( variables[variableIndex] );
 		if( allBooleanVariables[ el.id ] != 1)
 		{
 			el.value = srcUci.get(pkg, section, el.id);
@@ -518,10 +510,10 @@ function setDocumentFromUci(srcUci, pkg, section, controlDocument)
 	}
 	for(variableIndex = 0; variableIndex < optionalVariables.length; variableIndex++)
 	{
-		var el = controlDocument.getElementById( optionalVariables[variableIndex] );
+		var el = document.getElementById( optionalVariables[variableIndex] );
 		if( allBooleanVariables[ el.id ] != 1)
 		{
-			var check = controlDocument.getElementById( optionalVariables[variableIndex] + "_enabled" );
+			var check = document.getElementById( optionalVariables[variableIndex] + "_enabled" );
 			check.checked = srcUci.get(pkg, section, el.id) != "";
 			if(check.checked)
 			{
@@ -537,29 +529,24 @@ function setDocumentFromUci(srcUci, pkg, section, controlDocument)
 
 	var checkMinutes = (getMultipleFromUnit( srcUci.get("ddns_gargoyle", section, "check_unit") ) * srcUci.get("ddns_gargoyle", section, "check_interval"))/(60);
 	checkMinutes = (checkMinutes > 0) ? checkMinutes : 15;
-	controlDocument.getElementById( "ddns_check" ).value = checkMinutes;
+	document.getElementById( "ddns_check" ).value = checkMinutes;
 
 
 	var forceDays = (getMultipleFromUnit( srcUci.get("ddns_gargoyle", section, "force_unit") ) * srcUci.get("ddns_gargoyle", section, "force_interval"))/(24*60*60);
 	forceDays = (forceDays > 0) ? forceDays : 3;
-	controlDocument.getElementById( "ddns_force" ).value = forceDays;
+	document.getElementById( "ddns_force" ).value = forceDays;
 }
 
-function setProvider(controlDocument)
+function setProvider()
 {
-	if(controlDocument == null)
-	{
-		controlDocument = document;
-	}
-
 	var selected;
-	if(controlDocument.getElementById("ddns_provider_text") != null)
+	if(document.getElementById("ddns_provider_text") != null)
 	{
-		selected = controlDocument.getElementById("ddns_provider_text").firstChild.data;
+		selected = document.getElementById("ddns_provider_text").firstChild.data;
 	}
 	else
 	{
-		selected = getSelectedValue("ddns_provider", controlDocument);
+		selected = getSelectedValue("ddns_provider", document);
 	}
 	var provider = null;
 	for(providerIndex=0; providerIndex < serviceProviders.length && provider == null; providerIndex++)
@@ -569,12 +556,12 @@ function setProvider(controlDocument)
 	if(provider != null) //should NEVER be null, but test just in case
 	{
 		var ext_script = provider["external_script"];
-		controlDocument.getElementById("ddns_no_script").style.display="none";
+		document.getElementById("ddns_no_script").style.display="none";
 		if(ext_script != "")
 		{
 			if(extScripts.indexOf(ext_script) == -1)
 			{
-				controlDocument.getElementById("ddns_no_script").style.display="block";
+				document.getElementById("ddns_no_script").style.display="block";
 			}
 		}
 		var variables = provider["variables"];
@@ -590,25 +577,25 @@ function setProvider(controlDocument)
 
 		for(variableIndex = 0; variableIndex < variables.length; variableIndex++)
 		{
-			var div= controlDocument.createElement("div");
+			var div= document.createElement("div");
 			div.className="row form-group";
-			var label = controlDocument.createElement("label");
+			var label = document.createElement("label");
 			label.className="col-xs-5";
 			label.id=variables[variableIndex] + "_label";
-			label.appendChild( controlDocument.createTextNode( (ObjLen(DyDNS)==0 ? variableNames[variableIndex] : eval(variableNames[variableIndex])) + ":" ));
+			label.appendChild( document.createTextNode( (ObjLen(DyDNS)==0 ? variableNames[variableIndex] : eval(variableNames[variableIndex])) + ":" ));
 			div.appendChild(label);
-			var span = controlDocument.createElement("span");
+			var span = document.createElement("span");
 			span.className="col-xs-7"
 
 			var input;
 			if(allBooleanVariables[ variables[variableIndex] ] != 1)
 			{
-				input = createInput("text", controlDocument);
+				input = createInput("text", document);
 				input.className = "form-control";
 			}
 			else
 			{
-				input = createInput("checkbox", controlDocument);
+				input = createInput("checkbox", document);
 			}
 			input.id = variables[variableIndex];
 			span.appendChild(input);
@@ -622,27 +609,27 @@ function setProvider(controlDocument)
 		var optionalVariableNames = provider["optional_variable_names"];
 		for(variableIndex = 0; variableIndex < optionalVariables.length; variableIndex++)
 		{
-			var div= controlDocument.createElement("div");
+			var div= document.createElement("div");
 
-			var label = controlDocument.createElement("label");
+			var label = document.createElement("label");
 			label.className="leftcolumn";
 			label.id=optionalVariables[variableIndex] + "_label";
-			label.appendChild( controlDocument.createTextNode(optionalVariableNames[variableIndex] + ":" ));
+			label.appendChild( document.createTextNode(optionalVariableNames[variableIndex] + ":" ));
 			div.appendChild(label);
 			if(allBooleanVariables[ optionalVariables[variableIndex] ] != 1)
 			{
-				var span = controlDocument.createElement("span");
+				var span = document.createElement("span");
 				span.className = "rightcolumn";
 
-				var check = createInput("checkbox", controlDocument);
-				var text  = createInput("text", controlDocument);
+				var check = createInput("checkbox", document);
+				var text  = createInput("text", document);
 				text.className="form-control";
 				check.id = optionalVariables[variableIndex] + "_enabled";
 				text.id  = optionalVariables[variableIndex];
 				check.onclick= function()
 				{
 					var textId = this.id.replace("_enabled", "");
-			     		setElementEnabled( controlDocument.getElementById(textId), this.checked, "");
+			     		setElementEnabled( document.getElementById(textId), this.checked, "");
 				}
 				span.appendChild(check);
 				span.appendChild(text);
@@ -652,7 +639,7 @@ function setProvider(controlDocument)
 			}
 			else
 			{
-				var input = createInput("checkbox", controlDocument);
+				var input = createInput("checkbox", document);
 				input.id = optionalVariables[variableIndex];
 				div.appendChild(input);
 
@@ -662,7 +649,7 @@ function setProvider(controlDocument)
 		}
 
 
-		container = controlDocument.getElementById("ddns_variable_container");
+		container = document.getElementById("ddns_variable_container");
 		while(container.childNodes.length > 0)
 		{
 			container.removeChild( container.firstChild );
@@ -676,7 +663,7 @@ function setProvider(controlDocument)
 		{
 			if(allBooleanVariables[ optionalVariables[variableIndex] ] != 1)
 			{
-				setElementEnabled( controlDocument.getElementById(optionalVariables[variableIndex]), controlDocument.getElementById(optionalVariables[variableIndex] + "_enabled").checked, "");
+				setElementEnabled( document.getElementById(optionalVariables[variableIndex]), document.getElementById(optionalVariables[variableIndex] + "_enabled").checked, "");
 			}
 		}
 	}
@@ -696,7 +683,7 @@ function createEditButton()
 	editButton = createInput("button");
 	editButton.textContent = UI.Edit;
 	editButton.className = "btn btn-default btn-edit";
-	editButton.onclick = editServiceTableRow;
+	editButton.onclick = editDDNSModal;
 	return editButton;
 }
 
@@ -837,110 +824,31 @@ function forceUpdateForRow()
 }
 
 
-function editServiceTableRow()
+function editServiceTableRow(editRow, section, providerName, selectedDomain)
 {
+	var newDomain = document.getElementById("domain") != null ? document.getElementById("domain").value : providerName;
 
-	if( typeof(editServiceWindow) != "undefined" )
+	var errors = proofreadServiceProvider();
+	if(errors.length == 1)
 	{
-		//opera keeps object around after
-		//window is closed, so we need to deal
-		//with error condition
-		try
+		var dupRegEx=new RegExp(DyDNS.DupErr);
+		if(errors[0].match(dupRegEx) && newDomain == selectedDomain)
 		{
-			editServiceWindow.close();
-		}
-		catch(e){}
-	}
-
-	//editServiceWindow is global so we can close it above if it is left open
-	editServiceWindow = openPopupWindow("ddns_edit_service.sh", "edit", 560, 510);
-
-	var saveButton = createInput("button", editServiceWindow.document);
-	var closeButton = createInput("button", editServiceWindow.document);
-	saveButton.textContent = UI.CApplyChanges;
-	saveButton.className = "btn btn-primary";
-	closeButton.textContent = UI.CDiscardChanges;
-	closeButton.className = "btn btn-warning";
-
-	//load provider data for this row
-	var editServiceWindowRow=this.parentNode.parentNode;
-	var section = editServiceWindowRow.childNodes[2].firstChild.id;
-	var providerName = uci.get("ddns_gargoyle", section, "service_provider");
-	var selectedDomain = uci.get("ddns_gargoyle", section, "domain");
-	selectedDomain = selectedDomain == "" ? providerName : selectedDomain;
-
-
-	var provider = null;
-	for(providerIndex=0; providerIndex < serviceProviders.length && provider == null; providerIndex++)
-	{
-		provider = providerName == serviceProviders[providerIndex]["name"] ? serviceProviders[providerIndex] : null;
-	}
-	var providerVariables = provider["variables"];
-	var providerVariableNames = provider["variable_names"];
-
-	runOnServiceEditorLoaded = function ()
-	{
-		update_done=false;
-		if(editServiceWindow.document != null)
-		{
-			if(editServiceWindow.document.getElementById("bottom_button_container") != null)
-			{
-				editServiceWindow.document.getElementById("bottom_button_container").appendChild(saveButton);
-				editServiceWindow.document.getElementById("bottom_button_container").appendChild(closeButton);
-
-
-				setDocumentFromUci(uci, "ddns_gargoyle", section, editServiceWindow.document);
-
-
-
-				closeButton.onclick = function()
-				{
-					editServiceWindow.close();
-				}
-
-				saveButton.onclick = function()
-				{
-					var newDomain = editServiceWindow.document.getElementById("domain") != null ?
-								editServiceWindow.document.getElementById("domain").value :
-								providerName;
-
-					var errors = proofreadServiceProvider(editServiceWindow.document);
-					if(errors.length == 1)
-					{
-						var dupRegEx=new RegExp(DyDNS.DupErr);
-						//if(errors[0].match(/Duplicate/) && newDomain == selectedDomain)
-						if(errors[0].match(dupRegEx) && newDomain == selectedDomain)
-						{
-							errors = [];
-						}
-					}
-					if(errors.length > 0)
-					{
-						alert(errors.join("\n") + "\n\n"+DyDNS.UpSrvErr);
-						editServiceWindow.focus();
-					}
-					else
-					{
-						var truncatedDomain = newDomain.length > 20 ? newDomain.substr(0,17) + "..." : newDomain;
-						editServiceWindowRow.firstChild.firstChild.data = truncatedDomain;
-						setUciFromDocument(uci, "ddns_gargoyle", section, editServiceWindow.document);
-						updatedSections.push(section);
-						editServiceWindow.close();
-
-					}
-				}
-
-				editServiceWindow.focus();
-				update_done = true;
-			}
-		}
-		if(update_done == false)
-		{
-			setTimeout( "runOnServiceEditorLoaded()", 250);
+			errors = [];
 		}
 	}
-
-	runOnServiceEditorLoaded();
+	if(errors.length > 0)
+	{
+		alert(errors.join("\n") + "\n\n"+DyDNS.UpSrvErr);
+	}
+	else
+	{
+		var truncatedDomain = newDomain.length > 20 ? newDomain.substr(0,17) + "..." : newDomain;
+		editRow.firstChild.firstChild.data = truncatedDomain;
+		setUciFromDocument(uci, "ddns_gargoyle", section, document);
+		updatedSections.push(section);
+		closeModalWindow('ddns_service_modal');
+	}
 }
 
 function getMultipleFromUnit(unit)
@@ -967,4 +875,41 @@ function getMultipleFromUnit(unit)
 		multiple = 1;
 	}
 	return multiple;
+}
+
+function addDDNSModal()
+{
+	modalButtons = [
+		{"title" : UI.Add, "classes" : "btn btn-primary", "function" : addDdnsService},
+		"defaultDismiss"
+	];
+
+	modalElements = [];
+	setProvider();
+	modalPrepare('ddns_service_modal', DyDNS.AddDy, modalElements, modalButtons);
+	openModalWindow('ddns_service_modal');
+}
+
+function editDDNSModal()
+{
+	editRow=this.parentNode.parentNode;
+	//load provider data for this row
+	var section = editRow.childNodes[2].firstChild.id;
+	var providerName = uci.get("ddns_gargoyle", section, "service_provider");
+	var selectedDomain = uci.get("ddns_gargoyle", section, "domain");
+	selectedDomain = selectedDomain == "" ? providerName : selectedDomain;
+
+	modalButtons = [
+		{"title" : UI.CApplyChanges, "classes" : "btn btn-primary", "function" : function(){editServiceTableRow(editRow, section, providerName, selectedDomain);}},
+		"defaultDiscard"
+	];
+
+	modalElements = [
+		{'id' : 'ddns_provider', 'disable' : true}
+	];
+
+	setDocumentFromUci(uci, "ddns_gargoyle", section);
+
+	modalPrepare('ddns_service_modal', DyDNS.EDSect, modalElements, modalButtons);
+	openModalWindow('ddns_service_modal');
 }

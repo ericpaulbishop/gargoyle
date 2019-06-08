@@ -40,41 +40,8 @@
 				<h3 class="panel-title"><%~ ddns.DYSect %></h3>
 			</div>
 			<div class="panel-body">
-				<span id="add_ddns_label"><p><%~ AddDy %>:</p></span>
-				<div id="ddns_no_script" class="alert alert-danger" role="alert" style="display: none;"><%~ NoScriptErr %></div>
 				<div class="row form-group">
-					<label class="col-xs-5" for="ddns_provider" id="ddns_provider_label"><%~ SvPro %>:</label>
-					<span class="col-xs-7"><select class="form-control" id="ddns_provider" onchange="setProvider()"></select></span>
-				</div>
-
-				<div id="ddns_variable_container"></div>
-
-				<div class="row form-group">
-					<label class="col-xs-5" for="ddns_check" id="ddns_check_label"><%~ ChItv %>:</label>
-					<span class="col-xs-7">
-						<input type="text" class="form-control" id="ddns_check"  size="8" onkeyup="proofreadNumeric(this)"/>
-						<em><%~ minutes %></em>
-					</span>
-				</div>
-
-				<div class="row form-group">
-					<label class="col-xs-5" for="ddns_force" id="ddns_force_label"><%~ FUItv %>:</label>
-					<span class="col-xs-7">
-						<input type="text" class="form-control" id="ddns_force"  size="8" onkeyup="proofreadNumeric(this)"/>
-						<em><%~ days %></em>
-					</span>
-				</div>
-
-				<div class="row form-group">
-					<span class="col-xs-12"><button id="add_service_button" class="btn btn-default btn-add" onclick="addDdnsService()"><%~ AddDDNS %></button></span>
-				</div>
-
-				<div class="row form-group">
-					<span class="col-xs-12" id="ddns_1_txt">
-						<p><%~ HelpCI %></p>
-						<p><%~ HelpFI %></p>
-					</span>
-					<span class="col-xs-12"><a onclick="setDescriptionVisibility('ddns_1')"  id="ddns_1_ref" href="#ddns_1"><%~ Hide %></a></span>
+					<span class="col-xs-12"><button id="add_service_button" class="btn btn-default btn-add" onclick="addDDNSModal()"><%~ AddDDNS %></button></span>
 				</div>
 
 				<div id="internal_divider1" class="internal_divider"></div>
@@ -92,7 +59,20 @@
 	<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
 </div>
 
-
+<div class="modal fade" tabindex="-1" role="dialog" id="ddns_service_modal">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 id="modal-title" class="panel-title"><%~ AddDy %></h3>
+			</div>
+			<div class="modal-body">
+				<%in templates/ddns_service_template %>
+			</div>
+			<div class="modal-footer" id="modal_button_container">
+			</div>
+		</div>
+	</div>
+</div>
 
 <script>
 <!--
