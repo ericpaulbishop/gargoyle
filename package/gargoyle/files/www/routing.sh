@@ -53,12 +53,12 @@
 
 				<div class="row form-group">
 					<div id="static_route_add_container" class="col-xs-12">
-						<%in templates/static_route_template %>
+						<button id="add_button" class="btn btn-primary btn-add" onclick="addStaticModal()"><%~ Add %></button>
 					</div>
 				</div>
 
 				<div id="static_route_table_heading_container">
-					<span><%~ CSRSect %>:</span>
+					<label id="staticroute_current_heading_label" style="text-decoration:underline"><%~ CSRSect %>:</label>
 				</div>
 
 				<div class="row form-group">
@@ -76,6 +76,21 @@
 <div id="bottom_button_container" class="panel panel-default">
 	<button id="save_button" class="btn btn-primary btn-lg" onclick="saveChanges()"><%~ SaveChanges %></button>
 	<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="static_route_modal">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 id="modal-title" class="panel-title"><%~ ASRte %></h3>
+			</div>
+			<div class="modal-body">
+				<%in templates/static_route_template %>
+			</div>
+			<div class="modal-footer" id="modal_button_container">
+			</div>
+		</div>
+	</div>
 </div>
 
 <iframe id="reboot_test" onload="reloadPage()" style="display:none" ></iframe>

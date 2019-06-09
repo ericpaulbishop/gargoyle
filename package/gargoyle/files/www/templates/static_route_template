@@ -1,14 +1,17 @@
-				<table>
-					<tr class='table_row_add_header'>
-						<th><label id='add_dest_label' for='add_host'><%~ routing.DstnM %></label></th>
-						<th><label id='add_iface_label' for='add_mac'><%~ Ntwk %></label></th>
-						<th><label id='add_gateway_label' for='add_ip'><%~ Gtwy %></label></th>
-						<th></th>
-					</tr>
-					<tr class='table_row_add'>
-						<td><input type='text' id='add_dest' size='26' onkeyup='proofreadRouteIp(this)' maxLength='35' class='form-control' /></td>
-						<td><select id='add_iface' class='form-control'><option value="wan">WAN</option><option value="lan">LAN</option></select></td>
-						<td><input type='text' id='add_gateway' size='20' onkeyup='proofreadGatewayIp(this)' maxLength='15' class='form-control' /></td>
-						<td><button type='button' id='add_button' class='btn btn-default btn-add' onclick='addStaticRoute()'><%~ Add %></button></td>
-					</tr>
-				</table>
+				<div class="row form-group">
+					<label class="col-xs-5" id='add_dest_label' for='add_dest'><%~ routing.DstnM %></label>
+					<span class="col-xs-7"><input type='text' id='add_dest' class='form-control' onkeyup='proofreadRouteIp(this)' maxLength='35' /></span>
+				</div>
+				<div class="row form-group">
+					<label class="col-xs-5" id='add_iface_label' for='add_iface'><%~ Ntwk %></label>
+					<span class="col-xs-7">
+						<select id='add_iface' class='form-control'>
+							<option value="wan">WAN</option>
+							<option value="lan">LAN</option>
+						</select>
+					</span>
+				</div>
+				<div class="row form-group">
+					<label class="col-xs-5" id='add_gateway_label' for='add_gateway'><%~ Gtwy %></label>
+					<span class="col-xs-7"><input type='text' id='add_gateway' onkeyup='proofreadGatewayIp(this)' maxLength='15' class='form-control' /></span>
+				</div>

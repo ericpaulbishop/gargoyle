@@ -141,7 +141,7 @@ function createEditButton()
 	var editButton = createInput("button");
 	editButton.textContent = UI.Edit;
 	editButton.className = "btn btn-default btn-edit";
-	editButton.onclick = editStaticRoute;
+	editButton.onclick = editStaticModal;
 	return editButton;
 }
 
@@ -149,7 +149,7 @@ function createEditButton()
 
 function addStaticRoute()
 {
-	errors = proofreadStaticRoute(document);
+	errors = proofreadStaticRoute();
 	if(errors.length > 0)
 	{
 		alert(errors.join("\n") + "\n\n"+rtgS.AErr);
@@ -166,8 +166,8 @@ function addStaticRoute()
 		var row = [dest, iface, gateway, createEditButton() ];
 		var staticRouteTable = document.getElementById('static_route_table_container').firstChild;
 		addTableRow(staticRouteTable,row, true, false);
-		document.getElementById("add_dest").value = "";
-		document.getElementById("add_gateway").value = "";
+		
+		closeModalWindow('static_route_modal');
 	}
 }
 
@@ -188,16 +188,14 @@ function proofreadRouteIp(input)
 	proofreadText(input, validateRouteIp, 0);
 }
 
-function proofreadStaticRoute(controlDocument)
+function proofreadStaticRoute()
 {
-	controlDocument = controlDocument == null ? document : controlDocument;
-
 	addIds=['add_dest', 'add_gateway'];
 	labelIds= ['add_dest_label', 'add_gateway_label'];
 	functions = [validateRouteIp, validateGatewayIp];
 	returnCodes = [0,0];
 	visibilityIds=addIds;
-	return proofreadFields(addIds, labelIds, functions, returnCodes, visibilityIds, controlDocument);
+	return proofreadFields(addIds, labelIds, functions, returnCodes, visibilityIds, document);
 }
 
 function parseDest(origDest)
@@ -251,86 +249,68 @@ function parseDest(origDest)
 }
 
 
-function editStaticRoute()
+function editStaticRoute(editRow)
 {
-	if( typeof(editStaticWindow) != "undefined" )
+	// error checking goes here
+	var errors = proofreadStaticRoute();
+	if(errors.length > 0)
 	{
-		//opera keeps object around after
-		//window is closed, so we need to deal
-		//with error condition
-		try
-		{
-			editStaticWindow.close();
-		}
-		catch(e){}
+		alert(errors.join("\n") + "\n"+rtgS.SRErr);
 	}
+	else
+	{
+		//update document with new data
+		var newGw = document.getElementById("add_gateway").value;
+		newGw = newGw == "0.0.0.0" ? "*" : newGw;
+		var adjDst = parseDest( document.getElementById("add_dest").value );
+		var newDst = adjDst[1] == "" ? adjDst[0] : adjDst[0] + "/" + adjDst[1];
+		newDst = newDst == "0.0.0.0/0.0.0.0" ? "default" : newDst;
+		editRow.childNodes[0].firstChild.data = newDst;
+		editRow.childNodes[1].firstChild.data = getSelectedValue("add_iface", document);
+		editRow.childNodes[2].firstChild.data = newGw;
+		closeModalWindow('static_route_modal');
+	}
+}
 
+function addStaticModal()
+{
+	modalButtons = [
+		{"title" : UI.Add, "classes" : "btn btn-primary", "function" : addStaticRoute},
+		"defaultDismiss"
+	];
 
-	editStaticWindow = openPopupWindow("static_route_edit.sh", "edit", 560, 180);
+	var dest = "";
+	var iface = "wan";
+	var gateway = "";
 
-	saveButton = createInput("button", editStaticWindow.document);
-	closeButton = createInput("button", editStaticWindow.document);
-	saveButton.textContent = UI.CApplyChanges;
-	saveButton.className = "btn btn-primary";
-	closeButton.textContent = UI.CDiscardChanges;
-	closeButton.className = "btn btn-warning";
+	modalElements = [
+		{"id" : "add_dest", "value" : dest},
+		{"id" : "add_iface", "value" : iface},
+		{"id" : "add_gateway", "value" : gateway}
+	];
+	modalPrepare('static_route_modal', rtgS.ASRte, modalElements, modalButtons);
+	openModalWindow('static_route_modal');
+}
 
+function editStaticModal()
+{
 	editRow=this.parentNode.parentNode;
+	modalButtons = [
+		{"title" : UI.CApplyChanges, "classes" : "btn btn-primary", "function" : function(){editStaticRoute(editRow);}},
+		"defaultDiscard"
+	];
 
-	runOnEditorLoaded = function ()
-	{
-		updateDone=false;
-		if(editStaticWindow.document != null)
-		{
-			if(editStaticWindow.document.getElementById("bottom_button_container") != null)
-			{
-				editStaticWindow.document.getElementById("bottom_button_container").appendChild(saveButton);
-				editStaticWindow.document.getElementById("bottom_button_container").appendChild(closeButton);
+	dest = editRow.childNodes[0].firstChild.data;
+	dest = dest == "default" ? "0.0.0.0/0.0.0.0" : dest;
+	iface = editRow.childNodes[1].firstChild.data;
+	iface = iface == "*" ? "0.0.0.0" : iface;
+	gateway = editRow.childNodes[2].firstChild.data;
 
-				//set edit values
-				var oldDst = editRow.childNodes[0].firstChild.data;
-				var oldGw  = editRow.childNodes[2].firstChild.data;
-				oldGw  = oldGw  == "*" ? "0.0.0.0" : oldGw;
-				oldDst = oldDst == "default" ? "0.0.0.0/0.0.0.0" : oldDst;
-				editStaticWindow.document.getElementById("add_dest").value = oldDst;
-				setSelectedValue("add_iface", editRow.childNodes[1].firstChild.data, editStaticWindow.document);
-				editStaticWindow.document.getElementById("add_gateway").value = oldGw;
-				editStaticWindow.document.getElementById("add_button").style.display="none";
-				closeButton.onclick = function()
-				{
-					editStaticWindow.close();
-				}
-				saveButton.onclick = function()
-				{
-					// error checking goes here
-					var errors = proofreadStaticRoute(editStaticWindow.document, document, editRow);
-					if(errors.length > 0)
-					{
-						alert(errors.join("\n") + "\n"+rtgS.SRErr);
-					}
-					else
-					{
-						//update document with new data
-						var newGw = editStaticWindow.document.getElementById("add_gateway").value;
-						newGw = newGw == "0.0.0.0" ? "*" : newGw;
-						var adjDst = parseDest( editStaticWindow.document.getElementById("add_dest").value );
-						var newDst = adjDst[1] == "" ? adjDst[0] : adjDst[0] + "/" + adjDst[1];
-						newDst = newDst == "0.0.0.0/0.0.0.0" ? "default" : newDst;
-						editRow.childNodes[0].firstChild.data = newDst;
-						editRow.childNodes[1].firstChild.data = getSelectedValue("add_iface", editStaticWindow.document);
-						editRow.childNodes[2].firstChild.data = newGw;
-
-						editStaticWindow.close();
-					}
-				}
-				editStaticWindow.focus();
-				updateDone = true;
-			}
-		}
-		if(!updateDone)
-		{
-			setTimeout( "runOnEditorLoaded()", 250);
-		}
-	}
-	runOnEditorLoaded();
+	modalElements = [
+		{"id" : "add_dest", "value" : dest},
+		{"id" : "add_iface", "value" : iface},
+		{"id" : "add_gateway", "value" : gateway}
+	];
+	modalPrepare('static_route_modal', rtgS.ESSect, modalElements, modalButtons);
+	openModalWindow('static_route_modal');
 }
