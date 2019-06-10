@@ -42,8 +42,8 @@
 				</div>
 
 				<div class="row form-group">
-					<div id="portf_add_container" class="col-xs-12 table-responsive">
-						<%in templates/single_forward_template %>
+					<div id="portf_add_container" class="col-xs-12">
+						<button type="button" id="add_button" class="btn btn-default btn-add" onclick="addPortFModal(true)"><%~ Add %></button>
 					</div>
 				</div>
 
@@ -64,8 +64,8 @@
 				</div>
 
 				<div class="row form-group">
-					<div id="portfrange_add_container" class="col-xs-12 table-responsive">
-						<%in templates/multi_forward_template %>
+					<div id="portfrange_add_container" class="col-xs-12">
+						<button type='button' id='addr_button' class='btn btn-default btn-add' onclick='addPortFModal(false)'><%~ Add %></button>
 					</div>
 				</div>
 
@@ -153,6 +153,35 @@
 	<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
 </div>
 
+<div class="modal fade" tabindex="-1" role="dialog" id="single_forward_modal">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 id="single_forward_modal_title" class="panel-title"><%~ ForIPort %></h3>
+			</div>
+			<div class="modal-body">
+				<%in templates/single_forward_template %>
+			</div>
+			<div class="modal-footer" id="single_forward_modal_button_container">
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="multi_forward_modal">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 id="multi_forward_modal_title" class="panel-title"><%~ ForIPort %></h3>
+			</div>
+			<div class="modal-body">
+				<%in templates/multi_forward_template %>
+			</div>
+			<div class="modal-footer" id="multi_forward_modal_button_container">
+			</div>
+		</div>
+	</div>
+</div>
 
 <script>
 <!--

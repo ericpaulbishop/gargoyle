@@ -227,6 +227,7 @@ function addPortfRule()
 			values.push(createEditButton(true));
 			addTableRow(portfTable,values, true, false);
 		}
+		closeModalWindow('single_forward_modal');
 	}
 }
 
@@ -293,33 +294,31 @@ function addPortfRangeRule()
 			portfrangeTable = document.getElementById('portfrange_table_container').firstChild;
 			addTableRow(portfrangeTable,values, true, false);
 		}
+		closeModalWindow('multi_forward_modal');
 	}
 }
 
-function proofreadForwardRange(controlDocument, tableDocument, excludeRow)
+function proofreadForwardRange(excludeRow)
 {
-	controlDocument = controlDocument == null ? document : controlDocument;
-	tableDocument = tableDocument == null ? document : tableDocument;
-
 	var addIds = ['addr_sp', 'addr_ep', 'addr_ip'];
 	var labelIds = ['addr_sp_label', 'addr_ep_label', 'addr_ip_label'];
 	var functions = [validateNumeric, validateNumeric, validateIP];
 	var returnCodes = [0,0,0];
 	var visibilityIds = addIds;
-	var errors = proofreadFields(addIds, labelIds, functions, returnCodes, visibilityIds, controlDocument);
+	var errors = proofreadFields(addIds, labelIds, functions, returnCodes, visibilityIds, document);
 	if(errors.length == 0)
 	{
-		if( (1*controlDocument.getElementById('addr_sp').value) > (1*controlDocument.getElementById('addr_ep').value) )
+		if( (1*document.getElementById('addr_sp').value) > (1*document.getElementById('addr_ep').value) )
 		{
 			errors.push(prtS.GTErr);
 		}
 
 
-		var portfTable = tableDocument.getElementById('portf_table_container').firstChild;
+		var portfTable = document.getElementById('portf_table_container').firstChild;
 		var currentPortfData = getTableDataArray(portfTable, true, false);
-		var addStartPort = controlDocument.getElementById('addr_sp').value;
-		var addEndPort = controlDocument.getElementById('addr_ep').value;
-		var addProtocol = controlDocument.getElementById('addr_prot').value;
+		var addStartPort = document.getElementById('addr_sp').value;
+		var addEndPort = document.getElementById('addr_ep').value;
+		var addProtocol = document.getElementById('addr_prot').value;
 		var rowDataIndex=0;
 		for (rowDataIndex=0; rowDataIndex < currentPortfData.length ; rowDataIndex++)
 		{
@@ -330,7 +329,7 @@ function proofreadForwardRange(controlDocument, tableDocument, excludeRow)
 			}
 		}
 
-		var portfRangeTable = tableDocument.getElementById('portfrange_table_container').firstChild;
+		var portfRangeTable = document.getElementById('portfrange_table_container').firstChild;
 		var currentRangeData = getTableDataArray(portfRangeTable, true, false);
 		for (rowDataIndex=0; rowDataIndex < currentRangeData.length; rowDataIndex++)
 		{
@@ -350,30 +349,27 @@ function proofreadForwardRange(controlDocument, tableDocument, excludeRow)
 
 }
 
-function proofreadForwardSingle(controlDocument, tableDocument, excludeRow)
+function proofreadForwardSingle(excludeRow)
 {
-	controlDocument = controlDocument == null ? document : controlDocument;
-	tableDocument = tableDocument == null ? document : tableDocument;
-
 	var addIds = ['add_fp', 'add_ip'];
 	var labelIds = ['add_fp_label', 'add_ip_label', 'add_dp_label'];
 	var functions = [validateNumeric, validateIP, validateNumeric];
 	var returnCodes = [0,0,0];
 	var visibilityIds = addIds;
-	if(controlDocument.getElementById('add_dp').value.length > 0)
+	if(document.getElementById('add_dp').value.length > 0)
 	{
 		addIds.push('add_dp');
 	}
-	var errors = proofreadFields(addIds, labelIds, functions, returnCodes, visibilityIds, controlDocument);
+	var errors = proofreadFields(addIds, labelIds, functions, returnCodes, visibilityIds, document);
 
 
 
 	if(errors.length == 0)
 	{
-		var portfTable = tableDocument.getElementById('portf_table_container').firstChild;
+		var portfTable = document.getElementById('portf_table_container').firstChild;
 		var currentPortfData = getTableDataArray(portfTable, true, false);
-		var addPort = controlDocument.getElementById('add_fp').value;
-		var addProtocol = controlDocument.getElementById('add_prot').value;
+		var addPort = document.getElementById('add_fp').value;
+		var addProtocol = document.getElementById('add_prot').value;
 		var rowDataIndex=0;
 		for (rowDataIndex=0; rowDataIndex < currentPortfData.length; rowDataIndex++)
 		{
@@ -387,7 +383,7 @@ function proofreadForwardSingle(controlDocument, tableDocument, excludeRow)
 			}
 		}
 
-		var portfRangeTable = tableDocument.getElementById('portfrange_table_container').firstChild;
+		var portfRangeTable = document.getElementById('portfrange_table_container').firstChild;
 		var currentRangeData = getTableDataArray(portfRangeTable, true, false);
 		for (rowDataIndex=0; rowDataIndex < currentRangeData; rowDataIndex++)
 		{
@@ -620,116 +616,47 @@ function createEditButton(isSingle)
 	var editButton = createInput("button");
 	editButton.textContent = UI.Edit;
 	editButton.className = "btn btn-default btn-edit";
-	editButton.onclick = isSingle ? function(){ editForward(true, this); } : function(){ editForward(false, this); } ;
+	editButton.onclick = isSingle ? function(){editPortFModal(true, this)} : function(){editPortFModal(false, this)};
 	return editButton;
 }
 
-function editForward(isSingle, triggerElement)
+function editForward(isSingle, editRow)
 {
-	if( typeof(editForwardWindow) != "undefined" )
+	//set edit values
+	var r= isSingle ? "" : "r";
+
+	var errors;
+	if(isSingle)
 	{
-		//opera keeps object around after
-		//window is closed, so we need to deal
-		//with error condition
-		try
-		{
-			editForwardWindow.close();
-		}
-		catch(e){}
+		errors = proofreadForwardSingle(editRow);
 	}
-
-
-	var editLocation = isSingle ? "single_forward_edit.sh" : "multi_forward_edit.sh";
-	editForwardWindow = openPopupWindow(editLocation, "edit", 560, 220);
-
-	saveButton = createInput("button", editForwardWindow.document);
-	closeButton = createInput("button", editForwardWindow.document);
-	saveButton.textContent = UI.CApplyChanges;
-	saveButton.className = "btn btn-primary";
-	closeButton.textContent = UI.CDiscardChanges;
-	closeButton.className = "btn btn-warning";
-
-	editRow=triggerElement.parentNode.parentNode;
-
-	runOnEditorLoaded = function ()
+	else
 	{
-		updateDone=false;
-		if(editForwardWindow.document != null)
-		{
-			if(editForwardWindow.document.getElementById("bottom_button_container") != null)
-			{
-				editForwardWindow.document.getElementById("bottom_button_container").appendChild(saveButton);
-				editForwardWindow.document.getElementById("bottom_button_container").appendChild(closeButton);
-
-				//set edit values
-				var r= isSingle ? "" : "r";
-				editForwardWindow.document.getElementById("add" + r + "_button").style.display="none";
-				editForwardWindow.document.getElementById("add" + r + "_desc").value = editRow.childNodes[0].firstChild.data;
-				setSelectedText("add" + r + "_prot", editRow.childNodes[1].firstChild.data, editForwardWindow.document);
-				if(isSingle)
-				{
-					editForwardWindow.document.getElementById("add_fp").value   = editRow.childNodes[2].firstChild.data;
-					editForwardWindow.document.getElementById("add_ip").value   = editRow.childNodes[3].firstChild.data;
-					editForwardWindow.document.getElementById("add_dp").value   = editRow.childNodes[4].firstChild.data;
-				}
-				else
-				{
-					editForwardWindow.document.getElementById("addr_sp").value   = editRow.childNodes[2].firstChild.data;
-					editForwardWindow.document.getElementById("addr_ep").value   = editRow.childNodes[3].firstChild.data;
-					editForwardWindow.document.getElementById("addr_ip").value   = editRow.childNodes[4].firstChild.data;
-				}
-
-				closeButton.onclick = function()
-				{
-					editForwardWindow.close();
-				}
-				saveButton.onclick = function()
-				{
-					// error checking goes here
-					var errors;
-				       	if(isSingle)
-					{
-						errors = proofreadForwardSingle(editForwardWindow.document, document, editRow);
-					}
-					else
-					{
-						errors = proofreadForwardRange(editForwardWindow.document, document, editRow);
-					}
-					if(errors.length > 0)
-					{
-						alert(errors.join("\n") + "\n"+prtS.UpErr);
-					}
-					else
-					{
-						//update document with new data
-
-						editRow.childNodes[0].firstChild.data = editForwardWindow.document.getElementById("add" + r + "_desc").value;
-						editRow.childNodes[1].firstChild.data = getSelectedValue( "add" + r + "_prot", editForwardWindow.document );
-						if(isSingle)
-						{
-							editRow.childNodes[2].firstChild.data = editForwardWindow.document.getElementById("add_fp").value;
-							editRow.childNodes[3].firstChild.data = editForwardWindow.document.getElementById("add_ip").value;
-							editRow.childNodes[4].firstChild.data = editForwardWindow.document.getElementById("add_dp").value;
-						}
-						else
-						{
-							editRow.childNodes[2].firstChild.data = editForwardWindow.document.getElementById("addr_sp").value;
-							editRow.childNodes[3].firstChild.data = editForwardWindow.document.getElementById("addr_ep").value;
-							editRow.childNodes[4].firstChild.data = editForwardWindow.document.getElementById("addr_ip").value;
-						}
-						editForwardWindow.close();
-					}
-				}
-				editForwardWindow.focus();
-				updateDone = true;
-			}
-		}
-		if(!updateDone)
-		{
-			setTimeout( "runOnEditorLoaded()", 250);
-		}
+		errors = proofreadForwardRange(editRow);
 	}
-	runOnEditorLoaded();
+	if(errors.length > 0)
+	{
+		alert(errors.join("\n") + "\n"+prtS.UpErr);
+	}
+	else
+	{
+		//update document with new data
+		editRow.childNodes[0].firstChild.data = document.getElementById("add" + r + "_desc").value;
+		editRow.childNodes[1].firstChild.data = getSelectedValue( "add" + r + "_prot", document );
+		if(isSingle)
+		{
+			editRow.childNodes[2].firstChild.data = document.getElementById("add_fp").value;
+			editRow.childNodes[3].firstChild.data = document.getElementById("add_ip").value;
+			editRow.childNodes[4].firstChild.data = document.getElementById("add_dp").value;
+		}
+		else
+		{
+			editRow.childNodes[2].firstChild.data = document.getElementById("addr_sp").value;
+			editRow.childNodes[3].firstChild.data = document.getElementById("addr_ep").value;
+			editRow.childNodes[4].firstChild.data = document.getElementById("addr_ip").value;
+		}
+		closeModalWindow(isSingle ? "single_forward_modal" : "multi_forward_modal");
+	}
 }
 
 var updateInProgress=false;
@@ -789,4 +716,99 @@ function update_upnp()
 
 		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 	}
+}
+
+function addPortFModal(isSingle)
+{
+	modalButtons = [
+		{"title" : UI.Add, "classes" : "btn btn-primary", "function" : isSingle ? addPortfRule : addPortfRangeRule},
+		"defaultDismiss"
+	];
+
+	var desc = "";
+	var prot = "both";
+	if(isSingle)
+	{
+		var fp = "";
+		var dp = "";
+	}
+	else
+	{
+		var sp = "";
+		var ep = "";
+	}
+	var ip = "";
+
+	var r = isSingle ? "" : "r";
+	modalElements = [
+		{"id" : "add" + r + "_desc", "value" : desc},
+		{"id" : "add" + r + "_prot", "value" : prot},
+		{"id" : "add" + r + "_ip", "value" : ip}
+	];
+	if(isSingle)
+	{
+		modalElements.push(
+			{"id" : "add_fp", "value" : fp},
+			{"id" : "add_dp", "value" : dp}
+		);
+	}
+	else
+	{
+		modalElements.push(
+			{"id" : "addr_sp", "value" : sp},
+			{"id" : "addr_ep", "value" : ep}
+		);
+	}
+
+	modalPrepare(isSingle ? 'single_forward_modal' : 'multi_forward_modal', isSingle ? prtS.ForIPort : prtS.ForRPort, modalElements, modalButtons);
+	openModalWindow(isSingle ? 'single_forward_modal' : 'multi_forward_modal');
+}
+
+function editPortFModal(isSingle, triggerEl)
+{
+	editRow=triggerEl.parentNode.parentNode;
+	modalButtons = [
+		{"title" : UI.CApplyChanges, "classes" : "btn btn-primary", "function" : function(){editForward(isSingle ? true : false,editRow);}},
+		"defaultDiscard"
+	];
+
+	var desc = editRow.childNodes[0].firstChild.data;
+	var prot = editRow.childNodes[1].firstChild.data;
+	if(isSingle)
+	{
+		var fp = editRow.childNodes[2].firstChild.data;
+		var ip = editRow.childNodes[3].firstChild.data;
+		var dp = editRow.childNodes[4].firstChild.data;
+	}
+	else
+	{
+		var sp = editRow.childNodes[2].firstChild.data;
+		var ep = editRow.childNodes[3].firstChild.data;
+		var ip = editRow.childNodes[4].firstChild.data;
+	}
+	
+
+	var r = isSingle ? "" : "r";
+	modalElements = [
+		{"id" : "add" + r + "_desc", "value" : desc},
+		{"id" : "add" + r + "_prot", "value" : prot},
+		{"id" : "add" + r + "_ip", "value" : ip}
+	];
+	if(isSingle)
+	{
+		modalElements.push(
+			{"id" : "add_fp", "value" : fp},
+			{"id" : "add_dp", "value" : dp}
+		);
+	}
+	else
+	{
+		modalElements.push(
+			{"id" : "addr_sp", "value" : sp},
+			{"id" : "addr_ep", "value" : ep}
+		);
+	}
+
+	modalPrepare(isSingle ? 'single_forward_modal' : 'multi_forward_modal', prtS.PESect, modalElements, modalButtons);
+	openModalWindow(isSingle ? 'single_forward_modal' : 'multi_forward_modal');
 }
