@@ -482,7 +482,7 @@ function resetData()
 	var dupeCn = getSelectedValue("openvpn_server_duplicate_cn");
 	dupeCn= dupeCn == "true" || dupeCn == "1"
 
-	setAcDocumentFromUci(document, new UCIContainer(), "dummy", dupeCn, document.getElementById("openvpn_server_ip").value )
+	setAcDocumentFromUci(new UCIContainer(), "dummy", dupeCn, document.getElementById("openvpn_server_ip").value )
 
 
 	//client
@@ -687,7 +687,7 @@ function createAllowedClientControls(haveDownload)
 	var downloadButtonMulti = haveDownload ? createButton(ovpnS.Dload, "btn-download", downloadAcMulti, false) : createButton(ovpnS.Dload, "btn-download disabled", function(){ return; }, true ) ;
 	var downloadButtonSingle = haveDownload ? createButton(ovpnS.Dload, "btn-download", downloadAcSingle, false) : createButton(ovpnS.Dload, "btn-download disabled", function(){ return; }, true ) ;
 
-	var editButton = createButton(UI.Edit, "btn-edit", editAc, false)
+	var editButton = createButton(UI.Edit, "btn-edit", editOvpnClientModal, false)
 
 	return [enabledCheck, downloadButtonMulti, downloadButtonSingle, editButton]
 }
@@ -797,35 +797,35 @@ function setOpenvpnVisibility()
 
 
 
-	initializeAllowedClientVisibility(document, dupeCn);
-	setClientVisibility(document)
+	initializeAllowedClientVisibility(dupeCn);
+	setClientVisibility()
 }
 
-function initializeAllowedClientVisibility(controlDocument, dupeCn)
+function initializeAllowedClientVisibility(dupeCn)
 {
-	controlDocument.getElementById("openvpn_allowed_client_ip_container").style.display          = dupeCn ? "none" : "block"
-	controlDocument.getElementById("openvpn_allowed_client_have_subnet_container").style.display = dupeCn ? "none" : "block"
-	controlDocument.getElementById("openvpn_allowed_client_subnet_ip_container").style.display   = dupeCn ? "none" : "block"
-	controlDocument.getElementById("openvpn_allowed_client_subnet_mask_container").style.display = dupeCn ? "none" : "block"
-	setAllowedClientVisibility(controlDocument)
+	document.getElementById("openvpn_allowed_client_ip_container").style.display          = dupeCn ? "none" : "block"
+	document.getElementById("openvpn_allowed_client_have_subnet_container").style.display = dupeCn ? "none" : "block"
+	document.getElementById("openvpn_allowed_client_subnet_ip_container").style.display   = dupeCn ? "none" : "block"
+	document.getElementById("openvpn_allowed_client_subnet_mask_container").style.display = dupeCn ? "none" : "block"
+	setAllowedClientVisibility()
 
 }
 
-function setAllowedClientVisibility( controlDocument )
+function setAllowedClientVisibility()
 {
 	var selectedVis = document.getElementById("openvpn_allowed_client_remote_container").style.display == "none" ? "none" : "block"
-	controlDocument.getElementById("openvpn_allowed_client_remote_custom_container").style.display  = getSelectedValue("openvpn_allowed_client_remote", controlDocument) == "custom" ? selectedVis : "none";
+	document.getElementById("openvpn_allowed_client_remote_custom_container").style.display  = getSelectedValue("openvpn_allowed_client_remote", document) == "custom" ? selectedVis : "none";
 	
 
 	var selectedVis = document.getElementById("openvpn_allowed_client_have_subnet_container").style.display == "none" ? "none" : "block"
-	controlDocument.getElementById("openvpn_allowed_client_subnet_ip_container").style.display   = getSelectedValue("openvpn_allowed_client_have_subnet", controlDocument) == "true" ? selectedVis : "none";
-	controlDocument.getElementById("openvpn_allowed_client_subnet_mask_container").style.display = getSelectedValue("openvpn_allowed_client_have_subnet", controlDocument) == "true" ? selectedVis : "none";
+	document.getElementById("openvpn_allowed_client_subnet_ip_container").style.display   = getSelectedValue("openvpn_allowed_client_have_subnet", document) == "true" ? selectedVis : "none";
+	document.getElementById("openvpn_allowed_client_subnet_mask_container").style.display = getSelectedValue("openvpn_allowed_client_have_subnet", document) == "true" ? selectedVis : "none";
 }
 
-function setClientVisibility(controlDocument)
+function setClientVisibility()
 {
-	var upCheckEl  = controlDocument.getElementById("openvpn_client_config_upload");
-	var manCheckEl = controlDocument.getElementById("openvpn_client_config_manual");
+	var upCheckEl  = document.getElementById("openvpn_client_config_upload");
+	var manCheckEl = document.getElementById("openvpn_client_config_manual");
 	if( (!upCheckEl.checked) && (!manCheckEl.checked) )
 	{
 		upCheckEl.checked = true;
@@ -838,15 +838,15 @@ function setClientVisibility(controlDocument)
 	enableAssociatedField(textTaCheck, "openvpn_client_ta_key_text", "")
 	enableAssociatedField(textTaCheck, "openvpn_client_ta_direction", "1")
 
-	var single = getSelectedValue("openvpn_client_file_type", controlDocument) == "zip" ? 1 : 0;
+	var single = getSelectedValue("openvpn_client_file_type", document) == "zip" ? 1 : 0;
 	var multi  = single == 1 ? 0 : 1;
-	controlDocument.getElementById("openvpn_client_cipher_other_container").style.display = getSelectedValue("openvpn_client_cipher", controlDocument) == "other" ? "block" : "none"
-	setVisibility( ["openvpn_client_zip_file_container", "openvpn_client_conf_file_container", "openvpn_client_ca_file_container", "openvpn_client_cert_file_container", "openvpn_client_key_file_container", "openvpn_client_ta_key_file_container"], [single, multi, multi, multi, multi, multi], ["block", "block", "block", "block", "block", "block"], controlDocument)
-	setVisibility( ["openvpn_client_file_controls", "openvpn_client_manual_controls"], [ boolToInt(upCheckEl.checked), boolToInt(manCheckEl.checked) ], ["block","block"], controlDocument)
+	document.getElementById("openvpn_client_cipher_other_container").style.display = getSelectedValue("openvpn_client_cipher", document) == "other" ? "block" : "none"
+	setVisibility( ["openvpn_client_zip_file_container", "openvpn_client_conf_file_container", "openvpn_client_ca_file_container", "openvpn_client_cert_file_container", "openvpn_client_key_file_container", "openvpn_client_ta_key_file_container"], [single, multi, multi, multi, multi, multi], ["block", "block", "block", "block", "block", "block"], document)
+	setVisibility( ["openvpn_client_file_controls", "openvpn_client_manual_controls"], [ boolToInt(upCheckEl.checked), boolToInt(manCheckEl.checked) ], ["block","block"], document)
 	
 }
 
-function setRemoteNames( controlDocument, selectedRemote)
+function setRemoteNames(selectedRemote)
 {
 	var selectId = "openvpn_allowed_client_remote";
 	selectedRemote = selectedRemote == null ? "" : selectedRemote;
@@ -872,13 +872,13 @@ function setRemoteNames( controlDocument, selectedRemote)
 	names.push(ovpnS.WANIP+": " + currentWanIp, ovpnS.OthIPD)
 	values.push(currentWanIp, "custom")
 	
-	setAllowableSelections(selectId, values, names, controlDocument)
+	setAllowableSelections(selectId, values, names, document)
 	var chosen = selectedRemote == "" ? values[0] : selectedRemote
 	chosen = (!selectedFound) && selectedRemote != "" ? "custom" : selectedRemote
-	setSelectedValue(selectId, chosen, controlDocument)
+	setSelectedValue(selectId, chosen, document)
 	if(chosen == "custom")
 	{
-		controlDocument.getElementById("openvpn_allowed_client_remote_custom").value = selectedRemote
+		document.getElementById("openvpn_allowed_client_remote_custom").value = selectedRemote
 	}
 }
 
@@ -921,7 +921,7 @@ function getUnusedAcIp(serverInternalIp)
 	return candidateDefaultIp
 }
 
-function setAcDocumentFromUci(controlDocument, srcUci, id, dupeCn, serverInternalIp)
+function setAcDocumentFromUci(srcUci, id, dupeCn, serverInternalIp)
 {
 	var name = srcUci.get("openvpn_gargoyle", id, "name")
 	
@@ -938,14 +938,14 @@ function setAcDocumentFromUci(controlDocument, srcUci, id, dupeCn, serverInterna
 			name = ovpnS.Clnt + clientCount
 			id = "client" + clientCount
 		}
-		controlDocument.getElementById("openvpn_allowed_client_default_id").value = id
+		document.getElementById("openvpn_allowed_client_default_id").value = id
 	}
 	else
 	{
-		controlDocument.getElementById("openvpn_allowed_client_initial_id").value = id
+		document.getElementById("openvpn_allowed_client_initial_id").value = id
 	}
 
-	controlDocument.getElementById("openvpn_allowed_client_name").value = name
+	document.getElementById("openvpn_allowed_client_name").value = name
 	
 
 	var ip = srcUci.get("openvpn_gargoyle", id, "ip")
@@ -954,22 +954,22 @@ function setAcDocumentFromUci(controlDocument, srcUci, id, dupeCn, serverInterna
 		ip = getUnusedAcIp(serverInternalIp)
 
 	}
-	controlDocument.getElementById("openvpn_allowed_client_ip").value = ip
+	document.getElementById("openvpn_allowed_client_ip").value = ip
 	
-	setRemoteNames(controlDocument, srcUci.get("openvpn_gargoyle", id, "remote"))
+	setRemoteNames(srcUci.get("openvpn_gargoyle", id, "remote"))
 
 	var subnetIp   = srcUci.get("openvpn_gargoyle", id, "subnet_ip")
 	var subnetMask = srcUci.get("openvpn_gargoyle", id, "subnet_mask")
 	var preferVpnGateway = srcUci.get("openvpn_gargoyle", id, "prefer_vpngateway") == 1 ? true : false;
 
-	setSelectedValue("openvpn_allowed_client_have_subnet", (subnetIp != "" && subnetMask != "" ? "true" : "false"), controlDocument)
+	setSelectedValue("openvpn_allowed_client_have_subnet", (subnetIp != "" && subnetMask != "" ? "true" : "false"), document)
 	subnetIp   = subnetIp   == "" ? "192.168.2.1" : subnetIp;
 	subnetMask = subnetMask == "" ? "255.255.255.0" : subnetMask;
-	controlDocument.getElementById("openvpn_allowed_client_subnet_ip").value = subnetIp
-	controlDocument.getElementById("openvpn_allowed_client_subnet_mask").value = subnetMask
-	controlDocument.getElementById("openvpn_allowed_client_prefer_vpngateway").checked = preferVpnGateway;
+	document.getElementById("openvpn_allowed_client_subnet_ip").value = subnetIp
+	document.getElementById("openvpn_allowed_client_subnet_mask").value = subnetMask
+	document.getElementById("openvpn_allowed_client_prefer_vpngateway").checked = preferVpnGateway;
 
-	initializeAllowedClientVisibility(controlDocument, dupeCn)
+	initializeAllowedClientVisibility(dupeCn)
 }
 
 function getDefinedAcIps(retHash)
@@ -1022,22 +1022,22 @@ function getDefinedAcIds(retHash)
 
 
 
-function setAcUciFromDocument(controlDocument, id)
+function setAcUciFromDocument(id)
 {
-	var name = controlDocument.getElementById("openvpn_allowed_client_name").value;
+	var name = document.getElementById("openvpn_allowed_client_name").value;
 	
-	var ipContainer = controlDocument.getElementById("openvpn_allowed_client_ip_container")
-	var ip = controlDocument.getElementById("openvpn_allowed_client_ip").value
+	var ipContainer = document.getElementById("openvpn_allowed_client_ip_container")
+	var ip = document.getElementById("openvpn_allowed_client_ip").value
 	ip = ipContainer.style.display == "none" ? "" : ip
 	
-	var remote = getSelectedValue("openvpn_allowed_client_remote", controlDocument)
-	remote = remote == "custom" ? controlDocument.getElementById("openvpn_allowed_client_remote_custom").value : remote
+	var remote = getSelectedValue("openvpn_allowed_client_remote", document)
+	remote = remote == "custom" ? document.getElementById("openvpn_allowed_client_remote_custom").value : remote
 	
-	var haveSubnet = getSelectedValue("openvpn_allowed_client_have_subnet", controlDocument) == "true" ? true : false
+	var haveSubnet = getSelectedValue("openvpn_allowed_client_have_subnet", document) == "true" ? true : false
 	haveSubnet     = ipContainer.style.display == "none" ? false : haveSubnet
-	var subnetIp   = controlDocument.getElementById("openvpn_allowed_client_subnet_ip").value
-	var subnetMask = controlDocument.getElementById("openvpn_allowed_client_subnet_mask").value
-	var prefer_vpngateway = controlDocument.getElementById("openvpn_allowed_client_prefer_vpngateway").checked == true ? "1" : "0";
+	var subnetIp   = document.getElementById("openvpn_allowed_client_subnet_ip").value
+	var subnetMask = document.getElementById("openvpn_allowed_client_subnet_mask").value
+	var prefer_vpngateway = document.getElementById("openvpn_allowed_client_prefer_vpngateway").checked == true ? "1" : "0";
 
 	var pkg = "openvpn_gargoyle"
 	uci.set(pkg, id, "", "allowed_client")
@@ -1097,10 +1097,8 @@ function adjustSubnetIp(ip, mask)
 
 
 
-function validateAc(controlDocument, internalServerIp, internalServerMask)
+function validateAc(internalServerIp, internalServerMask)
 {
-	controlDocument = controlDocument == null ? document : controlDocument;
-	
 	var validateHaveText = function(txt) {  return txt.length > 0 ? 0 : 1 }
 
 	var prefix = "openvpn_allowed_client_"
@@ -1110,21 +1108,21 @@ function validateAc(controlDocument, internalServerIp, internalServerMask)
 	var validReturnCodes = [0,0,0,0,0]
 	var visibilityIds = [  prefix + "name_container", prefix + "ip_container", prefix + "remote_custom_container", prefix + "subnet_ip_container", prefix + "subnet_mask_container" ]
 
-	var errors = proofreadFields(inputIds, labelIds, functions, validReturnCodes, visibilityIds, controlDocument );
-	if(errors.length == 0 && controlDocument.getElementById(prefix + "ip_container").style.display != "none")
+	var errors = proofreadFields(inputIds, labelIds, functions, validReturnCodes, visibilityIds, document );
+	if(errors.length == 0 && document.getElementById(prefix + "ip_container").style.display != "none")
 	{
-		var testIp  = getNumericIp(controlDocument.getElementById(prefix + "ip").value)
+		var testIp  = getNumericIp(document.getElementById(prefix + "ip").value)
 		var vpnIp   = getNumericIp(internalServerIp)
 		var vpnMask = getNumericMask(internalServerMask)
 		if( ( testIp & vpnMask ) != ( vpnIp & vpnMask ) )
 		{
-			errors.push(ovpnS.ClntIntIP+" " + controlDocument.getElementById(prefix + "ip").value + " "+ovpnS.OSubErr)
+			errors.push(ovpnS.ClntIntIP+" " + document.getElementById(prefix + "ip").value + " "+ovpnS.OSubErr)
 		}
 	}
-	if(errors.length == 0 && controlDocument.getElementById(prefix + "subnet_ip_container").style.display != "none")
+	if(errors.length == 0 && document.getElementById(prefix + "subnet_ip_container").style.display != "none")
 	{
-		var subnetIpEl   = controlDocument.getElementById(prefix + "subnet_ip")
-		var subnetMaskEl = controlDocument.getElementById(prefix + "subnet_mask")
+		var subnetIpEl   = document.getElementById(prefix + "subnet_ip")
+		var subnetMaskEl = document.getElementById(prefix + "subnet_mask")
 		subnetIpEl.value = adjustSubnetIp(subnetIpEl.value, subnetMaskEl.value)
 	}
 
@@ -1151,7 +1149,7 @@ function removeAcCallback(table, row)
 
 function addAc()
 {
-	var errors = validateAc(document, document.getElementById("openvpn_server_ip").value , document.getElementById("openvpn_server_mask").value );
+	var errors = validateAc(document.getElementById("openvpn_server_ip").value , document.getElementById("openvpn_server_mask").value );
 	if(errors.length > 0)
 	{
 		alert(errors.join("\n") + "\n"+ovpnS.AddCErr);
@@ -1180,7 +1178,7 @@ function addAc()
 		}
 		id = testId
 
-		setAcUciFromDocument(document, id)
+		setAcUciFromDocument(id)
 		uci.set("openvpn_gargoyle", id, "enabled", "true")
 
 
@@ -1215,9 +1213,10 @@ function addAc()
 	
 		var dupeCn = getSelectedValue("openvpn_server_duplicate_cn")
 		dupeCn= dupeCn == "true" || dupeCn == "1"
-		setAcDocumentFromUci(document, new UCIContainer(), "dummy", dupeCn, document.getElementById("openvpn_server_ip").value )
+		setAcDocumentFromUci(new UCIContainer(), "dummy", dupeCn, document.getElementById("openvpn_server_ip").value )
 		
 		setOpenvpnVisibility()
+		closeModalWindow('openvpn_allowed_client_modal');
 	}
 
 }
@@ -1238,126 +1237,61 @@ function downloadAcSingle()
 	window.location="/utility/openvpn_download_credentials.sh?id=" + downloadId + "&configtype=" + confType
 }
 
-function editAc()
+function editAc(editRow,editId,serverInternalIp,serverInternalMask)
 {
-	if( typeof(editAcWindow) != "undefined" )
+	var errors = validateAc(serverInternalIp, serverInternalMask);
+	if(errors.length > 0)
 	{
-		//opera keeps object around after
-		//window is closed, so we need to deal
-		//with error condition
-		try
-		{
-			editAcWindow.close();
-		}
-		catch(e){}
+		alert(errors.join("\n") + "\n"+ovpnS.UpCErr);
 	}
-
-	
-	editAcWindow = openPopupWindow("openvpn_allowed_client_edit.sh", "edit", 560, 600);
-	
-	var saveButton = createInput("button", editAcWindow.document);
-	var closeButton = createInput("button", editAcWindow.document);
-	saveButton.textContent = UI.CApplyChanges;
-	saveButton.className = "btn btn-primary";
-	closeButton.textContent = UI.CDiscardChanges;
-	closeButton.className = "btn btn-warning";
-
-	var editRow=this.parentNode.parentNode;
-	var editId = editRow.childNodes[1].firstChild.id;
-	
-	var dupeCn = getSelectedValue("openvpn_server_duplicate_cn");
-	dupeCn= dupeCn == "true" || dupeCn == "1"
-	var serverInternalIp   = document.getElementById("openvpn_server_ip").value 
-	var serverInternalMask = document.getElementById("openvpn_server_mask").value 
-
-
-	var runOnEditorLoaded = function () 
+	else
 	{
-		var updateDone=false;
-		if(editAcWindow.document != null)
+		var name       = document.getElementById("openvpn_allowed_client_name").value
+		var ip         = document.getElementById("openvpn_allowed_client_ip").value
+		var subnetIp   = ""
+		var subnetMask = ""
+		if( getSelectedValue("openvpn_allowed_client_have_subnet", document) == "true")
 		{
-			if(editAcWindow.document.getElementById("bottom_button_container") != null)
-			{
-				editAcWindow.document.getElementById("bottom_button_container").appendChild(saveButton);
-				editAcWindow.document.getElementById("bottom_button_container").appendChild(closeButton);
-				
-				setAcDocumentFromUci(editAcWindow.document, uci, editId, dupeCn, serverInternalIp)
+			subnetIp   = document.getElementById("openvpn_allowed_client_subnet_ip").value
+			subnetMask = document.getElementById("openvpn_allowed_client_subnet_mask").value
+		}
+		var subnet = subnetIp != "" && subnetMask != "" ? subnetIp + "/" + subnetMask : ""
+		var vpngateway = document.getElementById("openvpn_allowed_client_prefer_vpngateway").checked == true ? "vpn_gateway" : uciOriginal.get('openvpn_gargoyle', 'server', 'internal_ip');
 
-
-				closeButton.onclick = function()
-				{
-					editAcWindow.close();
-				}
-				saveButton.onclick = function()
-				{
-					var errors = validateAc(editAcWindow.document, serverInternalIp, serverInternalMask);
-					if(errors.length > 0)
-					{
-						alert(errors.join("\n") + "\n"+ovpnS.UpCErr);
-					}
-					else
-					{
-						var name       = editAcWindow.document.getElementById("openvpn_allowed_client_name").value
-						var ip         = editAcWindow.document.getElementById("openvpn_allowed_client_ip").value
-						var subnetIp   = ""
-						var subnetMask = ""
-						if( getSelectedValue("openvpn_allowed_client_have_subnet", editAcWindow.document) == "true")
-						{
-							subnetIp   = editAcWindow.document.getElementById("openvpn_allowed_client_subnet_ip").value
-							subnetMask = editAcWindow.document.getElementById("openvpn_allowed_client_subnet_mask").value
-						}
-						var subnet = subnetIp != "" && subnetMask != "" ? subnetIp + "/" + subnetMask : ""
-						var vpngateway = editAcWindow.document.getElementById("openvpn_allowed_client_prefer_vpngateway").checked == true ? "vpn_gateway" : uciOriginal.get('openvpn_gargoyle', 'server', 'internal_ip');
-
-
-						setAcUciFromDocument(editAcWindow.document, editId)
+		setAcUciFromDocument(editId)
 					
-						while( editRow.childNodes[0].firstChild != null)
-						{
-							editRow.childNodes[0].removeChild( editRow.childNodes[0].firstChild )
-						}
-						editRow.childNodes[0].appendChild(document.createTextNode(name))
-
-
-						var ipElementContainer = document.createElement("span")
-						var naContainer = document.createElement("span")
-						var ipContainer = document.createElement("span")
-						var vpngwContainer = document.createElement("span")
-						naContainer.appendChild( document.createTextNode("---") )
-						naContainer.appendChild( document.createElement("br") )
-						naContainer.appendChild( document.createTextNode("---") )
-						ipContainer.appendChild( document.createTextNode(ip) )
-						ipContainer.appendChild( document.createElement("br") )
-						ipContainer.appendChild( document.createTextNode(subnet) )
-						vpngwContainer.appendChild( document.createElement("br") )
-						vpngwContainer.appendChild( document.createTextNode(vpngateway) )
-						ipElementContainer.appendChild(naContainer)
-						ipElementContainer.appendChild(ipContainer)
-						ipElementContainer.appendChild(vpngwContainer)
-						ipElementContainer.id = editId
-
-						while( editRow.childNodes[1].firstChild != null)
-						{
-							editRow.childNodes[1].removeChild( editRow.childNodes[1].firstChild )
-						}
-						
-						editRow.childNodes[1].appendChild( ipElementContainer )
-						setOpenvpnVisibility()
-
-						editAcWindow.close();
-					}
-				}
-				editAcWindow.focus();
-				updateDone = true;
-				
-			}
-		}
-		if(!updateDone)
+		while( editRow.childNodes[0].firstChild != null)
 		{
-			setTimeout(runOnEditorLoaded, 250);
+			editRow.childNodes[0].removeChild( editRow.childNodes[0].firstChild )
 		}
+		editRow.childNodes[0].appendChild(document.createTextNode(name))
+
+		var ipElementContainer = document.createElement("span")
+		var naContainer = document.createElement("span")
+		var ipContainer = document.createElement("span")
+		var vpngwContainer = document.createElement("span")
+		naContainer.appendChild( document.createTextNode("---") )
+		naContainer.appendChild( document.createElement("br") )
+		naContainer.appendChild( document.createTextNode("---") )
+		ipContainer.appendChild( document.createTextNode(ip) )
+		ipContainer.appendChild( document.createElement("br") )
+		ipContainer.appendChild( document.createTextNode(subnet) )
+		vpngwContainer.appendChild( document.createElement("br") )
+		vpngwContainer.appendChild( document.createTextNode(vpngateway) )
+		ipElementContainer.appendChild(naContainer)
+		ipElementContainer.appendChild(ipContainer)
+		ipElementContainer.appendChild(vpngwContainer)
+		ipElementContainer.id = editId
+
+		while( editRow.childNodes[1].firstChild != null)
+		{
+			editRow.childNodes[1].removeChild( editRow.childNodes[1].firstChild )
+		}
+						
+		editRow.childNodes[1].appendChild( ipElementContainer )
+		setOpenvpnVisibility()
+		closeModalWindow('openvpn_allowed_client_modal');
 	}
-	runOnEditorLoaded();
 }
 function clearOpenvpnKeys()
 {
@@ -1377,4 +1311,41 @@ function clearOpenvpnKeys()
 		}
 		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 	}
+}
+
+function addOvpnClientModal()
+{
+	modalButtons = [
+		{"title" : UI.Add, "classes" : "btn btn-primary", "function" : addAc},
+		"defaultDismiss"
+	];
+
+	modalElements = [];
+	var dupeCn = getSelectedValue("openvpn_server_duplicate_cn")
+	dupeCn= dupeCn == "true" || dupeCn == "1"
+	setAcDocumentFromUci(new UCIContainer(), "dummy", dupeCn, document.getElementById("openvpn_server_ip").value )
+	modalPrepare('openvpn_allowed_client_modal', ovpnS.CfgCred, modalElements, modalButtons);
+	openModalWindow('openvpn_allowed_client_modal');
+}
+
+function editOvpnClientModal()
+{
+	editRow=this.parentNode.parentNode;
+	var editId = editRow.childNodes[1].firstChild.id;
+	var dupeCn = getSelectedValue("openvpn_server_duplicate_cn");
+	dupeCn = dupeCn == "true" || dupeCn == "1";
+	var serverInternalIp = document.getElementById("openvpn_server_ip").value;
+	var serverInternalMask = document.getElementById("openvpn_server_mask").value;
+
+	modalButtons = [
+		{"title" : UI.CApplyChanges, "classes" : "btn btn-primary", "function" : function(){editAc(editRow,editId,serverInternalIp,serverInternalMask);}},
+		"defaultDiscard"
+	];
+
+	modalElements = [];
+
+	setAcDocumentFromUci(uci, editId, dupeCn, serverInternalIp);
+
+	modalPrepare('openvpn_allowed_client_modal', ovpnS.EditOCS, modalElements, modalButtons);
+	openModalWindow('openvpn_allowed_client_modal');
 }

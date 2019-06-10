@@ -177,22 +177,21 @@
 			</div>
 
 			<div class="panel-body">
+				<label class="col-xs-12" id="openvpn_allowed_client_add_label" style="text-decoration:underline"><p><%~ CfgCred %>:</p></label>
+
+				<div class="row form-group">
+					<div class="col-xs-12">
+						<button id='openvpn_allowed_client_add' class='btn btn-default btn-add' onclick='addOvpnClientModal()'><%~ Add %></button>
+					</div>
+				</div>
+
+				<div class='internal_divider'></div>
+
 				<label class="col-xs-12" id="openvpn_allowed_client_table_label" style="text-decoration:underline"><p><%~ CClnt %>:</p></label>
 
 				<div id="openvpn_allowed_client_table_container" class="table table-responsive"></div>
 
 				<div><em><%~ ZipCred %></em></div>
-
-				<div class='internal_divider'></div>
-
-				<label class="col-xs-12" id="openvpn_allowed_client_add_label" style="text-decoration:underline"><p><%~ CfgCred %>:</p></label>
-
-				<div class="row form-group">
-					<div class="col-xs-12"><%in /www/templates/openvpn_allowed_client_template %></div>
-					<div class="col-xs-12">
-						<button id='openvpn_allowed_client_add' class='btn btn-default btn-add' onclick='addAc()'><%~ Add %></button>
-					</div>
-				</div>
 			</div>
 		</div>
 	</div>
@@ -376,6 +375,21 @@
 <div id="bottom_button_container" class="panel panel-default">
 	<button id="save_button" class="btn btn-primary btn-lg" onclick="saveChanges()"><%~ SaveChanges %></button>
 	<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="openvpn_allowed_client_modal">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 id="modal-title" class="panel-title"><%~ CfgCred %></h3>
+			</div>
+			<div class="modal-body">
+				<%in templates/openvpn_allowed_client_template %>
+			</div>
+			<div class="modal-footer" id="modal_button_container">
+			</div>
+		</div>
+	</div>
 </div>
 
 <script>

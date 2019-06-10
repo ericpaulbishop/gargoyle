@@ -1,51 +1,51 @@
-<div id='openvpn_allowed_client_name_container' class="row form-group" >
-	<label class="col-xs-5" for='openvpn_allowed_client_name' id='openvpn_allowed_client_name_label'><%~ openvpn.ClntN %>:</label>
-	<span class="col-xs-7"><input type='text' class="form-control" name='openvpn_allowed_client_name' id='openvpn_allowed_client_name' size='30' /></span>
-</div>
+				<div id='openvpn_allowed_client_name_container' class="row form-group" >
+					<label class="col-xs-5" for='openvpn_allowed_client_name' id='openvpn_allowed_client_name_label'><%~ openvpn.ClntN %>:</label>
+					<span class="col-xs-7"><input type='text' class="form-control" name='openvpn_allowed_client_name' id='openvpn_allowed_client_name' size='30' /></span>
+				</div>
 
-<div id='openvpn_allowed_client_ip_container' class="row form-group" >
-	<label class="col-xs-5" for='openvpn_allowed_client_ip' id='openvpn_allowed_client_ip_label'><%~ ClntIP %>:</label>
-	<span class="col-xs-7"><input type='text' class="form-control" ip='openvpn_allowed_client_ip' id='openvpn_allowed_client_ip' size='30' maxlength='15' /></span>
-</div>
+				<div id='openvpn_allowed_client_ip_container' class="row form-group" >
+					<label class="col-xs-5" for='openvpn_allowed_client_ip' id='openvpn_allowed_client_ip_label'><%~ ClntIP %>:</label>
+					<span class="col-xs-7"><input type='text' class="form-control" ip='openvpn_allowed_client_ip' id='openvpn_allowed_client_ip' size='30' maxlength='15' /></span>
+				</div>
 
-<div id="openvpn_allowed_client_remote_container" class="row form-group" >
-	<label class="col-xs-5" id='openvpn_allowed_client_remote_label' for='openvpn_allowed_client_remote'><%~ ClntConn %>:</label>
-	<span class="col-xs-7"><select class="form-control" id="openvpn_allowed_client_remote" onchange='setAllowedClientVisibility( document )' ></select></span>
-</div>
-<div id="openvpn_allowed_client_remote_custom_container" class="row form-group" >
-	<span class="col-xs-7 col-xs-offset-5">
-		<input type='text' id='openvpn_allowed_client_remote_custom' size='30' />
-	</span>
-	<span style="clear:both"></span>
-</div>
+				<div id="openvpn_allowed_client_remote_container" class="row form-group" >
+					<label class="col-xs-5" id='openvpn_allowed_client_remote_label' for='openvpn_allowed_client_remote'><%~ ClntConn %>:</label>
+					<span class="col-xs-7"><select class="form-control" id="openvpn_allowed_client_remote" onchange='setAllowedClientVisibility( document )' ></select></span>
+				</div>
+				<div id="openvpn_allowed_client_remote_custom_container" class="row form-group" >
+					<span class="col-xs-7 col-xs-offset-5">
+						<input type='text' id='openvpn_allowed_client_remote_custom' size='30' />
+					</span>
+					<span style="clear:both"></span>
+				</div>
 
-<div id="openvpn_allowed_client_have_subnet_container" class="row form-group" >
-	<label class="col-xs-5" id='openvpn_allowed_client_have_subnet_label' for='openvpn_allowed_client_have_subnet'><%~ ClntSubN %>:</label>
-	<span class="col-xs-7">
-		<select class="form-control" id="openvpn_allowed_client_have_subnet" onchange='setAllowedClientVisibility( document )' >
-			<option value="false"><%~ NoSub %></option>
-			<option value="true"><%~ RtSub %></option>
-		</select>
-	</span>
-</div>
-<div id="openvpn_allowed_client_subnet_ip_container" class="row form-group" >
-	<span class="col-xs-7 col-xs-offset-5">
-		<input type='text' class="form-control" id='openvpn_allowed_client_subnet_ip' size='20' maxlength='15' />&nbsp;<em><%~ SubIP %></em>
-	</span>
-	<span style="clear:both"></span>
-</div>
-<div id="openvpn_allowed_client_subnet_mask_container" class="row form-group" >
-	<span class="col-xs-7 col-xs-offset-5">
-		<input type='text' class="form-control"  id='openvpn_allowed_client_subnet_mask' size='20' maxlength='15' />&nbsp;<em><%~ SubM %></em>
-	</span>
-	<span style="clear:both"></span>
-</div>
-<div id="openvpn_allowed_client_prefer_vpngateway_container" class="row form-group" >
-	<span class="col-xs-12">
-		<input type="checkbox" id="openvpn_allowed_client_prefer_vpngateway">
-		<label id='openvpn_allowed_client_prefer_vpngateway_label' for='openvpn_allowed_client_prefer_vpngateway'><%~ PrefVPNGtwy %></label>
-	</span>
-</div>
+				<div id="openvpn_allowed_client_have_subnet_container" class="row form-group" >
+					<label class="col-xs-5" id='openvpn_allowed_client_have_subnet_label' for='openvpn_allowed_client_have_subnet'><%~ ClntSubN %>:</label>
+					<span class="col-xs-7">
+						<select class="form-control" id="openvpn_allowed_client_have_subnet" onchange='setAllowedClientVisibility( document )' >
+							<option value="false"><%~ NoSub %></option>
+							<option value="true"><%~ RtSub %></option>
+						</select>
+					</span>
+				</div>
+				<div id="openvpn_allowed_client_subnet_ip_container" class="row form-group" >
+					<span class="col-xs-7 col-xs-offset-5">
+						<input type='text' class="form-control" id='openvpn_allowed_client_subnet_ip' size='20' maxlength='15' />&nbsp;<em><%~ SubIP %></em>
+					</span>
+					<span style="clear:both"></span>
+				</div>
+				<div id="openvpn_allowed_client_subnet_mask_container" class="row form-group" >
+					<span class="col-xs-7 col-xs-offset-5">
+						<input type='text' class="form-control"  id='openvpn_allowed_client_subnet_mask' size='20' maxlength='15' />&nbsp;<em><%~ SubM %></em>
+					</span>
+					<span style="clear:both"></span>
+				</div>
+				<div id="openvpn_allowed_client_prefer_vpngateway_container" class="row form-group" >
+					<span class="col-xs-12">
+						<input type="checkbox" id="openvpn_allowed_client_prefer_vpngateway">
+						<label id='openvpn_allowed_client_prefer_vpngateway_label' for='openvpn_allowed_client_prefer_vpngateway'><%~ PrefVPNGtwy %></label>
+					</span>
+				</div>
 
-<input class="form-control" style="display:none" id="openvpn_allowed_client_initial_id" />
-<input class="form-control" style="display:none" id="openvpn_allowed_client_default_id" />
+				<input class="form-control" style="display:none" id="openvpn_allowed_client_initial_id" />
+				<input class="form-control" style="display:none" id="openvpn_allowed_client_default_id" />
