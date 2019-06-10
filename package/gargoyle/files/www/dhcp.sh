@@ -153,16 +153,16 @@ for (etherIndex in etherData)
 	<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
 </div>
 
-<div class="modal hidden" tabindex="-1" role="dialog" id="static_ip_modal">
+<div class="modal fade" tabindex="-1" role="dialog" id="static_ip_modal">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h3 id="modal-title" class="panel-title"><%~ dhcp.AdSIP %></h3>
+				<h3 id="static_ip_modal_title" class="panel-title"><%~ dhcp.AdSIP %></h3>
 			</div>
 			<div class="modal-body">
 				<%in templates/static_ip_template %>
 			</div>
-			<div class="modal-footer" id="modal_button_container">
+			<div class="modal-footer" id="static_ip_modal_button_container">
 			</div>
 		</div>
 	</div>

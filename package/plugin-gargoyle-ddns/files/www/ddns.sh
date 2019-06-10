@@ -63,12 +63,12 @@
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h3 id="modal-title" class="panel-title"><%~ AddDy %></h3>
+				<h3 id="ddns_service_modal_title" class="panel-title"><%~ AddDy %></h3>
 			</div>
 			<div class="modal-body">
 				<%in templates/ddns_service_template %>
 			</div>
-			<div class="modal-footer" id="modal_button_container">
+			<div class="modal-footer" id="ddns_service_modal_button_container">
 			</div>
 		</div>
 	</div>

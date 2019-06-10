@@ -381,12 +381,12 @@
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h3 id="modal-title" class="panel-title"><%~ CfgCred %></h3>
+				<h3 id="openvpn_allowed_client_modal_title" class="panel-title"><%~ CfgCred %></h3>
 			</div>
 			<div class="modal-body">
 				<%in templates/openvpn_allowed_client_template %>
 			</div>
-			<div class="modal-footer" id="modal_button_container">
+			<div class="modal-footer" id="openvpn_allowed_client_modal_button_container">
 			</div>
 		</div>
 	</div>

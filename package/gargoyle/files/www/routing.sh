@@ -82,12 +82,12 @@
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
-				<h3 id="modal-title" class="panel-title"><%~ ASRte %></h3>
+				<h3 id="static_route_modal_title" class="panel-title"><%~ ASRte %></h3>
 			</div>
 			<div class="modal-body">
 				<%in templates/static_route_template %>
 			</div>
-			<div class="modal-footer" id="modal_button_container">
+			<div class="modal-footer" id="static_route_modal_button_container">
 			</div>
 		</div>
 	</div>

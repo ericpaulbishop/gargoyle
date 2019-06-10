@@ -3014,10 +3014,10 @@ function modalPrepare(modalID, title, elements, buttons)
 	defaultDiscard = defaultDismiss;
 	defaultDiscard.innerText = UI.CDiscardChanges;
 
-	titleEl = document.getElementById("modal-title");
+	titleEl = document.getElementById(modalID + "_title");
 	if(titleEl) { titleEl.innerHTML = title; }
 
-	btnContainer = document.getElementById("modal_button_container");
+	btnContainer = document.getElementById(modalID + "_button_container");
 	while(btnContainer.children.length > 0)
 	{
 		btnContainer.removeChild(btnContainer.children[0]);
