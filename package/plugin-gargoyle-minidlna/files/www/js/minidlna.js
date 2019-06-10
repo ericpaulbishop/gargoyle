@@ -233,7 +233,7 @@ function updateStatus(enabled)
 
 function statusDlna()
 {
-	window.location.href="http://" + currentLanIp + ":" + uciOriginal.get(pkg, sec, "port");
+	window.location.href="http://" + window.location.hostname + ":" + uciOriginal.get(pkg, sec, "port");
 }
 
 function rescanMedia()
