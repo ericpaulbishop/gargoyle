@@ -79,6 +79,7 @@ function resetData()
 	{
 		var ruleType = ruleTypes[typeIndex];
 		var rulePrefix = rulePrefixes[typeIndex];
+		var isRestriction = ruleType == "restriction_rule" ? true : false;
 
 		var sections = uciOriginal.getAllSectionsOfType(pkg, ruleType);
 		var ruleTableData = new Array();
@@ -100,7 +101,7 @@ function resetData()
 				checkElements.push(enabledCheck);
 				areChecked.push(enabledBool);
 
-				ruleTableData.push([description, enabledCheck, createEditButton(enabledBool)]);
+				ruleTableData.push([description, enabledCheck, createEditButton(enabledBool,isRestriction)]);
 			}
 		}
 
@@ -123,21 +124,22 @@ function resetData()
 			c.checked = b;
 		}
 
-		setDocumentFromUci(document, new UCIContainer(), "", ruleType, rulePrefix);
-		setVisibility(document, rulePrefix);
+		setDocumentFromUci(new UCIContainer(), "", ruleType, rulePrefix);
+		setVisibility(rulePrefix);
 	}
 }
 
 
 function addNewRule(ruleType, rulePrefix)
 {
-	var errors = validateRule(document, rulePrefix);
+	var errors = validateRule(rulePrefix);
 	if(errors.length > 0)
 	{
 		alert(errors.join("\n") + "\n"+restStr.ARErr);
 	}
 	else
 	{
+		var isRestriction = ruleType == "restriction_rule" ? true : false;
 		var tableContainer = document.getElementById(rulePrefix + 'table_container');
 		var table = tableContainer.firstChild;
 		var tableData = getTableDataArray(table);
@@ -150,7 +152,7 @@ function addNewRule(ruleType, rulePrefix)
 			newId = rulePrefix + "" + newIndex;
 		}
 
-		setUciFromDocument(document, newId, ruleType, rulePrefix);
+		setUciFromDocument(newId, ruleType, rulePrefix);
 
 		var description = uci.get(pkg, newId, "description");
 		description = description == "" ? newId : description;
@@ -158,53 +160,51 @@ function addNewRule(ruleType, rulePrefix)
 		var enabledCheck = createEnabledCheckbox(true);
 		enabledCheck.id = newId; //save section id as checkbox name (yeah, it's kind of sneaky...)
 
-		addTableRow(table, [description, enabledCheck, createEditButton(true)], true, false, removeRuleCallback);
+		addTableRow(table, [description, enabledCheck, createEditButton(true,isRestriction)], true, false, removeRuleCallback);
 
-		setDocumentFromUci(document, new UCIContainer(), "", ruleType, rulePrefix);
+		setDocumentFromUci(new UCIContainer(), "", ruleType, rulePrefix);
 
 		enabledCheck.checked = true;
+
+		closeModalWindow(ruleType + '_modal');
 	}
 }
 
-function setVisibility(controlDocument, rulePrefix)
+function setVisibility(rulePrefix)
 {
-	controlDocument = controlDocument == null ? document : controlDocument;
+	setInvisibleIfAnyChecked([rulePrefix + "all_access"], rulePrefix + "resources", "block");
+	setInvisibleIfAnyChecked([rulePrefix + "all_day"], rulePrefix + "hours_active_container", "block");
+	setInvisibleIfAnyChecked([rulePrefix + "every_day"], rulePrefix + "days_active", "block");
+	setInvisibleIfAnyChecked([rulePrefix + "all_day", rulePrefix + "every_day"], rulePrefix + "days_and_hours_active_container", "block");
+	setInvisibleIfAnyChecked([rulePrefix + "all_day", rulePrefix + "every_day"], rulePrefix + "schedule_repeats", "inline");
 
 
-	setInvisibleIfAnyChecked([rulePrefix + "all_access"], rulePrefix + "resources", "block", controlDocument);
-	setInvisibleIfAnyChecked([rulePrefix + "all_day"], rulePrefix + "hours_active_container", "block", controlDocument);
-	setInvisibleIfAnyChecked([rulePrefix + "every_day"], rulePrefix + "days_active", "block", controlDocument);
-	setInvisibleIfAnyChecked([rulePrefix + "all_day", rulePrefix + "every_day"], rulePrefix + "days_and_hours_active_container", "block", controlDocument);
-	setInvisibleIfAnyChecked([rulePrefix + "all_day", rulePrefix + "every_day"], rulePrefix + "schedule_repeats", "inline", controlDocument);
-
-
-	var scheduleRepeats = controlDocument.getElementById(rulePrefix + "schedule_repeats");
+	var scheduleRepeats = document.getElementById(rulePrefix + "schedule_repeats");
 	if(scheduleRepeats.style.display != "none")
 	{
-		setInvisibleIfIdMatches(rulePrefix + "schedule_repeats", "daily", rulePrefix + "days_and_hours_active_container", "block", controlDocument);
-		setInvisibleIfIdMatches(rulePrefix + "schedule_repeats", "weekly", rulePrefix + "days_active", "block", controlDocument);
-		setInvisibleIfIdMatches(rulePrefix + "schedule_repeats", "weekly", rulePrefix + "hours_active_container", "block", controlDocument);
+		setInvisibleIfIdMatches(rulePrefix + "schedule_repeats", "daily", rulePrefix + "days_and_hours_active_container", "block");
+		setInvisibleIfIdMatches(rulePrefix + "schedule_repeats", "weekly", rulePrefix + "days_active", "block");
+		setInvisibleIfIdMatches(rulePrefix + "schedule_repeats", "weekly", rulePrefix + "hours_active_container", "block");
 	}
 
 
-	setInvisibleIfIdMatches(rulePrefix + "applies_to", "all", rulePrefix + "applies_to_container", "block", controlDocument);
-	setInvisibleIfIdMatches(rulePrefix + "remote_ip_type", "all", rulePrefix + "remote_ip_container", "block", controlDocument);
-	setInvisibleIfIdMatches(rulePrefix + "remote_port_type", "all", rulePrefix + "remote_port", "inline", controlDocument);
-	setInvisibleIfIdMatches(rulePrefix + "local_port_type", "all", rulePrefix + "local_port", "inline", controlDocument);
-	setInvisibleIfIdMatches(rulePrefix + "app_protocol_type", "all", rulePrefix + "app_protocol", "inline", controlDocument);
-	setInvisibleIfIdMatches(rulePrefix + "url_type", "all", rulePrefix + "url_match_list", "block", controlDocument);
+	setInvisibleIfIdMatches(rulePrefix + "applies_to", "all", rulePrefix + "applies_to_container", "block");
+	setInvisibleIfIdMatches(rulePrefix + "remote_ip_type", "all", rulePrefix + "remote_ip_container", "block");
+	setInvisibleIfIdMatches(rulePrefix + "remote_port_type", "all", rulePrefix + "remote_port", "inline");
+	setInvisibleIfIdMatches(rulePrefix + "local_port_type", "all", rulePrefix + "local_port", "inline");
+	setInvisibleIfIdMatches(rulePrefix + "app_protocol_type", "all", rulePrefix + "app_protocol", "inline");
+	setInvisibleIfIdMatches(rulePrefix + "url_type", "all", rulePrefix + "url_match_list", "block");
 }
 
-function setInvisibleIfAnyChecked(checkIds, associatedElementId, defaultDisplayMode, controlDocument)
+function setInvisibleIfAnyChecked(checkIds, associatedElementId, defaultDisplayMode)
 {
-	controlDocument = controlDocument == null ? document : controlDocument;
 	defaultDisplayMode = defaultDisplayMode == null ? "block" : defaultDisplayMode;
-	var visElement = controlDocument.getElementById(associatedElementId);
+	var visElement = document.getElementById(associatedElementId);
 
 	var isChecked = false;
 	for(checkIndex = 0; checkIndex < checkIds.length ; checkIndex++)
 	{
-		var checkElement = controlDocument.getElementById( checkIds[checkIndex] );
+		var checkElement = document.getElementById( checkIds[checkIndex] );
 		if(checkElement != null)
 		{
 			isChecked = isChecked || checkElement.checked;
@@ -222,13 +222,12 @@ function setInvisibleIfAnyChecked(checkIds, associatedElementId, defaultDisplayM
 
 }
 
-function setInvisibleIfIdMatches(selectId, invisibleOptionValue, associatedElementId, defaultDisplayMode, controlDocument )
+function setInvisibleIfIdMatches(selectId, invisibleOptionValue, associatedElementId, defaultDisplayMode)
 {
-	controlDocument = controlDocument == null ? document : controlDocument;
 	defaultDisplayMode = defaultDisplayMode == null ? "restriction_rule" : defaultDisplayMode;
-	var visElement = controlDocument.getElementById(associatedElementId);
+	var visElement = document.getElementById(associatedElementId);
 
-	if(getSelectedValue(selectId, controlDocument) == invisibleOptionValue && visElement != null)
+	if(getSelectedValue(selectId, document) == invisibleOptionValue && visElement != null)
 	{
 		visElement.style.display = "none";
 	}
@@ -248,12 +247,12 @@ function createEnabledCheckbox(enabled)
 	return enabledCheckbox;
 }
 
-function createEditButton(enabled, ruleType, rulePrefix)
+function createEditButton(enabled, isRestriction)
 {
 	editButton = createInput("button");
 	editButton.textContent = UI.Edit;
 	editButton.className = "btn btn-default btn-edit";
-	editButton.onclick = editRule;
+	editButton.onclick = function(){editRestrictionModal(isRestriction, this);};
 
 	setElementEnabled(editButton, enabled);
 
@@ -276,104 +275,35 @@ function removeRuleCallback(table, row)
 	uci.removeSection(pkg, ruleId);
 }
 
-function editRule()
+function editRule(editRuleType,editRulePrefix,editRow)
 {
-	editRow = this.parentNode.parentNode;
-	editTable = editRow.parentNode.parentNode;
-	if(editTable.id.match("rule_"))
+	editRuleSectionId = editRow.childNodes[1].firstChild.id;
+
+	// error checking goes here
+	var errors = validateRule(editRulePrefix);
+	if(errors.length > 0)
 	{
-		editRuleType = "restriction_rule";
-		editRulePrefix = "rule_";
+		alert(errors.join("\n") + "\n"+restStr.ARErr);
 	}
 	else
 	{
-		editRuleType = "whitelist_rule";
-		editRulePrefix = "exception_";
+		setUciFromDocument(editRuleSectionId, editRuleType, editRulePrefix);
+		if(uci.get(pkg, editRuleSectionId, "description") != "")
+		{
+			editRow.childNodes[0].firstChild.data = uci.get(pkg, editRuleSectionId, "description");
+		}
+		closeModalWindow(editRuleType + '_modal');
 	}
 
-	if( typeof(editRuleWindow) != "undefined" )
-	{
-		//opera keeps object around after
-		//window is closed, so we need to deal
-		//with error condition
-		try
-		{
-			editRuleWindow.close();
-		}
-		catch(e){}
-	}
-
-
-	var editRuleWinType = editRuleType == "restriction_rule" ? "restriction_edit_rule.sh" : "whitelist_edit_rule.sh";
-	editRuleWindow = openPopupWindow(editRuleWinType, "edit", 560, 600);
-
-	saveButton = createInput("button", editRuleWindow.document);
-	closeButton = createInput("button", editRuleWindow.document);
-	saveButton.textContent = UI.CApplyChanges;
-	saveButton.className = "btn btn-primary";
-	closeButton.textContent = UI.CDiscardChanges;
-	closeButton.className = "btn btn-warning";
-
-	editRuleSectionId = editRow.childNodes[1].firstChild.id;
-
-	runOnEditorLoaded = function ()
-	{
-		updateDone=false;
-		if(editRuleWindow.document != null)
-		{
-			if(editRuleWindow.document.getElementById("bottom_button_container") != null)
-			{
-				editRuleWindow.document.getElementById("bottom_button_container").appendChild(saveButton);
-				editRuleWindow.document.getElementById("bottom_button_container").appendChild(closeButton);
-
-				setDocumentFromUci(editRuleWindow.document, uci, editRuleSectionId, editRuleType, editRulePrefix);
-				setVisibility(editRuleWindow.document, editRulePrefix);
-
-				closeButton.onclick = function()
-				{
-					editRuleWindow.close();
-				}
-				saveButton.onclick = function()
-				{
-					// error checking goes here
-					var errors = validateRule(editRuleWindow.document, editRulePrefix);
-					if(errors.length > 0)
-					{
-						alert(errors.join("\n") + "\n"+restStr.ARErr);
-					}
-					else
-					{
-						setUciFromDocument(editRuleWindow.document, editRuleSectionId, editRuleType, editRulePrefix);
-						if(uci.get(pkg, editRuleSectionId, "description") != "")
-						{
-							editRow.childNodes[0].firstChild.data = uci.get(pkg, editRuleSectionId, "description");
-						}
-						editRuleWindow.close();
-					}
-
-				}
-				editRuleWindow.focus();
-				updateDone = true;
-
-			}
-		}
-		if(!updateDone)
-		{
-			setTimeout( "runOnEditorLoaded()", 250);
-
-		}
-	}
-	runOnEditorLoaded();
 }
 
-function addAddressesToTable(controlDocument, textId, tableContainerId, tableId, macsValid)
+function addAddressesToTable(textId, tableContainerId, tableId, macsValid)
 {
-	controlDocument = controlDocument == null ? document : controlDocument;
-	var newAddrs = controlDocument.getElementById(textId).value;
+	var newAddrs = document.getElementById(textId).value;
 	var valid = macsValid ?  validateMultipleIpsOrMacs(newAddrs) : validateMultipleIps(newAddrs);
 	if(valid == 0)
 	{
-		var tableContainer = controlDocument.getElementById(tableContainerId);
+		var tableContainer = document.getElementById(tableContainerId);
 		var table = tableContainer.childNodes.length > 0 ? tableContainer.firstChild : createTable([""], [], tableId, true, false);
 		newAddrs = newAddrs.replace(/^[\t ]*/, "");
 		newAddrs = newAddrs.replace(/[\t ]*$/, "");
@@ -388,7 +318,7 @@ function addAddressesToTable(controlDocument, textId, tableContainerId, tableId,
 		{
 			tableContainer.appendChild(table);
 		}
-		controlDocument.getElementById(textId).value = "";
+		document.getElementById(textId).value = "";
 	}
 	else
 	{
@@ -396,24 +326,22 @@ function addAddressesToTable(controlDocument, textId, tableContainerId, tableId,
 	}
 }
 
-function addUrlToTable(controlDocument, textId, selectId, tableContainerId, tableId)
+function addUrlToTable(textId, selectId, tableContainerId, tableId)
 {
-	controlDocument = controlDocument == null ? document : controlDocument;
-
-	var newUrl = controlDocument.getElementById(textId).value;
-	var urlType = getSelectedValue(selectId, controlDocument);
-	var valid = validateUrl(newUrl, selectId, controlDocument);
+	var newUrl = document.getElementById(textId).value;
+	var urlType = getSelectedValue(selectId, document);
+	var valid = validateUrl(newUrl, selectId);
 	if(valid == 0)
 	{
-		var urlSpan = createUrlSpan(newUrl, controlDocument);
-		var tableContainer = controlDocument.getElementById(tableContainerId);
+		var urlSpan = createUrlSpan(newUrl);
+		var tableContainer = document.getElementById(tableContainerId);
 		var table = tableContainer.childNodes.length > 0 ? tableContainer.firstChild : createTable([restStr.UPrt, restStr.MTyp, restStr.MTExp], [], tableId, true, false);
 		addTableRow(table, [(urlType.match("domain") ? "domain" : "full"), urlType.substring(urlType.lastIndexOf("_")+1), urlSpan ], true, false);
 		if(tableContainer.childNodes.length == 0)
 		{
 			tableContainer.appendChild(table);
 		}
-		controlDocument.getElementById(textId).value = "";
+		document.getElementById(textId).value = "";
 	}
 	else
 	{
@@ -428,21 +356,20 @@ function addUrlToTable(controlDocument, textId, selectId, tableContainerId, tabl
 	}
 }
 
-function validateRule(controlDocument, rulePrefix)
+function validateRule(rulePrefix)
 {
-	controlDocument = controlDocument == null ? document : controlDocument;
 	var inputIds = [rulePrefix + "hours_active", rulePrefix + "days_and_hours_active", rulePrefix + "remote_port", rulePrefix + "local_port"];
 	var labelIds = [rulePrefix + "hours_active_label", rulePrefix + "days_and_hours_active_label", rulePrefix + "remote_port_label", rulePrefix + "local_port_label"];
 	var functions = [validateHours, validateWeeklyRange, validateMultiplePorts, validateMultiplePorts];
 	var validReturnCodes = [0,0,0,0];
 	var visibilityIds = [rulePrefix + "hours_active_container", rulePrefix + "days_and_hours_active_container", rulePrefix + "remote_port", rulePrefix + "local_port"];
-	if(controlDocument.getElementById(rulePrefix + "all_access").checked)
+	if(document.getElementById(rulePrefix + "all_access").checked)
 	{
 		visibilityIds[2] = rulePrefix + "resources";
 		visibilityIds[3] = rulePrefix + "resources";
 	}
 
-	return proofreadFields(inputIds, labelIds, functions, validReturnCodes, visibilityIds, controlDocument );
+	return proofreadFields(inputIds, labelIds, functions, validReturnCodes, visibilityIds, document );
 }
 function validateMultipleIps(ips)
 {
@@ -519,10 +446,9 @@ function proofreadMultiplePorts(input)
 	proofreadText(input, validateMultiplePorts, 0);
 }
 
-function validateUrl(url, selectId, controlDocument)
+function validateUrl(url, selectId)
 {
-	controlDocument = controlDocument == null ? document : controlDocument;
-	var urlType = getSelectedValue(selectId, controlDocument);
+	var urlType = getSelectedValue(selectId, document);
 	var valid = url.match(/[\n\r\"\']/) || url.length == 0 ? 1 : 0;
 	return valid;
 }
@@ -532,10 +458,8 @@ function proofreadUrl(input)
 	proofreadText(input, validateUrl, 0);
 }
 
-function createUrlSpan(urlStr, controlDocument)
+function createUrlSpan(urlStr)
 {
-	controlDocument = controlDocument == null ? document : controlDocument;
-
 	var splitUrl = [];
 	while(urlStr.length > 0)
 	{
@@ -544,13 +468,13 @@ function createUrlSpan(urlStr, controlDocument)
 		splitUrl.push(urlStr.length > 0 ? next + "-" : next);
 	}
 
-	var urlSpan = controlDocument.createElement('span');
+	var urlSpan = document.createElement('span');
 	while(splitUrl.length > 0)
 	{
-		urlSpan.appendChild(controlDocument.createTextNode( splitUrl.shift() ));
+		urlSpan.appendChild(document.createTextNode( splitUrl.shift() ));
 		if(splitUrl.length > 0)
 		{
-			urlSpan.appendChild(controlDocument.createElement('br'));
+			urlSpan.appendChild(document.createElement('br'));
 		}
 	}
 	return urlSpan;
@@ -575,24 +499,22 @@ function parseUrlSpan(urlSpan)
 }
 
 
-function setDocumentFromUci(controlDocument, sourceUci, sectionId, ruleType, rulePrefix)
+function setDocumentFromUci(sourceUci, sectionId, ruleType, rulePrefix)
 {
-	controlDocument = controlDocument == null ? document : controlDocument;
-
 	var description = sourceUci.get(pkg, sectionId, "description");
 	description = description == "" ? sectionId : description;
-	controlDocument.getElementById(rulePrefix + "name").value = description;
+	document.getElementById(rulePrefix + "name").value = description;
 
-	setIpTableAndSelectFromUci(controlDocument, sourceUci, pkg, sectionId, "local_addr", rulePrefix + "applies_to_table_container", rulePrefix + "applies_to_table", rulePrefix + "applies_to", rulePrefix + "applies_to_addr");
+	setIpTableAndSelectFromUci(sourceUci, pkg, sectionId, "local_addr", rulePrefix + "applies_to_table_container", rulePrefix + "applies_to_table", rulePrefix + "applies_to", rulePrefix + "applies_to_addr");
 
 
 	var daysAndHours = sourceUci.get(pkg, sectionId, "active_weekly_ranges");
 	var hours = sourceUci.get(pkg, sectionId, "active_hours");
 	var allDay = (daysAndHours == "" && hours == "");
-	controlDocument.getElementById(rulePrefix + "hours_active").value = hours;
-	controlDocument.getElementById(rulePrefix + "all_day").checked = allDay;
-	controlDocument.getElementById(rulePrefix + "days_and_hours_active").value = weekly_i18n(daysAndHours,"uci");
-	setSelectedValue(rulePrefix + "schedule_repeats", (daysAndHours == "" ? "daily" : "weekly"), controlDocument);
+	document.getElementById(rulePrefix + "hours_active").value = hours;
+	document.getElementById(rulePrefix + "all_day").checked = allDay;
+	document.getElementById(rulePrefix + "days_and_hours_active").value = weekly_i18n(daysAndHours,"uci");
+	setSelectedValue(rulePrefix + "schedule_repeats", (daysAndHours == "" ? "daily" : "weekly"), document);
 
 	var allDays = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"];
 	var dayStr =  sourceUci.get(pkg, sectionId, "active_weekdays");
@@ -618,25 +540,25 @@ function setDocumentFromUci(controlDocument, sourceUci, sectionId, ruleType, rul
 			dayFound = days[testIndex] == nextDay;
 		}
 		everyDay = everyDay && dayFound;
-		controlDocument.getElementById(rulePrefix + allDays[dayIndex]).checked = dayFound;
+		document.getElementById(rulePrefix + allDays[dayIndex]).checked = dayFound;
 	}
-	controlDocument.getElementById(rulePrefix + "every_day").checked = everyDay;
+	document.getElementById(rulePrefix + "every_day").checked = everyDay;
 
 
-	setIpTableAndSelectFromUci(controlDocument, sourceUci, pkg, sectionId, "remote_addr", rulePrefix + "remote_ip_table_container", rulePrefix + "remote_ip_table", rulePrefix + "remote_ip_type", rulePrefix + "remote_ip");
-	setTextAndSelectFromUci(controlDocument, sourceUci,  pkg, sectionId, "remote_port", rulePrefix + "remote_port", rulePrefix + "remote_port_type");
-	setTextAndSelectFromUci(controlDocument, sourceUci, pkg, sectionId, "local_port", rulePrefix + "local_port", rulePrefix + "local_port_type");
+	setIpTableAndSelectFromUci(sourceUci, pkg, sectionId, "remote_addr", rulePrefix + "remote_ip_table_container", rulePrefix + "remote_ip_table", rulePrefix + "remote_ip_type", rulePrefix + "remote_ip");
+	setTextAndSelectFromUci(sourceUci,  pkg, sectionId, "remote_port", rulePrefix + "remote_port", rulePrefix + "remote_port_type");
+	setTextAndSelectFromUci(sourceUci, pkg, sectionId, "local_port", rulePrefix + "local_port", rulePrefix + "local_port_type");
 
 	var proto = sourceUci.get(pkg, sectionId, "proto");
 	proto = proto != "tcp" && proto != "udp" ? "both" : proto;
-	setSelectedValue(rulePrefix + "transport_protocol", proto, controlDocument);
+	setSelectedValue(rulePrefix + "transport_protocol", proto, document);
 
 	var app_proto = sourceUci.get(pkg, sectionId, "app_proto");
 	var app_proto_type = app_proto == "" ? "except" : "only";
 	app_proto = app_proto == "" ? sourceUci.get(pkg, sectionId, "not_app_proto") : app_proto;
 	app_proto_type = app_proto == "" ? "all" : app_proto_type;
-	setSelectedValue(rulePrefix + "app_protocol_type", app_proto_type, controlDocument);
-	setSelectedValue(rulePrefix + "app_protocol", app_proto, controlDocument);
+	setSelectedValue(rulePrefix + "app_protocol_type", app_proto_type, document);
+	setSelectedValue(rulePrefix + "app_protocol", app_proto, document);
 
 
 
@@ -666,9 +588,9 @@ function setDocumentFromUci(controlDocument, sourceUci, sectionId, ruleType, rul
 			urlMatchType = urlDefinitions[urlTypeIndex] != "" ? "except" : urlMatchType;
 		}
 	}
-	setSelectedValue(rulePrefix + "url_type", urlMatchType, controlDocument);
+	setSelectedValue(rulePrefix + "url_type", urlMatchType, document);
 
-	var urlTableContainer = controlDocument.getElementById(rulePrefix + "url_match_table_container");
+	var urlTableContainer = document.getElementById(rulePrefix + "url_match_table_container");
 	if(urlTableContainer.childNodes.length > 0)
 	{
 		urlTableContainer.removeChild(urlTableContainer.firstChild);
@@ -677,7 +599,7 @@ function setDocumentFromUci(controlDocument, sourceUci, sectionId, ruleType, rul
 
 	if(urlDefFound)
 	{
-		var table = createTable([restStr.UPrt, restStr.MTyp, restStr.MTExp], [], rulePrefix + "url_match_table", true, false, null, null, controlDocument);
+		var table = createTable([restStr.UPrt, restStr.MTyp, restStr.MTExp], [], rulePrefix + "url_match_table", true, false, null, null, document);
 		for(urlTypeIndex=0; urlTypeIndex < urlTypes.length; urlTypeIndex++)
 		{
 			var defStr = urlDefinitions[urlTypeIndex];
@@ -689,7 +611,7 @@ function setDocumentFromUci(controlDocument, sourceUci, sectionId, ruleType, rul
 				var defIndex=0;
 				for(defIndex=0; defIndex < def.length; defIndex++)
 				{
-					addTableRow(table, [ urlPartTypes[urlTypeIndex], urlExprTypes[urlTypeIndex], createUrlSpan(def[defIndex], controlDocument) ], true, false, null, null, controlDocument);
+					addTableRow(table, [ urlPartTypes[urlTypeIndex], urlExprTypes[urlTypeIndex], createUrlSpan(def[defIndex]) ], true, false, null, null, document);
 				}
 			}
 		}
@@ -697,22 +619,21 @@ function setDocumentFromUci(controlDocument, sourceUci, sectionId, ruleType, rul
 	}
 
 
-	controlDocument.getElementById(rulePrefix + "url_match").value = "";
+	document.getElementById(rulePrefix + "url_match").value = "";
 
 	var allResourcesBlocked = true;
 	var resourceTypeIds = ["remote_ip_type", "remote_port_type", "local_port_type", "transport_protocol", "app_protocol_type", "url_type" ];
 	for(typeIndex=0; typeIndex < resourceTypeIds.length; typeIndex++)
 	{
-		var type = getSelectedValue(rulePrefix + resourceTypeIds[typeIndex], controlDocument);
+		var type = getSelectedValue(rulePrefix + resourceTypeIds[typeIndex], document);
 		allResourcesBlocked = allResourcesBlocked && (type == "all" || type == "both");
 	}
-	controlDocument.getElementById(rulePrefix + "all_access").checked = allResourcesBlocked;
+	document.getElementById(rulePrefix + "all_access").checked = allResourcesBlocked;
 
-	setVisibility(controlDocument, rulePrefix);
+	setVisibility(rulePrefix);
 }
-function setIpTableAndSelectFromUci(controlDocument, sourceUci, pkg, sectionId, optionId, tableContainerId, tableId, prefixSelectId, textId)
+function setIpTableAndSelectFromUci(sourceUci, pkg, sectionId, optionId, tableContainerId, tableId, prefixSelectId, textId)
 {
-	controlDocument = controlDocument == null ? document : controlDocument;
 	var optionValue = sourceUci.get(pkg, sectionId, optionId);
 	var type = "only";
 	if(optionValue == "")
@@ -720,10 +641,10 @@ function setIpTableAndSelectFromUci(controlDocument, sourceUci, pkg, sectionId, 
 		optionValue = sourceUci.get(pkg, sectionId, "not_" + optionId)
 		type = optionValue != "" ? "except" : "all";
 	}
-	setSelectedValue(prefixSelectId, type, controlDocument);
+	setSelectedValue(prefixSelectId, type, document);
 
 
-	var tableContainer = controlDocument.getElementById(tableContainerId);
+	var tableContainer = document.getElementById(tableContainerId);
 	if(tableContainer.childNodes.length > 0)
 	{
 		tableContainer.removeChild(tableContainer.firstChild);
@@ -735,19 +656,18 @@ function setIpTableAndSelectFromUci(controlDocument, sourceUci, pkg, sectionId, 
 		var ips = optionValue.split(/[\t ]*,[\t ]*/);
 
 
-		var table = createTable([""], [], tableId, true, false, null, null, controlDocument);
+		var table = createTable([""], [], tableId, true, false, null, null, document);
 		while(ips.length > 0)
 		{
-			addTableRow(table, [ ips.shift() ], true, false, null, null, controlDocument);
+			addTableRow(table, [ ips.shift() ], true, false, null, null, document);
 		}
 		tableContainer.appendChild(table);
 
-		controlDocument.getElementById(textId).value = "";
+		document.getElementById(textId).value = "";
 	}
 }
-function setTextAndSelectFromUci(controlDocument, sourceUci, pkg, sectionId, optionId, textId, prefixSelectId)
+function setTextAndSelectFromUci(sourceUci, pkg, sectionId, optionId, textId, prefixSelectId)
 {
-	controlDocument = controlDocument == null ? document : controlDocument;
 	var optionValue = sourceUci.get(pkg, sectionId, optionId);
 	var type = "only";
 	if(optionValue == "")
@@ -755,29 +675,26 @@ function setTextAndSelectFromUci(controlDocument, sourceUci, pkg, sectionId, opt
 		optionValue = sourceUci.get(pkg, sectionId, "not_" + optionId)
 		type = optionValue != "" ? "except" : "all";
 	}
-	setSelectedValue(prefixSelectId, type, controlDocument);
+	setSelectedValue(prefixSelectId, type, document);
 
 	// if option is not defined, optionValue is empty string, so no need to check for this case
-	controlDocument.getElementById(textId).value = optionValue;
+	document.getElementById(textId).value = optionValue;
 }
 
 
-function setUciFromDocument(controlDocument, sectionId, ruleType, rulePrefix)
+function setUciFromDocument(sectionId, ruleType, rulePrefix)
 {
 	// note: we assume error checking has already been done
 	uci.removeSection(pkg, sectionId);
 	uci.set(pkg, sectionId, "", ruleType);
 	uci.set(pkg, sectionId, "is_ingress", "0");
 
-
-	controlDocument = controlDocument == null ? document : controlDocument;
-
 	uci.set(pkg, sectionId, "", ruleType);
-	uci.set(pkg, sectionId, "description", controlDocument.getElementById(rulePrefix + "name").value);
+	uci.set(pkg, sectionId, "description", document.getElementById(rulePrefix + "name").value);
 
-	setFromIpTable(controlDocument, pkg, sectionId, "local_addr", rulePrefix + "applies_to_table_container", rulePrefix + "applies_to");
+	setFromIpTable(pkg, sectionId, "local_addr", rulePrefix + "applies_to_table_container", rulePrefix + "applies_to");
 
-	var daysActive = controlDocument.getElementById(rulePrefix + "days_active");
+	var daysActive = document.getElementById(rulePrefix + "days_active");
 	if(daysActive.style.display != "none")
 	{
 		var daysActive = [];
@@ -785,7 +702,7 @@ function setUciFromDocument(controlDocument, sectionId, ruleType, rulePrefix)
 
 		for(dayIndex =0; dayIndex < dayIds.length; dayIndex++)
 		{
-			if(controlDocument.getElementById(rulePrefix + dayIds[dayIndex]).checked)
+			if(document.getElementById(rulePrefix + dayIds[dayIndex]).checked)
 			{
 				daysActive.push(dayIds[dayIndex]);
 			}
@@ -793,31 +710,31 @@ function setUciFromDocument(controlDocument, sectionId, ruleType, rulePrefix)
 		daysActiveStr = daysActive.join(",");
 		uci.set(pkg, sectionId, "active_weekdays", daysActiveStr);
 	}
-	setIfVisible(controlDocument, pkg, sectionId, "active_hours",         rulePrefix + "hours_active",          rulePrefix + "hours_active_container" );
-	var weekly_ranges=controlDocument.getElementById(rulePrefix + "days_and_hours_active");
+	setIfVisible(pkg, sectionId, "active_hours",         rulePrefix + "hours_active",          rulePrefix + "hours_active_container" );
+	var weekly_ranges=document.getElementById(rulePrefix + "days_and_hours_active");
 	weekly_ranges.value=weekly_i18n(weekly_ranges.value, "table");
-	setIfVisible(controlDocument, pkg, sectionId, "active_weekly_ranges", rulePrefix + "days_and_hours_active", rulePrefix + "days_and_hours_active_container");
+	setIfVisible(pkg, sectionId, "active_weekly_ranges", rulePrefix + "days_and_hours_active", rulePrefix + "days_and_hours_active_container");
 
-	if(!controlDocument.getElementById(rulePrefix + "all_access").checked)
+	if(!document.getElementById(rulePrefix + "all_access").checked)
 	{
-		setFromIpTable(controlDocument, pkg, sectionId, "remote_addr", rulePrefix + "remote_ip_table_container", rulePrefix + "remote_ip_type");
-		setIfVisible(controlDocument, pkg, sectionId, "remote_port", rulePrefix + "remote_port", rulePrefix + "remote_port", rulePrefix + "remote_port_type");
-		setIfVisible(controlDocument, pkg, sectionId, "local_port",  rulePrefix + "local_port",  rulePrefix + "local_port",  rulePrefix + "local_port_type");
+		setFromIpTable(pkg, sectionId, "remote_addr", rulePrefix + "remote_ip_table_container", rulePrefix + "remote_ip_type");
+		setIfVisible(pkg, sectionId, "remote_port", rulePrefix + "remote_port", rulePrefix + "remote_port", rulePrefix + "remote_port_type");
+		setIfVisible(pkg, sectionId, "local_port",  rulePrefix + "local_port",  rulePrefix + "local_port",  rulePrefix + "local_port_type");
 
-		uci.set(pkg, sectionId, "proto", getSelectedValue(rulePrefix + "transport_protocol", controlDocument));
+		uci.set(pkg, sectionId, "proto", getSelectedValue(rulePrefix + "transport_protocol", document));
 
-		var appProtocolType = getSelectedValue(rulePrefix + "app_protocol_type", controlDocument);
+		var appProtocolType = getSelectedValue(rulePrefix + "app_protocol_type", document);
 		if(appProtocolType != "all")
 		{
 			var prefix = appProtocolType == "except" ? "not_" : "";
-			uci.set(pkg, sectionId, prefix + "app_proto", getSelectedValue(rulePrefix + "app_protocol", controlDocument));
+			uci.set(pkg, sectionId, prefix + "app_proto", getSelectedValue(rulePrefix + "app_protocol", document));
 		}
 
 
 
 
-		var urlMatchType = getSelectedValue(rulePrefix + "url_type", controlDocument);
-		var urlTable = controlDocument.getElementById(rulePrefix + "url_match_table_container").firstChild;
+		var urlMatchType = getSelectedValue(rulePrefix + "url_type", document);
+		var urlTable = document.getElementById(rulePrefix + "url_match_table_container").firstChild;
 		if(urlMatchType != "all" && urlTable != null)
 		{
 			var urlData = getTableDataArray(urlTable, true, false);
@@ -861,27 +778,25 @@ function setUciFromDocument(controlDocument, sectionId, ruleType, rulePrefix)
 
 
 
-function setIfVisible(controlDocument, pkg, sectionId, optionId, textId, visId, prefixSelectId)
+function setIfVisible(pkg, sectionId, optionId, textId, visId, prefixSelectId)
 {
-	controlDocument = controlDocument == null ? document : controlDocument;
-	visElement = controlDocument.getElementById(visId);
+	visElement = document.getElementById(visId);
 	if(visElement.style.display != "none")
 	{
-		var textElement = controlDocument.getElementById(textId);
+		var textElement = document.getElementById(textId);
 		if(prefixSelectId != null)
 		{
-			prefixValue = getSelectedValue(prefixSelectId, controlDocument);
+			prefixValue = getSelectedValue(prefixSelectId, document);
 			optionId = prefixValue == "except" ? "not_" + optionId : optionId;
 		}
 		uci.set(pkg, sectionId, optionId, textElement.value);
 	}
 }
 
-function setFromIpTable(controlDocument, pkg, sectionId, optionId, containerId, prefixSelectId)
+function setFromIpTable(pkg, sectionId, optionId, containerId, prefixSelectId)
 {
-	controlDocument = controlDocument == null ? document : controlDocument;
-	var localAddrType = getSelectedValue(prefixSelectId, controlDocument);
-	var table = controlDocument.getElementById(containerId).firstChild;
+	var localAddrType = getSelectedValue(prefixSelectId, document);
+	var table = document.getElementById(containerId).firstChild;
 	if(localAddrType != "all" && table != null)
 	{
 		var ipData = getTableDataArray(table, true, false);
@@ -924,4 +839,43 @@ function weekly_i18n(weekly_schd, source) { //this is part of i18n; TODO: best t
 		}
 	}
 	return joiner.join(" ");
+}
+
+function addRestrictionModal(isRestriction)
+{
+	ruleType = isRestriction ? 'restriction_rule' : 'whitelist_rule';
+	rulePrefix = isRestriction ? 'rule_' : 'exception_';
+
+	modalButtons = [
+		{"title" : UI.Add, "classes" : "btn btn-primary", "function" : function(){addNewRule(ruleType, rulePrefix)}},
+		"defaultDismiss"
+	];
+
+	modalElements = [];
+
+	setDocumentFromUci(new UCIContainer(), "", ruleType, rulePrefix);	
+
+	modalPrepare(ruleType + '_modal', isRestriction ? restStr.NRRule : restStr.NExcp, modalElements, modalButtons);
+	openModalWindow(ruleType + '_modal');
+}
+
+function editRestrictionModal(isRestriction, triggerEl)
+{
+	ruleType = isRestriction ? 'restriction_rule' : 'whitelist_rule';
+	rulePrefix = isRestriction ? 'rule_' : 'exception_';
+	editRow=triggerEl.parentNode.parentNode;
+	editRuleSectionId = editRow.childNodes[1].firstChild.id;
+
+	modalButtons = [
+		{"title" : UI.CApplyChanges, "classes" : "btn btn-primary", "function" : function(){editRule(ruleType,rulePrefix,editRow);}},
+		"defaultDiscard"
+	];
+
+	modalElements = [];
+
+	setDocumentFromUci(uci, editRuleSectionId, ruleType, rulePrefix);
+	setVisibility(rulePrefix);
+
+	modalPrepare(ruleType + '_modal', isRestriction ? restStr.ERSect : restStr.EESect, modalElements, modalButtons);
+	openModalWindow(ruleType + '_modal');
 }

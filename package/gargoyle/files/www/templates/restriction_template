@@ -6,7 +6,7 @@
 <div class="row form-group">
 	<label class="col-xs-5" for='rule_applies_to' id='rule_applies_to_label'><%~ RAppl %>:</label>
 	<span class="col-xs-7">
-		<select class='form-control' id='rule_applies_to' onchange='setVisibility(document,"rule_")'>
+		<select class='form-control' id='rule_applies_to' onchange='setVisibility("rule_")'>
 			<option value='all'><%~ AHsts %></option>
 			<option value='except'><%~ EHsts %></option>
 			<option value='only'><%~ OHsts %></option>
@@ -18,7 +18,7 @@
 	<div class="col-xs-offset-5 col-xs-7" id="rule_applies_to_table_container"></div>
 	<div class="col-xs-offset-5 col-xs-7">
 		<input type='text' id='rule_applies_to_addr' size='30' onkeyup='proofreadMultipleIpsOrMacs(this)' class='form-control' />
-		<button type="button" class="btn btn-default btn-add" id="rule_add_applies_to_addr" onclick='addAddressesToTable(document,"rule_applies_to_addr","rule_applies_to_table_container","rule_applies_to_table",true)'><%~ Add %></button>
+		<button type="button" class="btn btn-default btn-add" id="rule_add_applies_to_addr" onclick='addAddressesToTable("rule_applies_to_addr","rule_applies_to_table_container","rule_applies_to_table",true)'><%~ Add %></button>
 	</div>
 	<div class="col-xs-offset-5 col-xs-7">
 		<em><%~ HstAddr %></em>
@@ -28,9 +28,9 @@
 <div class="row form-group">
 	<label class="col-xs-5" for='rule_all_day' id='rule_schedule_label'><%~ Schd %>:</label>
 	<span class="col-xs-7">
-		<input type='checkbox' id='rule_all_day' onclick='setVisibility(document,"rule_")' /><label for="rule_all_day"><%~ ADay %></label>
-		<input type='checkbox' id='rule_every_day' onclick='setVisibility(document,"rule_")' /><label for="rule_every_day"><%~ EDay %></label>
-		<select id='rule_schedule_repeats' onchange='setVisibility(document,"rule_")' class='form-control'>
+		<input type='checkbox' id='rule_all_day' onclick='setVisibility("rule_")' /><label for="rule_all_day"><%~ ADay %></label>
+		<input type='checkbox' id='rule_every_day' onclick='setVisibility("rule_")' /><label for="rule_every_day"><%~ EDay %></label>
+		<select id='rule_schedule_repeats' onchange='setVisibility("rule_")' class='form-control'>
 			<option value='daily'><%~ DSchd %></option>
 			<option value='weekly'><%~ WSchd %></option>
 		</select>
@@ -68,14 +68,14 @@
 
 <div class="row form-group">
 	<label class='col-xs-5' for='rule_all_access' id='rule_all_access_label'><%~ RRsrc %>:</label>
-	<span class="col-xs-7"><input type='checkbox' id='rule_all_access' onclick='setVisibility(document,"rule_")' /><label for="rule_all_access"><%~ NetAcc %></label></span>
+	<span class="col-xs-7"><input type='checkbox' id='rule_all_access' onclick='setVisibility("rule_")' /><label for="rule_all_access"><%~ NetAcc %></label></span>
 </div>
 
 <div class="indent" id="rule_resources">
 	<div class="row form-group">
 		<label class="col-xs-5" id="rule_remote_ip_label" for='rule_remote_ip'><%~ RemIP %>:</label>
 		<span class="col-xs-7">
-			<select class='form-control' id='rule_remote_ip_type' onchange='setVisibility(document,"rule_")'>
+			<select class='form-control' id='rule_remote_ip_type' onchange='setVisibility("rule_")'>
 				<option value="all"><%~ BlAll %></option>
 				<option value="only"><%~ BlOny %></option>
 				<option value="except"><%~ BlExc %></option>
@@ -86,14 +86,14 @@
 		<div class="col-xs-offset-5 col-xs-7" id="rule_remote_ip_table_container"></div>
 		<div class="col-xs-offset-5 col-xs-7">
 			<input type='text' id='rule_remote_ip' size='30' onkeyup='proofreadMultipleIps(this)' class='form-control' />
-			<button type="button" class="btn btn-default btn-add" id="rule_add_remote_ip" onclick='addAddressesToTable(document,"rule_remote_ip","rule_remote_ip_table_container","rule_remote_ip_table",false)'><%~ Add %></button>
+			<button type="button" class="btn btn-default btn-add" id="rule_add_remote_ip" onclick='addAddressesToTable("rule_remote_ip","rule_remote_ip_table_container","rule_remote_ip_table",false)'><%~ Add %></button>
 		</div>
 	</div>
 
 	<div class="row form-group">
 		<label class="col-xs-5" id="rule_remote_port_label" for='rule_remote_port'><%~ RemPrt %>:</label>
 		<span class="col-xs-7">
-			<select class='form-control' id="rule_remote_port_type" onchange='setVisibility(document,"rule_")'>
+			<select class='form-control' id="rule_remote_port_type" onchange='setVisibility("rule_")'>
 				<option value="all"><%~ BlAll %></option>
 				<option value="only"><%~ BlOny %></option>
 				<option value="except"><%~ BlExc %></option>
@@ -106,7 +106,7 @@
 	<div class="row form-group">
 		<label class="col-xs-5" id="rule_local_port_label" for='rule_local_port'><%~ LclPrt %>:</label>
 		<span class="col-xs-7">
-			<select class='form-control' id="rule_local_port_type" onchange='setVisibility(document,"rule_")'>
+			<select class='form-control' id="rule_local_port_type" onchange='setVisibility("rule_")'>
 				<option value="all"><%~ BlAll %></option>
 				<option value="only"><%~ BlOny %></option>
 				<option value="except"><%~ BlExc %></option>
@@ -131,7 +131,7 @@
 	<div class="row form-group">
 		<label class="col-xs-5" id="rule_app_protocol_label" for='rule_app_protocol'><%~ ApProto %>:</label>
 		<span class="col-xs-7">
-			<select id="rule_app_protocol_type" class='form-control' onchange='setVisibility(document,"rule_")'>
+			<select id="rule_app_protocol_type" class='form-control' onchange='setVisibility("rule_")'>
 				<option value="all"><%~ BlAll %></option>
 				<option value="only"><%~ BlOny %></option>
 				<option value="except"><%~ BlExc %></option>
@@ -170,7 +170,7 @@
 	<div class="row form-group">
 		<label class="col-xs-5" id="rule_url_label" for='rule_url_type'><%~ WebURL %>:</label>
 		<span class="col-xs-7">
-			<select id="rule_url_type" class='form-control' onchange='setVisibility(document,"rule_")'>
+			<select id="rule_url_type" class='form-control' onchange='setVisibility("rule_")'>
 				<option value="all"><%~ BlAll %></option>
 				<option value="only"><%~ BlOny %></option>
 				<option value="except"><%~ BlExc %></option>
@@ -189,7 +189,7 @@
 				<option value="url_domain_regex"><%~ DmRgx %>:</option>
 			</select>
 			<input type='text' id='rule_url_match' size='30' class='form-control' />
-			<button type="button" class="btn btn-default btn-add" id="rule_add_url_match" onclick='addUrlToTable(document, "rule_url_match", "rule_url_match_type", "rule_url_match_table_container", "rule_url_match_table")'><%~ Add %></button>
+			<button type="button" class="btn btn-default btn-add" id="rule_add_url_match" onclick='addUrlToTable("rule_url_match", "rule_url_match_type", "rule_url_match_table_container", "rule_url_match_table")'><%~ Add %></button>
 		</div>
 	</div>
 </div>

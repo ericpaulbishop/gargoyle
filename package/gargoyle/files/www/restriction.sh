@@ -26,10 +26,9 @@
 
 			<div class="panel-body">
 				<div class="row form-group">
+					<span id="add_rule_label" class="col-xs-12" style="text-decoration:underline" ><%~ NRRule %>:</span>
 					<span class="col-xs-12">
-						<span id="add_rule_label" style="text-decoration:underline" ><%~ NRRule %>:</span>
-						<%in templates/restriction_template %>
-						<button id="add_restriction_button" class="btn btn-default btn-add" onclick="addNewRule('restriction_rule', 'rule_')"><%~ ANRule %></button>
+						<button id="add_restriction_button" class="btn btn-default btn-add" onclick="addRestrictionModal(true)"><%~ ANRule %></button>
 					</span>
 				</div>
 
@@ -51,10 +50,9 @@
 			</div>
 			<div class="panel-body">
 				<div class="row form-group">
+					<span id="add_exception_label" class="col-xs-12" style="text-decoration:underline"><%~ NExcp %>:</span>
 					<span class="col-xs-12">
-						<span id="add_exception_label" style="text-decoration:underline"><%~ NExcp %>:</span>
-						<%in templates/whitelist_template %>
-						<button id="add_restriction_button" class="btn btn-default btn-add" onclick="addNewRule('whitelist_rule', 'exception_')"><%~ ANRule %></button>
+						<button id="add_restriction_button" class="btn btn-default btn-add" onclick="addRestrictionModal(false)"><%~ ANRule %></button>
 					</span>
 				</div>
 
@@ -75,6 +73,35 @@
 	<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
 </div>
 
+<div class="modal fade" tabindex="-1" role="dialog" id="restriction_rule_modal">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 id="restriction_rule_modal_title" class="panel-title"><%~ NRRule %></h3>
+			</div>
+			<div class="modal-body">
+				<%in templates/restriction_template %>
+			</div>
+			<div class="modal-footer" id="restriction_rule_modal_button_container">
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="whitelist_rule_modal">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 id="whitelist_rule_modal_title" class="panel-title"><%~ NExcp %></h3>
+			</div>
+			<div class="modal-body">
+				<%in templates/whitelist_template %>
+			</div>
+			<div class="modal-footer" id="whitelist_rule_modal_button_container">
+			</div>
+		</div>
+	</div>
+</div>
 
 <script>
 <!--
