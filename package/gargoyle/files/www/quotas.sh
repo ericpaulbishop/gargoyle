@@ -24,6 +24,31 @@
 	echo "var tcInstalled=\""$(opkg list-installed 2>&1 | grep "^tc")"\";"
 
 	print_quotas
+
+	prAM=$(i18n pAM)
+	prPM=$(i18n pPM)
+	hrAM=$(i18n hAM)
+	hrPM=$(i18n hPM)
+	tfmt=$(uci -q get gargoyle.global.hour_style)
+	tabs=""
+
+	otime() {
+		for h in $(seq 0 23); do
+			tstr=""
+			[ -z $tfmt ] || [ $tfmt = "12" ] && {
+				hr=$(date -u -d $h:00 +"%I:%M")
+				[ $h -lt 12 ] && {
+					tstr="$prAM $hr $hrAM"
+				} || {
+					tstr="$prPM $hr $hrPM"
+				}
+			} || {
+				tstr=$(date -u -d $h:00 +"%H:%M")
+			}
+			echo -e "$tabs<option value=\"$(expr $h \* 3600)\">$tstr</option>"
+			[ $h = 0 ] && tabs="$1"
+		done
+	}
 %>
 	var uci = uciOriginal.clone();
 //-->
@@ -39,10 +64,9 @@
 
 			<div class="panel-body">
 				<div class="row form-group">
+					<span class="col-xs-12" id="add_quota_label" style="text-decoration:underline"><%~ AddQuota %>:</span>
 					<span class="col-xs-12">
-						<span id="add_quota_label" style="text-decoration:underline"><%~ AddQuota %>:</span>
-						<%in templates/quotas_template %>
-						<button id="add_quota_button" class="btn btn-default btn-add" onclick="addNewQuota()"><%~ AddQuota %></button>
+						<button id="add_quota_button" class="btn btn-default btn-add" onclick="addQuotaModal()"><%~ AddQuota %></button>
 					</span>
 				</div>
 
@@ -64,6 +88,20 @@
 	<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
 </div>
 
+<div class="modal fade" tabindex="-1" role="dialog" id="quotas_modal">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 id="quotas_modal_title" class="panel-title"><%~ AddQuota %></h3>
+			</div>
+			<div class="modal-body">
+				<%in templates/quotas_template %>
+			</div>
+			<div class="modal-footer" id="quotas_modal_button_container">
+			</div>
+		</div>
+	</div>
+</div>
 
 <script>
 <!--

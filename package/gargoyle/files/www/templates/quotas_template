@@ -1,30 +1,3 @@
-<%
-	prAM=$(i18n pAM)
-	prPM=$(i18n pPM)
-	hrAM=$(i18n hAM)
-	hrPM=$(i18n hPM)
-	tfmt=$(uci -q get gargoyle.global.hour_style)
-	tabs=""
-
-	otime() {
-		for h in $(seq 0 23); do
-			tstr=""
-			[ -z $tfmt ] || [ $tfmt = "12" ] && {
-				hr=$(date -u -d $h:00 +"%I:%M")
-				[ $h -lt 12 ] && {
-					tstr="$prAM $hr $hrAM"
-				} || {
-					tstr="$prPM $hr $hrPM"
-				}
-			} || {
-				tstr=$(date -u -d $h:00 +"%H:%M")
-			}
-			echo -e "$tabs<option value=\"$(expr $h \* 3600)\">$tstr</option>"
-			[ $h = 0 ] && tabs="$1"
-		done
-	}
-%>
-
 <div id="quotas_no_tc" class="alert alert-danger" role="alert" style="display: none;"><%~ NoTcErr %></div>
 <div class="row form-group">
 	<label class="col-xs-5" id="applies_to_label" for='applies_to_type'><%~ quotas.AppliesTo %>:</label>
