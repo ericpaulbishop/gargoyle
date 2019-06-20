@@ -1,0 +1,71 @@
+				<div class="row form-group">
+					<label class="col-xs-5" id="class_name_label" for="class_name"><%~ SrvClassName %>:</label>
+					<span class="col-xs-7"><input type="text" id="class_name" class="form-control" onkeyup="proofreadLengthRange(this,1,10)" size="12" maxlength="10" /></span>
+				</div>
+
+				<div class="row form-group">
+					<label class="col-xs-5" id="percent_bandwidth_label" for="percent_bandwidth"><%~ PerBandCap %>:</label>
+					<span class="col-xs-7">
+						<input type="text" id="percent_bandwidth" class="form-control" onkeyup="proofreadNumericRange(this,1,100)"  size="5" maxlength="3" />
+						<em>%</em>
+					</span>
+				</div>
+
+				<div><%~ BandMin %>:</div>
+				<div class="indent">
+					<div class="row form-group">
+						<span class="col-xs-12">
+							<input type="radio" name="min_radio" id="min_radio1" onclick="enableAssociatedField(document.getElementById('min_radio2'),'min_bandwidth', '')" />
+							<label for="min_radio1"><%~ BandMinNo %></label>
+						</span>
+					</div>
+					<div class="row form-group">
+						<span class="col-xs-5">
+							<input type="radio" name="min_radio" id="min_radio2" onclick="enableAssociatedField(document.getElementById('min_radio2'),'min_bandwidth', '')" />
+							<label id="min_bandwidth_label" for="min_radio2"><%~ BandMin %>:</label>
+						</span>
+
+						<span class="col-xs-7">
+							<input type="text" id="min_bandwidth" class="form-control" onkeyup="proofreadNumeric(this)"  size="10" maxlength="10" aria-labelledby="min_bandwidth_label"/>
+							<em><%~ Kbs %></em>
+						</span>
+					</div>
+				</div>
+
+				<div><%~ BandMax %>:</div>
+				<div class="indent">
+					<div class="row form-group">
+						<span class="col-xs-12">
+							<input type="radio" name="max_radio" id="max_radio1" onclick="enableAssociatedField(document.getElementById('max_radio2'),'max_bandwidth', '')" />
+							<label for="max_radio1"><%~ BandMaxNo %></label>
+						</span>
+					</div>
+					<div class="row form-group">
+						<span class="col-xs-5">
+							<input type="radio" name="max_radio" id="max_radio2" onclick="enableAssociatedField(document.getElementById('max_radio2'),'max_bandwidth', '')" />
+							<label id="max_bandwidth_label" for="max_radio2"><%~ BandMax %>:</label>
+						</span>
+						<span class="col-xs-7">
+							<input type="text" id="max_bandwidth" class="form-control" onkeyup="proofreadNumeric(this)"  size="10" maxlength="10" aria-labelledby="max_bandwidth_label"/>
+							<em><%~ Kbs %></em>
+						</span>
+					</div>
+				</div>
+
+				<div id="minrtt_container">
+					<div><%~ MinRTT %>:</div>
+					<div class="indent">
+						<div class="row form-group">
+							<span class="col-xs-12">
+								<input type="radio" name="rtt_radio" id="rtt_radio1"/>
+								<label for="rtt_radio1"><%~ ActRTT %></label>
+							</span>
+						</div>
+						<div class="row form-group">
+							<span class="col-xs-12">
+								<input type="radio" name="rtt_radio" id="rtt_radio2" />
+								<label for="rtt_radio2"><%~ OptiWAN %></label>
+							</span>
+						</div>
+					</div>
+				</div>

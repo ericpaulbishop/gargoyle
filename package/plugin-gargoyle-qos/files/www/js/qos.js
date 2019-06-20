@@ -619,12 +619,12 @@ function setQosEnabled()
 	}
 
 	resetRuleControls();
-	resetServiceClassControls(document);
+	resetServiceClassControls();
 }
 
 function addClassificationRule()
 {
-	errors = proofreadClassificationRule(document);
+	errors = proofreadClassificationRule();
 	if(errors.length > 0)
 	{
 		alert(errors.join("\n") + "\n\n"+qosStr.CsErr);
@@ -660,12 +660,12 @@ function addClassificationRule()
 		commentStr = control.value;
 		ruleTable = document.getElementById('qos_rule_table_container').firstChild;
 		addTableRow(ruleTable,[ruleText,classification, createRuleTableCommentButton(commentStr), createRuleTableEditButton()],true,true);
-
+		closeModalWindow('qos_rule_modal');
 		resetRuleControls();
 	}
 }
 
-function proofreadClassificationRule(controlDocument)
+function proofreadClassificationRule()
 {
 	addRuleIds = ["source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "connbytes_kb", "app_protocol", "comment_rule"];
 	validatePktSize = function(text){ return validateNumericRange(text, 1, 1500); };
@@ -678,7 +678,7 @@ function proofreadClassificationRule(controlDocument)
 	toggledMatchCriteria = 0;
 	for(ruleIndex = 0; ruleIndex < addRuleIds.length; ruleIndex++)
 	{
-		toggledMatchCriteria = toggledMatchCriteria + ( controlDocument.getElementById(addRuleIds[ruleIndex]).disabled == true ? 0 : 1);
+		toggledMatchCriteria = toggledMatchCriteria + ( document.getElementById(addRuleIds[ruleIndex]).disabled == true ? 0 : 1);
 		labelIds.push( addRuleIds[ruleIndex] + "_label");
 		returnCodes.push(0);
 	}
@@ -689,7 +689,7 @@ function proofreadClassificationRule(controlDocument)
 	}
 	else
 	{
-		errors = proofreadFields(addRuleIds, labelIds, ruleValidationFunctions, returnCodes, addRuleIds, controlDocument);
+		errors = proofreadFields(addRuleIds, labelIds, ruleValidationFunctions, returnCodes, addRuleIds, document);
 	}
 	return errors;
 }
@@ -709,7 +709,7 @@ function resetRuleControls()
 
 function addServiceClass()
 {
-	errors = proofreadServiceClass(document);
+	errors = proofreadServiceClass();
 	if(errors.length > 0)
 	{
 		alert(errors.join("\n") + "\n\n"+qosStr.SvErr);
@@ -752,21 +752,22 @@ function addServiceClass()
 
 		var classTableObject = document.getElementById('qos_class_table_container').firstChild;
 		addTableRow(classTableObject,newRowData,true,false,removeServiceClassCallback);
-		resetServiceClassControls(document);
+		resetServiceClassControls();
+		closeModalWindow('qos_class_modal');
 	}
 }
-function proofreadServiceClass(controlDocument)
+function proofreadServiceClass()
 {
 	addClassIds=[ "class_name","percent_bandwidth","max_bandwidth" ];
 	labelIds=[ "class_name_label", "percent_bandwidth_label", "max_bandwidth_label" ];
 	classValidationFunctions = [function(text){ return validateLengthRange(text,1,10);}, function(text){return validateNumericRange(text,1,100);}, validateNumeric ];
 	returnCodes= [0,0,0];
-	errors = proofreadFields(addClassIds, labelIds, classValidationFunctions, returnCodes, addClassIds, controlDocument);
+	errors = proofreadFields(addClassIds, labelIds, classValidationFunctions, returnCodes, addClassIds, document);
 	if(errors.length == "")
 	{
 		classTableData = getTableDataArray( document.getElementById('qos_class_table_container').firstChild, true, false );
 		classNameMatches =false;
-		newClassName = controlDocument.getElementById("class_name").value;
+		newClassName = document.getElementById("class_name").value;
 		for(rowIndex=0; rowIndex < classTableData.length && (!classNameMatches); rowIndex++)
 		{
 			existingClassName = classTableData[rowIndex][0];
@@ -782,23 +783,22 @@ function proofreadServiceClass(controlDocument)
 	return errors;
 }
 
-function resetServiceClassControls(controlDocument)
+function resetServiceClassControls()
 {
-	controlDocument.getElementById("class_name").value = "";
-	controlDocument.getElementById("percent_bandwidth").value = "";
+	document.getElementById("class_name").value = "";
+	document.getElementById("percent_bandwidth").value = "";
 
-	controlDocument.getElementById("min_radio1").checked = true;
-	controlDocument.getElementById("min_radio2").checked = false;
-	enableAssociatedField(controlDocument.getElementById("min_radio2"), "min_bandwidth", "", controlDocument);
+	document.getElementById("min_radio1").checked = true;
+	document.getElementById("min_radio2").checked = false;
+	enableAssociatedField(document.getElementById("min_radio2"), "min_bandwidth", "", document);
 
-	controlDocument.getElementById("max_radio1").checked = true;
-	controlDocument.getElementById("max_radio2").checked = false;
-	enableAssociatedField(controlDocument.getElementById("max_radio2"), "max_bandwidth", "", controlDocument);
+	document.getElementById("max_radio1").checked = true;
+	document.getElementById("max_radio2").checked = false;
+	enableAssociatedField(document.getElementById("max_radio2"), "max_bandwidth", "", document);
 
-	if (direction == 'download') {
-		controlDocument.getElementById("rtt_radio1").checked = false;
-		controlDocument.getElementById("rtt_radio2").checked = true;
-	}
+	document.getElementById("rtt_radio1").checked = false;
+	document.getElementById("rtt_radio2").checked = true;
+	document.getElementById("minrtt_container").style.display = direction == 'download' ? "block" : "none";
 }
 
 
@@ -849,170 +849,54 @@ function createRuleTableEditButton()
 	editRuleButton = createInput("button");
 	editRuleButton.textContent = UI.Edit;
 	editRuleButton.className = "btn btn-default btn-edit";
-	editRuleButton.onclick = editRuleTableRow;
+	editRuleButton.onclick = function(){editRuleModal(this);};
 
 	return editRuleButton;
 
 }
-function editRuleTableRow()
+function editRuleTableRow(editRuleWindowRow)
 {
-	if( typeof editRuleWindow != "undefined" )
+	errors = proofreadClassificationRule();
+	if(errors.length > 0)
 	{
-		//opera keeps object around after
-		//window is closed, so we need to deal
-		//with error condition
-		try
+		alert(errors.join("\n") + "\n\n"+qosStr.CUErr);
+	}
+	else
+	{
+		addRuleMatchControls = ["source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "connbytes_kb", "app_protocol"];
+		displayList = [qosStr.Src+": $", qosStr.SrcP+": $", qosStr.Dst+": $", qosStr.DstP+": $",  qosStr.MaxPktLen+": $ "+UI.byt, qosStr.MinPktLen+": $ "+UI.byt, qosStr.TrProto+": $", qosStr.Connb+": $ "+UI.KBy, qosStr.APro+": $"];
+		ruleText = ""
+		for (controlIndex = 0; controlIndex <addRuleMatchControls.length; controlIndex++)
 		{
-			editRuleWindow.close();
-		}
-		catch(e){}
-	}
-
-
-	editRuleWindow = openPopupWindow("qos_edit_rule.sh", "test", 560, 530);
-
-	try
-	{
-
-		saveButton = editRuleWindow.document.createElement('button');
-		saveButton.type= 'button';
-		closeButton = editRuleWindow.document.createElement('button');
-		closeButton.type= 'button';
-	}
-	catch(e)
-	{
-		saveButton = editRuleWindow.createElement('<button type="button"></button>');
-		closeButton = editRuleWindow.createElement('<button type="button"></button>');
-	}
-	saveButton.textContent = UI.CApplyChanges;
-	saveButton.className = "btn btn-primary";
-	closeButton.textContent = UI.CDiscardChanges;
-	closeButton.className = "btn btn-warning";
-
-
-	editRuleWindowRow=this.parentNode.parentNode;
-	if( editRuleWindowRow.children[2].firstChild.lastChild.className.includes("show") )
-	{
-		togglePopup(editRuleWindowRow.children[2].firstChild);
-	}
-
-	// we cant run setup functions until edit window is done loading and there
-	// is no sleep function in javascript, so we implement a recursive solution using
-	// the setTimeout function which runs a specific function after waiting a specified
-	// amount of time
-	runOnRuleEditorLoaded = function ()
-	{
-		update_done=false;
-		if(editRuleWindow.document != null)
-		{
-			if(editRuleWindow.document.getElementById("bottom_button_container") != null)
+			control = document.getElementById(addRuleMatchControls[controlIndex]);
+			controlValue = "";
+			if(control.type == "text")
 			{
-
-				editRuleWindow.document.getElementById("bottom_button_container").appendChild(saveButton);
-				editRuleWindow.document.getElementById("bottom_button_container").appendChild(closeButton);
-
-				//setup edit window controls
-				serviceClassOptions = document.getElementById("default_class").options;
-				for(classIndex = 0; classIndex < serviceClassOptions.length; classIndex++)
-				{
-					addOptionToSelectElement("classification", serviceClassOptions[classIndex].text, serviceClassOptions[classIndex].text, null, editRuleWindow.document);
-				}
-
-				ruleControlIds = ["source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "connbytes_kb", "app_protocol", "comment_rule"];
-
-				criteria = parseRuleMatchCriteria(editRuleWindowRow.firstChild.firstChild.data);
-				criteria.push(editRuleWindowRow.children[2].firstChild.lastChild.innerHTML);	//ugly hack to use existing functionality. look here if things start to go funny
-				for(ruleControlIndex=0; ruleControlIndex < ruleControlIds.length; ruleControlIndex++)
-				{
-					ruleControlId=ruleControlIds[ruleControlIndex];
-					ruleControl = editRuleWindow.document.getElementById(ruleControlId);
-					ruleControlCheckbox = editRuleWindow.document.getElementById("use_" + ruleControlId);
-					if(criteria[ruleControlIndex] != "")
-					{
-						if(ruleControl.type == "text")
-						{
-							ruleControl.value=criteria[ruleControlIndex];
-						}
-						if(ruleControl.type == "select-one")
-						{
-							setSelectedText( ruleControlId, criteria[ruleControlIndex], editRuleWindow.document);
-						}
-						ruleControlCheckbox.checked = true;
-					}
-					else
-					{
-						ruleControlCheckbox.checked = false;
-					}
-					enableAssociatedField(ruleControlCheckbox, ruleControlId, "", editRuleWindow.document);
-				}
-				setSelectedText("classification", editRuleWindowRow.childNodes[1].firstChild.data, editRuleWindow.document);
-
-
-
-
-
-				//exit & save functions
-				closeButton.onclick = function()
-				{
-					editRuleWindow.close();
-				}
-
-				saveButton.onclick = function()
-				{
-					errors = proofreadClassificationRule(editRuleWindow.document);
-					if(errors.length > 0)
-					{
-						alert(errors.join("\n") + "\n\n"+qosStr.CUErr);
-						editRuleWindow.focus();
-					}
-					else
-					{
-						addRuleMatchControls = ["source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "connbytes_kb", "app_protocol"];
-						displayList = [qosStr.Src+": $", qosStr.SrcP+": $", qosStr.Dst+": $", qosStr.DstP+": $",  qosStr.MaxPktLen+": $ "+UI.byt, qosStr.MinPktLen+": $ "+UI.byt, qosStr.TrProto+": $", qosStr.Connb+": $ "+UI.KBy, qosStr.APro+": $"];
-						ruleText = ""
-						for (controlIndex = 0; controlIndex <addRuleMatchControls.length; controlIndex++)
-						{
-							control = editRuleWindow.document.getElementById(addRuleMatchControls[controlIndex]);
-							controlValue = "";
-							if(control.type == "text")
-							{
-								controlValue = control.value;
-							}
-							if(control.type == "select-one")
-							{
-								controlValue = control.options[control.selectedIndex].text;
-							}
-							if(control.disabled == false)
-							{
-								substitution = displayList[controlIndex];
-								substitution = substitution.replace(/\$/, controlValue);
-								ruleText = ruleText == "" ? ruleText +substitution : ruleText + ", " + substitution;
-							}
-						}
-						classification = editRuleWindow.document.getElementById("classification").options[editRuleWindow.document.getElementById("classification").selectedIndex].text;
-						editRuleWindowRow.childNodes[0].firstChild.data = ruleText;
-						editRuleWindowRow.childNodes[0].style.color = "black";
-						editRuleWindowRow.childNodes[1].firstChild.data = classification;
-						editRuleWindowRow.childNodes[1].style.color = "black";
-						control = editRuleWindow.document.getElementById("comment_rule");
-						editRuleWindowRow.childNodes[2].firstChild.lastChild.innerHTML = control.value;	//additional ugly hacks
-						editRuleWindowRow.childNodes[2].firstChild.firstChild.disabled = control.disabled;
-						editRuleWindowRow.childNodes[2].firstChild.firstChild.value    = control.disabled ? "N/A" : "?";
-
-						editRuleWindow.close();
-					}
-				}
-				editRuleWindow.focus();
-				update_done = true;
+				controlValue = control.value;
+			}
+			if(control.type == "select-one")
+			{
+				controlValue = control.options[control.selectedIndex].text;
+			}
+			if(control.disabled == false)
+			{
+				substitution = displayList[controlIndex];
+				substitution = substitution.replace(/\$/, controlValue);
+				ruleText = ruleText == "" ? ruleText +substitution : ruleText + ", " + substitution;
 			}
 		}
-		if(update_done == false)
-		{
-			setTimeout( "runOnRuleEditorLoaded()", 250);
-		}
-	}
+		classification = document.getElementById("classification").options[document.getElementById("classification").selectedIndex].text;
+		editRuleWindowRow.childNodes[0].firstChild.data = ruleText;
+		editRuleWindowRow.childNodes[0].style.color = "black";
+		editRuleWindowRow.childNodes[1].firstChild.data = classification;
+		editRuleWindowRow.childNodes[1].style.color = "black";
+		control = document.getElementById("comment_rule");
+		editRuleWindowRow.childNodes[2].firstChild.lastChild.innerHTML = control.value;	//additional ugly hacks
+		editRuleWindowRow.childNodes[2].firstChild.firstChild.disabled = control.disabled;
+		editRuleWindowRow.childNodes[2].firstChild.firstChild.value    = control.disabled ? "N/A" : "?";
 
-	runOnRuleEditorLoaded();
+		closeModalWindow('qos_rule_modal');
+	}
 }
 
 function createRuleTableCommentButton(commentStr)
@@ -1052,198 +936,82 @@ function createClassTableEditButton(rowIndex)
 	editClassButton = createInput("button");
 	editClassButton.textContent = UI.Edit;
 	editClassButton.className = "btn btn-default btn-edit";
-	editClassButton.onclick = editClassTableRow;
+	editClassButton.onclick = function(){editClassModal(this);};
 	editClassButton.id = "" + rowIndex;
 
 	return editClassButton;
 }
 
 
-function editClassTableRow()
+function editClassTableRow(editClassWindowRow, timer)
 {
-	dynamic_update=false;
-
-	if( typeof editClassWindow != "undefined" )
+	errors = proofreadServiceClass();
+	if(errors.length == 1)
 	{
-		//opera keeps object around after
-		//window is closed, so we need to deal
-		//with error condition
-		try
+		if(errors[0] == qosStr.DCErr && document.getElementById("class_name").value == editClassWindowRow.childNodes[0].firstChild.data)
 		{
-			editClassWindow.close();
+			errors = [];
 		}
-		catch(e){}
 	}
-
-
-	editClassWindow = openPopupWindow("qos_edit_class.sh", "test", 560, 500);
-	try
+	if(errors.length > 0)
 	{
-		saveButton = editClassWindow.document.createElement('button');
-		saveButton.type= 'button';
-		closeButton = editClassWindow.document.createElement('button');
-		closeButton.type= 'button';
+		alert(errors.join("\n") + "\n\n"+qosStr.SUErr);
 	}
-	catch(e)
+	else
 	{
-		saveButton = editClassWindow.createElement('<button type="button"></button>');
-		closeButton = editClassWindow.createElement('<button type="button"></button>');
-	}
-
-	saveButton.textContent = UI.CApplyChanges;
-	saveButton.className = "btn btn-primary";
-	closeButton.textContent = UI.CDiscardChanges;
-	closeButton.className = "btn btn-warning";
-
-	editClassWindowRow=this.parentNode.parentNode;
-	runOnClassEditorLoaded = function ()
-	{
-		update_done=false;
-		if(editClassWindow.document != null)
+		oldClassName = editClassWindowRow.childNodes[0].firstChild.data;
+		newClassName = document.getElementById("class_name").value;
+		if(newClassName != oldClassName)
 		{
-			if(editClassWindow.document.getElementById("bottom_button_container") != null && updateInProgress == false)
+			//swap class name in select elements for new name
+			selectIds = ["default_class", "classification"];
+			for(selectIndex = 0; selectIndex < selectIds.length; selectIndex++)
 			{
-				updateInProgress = true;
-
-				if (direction == "upload") {editClassWindow.document.getElementById('rttdiv').style.display = 'none';}
-
-				/* Watch the window in case the user just closes without using one of the buttons.
-				   in which case we must re-enable the class bandwidth updater */
-				var timer = setInterval(function() {
-				    if(editClassWindow.closed) {
-				        clearInterval(timer);
-				        updateInProgress = false;
-					 dynamic_update=true;
-				    }
-				}, 700);
-
-
-				editClassWindow.document.getElementById("bottom_button_container").appendChild(saveButton);
-				editClassWindow.document.getElementById("bottom_button_container").appendChild(closeButton);
-
-				resetServiceClassControls(editClassWindow.document);
-
-				cells = editClassWindowRow.childNodes;
-				editClassWindow.document.getElementById("class_name").value = cells[0].firstChild.data;
-
-				percent = cells[1].firstChild.data;
-				editClassWindow.document.getElementById("percent_bandwidth").value = percent.substr(0, percent.length-1);
-
-				if(cells[2].firstChild.data != qosStr.ZERO)
+				selectElement = document.getElementById( selectIds[selectIndex] );
+				for(optionIndex = 0; optionIndex < selectElement.options.length; optionIndex++)
 				{
-					editClassWindow.document.getElementById("min_radio2").checked = true;
-					enableAssociatedField(editClassWindow.document.getElementById("min_radio2"), "min_bandwidth", "", editClassWindow.document);
-
-					minBandwidth = cells[2].firstChild.data;
-					editClassWindow.document.getElementById("min_bandwidth").value = minBandwidth;
-				}
-
-				if(cells[3].firstChild.data != qosStr.NOLIMIT)
-				{
-					editClassWindow.document.getElementById("max_radio2").checked = true;
-					enableAssociatedField(editClassWindow.document.getElementById("max_radio2"), "max_bandwidth", "", editClassWindow.document);
-
-					maxBandwidth = cells[3].firstChild.data;
-					editClassWindow.document.getElementById("max_bandwidth").value = maxBandwidth;
-				}
-
-
-				if (cells[4].firstChild.data == qosStr.YES) {
-					editClassWindow.document.getElementById("rtt_radio1").checked = true;
-				} else {
-					editClassWindow.document.getElementById("rtt_radio2").checked = true;
-				}
-
-
-				closeButton.onclick = function()
-				{
-					clearInterval(timer);
-					editClassWindow.close();
-				}
-
-				saveButton.onclick = function()
-				{
-					errors = proofreadServiceClass(editClassWindow.document);
-					if(errors.length == 1)
+					if(selectElement.options[optionIndex].text == oldClassName)
 					{
-						if(errors[0] == qosStr.DCErr && editClassWindow.document.getElementById("class_name").value == editClassWindowRow.childNodes[0].firstChild.data)
-						{
-							errors = [];
-						}
-					}
-					if(errors.length > 0)
-					{
-						alert(errors.join("\n") + "\n\n"+qosStr.SUErr);
-						editClassWindow.focus();
-					}
-					else
-					{
-						oldClassName = editClassWindowRow.childNodes[0].firstChild.data;
-						newClassName = editClassWindow.document.getElementById("class_name").value;
-						if(newClassName != oldClassName)
-						{
-							//swap class name in select elements for new name
-							selectIds = ["default_class", "classification"];
-							for(selectIndex = 0; selectIndex < selectIds.length; selectIndex++)
-							{
-								selectElement = document.getElementById( selectIds[selectIndex] );
-								for(optionIndex = 0; optionIndex < selectElement.options.length; optionIndex++)
-								{
-									if(selectElement.options[optionIndex].text == oldClassName)
-									{
-										selectElement.options[optionIndex].text = newClassName;
-									}
-								}
-							}
-
-
-							//swap class name in rules table for new name && if name matches new name make sure text is not red (indicating deleted class)
-							ruleTable = document.getElementById('qos_rule_table_container').firstChild;
-							ruleTableData = getTableDataArray(ruleTable, true,true);
-							for(ruleIndex = 0; ruleIndex < ruleTableData.length; ruleIndex++)
-							{
-								if(ruleTableData[ruleIndex][1] == oldClassName)
-								{
-									ruleTable.rows[ruleIndex+1].childNodes[1].firstChild.data = newClassName;
-								}
-								if(ruleTableData[ruleIndex][1] == newClassName)
-								{
-									ruleTable.rows[ruleIndex+1].childNodes[0].style.color = "black";
-									ruleTable.rows[ruleIndex+1].childNodes[1].style.color = "black";
-								}
-							}
-						}
-
-						var rowData = classTable[ editClassWindowRow.childNodes[5 + (direction == "download" ? 1:0)].firstChild.id ];
-						rowData.Name    = editClassWindow.document.getElementById("class_name").value ;
-						rowData.Percent = editClassWindow.document.getElementById("percent_bandwidth").value ;
-						rowData.MinBW   = editClassWindow.document.getElementById("min_radio1").checked == true ? qosStr.ZERO : editClassWindow.document.getElementById("min_bandwidth").value;
-						rowData.MaxBW   = editClassWindow.document.getElementById("max_radio1").checked == true ? qosStr.NOLIMIT : editClassWindow.document.getElementById("max_bandwidth").value;
-						rowData.MinRTT  = editClassWindow.document.getElementById("rtt_radio1").checked == true ? qosStr.YES : "";
-
-						editClassWindowRow.childNodes[0].firstChild.data = rowData.Name;
-						editClassWindowRow.childNodes[1].firstChild.data = rowData.Percent + "%";
-						editClassWindowRow.childNodes[2].firstChild.data = rowData.MinBW;
-						editClassWindowRow.childNodes[3].firstChild.data = rowData.MaxBW;
-						editClassWindowRow.childNodes[4].firstChild.data = rowData.MinRTT;
-
-						updateInProgress = false;
-						clearInterval(timer);
-						editClassWindow.close();
+						selectElement.options[optionIndex].text = newClassName;
 					}
 				}
+			}
 
-				editClassWindow.focus();
-				update_done = true;
+			//swap class name in rules table for new name && if name matches new name make sure text is not red (indicating deleted class)
+			ruleTable = document.getElementById('qos_rule_table_container').firstChild;
+			ruleTableData = getTableDataArray(ruleTable, true,true);
+			for(ruleIndex = 0; ruleIndex < ruleTableData.length; ruleIndex++)
+			{
+				if(ruleTableData[ruleIndex][1] == oldClassName)
+				{
+					ruleTable.rows[ruleIndex+1].childNodes[1].firstChild.data = newClassName;
+				}
+				if(ruleTableData[ruleIndex][1] == newClassName)
+				{
+					ruleTable.rows[ruleIndex+1].childNodes[0].style.color = "black";
+					ruleTable.rows[ruleIndex+1].childNodes[1].style.color = "black";
+				}
 			}
 		}
-		if(update_done == false)
-		{
-			setTimeout( "runOnClassEditorLoaded()", 250);
-		}
-	}
 
-	runOnClassEditorLoaded();
+		var rowData = classTable[ editClassWindowRow.childNodes[5 + (direction == "download" ? 1:0)].firstChild.id ];
+		rowData.Name    = document.getElementById("class_name").value ;
+		rowData.Percent = document.getElementById("percent_bandwidth").value ;
+		rowData.MinBW   = document.getElementById("min_radio1").checked == true ? qosStr.ZERO : document.getElementById("min_bandwidth").value;
+		rowData.MaxBW   = document.getElementById("max_radio1").checked == true ? qosStr.NOLIMIT : document.getElementById("max_bandwidth").value;
+		rowData.MinRTT  = document.getElementById("rtt_radio1").checked == true ? qosStr.YES : "";
+
+		editClassWindowRow.childNodes[0].firstChild.data = rowData.Name;
+		editClassWindowRow.childNodes[1].firstChild.data = rowData.Percent + "%";
+		editClassWindowRow.childNodes[2].firstChild.data = rowData.MinBW;
+		editClassWindowRow.childNodes[3].firstChild.data = rowData.MaxBW;
+		editClassWindowRow.childNodes[4].firstChild.data = rowData.MinRTT;
+
+		clearInterval(timer);
+		updateInProgress = false;
+		dynamic_update = true;
+		closeModalWindow('qos_class_modal');
+	}
 }
 
 function parseRuleMatchCriteria(matchText)
@@ -1426,4 +1194,153 @@ function resetFairLinkLimit()
 		}
 	}
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
+}
+
+function addRuleModal()
+{
+	modalButtons = [
+		{"title" : UI.Add, "classes" : "btn btn-primary", "function" : addClassificationRule},
+		"defaultDismiss"
+	];
+
+	modalElements = [];
+
+	resetRuleControls();
+	modalPrepare('qos_rule_modal', qosStr.AddNewClassRule, modalElements, modalButtons);
+	openModalWindow('qos_rule_modal');
+}
+
+function editRuleModal(triggerEl)
+{
+	editRow=triggerEl.parentNode.parentNode;
+	modalButtons = [
+		{"title" : UI.CApplyChanges, "classes" : "btn btn-primary", "function" : function(){editRuleTableRow(editRow);}},
+		"defaultDiscard"
+	];
+
+	modalElements = [];
+
+	//setup edit window controls
+	if(editRow.children[2].firstChild.lastChild.className.includes("show"))
+	{
+		togglePopup(editRuleWindowRow.children[2].firstChild);
+	}
+	serviceClassOptions = document.getElementById("default_class").options;
+	for(classIndex = 0; classIndex < serviceClassOptions.length; classIndex++)
+	{
+		addOptionToSelectElement("classification", serviceClassOptions[classIndex].text, serviceClassOptions[classIndex].text, null, document);
+	}
+
+	ruleControlIds = ["source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "connbytes_kb", "app_protocol", "comment_rule"];
+
+	criteria = parseRuleMatchCriteria(editRow.firstChild.firstChild.data);
+	criteria.push(editRow.children[2].firstChild.lastChild.innerHTML);
+	for(ruleControlIndex=0; ruleControlIndex < ruleControlIds.length; ruleControlIndex++)
+	{
+		ruleControlId=ruleControlIds[ruleControlIndex];
+		ruleControl = document.getElementById(ruleControlId);
+		ruleControlCheckbox = document.getElementById("use_" + ruleControlId);
+		if(criteria[ruleControlIndex] != "")
+		{
+			if(ruleControl.type == "text")
+			{
+				ruleControl.value=criteria[ruleControlIndex];
+			}
+			if(ruleControl.type == "select-one")
+			{
+				setSelectedText( ruleControlId, criteria[ruleControlIndex], document);
+			}
+			ruleControlCheckbox.checked = true;
+		}
+		else
+		{
+			ruleControlCheckbox.checked = false;
+		}
+		enableAssociatedField(ruleControlCheckbox, ruleControlId, "", document);
+	}
+	setSelectedText("classification", editRow.childNodes[1].firstChild.data, document);
+
+	modalPrepare('qos_rule_modal', qosStr.QERulClass, modalElements, modalButtons);
+	openModalWindow('qos_rule_modal');
+}
+
+function addClassModal()
+{
+	modalButtons = [
+		{"title" : UI.Add, "classes" : "btn btn-primary", "function" : addServiceClass},
+		"defaultDismiss"
+	];
+
+	modalElements = [];
+
+	resetServiceClassControls();
+	modalPrepare('qos_class_modal', qosStr.AddNewClassRule, modalElements, modalButtons);
+	openModalWindow('qos_class_modal');
+}
+
+function editClassModal(triggerEl)
+{
+	editRow=triggerEl.parentNode.parentNode;
+	/* Watch the modal in case the user just closes without using one of the buttons.
+	in which case we must re-enable the class bandwidth updater */
+	modalEl = document.getElementById('qos_class_modal');
+	var timer = setInterval(function() {
+		if(!modalEl.classList.contains('in')) {
+			clearInterval(timer);
+			updateInProgress = false;
+			dynamic_update=true;
+		}
+	}, 700);
+	modalButtons = [
+		{"title" : UI.CApplyChanges, "classes" : "btn btn-primary", "function" : function(){editClassTableRow(editRow, timer);}},
+		{"title" : UI.CDiscardChanges, "classes" : "btn btn-warning", "function" : function(){closeModalWindow('qos_class_modal');}}
+	];
+
+	modalElements = [];
+
+	dynamic_update=false;
+	function checkUpdateInProgress()
+	{
+		if(updateInProgress)
+		{
+			window.setTimeout(checkUpdateInProgress, 250);
+		}
+		else
+		{
+			updateInProgress = true;
+
+			resetServiceClassControls();
+
+			cells = editRow.childNodes;
+			document.getElementById("class_name").value = cells[0].firstChild.data;
+			percent = cells[1].firstChild.data;
+			document.getElementById("percent_bandwidth").value = percent.substr(0, percent.length-1);
+			if(cells[2].firstChild.data != qosStr.ZERO)
+			{
+				document.getElementById("min_radio2").checked = true;
+				enableAssociatedField(document.getElementById("min_radio2"), "min_bandwidth", "", document);
+				minBandwidth = cells[2].firstChild.data;
+				document.getElementById("min_bandwidth").value = minBandwidth;
+			}
+			if(cells[3].firstChild.data != qosStr.NOLIMIT)
+			{
+				document.getElementById("max_radio2").checked = true;
+				enableAssociatedField(document.getElementById("max_radio2"), "max_bandwidth", "", document);
+				maxBandwidth = cells[3].firstChild.data;
+				document.getElementById("max_bandwidth").value = maxBandwidth;
+			}
+			if (cells[4].firstChild.data == qosStr.YES)
+			{
+				document.getElementById("rtt_radio1").checked = true;
+			}
+			else
+			{
+				document.getElementById("rtt_radio2").checked = true;
+			}
+
+			modalPrepare('qos_class_modal', qosStr.QESrvClass, modalElements, modalButtons);
+			openModalWindow('qos_class_modal');
+		}
+	}
+	checkUpdateInProgress();
 }
