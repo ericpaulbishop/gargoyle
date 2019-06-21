@@ -1274,7 +1274,7 @@ function addClassModal()
 	modalElements = [];
 
 	resetServiceClassControls();
-	modalPrepare('qos_class_modal', qosStr.AddNewClassRule, modalElements, modalButtons);
+	modalPrepare('qos_class_modal', qosStr.AddNewServiceRule, modalElements, modalButtons);
 	openModalWindow('qos_class_modal');
 }
 
