@@ -1167,6 +1167,10 @@ td.bandwidth_table_column_4
 	text-align: right;
 	border: 1px solid #000
 }
+td.share_user_table_column_2
+{
+	display: none;
+}
 /* Gargoyle Modal Implementation -- mostly bootstrap 3 compatible */
 .modal
 {

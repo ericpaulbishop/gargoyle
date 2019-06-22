@@ -2426,82 +2426,49 @@ function arrToHash(arr)
 	return h
 }
 
+function doConfirmPassword(validatedFunc, invalidFunc)
+{
+	setControlsEnabled(false, true, UI.VPass);
+
+	var commands = "gargoyle_session_validator -p \"" + (document.getElementById("password").value).replace('$','\\$') + "\" -a \"dummy.browser\" -i \"127.0.0.1\""
+	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+	var stateChangeFunction = function(req)
+	{
+		if(req.readyState == 4)
+		{
+			closeModalWindow('password_confirm_modal');
+			var result = req.responseText.split("\n")[0]
+			if(result.match(/^echo \"invalid\"/))
+			{
+				invalidFunc.call(null);
+			}
+			else
+			{
+				validatedFunc.call(null);
+			}
+		}
+	}
+	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
+}
+
 
 function confirmPassword(confirmText, validatedFunc, invalidFunc)
 {
+	modalButtons = [
+		{"title" : UI.OK, "classes" : "btn btn-primary", "function" : function(){doConfirmPassword(validatedFunc, invalidFunc);}},
+		"defaultDismiss"
+	];
+
 	confirmText = confirmText == null ? UI.CPass+":" : confirmText;
-	if( typeof(confirmWindow) != "undefined" )
-	{
-		//opera keeps object around after
-		//window is closed, so we need to deal
-		//with error condition
-		try
-		{
-			confirmWindow.close();
-		}
-		catch(e){}
-	}
-	confirmWindow = openPopupWindow("password_confirm.sh", "password", 560, 260);
 
-	var okButton = createInput("button", confirmWindow.document);
-	var cancelButton = createInput("button", confirmWindow.document);
-
-	okButton.textContent   = UI.OK;
-	okButton.className     = "btn btn-primary";
-	cancelButton.textContent = UI.Cancel;
-	cancelButton.className = "btn btn-warning";
+	modalElements = [
+		{"id" : "confirm_text", "innertext" : confirmText},
+		{"id" : "password", "value" : ""}
+	];
 
 
-	runOnEditorLoaded = function ()
-	{
-		updateDone=false;
-		if(confirmWindow.document != null)
-		{
-			if(confirmWindow.document.getElementById("bottom_button_container") != null)
-			{
-				confirmWindow.document.getElementById("bottom_button_container").appendChild(okButton);
-				confirmWindow.document.getElementById("bottom_button_container").appendChild(cancelButton);
-				setChildText("confirm_text", confirmText, null, null, null, confirmWindow.document);
-
-				cancelButton.onclick = function()
-				{
-					confirmWindow.close();
-				}
-				okButton.onclick = function()
-				{
-					setControlsEnabled(false, true, UI.VPass);
-
-					var commands = "gargoyle_session_validator -p \"" + (confirmWindow.document.getElementById("password").value).replace('$','\\$') + "\" -a \"dummy.browser\" -i \"127.0.0.1\""
-					var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
-					var stateChangeFunction = function(req)
-					{
-						if(req.readyState == 4)
-						{
-							confirmWindow.close();
-							var result = req.responseText.split("\n")[0]
-							if(result.match(/^echo \"invalid\"/))
-							{
-								invalidFunc.call(null);
-							}
-							else
-							{
-								validatedFunc.call(null);
-							}
-						}
-					}
-					runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
-
-				}
-				confirmWindow.focus();
-				updateDone = true;
-			}
-		}
-		if(!updateDone)
-		{
-			setTimeout( "runOnEditorLoaded()", 250);
-		}
-	}
-	runOnEditorLoaded();
+	modalPrepare('password_confirm_modal', UI.CPass, modalElements, modalButtons);
+	openModalWindow('password_confirm_modal');
 }
 
 function getUhttpServerPort(isHttps, serverName, uciData)
@@ -2985,14 +2952,6 @@ function sidebar()
 	}
 }
 
-function openPopupWindow(url, name, width, height)
-{
-	var xCoor = (window.outerWidth - width)/2;
-	var yCoor = (window.outerHeight - height)/2;
-
-	return window.open(url, name, "width=" + width + ",height=" + height + ",left=" + xCoor + ",top=" + yCoor);
-}
-
 function openModalWindow(name)
 {
 	var modal = document.getElementById(name);
@@ -3011,7 +2970,7 @@ function modalPrepare(modalID, title, elements, buttons)
 	defaultDismiss.onclick = function(){closeModalWindow(modalID);};
 	defaultDismiss.className = "btn btn-warning";
 	defaultDismiss.innerText = UI.Cancel;
-	defaultDiscard = defaultDismiss;
+	defaultDiscard = defaultDismiss.cloneNode(true);
 	defaultDiscard.innerText = UI.CDiscardChanges;
 
 	titleEl = document.getElementById(modalID + "_title");
@@ -3030,6 +2989,10 @@ function modalPrepare(modalID, title, elements, buttons)
 			if(element.value !== undefined)
 			{
 				inputEl.value = element.value;
+			}
+			if(element.innertext !== undefined)
+			{
+				inputEl.innerText = element.innertext;
 			}
 			if(element.disable !== undefined)
 			{

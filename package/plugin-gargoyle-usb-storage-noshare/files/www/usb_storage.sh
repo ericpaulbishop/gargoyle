@@ -271,6 +271,8 @@
 	</div>
 </div>
 
+<%in templates/password_confirm_template %>
+
 <script>
 <!--
 	resetData();

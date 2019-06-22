@@ -379,7 +379,7 @@ function addUser()
 		if(userTable == null)
 		{
 			var tableContainer = document.getElementById("user_table_container");
-			userTable = createTable(["", ""], [], "share_user_table", true, false, removeUserCallback);
+			userTable = createTable([usbSStr.User, ""], [], "share_user_table", true, false, removeUserCallback);
 			setSingleChild(tableContainer, userTable);
 		}
 		var userPass = createInput("hidden")
