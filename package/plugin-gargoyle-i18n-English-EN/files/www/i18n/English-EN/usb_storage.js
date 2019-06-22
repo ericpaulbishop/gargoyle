@@ -85,6 +85,7 @@ usbSStr.DupShrErr="Share name is a duplicate";
 usbSStr.UpShrErr="Could not update share.";
 usbSStr.SwpPErr="ERROR: Invalid Allocation Percentages Specified";
 usbSStr.InvPErr="ERROR: Invalid Password";
+usbSStr.NoNFSIPErr="NFS share type with IP access selected, but no IPs are configured";
 usbSStr.ChPass="Change Password";
 usbSStr.Name="Name";
 usbSStr.UDisk="Unmounting Disks";

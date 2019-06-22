@@ -384,7 +384,7 @@ function addUser()
 		}
 		var userPass = createInput("hidden")
 		userPass.value = pass1
-		var editButton = createEditButton(editUser);
+		var editButton = createEditButton(editUserModal);
 		addTableRow(userTable, [ user, userPass, editButton], true, false, removeUserCallback)
 		addOptionToSelectElement("user_access", user, user);
 		userNames.push(user)
@@ -393,6 +393,7 @@ function addUser()
 		document.getElementById("user_pass").value = ""
 		document.getElementById("user_pass_confirm").value = ""
 
+		closeModalWindow('share_user_modal');
 	}
 
 }
@@ -448,86 +449,29 @@ function removeUserCallback(table, row)
 
 }
 
-function editUser()
+function editUser(editShareUserRow)
 {
-	if( typeof(editUserWindow) != "undefined" )
+	var pass1 = document.getElementById("user_pass").value;
+	var pass2 = document.getElementById("user_pass_confirm").value;
+	var errors = []
+	if(pass1 == "" && pass2 == "")
 	{
-		//opera keeps object around after
-		//window is closed, so we need to deal
-		//with error condition
-		try
-		{
-			editUserWindow.close();
-		}
-		catch(e){}
+		errors.push(usbSStr.PwEmErr)
 	}
-
-
-	editUserWindow = openPopupWindow("share_user_edit.sh", "edit", 560, 230);
-	var okButton = createInput("button", editUserWindow.document);
-	var cancelButton = createInput("button", editUserWindow.document);
-
-	okButton.textContent   = usbSStr.ChPass;
-	okButton.className     = "btn btn-primary";
-	cancelButton.textContent = UI.Cancel;
-	cancelButton.className = "btn btn-warning";
-
-
-	editShareUserRow=this.parentNode.parentNode;
-	editShareUser=editShareUserRow.childNodes[0].firstChild.data;
-
-
-	runOnEditorLoaded = function ()
+	if(pass1 != pass2)
 	{
-		updateDone=false;
-		if(editUserWindow.document != null)
-		{
-			if(editUserWindow.document.getElementById("bottom_button_container") != null)
-			{
-				editUserWindow.document.getElementById("share_user_text").appendChild( document.createTextNode(editShareUser) )
-
-
-				editUserWindow.document.getElementById("bottom_button_container").appendChild(okButton);
-				editUserWindow.document.getElementById("bottom_button_container").appendChild(cancelButton);
-
-				cancelButton.onclick = function()
-				{
-					editUserWindow.close();
-				}
-				okButton.onclick = function()
-				{
-					var pass1 = editUserWindow.document.getElementById("new_password").value;
-					var pass2 = editUserWindow.document.getElementById("new_password_confirm").value;
-					var errors = []
-					if(pass1 == "" && pass2 == "")
-					{
-						errors.push(usbSStr.PwEmErr)
-					}
-					if(pass1 != pass2)
-					{
-						errors.push(usbSStr.PwEqErr)
-					}
-					if(errors.length > 0)
-					{
-						alert(errors.join("\n") + "\n"+usbSStr.PwUErr);
-
-					}
-					else
-					{
-						editShareUserRow.childNodes[1].firstChild.value = pass1
-						editUserWindow.close();
-					}
-				}
-				editUserWindow.focus();
-				updateDone = true;
-			}
-		}
-		if(!updateDone)
-		{
-			setTimeout( "runOnEditorLoaded()", 250);
-		}
+		errors.push(usbSStr.PwEqErr)
 	}
-	runOnEditorLoaded();
+	if(errors.length > 0)
+	{
+		alert(errors.join("\n") + "\n"+usbSStr.PwUErr);
+
+	}
+	else
+	{
+		editShareUserRow.childNodes[1].firstChild.value = pass1
+		closeModalWindow('share_user_modal');
+	}
 }
 
 function updateWanFtpVisibility()
@@ -577,7 +521,7 @@ function resetData()
 			var userIndex
 			for(userIndex=0; userIndex < userNames.length; userIndex++)
 			{
-				userEditButton = createEditButton( editUser )
+				userEditButton = createEditButton(editUserModal)
 				userPass = createInput("hidden")
 				userPass.value = ""
 				userTableData.push( [ userNames[userIndex], userPass, userEditButton ] )
@@ -761,7 +705,7 @@ function resetData()
 		getMounted(ftpShares, "vsftpd");
 		getMounted(nfsShares, "nfsd");
 
-		if(setDriveList(document))
+		if(setDriveList())
 		{
 			document.getElementById("sharing_add_heading_container").style.display  = "block";
 			document.getElementById("sharing_add_controls_container").style.display = "block";
@@ -787,7 +731,7 @@ function resetData()
 			vis["cifs"] = shareData[5]
 			vis["ftp"]  = shareData[6]
 			vis["nfs"]  = shareData[7]
-			shareTableData.push( [ shareData[0], shareData[1], "/" + shareData[3], getVisStr(vis), createEditButton(editShare) ] )
+			shareTableData.push( [ shareData[0], shareData[1], "/" + shareData[3], getVisStr(vis), createEditButton(editDiskModal) ] )
 		}
 		var shareTable = createTable([usbSStr.Name, usbSStr.Disk, usbSStr.SDir, usbSStr.STyp, ""], shareTableData, "share_table", true, false, removeShareCallback);
 		var tableContainer = document.getElementById('sharing_mount_table_container');
@@ -834,7 +778,7 @@ function resetData()
 }
 
 //returns (boolean) whether drive list is empty
-function setDriveList(controlDocument)
+function setDriveList()
 {
 
 	var driveList = [];
@@ -854,47 +798,44 @@ function setDriveList(controlDocument)
 			driveDisplayList.push( storageDrives[driveIndex][5].replace(/%20/g, " ") + " (" + driveName + ", " + driveFs + ", " + driveSize + ")" );
 		}
 	}
-	setAllowableSelections("share_disk", driveList, driveDisplayList, controlDocument);
+	setAllowableSelections("share_disk", driveList, driveDisplayList, document);
 
 	return (driveList.length > 0)
 }
 
-function shareSettingsToDefault(controlDocument)
+function shareSettingsToDefault()
 {
-	controlDocument = controlDocument == null ? document : controlDocument
-	var currentDrive = getSelectedValue("share_disk", controlDocument);
+	var currentDrive = getSelectedValue("share_disk", document);
 	var defaultData = [ "share_" + (sharePathList.length + 1), currentDrive,  driveToMountPoints[currentDrive][0], "", driveToMountPoints[currentDrive][0], true, true, true, "none", [], [], "ro", "*" ] ;
-	setDocumentFromShareData(controlDocument, defaultData)
+	setDocumentFromShareData(defaultData)
 }
 
-function createUserAccessTable(clear, controlDocument)
+function createUserAccessTable(clear)
 {
-	controlDocument = controlDocument == null ? document : controlDocument
-	var userAccessTable = controlDocument.getElementById("user_access_table");
+	var userAccessTable = document.getElementById("user_access_table");
 	if(clear || userAccessTable ==  null)
 	{
-		var container = controlDocument.getElementById("user_access_table_container");
-		userAccessTable =  createTable(["", ""], [], "user_access_table", true, false, removeUserAccessCallback, null, controlDocument);
+		var container = document.getElementById("user_access_table_container");
+		userAccessTable =  createTable(["", ""], [], "user_access_table", true, false, removeUserAccessCallback, null, document);
 		setSingleChild(container, userAccessTable);
 	}
 }
 
-function addUserAccess(controlDocument)
+function addUserAccess()
 {
-	controlDocument = controlDocument == null ? document : controlDocument
-	var addUser = getSelectedValue("user_access", controlDocument)
+	var addUser = getSelectedValue("user_access", document)
 	if(addUser == null || addUser == "")
 	{
 		alert(usbSStr.NShUsrErr)
 	}
 	else
 	{
-		var access = getSelectedValue("user_access_type", controlDocument)
-		removeOptionFromSelectElement("user_access", addUser, controlDocument);
+		var access = getSelectedValue("user_access_type", document)
+		removeOptionFromSelectElement("user_access", addUser, document);
 
 		createUserAccessTable(false)
-		var userAccessTable = controlDocument.getElementById("user_access_table");
-		addTableRow(userAccessTable, [ addUser, access ], true, false, removeUserAccessCallback, null, controlDocument)
+		var userAccessTable = document.getElementById("user_access_table");
+		addTableRow(userAccessTable, [ addUser, access ], true, false, removeUserAccessCallback, null, document)
 	}
 }
 function removeUserAccessCallback(table, row)
@@ -953,15 +894,14 @@ function updateFormatPercentages(ctrlId)
 	return valid
 }
 
-function getVis(controlDocument)
+function getVis()
 {
-	controlDocument = controlDocument == null ? document : controlDocument
 	var vis = []
 	var visTypes = ["ftp", "cifs", "nfs"]
 	var vIndex;
 	for(vIndex=0; vIndex < visTypes.length; vIndex++)
 	{
-		vis[ visTypes[vIndex] ] = controlDocument.getElementById( "share_type_" + visTypes[vIndex] ).checked
+		vis[ visTypes[vIndex] ] = document.getElementById( "share_type_" + visTypes[vIndex] ).checked
 	}
 	return vis;
 }
@@ -973,31 +913,29 @@ function getVisStr(vis)
 	return visStr.replace(/\+\+/g, "+").replace(/^\+/, "").replace(/\+$/, "");
 }
 
-function getShareDataFromDocument(controlDocument, originalName)
+function getShareDataFromDocument(originalName)
 {
-	controlDocument = controlDocument == null ? document : controlDocument
+	var shareDrive = getSelectedValue("share_disk", document);
 
-	var shareDrive = getSelectedValue("share_disk", controlDocument);
-
-	var shareSubdir = controlDocument.getElementById("share_dir").value
+	var shareSubdir = document.getElementById("share_dir").value
 	shareSubdir     = shareSubdir.replace(/^\//, "").replace(/\/$/, "")
 
-	var shareSpecificity = getSelectedValue("share_specificity", controlDocument);
-	var shareName = controlDocument.getElementById("share_name").value;
+	var shareSpecificity = getSelectedValue("share_specificity", document);
+	var shareName = document.getElementById("share_name").value;
 	var shareDiskMount =  driveToMountPoints[shareDrive][ ( shareSpecificity == "blkid" ? 0 : 1 ) ];
 	var altDiskMount   = driveToMountPoints[shareDrive][ ( shareSpecificity == "blkid" ? 1 : 0 ) ];
 	var fullSharePath  = (shareDiskMount + "/" + shareSubdir).replace(/\/\//g, "/").replace(/\/$/, "");
 	var altSharePath   = (altDiskMount + "/" + shareSubdir).replace(/\/\//g, "/").replace(/\/$/, "");
 
-	var enabledTypes = getVis(controlDocument);
+	var enabledTypes = getVis();
 
 
 
 
-	var anonymousAccess = getSelectedValue("anonymous_access", controlDocument)
+	var anonymousAccess = getSelectedValue("anonymous_access", document)
 	var roUsers = [];
 	var rwUsers = [];
-	var userAccessTable = controlDocument.getElementById("user_access_table")
+	var userAccessTable = document.getElementById("user_access_table")
 	if(userAccessTable != null)
 	{
 		var userAccessTableData = getTableDataArray(userAccessTable, true, false);
@@ -1009,11 +947,11 @@ function getShareDataFromDocument(controlDocument, originalName)
 			if(rowData[1] == "R/W") { rwUsers.push(rowData[0]); }
 		}
 	}
-	var nfsAccess = getSelectedValue("nfs_access", controlDocument)
-	var nfsAccessIps = getSelectedValue("nfs_policy", controlDocument) == "share" ? "*" : [];
+	var nfsAccess = getSelectedValue("nfs_access", document)
+	var nfsAccessIps = getSelectedValue("nfs_policy", document) == "share" ? "*" : [];
 	if( typeof(nfsAccessIps) != "string")
 	{
-		var nfsIpTable = controlDocument.getElementById("nfs_ip_table");
+		var nfsIpTable = document.getElementById("nfs_ip_table");
 		if(nfsIpTable != null)
 		{
 			var nfsIpData = getTableDataArray(nfsIpTable);
@@ -1038,6 +976,10 @@ function getShareDataFromDocument(controlDocument, originalName)
 			errors.push(usbSStr.NoAAUsrErr);
 		}
 	}
+	if( enabledTypes["nfs"] && getSelectedValue("nfs_policy", document) != "share" && nfsAccessIps.length < 1)
+	{
+		errors.push(usbSStr.NoNFSIPErr);
+	}
 	if( sharePathToShareData[ fullSharePath ] != null || sharePathToShareData[ altSharePath ] != null )
 	{
 		var existing = sharePathToShareData[ fullSharePath ];
@@ -1061,27 +1003,25 @@ function getShareDataFromDocument(controlDocument, originalName)
 	return result;
 }
 
-function setDocumentFromShareData(controlDocument, shareData)
+function setDocumentFromShareData(shareData)
 {
-	controlDocument = controlDocument == null ? document : controlDocument
-
 	var shareDrive = shareData[1]
-	setDriveList(controlDocument);
-	setSelectedValue("share_disk", shareDrive, controlDocument)
-	controlDocument.getElementById("share_dir").value = "/" + shareData[3]
-	controlDocument.getElementById("share_name").value = shareData[0]
+	setDriveList();
+	setSelectedValue("share_disk", shareDrive, document)
+	document.getElementById("share_dir").value = "/" + shareData[3]
+	document.getElementById("share_name").value = shareData[0]
 
 	var shareSpecificity = (shareData[2] == driveToMountPoints[shareDrive][0]) ? "blkid" : "dev";
-	setSelectedValue("share_specificity", shareSpecificity, controlDocument)
+	setSelectedValue("share_specificity", shareSpecificity, document)
 
 
-	controlDocument.getElementById("share_type_cifs").checked = shareData[5]
-	controlDocument.getElementById("share_type_ftp").checked  = shareData[6]
-	controlDocument.getElementById("share_type_nfs").checked  = shareData[7]
+	document.getElementById("share_type_cifs").checked = shareData[5]
+	document.getElementById("share_type_ftp").checked  = shareData[6]
+	document.getElementById("share_type_nfs").checked  = shareData[7]
 
-	setSelectedValue("anonymous_access", shareData[8], controlDocument)
-	createUserAccessTable(true,controlDocument)
-	var userAccessTable = controlDocument.getElementById("user_access_table")
+	setSelectedValue("anonymous_access", shareData[8], document)
+	createUserAccessTable(true)
+	var userAccessTable = document.getElementById("user_access_table")
 	var userIndices = [];
 	userIndices[9] = "rw"
 	userIndices[10] = "ro"
@@ -1094,17 +1034,22 @@ function setDocumentFromShareData(controlDocument, shareData)
 		var ulIndex;
 		for(ulIndex=0;ulIndex < userList.length; ulIndex++)
 		{
-			addTableRow(userAccessTable, [ userList[ulIndex], userType == "rw" ? "R/W" : "R/O" ], true, false, removeUserAccessCallback, null, controlDocument)
+			addTableRow(userAccessTable, [ userList[ulIndex], userType == "rw" ? "R/W" : "R/O" ], true, false, removeUserAccessCallback, null, document)
 			usersWithEntries[ userList[ulIndex] ] = 1
 		}
 	}
 
-	setSelectedValue("nfs_access", shareData[11], controlDocument);
+	setSelectedValue("nfs_access", shareData[11], document);
 	var nfsAccessIps = shareData[12];
-	setSelectedValue("nfs_policy", typeof(nfsAccessIps) == "string" ? "share" : "ip", controlDocument);
+	setSelectedValue("nfs_policy", typeof(nfsAccessIps) == "string" ? "share" : "ip", document);
+	nfsiptablecontainer = document.getElementById("nfs_ip_table_container");
+	if(nfsiptablecontainer .firstChild != null)
+	{
+		nfsiptablecontainer.removeChild(nfsiptablecontainer.firstChild);
+	}
 	if(nfsAccessIps instanceof Array)
 	{
-		addAddressStringToTable(controlDocument,nfsAccessIps.join(","),"nfs_ip_table_container","nfs_ip_table",false, 2, true, 250)
+		addAddressStringToTable(document,nfsAccessIps.join(","),"nfs_ip_table_container","nfs_ip_table",false, 2, true, 250)
 	}
 
 	//update user select element
@@ -1118,16 +1063,16 @@ function setDocumentFromShareData(controlDocument, shareData)
 			usersWithoutEntries.push(u);
 		}
 	}
-	setAllowableSelections("user_access", usersWithoutEntries, usersWithoutEntries, controlDocument);
+	setAllowableSelections("user_access", usersWithoutEntries, usersWithoutEntries, document);
 
-	setShareTypeVisibility(controlDocument)
-	setSharePaths(controlDocument);
+	setShareTypeVisibility()
+	setSharePaths();
 
 }
 
 function addNewShare()
 {
-	var rawShareData = getShareDataFromDocument(document, null)
+	var rawShareData = getShareDataFromDocument(null)
 	var errors = rawShareData["errors"]
 	if(errors.length > 0)
 	{
@@ -1147,24 +1092,24 @@ function addNewShare()
 		nameToSharePath [ shareName ] = fullSharePath
 
 		var shareTable = document.getElementById("share_table")
-		addTableRow(shareTable, [shareName, shareData[1], "/" + shareData[3], shareType, createEditButton(editShare) ], true, false, removeShareCallback)
+		addTableRow(shareTable, [shareName, shareData[1], "/" + shareData[3], shareType, createEditButton(editDiskModal) ], true, false, removeShareCallback)
 
 		shareSettingsToDefault();
+
+		closeModalWindow('share_disk_modal');
 	}
 
 }
 
-function setShareTypeVisibility(controlDocument)
+function setShareTypeVisibility()
 {
-	controlDocument = controlDocument == null ? document : controlDocument
-
-	var vis = getVis(controlDocument);
+	var vis = getVis();
 	vis["ftp_or_cifs"] = vis["ftp"] || vis["cifs"]
 
 	var getTypeDisplay = function(type) { return vis[type] ? type.toUpperCase() : "" }
 	var userLabel = (getTypeDisplay("cifs") + "/" + getTypeDisplay("ftp")).replace(/^\//, "").replace(/\/$/, "");
-	setChildText("anonymous_access_label", usbSStr.FAAcc.replace(/FTP\/CIFS/, userLabel) + ":", null, null, null, controlDocument)
-	setChildText("user_access_label", usbSStr.FAUsr.replace(/FTP\/CIFS/, userLabel) + ":", null, null, null, controlDocument)
+	setChildText("anonymous_access_label", usbSStr.FAAcc.replace(/FTP\/CIFS/, userLabel) + ":", null, null, null, document)
+	setChildText("user_access_label", usbSStr.FAUsr.replace(/FTP\/CIFS/, userLabel) + ":", null, null, null, document)
 
 	var visIds = [];
 	visIds[ "ftp_or_cifs" ] =  [ "anonymous_access_container", "user_access_container" ];
@@ -1176,43 +1121,42 @@ function setShareTypeVisibility(controlDocument)
 		var idIndex;
 		for(idIndex=0; idIndex<ids.length;idIndex++)
 		{
-			controlDocument.getElementById( ids[idIndex] ).style.display = vis[ idType ] ? "block" : "none"
+			document.getElementById( ids[idIndex] ).style.display = vis[ idType ] ? "block" : "none"
 		}
 	}
 	if(vis["nfs"])
 	{
-		setInvisibleIfIdMatches("nfs_policy",  ["share"], "nfs_ip_container",    "block", controlDocument);
+		setInvisibleIfIdMatches("nfs_policy",  ["share"], "nfs_ip_container",    "block", document);
 	}
 }
 
-function setSharePaths(controlDocument)
+function setSharePaths()
 {
-	controlDocument = controlDocument == null ? document : controlDocument;
-	var escapedName=escape(controlDocument.getElementById("share_name").value);
+	var escapedName=escape(document.getElementById("share_name").value);
 	var ip = uciOriginal.get("network", "lan", "ipaddr");
-	if(controlDocument.getElementById("share_type_nfs").checked)
+	if(document.getElementById("share_type_nfs").checked)
 	{
-		controlDocument.getElementById("nfs_path_container").style.display = "block";
-		setChildText("nfs_path", ip + ":/nfs/" + escapedName, null, null, null, controlDocument);
+		document.getElementById("nfs_path_container").style.display = "block";
+		setChildText("nfs_path", ip + ":/nfs/" + escapedName, null, null, null, document);
 	}
 	else
 	{
-		controlDocument.getElementById("nfs_path_container").style.display = "none";
+		document.getElementById("nfs_path_container").style.display = "none";
 	}
-	if(controlDocument.getElementById("share_type_ftp").checked)
+	if(document.getElementById("share_type_ftp").checked)
 	{
-		controlDocument.getElementById("ftp_path_container").style.display = "block";
-		setChildText("ftp_path", "ftp://" + ip + "/" + escapedName, null, null, null, controlDocument);
+		document.getElementById("ftp_path_container").style.display = "block";
+		setChildText("ftp_path", "ftp://" + ip + "/" + escapedName, null, null, null, document);
 	}
 	else
 	{
-		controlDocument.getElementById("ftp_path_container").style.display = "none";
+		document.getElementById("ftp_path_container").style.display = "none";
 	}
 }
 
 
 
-function createEditButton( editFunction )
+function createEditButton(editFunction)
 {
 	editButton = createInput("button");
 	editButton.textContent = UI.Edit;
@@ -1242,108 +1186,50 @@ function removeShareCallback(table, row)
 	setSharePaths();
 }
 
-function editShare()
+function editShare(editRow,editName,editPath)
 {
-	if( typeof(editShareWindow) != "undefined" )
+	var rawShareData = getShareDataFromDocument(editName)
+	var errors = rawShareData["errors"];
+	if(errors.length > 0)
 	{
-		//opera keeps object around after
-		//window is closed, so we need to deal
-		//with error condition
-		try
-		{
-			editShareWindow.close();
-		}
-		catch(e){}
+		alert(errors.join("\n") + "\n"+usbSStr.UpShrErr);
 	}
-
-
-	editShareWindow = openPopupWindow("usb_storage_edit.sh", "edit", 650, 600);
-
-	var saveButton = createInput("button", editShareWindow.document);
-	var closeButton = createInput("button", editShareWindow.document);
-	saveButton.textContent = UI.CApplyChanges;
-	saveButton.className = "btn btn-primary";
-	closeButton.textContent = UI.CDiscardChanges;
-	closeButton.className = "btn btn-warning";
-
-	editRow=this.parentNode.parentNode;
-	editName=editRow.childNodes[0].firstChild.data;
-	editPath=nameToSharePath[editName];
-	editShareData=sharePathToShareData[ editPath ];
-
-
-	var runOnEditorLoaded = function ()
+	else
 	{
-		var updateDone=false;
-		if(editShareWindow.document != null)
+		var shareData = rawShareData["share"]
+		var shareName = shareData[0]
+		var fullSharePath = shareData[4];
+		var shareType = getVisStr( getVis() );
+
+		if(editName != shareName)
 		{
-			if(editShareWindow.document.getElementById("bottom_button_container") != null)
+			delete nameToSharePath[ editName ]
+		}
+		if(editPath != fullSharePath)
+		{
+			var newSharePathList = []
+			while(sharePathList.length > 0)
 			{
-				updateDone = true;
-
-				editShareWindow.document.getElementById("bottom_button_container").appendChild(saveButton);
-				editShareWindow.document.getElementById("bottom_button_container").appendChild(closeButton);
-
-				setDocumentFromShareData(editShareWindow.document, editShareData)
-
-				closeButton.onclick = function()
+				var next = sharePathList.shift();
+				if(next != editPath)
 				{
-					editShareWindow.close();
+					newSharePathList.push(next)
 				}
-				saveButton.onclick = function()
-				{
-					var rawShareData = getShareDataFromDocument(editShareWindow.document, editName)
-					var errors = rawShareData["errors"];
-					if(errors.length > 0)
-					{
-						alert(errors.join("\n") + "\n"+usbSStr.UpShrErr);
-					}
-					else
-					{
-						var shareData = rawShareData["share"]
-						var shareName = shareData[0]
-						var fullSharePath = shareData[4];
-						var shareType = getVisStr( getVis(editShareWindow.document) );
-
-						if(editName != shareName)
-						{
-							delete nameToSharePath[ editName ]
-						}
-						if(editPath != fullSharePath)
-						{
-							var newSharePathList = []
-							while(sharePathList.length > 0)
-							{
-								var next = sharePathList.shift();
-								if(next != editPath)
-								{
-									newSharePathList.push(next)
-								}
-							}
-							newSharePathList.push(fullSharePath)
-							sharePathList = newSharePathList
-							delete sharePathToShareData[ editPath ]
-						}
-						sharePathToShareData[ fullSharePath ] = shareData
-						nameToSharePath [ shareName ] = fullSharePath
-
-						editRow.childNodes[0].firstChild.data = shareName
-						editRow.childNodes[1].firstChild.data = shareData[1]
-						editRow.childNodes[2].firstChild.data = "/" + shareData[3]
-						editRow.childNodes[3].firstChild.data = shareType
-
-						editShareWindow.close();
-					}
-				}
-				editShareWindow.focus();
 			}
+			newSharePathList.push(fullSharePath)
+			sharePathList = newSharePathList
+			delete sharePathToShareData[ editPath ]
 		}
-		if(!updateDone)
-		{
-			setTimeout(runOnEditorLoaded, 250);
-		}
+		sharePathToShareData[ fullSharePath ] = shareData
+		nameToSharePath [ shareName ] = fullSharePath
+
+		editRow.childNodes[0].firstChild.data = shareName
+		editRow.childNodes[1].firstChild.data = shareData[1]
+		editRow.childNodes[2].firstChild.data = "/" + shareData[3]
+		editRow.childNodes[3].firstChild.data = shareType
+
+		closeModalWindow('share_disk_modal');
 	}
-	runOnEditorLoaded();
 }
 
 function unmountAllUsb()
@@ -1501,3 +1387,79 @@ function reloadPage()
 	}
 }
 
+function addUserModal()
+{
+	modalButtons = [
+		{"title" : UI.Add, "classes" : "btn btn-primary", "function" : addUser},
+		"defaultDismiss"
+	];
+
+	newuser = "";
+	userpass = "";
+	userpassconfirm = "";
+
+	modalElements = [
+		{"id" : "new_user", "value" : newuser},
+		{"id" : "user_pass", "value" : userpass},
+		{"id" : "user_pass_confirm", "value" : userpassconfirm}
+	];
+
+	modalPrepare('share_user_modal', usbSStr.AddU, modalElements, modalButtons);
+	openModalWindow('share_user_modal');
+}
+
+function editUserModal()
+{
+	editRow=this.parentNode.parentNode;
+
+	modalButtons = [
+		{"title" : UI.CApplyChanges, "classes" : "btn btn-primary", "function" : function(){editUser(editRow);}},
+		"defaultDiscard"
+	];
+
+	newuser = editRow.childNodes[0].firstChild.data;
+	userpass = "";
+	userpassconfirm = "";
+
+	modalElements = [
+		{"id" : "new_user", "value" : newuser, "disable" : true},
+		{"id" : "user_pass", "value" : userpass},
+		{"id" : "user_pass_confirm", "value" : userpassconfirm}
+	];
+
+	modalPrepare('share_user_modal', usbSStr.ChUPass, modalElements, modalButtons);
+	openModalWindow('share_user_modal');
+}
+
+function addDiskModal()
+{
+	modalButtons = [
+		{"title" : UI.Add, "classes" : "btn btn-primary", "function" : addNewShare},
+		"defaultDismiss"
+	];
+
+	modalElements = [];
+
+	shareSettingsToDefault();
+	modalPrepare('share_disk_modal', usbSStr.ADir, modalElements, modalButtons);
+	openModalWindow('share_disk_modal');
+}
+
+function editDiskModal()
+{
+	editRow=this.parentNode.parentNode;
+	editName=editRow.childNodes[0].firstChild.data;
+	editPath=nameToSharePath[editName];
+	editShareData=sharePathToShareData[editPath];
+
+	modalButtons = [
+		{"title" : UI.CApplyChanges, "classes" : "btn btn-primary", "function" : function(){editShare(editRow,editName,editPath);}},
+		"defaultDiscard"
+	];
+
+	modalElements = [];
+
+	setDocumentFromShareData(editShareData)
+	modalPrepare('share_disk_modal', usbSStr.EshDS, modalElements, modalButtons);
+	openModalWindow('share_disk_modal');
+}

@@ -1,0 +1,13 @@
+				<div id="user_container" class="row form-group">
+					<label class="col-xs-5" id="user_label" for="new_user"><%~ NewU %>:</label>
+					<span class="col-xs-7"><input id="new_user" class="form-control" type="text"/></span>
+				</div>
+
+				<div id="user_pass_container" class="row form-group">
+					<label class="col-xs-5" id="user_pass_label" for="user_pass"><%~ Pasw %>:</label>
+					<span class="col-xs-7"><input id="user_pass" class="form-control" type="password"/></span>
+				</div>
+				<div id="user_pass_confirm_container" class="row form-group">
+					<label class="col-xs-5" id="user_pass_confirm_label" for="user_pass_confirm"><%~ CfPass %>:</label>
+					<span class="col-xs-7"><input id="user_pass_confirm" class="form-control" type="password"/></span>
+				</div>

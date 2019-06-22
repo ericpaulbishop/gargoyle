@@ -99,22 +99,9 @@
 					<span class="col-xs-7"><input id="cifs_workgroup" class="form-control" type="text" size='30'/></span>
 				</div>
 
-				<div id="user_container" class="row form-group">
-					<span class="col-xs-12" id="cifs_user_label" style="text-decoration:underline"><%~ CFUsr %>:</span>
-					<label class="col-xs-5" id="user_label" for="new_user"><%~ NewU %>:</label>
-					<span class="col-xs-7"><input id="new_user" class="form-control" type="text"/></span>
-				</div>
-
+				<span id="cifs_user_label" style="text-decoration:underline"><%~ CFUsr %>:</span>
 				<div id="user_pass_container" class="row form-group">
-					<label class="col-xs-5" id="user_pass_label" for="user_pass"><%~ Pasw %>:</label>
-					<span class="col-xs-7"><input id="user_pass" class="form-control" type="password"/></span>
-				</div>
-				<div id="user_pass_confirm_container" class="row form-group">
-					<label class="col-xs-5" id="user_pass_confirm_label" for="user_pass_confirm"><%~ CfPass %>:</label>
-					<span class="col-xs-7"><input id="user_pass_confirm" class="form-control" type="password"/></span>
-				</div>
-				<div id="user_pass_container" class="row form-group">
-					<span class="col-xs-12"><button id="add_user" class="btn btn-default btn-add" onclick="addUser()"><%~ AddU %></button></span>
+					<span class="col-xs-12"><button id="add_user" class="btn btn-default btn-add" onclick="addUserModal()"><%~ AddU %></button></span>
 				</div>
 
 				<div style="margin-bottom:20px;" class="row form-group">
@@ -127,8 +114,7 @@
 
 				<div id="sharing_add_controls_container" class="row form-group">
 					<span class="col-xs-12">
-						<%in templates/usb_storage_template %>
-						<button id="add_share_button" class="btn btn-default btn-add" onclick="addNewShare()"><%~ ADsk %></button>
+						<button id="add_share_button" class="btn btn-default btn-add" onclick="addDiskModal()"><%~ ADsk %></button>
 					</span>
 				</div>
 				<div class="internal_divider"></div>
@@ -255,6 +241,35 @@
 
 <iframe id="reboot_test" onload="reloadPage()" style="display:none"></iframe>
 
+<div class="modal fade" tabindex="-1" role="dialog" id="share_user_modal">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 id="share_user_modal_title" class="panel-title"><%~ AddU %></h3>
+			</div>
+			<div class="modal-body">
+				<%in templates/share_user_template %>
+			</div>
+			<div class="modal-footer" id="share_user_modal_button_container">
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="share_disk_modal">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 id="share_disk_modal_title" class="panel-title"><%~ ADir %></h3>
+			</div>
+			<div class="modal-body">
+				<%in templates/usb_storage_template %>
+			</div>
+			<div class="modal-footer" id="share_disk_modal_button_container">
+			</div>
+		</div>
+	</div>
+</div>
 
 <script>
 <!--

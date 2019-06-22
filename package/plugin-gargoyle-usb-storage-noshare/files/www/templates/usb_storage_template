@@ -91,12 +91,12 @@
 
 <div id="nfs_spacer" style="margin-bottom:20px"></div>
 
-<div id="ftp_path_container" class="col-xs-12 row form-group">
+<div id="ftp_path_container" class="form-group">
 	<label id="ftp_path_label" for="ftp_path"><%~ FPath %>:</label>
 	<span id="ftp_path"></span>
 </div>
 
-<div id="nfs_path_container" class="col-xs-12 row form-group">
+<div id="nfs_path_container" class="form-group">
 	<label id="nfs_path_label" for="nfs_path"><%~ NPath %>:</label>
 	<span id="nfs_path"></span>
 </div>
