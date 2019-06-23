@@ -81,7 +81,7 @@
 							</div>
 							<div>
 								<span>
-									<button id="upload_lang_button" class="btn btn-default" onclick="do_get_lfile()">Upload ⇧</button>
+									<button id="upload_lang_button" class="btn btn-default" onclick="do_get_lfile()"><%~ Upld %> ⇧</button>
 								</span>
 							</div>
 							<input id="lfile_fname" type="hidden" name="fname" value="" />

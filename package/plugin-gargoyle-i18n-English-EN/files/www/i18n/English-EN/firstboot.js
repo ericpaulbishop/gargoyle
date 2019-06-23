@@ -9,6 +9,7 @@ fbS.Stz="Select your timezone";
 fbS.Sla="Select Language";
 fbS.SSet="Save Settings";
 fbS.ULngF="Upload Language File";
+fbS.Upld="Upload";
 
 //javascript
 fbS.nopsErr="ERROR: You must specify a password";

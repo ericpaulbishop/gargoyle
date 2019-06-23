@@ -85,6 +85,7 @@ usbSStr.DupShrErr="Powielona nazwa udziału";
 usbSStr.UpShrErr="Nie można zaktualizować udziału.";
 usbSStr.SwpPErr="BŁĄD: Niewłaściwe określenie procentowego podziału";
 usbSStr.InvPErr="BŁĄD: Złe hasło";
+usbSStr.NoNFSIPErr="Dla NFS została wybrana polityka dostępu z określonych adresów IP, ale żaden adres nie został określony.";
 usbSStr.ChPass="Zmień hasło";
 usbSStr.Name="Nazwa";
 usbSStr.UDisk="Odmontowywanie nośników";
