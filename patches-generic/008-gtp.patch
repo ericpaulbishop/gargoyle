@@ -1,5 +1,5 @@
---- /dev/null	2015-02-27 13:47:29.743247119 -0500
-+++ b/package/network/services/uhttpd/patches/008-gtp.patch	2015-03-16 13:09:28.407711290 -0400
+--- /dev/null
++++ b/package/network/services/uhttpd/patches/008-gtp.patch
 @@ -0,0 +1,26 @@
 +--- a/client.c	2018-03-13 11:16:20.108052638 -0400
 ++++ b/client.c	2018-03-13 11:18:42.768756208 -0400

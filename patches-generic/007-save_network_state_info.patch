@@ -1,6 +1,6 @@
---- a/package/network/config/netifd/files/lib/netifd/dhcp.script	2015-07-21 12:50:17.035882124 -0400
-+++ b/package/network/config/netifd/files/lib/netifd/dhcp.script	2015-07-21 22:37:42.839313380 -0400
-@@ -4,6 +4,13 @@
+--- a/package/network/config/netifd/files/lib/netifd/dhcp.script
++++ b/package/network/config/netifd/files/lib/netifd/dhcp.script
+@@ -4,6 +4,12 @@
  . /lib/functions.sh
  . /lib/netifd/netifd-proto.sh
  
@@ -10,11 +10,10 @@
 +	uci_set_state "$1" "$2" "$3" "$4"
 +}
 +
-+
  set_classless_routes() {
  	local max=128
  	while [ -n "$1" -a -n "$2" -a $max -gt 0 ]; do
-@@ -51,6 +58,31 @@
+@@ -59,6 +65,31 @@
  	proto_send_update "$INTERFACE"
  
  
@@ -46,8 +45,8 @@
  	if [ "$IFACE6RD" != 0 -a -n "$ip6rd" ]; then
  		local v4mask="${ip6rd%% *}"
  		ip6rd="${ip6rd#* }"
---- /dev/null	2012-09-18 15:11:33.606325627 -0400
-+++ b/package/network/services/ppp/files/etc/ppp/ip-down.d/state	2012-09-25 14:39:52.633923965 -0400
+--- /dev/null
++++ b/package/network/services/ppp/files/etc/ppp/ip-down.d/state
 @@ -0,0 +1,15 @@
 +#!/bin/sh
 +. /lib/functions.sh
@@ -64,8 +63,8 @@
 +	uci_revert_state network "$PPP_IPPARAM"
 +}
 +
---- /dev/null	2012-09-18 15:11:33.606325627 -0400
-+++ b/package/network/services/ppp/files/etc/ppp/ip-up.d/state	2012-09-25 14:38:06.108295459 -0400
+--- /dev/null
++++ b/package/network/services/ppp/files/etc/ppp/ip-up.d/state
 @@ -0,0 +1,22 @@
 +#!/bin/sh
 +
@@ -89,9 +88,9 @@
 +	uci_set_state network "$PPP_IPPARAM" netmask "255.255.255.255"
 +}
 +
---- a/package/network/services/ppp/Makefile	2015-07-21 12:50:17.031882190 -0400
-+++ b/package/network/services/ppp/Makefile	2015-07-21 22:32:37.776295691 -0400
-@@ -188,9 +188,13 @@
+--- a/package/network/services/ppp/Makefile
++++ b/package/network/services/ppp/Makefile
+@@ -223,9 +223,13 @@
  	$(INSTALL_DIR) $(1)/usr/sbin
  	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/sbin/pppd $(1)/usr/sbin/
  	$(INSTALL_DIR) $(1)/etc/ppp

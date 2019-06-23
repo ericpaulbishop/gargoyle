@@ -1,5 +1,5 @@
---- /dev/null	2015-07-12 18:46:53.001433637 -0400
-+++ b/package/kernel/mac80211/patches/969-allow-sta-bridge.patch	2015-08-15 17:50:34.427605398 -0400
+--- /dev/null
++++ b/package/kernel/mac80211/patches/969-allow-sta-bridge.patch
 @@ -0,0 +1,45 @@
 +--- a/net/wireless/util.c	2018-01-22 23:10:57.014111703 -0500
 ++++ b/net/wireless/util.c	2018-01-22 23:14:53.458313048 -0500
@@ -46,14 +46,14 @@
 + 		return 0;
 + 	}
 + 
---- a/package/network/services/hostapd/files/hostapd.sh	2018-01-21 17:03:01.771388636 -0500
-+++ b/package/network/services/hostapd/files/hostapd.sh	2018-01-22 23:28:50.233598486 -0500
-@@ -566,9 +566,6 @@
+--- a/package/network/services/hostapd/files/hostapd.sh
++++ b/package/network/services/hostapd/files/hostapd.sh
+@@ -670,9 +670,6 @@ wpa_supplicant_prepare_interface() {
  			adhoc)
  				fail=1
  			;;
 -			sta)
--				[ "$wds" = 1 ] || fail=1
+-				[ "$wds" = 1 -o "$multi_ap" = 1 ] || fail=1
 -			;;
  		esac
  
