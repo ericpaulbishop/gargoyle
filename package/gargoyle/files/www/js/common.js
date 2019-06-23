@@ -2970,7 +2970,9 @@ function modalPrepare(modalID, title, elements, buttons)
 	defaultDismiss.onclick = function(){closeModalWindow(modalID);};
 	defaultDismiss.className = "btn btn-warning";
 	defaultDismiss.innerText = UI.Cancel;
-	defaultDiscard = defaultDismiss.cloneNode(true);
+	defaultDiscard = document.createElement("button");
+	defaultDiscard.onclick = function(){closeModalWindow(modalID);};
+	defaultDiscard.className = "btn btn-warning";
 	defaultDiscard.innerText = UI.CDiscardChanges;
 
 	titleEl = document.getElementById(modalID + "_title");
