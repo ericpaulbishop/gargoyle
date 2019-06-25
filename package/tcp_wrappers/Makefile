@@ -9,11 +9,11 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=tcp_wrappers
 PKG_VERSION:=7.6
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 PKG_SOURCE:=$(PKG_NAME)_$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=ftp://ftp.porcupine.org/pub/security
-PKG_MD5SUM:=e6fa25f71226d090f34de3f6b122fb5a
+PKG_HASH:=9543d7adedf78a6de0b221ccbbd1952e08b5138717f4ade814039bb489a4315d
 
 PKG_LICENSE:=BSD
 PKG_LICENE_FILES:=DISCLAIMER
@@ -30,7 +30,7 @@ define Package/libwrap
   MAINTAINER:=Peter Wagner <tripolar@gmx.at>
 endef
 
-TARGET_CFLAGS += $(FPIC)
+TARGET_CFLAGS += $(FPIC) -Wall
 
 ifeq ($(CONFIG_USE_MUSL),)
 TARGET_EXTRA_LIBS:=LIBS=-lnsl

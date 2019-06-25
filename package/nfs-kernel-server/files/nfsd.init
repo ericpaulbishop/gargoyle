@@ -7,7 +7,9 @@ STOP=60
 SERVICE_USE_PID=1
 
 NFS_D=/var/lib/nfs
+RECOVERY_D=$NFS_D/v4recovery
 LOCK_D=/var/lib/nfs/sm
+VAR_NFS=/var/lib/nfs
 
 fsid=6669
 valid_found=0
@@ -78,11 +80,6 @@ add_export_line()
 
 start_service() {
 
-	portmap_running=$(ps | grep "portmap" | grep -v "grep")
-	if [ -z "$portmap_running" ] ; then
-		/etc/init.d/portmap start
-	fi
-
 	if [ ! -d /tmp/nfs ] ; then
 		mkdir /tmp/nfs
 	fi
@@ -113,17 +110,14 @@ start_service() {
 	else
 		mv /tmp/tmp_exports /etc/exports
 	fi
-
-
-	portmap_running=$(ps | grep "portmap" | grep -v "grep")
-	if [ -z "$portmap_running" ] ; then
-		echo "ERROR: Couldn't start portmap"
-		exit;
-	fi
 	
 	mkdir -p $NFS_D
+	mkdir -p $RECOVERY_D
 	mkdir -p $LOCK_D
 	touch $NFS_D/rmtab
+
+	mkdir -p $VAR_NFS
+	chown nfs:nfs $VAR_NFS
 
 	sysctl -w fs.nfs.nlm_tcpport=32777 fs.nfs.nlm_udpport=32777 > /dev/null
 
@@ -133,15 +127,11 @@ start_service() {
 	procd_close_instance
 
 	/usr/sbin/exportfs -r
-	/usr/sbin/rpc.nfsd
+	/usr/sbin/rpc.nfsd --grace-time 10
 
 	procd_open_instance
 	procd_set_param command /usr/sbin/rpc.mountd -p 32780 -F
 	procd_close_instance
-
-
-	
-
 }
 
 stop_service() {
