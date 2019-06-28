@@ -114,6 +114,7 @@ start_service() {
 	mkdir -p $NFS_D
 	mkdir -p $RECOVERY_D
 	mkdir -p $LOCK_D
+	chown nfs:nfs $LOCK_D
 	touch $NFS_D/rmtab
 
 	mkdir -p $VAR_NFS
