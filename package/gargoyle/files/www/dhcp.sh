@@ -153,7 +153,7 @@ for (etherIndex in etherData)
 	<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
 </div>
 
-<div class="modal fade" tabindex="-1" role="dialog" id="static_ip_modal">
+<div class="modal fade" tabindex="-1" role="dialog" id="static_ip_modal" aria-hidden="true" aria-labelledby="static_ip_modal_title">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
