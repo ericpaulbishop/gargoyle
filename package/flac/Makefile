@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2006-2009 OpenWrt.org
+# Copyright (C) 2006-2016 OpenWrt.org
 #
 # This is free software, licensed under the GNU General Public License v2.
 # See /LICENSE for more information.
@@ -8,13 +8,19 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=flac
-PKG_VERSION:=1.2.1
-PKG_RELEASE:=1
+PKG_VERSION:=1.3.2
+PKG_RELEASE:=2
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=@SF/flac
-PKG_HASH:=153c8b15a54da428d1f0fadc756c22c7
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
+PKG_SOURCE_URL:=https://downloads.xiph.org/releases/flac/
+PKG_HASH:=91cfc3ed61dc40f47f050a109b08610667d73477af6ef36dcad31c31a4a8d53f
+PKG_MAINTAINER:=Ted Hess <thess@kitschensync.net>
+
 PKG_INSTALL:=1
+
+PKG_LICENSE:=GFDL-1.2 GPL-2 LGPL-2.1 BSD-3-Clause
+PKG_LICENSE_FILES:=README COPYING.FDL COPYING.GPL COPYING.LGPL COPYING.Xiph
+PKG_CPE_ID:=cpe:/a:flac_project:flac
 
 PKG_FIXUP:=autoreconf
 PKG_REMOVE_FILES:=autogen.sh aclocal.m4
@@ -25,23 +31,21 @@ define Package/libflac
   SECTION:=libs
   CATEGORY:=Libraries
   TITLE:=Free Lossless Audio Codec library
-  URL:=http://flac.sourceforge.net/
+  URL:=https://xiph.org/flac
 endef
 
-define Build/Configure
-	$(call Build/Configure/Default, \
-		--disable-cpplibs \
-		--disable-sse \
-		--disable-3dnow \
-		--disable-altivec \
-		--disable-doxgen-docs \
-		--disable-local-xmms-plugin \
-		--disable-xmms-plugin \
-		--disable-ogg \
-		--disable-oggtest \
-		--disable-debug \
-	)
-endef
+CONFIGURE_ARGS += \
+	--disable-cpplibs \
+	--disable-sse \
+	--disable-3dnow \
+	--disable-altivec \
+	--disable-doxgen-docs \
+	--disable-local-xmms-plugin \
+	--disable-xmms-plugin \
+	--disable-ogg \
+	--disable-oggtest \
+	$(if $(CONFIG_DEBUG),--enable-debug) \
+	--enable-static
 
 TARGET_CFLAGS += $(FPIC)
 

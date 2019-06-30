@@ -20,4 +20,3 @@
  
  mostlyclean-compile:
  	-rm -f *.$(OBJEXT)
-
