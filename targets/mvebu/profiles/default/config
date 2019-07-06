@@ -3247,7 +3247,7 @@ CONFIG_PACKAGE_libxtables=y
 #
 # SSL
 #
-# CONFIG_PACKAGE_libgnutls is not set
+CONFIG_PACKAGE_libgnutls=m
 # CONFIG_PACKAGE_libmbedtls is not set
 CONFIG_PACKAGE_libopenssl=y
 
@@ -3382,7 +3382,7 @@ CONFIG_PACKAGE_libfdisk=y
 CONFIG_PACKAGE_libffmpeg-mini=y
 CONFIG_PACKAGE_libflac=y
 # CONFIG_PACKAGE_libgcrypt is not set
-# CONFIG_PACKAGE_libgmp is not set
+CONFIG_PACKAGE_libgmp=m
 # CONFIG_PACKAGE_libgpg-error is not set
 # CONFIG_PACKAGE_libiconv is not set
 CONFIG_PACKAGE_libiconv-full=y
@@ -3408,7 +3408,7 @@ CONFIG_PACKAGE_libnetfilter-conntrack=y
 # CONFIG_PACKAGE_libnetfilter-log is not set
 # CONFIG_PACKAGE_libnetfilter-queue is not set
 # CONFIG_PACKAGE_libnetsnmp is not set
-# CONFIG_PACKAGE_libnettle is not set
+CONFIG_PACKAGE_libnettle=m
 CONFIG_PACKAGE_libnfnetlink=y
 CONFIG_PACKAGE_libnftnl=y
 # CONFIG_PACKAGE_libnghttp2 is not set
@@ -3667,7 +3667,7 @@ CONFIG_PACKAGE_tc=y
 #
 # VPN
 #
-CONFIG_PACKAGE_openvpn-easy-rsa=y
+CONFIG_PACKAGE_openvpn-gargoyle-easy-rsa=y
 # CONFIG_PACKAGE_openvpn-gargoyle-mbedtls is not set
 # CONFIG_PACKAGE_openvpn-gargoyle-nossl is not set
 CONFIG_PACKAGE_openvpn-gargoyle-openssl=y
