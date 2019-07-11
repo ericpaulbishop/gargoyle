@@ -1,0 +1,67 @@
+From bc93013d99d9d756d67da28e3851e79b7cee594e Mon Sep 17 00:00:00 2001
+From: Rosen Penev <rosenp@gmail.com>
+Date: Mon, 29 Apr 2019 14:22:43 -0700
+Subject: [PATCH] openssl: Fix compilation without deprecated OpenSSL APIs
+
+---
+ src/tls.c | 16 +++++++++++-----
+ 1 file changed, 11 insertions(+), 5 deletions(-)
+
+diff --git a/src/tls.c b/src/tls.c
+index b294ea3..5caf793 100644
+--- a/src/tls.c
++++ b/src/tls.c
+@@ -45,6 +45,10 @@
+ # include <openssl/err.h>
+ # include <openssl/rand.h>
+ # include <openssl/evp.h>
++#if OPENSSL_VERSION_NUMBER < 0x10100000L
++#define X509_get0_notBefore X509_get_notBefore
++#define X509_get0_notAfter X509_get_notAfter
++#endif
+ #endif /* HAVE_LIBSSL */
+ 
+ #ifdef HAVE_LIBIDN
+@@ -164,8 +168,10 @@ int tls_lib_init(char **errstr)
+ #ifdef HAVE_LIBSSL
+     int e;
+ 
++#if OPENSSL_VERSION_NUMBER < 0x10100000L
+     SSL_load_error_strings();
+     SSL_library_init();
++#endif
+     if ((e = seed_prng(errstr)) != TLS_EOK)
+     {
+         return e;
+@@ -470,7 +476,7 @@ int tls_cert_info_get(tls_t *tls, tls_cert_info_t *tci, char **errstr)
+     X509 *x509cert;
+     X509_NAME *x509_subject;
+     X509_NAME *x509_issuer;
+-    ASN1_TIME *asn1time;
++    const ASN1_TIME *asn1time;
+     int nid[6] = { NID_commonName,
+         NID_organizationName,
+         NID_organizationalUnitName,
+@@ -515,8 +521,8 @@ int tls_cert_info_get(tls_t *tls, tls_cert_info_t *tci, char **errstr)
+         *errstr = xasprintf(_("%s: error getting SHA1 fingerprint"), errmsg);
+         return TLS_ECERT;
+     }
+-    asn1time = X509_get_notBefore(x509cert);
+-    if (asn1time_to_time_t((char *)asn1time->data,
++    asn1time = X509_get0_notBefore(x509cert);
++    if (asn1time_to_time_t((const char *)asn1time->data,
+                 (asn1time->type != V_ASN1_GENERALIZEDTIME),
+                 &(tci->activation_time)) != 0)
+     {
+@@ -525,8 +531,8 @@ int tls_cert_info_get(tls_t *tls, tls_cert_info_t *tci, char **errstr)
+         tls_cert_info_free(tci);
+         return TLS_ECERT;
+     }
+-    asn1time = X509_get_notAfter(x509cert);
+-    if (asn1time_to_time_t((char *)asn1time->data,
++    asn1time = X509_get0_notAfter(x509cert);
++    if (asn1time_to_time_t((const char *)asn1time->data,
+                 (asn1time->type != V_ASN1_GENERALIZEDTIME),
+                 &(tci->expiration_time)) != 0)
+     {
+

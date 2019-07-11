@@ -10,7 +10,7 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=msmtp
 PKG_VERSION:=1.8.4
-PKG_RELEASE:=2
+PKG_RELEASE:=3
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
 PKG_SOURCE_URL:=https://marlam.de/msmtp/releases
@@ -46,7 +46,7 @@ endef
 
 define Package/msmtp
 $(call Package/msmtp/Default)
-  DEPENDS+= +libgnutls +ca-bundle
+  DEPENDS+= +libopenssl +ca-bundle
   TITLE+= (with SSL support)
   VARIANT:=ssl
 endef
@@ -104,7 +104,7 @@ CONFIGURE_ARGS += \
 	--without-msmtpd
 
 ifeq ($(BUILD_VARIANT),ssl)
-	CONFIGURE_ARGS += --with-tls=gnutls
+	CONFIGURE_ARGS += --with-tls=openssl
 else
 	CONFIGURE_ARGS += --without-tls
 endif
@@ -115,6 +115,9 @@ define Package/msmtp/install
 		$(1)/etc/msmtprc
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(CP) $(PKG_INSTALL_DIR)/usr/bin/msmtp $(1)/usr/bin/
+	$(INSTALL_DIR) $(1)/usr/sbin $(1)/usr/lib
+	ln -sf ../bin/msmtp $(1)/usr/sbin/sendmail
+	ln -sf ../bin/msmtp $(1)/usr/lib/sendmail
 endef
 
 define Package/msmtp-mta/install
