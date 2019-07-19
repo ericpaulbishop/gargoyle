@@ -2291,7 +2291,7 @@ CONFIG_PACKAGE_netifd=y
 CONFIG_PACKAGE_nvram=y
 # CONFIG_PACKAGE_om-watchdog is not set
 CONFIG_PACKAGE_openwrt-keyring=y
-CONFIG_PACKAGE_opkg=y
+# CONFIG_PACKAGE_opkg is not set
 CONFIG_PACKAGE_otrx=y
 CONFIG_PACKAGE_procd=y
 
@@ -3354,7 +3354,7 @@ CONFIG_PACKAGE_libubus=y
 # CONFIG_PACKAGE_libubus-lua is not set
 CONFIG_PACKAGE_libuci=y
 # CONFIG_PACKAGE_libuci-lua is not set
-CONFIG_PACKAGE_libuclient=y
+# CONFIG_PACKAGE_libuclient is not set
 # CONFIG_PACKAGE_libunwind is not set
 # CONFIG_PACKAGE_libusb-1.0 is not set
 # CONFIG_PACKAGE_libusb-compat is not set
@@ -3670,7 +3670,7 @@ CONFIG_PACKAGE_qos-gargoyle=y
 # CONFIG_PACKAGE_soloscli is not set
 # CONFIG_PACKAGE_tcpdump is not set
 # CONFIG_PACKAGE_tcpdump-mini is not set
-CONFIG_PACKAGE_uclient-fetch=y
+# CONFIG_PACKAGE_uclient-fetch is not set
 # CONFIG_PACKAGE_umbim is not set
 # CONFIG_PACKAGE_umdns is not set
 # CONFIG_PACKAGE_vti is not set
