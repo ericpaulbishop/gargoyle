@@ -255,6 +255,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 							<option value="VHT40">40MHz</option>
 							<option value="VHT80">80MHz</option>
 							<option value="VHT160">160MHz</option>
+							<option value="VHT80P80">80+80MHz</option>
 						</select>
 					</span>
 				</div>
@@ -331,6 +332,12 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					<span class="col-xs-7">
 						<select id="bridge_channel_5ghz" class="form-control" onchange="setChannel(this)" ></select>
 					</span>
+					<div id="bridge_channel_seg2_5ghz_container">
+						<label class="col-xs-5" for="bridge_channel_seg2_5ghz" id="bridge_channel_seg2_5ghz_label"><%~ WChn %> 2:</label>
+						<span class="col-xs-7">
+							<select id="bridge_channel_seg2_5ghz" class="form-control" onchange="setChannel(this)" ></select>
+						</span>
+					</div>
 					<span class="alert alert-warning col-xs-12" role="alert" id="bridge_channel_5ghz_dfs"><%~ DFSWarning %></span>
 				</div>
 
@@ -746,6 +753,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 							<option value="VHT40">40MHz</option>
 							<option value="VHT80">80MHz</option>
 							<option value="VHT160">160MHz</option>
+							<option value="VHT80P80">80+80MHz</option>
 						</select>
 					</span>
 				</div>
@@ -951,6 +959,12 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					<span class="col-xs-7" >
 						<select class="form-control" id="wifi_channel1_5ghz" onchange="setChannel(this)" ></select>
 					</span>
+					<div id="wifi_channel1_seg2_5ghz_container">
+					<label class="col-xs-5" for="wifi_channel1_seg2_5ghz" id="wifi_channel1_seg2_5ghz_label"><%~ WChn %> 2 (5GHz):</label>
+					<span class="col-xs-7" >
+						<select class="form-control" id="wifi_channel1_seg2_5ghz" onchange="setChannel(this)" ></select>
+					</span>
+					</div>
 					<span class="alert alert-warning col-xs-12" role="alert" id="wifi_channel1_5ghz_dfs"><%~ DFSWarning %></span>
 				</div>
 

@@ -12,12 +12,14 @@ print_mac80211_channels_for_wifi_dev()
 	echo "nextChPwr  = [];" >> "$out"
 	mode=$(uci get wireless.$wifi_dev.hwmode)
 
-	wifiN=$(iwinfo $wifi_dev h | sed 's/\bVHT[0-9]\{2,3\}//g' | sed 's/^[ ]*//')
+	wifiN=$(iwinfo $wifi_dev h | sed 's/\bVHT[0-9]\{2,3\}\(+[0-9]\{2\}\)\?//g' | sed 's/^[ ]*//')
 	wifiAC=$(iwinfo $wifi_dev h | sed 's/\bHT[0-9]\{2,3\}//g' | sed 's/^[ ]*//')
 	if [ "$wifiAC" ] ; then
 		maxAC=$(echo $wifiAC | awk -F " VHT" '{print $NF}')
+		AC80P80=$(echo $wifiAC | grep "VHT80+80")
 	else
 		maxAC="0"
+		AC80P80=""
 	fi
 
 	#802.11ac should only be able to operate on the "A" device
@@ -39,6 +41,11 @@ print_mac80211_channels_for_wifi_dev()
 			echo "var GwifiN = false;" >> "$out"
 		fi
 		echo "var maxACwidth = \"$maxAC\" ;" >> "$out"
+		if [ "$AC80P80" ] ; then
+			echo "var AC80P80 = true;" >> "$out"
+		else
+			echo "var AC80P80 = false;" >> "$out"
+		fi
 	else
 		chId="G"
 		echo "wifiDevG=\"$wifi_dev\";" >> "$out"
