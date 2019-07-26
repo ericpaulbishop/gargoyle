@@ -130,6 +130,8 @@ basicS.RnwL="Acquiring new DHCP Lease";
 basicS.RlsL="Releasing DHCP Lease";
 basicS.ScnMo="Scanning For Mobile Devices";
 basicS.NoDv="No devices found";
+basicS.SameChanSeg="80+80MHz channel segments cannot be the same";
+basicS.ContigChanSeg="80+80MHz channel segments cannot be contiguous";
 
 basicS.WANIntr="WAN Interface";
 basicS.Mo3gQMI="USB Modem (QMI)";
