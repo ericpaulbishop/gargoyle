@@ -277,7 +277,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="bridge_list_ssid_container" class="row form-group">
 					<label class="col-xs-5" for="bridge_list_ssid" id="bridge_list_ssid_label"><%~ Join %>:</label>
 					<span class="col-xs-7">
-						<select id="bridge_list_ssid" style="width:180px;max-width:180px" onchange="setSsidVisibility(this.id)" >
+						<select id="bridge_list_ssid" class="form-control" style="width:180px;max-width:180px" onchange="setSsidVisibility(this.id)" >
 							<option value="custom"><%~ Other %></option>
 						</select>
 						<button class="btn btn-default" id="bridge_rescan_button" onclick="scanWifi('bridge_custom_ssid')"><%~ RScn %></button>
@@ -328,10 +328,12 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				</div>
 
 				<div id="bridge_channel_5ghz_container" class="row form-group">
-					<label class="col-xs-5" for="bridge_channel_5ghz" id="bridge_channel_5ghz_label"><%~ WChn %>:</label>
-					<span class="col-xs-7">
-						<select id="bridge_channel_5ghz" class="form-control" onchange="setChannel(this)" ></select>
-					</span>
+					<div id="bridge_channel_seg1_5ghz_container">
+						<label class="col-xs-5" for="bridge_channel_5ghz" id="bridge_channel_5ghz_label"><%~ WChn %>:</label>
+						<span class="col-xs-7">
+							<select id="bridge_channel_5ghz" class="form-control" onchange="setChannel(this)" ></select>
+						</span>
+					</div>
 					<div id="bridge_channel_seg2_5ghz_container">
 						<label class="col-xs-5" for="bridge_channel_seg2_5ghz" id="bridge_channel_seg2_5ghz_label"><%~ WChn %> 2:</label>
 						<span class="col-xs-7">
@@ -955,15 +957,17 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				</div>
 
 				<div id="wifi_channel1_5ghz_container" class="row indent">
-					<label class="col-xs-5" for="wifi_channel1_5ghz" id="wifi_channel1_5ghz_label"><%~ WChn %> (5GHz):</label>
-					<span class="col-xs-7" >
-						<select class="form-control" id="wifi_channel1_5ghz" onchange="setChannel(this)" ></select>
-					</span>
+					<div id="wifi_channel1_seg1_5ghz_container">
+						<label class="col-xs-5" for="wifi_channel1_5ghz" id="wifi_channel1_5ghz_label"><%~ WChn %> (5GHz):</label>
+						<span class="col-xs-7" >
+							<select class="form-control" id="wifi_channel1_5ghz" onchange="setChannel(this)" ></select>
+						</span>
+					</div>
 					<div id="wifi_channel1_seg2_5ghz_container">
-					<label class="col-xs-5" for="wifi_channel1_seg2_5ghz" id="wifi_channel1_seg2_5ghz_label"><%~ WChn %> 2 (5GHz):</label>
-					<span class="col-xs-7" >
-						<select class="form-control" id="wifi_channel1_seg2_5ghz" onchange="setChannel(this)" ></select>
-					</span>
+						<label class="col-xs-5" for="wifi_channel1_seg2_5ghz" id="wifi_channel1_seg2_5ghz_label"><%~ WChn %> 2 (5GHz):</label>
+						<span class="col-xs-7" >
+							<select class="form-control" id="wifi_channel1_seg2_5ghz" onchange="setChannel(this)" ></select>
+						</span>
 					</div>
 					<span class="alert alert-warning col-xs-12" role="alert" id="wifi_channel1_5ghz_dfs"><%~ DFSWarning %></span>
 				</div>
