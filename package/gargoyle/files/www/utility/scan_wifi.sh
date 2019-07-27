@@ -36,8 +36,8 @@
 			i_info=$( iwinfo "$i" info 2>/dev/null )
 			is_sta=$( printf "$i_info\n" | grep "Mode: *Client" )
 			if [ -n "$is_sta" ] ; then
-				is_g=$(   printf "$i_info\n" | egrep "802.11((b)|(bg)|(gb)|(g)|(gn)|(bgn))" )
-				is_a=$(   printf "$i_info\n" | egrep "802.11an" )
+				is_g=$(   printf "$i_info\n" | egrep "802.11((b)|(bg)|(g)|(gn)|(bgn))" )
+				is_a=$(   printf "$i_info\n" | egrep "802.11((a)|(an)|(anac)|(nac)|(ac))" )
 				if [ -n "$is_g" ] ; then
 					g_sta="$i"
 				elif [ -n "$is_a" ] ; then
@@ -54,7 +54,7 @@
 		fi
 
 		if [ `uci show wireless | grep wifi-device | wc -l`"" = "2" ] && [ -e "/sys/class/ieee80211/phy1" ] && [ ! `uci get wireless.@wifi-device[0].hwmode`"" = `uci get wireless.@wifi-device[1].hwmode`""  ] ; then
-			phy0_is_g=$(iw phy0 info | grep " 2.*MHz")
+			phy0_is_g=$(iw phy0 info | grep "2[0-9]\{3\} MHz \[[0-9]\{1,3\}\]")
 			g_phy="phy0"
 			a_phy="phy1"
 			if [ -z "$phy0_is_g" ] ; then
