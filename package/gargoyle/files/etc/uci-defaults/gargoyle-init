@@ -71,17 +71,6 @@ while [ "$next_include" = "include" ] ; do
 done
 
 
-
-# add new busybox ntp system section if necessary
-ntp_section=$(uci get system.ntp 2>/dev/null)
-if [ "$ntp_section" != "timeserver" ] ; then
-	uci del system.ntp 2>/dev/null
-	uci set system.ntp="timeserver"                 2>/dev/null
-	uci add_list system.ntp.server="0.pool.ntp.org" 2>/dev/null
-	uci add_list system.ntp.server="1.pool.ntp.org" 2>/dev/null
-	uci add_list system.ntp.server="2.pool.ntp.org" 2>/dev/null
-fi
-
 # prevent automount by block-mount/fstab
 if [ -e /etc/init.d/usb_storage -a -e /etc/config/fstab ]; then
 	uci set fstab.@global[0].anon_mount=0
