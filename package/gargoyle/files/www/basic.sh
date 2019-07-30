@@ -353,9 +353,12 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					<span class="col-xs-7">
 						<select id="bridge_encryption" class="form-control" onchange="setBridgeVisibility()">
 							<option value="none"><%~ None %></option>
+							<option value="sae-mixed">WPA3/WPA2 SAE/PSK</option>
+							<option value="sae">WPA3 SAE</option>
 							<option value="psk2">WPA2 PSK</option>
 							<option value="psk">WPA PSK</option>
 							<option value="wep">WEP</option>
+							<option value="owe">OWE</option>
 						</select>
 					</span>
 				</div>

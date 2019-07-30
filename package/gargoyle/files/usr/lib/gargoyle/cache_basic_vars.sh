@@ -154,6 +154,11 @@ else
 	echo "var dualBandWireless=false;" >> "$out_file"
 fi
 
+echo "var wpad_eap = $(hostapd -veap && echo 'true' || echo 'false');" >> "$out_file"
+echo "var wpad_sae = $(hostapd -vsae && echo 'true' || echo 'false');" >> "$out_file"
+echo "var wpad_owe = $(hostapd -vowe && echo 'true' || echo 'false');" >> "$out_file"
+echo "var wpad_sb192 = $(hostapd -vsuiteb192 && echo 'true' || echo 'false');" >> "$out_file"
+
 awk -F= '/DISTRIB_TARGET/{printf "var distribTarget=%s;\n", $2}' /etc/openwrt_release >> "$out_file"
 
 echo $(ping -c 1 8.8.8.8 >/dev/null 2>/dev/null && gipquery -g -r JS) >> "$out_file"

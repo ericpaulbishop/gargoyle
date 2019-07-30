@@ -1264,11 +1264,47 @@ function setWifiVisibility()
 	var wifiMode=getSelectedValue("wifi_mode");
 	if(wifiMode == "ap+wds")
 	{
-		setAllowableSelections('wifi_encryption1', ['none', 'psk2', 'psk', 'wep'], [basicS.None, 'WPA2 PSK', 'WPA PSK', 'WEP']);
+		var values = ['none', 'psk2', 'psk', 'wep'];
+		var names = [basicS.None, 'WPA2 PSK', 'WPA PSK', 'WEP'];
+		if(wpad_sae)
+		{
+			values.splice(values.indexOf('psk2'),0,'sae-mixed','sae');
+			names.splice(names.indexOf('WPA2 PSK'),0,'WPA3/WPA2 SAE/PSK','WPA3 SAE');
+		}
+		if(wpad_owe)
+		{
+			values.push('owe');
+			names.push('OWE');
+		}
+		setAllowableSelections('wifi_encryption1', values, names);
 	}
 	else
 	{
-		setAllowableSelections('wifi_encryption1', ['none', 'psk2', 'psk', 'wep', 'wpa', 'wpa2'], [basicS.None, 'WPA2 PSK', 'WPA PSK', 'WEP', 'WPA RADIUS', 'WPA2 RADIUS']);
+		var values = ['none', 'psk2', 'psk', 'wep'];
+		var names = [basicS.None, 'WPA2 PSK', 'WPA PSK', 'WEP'];
+		if(wpad_sae)
+		{
+			values.splice(values.indexOf('psk2'),0,'sae-mixed','sae');
+			names.splice(names.indexOf('WPA2 PSK'),0,'WPA3/WPA2 SAE/PSK','WPA3 SAE');
+		}
+		if(wpad_owe)
+		{
+			values.push('owe');
+			names.push('OWE');
+		}
+		if(wpad_eap)
+		{
+			values.push('wpa2');
+			names.push('WPA2 RADIUS');
+			values.push('wpa');
+			names.push('WPA RADIUS');
+			if(wpad_sb192)
+			{
+				//values.splice(values.indexOf('wpa2'),0,'wpa3');
+				//names.splice(names.indexOf('WPA2 RADIUS'),0,'WPA3 RADIUS');
+			}
+		}
+		setAllowableSelections('wifi_encryption1', values, names);
 	}
 
 	if(wifiMode == 'adhoc')
@@ -1279,7 +1315,19 @@ function setWifiVisibility()
 	else
 	{
 		document.getElementById("wifi_ssid2_label").firstChild.data = basicS.Join+":";
-		setAllowableSelections('wifi_encryption2', ['none', 'psk2', 'psk', 'wep'], [basicS.None, 'WPA2 PSK', 'WPA PSK', 'WEP']);
+		var values = ['none', 'psk2', 'psk', 'wep'];
+		var names = [basicS.None, 'WPA2 PSK', 'WPA PSK', 'WEP'];
+		if(wpad_sae)
+		{
+			values.splice(values.indexOf('psk2'),0,'sae-mixed','sae');
+			names.splice(names.indexOf('WPA2 PSK'),0,'WPA3/WPA2 SAE/PSK','WPA3 SAE');
+		}
+		if(wpad_owe)
+		{
+			values.push('owe');
+			names.push('OWE');
+		}
+		setAllowableSelections('wifi_encryption2', values, names);
 	}
 
 	if(GwifiN == false)
@@ -1374,7 +1422,7 @@ function setWifiVisibility()
 
 	var mf = getSelectedValue("mac_filter_enabled") == "enabled" ? 1 : 0;
 	var e1 = document.getElementById('wifi_encryption1').value;
-	var p1 = (e1 != 'none' && e1 != 'wep') ? 1 : 0;
+	var p1 = (e1 != 'none' && e1 != 'wep' && e1 != 'owe') ? 1 : 0;
 	var w1 = (e1 == 'wep') ? 1 : 0;
 	var r1 = (e1 == 'wpa' || e1 == 'wpa2') ? 1 : 0;
 	var gns = (wirelessDriver == "mac80211" && !isb43); //drivers that support guest networks
@@ -1388,7 +1436,7 @@ function setWifiVisibility()
 	var e2 = document.getElementById('wifi_fixed_encryption2').style.display != 'none' ? document.getElementById('wifi_fixed_encryption2').firstChild.data : getSelectedValue('wifi_encryption2');
 	var b = (GwifiN ? 0 : 1) && (AwifiN ? 0 : 1); //we shouldnt have to look for AC here
 
-	var p2 = e2.match(/psk/) || e2.match(/WPA/) ? 1 : 0;
+	var p2 = e2.match(/sae/) || e2.match(/psk/) || e2.match(/WPA/) ? 1 : 0;
 	var w2 = e2.match(/wep/) || e2.match(/WEP/) ? 1 : 0;
 
 	var wc = checkWifiCountryVisibility();
@@ -1441,8 +1489,21 @@ function setBridgeVisibility()
 
 	if(document.getElementById("global_bridge").checked)
 	{
+		var values = ['none', 'psk2', 'psk', 'wep'];
+		var names = [basicS.None, 'WPA2 PSK', 'WPA PSK', 'WEP'];
+		if(wpad_sae)
+		{
+			values.splice(values.indexOf('psk2'),0,'sae-mixed','sae');
+			names.splice(names.indexOf('WPA2 PSK'),0,'WPA3/WPA2 SAE/PSK','WPA3 SAE');
+		}
+		if(wpad_owe)
+		{
+			values.push('owe');
+			names.push('OWE');
+		}
+		setAllowableSelections('bridge_encryption', values, names);
 		var brenc = document.getElementById("bridge_fixed_encryption_container").style.display == "none" ? getSelectedValue("bridge_encryption") : document.getElementById("bridge_fixed_encryption").firstChild.data;
-		document.getElementById("bridge_pass_container").style.display = brenc.match(/psk/) || brenc.match(/WPA/) ? "block" : "none";
+		document.getElementById("bridge_pass_container").style.display = brenc.match(/sae/) || brenc.match(/psk/) || brenc.match(/WPA/) ? "block" : "none";
 		document.getElementById("bridge_wep_container").style.display  = brenc.match(/wep/) || brenc.match(/WEP/) ? "block" : "none";
 
 		var bridgeMode = getSelectedValue("bridge_mode")
@@ -2571,9 +2632,9 @@ function setSsidVisibility(selectId)
 		}
 		var be = getSelectedValue('bridge_encryption');
 		var we = getSelectedValue('wifi_encryption2');
-		var bp = be.match(/psk/) || be.match(/WPA/) ? 1 : 0;
+		var bp = be.match(/sae/) || be.match(/psk/) || be.match(/WPA/) ? 1 : 0;
 		var bw = be.match(/wep/) || be.match(/WEP/) ? 1 : 0;
-		var wp = we.match(/psk/) || we.match(/WPA/) ? 1 : 0;
+		var wp = we.match(/sae/) || we.match(/psk/) || we.match(/WPA/) ? 1 : 0;
 		var ww = we.match(/wep/) || we.match(/WEP/) ? 1 : 0;
 		setVisibility(visIds , [1,ic,0,ic,inc,ic,inc,  1,ic,0,ic,inc,ic,inc,  ic*isAp,inc*isAp,  wp,ww,bp,bw] );
 	}
@@ -2581,9 +2642,9 @@ function setSsidVisibility(selectId)
 	{
 		var be = getSelectedValue('bridge_encryption');
 		var we = getSelectedValue('wifi_encryption2');
-		var bp = be.match(/psk/) || be.match(/WPA/) ? 1 : 0;
+		var bp = be.match(/sae/) || be.match(/psk/) || be.match(/WPA/) ? 1 : 0;
 		var bw = be.match(/wep/) || be.match(/WEP/) ? 1 : 0;
-		var wp = we.match(/psk/) || we.match(/WPA/) ? 1 : 0;
+		var wp = we.match(/sae/) || we.match(/psk/) || we.match(/WPA/) ? 1 : 0;
 		var ww = we.match(/wep/) || we.match(/WEP/) ? 1 : 0;
 		setVisibility(visIds, [0,0,1,1,0,1,0,          0,0,1,1,0,1,0,         isAp,0,    wp,ww,bp,bw] );
 	}
@@ -2724,7 +2785,11 @@ function parseWifiScan(rawScanOutput)
 		if(ssid != null && channel != null && qualStr != null && encStr != null )
 		{
 			var enc = "psk2"
-			if(encStr.match(/WPA2 PSK/))
+			if(encStr.match(/WPA3 SAE/))
+			{
+				enc = "sae"
+			}
+			else if(encStr.match(/WPA2 PSK/))
 			{
 				enc = "psk2"
 			}
