@@ -20,6 +20,11 @@ case "$tmodel" in
 	TEMPCPU=$(cut -c1-2 /sys/class/hwmon/hwmon1/temp1_input);
 	TEMPMEM=$(cut -c1-2 /sys/class/hwmon/hwmon0/temp2_input);
 	TEMPWIFI=$(cut -c1-2 /sys/class/hwmon/hwmon0/temp1_input);;
+"Netgear Nighthawk X4S R7800")
+	TEMPCPU=$(cut -c1-2 /sys/class/thermal/thermal_zone1/temp);
+	TEMPMEM=$(cut -c1-2 /sys/class/thermal/thermal_zone2/temp);
+	TEMPWIFI=$(cat /sys/class/hwmon/hwmon0/temp1_input 2>/dev/null || cat /sys/class/hwmon/hwmon1/temp1_input 2>/dev/null || echo "-");
+	TEMPWIFI=$(echo $TEMPWIFI | cut -c1-2);;
 *)
 	TEMPCPU="-";
 	TEMPMEM="-";
