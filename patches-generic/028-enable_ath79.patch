@@ -1,0 +1,11 @@
+--- a/target/linux/ath79/Makefile
++++ b/target/linux/ath79/Makefile
+@@ -6,7 +6,7 @@
+ CPU_TYPE:=24kc
+ SUBTARGETS:=generic nand tiny
+ 
+-FEATURES:=ramdisk source-only
++FEATURES:=ramdisk
+ 
+ KERNEL_PATCHVER:=4.14
+ 
