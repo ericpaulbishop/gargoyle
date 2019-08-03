@@ -2884,6 +2884,8 @@ function setChannelWidth(selectCtl, band)
 			aChannels  = []
 			var validAPlus  = [36, 44, 52, 60, 100, 108, 116, 124, 132, 140, 149, 157]
 			var validAMinus = [40, 48, 56, 64, 104, 112, 120, 128, 136, 144, 153, 161]
+			validAPlus = channelBondCheck(origAChan,band,validAPlus,2,1);
+			validAMinus = channelBondCheck(origAChan,band,validAMinus,2,-1);
 			var validTest  = hplus ? arrToHash(validAPlus) : arrToHash(validAMinus)
 			for(var chanIndex=0; chanIndex < origAChan.length; chanIndex++)
 			{
@@ -2897,6 +2899,9 @@ function setChannelWidth(selectCtl, band)
 			var valid40 = [36, 44, 52, 60, 100, 108, 116, 124, 132, 140, 149, 157]
 			var valid80 = [36, 52, 100, 116, 132, 149]
 			var valid160 = [36, 100]
+			valid40 = channelBondCheck(origAChan,band,valid40,2,1);
+			valid80 = channelBondCheck(origAChan,band,valid80,4,1);
+			valid160 = channelBondCheck(origAChan,band,valid160,8,1);
 			if(chw == 'VHT40')
 			{
 				var validTest  = arrToHash(valid40)
@@ -2945,6 +2950,34 @@ function setChannelWidth(selectCtl, band)
 		document.getElementById("wifi_channel2_5ghz_dfs").style.display = dfsChan == true ? "block" : "none";
 		document.getElementById("bridge_channel_5ghz_dfs").style.display = dfsChan == true ? "block" : "none";
 	}
+}
+
+function channelBondCheck(channels, band, bonded, num_bond, dir_bond)
+{
+	retVal = [];
+	gap = band == "A" ? 4 : 4;
+	bonded.forEach(function(primary) {
+		valid = false;
+		if(channels.indexOf(primary) > -1)
+		{
+			valid = true;
+			x = 1;
+			while(x < num_bond)
+			{
+				if(channels.indexOf(primary+(x*gap*dir_bond)) == -1)
+				{
+					valid = false;
+					break;
+				}
+				x++;
+			}
+		}
+		if(valid)
+		{
+			retVal.push(primary);
+		}
+	});
+	return retVal;
 }
 
 function getSelectedWifiChannels()
