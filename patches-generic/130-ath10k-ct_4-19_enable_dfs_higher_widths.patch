@@ -1,6 +1,6 @@
 --- a/dev/null
 +++ b/package/kernel/ath10k-ct/patches/699-enable_dfs_higher_widths_10-4_4-19.patch
-@@ -0,0 +0,11 @@
+@@ -0,0 +1,11 @@
 +--- a/ath10k-4.19/mac.c
 ++++ b/ath10k-4.19/mac.c
 +@@ -9392,6 +9392,8 @@ static struct ieee80211_iface_combinatio
