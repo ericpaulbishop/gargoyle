@@ -241,7 +241,7 @@
 
 <iframe id="reboot_test" onload="reloadPage()" style="display:none"></iframe>
 
-<div class="modal fade" tabindex="-1" role="dialog" id="share_user_modal">
+<div class="modal fade" tabindex="-1" role="dialog" id="share_user_modal" aria-hidden="true" aria-labelledby="share_user_modal_title">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
@@ -256,7 +256,7 @@
 	</div>
 </div>
 
-<div class="modal fade" tabindex="-1" role="dialog" id="share_disk_modal">
+<div class="modal fade" tabindex="-1" role="dialog" id="share_disk_modal" aria-hidden="true" aria-labelledby="share_disk_modal_title">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">

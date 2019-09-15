@@ -2952,16 +2952,96 @@ function sidebar()
 	}
 }
 
+function setupModalKeys(name)
+{
+	//Find all selectable elements so we can store the first and last ones
+	//Note that in this implementation we will always include the modal itself in the tab order as the zeroth element
+	modal = document.getElementById(name);
+	focusableEls = modal.querySelectorAll('a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), [tabindex="0"]');
+	focusableEls = Array.prototype.slice.call(focusableEls);
+	firstFocusableEl = focusableEls[0];
+	lastFocusableEl = focusableEls[focusableEls.length-1];
+
+	handleEscapeKey = function() {
+		closeModalWindow(name);
+	};
+	handleBackwardsTab = function(e) {
+		if(document.activeElement === modal)
+		{
+			e.preventDefault();
+			lastFocusableEl.focus();
+		}
+		else if(document.activeElement === firstFocusableEl)
+		{
+			e.preventDefault();
+			modal.focus();
+		}
+	};
+	handleForwardsTab = function(e) {
+		if(document.activeElement === lastFocusableEl)
+		{
+			e.preventDefault();
+			modal.focus();
+		}
+	};
+	handleModalKeys = function(e) {
+		KEY_ESC = "Escape";
+		KEY_TAB = "Tab";
+
+		switch(e.key)
+		{
+			case KEY_ESC:
+				handleEscapeKey();
+				break;
+			case KEY_TAB:
+				if(focusableEls.length == 1)
+				{
+					e.preventDefault();
+					break;
+				}
+				else if(e.shiftKey)
+				{
+					handleBackwardsTab(e);
+				}
+				else
+				{
+					handleForwardsTab(e);
+				}
+				break;
+			default:
+				break;
+		}
+	};
+	document.onkeydown = handleModalKeys;
+}
+
 function openModalWindow(name)
 {
 	var modal = document.getElementById(name);
 	modal.classList.add("in");
+	//Remove aria-hidden attribute
+	modal.removeAttribute('aria-hidden');
+	//Capture modal keys
+	setupModalKeys(name);
+	//Store the element to restore focus
+	modalTriggerElement = document.activeElement;
+	//Focus the modal
+	modal.focus();
 }
 
 function closeModalWindow(name)
 {
 	var modal = document.getElementById(name);
 	modal.classList.remove("in");
+	//Restore aria-hidden attribute
+	modal.setAttribute("aria-hidden","true");
+	//Uncapture ESC key
+	document.onkeydown = null;
+	//Restore focus
+	if(modalTriggerElement !== null)
+	{
+		modalTriggerElement.focus()
+	}
 }
 
 function modalPrepare(modalID, title, elements, buttons)

@@ -166,6 +166,9 @@ function updateConnectionTable()
 						var bytes2 = (line.match(/bytes=([^ \t]*)[\t ]+.*bytes=([^ \t]*)[\t ]+/))[2];
 
 						var wan_connection = true;
+						var ovpn_match = uciOriginal.get('openvpn_gargoyle','server','internal_ip');
+						ovpn_match = ovpn_match == "" ? "10.8.0.1" : ovpn_match;
+						ovpn_match = ovpn_match.split('.',3).join('.') + '.';
 
 						//Connections are weird in that they list src/dest while we are interested in upload/download.
 						//Based on the location of the router WanIP in the connection record we can determine traffic direction
@@ -184,7 +187,7 @@ function updateConnectionTable()
 							WanIp = dstIp2;
 							WanPort = dstPort2;
 						//Openvpn connections. These only appear if Openvpn is active
-						} else if ((dstIp2.match(/10\.8\.0\..*/) != null) && (srcIp.match(/10\.8\.0\..*/) == null)) {
+						} else if ((dstIp2.indexOf(ovpn_match) === 0) && (srcIp.indexOf(ovpn_match) !== 0)) {
 							downloadBytes = bytes2;
 							uploadBytes = bytes;
 							localIp = srcIp;

@@ -73,7 +73,7 @@
 	<button id="reset_button" class="btn btn-warning btn-lg" onclick="resetData()"><%~ Reset %></button>
 </div>
 
-<div class="modal fade" tabindex="-1" role="dialog" id="restriction_rule_modal">
+<div class="modal fade" tabindex="-1" role="dialog" id="restriction_rule_modal" aria-hidden="true" aria-labelledby="restriction_rule_modal_title">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
@@ -88,7 +88,7 @@
 	</div>
 </div>
 
-<div class="modal fade" tabindex="-1" role="dialog" id="whitelist_rule_modal">
+<div class="modal fade" tabindex="-1" role="dialog" id="whitelist_rule_modal" aria-hidden="true" aria-labelledby="whitelist_rule_modal_title">
 	<div class="modal-dialog" role="document">
 		<div class="modal-content">
 			<div class="modal-header">
