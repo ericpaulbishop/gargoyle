@@ -668,7 +668,9 @@ for target in $targets ; do
 			make menuconfig
 			sh $netfilter_patch_script . "$top_dir/netfilter-match-modules" 0 1 >/dev/null 2>&1
 		else
+			
 			sh $netfilter_patch_script . "$top_dir/netfilter-match-modules" 1 1 >/dev/null 2>&1
+			make menuconfig
 		fi
 
 	
@@ -686,6 +688,7 @@ for target in $targets ; do
 			sh $netfilter_patch_script . "$top_dir/netfilter-match-modules" 0 1  
 		else
 			sh $netfilter_patch_script . "$top_dir/netfilter-match-modules" 1 1 
+			make menuconfig
 		fi
 
 
