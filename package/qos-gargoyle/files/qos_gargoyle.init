@@ -455,7 +455,7 @@ initialize_qos()
 			#Add the leaf class
 			tc class add dev $qos_interface parent 1:1 classid 1:$next_class_index hfsc ls m2 ${m2}Mbit $ll_str $ul_str
 			#Add the qdisc to the leaf class, assuming average packet at 250 bytes.
-			tc qdisc add dev $qos_interface parent 1:$next_class_index handle $next_class_index:1 sfq headdrop limit $(($tbw/250)) $sfq_depth divisor 256
+			tc qdisc add dev $qos_interface parent 1:$next_class_index handle $next_class_index:1 sfq headdrop limit $(($tbw/250)) $sfq_depth divisor 512
 
 			#
 			#Folks interested in experimenting with CoDEL can comment out the preceeding line and uncomment hte next line.
@@ -473,7 +473,7 @@ initialize_qos()
 			#Add a filter to the root class to direct packets to this leaf class according to the conntrack mark
 			tc filter add dev $qos_interface parent 1:0 protocol ip handle $next_classid fw flowid 1:$next_class_index
 			#Add a filter to the leaf class to define flows as being the source IP address.
-			tc filter add dev $qos_interface parent $next_class_index: handle 1 flow divisor 256 map key nfct-src and 0xff
+			tc filter add dev $qos_interface parent $next_class_index: handle 1 flow divisor 512 map key nfct-src and 0xff
 			$echo_off
 
 			if [ "$upload_default_class" = "$uclass_name" ] ; then
@@ -615,9 +615,9 @@ initialize_qos()
 
 			tc class add dev imq0 parent 1:1 classid 1:$next_class_index hfsc $rt_str $ll_str $ul_str
 			#Assume average download packet size is 250 bytes.
-			tc qdisc add dev imq0 parent 1:$next_class_index handle $next_class_index:1 sfq headdrop limit $(($tbw/250)) $sfq_depth divisor 256  
+			tc qdisc add dev imq0 parent 1:$next_class_index handle $next_class_index:1 sfq headdrop limit $(($tbw/250)) $sfq_depth divisor 512  
 			tc filter add dev imq0 parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index
-			tc filter add dev imq0 parent $next_class_index: handle 1 flow divisor 256 map key dst and 0xff
+			tc filter add dev imq0 parent $next_class_index: handle 1 flow divisor 512 map key dst and 0xff
 			$echo_off
 
 			if [ "$download_default_class" = "$dclass_name" ] ; then
