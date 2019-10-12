@@ -420,11 +420,18 @@ function setUciFromDocument(dstUci, pkg, section)
 		providerName = getSelectedValue("ddns_provider", document);
 	}
 
-	dstUci.removeSection("ddns_gargoyle", section);
+	dstUci.removeSection("ddns_gargoyle", section);//删除，再设置
 	dstUci.set("ddns_gargoyle", section, "", "service");
 	dstUci.set("ddns_gargoyle", section, "enabled", "1");
 	dstUci.set("ddns_gargoyle", section, "service_provider", providerName);
-	dstUci.set("ddns_gargoyle", section, "ip_source", "internet");
+	var ip_interface=document.getElementById("ip_interface").value;//select or  input? input is easy
+	if(ip_interface!=""){
+		dstUci.set("ddns_gargoyle", section, "ip_source", "interface");
+		dstUci.set("ddns_gargoyle", section, "ip_interface", ip_interface);
+	}else{
+		dstUci.set("ddns_gargoyle", section, "ip_source", "internet");
+	}
+	
 	dstUci.set("ddns_gargoyle", section, "force_interval", document.getElementById("ddns_force").value  );
 	dstUci.set("ddns_gargoyle", section, "force_unit", "days");
 	dstUci.set("ddns_gargoyle", section, "check_interval", document.getElementById("ddns_check").value );
@@ -535,6 +542,8 @@ function setDocumentFromUci(srcUci, pkg, section)
 	var forceDays = (getMultipleFromUnit( srcUci.get("ddns_gargoyle", section, "force_unit") ) * srcUci.get("ddns_gargoyle", section, "force_interval"))/(24*60*60);
 	forceDays = (forceDays > 0) ? forceDays : 3;
 	document.getElementById( "ddns_force" ).value = forceDays;
+
+	document.getElementById("ip_interface").value=srcUci.get("ddns_gargoyle",section,"ip_interface");
 }
 
 function setProvider()

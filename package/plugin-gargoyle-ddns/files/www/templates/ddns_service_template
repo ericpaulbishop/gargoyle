@@ -23,6 +23,14 @@
 				</div>
 
 				<div class="row form-group">
+					<label class="col-xs-5" for="ip_interface" id="ip_interface_label">ip_interface:</label>
+					<span class="col-xs-7">
+						<input type="text" class="form-control" id="ip_interface"  size="8" 
+						<em>diy ip_interface(default WAN like "pppoe-wan"). if empty it mean ip_souce=internet,else ip_source=interface</em>
+					</span>
+				</div>
+
+				<div class="row form-group">
 					<span class="col-xs-12" id="ddns_1_txt">
 						<p><%~ HelpCI %></p>
 						<p><%~ HelpFI %></p>
