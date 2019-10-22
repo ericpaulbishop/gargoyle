@@ -1,0 +1,7 @@
+config gargoyle_stamgr 'global'
+	option max_retry '3'
+	option max_wait '45'
+	option disconnect_quality_threshold '50'
+	option connect_quality_threshold '70'
+	option blacklist_timer '600'
+	option enabled '0'

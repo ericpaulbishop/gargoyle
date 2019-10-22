@@ -1,0 +1,21 @@
+				<div class="row form-group">
+					<label class="col-xs-5" id='add_radio_label' for='add_radio'><%~ APBand %></label>
+					<span class="col-xs-7"><select id='add_radio' class='form-control'></select></span>
+				</div>
+				<div class="row form-group">
+					<label class="col-xs-5" id='add_ssid_label' for='add_ssid'>SSID</label>
+					<span class="col-xs-7"><input type='text' id='add_ssid' maxLength='31' class='form-control' /></span>
+				</div>
+				<div class="row form-group">
+					<label class="col-xs-5" id='add_bssid_label' for='add_bssid'>BSSID</label>
+					<span class="col-xs-7"><input type='text' id='add_bssid' onkeyup='proofreadMac(this)' maxLength='17' class='form-control' /></span>
+				</div>
+				<div class="row form-group">
+					<label class="col-xs-5" id='add_enc_label' for='add_enc'><%~ Encryption %></label>
+					<span class="col-xs-7">
+						<select id='add_enc' class='form-control'></select>
+				</div>
+				<div class="row form-group">
+					<label class="col-xs-5" id='add_password_label' for='add_password'><%~ Password %></label>
+					<span class="col-xs-7"><input type='text' id='add_password' class='form-control' /></span>
+				</div>
