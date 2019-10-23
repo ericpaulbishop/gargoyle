@@ -19,3 +19,4 @@
 					<label class="col-xs-5" id='add_password_label' for='add_password'><%~ Password %></label>
 					<span class="col-xs-7"><input type='text' id='add_password' class='form-control' /></span>
 				</div>
+

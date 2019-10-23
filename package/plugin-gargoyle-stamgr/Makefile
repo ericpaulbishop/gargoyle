@@ -15,7 +15,7 @@ define Package/plugin-gargoyle-stamgr
 	SUBMENU:=Gargoyle Web Interface
 	TITLE:=STA Manager for Gargoyle
 	MAINTAINER:=Michael Gray <support@lantisproject.com>
-	DEPENDS:=+gargoyle iwinfo
+	DEPENDS:=+gargoyle +iwinfo +jshn +jsonfilter
 	PKGARCH:=all
 endef
 
@@ -36,7 +36,7 @@ define Package/plugin-gargoyle-stamgr/postinst
 #!/bin/sh
 
 if [ -z "$${IPKG_INSTROOT}" ]; then
-	menu_name="System Logs"
+	menu_name="STA Manager"
 	[ -n `which i18n` ] && {
 		mn=$$(i18n-menu gargoyle.display.connection_stamanager)
 		if [ -n "$$mn" ] ; then
