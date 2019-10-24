@@ -38,7 +38,7 @@ load_vars()
 	{
 		local type="$1" name="$2"
 		log_print "DEBUG" "Loaded $name = $type"
-		if [ "$name" = "$pkgname" ] && [ "$type" = "gargoyle_stamgr" ] ; then
+		if [ "$name" = "global" ] && [ "$type" = "$pkgname" ] ; then
 			option_cb()
 			{
 				local option="$1" value="$2"

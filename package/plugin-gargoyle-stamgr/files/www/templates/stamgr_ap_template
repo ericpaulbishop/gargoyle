@@ -1,5 +1,5 @@
 				<div class="row form-group">
-					<label class="col-xs-5" id='add_radio_label' for='add_radio'><%~ APBand %></label>
+					<label class="col-xs-5" id='add_radio_label' for='add_radio'><%~ Band %></label>
 					<span class="col-xs-7"><select id='add_radio' class='form-control'></select></span>
 				</div>
 				<div class="row form-group">

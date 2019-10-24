@@ -10,9 +10,9 @@ var stamgrStr=new Object(); //part of i18n
 
 var encryptionList = [];
 encryptionList['none'] = 'Open';
-encryptionList['psk'] = 'WPA-Personal';
-encryptionList['psk2'] = 'WPA2-Personal';
-encryptionList['sae'] = 'WPA3-Personal';
+encryptionList['psk'] = 'WPA PSK';
+encryptionList['psk2'] = 'WPA2 PSK';
+encryptionList['sae'] = 'WPA3 SAE';
 
 function saveChanges()
 {
