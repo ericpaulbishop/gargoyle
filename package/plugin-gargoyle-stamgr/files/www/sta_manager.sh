@@ -115,7 +115,7 @@
 							<span id="currentid"></span>
 						</li>
 						<li class="list-group-item">
-							<span class="list-group-item-title"><%~ Band %></span>
+							<span class="list-group-item-title"><%~ Band %>:</span>
 							<span id="currentradio"></span>
 						</li>
 						<li class="list-group-item">

@@ -145,7 +145,7 @@ function resetData()
 	activecfgid = runtimeObj.active_cfg_id === undefined ? "-" : runtimeObj.active_cfg_id;
 	document.getElementById("currentid").innerHTML = activecfgid;
 	connected = runtimeObj.current_wireless_cfg.connected;
-	document.getElementById("connected").innerHTML = connected == "true" ? "Yes" : "No";
+	document.getElementById("connected").innerHTML = connected == "true" ? UI.YES : UI.NO;
 	document.getElementById("currentradio").innerHTML = runtimeObj.current_wireless_cfg.radio === undefined ? "-" : translateBackendFrontend(runtimeObj.current_wireless_cfg.radio,radioList);
 	document.getElementById("currentssid").innerHTML = runtimeObj.current_wireless_cfg.ssid === undefined ? "-" : runtimeObj.current_wireless_cfg.ssid;
 	document.getElementById("currentbssid").innerHTML = runtimeObj.current_wireless_cfg.bssid === undefined ? "-" : runtimeObj.current_wireless_cfg.bssid;
@@ -171,7 +171,7 @@ function resetData()
 		liEl.className = "list-group-item";
 		var titleEl = document.createElement("span");
 		titleEl.className = "list-group-item-title";
-		titleEl.innerHTML = "Blacklist Time:";
+		titleEl.innerHTML = stamgrStr.BlacklistTime + ":";
 		var textEl = document.createElement("span");
 		//textEl.innerHTML = new Date(blacklisted[idx].time*1000).toLocaleString();
 		var now = new Date().getTime();
@@ -211,37 +211,37 @@ function proofreadAP(excludeRow)
 	errors = [];
 	if(radioList[document.getElementById('add_radio').value] === undefined)
 	{
-		errors.push('There is a problem with ' + document.getElementById('add_radio_label').innerText);
+		errors.push(UI.prfErr + ' ' + document.getElementById('add_radio_label').innerText);
 	}
 	if(validateLengthRange(document.getElementById('add_ssid').value,1,31))
 	{
-		errors.push('There is a problem with ' + document.getElementById('add_ssid_label').innerText);
+		errors.push(UI.prfErr + ' ' + document.getElementById('add_ssid_label').innerText);
 	}
 	if(document.getElementById('add_bssid').value != "" && document.getElementById('add_bssid').value != "-" && validateMac(document.getElementById('add_bssid').value))
 	{
-		errors.push('There is a problem with ' + document.getElementById('add_bssid_label').innerText);
+		errors.push(UI.prfErr + ' ' + document.getElementById('add_bssid_label').innerText);
 	}
 	if(encryptionList[document.getElementById('add_enc').value] === undefined)
 	{
-		errors.push('There is a problem with ' + document.getElementById('add_enc_label').innerText);
+		errors.push(UI.prfErr + ' ' + document.getElementById('add_enc_label').innerText);
 	}
 	else
 	{
 		if(document.getElementById('add_enc').value == 'none' && validateLengthRange(document.getElementById('add_password').value,0,0))
 		{
-			errors.push('There is a problem with ' + document.getElementById('add_enc_label').innerText + '/' + document.getElementById('add_password_label').innerText);
+			errors.push(UI.prfErr + ' ' + document.getElementById('add_enc_label').innerText + '/' + document.getElementById('add_password_label').innerText);
 		}
 		else if(document.getElementById('add_enc').value == 'wep' && validateLengthRange(document.getElementById('add_password').value,5,13))
 		{
-			errors.push('There is a problem with ' + document.getElementById('add_enc_label').innerText + '/' + document.getElementById('add_password_label').innerText);
+			errors.push(UI.prfErr + ' ' + document.getElementById('add_enc_label').innerText + '/' + document.getElementById('add_password_label').innerText);
 		}
 		else if(document.getElementById('add_enc').value == 'psk' && validateLengthRange(document.getElementById('add_password').value,8,63))
 		{
-			errors.push('There is a problem with ' + document.getElementById('add_enc_label').innerText + '/' + document.getElementById('add_password_label').innerText);
+			errors.push(UI.prfErr + ' ' + document.getElementById('add_enc_label').innerText + '/' + document.getElementById('add_password_label').innerText);
 		}
 		else if(document.getElementById('add_enc').value == 'psk2' && validateLengthRange(document.getElementById('add_password').value,8,63))
 		{
-			errors.push('There is a problem with ' + document.getElementById('add_enc_label').innerText + '/' + document.getElementById('add_password_label').innerText);
+			errors.push(UI.prfErr + ' ' + document.getElementById('add_enc_label').innerText + '/' + document.getElementById('add_password_label').innerText);
 		}
 	}
 	return errors;

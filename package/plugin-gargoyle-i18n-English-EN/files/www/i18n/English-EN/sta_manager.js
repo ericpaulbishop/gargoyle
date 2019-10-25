@@ -10,6 +10,7 @@ stamgrStr.MaxWait="Max wait between connection attempts";
 stamgrStr.DisconnectQualThresh="Disconnect quality threshold";
 stamgrStr.ConnectQualThresh="Connect quality threshold";
 stamgrStr.BlacklistTimer="Blacklist failed connections for";
+stamgrStr.BlacklistTime="Time Remaining";
 stamgrStr.Status="Runtime Status";
 stamgrStr.WirelessAPs="Wireless Access Points";
 stamgrStr.AddAP="Add Access Point";
