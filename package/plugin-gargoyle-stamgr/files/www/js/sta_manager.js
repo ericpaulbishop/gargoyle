@@ -140,16 +140,15 @@ function resetData()
 	
 	//Init Runtime Status
 	runtimeObj = JSON.parse(runtime_status == '' ? '{}' : runtime_status);
-	//Fix datetime issues eventually
-	document.getElementById("lastupdate").innerHTML = runtimeObj.lastUpdate === undefined ? "-" : new Date(runtimeObj.lastUpdate*1000).toLocaleString();
+	document.getElementById("lastupdate").innerHTML = typeof currentTime === 'undefined' ? "-" : currentTime;
 	activecfgid = runtimeObj.active_cfg_id === undefined ? "-" : runtimeObj.active_cfg_id;
 	document.getElementById("currentid").innerHTML = activecfgid;
-	connected = runtimeObj.current_wireless_cfg.connected;
+	connected = runtimeObj.current_wireless_cfg === undefined ? "-" : runtimeObj.current_wireless_cfg.connected;
 	document.getElementById("connected").innerHTML = connected == "true" ? UI.YES : UI.NO;
-	document.getElementById("currentradio").innerHTML = runtimeObj.current_wireless_cfg.radio === undefined ? "-" : translateBackendFrontend(runtimeObj.current_wireless_cfg.radio,radioList);
-	document.getElementById("currentssid").innerHTML = runtimeObj.current_wireless_cfg.ssid === undefined ? "-" : runtimeObj.current_wireless_cfg.ssid;
-	document.getElementById("currentbssid").innerHTML = runtimeObj.current_wireless_cfg.bssid === undefined ? "-" : runtimeObj.current_wireless_cfg.bssid;
-	document.getElementById("currentencryption").innerHTML = runtimeObj.current_wireless_cfg.encryption === undefined ? "-" : translateBackendFrontend(runtimeObj.current_wireless_cfg.encryption,encryptionList);
+	document.getElementById("currentradio").innerHTML = runtimeObj.current_wireless_cfg === undefined ? "-" : translateBackendFrontend(runtimeObj.current_wireless_cfg.radio,radioList);
+	document.getElementById("currentssid").innerHTML = runtimeObj.current_wireless_cfg === undefined ? "-" : runtimeObj.current_wireless_cfg.ssid;
+	document.getElementById("currentbssid").innerHTML = runtimeObj.current_wireless_cfg === undefined ? "-" : runtimeObj.current_wireless_cfg.bssid;
+	document.getElementById("currentencryption").innerHTML = runtimeObj.current_wireless_cfg === undefined ? "-" : translateBackendFrontend(runtimeObj.current_wireless_cfg.encryption,encryptionList);
 	
 	blacklistEl = document.getElementById("blacklistsection_div");
 	blacklisted = runtimeObj.station_blacklist;

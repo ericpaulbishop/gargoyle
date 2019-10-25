@@ -34,6 +34,8 @@
 			json="$(cat /tmp/gargoyle_stamgr.json)"
 		fi
 		echo "var runtime_status = '$json';"
+
+		[ -n "$json" ] && . /usr/lib/gargoyle/current_time.sh $(echo $json | jsonfilter -q -e '@.lastUpdate')
 %>
 //-->
 </script>
