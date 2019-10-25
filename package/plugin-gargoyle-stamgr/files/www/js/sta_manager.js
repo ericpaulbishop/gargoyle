@@ -100,6 +100,13 @@ function saveChanges()
 function resetData()
 {
 	document.getElementById("enablestamgr").checked = uciOriginal.get("gargoyle_stamgr", "global", "enabled") == "1" ? true : false;
+	if(uciOriginal.getAllSectionsOfType("wireless","stacfg").length == 0)
+	{
+		document.getElementById("no_stacfg").style.display = "block";
+		document.getElementById("enablestamgr").disabled = true;
+		document.getElementById("enablestamgr").checked = false;
+	}
+	if(!wpa3) { delete encryptionList['sae'] 
 	document.getElementById("maxretry").value = uciOriginal.get("gargoyle_stamgr", "global", "max_retry");
 	document.getElementById("maxwait").value = uciOriginal.get("gargoyle_stamgr", "global", "max_wait");
 	document.getElementById("disconnectqualthresh").value = uciOriginal.get("gargoyle_stamgr", "global", "disconnect_quality_threshold");

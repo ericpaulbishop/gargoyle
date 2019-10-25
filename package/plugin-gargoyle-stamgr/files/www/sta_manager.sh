@@ -18,16 +18,12 @@
 			echo "radioList['radio0'] = '2.4GHz';"
 		elif [ "$radio0" = "11a" ] ; then
 			echo "radioList['radio0'] = '5GHz';"
-		else
-			echo "radioList['radio0'] = '';"
 		fi
 		radio1=$(uci -q get wireless.radio1.hwmode)
 		if [ "$radio1" = "11g" ] ; then
 			echo "radioList['radio1'] = '2.4GHz';"
 		elif [ "$radio1" = "11a" ] ; then
 			echo "radioList['radio1'] = '5GHz';"
-		else
-			echo "radioList['radio1'] = '';"
 		fi
 		
 		if [ -e "/tmp/gargoyle_stamgr.json" ] ; then
@@ -36,6 +32,8 @@
 		echo "var runtime_status = '$json';"
 
 		[ -n "$json" ] && . /usr/lib/gargoyle/current_time.sh $(echo $json | jsonfilter -q -e '@.lastUpdate')
+
+		hostapd -vsae && echo "var wpa3 = true;" || echo "var wpa3 = false;"
 %>
 //-->
 </script>
@@ -53,6 +51,8 @@
 					<h3 class="panel-title"><%~ StaMgrSettings %></h3>
 				</div>
 			<div class="panel-body">
+				<div id="no_stacfg" class="alert alert-danger" role="alert" style="display: none;"><%~ NoStacfgErr %></div>
+
 				<div class="row form-group">
 					<span class="col-xs-12">
 						<input type="checkbox" id="enablestamgr"/>
