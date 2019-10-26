@@ -114,7 +114,7 @@ check_sta()
 {
 	sta_radio="$(uci_get "wireless" "$stacfgsec" "device")"
 	sta_wlan="$(echo $sta_radio | sed 's/radio/wlan/g')"
-	wireless_info="$(iwinfo $sta_wlan i)"
+	wireless_info="$(iwinfo $sta_wlan i 2>/dev/null)"
 	
 	
 	sta_connected="$(echo "$wireless_info" | awk '/ESSID:/ {print $3}; /Channel:/ {print $4};' | grep -v "unknown")"
@@ -156,7 +156,7 @@ get_scan_results()
 	local radios="radio0 radio1"
 	scan_results=""
 	for radio in $radios ; do
-		scan_list="$(iwinfo $radio s | awk -v var4="$radio" 'BEGIN{FS="[[:space:]]"}/Address:/{var1=$NF}/ESSID:/{var2="";for(i=12;i<=NF;i++)if(var2==""){var2=$i}else{var2=var2" "$i};gsub(/,/,".",var2)}/Quality:/{split($NF,var0,"/")}/Encryption:/{if($NF=="none"){var3="+"}else{var3="-"};printf "%i,%s,%s,%s,%s\n",(var0[1]*100/var0[2]),var1,var2,var3,var4}' | sort -rn)"
+		scan_list="$(iwinfo $radio s 2>/dev/null | awk -v var4="$radio" 'BEGIN{FS="[[:space:]]"}/Address:/{var1=$NF}/ESSID:/{var2="";for(i=12;i<=NF;i++)if(var2==""){var2=$i}else{var2=var2" "$i};gsub(/,/,".",var2)}/Quality:/{split($NF,var0,"/")}/Encryption:/{if($NF=="none"){var3="+"}else{var3="-"};printf "%i,%s,%s,%s,%s\n",(var0[1]*100/var0[2]),var1,var2,var3,var4}' | sort -rn)"
 		if [ -z "${scan_results}" ] ; then
 			scan_results="$scan_list"
 		else
