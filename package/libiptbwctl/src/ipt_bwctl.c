@@ -611,7 +611,7 @@ static int set_bandwidth_data(char* id, unsigned char zero_unset, unsigned char 
 	*history_included = set_history;
 	*zero_unset_ips = zero_unset;
 	*last_backup_time = (uint64_t)last_backup;
-	memcpy(set_id, id, BANDWIDTH_MAX_ID_LENGTH);
+	strncpy(set_id, id, BANDWIDTH_MAX_ID_LENGTH);
 	set_id[BANDWIDTH_MAX_ID_LENGTH-1] = '\0';
 
 	while(!done && sockfd >= 0 && got_lock)
