@@ -1,4 +1,4 @@
-/*
+﻿/*
  * UTF-8 (with BOM) Czech-CS text strings for sta_manager.sh html elements
  */
 
