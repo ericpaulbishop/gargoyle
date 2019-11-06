@@ -121,6 +121,8 @@ UI.prdr="port redirected to router";
 UI.puse="port in use by router";
 UI.pfwd="port forwarded to";
 UI.conn="connected";
+UI.YES="Yes";
+UI.NO="No";
 
 UI.AJAX="AJAX Browser Support Needed";
 UI.AJAXUpg="Please upgrade to an AJAX compatible browser and try again. Such browsers include Firefox 2.0+, Safari and IE 6+.";

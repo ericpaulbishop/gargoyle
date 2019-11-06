@@ -3068,6 +3068,17 @@ function modalPrepare(modalID, title, elements, buttons)
 		inputEl = document.getElementById(element.id);
 		if(inputEl)
 		{
+			if(element.options !== undefined)
+			{
+				removeAllOptionsFromSelectElement(inputEl);
+				for (var key in element.options)
+				{
+					var optEl = document.createElement('option');
+					optEl.innerHTML = element.options[key];
+					optEl.value = key;
+					inputEl.options.add(optEl);
+				}
+			}
 			if(element.value !== undefined)
 			{
 				inputEl.value = element.value;
