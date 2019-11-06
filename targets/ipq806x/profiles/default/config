@@ -4,7 +4,7 @@
 #
 CONFIG_MODULES=y
 CONFIG_HAVE_DOT_CONFIG=y
-CONFIG_DEFAULT_TARGET_ipq806x=y
+CONFIG_DEFAULT_TARGET_ipq806x_generic=y
 # CONFIG_TARGET_sunxi is not set
 # CONFIG_TARGET_apm821xx is not set
 # CONFIG_TARGET_ath25 is not set
@@ -43,50 +43,52 @@ CONFIG_TARGET_ipq806x=y
 # CONFIG_TARGET_uml is not set
 # CONFIG_TARGET_zynq is not set
 # CONFIG_TARGET_x86 is not set
+CONFIG_TARGET_ipq806x_generic=y
 CONFIG_TARGET_MULTI_PROFILE=y
-# CONFIG_TARGET_ipq806x_Default is not set
-# CONFIG_TARGET_ipq806x_DEVICE_buffalo_wxr-2533dhp is not set
-# CONFIG_TARGET_ipq806x_DEVICE_compex_wpq864 is not set
-# CONFIG_TARGET_ipq806x_DEVICE_linksys_ea8500 is not set
-# CONFIG_TARGET_ipq806x_DEVICE_nec_wg2600hp is not set
-# CONFIG_TARGET_ipq806x_DEVICE_netgear_d7800 is not set
-# CONFIG_TARGET_ipq806x_DEVICE_netgear_r7500 is not set
-# CONFIG_TARGET_ipq806x_DEVICE_netgear_r7500v2 is not set
-# CONFIG_TARGET_ipq806x_DEVICE_netgear_r7800 is not set
-# CONFIG_TARGET_ipq806x_DEVICE_qcom_ipq8064-ap148 is not set
-# CONFIG_TARGET_ipq806x_DEVICE_qcom_ipq8064-ap148-legacy is not set
-# CONFIG_TARGET_ipq806x_DEVICE_qcom_ipq8064-ap161 is not set
-# CONFIG_TARGET_ipq806x_DEVICE_qcom_ipq8064-db149 is not set
-# CONFIG_TARGET_ipq806x_DEVICE_tplink_c2600 is not set
-# CONFIG_TARGET_ipq806x_DEVICE_tplink_vr2600v is not set
-# CONFIG_TARGET_ipq806x_DEVICE_zyxel_nbg6817 is not set
+# CONFIG_TARGET_ipq806x_generic_Default is not set
+# CONFIG_TARGET_ipq806x_generic_DEVICE_buffalo_wxr-2533dhp is not set
+# CONFIG_TARGET_ipq806x_generic_DEVICE_compex_wpq864 is not set
+# CONFIG_TARGET_ipq806x_generic_DEVICE_linksys_ea8500 is not set
+# CONFIG_TARGET_ipq806x_generic_DEVICE_nec_wg2600hp is not set
+# CONFIG_TARGET_ipq806x_generic_DEVICE_netgear_d7800 is not set
+# CONFIG_TARGET_ipq806x_generic_DEVICE_netgear_r7500 is not set
+# CONFIG_TARGET_ipq806x_generic_DEVICE_netgear_r7500v2 is not set
+# CONFIG_TARGET_ipq806x_generic_DEVICE_netgear_r7800 is not set
+# CONFIG_TARGET_ipq806x_generic_DEVICE_qcom_ipq8064-ap148 is not set
+# CONFIG_TARGET_ipq806x_generic_DEVICE_qcom_ipq8064-ap148-legacy is not set
+# CONFIG_TARGET_ipq806x_generic_DEVICE_qcom_ipq8064-ap161 is not set
+# CONFIG_TARGET_ipq806x_generic_DEVICE_qcom_ipq8064-db149 is not set
+# CONFIG_TARGET_ipq806x_generic_DEVICE_tplink_c2600 is not set
+# CONFIG_TARGET_ipq806x_generic_DEVICE_tplink_vr2600v is not set
+# CONFIG_TARGET_ipq806x_generic_DEVICE_zyxel_nbg6817 is not set
 
 #
 # Target Devices
 #
 # CONFIG_TARGET_ALL_PROFILES is not set
 CONFIG_TARGET_PER_DEVICE_ROOTFS=y
-# CONFIG_TARGET_DEVICE_ipq806x_DEVICE_buffalo_wxr-2533dhp is not set
-# CONFIG_TARGET_DEVICE_ipq806x_DEVICE_compex_wpq864 is not set
-CONFIG_TARGET_DEVICE_ipq806x_DEVICE_linksys_ea8500=y
-CONFIG_TARGET_DEVICE_PACKAGES_ipq806x_DEVICE_linksys_ea8500="kmod-ath10k-ct ath10k-firmware-qca99x0-ct"
-# CONFIG_TARGET_DEVICE_ipq806x_DEVICE_nec_wg2600hp is not set
-CONFIG_TARGET_DEVICE_ipq806x_DEVICE_netgear_d7800=y
-CONFIG_TARGET_DEVICE_PACKAGES_ipq806x_DEVICE_netgear_d7800="kmod-ath10k-ct ath10k-firmware-qca99x0-ct"
-# CONFIG_TARGET_DEVICE_ipq806x_DEVICE_netgear_r7500 is not set
-CONFIG_TARGET_DEVICE_ipq806x_DEVICE_netgear_r7500v2=y
-CONFIG_TARGET_DEVICE_PACKAGES_ipq806x_DEVICE_netgear_r7500v2="kmod-ath10k-ct ath10k-firmware-qca99x0-ct"
-CONFIG_TARGET_DEVICE_ipq806x_DEVICE_netgear_r7800=y
-CONFIG_TARGET_DEVICE_PACKAGES_ipq806x_DEVICE_netgear_r7800="kmod-ath10k-ct ath10k-firmware-qca9984-ct"
-# CONFIG_TARGET_DEVICE_ipq806x_DEVICE_qcom_ipq8064-ap148 is not set
-# CONFIG_TARGET_DEVICE_ipq806x_DEVICE_qcom_ipq8064-ap148-legacy is not set
-# CONFIG_TARGET_DEVICE_ipq806x_DEVICE_qcom_ipq8064-ap161 is not set
-# CONFIG_TARGET_DEVICE_ipq806x_DEVICE_qcom_ipq8064-db149 is not set
-CONFIG_TARGET_DEVICE_ipq806x_DEVICE_tplink_c2600=y
-CONFIG_TARGET_DEVICE_PACKAGES_ipq806x_DEVICE_tplink_c2600="kmod-ath10k-ct ath10k-firmware-qca99x0-ct"
-# CONFIG_TARGET_DEVICE_ipq806x_DEVICE_tplink_vr2600v is not set
-CONFIG_TARGET_DEVICE_ipq806x_DEVICE_zyxel_nbg6817=y
-CONFIG_TARGET_DEVICE_PACKAGES_ipq806x_DEVICE_zyxel_nbg6817="kmod-ath10k-ct ath10k-firmware-qca9984-ct"
+# CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_buffalo_wxr-2533dhp is not set
+# CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_compex_wpq864 is not set
+CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_linksys_ea8500=y
+CONFIG_TARGET_DEVICE_PACKAGES_ipq806x_generic_DEVICE_linksys_ea8500="kmod-ath10k-ct ath10k-firmware-qca99x0-ct"
+# CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_nec_wg2600hp is not set
+CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_netgear_d7800=y
+CONFIG_TARGET_DEVICE_PACKAGES_ipq806x_generic_DEVICE_netgear_d7800="kmod-ath10k-ct ath10k-firmware-qca99x0-ct"
+# CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_netgear_r7500 is not set
+CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_netgear_r7500v2=y
+CONFIG_TARGET_DEVICE_PACKAGES_ipq806x_generic_DEVICE_netgear_r7500v2="kmod-ath10k-ct ath10k-firmware-qca99x0-ct"
+CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_netgear_r7800=y
+CONFIG_TARGET_DEVICE_PACKAGES_ipq806x_generic_DEVICE_netgear_r7800="kmod-ath10k-ct ath10k-firmware-qca9984-ct"
+# CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_qcom_ipq8064-ap148 is not set
+# CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_qcom_ipq8064-ap148-legacy is not set
+# CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_qcom_ipq8064-ap161 is not set
+# CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_qcom_ipq8064-db149 is not set
+CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_tplink_c2600=y
+CONFIG_TARGET_DEVICE_PACKAGES_ipq806x_generic_DEVICE_tplink_c2600="kmod-ath10k-ct ath10k-firmware-qca99x0-ct"
+# CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_tplink_vr2600v is not set
+CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_zyxel_nbg6817=y
+CONFIG_TARGET_DEVICE_PACKAGES_ipq806x_generic_DEVICE_zyxel_nbg6817="kmod-ath10k-ct ath10k-firmware-qca9984-ct"
+CONFIG_HAS_SUBTARGETS=y
 CONFIG_HAS_DEVICES=y
 CONFIG_TARGET_BOARD="ipq806x"
 CONFIG_TARGET_SUBTARGET="generic"
@@ -94,6 +96,7 @@ CONFIG_TARGET_ARCH_PACKAGES="arm_cortex-a15_neon-vfpv4"
 CONFIG_DEFAULT_TARGET_OPTIMIZATION="-Os -pipe"
 CONFIG_CPU_TYPE="cortex-a15+neon-vfpv4"
 CONFIG_LINUX_4_14=y
+CONFIG_MODULE_DEFAULT_ath10k-firmware-qca988x-ct=y
 CONFIG_MODULE_DEFAULT_ath10k-firmware-qca9984-ct=y
 CONFIG_MODULE_DEFAULT_ath10k-firmware-qca99x0-ct=y
 CONFIG_DEFAULT_base-files=y
@@ -173,6 +176,10 @@ CONFIG_DEFAULT_uci=y
 CONFIG_MODULE_DEFAULT_uci=y
 CONFIG_DEFAULT_uclient-fetch=y
 CONFIG_MODULE_DEFAULT_uclient-fetch=y
+CONFIG_DEFAULT_urandom-seed=y
+CONFIG_MODULE_DEFAULT_urandom-seed=y
+CONFIG_DEFAULT_urngd=y
+CONFIG_MODULE_DEFAULT_urngd=y
 CONFIG_DEFAULT_wpad-basic=y
 CONFIG_MODULE_DEFAULT_wpad-basic=y
 CONFIG_HAS_FPU=y
@@ -231,6 +238,7 @@ CONFIG_TARGET_UBIFS_JOURNAL_SIZE=""
 # CONFIG_ALL is not set
 # CONFIG_BUILDBOT is not set
 CONFIG_SIGNED_PACKAGES=y
+CONFIG_SIGNATURE_CHECK=y
 
 #
 # General build options
@@ -579,8 +587,8 @@ CONFIG_BUSYBOX_DEFAULT_FEATURE_TAR_GNU_EXTENSIONS=y
 # CONFIG_BUSYBOX_DEFAULT_FEATURE_TAR_UNAME_GNAME is not set
 # CONFIG_BUSYBOX_DEFAULT_FEATURE_TAR_NOPRESERVE_TIME is not set
 # CONFIG_BUSYBOX_DEFAULT_FEATURE_TAR_SELINUX is not set
-# CONFIG_BUSYBOX_DEFAULT_UNZIP is not set
-# CONFIG_BUSYBOX_DEFAULT_FEATURE_UNZIP_CDF is not set
+CONFIG_BUSYBOX_DEFAULT_UNZIP=y
+CONFIG_BUSYBOX_DEFAULT_FEATURE_UNZIP_CDF=y
 # CONFIG_BUSYBOX_DEFAULT_FEATURE_UNZIP_BZIP2 is not set
 # CONFIG_BUSYBOX_DEFAULT_FEATURE_UNZIP_LZMA is not set
 # CONFIG_BUSYBOX_DEFAULT_FEATURE_UNZIP_XZ is not set
@@ -648,7 +656,7 @@ CONFIG_BUSYBOX_DEFAULT_FEATURE_LS_USERNAME=y
 CONFIG_BUSYBOX_DEFAULT_FEATURE_LS_COLOR=y
 CONFIG_BUSYBOX_DEFAULT_FEATURE_LS_COLOR_IS_DEFAULT=y
 CONFIG_BUSYBOX_DEFAULT_MD5SUM=y
-# CONFIG_BUSYBOX_DEFAULT_SHA1SUM is not set
+CONFIG_BUSYBOX_DEFAULT_SHA1SUM=y
 CONFIG_BUSYBOX_DEFAULT_SHA256SUM=y
 # CONFIG_BUSYBOX_DEFAULT_SHA512SUM is not set
 # CONFIG_BUSYBOX_DEFAULT_SHA3SUM is not set
@@ -1008,10 +1016,10 @@ CONFIG_BUSYBOX_DEFAULT_PIVOT_ROOT=y
 # CONFIG_BUSYBOX_DEFAULT_FEATURE_SETPRIV_CAPABILITIES is not set
 # CONFIG_BUSYBOX_DEFAULT_FEATURE_SETPRIV_CAPABILITY_NAMES is not set
 # CONFIG_BUSYBOX_DEFAULT_SETSID is not set
-# CONFIG_BUSYBOX_DEFAULT_SWAPON is not set
-# CONFIG_BUSYBOX_DEFAULT_FEATURE_SWAPON_DISCARD is not set
-# CONFIG_BUSYBOX_DEFAULT_FEATURE_SWAPON_PRI is not set
-# CONFIG_BUSYBOX_DEFAULT_SWAPOFF is not set
+CONFIG_BUSYBOX_DEFAULT_SWAPON=y
+CONFIG_BUSYBOX_DEFAULT_FEATURE_SWAPON_DISCARD=y
+CONFIG_BUSYBOX_DEFAULT_FEATURE_SWAPON_PRI=y
+CONFIG_BUSYBOX_DEFAULT_SWAPOFF=y
 # CONFIG_BUSYBOX_DEFAULT_FEATURE_SWAPONOFF_LABEL is not set
 CONFIG_BUSYBOX_DEFAULT_SWITCH_ROOT=y
 # CONFIG_BUSYBOX_DEFAULT_TASKSET is not set
@@ -1150,7 +1158,7 @@ CONFIG_BUSYBOX_DEFAULT_FEATURE_PREFER_IPV4_ADDRESS=y
 CONFIG_BUSYBOX_DEFAULT_VERBOSE_RESOLUTION_ERRORS=y
 # CONFIG_BUSYBOX_DEFAULT_FEATURE_TLS_SHA1 is not set
 # CONFIG_BUSYBOX_DEFAULT_ARP is not set
-# CONFIG_BUSYBOX_DEFAULT_ARPING is not set
+CONFIG_BUSYBOX_DEFAULT_ARPING=y
 CONFIG_BUSYBOX_DEFAULT_BRCTL=y
 CONFIG_BUSYBOX_DEFAULT_FEATURE_BRCTL_FANCY=y
 CONFIG_BUSYBOX_DEFAULT_FEATURE_BRCTL_SHOW=y
@@ -2344,6 +2352,7 @@ CONFIG_FSTOOLS_UBIFS_EXTROOT=y
 # CONFIG_FSTOOLS_OVL_MOUNT_FULL_ACCESS_TIME is not set
 # CONFIG_FSTOOLS_OVL_MOUNT_COMPRESS_ZLIB is not set
 CONFIG_PACKAGE_fwtool=y
+CONFIG_PACKAGE_getrandom=y
 CONFIG_PACKAGE_jsonfilter=y
 # CONFIG_PACKAGE_libatomic is not set
 CONFIG_PACKAGE_libc=y
@@ -2357,7 +2366,7 @@ CONFIG_PACKAGE_mtd=y
 CONFIG_PACKAGE_netifd=y
 # CONFIG_PACKAGE_om-watchdog is not set
 CONFIG_PACKAGE_openwrt-keyring=y
-# CONFIG_PACKAGE_opkg is not set
+CONFIG_PACKAGE_opkg=m
 CONFIG_PACKAGE_procd=y
 
 #
@@ -2376,6 +2385,8 @@ CONFIG_PACKAGE_ubusd=y
 # CONFIG_PACKAGE_ucert is not set
 # CONFIG_PACKAGE_ucert-full is not set
 CONFIG_PACKAGE_uci=y
+CONFIG_PACKAGE_urandom-seed=y
+CONFIG_PACKAGE_urngd=y
 CONFIG_PACKAGE_usign=y
 # CONFIG_PACKAGE_wireless-tools is not set
 # CONFIG_PACKAGE_zram-swap is not set
@@ -2476,7 +2487,7 @@ CONFIG_PACKAGE_plugin-gargoyle-wol=y
 # CONFIG_PACKAGE_ath10k-firmware-qca9888-ct is not set
 # CONFIG_PACKAGE_ath10k-firmware-qca9888-ct-htt is not set
 # CONFIG_PACKAGE_ath10k-firmware-qca988x is not set
-# CONFIG_PACKAGE_ath10k-firmware-qca988x-ct is not set
+CONFIG_PACKAGE_ath10k-firmware-qca988x-ct=m
 # CONFIG_PACKAGE_ath10k-firmware-qca988x-ct-htt is not set
 # CONFIG_PACKAGE_ath10k-firmware-qca9984 is not set
 CONFIG_PACKAGE_ath10k-firmware-qca9984-ct=m
@@ -2882,6 +2893,7 @@ CONFIG_PACKAGE_kmod-nfnetlink=y
 # CONFIG_PACKAGE_kmod-atl1e is not set
 # CONFIG_PACKAGE_kmod-atl2 is not set
 # CONFIG_PACKAGE_kmod-b44 is not set
+# CONFIG_PACKAGE_kmod-be2net is not set
 # CONFIG_PACKAGE_kmod-bnx2 is not set
 # CONFIG_PACKAGE_kmod-dm9000 is not set
 # CONFIG_PACKAGE_kmod-dummy is not set
@@ -3261,6 +3273,7 @@ CONFIG_PACKAGE_MAC80211_MESH=y
 # CONFIG_PACKAGE_kmod-mt76 is not set
 # CONFIG_PACKAGE_kmod-mt7601u is not set
 # CONFIG_PACKAGE_kmod-mt7603 is not set
+# CONFIG_PACKAGE_kmod-mt7615e is not set
 # CONFIG_PACKAGE_kmod-mt76x0e is not set
 # CONFIG_PACKAGE_kmod-mt76x0u is not set
 # CONFIG_PACKAGE_kmod-mt76x2 is not set
@@ -3361,7 +3374,6 @@ CONFIG_OPENSSL_WITH_CMS=y
 #
 # Algorithm Selection
 #
-CONFIG_OPENSSL_WITH_EC=y
 # CONFIG_OPENSSL_WITH_EC2M is not set
 CONFIG_OPENSSL_WITH_CHACHA_POLY1305=y
 CONFIG_OPENSSL_PREFER_CHACHA_OVER_GCM=y
@@ -3895,7 +3907,6 @@ CONFIG_PACKAGE_umbim=y
 # CONFIG_PACKAGE_wget-nossl is not set
 # CONFIG_PACKAGE_wpa-cli is not set
 # CONFIG_PACKAGE_wpa-supplicant is not set
-# CONFIG_WPA_SUPPLICANT_NO_TIMESTAMP_CHECK is not set
 # CONFIG_WPA_RFKILL_SUPPORT is not set
 CONFIG_WPA_MSG_MIN_PRIORITY=3
 # CONFIG_WPA_WOLFSSL is not set
