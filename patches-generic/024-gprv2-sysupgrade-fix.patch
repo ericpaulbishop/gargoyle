@@ -81,3 +81,28 @@
  
  $(eval $(call SingleProfile,CameoAP121_8M,64kraw-nojffs,DIR505A1,dir-505-a1,DIR-505-A1,ttyATH0,115200,"HORNET-PACKET-DIR505A1-3",1.99.99,""))
  
+--- a/target/linux/ar71xx/image/generic-legacy-devices.mk
++++ b/target/linux/ar71xx/image/generic-legacy-devices.mk
+@@ -132,11 +132,17 @@
+ endef
+ LEGACY_DEVICES += DB120
+ 
+-define LegacyDevice/HORNETUBx2
+-  DEVICE_TITLE := ALFA Network Hornet-UB-x2 board (16MB flash, 64MB ram)
+-  DEVICE_PACKAGES := kmod-usb-core kmod-usb2 kmod-usb-ledtrig-usbport
+-endef
+-LEGACY_DEVICES += HORNETUBx2
++#define LegacyDevice/HORNETUBx2
++#  DEVICE_TITLE := ALFA Network Hornet-UB-x2 board (16MB flash, 64MB ram)
++#  DEVICE_PACKAGES := kmod-usb-core kmod-usb2 kmod-usb-ledtrig-usbport
++#endef
++#LEGACY_DEVICES += HORNETUBx2
++
++define LegacyDevice/GPRv2
++  DEVICE_TITLE := Gargoyle Pocket Router v2 (ALFA Network Hornet-UB-x2 board) (16MB flash, 64MB ram)
++  DEVICE_PACKAGES := kmod-usb-core kmod-usb2 kmod-usb-ledtrig-usbport
++endef
++LEGACY_DEVICES += GPRv2
+ 
+ define LegacyDevice/TUBE2H16M
+   DEVICE_TITLE := ALFA Network Tube2H board (16MB flash)

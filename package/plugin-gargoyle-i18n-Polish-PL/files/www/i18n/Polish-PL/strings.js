@@ -121,6 +121,8 @@ UI.prdr="port przekierowany na router";
 UI.puse="port używany przez router";
 UI.pfwd="port przekierowany do";
 UI.conn="połączony";
+UI.YES="Tak";
+UI.NO="Nie";
 
 UI.AJAX="Wymagane wsparcie AJAX ze strony przeglądarki";
 UI.AJAXUpg="Niezbędne jest użycie przeglądarki ze wsparciem dla AJAX. Może to być jedna z wymienionych: Firefox 2.0+, Safari lub IE 6+.";

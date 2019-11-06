@@ -1,0 +1,11 @@
+#!/bin/sh
+
+menu_name="STA Manager"
+[ -x /usr/bin/i18n-menu ] && {
+	translation=$(i18n-menu gargoyle.display.connection_stamanager)
+	[ -n "$translation" ] && menu_name="$translation"
+}
+uci set gargoyle.display.connection_stamanager="$menu_name"
+uci set gargoyle.scripts.connection_stamanager="sta_manager.sh"
+uci set gargoyle.connection.stamanager="220"
+uci commit
