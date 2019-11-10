@@ -148,7 +148,7 @@ ifeq ($(call qstrip,$(CONFIG_EXTERNAL_KERNEL_TREE))$(call qstrip,$(CONFIG_KERNEL
   ifeq ($(word 1,$(subst ., ,$(KERNEL_BASE))),3)
     LINUX_SITE:=@KERNEL/linux/kernel/v3.x$(TESTING)
   else
-    LINUX_SITE:=@KERNEL/linux/kernel/v$(KERNEL)$(TESTING)
+    LINUX_SITE:=@KERNEL/linux/kernel/v$(word 1,$(subst ., ,$(KERNEL_BASE))).x$(TESTING)
   endif
 endif
 
