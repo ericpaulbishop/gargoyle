@@ -54,7 +54,6 @@ CONFIG_TARGET_MULTI_PROFILE=y
 # CONFIG_TARGET_ar71xx_generic_DEVICE_ap121f is not set
 # CONFIG_TARGET_ar71xx_generic_DEVICE_ALFAAP96 is not set
 # CONFIG_TARGET_ar71xx_generic_DEVICE_HORNETUB is not set
-# CONFIG_TARGET_ar71xx_generic_DEVICE_HORNETUBx2 is not set
 # CONFIG_TARGET_ar71xx_generic_DEVICE_ALFANX is not set
 # CONFIG_TARGET_ar71xx_generic_DEVICE_n5q is not set
 # CONFIG_TARGET_ar71xx_generic_DEVICE_r36a is not set
@@ -144,6 +143,7 @@ CONFIG_TARGET_MULTI_PROFILE=y
 # CONFIG_TARGET_ar71xx_generic_DEVICE_oolite-v5.2 is not set
 # CONFIG_TARGET_ar71xx_generic_DEVICE_oolite-v5.2-dev is not set
 # CONFIG_TARGET_ar71xx_generic_DEVICE_minibox-v3.2 is not set
+# CONFIG_TARGET_ar71xx_generic_DEVICE_GPRv2 is not set
 # CONFIG_TARGET_ar71xx_generic_DEVICE_lan-turtle is not set
 # CONFIG_TARGET_ar71xx_generic_DEVICE_packet-squirrel is not set
 # CONFIG_TARGET_ar71xx_generic_DEVICE_wifi-pineapple-nano is not set
@@ -325,7 +325,6 @@ CONFIG_TARGET_MULTI_PROFILE=y
 # CONFIG_TARGET_DEVICE_ar71xx_generic_DEVICE_ap121f is not set
 # CONFIG_TARGET_DEVICE_ar71xx_generic_DEVICE_ALFAAP96 is not set
 # CONFIG_TARGET_DEVICE_ar71xx_generic_DEVICE_HORNETUB is not set
-# CONFIG_TARGET_DEVICE_ar71xx_generic_DEVICE_HORNETUBx2 is not set
 # CONFIG_TARGET_DEVICE_ar71xx_generic_DEVICE_ALFANX is not set
 # CONFIG_TARGET_DEVICE_ar71xx_generic_DEVICE_n5q is not set
 # CONFIG_TARGET_DEVICE_ar71xx_generic_DEVICE_r36a is not set
@@ -405,6 +404,7 @@ CONFIG_TARGET_DEVICE_ar71xx_generic_DEVICE_ESR900=y
 CONFIG_TARGET_DEVICE_ar71xx_generic_DEVICE_oolite-v1=y
 # CONFIG_TARGET_DEVICE_ar71xx_generic_DEVICE_oolite-v5.2 is not set
 # CONFIG_TARGET_DEVICE_ar71xx_generic_DEVICE_oolite-v5.2-dev is not set
+# CONFIG_TARGET_DEVICE_ar71xx_generic_DEVICE_GPRv2 is not set
 # CONFIG_TARGET_DEVICE_ar71xx_generic_DEVICE_gl-inet-6408A-v1 is not set
 # CONFIG_TARGET_DEVICE_ar71xx_generic_DEVICE_gl-inet-6416A-v1 is not set
 # CONFIG_TARGET_DEVICE_ar71xx_generic_DEVICE_gl-domino is not set
@@ -3946,7 +3946,7 @@ CONFIG_PACKAGE_libubus=y
 # CONFIG_PACKAGE_libubus-lua is not set
 CONFIG_PACKAGE_libuci=y
 # CONFIG_PACKAGE_libuci-lua is not set
-# CONFIG_PACKAGE_libuclient is not set
+CONFIG_PACKAGE_libuclient=y
 # CONFIG_PACKAGE_libunwind is not set
 CONFIG_PACKAGE_libusb-1.0=y
 # CONFIG_PACKAGE_libusb-compat is not set
@@ -4296,7 +4296,7 @@ CONFIG_PACKAGE_SAMBA_MAX_DEBUG_LEVEL=-1
 # CONFIG_PACKAGE_soloscli is not set
 # CONFIG_PACKAGE_tcpdump is not set
 # CONFIG_PACKAGE_tcpdump-mini is not set
-# CONFIG_PACKAGE_uclient-fetch is not set
+CONFIG_PACKAGE_uclient-fetch=y
 CONFIG_PACKAGE_umbim=y
 # CONFIG_PACKAGE_umdns is not set
 # CONFIG_PACKAGE_vsc7385-ucode-pb44 is not set
