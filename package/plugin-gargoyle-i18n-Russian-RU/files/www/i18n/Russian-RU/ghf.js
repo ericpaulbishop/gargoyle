@@ -4,4 +4,4 @@ ghf.title="Утилита управления маршрутизатором Ga
 ghf.desc="Утилита управления роутером";
 ghf.devn="Имя устройства";
 ghf.waits="Пожалуйста, подождите, настройки применяются";
-ghf.badoverlay="Router storage full (read only) or is mounted in volatile storage (RAM). It will not function correctly, or will revert to a previous state after rebooting. Restore default configuration or flash new firmware (without preserving settings).";
+ghf.badoverlay="Память маршрутизатора заполнена (режим только для чтения) или смонтирована в энергозависимой памяти (RAM). Он не будет работать правильно или будет возвращатся в предыдущее состояние после перезагрузки. Восстановите настройки по умолчанию или обновите прошивку на новую версию (без сохранения настроек).";
