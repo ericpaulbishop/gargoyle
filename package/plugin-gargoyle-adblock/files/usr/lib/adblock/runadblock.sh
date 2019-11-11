@@ -102,8 +102,8 @@ update_blocklist()
 
 	#Download and process the files needed to make the lists
 	logger -t ADBLOCK Retrieving ad lists from remote source
-	wget -qO- http://www.mvps.org/winhelp2002/hosts.txt| awk -v r="$ENDPOINT_IP4" '{sub(/^0.0.0.0/, r)} $0 ~ "^"r' > /tmp/block.build.list
-	wget -qO- "http://adaway.org/hosts.txt"|awk -v r="$ENDPOINT_IP4" '{sub(/^127.0.0.1/, r)} $0 ~ "^"r' >> /tmp/block.build.list
+	ewget http://winhelp2002.mvps.org/hosts.txt 2>/dev/null | awk -v r="$ENDPOINT_IP4" '{sub(/^0.0.0.0/, r)} $0 ~ "^"r' > /tmp/block.build.list
+	ewget https://adaway.org/hosts.txt 2>/dev/null |awk -v r="$ENDPOINT_IP4" '{sub(/^127.0.0.1/, r)} $0 ~ "^"r' >> /tmp/block.build.list
 
 	#Check we got a hosts file
 	if [ -s "/tmp/block.build.list" ]
