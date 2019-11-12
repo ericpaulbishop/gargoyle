@@ -548,12 +548,10 @@ function UCIContainer()
 				var matches = oldValue.length == newValue.length;
 				if(matches)
 				{
-					var sortedOld = oldValue.sort()
-					var sortedNew = newValue.sort()
-					var sortedIndex;
-					for(sortedIndex=0; matches && sortedIndex <sortedOld.length; sortedIndex++)
+					var matchIndex;
+					for(matchIndex=0; matches && matchIndex < oldValue.length; matchIndex++)
 					{
-						matches = sortedOld[sortedIndex] == sortedNew[sortedIndex] ? true : false
+						matches = oldValue[matchIndex] == newValue[matchIndex] ? true : false
 					}
 				}
 				if(matches)
