@@ -26,6 +26,7 @@ quotasStr.OneTimeQuotaError="Может быть установлена толь
 quotasStr.OneNetworkQuotaError="Может быть установлена только одна квота относящаяся ко всей сети в один временной промежуток";
 quotasStr.QuotaAddError="Невозможно добавить квоту.";
 quotasStr.NA="НП"; //Not Applicable abbr
+quotasStr.NoTcErr="Вам необходимо установить дополнительный плагин, чтобы использовать эту опцию!";
 
 //template
 quotasStr.AppliesTo="Применяется к";
