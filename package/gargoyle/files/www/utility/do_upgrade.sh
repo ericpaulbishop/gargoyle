@@ -10,68 +10,50 @@
 	echo "Content-Type: text/html; charset=utf-8"
 	echo ""
 
-	echo '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">'
-	echo '<html xmlns="http://www.w3.org/1999/xhtml">'
+	echo '<!DOCTYPE html>'
 	echo '<body>'
 
 	mkdir -p /tmp/up
 	mv $FORM_upgrade_file /tmp/up/upgrade
 
 	cd /tmp/up/
-	if [ -e /usr/bin/bin2trx ] ; then
-		/usr/bin/bin2trx /tmp/up/upgrade >/tmp/up/trxtest 2>&1
-		trx_test=$(cat /tmp/up/trxtest)
-		if [ -n "$trx_test" ] ; then
-			echo "<script type=\"text/javascript\">top.failure();</script>"
+	fwtool -i fwtool.json upgrade
+	echo "<span id=\"fwtool\">$(cat fwtool.json)</span>"
+	. /usr/share/libubox/jshn.sh
+	json_load "$(/usr/libexec/validate_firmware_image upgrade)" || {
+		# Image check failed
+		echo "<script type=\"text/javascript\">top.failureByBootloader();</script>"
+		echo "</body></html>"
+		rm -rf /tmp/up
+		exit
+	}
+	json_dump > validate_firmware_image.json
+	echo "<span id=\"validate_firmware_image\">$(cat validate_firmware_image.json)</span>"
+
+	md5sum upgrade 2>/dev/null | cut -d ' ' -f 1 > hash.md5
+	sha1sum upgrade 2>/dev/null | cut -d ' ' -f 1 > hash.sha1
+	sha256sum upgrade 2>/dev/null | cut -d ' ' -f 1 > hash.sha256
+	echo "<span id=\"md5sum\">$(cat hash.md5)</span>"
+	echo "<span id=\"sha1sum\">$(cat hash.sha1)</span>"
+	echo "<span id=\"sha256sum\">$(cat hash.sha256)</span>"
+
+	echo "<span id=\"firmware_hash\">$FORM_firmware_hash</span>"
+
+	echo "<span id=\"firmware_size\">$(wc -c upgrade | cut -f1 -d' ')</span>"
+
+	is_tplink=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine/ {print $2}' /proc/cpuinfo | grep "TL\-[WM][DR]")
+	if [ -n "$is_tplink" ]; then
+		boot_size=$(dd bs=4 count=1 skip=37 if=/tmp/up/upgrade 2>/dev/null | hexdump -v -n 4 -e '1/1 "%02x"')
+		[ "$boot_size" != "00000000" ] && {
+			# Invalid image, it contains a bootloader
+			echo "<script type=\"text/javascript\">top.failureByBootloader();</script>"
 			echo "</body></html>"
+			rm -rf /tmp/up
 			exit
-		else
-			echo "<script type=\"text/javascript\">top.uploaded();</script>"
-			#make sure output buffer gets flushed by writing lots of whitespace to output
-			inc=1
-			while [ $inc -lt 500 ] ; do
-				echo "     "
-				inc=$(($inc + 1))
-			done
-
-			#tor eats up memory like crazy and can make an upgrade crash, kill it if it exists
-			if [ -e /etc/init.d/tor ] ; then
-				/etc/init.d/tor stop >/dev/null 2>&1
-			fi
-			mtd write upgrade linux ; echo "<script type=\"text/javascript\">top.upgraded();</script></body></html>" ; reboot
-		fi
-	else
-
-		is_tplink=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine/ {print $2}' /proc/cpuinfo | grep "TL\-[WM][DR]")
-		if [ -n "$is_tplink" ]; then
-			boot_size=$(dd bs=4 count=1 skip=37 if=/tmp/up/upgrade 2>/dev/null | hexdump -v -n 4 -e '1/1 "%02x"')
-			[ "$boot_size" != "00000000" ] && {
-				# Invalid image, it contains a bootloader
-				echo "<script type=\"text/javascript\">top.failureByBootloader();</script>"
-				echo "</body></html>"
-				rm /tmp/up/upgrade
-				exit
-			}
-		fi
-
-		echo "<script type=\"text/javascript\">top.uploaded();</script>"
-		#make sure output buffer gets flushed by writing lots of whitespace to output
-		inc=1
-		while [ $inc -lt 500 ] ; do
-			echo "     "
-			inc=$(($inc + 1))
-		done
-
-		#tor eats up memory like crazy and can make an upgrade crash, kill it if it exists
-		if [ -e /etc/init.d/tor ] ; then
-			/etc/init.d/tor stop >/dev/null 2>&1
-		fi
-
-		#if attempting to preserve settings, don't pass -n
-		if [ "$FORM_upgrade_preserve" = "on" ] ; then
-			/sbin/sysupgrade    /tmp/up/upgrade  2>&1 | awk ' $0 ~ /eboot/ { print "<script type=\"text/javascript\">top.upgraded();</script></body></html>" ; } '
-		else
-			/sbin/sysupgrade -n /tmp/up/upgrade  2>&1 | awk ' $0 ~ /eboot/ { print "<script type=\"text/javascript\">top.upgraded();</script></body></html>" ; } '
-		fi
+		}
 	fi
+
+	echo "<script type=\"text/javascript\">top.uploaded();</script>"
+
+	echo "</body></html>"
 ?>

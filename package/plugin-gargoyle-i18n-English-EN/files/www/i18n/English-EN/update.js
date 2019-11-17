@@ -8,6 +8,17 @@ upS.Warn="By default upgrading your firmware will completely erase your current 
 upS.CGV="Current Gargoyle Version";
 upS.SelF="Select Firmware File";
 upS.Prsv="Attempt to Preserve Settings";
+upS.UploadFrm="Upload Firmware";
+upS.ConfirmNext="Firmware upgrade will not start until confirmed on the next page.";
+upS.EHash="Enter hash";
+upS.ValidFw="Valid firmware";
+upS.DevMatch="Firmware matches device";
+upS.SuppDevs="Supported devices";
+upS.FwFitFlash="Firmware fits in flash memory";
+upS.ChksumMatch="Checksum matches";
+upS.NoPrsv="Preserve settings is not allowed with this firmware";
+upS.ForceWarn="Firmware has been detected as incompatible with this device (wrong device OR too big OR invalid firmware format). Forcing firmware upgrade can result in a bricked device if used incorrectly. Please ensure this firmware is correct for your device!</p><p>If you wish to force the upgrade, please tick <em>Force upgrade</em> below.";
+upS.ForceUpg="Force upgrade";
 
 //javascript
 upS.SelErr="ERROR: You must select a firmware file.";
@@ -16,8 +27,10 @@ upS.Uping="Uploading Firmware";
 upS.UWait="Upgrading, Please Wait.";
 upS.Rbtg="Upgrade Complete, Rebooting...";
 upS.UErr="An error has occurred: Your router can not be upgraded.";
+upS.UpConfirm="Confirm Upgrade";
 upS.UErrBB="Firmware contains a bootloader. Your router can not be upgraded.";
 upS.brcmT="Firmware should be a .bin or .trx file";
 upS.ar71xxT="Firmware should be a sysupgrade.bin file";
 upS.othrT="Firmware should be a combined .img file";
 upS.mvebu="Firmware should be a sysupgrade.bin file";
+

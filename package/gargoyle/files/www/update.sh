@@ -15,6 +15,27 @@
 	awk -F= '/DISTRIB_TARGET/{printf "var distribTarget=%s;\n", $2}' /etc/openwrt_release
 	gargoyle_version=$(cat data/gargoyle_version.txt)
 	echo "var gargoyleVersion=\"$gargoyle_version\"";
+
+	# Check if existing upgrade file exists and purge it if older than 1 hour
+	upgrade_date=$(date -r /tmp/up/upgrade "+%s" 2>/dev/null)
+	current_date=$(date "+%s")
+	if [ $((current_date - upgrade_date)) -gt 3600 ] ; then
+		rm -rf /tmp/up
+	fi
+
+	# Flag if upgrade file already exists
+	[ -e "/tmp/up/upgrade" ] && echo "var upgradePresent=true;" || echo "var upgradePresent=false;"
+	[ -e "/tmp/up/upgrade" ] && echo "var firmware_size=$(wc -c /tmp/up/upgrade | cut -f1 -d' ');" || echo "var firmware_size=0;"
+	[ -e "/tmp/up/fwtool.json" ] && echo "var fwtoolStr='$(cat /tmp/up/fwtool.json)';" || echo "var fwtoolStr='{}';"
+	[ -e "/tmp/up/validate_firmware_image.json" ] && echo "var validateFwStr='$(cat /tmp/up/validate_firmware_image.json)';" || echo "var validateFwStr='{}';"
+	[ -e "/tmp/up/hash.md5" ] && echo "var md5hash='$(cat /tmp/up/hash.md5)';" || echo "var md5hash='';"
+	[ -e "/tmp/up/hash.sha1" ] && echo "var sha1hash='$(cat /tmp/up/hash.sha1)';" || echo "var sha1hash='';"
+	[ -e "/tmp/up/hash.sha256" ] && echo "var sha256hash='$(cat /tmp/up/hash.sha256)';" || echo "var sha256hash='';"
+
+	echo "var procmtdLines = [];"
+	echo "var procpartLines = [];"
+	cat /proc/mtd | sed 's/"//g' | awk '{print "procmtdLines.push(\""$0"\");"}'
+	cat /proc/partitions | sed 's/"//g' | awk '{print "procpartLines.push(\""$0"\");"}'
 %>
 //-->
 </script>
@@ -29,9 +50,6 @@
 			<div class="panel-body">
 				<div class="row form-group">
 					<div class="col-lg-12">
-						<div class="alert alert-warning" role="alert">
-							<%~ Warn %>
-						</div>
 						<div class="alert alert-info" role="alert">
 							<span><%~ CGV %>:</span>
 							<span id="gargoyle_version"></span>
@@ -51,18 +69,22 @@
 									<em><span id="upgrade_text"></span></em>
 									<br/>
 									<br/>
-									<input type="checkbox" id="upgrade_preserve" name="upgrade_preserve" />&nbsp;<label id="upgrade_preserve_label" for="upgrade_preserve" style="vertical-align:middle"><%~ Prsv %></label>
-									<br/>
-									<br/>
 								</span>
 							</div>
 
 
+							<div class="row form-group">
+								<label class="col-xs-5" id="firmware_hash_label" for="firmware_hash"><%~ EHash %> (MD5/SHA-1/SHA-256):</label>
+								<span class="col-xs-7">
+									<input class="form-control" type="text" id="firmware_hash" name="firmware_hash"/>
+									<em>(<%~ optional %>)</em>
+								</span>
+							</div>
 							<input id="upgrade_hash" name="hash" type="hidden" value="" />
-							<input id="upgrade_arch" name="arch" type="hidden" value="" />
+							<span class="col-xs-12"><em><%~ ConfirmNext %></em></span>
 
 							<div class="row form-group">
-								<span class="col-xs-12"><button id="upgrade_button" class="btn btn-danger btn-lg" onclick="doUpgrade()"><%~ Upgrade %></button></span>
+								<span class="col-xs-12"><button id="upgrade_button" class="btn btn-primary btn-lg" onclick="doUpload()"><%~ UploadFrm %></button></span>
 							</div>
 						</form>
 					</div>
@@ -71,11 +93,28 @@
 		</div>
 	</div>
 </div>
+
 <iframe id="do_upgrade" name="do_upgrade" src="#" style="display:none"></iframe>
+<iframe id="reboot_test" onload="reloadPage()" style="display:none"></iframe>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="upgrade_confirm_modal" aria-hidden="true" aria-labelledby="upgrade_confirm_modal_title">
+	<div class="modal-dialog modal-lg" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 id="upgrade_confirm_modal_title" class="panel-title"><%~ UpConfirm %></h3>
+			</div>
+			<div class="modal-body">
+				<%in templates/upgrade_confirm_template %>
+			</div>
+			<div class="modal-footer" id="upgrade_confirm_modal_button_container">
+			</div>
+		</div>
+	</div>
+</div>
 
 <script>
 <!--
-	setUpgradeFormat();
+	resetData();
 //-->
 </script>
 
