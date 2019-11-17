@@ -3050,10 +3050,12 @@ function modalPrepare(modalID, title, elements, buttons)
 	defaultDismiss.onclick = function(){closeModalWindow(modalID);};
 	defaultDismiss.className = "btn btn-warning";
 	defaultDismiss.innerText = UI.Cancel;
+	defaultDismiss.id = "modal_button_default_dismiss";
 	defaultDiscard = document.createElement("button");
 	defaultDiscard.onclick = function(){closeModalWindow(modalID);};
 	defaultDiscard.className = "btn btn-warning";
 	defaultDiscard.innerText = UI.CDiscardChanges;
+	defaultDiscard.id = "modal_button_default_discard";
 
 	titleEl = document.getElementById(modalID + "_title");
 	if(titleEl) { titleEl.innerHTML = title; }
@@ -3109,6 +3111,14 @@ function modalPrepare(modalID, title, elements, buttons)
 			btnEl.className = button.classes;
 			btnEl.onclick = button.function;
 			btnEl.innerText = button.title;
+			if(button.id !== undefined)
+			{
+				btnEl.id = button.id;
+			}
+			if(button.disabled !== undefined)
+			{
+				btnEl.disabled = button.disabled;
+			}
 			btnContainer.appendChild(btnEl);
 		}
 	});
