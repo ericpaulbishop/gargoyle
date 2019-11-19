@@ -32,7 +32,7 @@ function doUpgrade()
 		forceupgrade = document.getElementById("force_upgrade").checked;
 		var Commands = [];
 		Commands.push("/etc/init.d/tor stop >/dev/null 2>&1");
-		Commands.push("sysupgrade " + (preservesettings ? "" : "-n ") + (forceupgrade ? "" : "-F ") + "/tmp/up/upgrade");
+		Commands.push("sysupgrade " + (preservesettings ? "" : "-n ") + (forceupgrade ? "-F " : "") + "/tmp/up/upgrade");
 		var commands = Commands.join("\n");
 		var param = getParameterDefinition("commands", commands)  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 
