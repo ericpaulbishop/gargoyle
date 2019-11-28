@@ -201,7 +201,8 @@ function resetData()
 	{
 		for(serverIndex=tzServers.length; serverIndex < 3; serverIndex++)
 		{
-			document.getElementById("server" + (1+sectionIndex)).value = (2-serverIndex) + ".pool.ntp.org"
+			document.getElementById("server" + (1+sectionIndex)).value = (serverIndex) + ".pool.ntp.org";
+			sectionIndex += 1;
 		}
 	}
 
@@ -238,7 +239,7 @@ function updateServerList()
 		}
 		else
 		{
-			var regionServer = ((3-serverIndex) + "." + region + ".pool.ntp.org").replace(/\.global\./, ".")
+			var regionServer = ((serverIndex-1) + "." + region + ".pool.ntp.org").replace(/\.global\./, ".")
 			setElementEnabled( document.getElementById("server" + serverIndex), false, regionServer);
 		}
 	}
