@@ -14,6 +14,8 @@ encryptionList['psk'] = 'WPA PSK';
 encryptionList['psk2'] = 'WPA2 PSK';
 encryptionList['sae'] = 'WPA3 SAE';
 
+var scannedSsids = [];
+
 function saveChanges()
 {
 	errorList = proofreadAll();
@@ -99,6 +101,8 @@ function saveChanges()
 
 function resetData()
 {
+	var ssidDisplay = [];
+	var ssidValue = [];
 	document.getElementById("enablestamgr").checked = uciOriginal.get("gargoyle_stamgr", "global", "enabled") == "1" ? true : false;
 	if(uciOriginal.get("wireless","stacfg","mode") != "sta")
 	{
@@ -106,6 +110,15 @@ function resetData()
 		document.getElementById("enablestamgr").disabled = true;
 		document.getElementById("enablestamgr").checked = false;
 	}
+	else
+	{
+		ssidDisplay.push(stamgrStr.CurWanCfg);
+		ssidValue.push("curwancfg");
+	}
+	ssidDisplay.push(stamgrStr.Other);
+	ssidValue.push("custom");
+	setAllowableSelections("wifilist", ssidValue, ssidDisplay);
+	setSelectedValue("wifilist","custom");
 	if(!wpa3) { delete encryptionList['sae'] }
 	document.getElementById("maxretry").value = uciOriginal.get("gargoyle_stamgr", "global", "max_retry");
 	document.getElementById("maxwait").value = uciOriginal.get("gargoyle_stamgr", "global", "max_wait");
@@ -358,6 +371,24 @@ function addAPModal()
 	var enc = "";
 	var password = "";
 
+	var selectedValue = document.getElementById("wifilist").value;
+	if(selectedValue == "curwancfg")
+	{
+		radio = uciOriginal.get("wireless","stacfg","device");
+		ssid = uciOriginal.get("wireless","stacfg","ssid");
+		bssid = uciOriginal.get("wireless","stacfg","bssid");
+		enc = uciOriginal.get("wireless","stacfg","encryption");
+		password = uciOriginal.get("wireless","stacfg","key");
+	}
+	else if(selectedValue != "custom")
+	{
+		radio = scannedSsids[4][selectedValue];
+		ssid = scannedSsids[0][selectedValue];
+		ssid = ssid == " unknown" ? "" : ssid;
+		bssid = ssid == "" ? scannedSsids[5][selectedValue] : "";
+		enc = scannedSsids[1][selectedValue];
+	}
+
 	modalElements = [
 		{"id" : "add_radio", "options" : radioList, "value" : radio},
 		{"id" : "add_ssid", "value" : ssid},
@@ -422,4 +453,151 @@ function translateBackendFrontend(str,lookup)
 		}
 	}
 	return retVal;
+}
+
+function scanWifi()
+{
+	setControlsEnabled(false, true, stamgrStr.Scanning);
+	var param = getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+
+	var stateChangeFunction = function(req)
+	{
+		if(req.readyState == 4)
+		{
+			scannedSsids = parseWifiScan(req.responseText);
+			if(scannedSsids[0].length > 0)
+			{
+				var ssidDisplay = [];
+				var ssidValue = [];
+				var ssidIndex=0;
+				for(ssidIndex=0; ssidIndex < scannedSsids[0].length; ssidIndex++)
+				{
+					var ssid = scannedSsids[0][ssidIndex];
+					var enc  = scannedSsids[1][ssidIndex];
+					var qual = scannedSsids[3][ssidIndex];
+
+					ssid = ssid == " unknown" ? "Hidden (" + scannedSsids[5][ssidIndex] + ")" : ssid;
+					enc = enc =="none" ? "Open" :  enc.replace(/psk/g, "wpa").toUpperCase();
+					var ghz = translateBackendFrontend(scannedSsids[4][ssidIndex],radioList);
+					ssidDisplay.push( ssid + " (" + enc + ", " + qual +"% Signal, " + ghz +  ")");
+
+					ssidValue.push(ssidIndex + "");
+				}
+
+				if(uciOriginal.get("wireless","stacfg","mode") == "sta")
+				{
+					ssidDisplay.push(stamgrStr.CurWanCfg);
+					ssidValue.push("curwancfg");
+				}
+				ssidDisplay.push(stamgrStr.Other);
+				ssidValue.push("custom");
+
+				setAllowableSelections("wifilist", ssidValue, ssidDisplay);
+				setSelectedValue("wifilist","custom");
+			}
+			else
+			{
+				alert(stamgrStr.NoWifi);
+			}
+			setControlsEnabled(true);
+		}
+	}
+	runAjax("POST", "utility/scan_wifi.sh", param, stateChangeFunction);
+}
+
+function parseWifiScan(rawScanOutput)
+{
+	adjScanOutput = rawScanOutput.replace(/Quality/g, "\n          Quality");
+	adjScanOutput = adjScanOutput.replace(/Channel/g, "\n          Channel");
+
+	var parsed = [ [],[],[],[],[],[] ];
+	var cells = adjScanOutput.split(/Cell/);
+	cells.shift(); //get rid of anything before first AP data
+
+	var getCellValues=function(id, cellLines)
+	{
+		var vals=[];
+		var lineIndex;
+		for(lineIndex=0; lineIndex < cellLines.length; lineIndex++)
+		{
+			var line = cellLines[lineIndex];
+			var idIndex = line.indexOf(id);
+			var cIndex  = line.indexOf(":");
+			var eqIndex = line.indexOf("=");
+			var splitIndex = cIndex;
+			if(splitIndex < 0 || (eqIndex >= 0 && eqIndex < splitIndex))
+			{
+				splitIndex = eqIndex;
+			}
+			if(idIndex >= 0 && splitIndex > idIndex)
+			{
+				var val=line.substr(splitIndex+1);
+				val = val.replace(/^[^\"]*\"/g, "");
+				val = val.replace(/\".*$/g, "");
+				vals.push(val);
+			}
+		}
+		return vals;
+	}
+
+	while(cells.length > 0)
+	{
+		var cellData  = cells.shift();
+		var cellLines = cellData.split(/[\r\n]+/);
+
+		var bssid   = getCellValues("Address", cellLines).shift().trim();
+		var ssid    = getCellValues("ESSID", cellLines).shift();
+		var channel = getCellValues("Channel", cellLines).shift();
+		var qualStr = getCellValues("Quality", cellLines).shift();
+		var encStr  = getCellValues("Encryption", cellLines).shift();
+
+		if(ssid != null && channel != null && qualStr != null && encStr != null )
+		{
+			var enc = "psk2"
+			if(encStr.match(/WPA2 PSK/))
+			{
+				enc = "psk2"
+			}
+			else if(encStr.match(/WPA PSK/))
+			{
+				enc = "psk"
+			}
+			else if(encStr.match(/WEP/))
+			{
+				enc = "wep"
+			}
+			else if(encStr.match(/none/))
+			{
+				enc = "none"
+			}
+
+			var splitQual =qualStr.replace(/[\t ]+Sig.*$/g, "").split(/\//);
+			var quality = Math.round( (parseInt(splitQual[0])*100)/parseInt(splitQual[1]) );
+			quality = quality > 100 ? 100 : quality;
+
+
+			parsed[0].push(ssid);
+			parsed[1].push(enc);
+			parsed[2].push(channel);
+			parsed[3].push(quality);
+			parsed[4].push( channel > 30 ? translateBackendFrontend("5GHz",radioList) : translateBackendFrontend("2.4GHz",radioList))
+			parsed[5].push(bssid);
+		}
+	}
+
+	var qualityIndices = [];
+	var qIndex;
+	for(qIndex=0; qIndex < parsed[3].length; qIndex++) { qualityIndices.push( [ qIndex, parsed[3][qIndex] ] ); }
+	var sortQuality = function(q1,q2){ return q2[1] - q1[1]; };
+	qualityIndices = qualityIndices.sort(sortQuality);
+
+	var sortedParsed = [ [],[],[],[],[],[] ];
+	while(qualityIndices.length > 0)
+	{
+		var i = qualityIndices.shift()[0];
+		var pIndex;
+		for(pIndex=0; pIndex < 6; pIndex++){ sortedParsed[pIndex].push( parsed[pIndex][i] ); }
+	}
+
+	return sortedParsed;
 }

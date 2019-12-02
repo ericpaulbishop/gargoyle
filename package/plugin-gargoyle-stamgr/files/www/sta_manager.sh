@@ -86,6 +86,13 @@
 				</div>
 				
 				<div class="row form-group">
+					<span class="col-xs-12">
+						<select class="form-control" id="wifilist"></select>
+						<button id="scan_button" class="btn btn-default" onclick="scanWifi()"><%~ ScanWifi %></button>
+					</span>
+				</div>
+
+				<div class="row form-group">
 					<span class="col-xs-12"><button id="add_button" class="btn btn-default btn-add" onclick="addAPModal()"><%~ Add %> AP</button></span>
 				</div>
 			</div>
