@@ -1634,7 +1634,7 @@ function localdate(ldate)
 
 function resetData()
 {
-	wanMacLoc = uciOriginal.get("network","wan_dev","macaddr") != "" ? "wan_dev" : wanMacLoc;
+	wanMacLoc = uciOriginal.get("network","wan_dev") != "" ? "wan_dev" : wanMacLoc;
 	var removeChannels = [];
 	var hwAmode = "disabled";
 	var hwGmode = "disabled";
