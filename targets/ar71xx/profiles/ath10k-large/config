@@ -422,7 +422,8 @@ CONFIG_TARGET_DEVICE_PACKAGES_ar71xx_generic_DEVICE_ESR1750="kmod-ath10k-ct ath1
 # CONFIG_TARGET_DEVICE_ar71xx_generic_DEVICE_gl-ar150 is not set
 # CONFIG_TARGET_DEVICE_ar71xx_generic_DEVICE_gl-ar300 is not set
 # CONFIG_TARGET_DEVICE_ar71xx_generic_DEVICE_gl-ar300m is not set
-# CONFIG_TARGET_DEVICE_ar71xx_generic_DEVICE_gl-ar750 is not set
+CONFIG_TARGET_DEVICE_ar71xx_generic_DEVICE_gl-ar750=y
+CONFIG_TARGET_DEVICE_PACKAGES_ar71xx_generic_DEVICE_gl-ar750="kmod-ath10k-ct ath10k-firmware-qca9887-ct"
 # CONFIG_TARGET_DEVICE_ar71xx_generic_DEVICE_gl-ar750s is not set
 # CONFIG_TARGET_DEVICE_ar71xx_generic_DEVICE_gl-mifi is not set
 # CONFIG_TARGET_DEVICE_ar71xx_generic_DEVICE_gl-usb150 is not set
