@@ -37,6 +37,8 @@ function saveChanges()
 		var uci = uciOriginal.clone();
 		var uciCompare = uciOriginal.clone();
 
+		var wasBridge = isBridge(uciCompare);
+
 		var doReboot= (!isBridge(uciOriginal)) && document.getElementById("global_bridge").checked;
 		if(doReboot)
 		{
@@ -144,6 +146,12 @@ function saveChanges()
 
 		if( document.getElementById("global_gateway").checked )
 		{
+			//If we were previously bridged, and are now going to a gateway, we re-enable DHCP for the user
+			//Under all other circumstances, DHCP will remain as it was previously set
+			if(wasBridge)
+			{
+				uci.remove("dhcp","lan","ignore");
+			}
 			var wifiGSelected = true;
 			var wifiASelected = false;
 			var dualBandSelected = false;
