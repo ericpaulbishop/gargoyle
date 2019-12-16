@@ -131,7 +131,6 @@ function saveChanges()
 		preCommands = preCommands + "\nuci -q del network.wwan\nuci commit\n";
 		uci.removeSection("network", "wwan");
 		uciCompare.removeSection("network", "wwan");
-		uci.set("dhcp", "lan", "ignore", "0");
 		var lanzone = uci.getAllSectionsOfType("firewall","zone");
 		for(x = 0; x < lanzone.length; x++)
 		{
