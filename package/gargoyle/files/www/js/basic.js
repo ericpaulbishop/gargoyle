@@ -2792,7 +2792,7 @@ function parseWifiScan(rawScanOutput)
 		if(ssid != null && channel != null && qualStr != null && encStr != null )
 		{
 			var enc = "psk2"
-			if(encStr.match(/WPA3 SAE/))
+			if((encStr.match(/WPA3 SAE/) || encStr.match(/WPA2\/WPA3 PSK\/SAE/)) && wpad_sae)
 			{
 				enc = "sae"
 			}
