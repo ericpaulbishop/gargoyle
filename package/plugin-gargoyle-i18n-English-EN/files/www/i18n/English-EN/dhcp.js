@@ -14,12 +14,17 @@ dhcpS.SelH="Select Hostname/MAC From Currently Connected Hosts";
 dhcpS.AsSIP="Assigned Static IP Addresses";
 dhcpS.opt="optional";
 dhcpS.ESIP="Edit Static IP";
+dhcpS.Suff="Suffix";
 dhcpS.dHErr="duplicate Hostname";
 dhcpS.dMErr="duplicate MAC";
 dhcpS.dIPErr="duplicate IP address";
+dhcpS.dHIDErr="duplicate IPv6 Suffix";
+dhcpS.dDUIDErr="duplicate DUID";
 dhcpS.subErr="Specified static IP falls outside LAN subnet.";
 dhcpS.ipErr="Specified static IP is current router IP.";
 dhcpS.dsubErr="Specified DHCP range falls outside LAN subnet.";
 dhcpS.dipErr="Specified DHCP range contains current LAN IP.";
+dhcpS.NoDUID="DUID required to set IPv6 Suffix";
 dhcpS.upErr="Could not update static IP.";
 dhcpS.AErr="Could not add row.";
+

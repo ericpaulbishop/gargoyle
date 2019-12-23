@@ -3123,3 +3123,170 @@ function modalPrepare(modalID, title, elements, buttons)
 		}
 	});
 }
+
+//IPv6 library
+function ip6_full(address)
+{
+	//replace ipv4 address
+	var ipv4 = address.match(/(.*:)([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$)/);
+	if (ipv4) {
+		var address = ipv4[1];
+		ipv4 = ipv4[2].match(/[0-9]+/g);
+		for (var i = 0;i < 4;i ++) {
+			var byte = parseInt(ipv4[i],10);
+			ipv4[i] = ("0" + byte.toString(16)).substr(-2);
+		}
+		address += ipv4[0] + ipv4[1] + ':' + ipv4[2] + ipv4[3];
+	}
+
+	//leading and trailing ::
+	address = address.replace(/^:|:$/g, '');
+
+	var ipv6 = address.split(':');
+
+	for (var i = 0; i < ipv6.length; i ++) {
+		var hex = ipv6[i];
+		if (hex != "") {
+			//normalize leading zeros
+			ipv6[i] = ("0000" + hex).substr(-4);
+		}
+		else {
+			//normalize grouped zeros ::
+			hex = [];
+			for (var j = ipv6.length; j <= 8; j ++) {
+				hex.push('0000');
+			}
+			ipv6[i] = hex.join(':');
+		}
+	}
+
+	return ipv6.join(':');
+}
+
+function ip6_canonical(address)
+{
+	var fullAddress = ip6_full(address);
+	var components = fullAddress.split(":");
+	
+	for(var componentIdx = 0; componentIdx < components.length; componentIdx++)
+	{
+		//suppress leading zeros
+		components[componentIdx] = components[componentIdx].replace(/^0+([1-9a-f]{1,3})/i,'$1');
+		//convert remaining all zero fields to a single zero
+		components[componentIdx] = components[componentIdx].replace(/^0+/,'0');
+	}
+
+	//Shorten longest run of all zeros (that is greater than 1 field)
+	var zeroCounts = [];
+	zeroCounts.length = components.length;
+	zeroCounts.fill(0);
+	inZeroChain = false;
+	firstZeroInChain = 0;
+	for(var componentIdx = 0; componentIdx < components.length; componentIdx++)
+	{
+		if(components[componentIdx] == "0")
+		{
+			if(inZeroChain)
+			{
+				for(var zeroIdx = componentIdx; zeroIdx >= firstZeroInChain; zeroIdx--)
+				{
+					zeroCounts[zeroIdx] = zeroCounts[zeroIdx] + 1;
+				}
+			}
+			else
+			{
+				inZeroChain = true;
+				firstZeroInChain = componentIdx;
+				zeroCounts[componentIdx] = zeroCounts[componentIdx] + 1;
+			}
+		}
+		else
+		{
+			inZeroChain = false;
+		}
+	}
+
+	maxZeroCount = Math.max(...zeroCounts);
+	maxZeroCountIdxs = [];
+	for(var idx = 0; (maxZeroCount > 1) && (idx < zeroCounts.length); idx++)
+	{
+		if(zeroCounts[idx] == maxZeroCount)
+		{
+			maxZeroCountIdxs.push(idx);
+		}
+	}
+
+	if(maxZeroCountIdxs.length > 0)
+	{
+		components.splice(maxZeroCountIdxs[0],maxZeroCount-1)
+		components[maxZeroCountIdxs[0]] = "";
+	}
+
+	if(components[0] == "" && components.length == 1)
+	{
+		components.splice(0,0,"");
+		components.splice(0,0,"");
+	}
+	else if(components[0] == "")
+	{
+		components.splice(0,0,"");
+	}
+	else if(components[components.length-1] == "")
+	{
+		components.push("");
+	}
+
+	return components.join(':');
+}
+
+function ip6_splitmask(address)
+{
+	var ipv6 = {};
+	bitmask = address.substring(address.indexOf("/")+1);
+	addr = address.substring(0, address.indexOf("/"));
+	ipv6.address = addr;
+	ipv6.bitmask = bitmask;
+
+	return ipv6;
+}
+
+function validateIP6(address)
+{
+	//return codes:
+	//0 == valid IP
+	//1 = improper format
+
+	var errorCode = 0;
+
+	var components = address.split(":");
+	if((address.match(/:{3,}/)) || (address.match(/::.+::/)) ||
+		(address.match(/[^:]:$/)) || (address.match(/^:(?!:)/)))
+	{
+		errorCode = 1;
+	}
+
+	if(components.length < 2 || components.length > 8)
+	{
+		errorCode = 1;
+	}
+
+	if(components.length < 8 && !address.match(/::/))
+	{
+		errorCode = 1;
+	}
+
+	for(var componentIdx = 0; componentIdx < components.length; componentIdx++)
+	{
+		if(!components[componentIdx].match(/^[0-9a-f]{0,4}$/i))
+		{
+			errorCode = 1;
+		}
+	}
+
+	return errorCode;
+}
+
+function proofreadIp6(input)
+{
+	proofreadText(input, validateIP6, 0);
+}
