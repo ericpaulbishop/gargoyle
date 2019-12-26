@@ -27,9 +27,9 @@
 	#ugly one-liner
 	#unmounted_drives=$( drives=$(cat /tmp/drives_found.txt | grep "dev" | sed 's/[0-9]:.*$//g' | uniq) ; for d in $drives ; do mounted=$(cat /proc/mounts | awk '$1 ~ /dev/ { print $1 }' | uniq |  grep "$d") ; if [ -z "$mounted" ] ; then echo "$d" ; fi  ; done )
 
-	drives="$(awk  -F':' '$1 ~ /^\/dev\// { sub(/[0-9]+$/, "", $1); arr[$1]; } END { for (x in arr) { print x; } }' /tmp/drives_found.txt)"
+	drives="$(awk  -F':' '$1 ~ /^\/dev\/sd[a-z]/ { sub(/[0-9]+$/, "", $1); arr[$1]; } $1 ~ /^\/dev\/mmcblk/ { sub(/p[0-9]+$/, "", $1); arr[$1]; } END { for (x in arr) { print x; } }' /tmp/drives_found.txt)"
 	for d in ${drives}; do
-		if awk -v devpath="^${d}[0-9]+" '$1 ~ devpath { is_mounted = "yes"} END { if (is_mounted == "yes") { exit 1; } }' /proc/mounts; then
+		if awk -v devpath="^${d}p*[0-9]+" '$1 ~ devpath { is_mounted = "yes"} END { if (is_mounted == "yes") { exit 1; } }' /proc/mounts; then
 			size=$(( 1024 * $(fdisk -s "$d") ))
 			DRIVE=$(echo ${d##/*/})
 			if [ -e "/sys/class/block/$DRIVE/device/model" ]; then
@@ -42,8 +42,8 @@
 			echo "drivesWithNoMounts.push( [ \"$d\", \"$size\", \"$DRIVE\" ] );"
 		fi
 	done
-	echo "var extroot_enabled=\""$(mount | grep "/dev/sd.*on /overlay" | wc -l)"\";"
-	echo "var extroot_drive=\""$(mount | awk '/\/dev\/sd.*on \/overlay/ {print $1}')"\";"
+	echo "var extroot_enabled=\""$(mount | grep "/dev/[sm][dm].*on /overlay" | wc -l)"\";"
+	echo "var extroot_drive=\""$(mount | awk '/\/dev\/[sm][dm].*on \/overlay/ {print $1}')"\";"
 
 	echo "var fullVariant=\""$(opkg list-installed 2>&1 | grep plugin-gargoyle-usb-storage-full)"\";"
 %>

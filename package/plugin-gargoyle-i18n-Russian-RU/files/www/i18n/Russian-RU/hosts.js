@@ -7,6 +7,7 @@ hostsStr.RefreshR="Частота обновления";
 hostsStr.RInfo="Указывает, как часто обновляется информация на этой странице";
 hostsStr.CurrLeases="Присвоенные DHCP адреса";
 hostsStr.ConWifiHosts="Беспроводные подключения";
+hostsStr.ConClientWifi="Подключения к WiFi в роли клиента";
 hostsStr.ActiveHosts="Активные подключения";
 
 //javascript
