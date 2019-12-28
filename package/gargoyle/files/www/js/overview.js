@@ -81,37 +81,35 @@ function resetData()
 	{
 		document.getElementById("bridge_container").style.display = "none";
 
-		setChildText("lan_ip", currentLanIp);
-		setChildText("lan_mask", currentLanMask);
-		setChildText("lan_mac", currentLanMac );
+		var childTxt = currentLanIp + "\n" + (currentLanIp6 == "" ? "-" : currentLanIp6);
+		setChildText("lan_ip", childTxt);
+		childTxt = currentLanMask + "\n" + (currentLanIp6 == "" ? "-" : currentLanIp6 + "/" + currentLanMask6);
+		setChildText("lan_mask", childTxt);
+		setChildText("lan_mac", currentLanMac);
 
 		if(uciOriginal.get("network", "wan", "") == "")
 		{
 			document.getElementById("wan_container").style.display = "none";
 		}
-		setChildText("wan_ip", currentWanIp==""?"-":currentWanIp);
-		setChildText("wan_mask", currentWanMask==""?"-":currentWanMask);
+		childTxt = (currentWanIp == "" ? "-" : currentWanIp) + "\n" + (currentWanIp6 == "" ? "-" : currentWanIp6);
+		setChildText("wan_ip", childTxt);
+		childTxt = (currentWanMask == "" ? "-" : currentWanMask) + "\n" + (currentWanIp6 == "" ? "-" : currentWanIp6 + "/" + currentWanMask6);
+		setChildText("wan_mask", childTxt);
 		setChildText("wan_mac", currentWanMac==""?"-":currentWanMac);
-		setChildText("wan_gateway", currentWanGateway==""?"-":currentWanGateway);
+		childTxt = (currentWanGateway == "" ? "-" : currentWanGateway) + "\n" + (currentWanGateway6 == "" ? "-" : ip6_canonical(currentWanGateway6));
+		setChildText("wan_gateway", childTxt);
 
 		var wanDnsList = wanDns.split(/[\t ]+/);
+		childTxt = "-";
 		if(wanDnsList.length > 0)
 		{
-			setChildText("wan_dns", wanDnsList.shift() );
-		}
-		if(wanDns == "")
-		{
-			setChildText("wan_dns", "-");
+			childTxt = wanDnsList.shift();
 		}
 		while(wanDnsList.length > 0)
 		{
-			var brk = document.createElement("br");
-			var rightSpan = document.createElement("span");
-			rightSpan.appendChild( document.createTextNode(wanDnsList.shift()) );
-
-			document.getElementById("wan_dns").appendChild(brk);
-			document.getElementById("wan_dns").appendChild(rightSpan);
+			childTxt = childTxt + "\n" + wanDnsList.shift();
 		}
+		setChildText("wan_dns", childTxt);
 
 		if(uciOriginal.get("network", "wan", "proto") != "pppoe")
 		{

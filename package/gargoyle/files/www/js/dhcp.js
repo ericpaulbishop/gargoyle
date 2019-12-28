@@ -51,12 +51,14 @@ function saveChanges()
 			uci.remove("dhcp", "lan", "ignore");
 			uci.set("dhcp","lan","dhcpv6",document.getElementById("dhcpv6").value);
 			uci.set("dhcp","lan","ra",document.getElementById("ra").value);
+			uci.set("dhcp","lan","ra_management",document.getElementById("ra_management").value);
 		}
 		else
 		{
 			uci.set("dhcp", "lan", "ignore", "1");
 			uci.set("dhcp","lan","dhcpv6","disabled");
 			uci.set("dhcp","lan","ra","disabled");
+			uci.remove("dhcp","lan","ra_management");
 			dhcpWillBeEnabled = false;
 		}
 
@@ -92,6 +94,11 @@ function saveChanges()
 		createHostCommands = [ "touch /etc/hosts", "rm /etc/hosts" ];
 		createHostCommands.push("echo \"127.0.0.1\tlocalhost localhost4\" >> /etc/hosts");
 		createHostCommands.push("echo \"::1\tlocalhost localhost6\" >> /etc/hosts");
+		for (ip in ipHostHash)
+		{
+			host= ipHostHash[ip];
+			createHostCommands.push("echo \"" + ip + "\t" + host + "\" >> /etc/hosts");
+		}
 
 		var firewallCommands = [];
 		var firewallDefaultSections = uci.getAllSectionsOfType("firewall", "defaults");
@@ -220,6 +227,9 @@ function resetData()
 
 	ra = uciOriginal.get("dhcp", "lan", "ra");
 	document.getElementById("ra").value = ra == "" ? "disabled" : ra;
+
+	ra_management = uciOriginal.get("dhcp", "lan", "ra_management");
+	document.getElementById("ra_management").value = ra_management == "" ? "1" : ra_management;
 
 	ip6obj = ip6_splitmask(uciOriginal.get("network", "globals", "ula_prefix"));
 	ula_prefix = ip6obj.address;

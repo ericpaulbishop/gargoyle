@@ -3242,10 +3242,17 @@ function ip6_canonical(address)
 function ip6_splitmask(address)
 {
 	var ipv6 = {};
-	bitmask = address.substring(address.indexOf("/")+1);
-	addr = address.substring(0, address.indexOf("/"));
-	ipv6.address = addr;
-	ipv6.bitmask = bitmask;
+	var tmp = address.split("/");
+	if(tmp.length == 2)
+	{
+		ipv6.address = tmp[0];
+		ipv6.bitmask = tmp[1];
+	}
+	else
+	{
+		ipv6.address = tmp[0];
+		ipv6.bitmask = "";
+	}
 
 	return ipv6;
 }
@@ -3289,4 +3296,116 @@ function validateIP6(address)
 function proofreadIp6(input)
 {
 	proofreadText(input, validateIP6, 0);
+}
+
+function validateIP6Range(range)
+{
+	//return codes:
+	//0 == valid IP
+	//1 = improper format
+
+	var errorCode = 1;
+
+	if(range.indexOf("/") > 0)
+	{
+		var split=range.split("/");
+		if(split.length == 2)
+		{
+			var ipValid = validateIP6(split[0]);
+			var maskValid = split[1] < 1 || split[1] > 128 ? 1 : 0;
+			errorCode = ipValid == 0 && maskValid == 0 ? 0 : 1;
+		}
+	}
+	else
+	{
+		errorCode = validateIP6(range);
+	}
+
+	return errorCode;
+}
+
+function proofreadIp6Range(input)
+{
+	proofreadText(input, validateIP6Range, 0);
+}
+
+function validateIP6ForceRange(range)
+{
+	//return codes:
+	//0 == valid IP
+	//1 = improper format
+
+	var errorCode = 1;
+
+	if(range.indexOf("/") > 0)
+	{
+		var split=range.split("/");
+		if(split.length == 2)
+		{
+			var ipValid = validateIP6(split[0]);
+			var maskValid = split[1] < 1 || split[1] > 128 ? 1 : 0;
+			errorCode = ipValid == 0 && maskValid == 0 ? 0 : 1;
+		}
+	}
+
+	return errorCode;
+}
+
+function proofreadIp6ForceRange(input)
+{
+	proofreadText(input, validateIP6ForceRange, 0);
+}
+
+function ip6_mask(address, mask, direction=0)
+{
+	//direction = 0 : Mask from MSB
+	//direction = 1 : Mask from LSB
+	var newAddr = "";
+	var tmpAddr = [];
+	var addr = ip6_full(address);
+	var addrArr = addr.split(":");
+
+	maskDiv = mask/4>>0;
+	maskRem = mask%4;
+	
+	maskStr = "f".repeat(maskDiv);
+	maskStr2 = parseInt("1".repeat(maskRem), 2).toString(16);
+	maskStr = maskStr + (isNaN(maskStr2) ? "" : maskStr2);
+
+	maskStr = maskStr.replace(/(.{4})/g,"$1:").replace(/:$/,"");
+
+	var maskArr = maskStr.split(":");
+
+	for(x = maskArr.length; x < 8; x++)
+	{
+		maskArr.push("0");
+	}
+
+	if(direction)
+	{
+		maskArr = maskArr.reverse();
+		for(x = 0; x < 8; x++)
+		{
+			maskArr[x] = maskArr[x].split("").reverse().join("");
+		}
+	}
+
+	for(x = 0; x < 8; x++)
+	{
+		var bAddr = parseInt(addrArr[x], 16).toString("2").padStart(16, "0").split("");
+		var bMask = parseInt(maskArr[x], 16).toString("2").padStart(16, "0").split("");
+		bMask = direction ? bMask : bMask.reverse();
+
+		bTmp = "";
+		for(y = 0; y < 16; y++)
+		{
+			bTmp = bTmp + String((bAddr[y] & bMask[y]));
+		}
+
+		tmpAddr[x] = parseInt(bTmp, 2).toString(16);
+	}
+
+	newAddr = ip6_canonical(tmpAddr.join(":"));
+
+	return newAddr;
 }

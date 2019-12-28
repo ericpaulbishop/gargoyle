@@ -67,6 +67,8 @@ for (ip6leaseIndex in ip6leaseData)
 	ipMacHash[ip6_splitmask(host[1]).address] = ip6neighData[ip6_splitmask(host[1]).address];
 	ipDUIDHash[ip6_splitmask(host[1]).address] = host[0];
 }
+ipHostHash["127.0.0.1"] = "localhost";
+ipHostHash["::1"] = "localhost6";
 
 //-->
 </script>
@@ -145,6 +147,17 @@ for (ip6leaseIndex in ip6leaseData)
 							<option value="server">Enabled</option>
 							<option value="relay" disabled>Relayed</option>
 							<option value="disabled">Disabled</option>
+						</select>
+					</span>
+				</div>
+
+				<div id="ra_management_container" class="row form-group">
+					<label class="col-xs-5" for="ra_management" id="ra_management_label">Router Advertisements Management:</label>
+					<span class="col-xs-7">
+						<select class="form-control" id="ra_management">
+							<option value="2">Stateful</option>
+							<option value="1">Stateful+Stateless</option>
+							<option value="0">Stateless</option>
 						</select>
 					</span>
 				</div>

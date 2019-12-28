@@ -80,6 +80,16 @@
 	fi
 	echo "var countryData = parseCountry(countryLines);"
 
+	echo "var ifstatus = new Array();"
+	echo "ifstatus[\"lan\"] = \`$(ifstatus lan)\`;"
+	echo "ifstatus[\"wan\"] = \`$(ifstatus wan)\`;"
+	echo "ifstatus[\"wan6\"] = \`$(ifstatus wan6)\`;"
+
+	echo "var ifstatusJSON = [];"
+	echo "ifstatusJSON[\"lan\"] = JSON.parse(ifstatus[\"lan\"]);"
+	echo "ifstatusJSON[\"wan\"] = JSON.parse(ifstatus[\"wan\"]);"
+	echo "ifstatusJSON[\"wan6\"] = JSON.parse(ifstatus[\"wan6\"]);"
+
 %>
 var timezoneOffset = (parseInt(timezoneOffStr.substr(0,3),10)*60+parseInt(timezoneOffStr.substr(3,2),10))*60;
 
@@ -619,59 +629,91 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<h3 class="panel-title"><%~ LANSec %></h3>
 			</div>
 			<div class="panel-body">
+				<div class="col-lg-6">
+					<div id="lan_ip_container" class="row form-group">
+						<label  class="col-xs-5" for="lan_ip" id="lan_ip_label"><%~ RtrIP %>:</label>
+						<span class="col-xs-7"><input type="text" class="form-control" name="lan_ip" id="lan_ip" onkeyup="proofreadIp(this)" size="20" maxlength="15" /></span>
+					</div>
 
-				<div id="lan_ip_container" class="row form-group">
-					<label  class="col-xs-5" for="lan_ip" id="lan_ip_label"><%~ RtrIP %>:</label>
-					<span class="col-xs-7"><input type="text" class="form-control" name="lan_ip" id="lan_ip" onkeyup="proofreadIp(this)" size="20" maxlength="15" /></span>
+					<div id="lan_mask_container" class="row form-group">
+						<label  class="col-xs-5" for="lan_mask" id="lan_mask_label"><%~ SMsk %>:</label>
+						<span class="col-xs-7"><input type="text" class="form-control" name="lan_mask" id="lan_mask" onkeyup="proofreadMask(this)" size="20" maxlength="15" /></span>
+					</div>
+
+					<div id="lan_gateway_container" class="row form-group">
+						<label  class="col-xs-5" for="lan_gateway" id="lan_gateway_label"><%~ Gtwy %>:</label>
+						<span class="col-xs-7"><input type="text" class="form-control" name="lan_gateway" id="lan_gateway" onkeyup="proofreadIp(this)" size="20" maxlength="15" /></span>
+					</div>
 				</div>
 
-				<div id="lan_mask_container" class="row form-group">
-					<label  class="col-xs-5" for="lan_mask" id="lan_mask_label"><%~ SMsk %>:</label>
-					<span class="col-xs-7"><input type="text" class="form-control" name="lan_mask" id="lan_mask" onkeyup="proofreadMask(this)" size="20" maxlength="15" /></span>
+				<div class="col-lg-6">
+					<div id="lan_ip6_container" class="row form-group">
+						<label  class="col-xs-5" for="lan_ip6" id="lan_ip6_label"><%~ RtrIP %>:</label>
+						<span class="col-xs-7" id="lan_ip6"></span>
+					</div>
+
+					<div id="lan_ip6addr_container" class="row form-group">
+						<label  class="col-xs-5" for="lan_ip6addr" id="lan_ip6addr_label"><%~ RtrIP %>:</label>
+						<span class="col-xs-7"><input type="text" class="form-control" name="lan_ip6addr" id="lan_ip6addr" onkeyup="proofreadIp6ForceRange(this)" /></span>
+					</div>
+
+					<div id="lan_ip6assign_container" class="row form-group">
+						<label class="col-xs-5" for="lan_ip6assign" id="lan_ip6assign_label"><%~ Ip6AMsk %>:</label>
+						<span class="col-xs-7"><input type="text" class="form-control" name="lan_ip6assign" id="lan_ip6assign" /></span>
+					</div>
+
+					<div id="lan_ip6hint_container" class="row form-group">
+						<label  class="col-xs-5" for="lan_ip6hint" id="lan_ip6hint_label"><%~ Ip6SubPrfx %>:</label>
+						<span class="col-xs-7"><input type="text" class="form-control" name="lan_ip6hint" id="lan_ip6hint" /><em> (<%~ optl %>)</em></span>
+					</div>
+
+					<div id="lan_ip6ifaceid_container" class="row form-group">
+						<label  class="col-xs-5" for="lan_ip6ifaceid" id="lan_ip6ifaceid_label"><%~ Ip6Ifaceid %>:</label>
+						<span class="col-xs-7"><input type="text" class="form-control" name="lan_ip6ifaceid" id="lan_ip6ifaceid" /><em> (<%~ optl %>)</em></span>
+					</div>
+
+					<div id="lan_ip6gw_container" class="row form-group">
+						<label  class="col-xs-5" for="lan_ip6gw" id="lan_ip6gw_label"><%~ Gtwy %>:</label>
+						<span class="col-xs-7"><input type="text" class="form-control" name="lan_ip6gw" id="lan_ip6gw" onkeyup="proofreadIp6(this)" /></span>
+					</div>
 				</div>
 
-				<div id="lan_gateway_container" class="row form-group">
-					<label  class="col-xs-5" for="lan_gateway" id="lan_gateway_label"><%~ Gtwy %>:</label>
-					<span class="col-xs-7"><input type="text" class="form-control" name="lan_gateway" id="lan_gateway" onkeyup="proofreadIp(this)" size="20" maxlength="15" /></span>
-				</div>
+				<div class="col-lg-12">
+					<div id="lan_dns_source_container" class="row form-group">
+						<label  class="col-xs-5" id="lan_dns_source_label" for="lan_dns_source"><%~ DnsSvs %>:</label>
+						<span class="col-xs-7">
+							<select class="form-control" id="lan_dns_source" onchange="setDnsSource(this)">
+								<option value="isp"><%~ DfltDNS %></option>
+								<option value="opendns"><%~ OpnSrvs %></option>
+								<option value="google"><%~ GooSrvs %></option>
+								<option value="opendnsfs"><%~ OpnSrvsFS %></option>
+								<option value="quad9"><%~ Quad9 %></option>
+								<option value="custom"><%~ CstDSrv %></option>
+							</select>
+							<div id="lan_dns_custom_container" class="second_row_right_column">
+								<input  type="text" id="add_lan_dns" class="form-control" onkeyup="proofreadIp(this)" size="20" maxlength="17" />
+								<button class="btn btn-default btn-add" id="add_lan_dns_button" onclick="addDns('lan')"><%~ Add %></button>
+								<div id="lan_dns_table_container" class="form-group second_row_right_column"></div>
+							</div>
+						</span>
+					</div>
 
-				<div id="lan_dns_source_container" class="row form-group">
-					<label  class="col-xs-5" id="lan_dns_source_label" for="lan_dns_source"><%~ DnsSvs %>:</label>
-					<span class="col-xs-7">
-						<select class="form-control" id="lan_dns_source" onchange="setDnsSource(this)">
-							<option value="isp"><%~ DfltDNS %></option>
-							<option value="opendns"><%~ OpnSrvs %></option>
-							<option value="google"><%~ GooSrvs %></option>
-							<option value="opendnsfs"><%~ OpnSrvsFS %></option>
-							<option value="quad9"><%~ Quad9 %></option>
-							<option value="custom"><%~ CstDSrv %></option>
-						</select>
-						<div id="lan_dns_custom_container" class="second_row_right_column">
-							<input  type="text" id="add_lan_dns" class="form-control" onkeyup="proofreadIp(this)" size="20" maxlength="17" />
-							<button class="btn btn-default btn-add" id="add_lan_dns_button" onclick="addDns('lan')"><%~ Add %></button>
-							<div id="lan_dns_table_container" class="form-group second_row_right_column"></div>
+					<div id="lan_dns_options_container">
+						<div class="row form-group">
+							<span class="col-xs-12">
+								<input type="checkbox" id="lan_dns_altroot" />
+								<label class="short-left-pad" for="lan_dns_altroot" id="lan_dns_altroot_label" ><%~ Allow %> <a href="https://bit.namecoin.info">NameCoin</a>/<a href="http://www.opennicproject.org">OpenNIC</a> <%~ Rsln %></label>
+							</span>
 						</div>
-					</span>
-				</div>
 
-
-				<div id="lan_dns_options_container">
-				
-					<div class="row form-group">
-						<span class="col-xs-12">
-							<input type="checkbox" id="lan_dns_altroot" />
-							<label class="short-left-pad" for="lan_dns_altroot" id="lan_dns_altroot_label" ><%~ Allow %> <a href="https://bit.namecoin.info">NameCoin</a>/<a href="http://www.opennicproject.org">OpenNIC</a> <%~ Rsln %></label>
-						</span>
-					</div>
-
-					<div class="row form-group">
-						<span class="col-xs-12">
-							<input type="checkbox" id="lan_dns_force"/>
-							<label class="short-left-pad" for="lan_dns_force" id="lan_dns_force_label" style="vertical-align:middle"><%~ RtrDNS %></label>
-						</span>
+						<div class="row form-group">
+							<span class="col-xs-12">
+								<input type="checkbox" id="lan_dns_force"/>
+								<label class="short-left-pad" for="lan_dns_force" id="lan_dns_force_label" style="vertical-align:middle"><%~ RtrDNS %></label>
+							</span>
+						</div>
 					</div>
 				</div>
-
 			</div>
 		</div>
 	</div>

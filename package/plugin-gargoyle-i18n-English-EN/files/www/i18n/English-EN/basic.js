@@ -115,6 +115,9 @@ basicS.DPing="Drop Ping From WAN Side";
 basicS.WifiCountry="Country";
 basicS.WifiCountryWarning="Gargoyle has attempted to determine your geographical region. If this is not correct, it is strongly recommended to leave this setting as <i>World (Default)</i>.<br>Setting this value incorrectly may lead to you violating regulatory standards in your region. If in doubt, choose <i>World (Default)</i> which is legal in all regions.<br>By setting your country correctly, you may be allowed to use additional channels, higher transmit power or wider channel widths.<br><br>Note: You may only change this setting once.";
 basicS.DFSWarning="The selected channel is a <i>DFS (Dynamic Frequency Selection)</i> channel. Before transmitting, Gargoyle must first scan for 60 seconds for signals from radar installations occupying this frequency. If any are detected, Gargoyle may choose to transmit on a <u>different</u> channel to the one you have selected, or may <u>not transmit at all</u> depending on your particular device. Gargoyle will continue to monitor for radar pulses during operation and may switch channels or stop transmitting at any time.";
+basicS.Ip6AMsk="Prefix Assignment Mask";
+basicS.Ip6SubPrfx="Sub-prefix";
+basicS.Ip6Ifaceid="Router Host ID";
 
 //javascript
 basicS.WaitRb="Please Wait While Settings Are Applied And Device Is Restarted";
@@ -139,3 +142,4 @@ basicS.Mo3gNCM="USB Modem (NCM)";
 basicS.Mo3gMBIM="USB Modem (MBIM)";
 basicS.Mo3gHiLink="USB Modem (HiLink, RNDIS)";
 basicS.Dfult="Default";
+
