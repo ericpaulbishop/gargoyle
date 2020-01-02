@@ -156,12 +156,13 @@
 					<span class="col-xs-5"><%~ TDDir %>:</span>
 					<span class="col-xs-7" id="tor_dir_ramdisk_static">/var/tor</span>
 					<span class="col-xs-7" id="tor_dir_root_static">/usr/lib/tor</span>
-					<span class="col-xs-7"><input type="text" id="tor_dir_text" style="display:none" /></span>
+					<span class="col-xs-7"><input type="text" id="tor_dir_text" style="display:none" class="form-control" /></span>
 				</div>
 				<div class="row form-group">
 					<span class="col-xs-5"><%~ TDDrv %>:</span>
 					<span class="col-xs-7"><select id="tor_dir_drive_select" onchange="setTorVisibility()" class="form-control"></select></span>
 				</div>
+				<div class="alert alert-danger" role="alert" id="tor_dir_incompatible"><%~ tordirincompat %></div>
 				<div>
 					<span class="col-xs-12">
 						<em><%~ CacheWarn %></em>

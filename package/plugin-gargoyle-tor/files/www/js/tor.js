@@ -456,9 +456,18 @@ function setTorVisibility()
 		vis = torDirDrive == "ramdisk" || torDirDrive == "" ? [1,0,0] : vis;
 		vis = torDirDrive == "root"    ? [0,1,0] : vis;
 		setVisibility( ["tor_dir_ramdisk_static", "tor_dir_root_static", "tor_dir_text"], vis )
+		var validDrive = true;
+		for(x = 0; x < storageDrives.length; x++)
+		{
+			if(storageDrives[x][0] == torDirDrive && storageDrives[x][3].match(/FAT/gi) != null)
+			{
+				validDrive = false;
+			}
+		}
+		document.getElementById("save_button").disabled = validDrive ? false : true;
+		document.getElementById("tor_dir_incompatible").style.display = validDrive ? "none" : "block";
 	}
 
 
 
 }
-
