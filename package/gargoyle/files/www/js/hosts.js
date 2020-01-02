@@ -145,6 +145,7 @@ function resetVariables()
 
 function getHostname(ip)
 {
+	ip = validateIP6(ip) == 0 ? ip6_canonical(ip) : ip;
 	var hostname = ipToHostname[ip] == null ? "("+UI.unk+")" : ipToHostname[ip];
 	hostname = hostname.length < 25 ? hostname : hostname.substr(0,22)+"...";
 	return hostname;
@@ -190,7 +191,7 @@ function parseArp(arpLines, leaseLines)
 	{
 		var nextLine = arpLines[lineIndex];
 		var splitLine = nextLine.split(/[\t ]+/);
-		var mac = splitLine[3].toUpperCase();
+		var mac = splitLine[4].toUpperCase();
 		var ip = splitLine[0];
 		arpHash[ mac ] = ip;
 		arpHash[ ip  ] = mac;
@@ -354,7 +355,7 @@ function parseConntrack(arpHash, currentWanIp, lines)
 
 		//for some reason I'm seeing src ips of 0.0.0.0 -- WTF???
 		//exclude anything starting at router, or ending at external wan ip, since this is probably a connection to router from outside
-		if(ipHash[srcIp] == null && srcIp != currentWanIp && srcIp != currentLanIp && dstIp != currentWanIp && srcIp != "0.0.0.0")
+		if(ipHash[srcIp] == null && srcIp != currentWanIp && currentWanIp6.indexOf(ip6_canonical(srcIp)) < 0 && srcIp != currentLanIp && currentLanIp6.indexOf(ip6_canonical(srcIp)) < 0 && dstIp != currentWanIp && currentWanIp6.indexOf(ip6_canonical(dstIp)) < 0 && srcIp != "0.0.0.0" && srcIp.match(/^fe80:/) == null && dstIp.match(/^fe80:/) == null)
 		{
 			ipList.push(srcIp);
 			ipHash[srcIp] = 1;

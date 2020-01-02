@@ -3127,22 +3127,23 @@ function modalPrepare(modalID, title, elements, buttons)
 //IPv6 library
 function ip6_full(address)
 {
+	var tmpAddr = ip6_splitmask(address);
 	//replace ipv4 address
-	var ipv4 = address.match(/(.*:)([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$)/);
+	var ipv4 = tmpAddr.address.match(/(.*:)([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$)/);
 	if (ipv4) {
-		var address = ipv4[1];
+		tmpAddr.address = ipv4[1];
 		ipv4 = ipv4[2].match(/[0-9]+/g);
 		for (var i = 0;i < 4;i ++) {
 			var byte = parseInt(ipv4[i],10);
 			ipv4[i] = ("0" + byte.toString(16)).substr(-2);
 		}
-		address += ipv4[0] + ipv4[1] + ':' + ipv4[2] + ipv4[3];
+		tmpAddr.address += ipv4[0] + ipv4[1] + ':' + ipv4[2] + ipv4[3];
 	}
 
 	//leading and trailing ::
-	address = address.replace(/^:|:$/g, '');
+	tmpAddr.address = tmpAddr.address.replace(/^:|:$/g, '');
 
-	var ipv6 = address.split(':');
+	var ipv6 = tmpAddr.address.split(':');
 
 	for (var i = 0; i < ipv6.length; i ++) {
 		var hex = ipv6[i];
@@ -3160,13 +3161,16 @@ function ip6_full(address)
 		}
 	}
 
-	return ipv6.join(':');
+	tmpAddr.address = ipv6.join(':');
+
+	return (tmpAddr.bitmask == "" ? tmpAddr.address : tmpAddr.address + "/" + tmpAddr.bitmask);
 }
 
 function ip6_canonical(address)
 {
 	var fullAddress = ip6_full(address);
-	var components = fullAddress.split(":");
+	var tmpAddr = ip6_splitmask(fullAddress);
+	var components = tmpAddr.address.split(":");
 	
 	for(var componentIdx = 0; componentIdx < components.length; componentIdx++)
 	{
@@ -3236,7 +3240,7 @@ function ip6_canonical(address)
 		components.push("");
 	}
 
-	return components.join(':');
+	return (tmpAddr.bitmask == "" ? components.join(':') : components.join(':') + "/" + tmpAddr.bitmask);
 }
 
 function ip6_splitmask(address)
@@ -3393,8 +3397,29 @@ function ip6_mask(address, mask, direction=0)
 	for(x = 0; x < 8; x++)
 	{
 		var bAddr = parseInt(addrArr[x], 16).toString("2").padStart(16, "0").split("");
-		var bMask = parseInt(maskArr[x], 16).toString("2").padStart(16, "0").split("");
-		bMask = direction ? bMask : bMask.reverse();
+		var bMask = [];
+		var maskArr2 = [];
+		if(direction == 0)
+		{
+			maskArr2 = maskArr[x].padEnd(4, "0").split("");
+		}
+		else
+		{
+			maskArr2 = maskArr[x].padStart(4, "0").split("");
+		}
+		for(y = 0; y < 4; y++)
+		{
+			hexDigit = maskArr2[y];
+			binaryDigits = parseInt(hexDigit, 16).toString("2").padStart(4, "0").split("");
+			if(direction == 0)
+			{
+				bindaryDigits = binaryDigits.reverse();
+			}
+			for(z = 0; z < 4; z++)
+			{
+				bMask.push(binaryDigits[z]);
+			}
+		}
 
 		bTmp = "";
 		for(y = 0; y < 16; y++)
@@ -3408,4 +3433,35 @@ function ip6_mask(address, mask, direction=0)
 	newAddr = ip6_canonical(tmpAddr.join(":"));
 
 	return newAddr;
+}
+
+function ip6_scope(address)
+{
+	var retVal = [null, null];
+	if(ip6_mask(address,3) == "2000::")
+	{
+		retVal = ["Global", "Global Unicast Address"];
+	}
+	if(ip6_mask(address,32) == "2001::")
+	{
+		retVal = ["Global", "Teredo Tunnel"];
+	}
+	if(ip6_mask(address,96) == "64:ff9b::")
+	{
+		retVal = ["Global", "IPv4/IPv6 Translation"];
+	}
+	if(ip6_mask(address,8) == "ff00::")
+	{
+		retVal = ["Global", "Global Multicast Address"];
+	}
+	if(ip6_mask(address,7) == "fc00::")
+	{
+		retVal = ["Global", "Unique Local Address"];
+	}
+	if(ip6_mask(address,10) == "fe80::")
+	{
+		retVal = ["Link", "Link-local Address"];
+	}
+
+	return retVal;
 }

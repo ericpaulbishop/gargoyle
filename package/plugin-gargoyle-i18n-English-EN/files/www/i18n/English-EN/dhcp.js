@@ -15,6 +15,7 @@ dhcpS.AsSIP="Assigned Static IP Addresses";
 dhcpS.opt="optional";
 dhcpS.ESIP="Edit Static IP";
 dhcpS.Suff="Suffix";
+dhcpS.IP6Prefs="IPv6 Address Prefixes";
 dhcpS.dHErr="duplicate Hostname";
 dhcpS.dMErr="duplicate MAC";
 dhcpS.dIPErr="duplicate IP address";

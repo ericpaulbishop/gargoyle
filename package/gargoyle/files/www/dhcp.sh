@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "connection" -p "dhcp" -j "gs_sortable.js table.js dhcp.js" -z "dhcp.js" network wireless dhcp firewall
+	gargoyle_header_footer -h -i -s "connection" -p "dhcp" -j "gs_sortable.js table.js dhcp.js" -z "dhcp.js" network wireless dhcp firewall
 	subnet=$(ifconfig br-lan | awk 'BEGIN {FS=":"}; $0 ~ /inet.addr/ {print $2}' | awk 'BEGIN {FS="."}; {print $1"\."$2"\."$3"\."}')
 %>
 
@@ -34,11 +34,19 @@
 
 	echo "var ip6leaseData = new Array();";
 	if [ -e /tmp/hosts/odhcpd ] ; then
-		awk ' $0 ~ /#.*[a-z,A-Z,0-9]+/ {print "ip6leaseData.push([\""$3"\",\""$9"\",\""$5"\"]);"};' /tmp/hosts/odhcpd
+		while read lease; do
+			wcnt="$(echo $lease | wc -w)"
+			idx=9
+			while [ "$idx" -le "$wcnt" ]
+			do
+				echo "$lease" | awk -v idx="$idx" ' $0 ~ /#.*[a-z,A-Z,0-9]+/ {print "ip6leaseData.push([\""$3"\",\""$idx"\",\""$5"\"]);"};'
+				idx=$(($idx+1))
+			done
+		done </tmp/hosts/odhcpd
 	fi
 
 	echo "var ip6neighData = new Array();";
-	ip -6 neigh | grep -v "FAILED" | awk '{print "ip6neighData[\""$1"\"] = \""$5"\";"};'
+	ip -6 neigh | grep -v "FAILED" | grep -v "^fe80:" | awk '{print "ip6neighData[\""$1"\"] = \""$5"\";"};'
 %>
 
 var ipHostHash = new Array();
@@ -162,18 +170,9 @@ ipHostHash["::1"] = "localhost6";
 					</span>
 				</div>
 
-				<div id="ulaprefix_container" class="row form-group">
-					<label class="col-xs-5" for="ulaprefix" id="ulaprefix_label">Unique Local Address Prefix:</label>
-					<span class="col-xs-7">
-						<input type="text" class="form-control" id="ulaprefix" disabled />
-					</span>
-				</div>
-
-				<div id="ulaprefixmask_container" class="row form-group">
-					<label class="col-xs-5" for="ulaprefixmask" id="ulaprefixmask_label">Unique Local Address Prefix Mask:</label>
-					<span class="col-xs-7">
-						<input type="text" class="form-control" id="ulaprefixmask" disabled />
-					</span>
+				<div id="ip6prefix_container" class="row form-group">
+					<label class="col-xs-5" for="ip6prefix" id="ip6prefix_label"><%~ IP6Prefs %>:</label>
+					<span class="col-xs-7" id="ip6prefix"></span>
 				</div>
 			</div>
 		</div>

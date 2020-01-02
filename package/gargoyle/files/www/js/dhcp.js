@@ -94,11 +94,6 @@ function saveChanges()
 		createHostCommands = [ "touch /etc/hosts", "rm /etc/hosts" ];
 		createHostCommands.push("echo \"127.0.0.1\tlocalhost localhost4\" >> /etc/hosts");
 		createHostCommands.push("echo \"::1\tlocalhost localhost6\" >> /etc/hosts");
-		for (ip in ipHostHash)
-		{
-			host= ipHostHash[ip];
-			createHostCommands.push("echo \"" + ip + "\t" + host + "\" >> /etc/hosts");
-		}
 
 		var firewallCommands = [];
 		var firewallDefaultSections = uci.getAllSectionsOfType("firewall", "defaults");
@@ -229,13 +224,17 @@ function resetData()
 	document.getElementById("ra").value = ra == "" ? "disabled" : ra;
 
 	ra_management = uciOriginal.get("dhcp", "lan", "ra_management");
-	document.getElementById("ra_management").value = ra_management == "" ? "1" : ra_management;
+	document.getElementById("ra_management").value = ra_management == "" ? "2" : ra_management;
 
-	ip6obj = ip6_splitmask(uciOriginal.get("network", "globals", "ula_prefix"));
-	ula_prefix = ip6obj.address;
-	ula_mask = ip6obj.bitmask;
-	document.getElementById("ulaprefix").value = ula_prefix;
-	document.getElementById("ulaprefixmask").value = ula_mask;
+	var ip6txt = "";
+	for(var x = 0; x < currentLanIp6.length; x++)
+	{
+		if(ip6_scope(currentLanIp6[x])[0] == "Global")
+		{
+			ip6txt = ip6txt + (x == 0 ? "" : "\n") + ip6_mask(currentLanIp6[x], currentLanMask6[x]) + "/" + currentLanMask6[x];
+		}
+	}
+	setChildText("ip6prefix", ip6txt);
 
 	//setup hostname/mac list
 	resetHostnameMacList();

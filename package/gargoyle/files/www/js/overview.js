@@ -81,9 +81,23 @@ function resetData()
 	{
 		document.getElementById("bridge_container").style.display = "none";
 
-		var childTxt = currentLanIp + "\n" + (currentLanIp6 == "" ? "-" : currentLanIp6);
+		var childTxt = currentLanIp;
+		for(var x = 0; x < currentLanIp6.length; x++)
+		{
+			if(ip6_scope(currentLanIp6[x])[0] == "Global")
+			{
+				childTxt = childTxt + "\n" + currentLanIp6[x];
+			}
+		}
 		setChildText("lan_ip", childTxt);
-		childTxt = currentLanMask + "\n" + (currentLanIp6 == "" ? "-" : currentLanIp6 + "/" + currentLanMask6);
+		childTxt = currentLanMask;
+		for(var x = 0; x < currentLanIp6.length; x++)
+		{
+			if(ip6_scope(currentLanIp6[x])[0] == "Global")
+			{
+				childTxt = childTxt + "\n" + currentLanIp6[x] + "/" + currentLanMask6[x];
+			}
+		}
 		setChildText("lan_mask", childTxt);
 		setChildText("lan_mac", currentLanMac);
 
@@ -91,9 +105,23 @@ function resetData()
 		{
 			document.getElementById("wan_container").style.display = "none";
 		}
-		childTxt = (currentWanIp == "" ? "-" : currentWanIp) + "\n" + (currentWanIp6 == "" ? "-" : currentWanIp6);
+		childTxt = (currentWanIp == "" ? "-" : currentWanIp);
+		for(var x = 0; x < currentWanIp6.length; x++)
+		{
+			if(ip6_scope(currentWanIp6[x])[0] == "Global")
+			{
+				childTxt = childTxt + "\n" + currentWanIp6[x];
+			}
+		}
 		setChildText("wan_ip", childTxt);
-		childTxt = (currentWanMask == "" ? "-" : currentWanMask) + "\n" + (currentWanIp6 == "" ? "-" : currentWanIp6 + "/" + currentWanMask6);
+		childTxt = (currentWanMask == "" ? "-" : currentWanMask);
+		for(var x = 0; x < currentWanIp6.length; x++)
+		{
+			if(ip6_scope(currentWanIp6[x])[0] == "Global")
+			{
+				childTxt = childTxt + "\n" + currentWanIp6[x] + "/" + currentWanMask6[x];
+			}
+		}
 		setChildText("wan_mask", childTxt);
 		setChildText("wan_mac", currentWanMac==""?"-":currentWanMac);
 		childTxt = (currentWanGateway == "" ? "-" : currentWanGateway) + "\n" + (currentWanGateway6 == "" ? "-" : ip6_canonical(currentWanGateway6));
