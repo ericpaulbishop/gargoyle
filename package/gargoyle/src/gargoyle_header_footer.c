@@ -49,8 +49,8 @@ void print_hostname_map(void);
 void print_js_var(char* var, char* value);
 void print_js_list_var(char* var, list** value);
 char* get_interface_mac(char* if_name);
-char* get_interface_ip(char* if_name, int family);
-char* get_interface_netmask(char* if_name, int family);
+void* get_interface_ip(char* if_name, int family);
+void* get_interface_netmask(char* if_name, int family);
 char* get_interface_gateway(char* if_name, int family);
 int load_saved_default_interfaces( char** default_lan_if, char** default_wan_if, char** default_wan_mac);
 void save_default_interfaces(char* default_lan_if, char* default_wan_if, char* default_wan_mac);
@@ -911,10 +911,8 @@ void print_interface_vars(void)
 	char* uci_wan_gateway6 = NULL;
         char* uci_lan_ip       = NULL;
         char* uci_lan_mask     = NULL;
-	char* uci_lan_ip6      = NULL;
         char* uci_wan_ip       = NULL;
         char* uci_wan_mask     = NULL;
-	char* uci_wan_ip6      = NULL;
 
 	char* uci_ula_prefix  = NULL;
 	char* uci_ula_mask    = NULL;
@@ -1011,10 +1009,6 @@ void print_interface_vars(void)
                 {
                         uci_lan_mask=get_option_value_string(uci_to_option(e));
                 }
-		if(get_uci_option(state_ctx, &e, p, "network", "lan", "ip6addr") == UCI_OK)
-                {
-                        uci_lan_ip6=get_option_value_string(uci_to_option(e));
-                }
                 if(get_uci_option(state_ctx, &e, p, "network", "wan", "ipaddr") == UCI_OK)
                 {
                         uci_wan_ip=get_option_value_string(uci_to_option(e));
@@ -1022,10 +1016,6 @@ void print_interface_vars(void)
                 if(get_uci_option(state_ctx, &e, p, "network", "wan", "netmask") == UCI_OK)
                 {
                         uci_wan_mask=get_option_value_string(uci_to_option(e));
-                }
-		if(get_uci_option(state_ctx, &e, p, "network", "wan", "ip6addr") == UCI_OK)
-                {
-                        uci_wan_ip6=get_option_value_string(uci_to_option(e));
                 }
 		if(get_uci_option(state_ctx, &e, p, "network", "globals", "ula_prefix") == UCI_OK)
 		{
@@ -1088,15 +1078,15 @@ void print_interface_vars(void)
 
 
 
-        char* current_lan_ip      = uci_lan_ip != NULL   ? strdup(uci_lan_ip)   : get_interface_ip(current_lan_bridge, AF_INET);
-        char* current_lan_mask    = uci_lan_mask != NULL ? strdup(uci_lan_mask) : get_interface_netmask(current_lan_bridge, AF_INET);
-	char* current_lan_ip6     = uci_lan_ip6 != NULL  ? strdup(uci_lan_ip6)  : get_interface_ip(current_lan_bridge, AF_INET6);
-	char* current_lan_mask6   = get_interface_netmask(current_lan_bridge, AF_INET6);
+        char* current_lan_ip      = uci_lan_ip != NULL   ? strdup(uci_lan_ip)   : (char*)get_interface_ip(current_lan_bridge, AF_INET);
+        char* current_lan_mask    = uci_lan_mask != NULL ? strdup(uci_lan_mask) : (char*)get_interface_netmask(current_lan_bridge, AF_INET);
+	list* current_lan_ip6     = (list*)get_interface_ip(current_lan_bridge, AF_INET6);
+	list* current_lan_mask6   = (list*)get_interface_netmask(current_lan_bridge, AF_INET6);
 
-        char* current_wan_ip      = uci_wan_ip != NULL   ? strdup(uci_wan_ip)   : get_interface_ip(current_wan_if, AF_INET);
-        char* current_wan_mask    = uci_wan_mask != NULL ? strdup(uci_wan_mask) : get_interface_netmask(current_wan_if, AF_INET);
-	char* current_wan_ip6     = uci_wan_ip6 != NULL  ? strdup(uci_wan_ip6)  : get_interface_ip(current_wan_if, AF_INET6);
-	char* current_wan_mask6   = get_interface_netmask(current_wan_if, AF_INET6);
+        char* current_wan_ip      = uci_wan_ip != NULL   ? strdup(uci_wan_ip)   : (char*)get_interface_ip(current_wan_if, AF_INET);
+        char* current_wan_mask    = uci_wan_mask != NULL ? strdup(uci_wan_mask) : (char*)get_interface_netmask(current_wan_if, AF_INET);
+	list* current_wan_ip6     = (list*)get_interface_ip(current_wan_if, AF_INET6);
+	list* current_wan_mask6   = (list*)get_interface_netmask(current_wan_if, AF_INET6);
 
         char* current_wan_gateway  = uci_wan_gateway != NULL ? strdup(uci_wan_gateway)   : get_interface_gateway(current_wan_if, AF_INET);
 	char* current_wan_gateway6 = uci_wan_gateway6 != NULL ? strdup(uci_wan_gateway6) : get_interface_gateway(current_wan_if, AF_INET6);
@@ -1137,8 +1127,8 @@ void print_interface_vars(void)
         print_js_var("currentLanMac", current_lan_mac);
         print_js_var("currentLanIp", current_lan_ip);
         print_js_var("currentLanMask", current_lan_mask);
-	print_js_var("currentLanIp6", current_lan_ip6);
-	print_js_var("currentLanMask6", current_lan_mask6);
+	print_js_list_var("currentLanIp6", &current_lan_ip6);
+	print_js_list_var("currentLanMask6", &current_lan_mask6);
 	print_js_var("currentULAPrefix", uci_ula_prefix);
 	print_js_var("currentULAMask", uci_ula_mask);
 
@@ -1150,8 +1140,8 @@ void print_interface_vars(void)
         print_js_var("currentWanMac", current_wan_mac);
         print_js_var("currentWanIp", current_wan_ip);
         print_js_var("currentWanMask", current_wan_mask);
-	print_js_var("currentWanIp6", current_wan_ip6);
-	print_js_var("currentWanMask6", current_wan_mask6);
+	print_js_list_var("currentWanIp6", &current_wan_ip6);
+	print_js_list_var("currentWanMask6", &current_wan_mask6);
         print_js_var("currentWanGateway", current_wan_gateway);
 	print_js_var("currentWanGateway6", current_wan_gateway6);
 
@@ -1336,16 +1326,14 @@ char* get_interface_gateway(char* if_name, int family)
         return gateway;
 }
 
-char* get_interface_ip(char* if_name, int family)
+void* get_interface_ip(char* if_name, int family)
 {
 	struct ifaddrs* ifap;
 	struct ifaddrs* ifa;
 	struct sockaddr_in* in;
 	struct sockaddr_in6* in6;
-	char* ip = NULL;
+	void* ip = NULL;
 	char* addr = NULL;
-	char* cmp = NULL;
-	char linklocal[5] = "fe80";
 
 	if(family == AF_INET)
 	{
@@ -1354,6 +1342,7 @@ char* get_interface_ip(char* if_name, int family)
 	else if(family == AF_INET6)
 	{
 		addr = (char*)malloc(INET6_ADDRSTRLEN);
+		ip = initialize_list();
 	}
 
 	getifaddrs(&ifap);
@@ -1369,13 +1358,7 @@ char* get_interface_ip(char* if_name, int family)
 		{
 			in6 = (struct sockaddr_in6*)ifa->ifa_addr;
 			inet_ntop(AF_INET6, &in6->sin6_addr, addr, INET6_ADDRSTRLEN);
-			//discard linklocal
-			cmp = strstr(addr, linklocal);
-			if(cmp != addr)
-			{
-				ip = strdup(addr);
-				break;
-			}
+			push_list(ip, (void*)strdup(addr));
 		}
 	}
 
@@ -1384,16 +1367,14 @@ char* get_interface_ip(char* if_name, int family)
 	return ip;
 }
 
-char* get_interface_netmask(char* if_name, int family)
+void* get_interface_netmask(char* if_name, int family)
 {
 	struct ifaddrs* ifap;
 	struct ifaddrs* ifa;
 	struct sockaddr_in* in;
 	struct sockaddr_in6* in6;
-	char* netmask = NULL;
+	void* netmask = NULL;
 	char* addr = NULL;
-	char* cmp = NULL;
-	char linklocal[5] = "fe80";
 
 	if(family == AF_INET)
 	{
@@ -1402,6 +1383,7 @@ char* get_interface_netmask(char* if_name, int family)
 	else if(family == AF_INET6)
 	{
 		addr = (char*)malloc(INET6_ADDRSTRLEN);
+		netmask = initialize_list();
 	}
 
 	getifaddrs(&ifap);
@@ -1417,33 +1399,28 @@ char* get_interface_netmask(char* if_name, int family)
 		{
 			in6 = (struct sockaddr_in6*)ifa->ifa_addr;
 			inet_ntop(AF_INET6, &in6->sin6_addr, addr, INET6_ADDRSTRLEN);
-			//discard linklocal
-			cmp = strstr(addr, linklocal);
-			if(cmp != addr)
-			{
-				unsigned char* c = ((struct sockaddr_in6*)ifa->ifa_netmask)->sin6_addr.s6_addr;
-				int i = 0, j = 0;
-				unsigned char n = 0;
-				while(i < 16)
-				{
-					n = c[i];
-					while(n > 0)
-					{
-						if(n & 1)
-						{
-							j = j+1;
-						}
 
-						n = n/2;
+			unsigned char* c = ((struct sockaddr_in6*)ifa->ifa_netmask)->sin6_addr.s6_addr;
+			int i = 0, j = 0;
+			unsigned char n = 0;
+			while(i < 16)
+			{
+				n = c[i];
+				while(n > 0)
+				{
+					if(n & 1)
+					{
+						j = j+1;
 					}
 
-					i = i + 1;
+					n = n/2;
 				}
 
-				sprintf(addr, "%d", j);
-				netmask = strdup(addr);
-				break;
+				i = i + 1;
 			}
+
+			sprintf(addr, "%d", j);
+			push_list(netmask, (void*)strdup(addr));
 		}
 	}
 
