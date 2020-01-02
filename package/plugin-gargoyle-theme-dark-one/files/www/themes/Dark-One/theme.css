@@ -636,3 +636,24 @@ input.form-control
 {
 	color: #8585b3;
 }
+#wait_icon
+{
+	left: 114px;
+}
+#wait_msg
+{
+	background-color: #737582;
+}
+.modal-content
+{
+	-moz-border-radius: 20px 0px 20px 0px;
+	-webkit-border-radius: 20px 0px 20px 0px;
+	border-radius: 20px 0px 20px 0px;
+	background: #474747;
+	background: -moz-linear-gradient( center bottom, #373737 0%, #575757 100% );
+	background: -webkit-gradient( linear, left bottom, left top, color-stop(0, #373737), color-stop(1, #474747) );
+	-moz-box-shadow: 10px 10px 10px #111;
+	-webkit-box-shadow: 10px 10px 10px #111;
+	box-shadow: 10px 10px 10px #111;
+	border-color: #7ad;
+}
