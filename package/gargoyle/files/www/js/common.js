@@ -3360,10 +3360,11 @@ function proofreadIp6ForceRange(input)
 	proofreadText(input, validateIP6ForceRange, 0);
 }
 
-function ip6_mask(address, mask, direction=0)
+function ip6_mask(address, mask, direction)
 {
 	//direction = 0 : Mask from MSB
 	//direction = 1 : Mask from LSB
+	direction = typeof direction === 'undefined' ? 0 : direction;
 	var newAddr = "";
 	var tmpAddr = [];
 	var addr = ip6_full(address);
