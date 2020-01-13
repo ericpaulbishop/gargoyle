@@ -3210,7 +3210,7 @@ function ip6_canonical(address)
 		}
 	}
 
-	maxZeroCount = Math.max(...zeroCounts);
+	maxZeroCount = Math.max.apply(null, zeroCounts);
 	maxZeroCountIdxs = [];
 	for(var idx = 0; (maxZeroCount > 1) && (idx < zeroCounts.length); idx++)
 	{
