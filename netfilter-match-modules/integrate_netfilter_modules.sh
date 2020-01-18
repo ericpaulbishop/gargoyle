@@ -257,41 +257,41 @@ for new_d in $new_module_dirs ; do
 	
 	if [ "$patch_kernel" = 1 ] ; then		
 		#copy files for netfilter module
-		cp -r $new_d/module/* linux.new/net/ipv4/netfilter/
-		cp -r $new_d/header/* linux.new/include/linux/netfilter_ipv4/
+		cp -r $new_d/module/* linux.new/net/netfilter/
+		cp -r $new_d/header/* linux.new/include/linux/netfilter/
 	
 		#update netfilter Makefile
-		match_comment_line_num=$(cat linux.new/net/ipv4/netfilter/Makefile | egrep -n "#.*[Mm][Aa][Tt][Cc][Hh]" | sed 's/:.*$//g' )
-		config_line='obj-$(CONFIG_IP_NF_MATCH_'$upper_name') += ipt_'$lower_name'.o' 
-		insert_lines_at "$match_comment_line_num" "$config_line" "linux.new/net/ipv4/netfilter/Makefile" "1"
-		cp  "linux.new/net/ipv4/netfilter/Makefile" ./test1
+		match_comment_line_num=$(cat linux.new/net/netfilter/Makefile | egrep -n "#.*[Mm][Aa][Tt][Cc][Hh]" | sed 's/:.*$//g' )
+		config_line='obj-$(CONFIG_NETFILTER_XT_MATCH_'$upper_name') += xt_'$lower_name'.o' 
+		insert_lines_at "$match_comment_line_num" "$config_line" "linux.new/net/netfilter/Makefile" "1"
+		cp  "linux.new/net/netfilter/Makefile" ./test1
 
 		#update netfilter Config.in/Kconfig file
-		if [ -e linux.new/net/ipv4/netfilter/Kconfig ] ; then
-			end_line_num=$(cat linux.new/net/ipv4/netfilter/Kconfig | egrep -n "endmenu" | sed 's/:.*$//g' )
+		if [ -e linux.new/net/netfilter/Kconfig ] ; then
+			end_line_num=$(cat linux.new/net/netfilter/Kconfig | egrep -n "endmenu" | sed 's/:.*$//g' )
 			insert_line_num=$(($end_line_num-1))
-			config_lines=$(printf "%s\n"  "config IP_NF_MATCH_$upper_name" "	tristate \"$lower_name match support\"" "	depends on IP_NF_IPTABLES" "	help" "		This option enables $lower_name match support." "" "")
-			insert_lines_at "$insert_line_num" "$config_lines" "linux.new/net/ipv4/netfilter/Kconfig" "1"
+			config_lines=$(printf "%s\n"  "config NETFILTER_XT_MATCH_$upper_name" "	tristate \"$lower_name match support\"" "	depends on NETFILTER_XTABLES" "	help" "		This option enables $lower_name match support." "" "")
+			insert_lines_at "$insert_line_num" "$config_lines" "linux.new/net/netfilter/Kconfig" "1"
 		fi
-		if [ -e linux.new/net/ipv4/netfilter/Config.in ] ; then
-			match_comment_line_num=$(cat linux.new/net/ipv4/netfilter/Config.in | egrep -n "#.*[Mm][Aa][Tt][Cc][Hh]" | sed 's/:.*$//g' )
-			match_comment_line="  dep_tristate '  $lower_name match support' CONFIG_IP_NF_MATCH_$upper_name \$CONFIG_IP_NF_IPTABLES"
-			insert_lines_at "$match_comment_line_num" "$match_comment_line" "linux.new/net/ipv4/netfilter/Config.in" "1"
-			cp  "linux.new/net/ipv4/netfilter/Config.in" ./test2
+		if [ -e linux.new/net/netfilter/Config.in ] ; then
+			match_comment_line_num=$(cat linux.new/net/netfilter/Config.in | egrep -n "#.*[Mm][Aa][Tt][Cc][Hh]" | sed 's/:.*$//g' )
+			match_comment_line="  dep_tristate '  $lower_name match support' CONFIG_NETFILTER_XT_MATCH_$upper_name \$CONFIG_NETFILTER_XTABLES"
+			insert_lines_at "$match_comment_line_num" "$match_comment_line" "linux.new/net/netfilter/Config.in" "1"
+			cp  "linux.new/net/netfilter/Config.in" ./test2
 		fi
 	
 		#copy files for iptables extension
 		cp -r $new_d/extension/* iptables.new/extensions
-		cp -r $new_d/header/*    iptables.new/include/linux/netfilter_ipv4/
+		cp -r $new_d/header/*    iptables.new/include/linux/netfilter/
 
 		#create test file, which is used by iptables Makefile
 		echo "#!/bin/sh" > "iptables.new/extensions/.$lower_name-test"
-		echo "[ -f \$KERNEL_DIR/include/linux/netfilter_ipv4/ipt_$lower_name.h ] && echo $lower_name" >> "iptables.new/extensions/.$lower_name-test"
+		echo "[ -f \$KERNEL_DIR/include/linux/netfilter/xt_$lower_name.h ] && echo $lower_name" >> "iptables.new/extensions/.$lower_name-test"
 		chmod 777 "iptables.new/extensions/.$lower_name-test"
 
 		#update config templates -- just for simplicity do so for both 2.4-generic and 2.6-generic 
 		for config in $generic_config_file $config_file ; do
-			echo "CONFIG_IP_NF_MATCH_$upper_name=m" >> $config
+			echo "CONFIG_NETFILTER_XT_MATCH_$upper_name=m" >> $config
 		done
 	fi
 	
@@ -305,8 +305,8 @@ for new_d in $new_module_dirs ; do
 
 		echo "  SUBMENU:=\$(NF_MENU)" >>../"$kernel_netfilter_mk"
 		echo "  TITLE:=$lower_name" >>../"$kernel_netfilter_mk"
-		echo "  KCONFIG:=\$(KCONFIG_IPT_$upper_name)" >>../"$kernel_netfilter_mk"
-		echo "  FILES:=\$(LINUX_DIR)/net/ipv4/netfilter/*$lower_name*.\$(LINUX_KMOD_SUFFIX)" >>../"$kernel_netfilter_mk"
+		echo "  KCONFIG:=\$(KCONFIG_XT_$upper_name)" >>../"$kernel_netfilter_mk"
+		echo "  FILES:=\$(LINUX_DIR)/net/netfilter/*$lower_name*.\$(LINUX_KMOD_SUFFIX)" >>../"$kernel_netfilter_mk"
 		echo "  AUTOLOAD:=\$(call AutoLoad,45,\$(notdir \$(IPT_$upper_name-m)))" >>../"$kernel_netfilter_mk"
 		if [ "$lower_name" = "layer7" ] ; then
 			echo "	DEPENDS:= +kmod-ipt-core +kmod-ipt-conntrack" >>../"$kernel_netfilter_mk"
@@ -331,7 +331,7 @@ for new_d in $new_module_dirs ; do
 		echo "">>../include/netfilter.mk
 		echo "">>../include/netfilter.mk
 		echo "IPT_$upper_name-m :=">>../include/netfilter.mk
-		echo "IPT_$upper_name-\$(CONFIG_IP_NF_MATCH_$upper_name) += \$(P_V4)ipt_$lower_name">>../include/netfilter.mk
+		echo "IPT_$upper_name-\$(CONFIG_NETFILTER_XT_MATCH_$upper_name) += \$(P_XT)xt_$lower_name">>../include/netfilter.mk
 		echo "IPT_BUILTIN += \$(IPT_$upper_name-y)">>../include/netfilter.mk
 	fi
 done
@@ -340,8 +340,8 @@ if [ "$patch_kernel" = 1 ] ; then
 	#build netfilter patch file
 	rm -rf $patch_dir/650-custom_netfilter_match_modules.patch 2>/dev/null
 	cd linux.new
-	module_files=$(find net/ipv4/netfilter)
-	include_files=$(find include/linux/netfilter_ipv4)
+	module_files=$(find net/netfilter)
+	include_files=$(find include/linux/netfilter)
 	test_files="$module_files $include_files"
 	cd ..
 	for t in $test_files ; do
@@ -358,7 +358,7 @@ if [ "$patch_kernel" = 1 ] ; then
 	rm -f ../package/iptables/patches/650-custom_netfilter_match_modules.patch 2>/dev/null
 	cd iptables.new
 	extension_files=$(find extensions)
-	include_files=$(find include/linux/netfilter_ipv4)
+	include_files=$(find include/linux/netfilter)
 	cd ..
 	for t in $extension_files $include_files ; do
 		if [ ! -d "iptables.new/$t" ] ; then

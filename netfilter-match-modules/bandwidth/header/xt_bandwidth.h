@@ -20,8 +20,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _IPT_BANDWIDTH_H
-#define _IPT_BANDWIDTH_H
+#ifndef _XT_BANDWIDTH_H
+#define _XT_BANDWIDTH_H
 
 /*flags -- first three don't map to parameters the rest do */
 #define BANDWIDTH_INITIALIZED		   1
@@ -74,7 +74,7 @@
 #define BANDWIDTH_ENTRY_LENGTH		  12
 
 
-struct ipt_bandwidth_info
+struct xt_bandwidth_info
 {
 	char id[BANDWIDTH_MAX_ID_LENGTH];
 	unsigned char type;
@@ -98,9 +98,9 @@ struct ipt_bandwidth_info
 	unsigned long hashed_id;
 	void* iam;
 	uint64_t* combined_bw;
-	struct ipt_bandwidth_info* non_const_self;
+	struct xt_bandwidth_info* non_const_self;
 	unsigned long* ref_count;
 
 
 };
-#endif /*_IPT_BANDWIDTH_H*/
+#endif /*_XT_BANDWIDTH_H*/

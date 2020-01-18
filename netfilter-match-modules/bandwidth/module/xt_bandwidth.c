@@ -34,8 +34,7 @@
 
 
 #include "bandwidth_deps/tree_map.h"
-#include <linux/netfilter_ipv4/ip_tables.h>
-#include <linux/netfilter_ipv4/ipt_bandwidth.h>
+#include <linux/netfilter/xt_bandwidth.h>
 
 
 #include <linux/ip.h>
@@ -48,6 +47,8 @@
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Eric Bishop");
 MODULE_DESCRIPTION("Match bandwidth used, designed for use with Gargoyle web interface (www.gargoyle-router.com)");
+MODULE_ALIAS("ipt_bandwidth");
+//MODULE_ALIAS("ip6t_bandwidth");
 
 /* 
  * WARNING: accessing the sys_tz variable takes FOREVER, and kills performance 
@@ -67,7 +68,7 @@ static string_map* id_map = NULL;
 
 typedef struct info_and_maps_struct
 {
-	struct ipt_bandwidth_info* info;
+	struct xt_bandwidth_info* info;
 	long_map* ip_map;
 	long_map* ip_history_map;
 }info_and_maps;
@@ -110,7 +111,7 @@ static void check_for_timezone_shift(time_t now, int already_locked);
 
 
 static bw_history* initialize_history(uint32_t max_nodes);
-static unsigned char update_history(bw_history* history, time_t interval_start, time_t interval_end, struct ipt_bandwidth_info* info);
+static unsigned char update_history(bw_history* history, time_t interval_start, time_t interval_end, struct xt_bandwidth_info* info);
 
 
 
@@ -122,8 +123,8 @@ static uint64_t pow64(uint64_t base, uint64_t pow);
 static uint64_t get_bw_record_max(void); /* called by init to set global variable */
 
 static inline int is_leap(unsigned int y);
-static time_t get_next_reset_time(struct ipt_bandwidth_info *info, time_t now, time_t previous_reset);
-static time_t get_nominal_previous_reset_time(struct ipt_bandwidth_info *info, time_t current_next_reset);
+static time_t get_next_reset_time(struct xt_bandwidth_info *info, time_t now, time_t previous_reset);
+static time_t get_nominal_previous_reset_time(struct xt_bandwidth_info *info, time_t current_next_reset);
 
 static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long ip, uint64_t initial_bandwidth);
 
@@ -521,7 +522,7 @@ static bw_history* initialize_history(uint32_t max_nodes)
 }
 
 /* returns 1 if there are non-zero nodes in history, 0 if history is empty (all zero) */
-static unsigned char update_history(bw_history* history, time_t interval_start, time_t interval_end, struct ipt_bandwidth_info* info)
+static unsigned char update_history(bw_history* history, time_t interval_start, time_t interval_end, struct xt_bandwidth_info* info)
 {
 	unsigned char history_is_nonzero = 0;
 	if(history != NULL) /* should never be null, but let's be sure */
@@ -570,7 +571,7 @@ static unsigned char update_history(bw_history* history, time_t interval_start, 
 }
 
 
-static struct ipt_bandwidth_info* do_reset_info = NULL;
+static struct xt_bandwidth_info* do_reset_info = NULL;
 static long_map* do_reset_ip_map = NULL;
 static long_map* do_reset_delete_ips = NULL;
 static time_t do_reset_interval_start = 0;
@@ -645,7 +646,7 @@ static void reset_histories(unsigned long key, void* value)
 
 static void handle_interval_reset(info_and_maps* iam, time_t now)
 {
-	struct ipt_bandwidth_info* info;
+	struct xt_bandwidth_info* info;
 
 	#ifdef BANDWIDTH_DEBUG
 		printk("now, handling interval reset\n");
@@ -854,7 +855,7 @@ static inline int is_leap(unsigned int y)
 /* end of code  yoinked from xt_time */
 
 
-static time_t get_nominal_previous_reset_time(struct ipt_bandwidth_info *info, time_t current_next_reset)
+static time_t get_nominal_previous_reset_time(struct xt_bandwidth_info *info, time_t current_next_reset)
 {
 	time_t previous_reset = current_next_reset;
 	if(info->reset_is_constant_interval == 0)
@@ -882,7 +883,7 @@ static time_t get_nominal_previous_reset_time(struct ipt_bandwidth_info *info, t
 }
 
 
-static time_t get_next_reset_time(struct ipt_bandwidth_info *info, time_t now, time_t previous_reset)
+static time_t get_next_reset_time(struct xt_bandwidth_info *info, time_t now, time_t previous_reset)
 {
 	//first calculate when next reset would be if reset_time is 0 (which it may be)
 	time_t next_reset = 0;
@@ -1040,7 +1041,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 	uint64_t* new_bw = NULL;
 	if(iam != NULL) /* should never happen, but let's be certain */
 	{
-		struct ipt_bandwidth_info *info = iam->info;
+		struct xt_bandwidth_info *info = iam->info;
 		long_map* ip_map = iam->ip_map;
 		long_map* ip_history_map = iam->ip_history_map;
 
@@ -1129,7 +1130,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 static bool match(const struct sk_buff *skb, struct xt_action_param *par)
 {
 
-	struct ipt_bandwidth_info *info = ((const struct ipt_bandwidth_info*)(par->matchinfo))->non_const_self;
+	struct xt_bandwidth_info *info = ((const struct xt_bandwidth_info*)(par->matchinfo))->non_const_self;
 	
 	time_t now;
 	int match_found;
@@ -1591,7 +1592,7 @@ static void parse_get_request(unsigned char* request_buffer, get_request* parsed
 }
 
 
-static int ipt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
+static int xt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 {
 	/* check for timezone shift & adjust if necessary */
 	char* buffer;
@@ -2024,7 +2025,7 @@ static void set_single_ip_data(unsigned char history_included, info_and_maps* ia
 
 }
 
-static int ipt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t len)
+static int xt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t len)
 {
 	/* check for timezone shift & adjust if necessary */
 	char* buffer;
@@ -2166,7 +2167,7 @@ static int checkentry(const struct xt_mtchk_param *par)
 {
 
 
-	struct ipt_bandwidth_info *info = (struct ipt_bandwidth_info*)(par->matchinfo);
+	struct xt_bandwidth_info *info = (struct xt_bandwidth_info*)(par->matchinfo);
 
 
 
@@ -2180,7 +2181,7 @@ static int checkentry(const struct xt_mtchk_param *par)
 
 	if(info->ref_count == NULL) /* first instance, we're inserting rule */
 	{
-		struct ipt_bandwidth_info *master_info = (struct ipt_bandwidth_info*)kmalloc(sizeof(struct ipt_bandwidth_info), GFP_ATOMIC);
+		struct xt_bandwidth_info *master_info = (struct xt_bandwidth_info*)kmalloc(sizeof(struct xt_bandwidth_info), GFP_ATOMIC);
 		info->ref_count = (unsigned long*)kmalloc(sizeof(unsigned long), GFP_ATOMIC);
 
 		if(info->ref_count == NULL) /* deal with kmalloc failure */
@@ -2355,7 +2356,7 @@ static int checkentry(const struct xt_mtchk_param *par)
 static void destroy(const struct xt_mtdtor_param *par)
 {
 
-	struct ipt_bandwidth_info *info = (struct ipt_bandwidth_info*)(par->matchinfo);
+	struct xt_bandwidth_info *info = (struct xt_bandwidth_info*)(par->matchinfo);
 
 	#ifdef BANDWIDTH_DEBUG
 		printk("destroy called\n");
@@ -2418,35 +2419,37 @@ static void destroy(const struct xt_mtdtor_param *par)
 	#endif
 }
 
-static struct nf_sockopt_ops ipt_bandwidth_sockopts = 
+static struct nf_sockopt_ops xt_bandwidth_sockopts = 
 {
 	.pf = PF_INET,
 	.set_optmin = BANDWIDTH_SET,
 	.set_optmax = BANDWIDTH_SET+1,
-	.set = ipt_bandwidth_set_ctl,
+	.set = xt_bandwidth_set_ctl,
 	.get_optmin = BANDWIDTH_GET,
 	.get_optmax = BANDWIDTH_GET+1,
-	.get = ipt_bandwidth_get_ctl
+	.get = xt_bandwidth_get_ctl
 };
 
 
-static struct xt_match bandwidth_match __read_mostly = 
+static struct xt_match bandwidth_mt_reg[] __read_mostly = 
 {
-	.name		= "bandwidth",
-	.match		= match,
-	.family		= AF_INET,
-	.matchsize	= sizeof(struct ipt_bandwidth_info),
-	.checkentry	= checkentry,
-	.destroy	= destroy,
-	.me		= THIS_MODULE,
+	{
+		.name		= "bandwidth",
+		.match		= match,
+		.family		= NFPROTO_IPV4,
+		.matchsize	= sizeof(struct xt_bandwidth_info),
+		.checkentry	= checkentry,
+		.destroy	= destroy,
+		.me		= THIS_MODULE,
+	},
 };
 
 static int __init init(void)
 {
 	/* Register setsockopt */
-	if (nf_register_sockopt(&ipt_bandwidth_sockopts) < 0)
+	if (nf_register_sockopt(&xt_bandwidth_sockopts) < 0)
 	{
-		printk("ipt_bandwidth: Can't register sockopts. Aborting\n");
+		printk("xt_bandwidth: Can't register sockopts. Aborting\n");
 	}
 	bandwidth_record_max = get_bw_record_max();
 	local_minutes_west = old_minutes_west = sys_tz.tz_minuteswest;
@@ -2467,7 +2470,7 @@ static int __init init(void)
 	}
 
 
-	return xt_register_match(&bandwidth_match);
+	return xt_register_matches(bandwidth_mt_reg, ARRAY_SIZE(bandwidth_mt_reg));
 }
 
 static void __exit fini(void)
@@ -2489,11 +2492,10 @@ static void __exit fini(void)
 			/* info portion of iam gets taken care of automatically */
 		}
 	}
-	nf_unregister_sockopt(&ipt_bandwidth_sockopts);
-	xt_unregister_match(&bandwidth_match);
+	nf_unregister_sockopt(&xt_bandwidth_sockopts);
+	xt_unregister_matches(bandwidth_mt_reg, ARRAY_SIZE(bandwidth_mt_reg));
 	spin_unlock_bh(&bandwidth_lock);
 	up(&userspace_lock);
-
 }
 
 module_init(init);

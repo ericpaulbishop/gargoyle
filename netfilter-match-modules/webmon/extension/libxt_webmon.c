@@ -28,30 +28,8 @@
 
 #include <arpa/inet.h>
 
-/*
- * in iptables 1.4.0 and higher, iptables.h includes xtables.h, which
- * we can use to check whether we need to deal with the new requirements
- * in pre-processor directives below
- */
 #include <iptables.h>  
-#include <linux/netfilter_ipv4/ipt_webmon.h>
-
-#ifdef _XTABLES_H
-	#define iptables_rule_match	xtables_rule_match
-	#define iptables_match		xtables_match
-	#define iptables_target		xtables_target
-	#define ipt_tryload		xt_tryload
-#endif
-
-/* 
- * XTABLES_VERSION_CODE is only defined in versions 1.4.1 and later, which
- * also require the use of xtables_register_match
- * 
- * Version 1.4.0 uses register_match like previous versions
- */
-#ifdef XTABLES_VERSION_CODE 
-	#define register_match          xtables_register_match
-#endif
+#include <linux/netfilter/xt_webmon.h>
 
 
 #define STRIP "%d.%d.%d.%d"
@@ -67,7 +45,7 @@
 static void param_problem_exit_error(char* msg);
 
 
-void parse_ips_and_ranges(char* addr_str, struct ipt_webmon_info *info);
+void parse_ips_and_ranges(char* addr_str, struct xt_webmon_info *info);
 
 char** split_on_separators(char* line, char* separators, int num_separators, int max_pieces, int include_remainder_at_max);
 char* trim_flanking_whitespace(char* str);
@@ -106,14 +84,10 @@ static struct option opts[] =
 };
 
 static void webmon_init(
-#ifdef _XTABLES_H
 	struct xt_entry_match *match
-#else
-	struct ipt_entry_match *match, unsigned int *nfcache
-#endif
 	)
 {
-	struct ipt_webmon_info *info = (struct ipt_webmon_info *)match->data;
+	struct xt_webmon_info *info = (struct xt_webmon_info *)match->data;
 	info->max_domains=DEFAULT_MAX;
 	info->max_searches=DEFAULT_MAX;
 	info->num_exclude_ips=0;
@@ -128,16 +102,11 @@ static int parse(	int c,
 			char **argv,
 			int invert,
 			unsigned int *flags,
-#ifdef _XTABLES_H
-			const void *entry,
-#else
-			const struct ipt_entry *entry,
-			unsigned int *nfcache,
-#endif			
-			struct ipt_entry_match **match
+			const void *entry,			
+			struct xt_entry_match **match
 			)
 {
-	struct ipt_webmon_info *info = (struct ipt_webmon_info *)(*match)->data;
+	struct xt_webmon_info *info = (struct xt_webmon_info *)(*match)->data;
 	int valid_arg = 1;
 	long max;
 	switch (c)
@@ -195,7 +164,7 @@ static int parse(	int c,
 
 
 	
-static void print_webmon_args(	struct ipt_webmon_info* info )
+static void print_webmon_args(	struct xt_webmon_info* info )
 {
 	printf("--max_domains %ld ", (unsigned long int)info->max_domains);
 	printf("--max_searches %ld ", (unsigned long int)info->max_searches);
@@ -211,7 +180,7 @@ static void print_webmon_args(	struct ipt_webmon_info* info )
 		}
 		for(ip_index=0; ip_index < info->num_exclude_ranges; ip_index++)
 		{
-			struct ipt_webmon_ip_range r = (info->exclude_ranges)[ip_index];
+			struct xt_webmon_ip_range r = (info->exclude_ranges)[ip_index];
 			printf("%s"STRIP"-"STRIP, comma, NIPQUAD(r.start), NIPQUAD(r.end) );
 			sprintf(comma, ",");
 		}
@@ -275,52 +244,43 @@ static void final_check(unsigned int flags)
 }
 
 /* Prints out the matchinfo. */
-#ifdef _XTABLES_H
 static void print(const void *ip, const struct xt_entry_match *match, int numeric)
-#else	
-static void print(const struct ipt_ip *ip, const struct ipt_entry_match *match, int numeric)
-#endif
 {
 	printf("WEBMON ");
-	struct ipt_webmon_info *info = (struct ipt_webmon_info *)match->data;
+	struct xt_webmon_info *info = (struct xt_webmon_info *)match->data;
 
 	print_webmon_args(info);
 }
 
-/* Saves the union ipt_matchinfo in parsable form to stdout. */
-#ifdef _XTABLES_H
+/* Saves the union xt_matchinfo in parsable form to stdout. */
 static void save(const void *ip, const struct xt_entry_match *match)
-#else
-static void save(const struct ipt_ip *ip, const struct ipt_entry_match *match)
-#endif
 {
-	struct ipt_webmon_info *info = (struct ipt_webmon_info *)match->data;
+	struct xt_webmon_info *info = (struct xt_webmon_info *)match->data;
 	print_webmon_args(info);
 }
 
-static struct iptables_match webmon = 
-{ 
-	.next		= NULL,
- 	.name		= "webmon",
-	#ifdef XTABLES_VERSION_CODE
-		.version = XTABLES_VERSION,
-	#else
-		.version = IPTABLES_VERSION,
-	#endif
-	.size		= XT_ALIGN(sizeof(struct ipt_webmon_info)),
-	.userspacesize	= XT_ALIGN(sizeof(struct ipt_webmon_info)),
-	.help		= &help,
-	.init           = &webmon_init,
-	.parse		= &parse,
-	.final_check	= &final_check,
-	.print		= &print,
-	.save		= &save,
-	.extra_opts	= opts
+static struct xtables_match webmon_mt_reg[] = 
+{
+	{
+		.next		= NULL,
+	 	.name		= "webmon",
+		.family		= NFPROTO_IPV4,
+		.version	= XTABLES_VERSION,
+		.size		= XT_ALIGN(sizeof(struct xt_webmon_info)),
+		.userspacesize	= XT_ALIGN(sizeof(struct xt_webmon_info)),
+		.help		= &help,
+		.init           = &webmon_init,
+		.parse		= &parse,
+		.final_check	= &final_check,
+		.print		= &print,
+		.save		= &save,
+		.extra_opts	= opts
+	},
 };
 
 void _init(void)
 {
-	register_match(&webmon);
+	xtables_register_matches(webmon_mt_reg, ARRAY_SIZE(webmon_mt_reg));
 }
 
 
@@ -331,23 +291,13 @@ void _init(void)
 #define FALSE 0
 #endif
 
-
-
-
-
-
-
 static void param_problem_exit_error(char* msg)
 {
-	#ifdef xtables_error
-		xtables_error(PARAMETER_PROBLEM, "%s", msg);
-	#else
-		exit_error(PARAMETER_PROBLEM, msg);
-	#endif
+	xtables_error(PARAMETER_PROBLEM, "%s", msg);
 }
 
 
-void parse_ips_and_ranges(char* addr_str, struct ipt_webmon_info *info)
+void parse_ips_and_ranges(char* addr_str, struct xt_webmon_info *info)
 {
 	char** addr_parts = split_on_separators(addr_str, ",", 1, -1, 0);
 
@@ -370,7 +320,7 @@ void parse_ips_and_ranges(char* addr_str, struct ipt_webmon_info *info)
 			
 			if(start_valid == 4 && end_valid == 4)
 			{
-				struct ipt_webmon_ip_range r;
+				struct xt_webmon_ip_range r;
 				struct in_addr sip, eip;
 				inet_pton(AF_INET, start, &sip);
 				inet_pton(AF_INET, end, &eip);
@@ -440,7 +390,7 @@ void parse_ips_and_ranges(char* addr_str, struct ipt_webmon_info *info)
 				}
 				if(mask_valid)
 				{
-					struct ipt_webmon_ip_range r;
+					struct xt_webmon_ip_range r;
 					struct in_addr bip;
 					inet_pton(AF_INET, start, &bip);
 					r.start = ( ((uint32_t)bip.s_addr) & mask );
@@ -476,7 +426,6 @@ void parse_ips_and_ranges(char* addr_str, struct ipt_webmon_info *info)
 		free(next_str);
 	}
 	free(addr_parts);
-	
 }
 
 

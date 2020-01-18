@@ -31,31 +31,8 @@
 #include <sys/time.h>
 #include <limits.h>
 
-/*
- * in iptables 1.4.0 and higher, iptables.h includes xtables.h, which
- * we can use to check whether we need to deal with the new requirements
- * in pre-processor directives below
- */
 #include <iptables.h>  
-#include <linux/netfilter_ipv4/ipt_bandwidth.h>
-
-#ifdef _XTABLES_H
-	#define iptables_rule_match	xtables_rule_match
-	#define iptables_match		xtables_match
-	#define iptables_target		xtables_target
-	#define ipt_tryload		xt_tryload
-#endif
-
-/* 
- * XTABLES_VERSION_CODE is only defined in versions 1.4.1 and later, which
- * also require the use of xtables_register_match
- * 
- * Version 1.4.0 uses register_match like previous versions
- */
-#ifdef XTABLES_VERSION_CODE 
-	#define register_match          xtables_register_match
-#endif
-
+#include <linux/netfilter/xt_bandwidth.h>
 
 
 int get_minutes_west(void);
@@ -107,16 +84,11 @@ static int parse(	int c,
 			char **argv,
 			int invert,
 			unsigned int *flags,
-#ifdef _XTABLES_H
-			const void *entry,
-#else
-			const struct ipt_entry *entry,
-			unsigned int *nfcache,
-#endif			
-			struct ipt_entry_match **match
+			const void *entry,		
+			struct xt_entry_match **match
 			)
 {
-	struct ipt_bandwidth_info *info = (struct ipt_bandwidth_info *)(*match)->data;
+	struct xt_bandwidth_info *info = (struct xt_bandwidth_info *)(*match)->data;
 	int valid_arg = 0;
 	long int num_read;
 	uint64_t read_64;
@@ -336,7 +308,7 @@ static int parse(	int c,
 
 
 
-static void print_bandwidth_args( struct ipt_bandwidth_info* info )
+static void print_bandwidth_args( struct xt_bandwidth_info* info )
 {
 	if(info->cmp == BANDWIDTH_CHECK)
 	{
@@ -479,26 +451,18 @@ static void final_check(unsigned int flags)
 }
 
 /* Prints out the matchinfo. */
-#ifdef _XTABLES_H
 static void print(const void *ip, const struct xt_entry_match *match, int numeric)
-#else	
-static void print(const struct ipt_ip *ip, const struct ipt_entry_match *match, int numeric)
-#endif
 {
 	printf("bandwidth ");
-	struct ipt_bandwidth_info *info = (struct ipt_bandwidth_info *)match->data;
+	struct xt_bandwidth_info *info = (struct xt_bandwidth_info *)match->data;
 
 	print_bandwidth_args(info);
 }
 
-/* Saves the union ipt_matchinfo in parsable form to stdout. */
-#ifdef _XTABLES_H
+/* Saves the union xt_matchinfo in parsable form to stdout. */
 static void save(const void *ip, const struct xt_entry_match *match)
-#else
-static void save(const struct ipt_ip *ip, const struct ipt_entry_match *match)
-#endif
 {
-	struct ipt_bandwidth_info *info = (struct ipt_bandwidth_info *)match->data;
+	struct xt_bandwidth_info *info = (struct xt_bandwidth_info *)match->data;
 	time_t now;
 	
 	print_bandwidth_args(info);
@@ -507,37 +471,32 @@ static void save(const struct ipt_ip *ip, const struct ipt_entry_match *match)
 	printf("--last_backup-time %ld ", now);
 }
 
-static struct iptables_match bandwidth = 
-{ 
-	.next		= NULL,
- 	.name		= "bandwidth",
-	#ifdef XTABLES_VERSION_CODE
-		.version = XTABLES_VERSION, 
-	#else
-		.version = IPTABLES_VERSION,
-	#endif
-	.size		= XT_ALIGN(sizeof(struct ipt_bandwidth_info)),
-	.userspacesize	= XT_ALIGN(sizeof(struct ipt_bandwidth_info)),
-	.help		= &help,
-	.parse		= &parse,
-	.final_check	= &final_check,
-	.print		= &print,
-	.save		= &save,
-	.extra_opts	= opts
+static struct xtables_match bandwidth_mt_reg[] = 
+{
+	{
+		.next		= NULL,
+	 	.name		= "bandwidth",
+		.family		= NFPROTO_IPV4,
+		.version	= XTABLES_VERSION, 
+		.size		= XT_ALIGN(sizeof(struct xt_bandwidth_info)),
+		.userspacesize	= XT_ALIGN(sizeof(struct xt_bandwidth_info)),
+		.help		= &help,
+		.parse		= &parse,
+		.final_check	= &final_check,
+		.print		= &print,
+		.save		= &save,
+		.extra_opts	= opts
+	},
 };
 
 void _init(void)
 {
-	register_match(&bandwidth);
+	xtables_register_matches(bandwidth_mt_reg, ARRAY_SIZE(bandwidth_mt_reg));
 }
 
 static void param_problem_exit_error(char* msg)
 {
-	#ifdef xtables_error
-		xtables_error(PARAMETER_PROBLEM, "%s", msg);
-	#else
-		exit_error(PARAMETER_PROBLEM, msg);
-	#endif
+	xtables_error(PARAMETER_PROBLEM, "%s", msg);
 }
 
 /* 

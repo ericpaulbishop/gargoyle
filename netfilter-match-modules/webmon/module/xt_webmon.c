@@ -33,8 +33,7 @@
 #include <linux/spinlock.h>
 #include <linux/proc_fs.h>
 
-#include <linux/netfilter_ipv4/ip_tables.h>
-#include <linux/netfilter_ipv4/ipt_webmon.h>
+#include <linux/netfilter/xt_webmon.h>
 
 #include "webmon_deps/tree_map.h"
 
@@ -49,6 +48,8 @@
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Eric Bishop");
 MODULE_DESCRIPTION("Monitor URL in HTTP(S) Requests, designed for use with Gargoyle web interface (www.gargoyle-router.com)");
+MODULE_ALIAS("ipt_webmon");
+//MODULE_ALIAS("ip6t_webmon");
 
 #define NIPQUAD(addr) \
 	((unsigned char *)&addr)[0], \
@@ -697,7 +698,7 @@ static struct file_operations webmon_proc_search_fops = {
 
 
 
-static int ipt_webmon_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t len)
+static int xt_webmon_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t len)
 {
 
 	char* buffer = kmalloc(len, GFP_ATOMIC);
@@ -807,21 +808,21 @@ static int ipt_webmon_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t le
 	
 	return 1;
 }
-static struct nf_sockopt_ops ipt_webmon_sockopts = 
+static struct nf_sockopt_ops xt_webmon_sockopts = 
 {
 	.pf         = PF_INET,
 	.set_optmin = WEBMON_SET,
 	.set_optmax = WEBMON_SET+1,
-	.set        = ipt_webmon_set_ctl,
+	.set        = xt_webmon_set_ctl,
 };
 
 
 
 
-static bool match(const struct sk_buff *skb, struct xt_action_param *par)
+static bool weburl_mt(const struct sk_buff *skb, struct xt_action_param *par)
 {
 
-	const struct ipt_webmon_info *info = (const struct ipt_webmon_info*)(par->matchinfo);
+	const struct xt_webmon_info *info = (const struct xt_webmon_info*)(par->matchinfo);
 
 	
 	struct iphdr* iph;
@@ -876,7 +877,7 @@ static bool match(const struct sk_buff *skb, struct xt_action_param *par)
 				}
 				for(ip_index=0; ip_index < info->num_exclude_ranges; ip_index++)
 				{
-					struct ipt_webmon_ip_range r = (info->exclude_ranges)[ip_index];
+					struct xt_webmon_ip_range r = (info->exclude_ranges)[ip_index];
 					if( (unsigned long)ntohl( r.start) <= (unsigned long)ntohl(iph->saddr) && (unsigned long)ntohl(r.end) >= (unsigned long)ntohl(iph->saddr) )
 					{
 						save = info->exclude_type == WEBMON_EXCLUDE ? 0 : 1;
@@ -1144,7 +1145,7 @@ static bool match(const struct sk_buff *skb, struct xt_action_param *par)
 				}
 				for(ip_index=0; ip_index < info->num_exclude_ranges; ip_index++)
 				{
-					struct ipt_webmon_ip_range r = (info->exclude_ranges)[ip_index];
+					struct xt_webmon_ip_range r = (info->exclude_ranges)[ip_index];
 					if( (unsigned long)ntohl( r.start) <= (unsigned long)ntohl(iph->saddr) && (unsigned long)ntohl(r.end) >= (unsigned long)ntohl(iph->saddr) )
 					{
 						save = info->exclude_type == WEBMON_EXCLUDE ? 0 : 1;
@@ -1196,7 +1197,7 @@ static bool match(const struct sk_buff *skb, struct xt_action_param *par)
 static int checkentry(const struct xt_mtchk_param *par)
 {
 
-	struct ipt_webmon_info *info = (struct ipt_webmon_info*)(par->matchinfo);
+	struct xt_webmon_info *info = (struct xt_webmon_info*)(par->matchinfo);
 
 
 	spin_lock_bh(&webmon_lock);
@@ -1227,7 +1228,7 @@ static int checkentry(const struct xt_mtchk_param *par)
 
 static void destroy( const struct xt_mtdtor_param *par )
 {
-	struct ipt_webmon_info *info = (struct ipt_webmon_info*)(par->matchinfo);
+	struct xt_webmon_info *info = (struct xt_webmon_info*)(par->matchinfo);
 
 	spin_lock_bh(&webmon_lock);
 	*(info->ref_count) = *(info->ref_count) - 1;
@@ -1239,16 +1240,17 @@ static void destroy( const struct xt_mtdtor_param *par )
 
 }
 
-static struct xt_match webmon_match __read_mostly  = 
+static struct xt_match webmon_mt_reg[] __read_mostly  = 
 {
-
-	.name		= "webmon",
-	.match		= match,
-	.family		= AF_INET,
-	.matchsize	= sizeof(struct ipt_webmon_info),
-	.checkentry	= checkentry,
-	.destroy	= destroy,
-	.me		= THIS_MODULE,
+	{
+		.name		= "webmon",
+		.match		= weburl_mt,
+		.family		= NFPROTO_IPV4,
+		.matchsize	= sizeof(struct xt_webmon_info),
+		.checkentry	= checkentry,
+		.destroy	= destroy,
+		.me		= THIS_MODULE,
+	},
 };
 
 static int __init init(void)
@@ -1280,15 +1282,15 @@ static int __init init(void)
 		proc_create("webmon_recent_searches", 0, NULL, &webmon_proc_search_fops);
 	#endif
 	
-	if (nf_register_sockopt(&ipt_webmon_sockopts) < 0)
+	if (nf_register_sockopt(&xt_webmon_sockopts) < 0)
 	{
-		printk("ipt_webmon: Can't register sockopts. Aborting\n");
+		printk("xt_webmon: Can't register sockopts. Aborting\n");
 		spin_unlock_bh(&webmon_lock);
 		return -1;
 	}
 	spin_unlock_bh(&webmon_lock);
 
-	return xt_register_match(&webmon_match);
+	return xt_register_matches(webmon_mt_reg, ARRAY_SIZE(webmon_mt_reg));
 }
 
 static void __exit fini(void)
@@ -1303,17 +1305,16 @@ static void __exit fini(void)
 		remove_proc_entry("webmon_recent_domains", NULL);
 		remove_proc_entry("webmon_recent_searches", NULL);
 	#endif
-	nf_unregister_sockopt(&ipt_webmon_sockopts);
-	xt_unregister_match(&webmon_match);
+	nf_unregister_sockopt(&xt_webmon_sockopts);
+	xt_unregister_matches(webmon_mt_reg, ARRAY_SIZE(webmon_mt_reg));
 	destroy_map(domain_map, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
 	destroy_map(search_map, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
 	destroy_queue(recent_domains);
 	destroy_queue(recent_searches);
 
 	spin_unlock_bh(&webmon_lock);
-
-
 }
 
 module_init(init);
 module_exit(fini);
+

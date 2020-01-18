@@ -31,27 +31,27 @@
 #include <net/tcp.h>
 #include <linux/time.h>
 
-#include <linux/netfilter_ipv4/ip_tables.h>
-#include <linux/netfilter_ipv4/ipt_timerange.h>
+#include <linux/netfilter/x_tables.h>
+#include <linux/netfilter/xt_timerange.h>
 
 #include <linux/ktime.h>
 
 
 #include <linux/ip.h>
 
-#include <linux/netfilter/x_tables.h>
-
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Eric Bishop");
 MODULE_DESCRIPTION("Match time ranges, designed for use with Gargoyle web interface (www.gargoyle-router.com)");
+MODULE_ALIAS("ipt_timerange");
+MODULE_ALIAS("ip6t_timerange");
 
 
 extern struct timezone sys_tz;
 
 
-static bool match(const struct sk_buff *skb, struct xt_action_param *par)
+static bool timerange_mt(const struct sk_buff *skb, struct xt_action_param *par)
 {
-	const struct ipt_timerange_info *info = (const struct ipt_timerange_info*)(par->matchinfo);
+	const struct xt_timerange_info *info = (const struct xt_timerange_info*)(par->matchinfo);
 
 	
 	time_t stamp_time;
@@ -110,31 +110,39 @@ static bool match(const struct sk_buff *skb, struct xt_action_param *par)
 	return match_found;
 }
 
-
 static int checkentry(const struct xt_mtchk_param *par)
 {
 	return 0;
 }
 
-
-static struct xt_match timerange_match  __read_mostly = 
+static struct xt_match timerange_mt_reg[]  __read_mostly = 
 {
-	.name		= "timerange",
-	.match		= match,
-	.family		= AF_INET,
-	.matchsize	= sizeof(struct ipt_timerange_info),
-	.checkentry	= checkentry,
-	.me		= THIS_MODULE,
+	{	
+		.name		= "timerange",
+		.family		= NFPROTO_IPV4,
+		.match		= timerange_mt,
+		.matchsize	= sizeof(struct xt_timerange_info),
+		.checkentry	= checkentry,
+		.me		= THIS_MODULE,
+	},
+	{
+		.name		= "timerange",
+		.family		= NFPROTO_IPV6,
+		.match		= timerange_mt,
+		.matchsize	= sizeof(struct xt_timerange_info),
+		.checkentry	= checkentry,
+		.me		= THIS_MODULE,
+	},
 };
 
 static int __init init(void)
 {
-	return xt_register_match(&timerange_match);
+	return xt_register_matches(timerange_mt_reg, ARRAY_SIZE(timerange_mt_reg));
 }
 
 static void __exit fini(void)
 {
-	xt_unregister_match(&timerange_match);
+	xt_unregister_matches(timerange_mt_reg, ARRAY_SIZE(timerange_mt_reg));
 }
 
 module_init(init);
