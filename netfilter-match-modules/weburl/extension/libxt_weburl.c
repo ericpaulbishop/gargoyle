@@ -1,4 +1,4 @@
-/*  weburl --	An iptables extension to match URLs in HTTP(S) requests
+/*  weburl --	An xtables extension to match URLs in HTTP(S) requests
  *  		This module can match using string match or regular expressions
  *  		Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
  *
@@ -192,21 +192,7 @@ static struct xtables_match weburl_mt_reg[] =
 	{
 		.next		= NULL,
 	 	.name		= "weburl",
-		.family		= NFPROTO_IPV4,
-		.version	= XTABLES_VERSION,
-		.size		= XT_ALIGN(sizeof(struct xt_weburl_info)),
-		.userspacesize	= XT_ALIGN(sizeof(struct xt_weburl_info)),
-		.help		= &help,
-		.parse		= &parse,
-		.final_check	= &final_check,
-		.print		= &print,
-		.save		= &save,
-		.extra_opts	= opts
-	},
-	{
-		.next		= NULL,
-	 	.name		= "weburl",
-		.family		= NFPROTO_IPV6,
+		.family		= NFPROTO_UNSPEC,
 		.version	= XTABLES_VERSION,
 		.size		= XT_ALIGN(sizeof(struct xt_weburl_info)),
 		.userspacesize	= XT_ALIGN(sizeof(struct xt_weburl_info)),

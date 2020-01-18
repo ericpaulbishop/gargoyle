@@ -511,15 +511,7 @@ static struct xt_match xt_weburl_mt_reg[]  __read_mostly  =
 	{
 		.name		= "weburl",
 		.match		= weburl_mt,
-		.family		= NFPROTO_IPV4,
-		.matchsize	= sizeof(struct xt_weburl_info),
-		.checkentry	= checkentry,
-		.me		= THIS_MODULE,
-	},
-	{
-		.name		= "weburl",
-		.match		= weburl_mt,
-		.family		= NFPROTO_IPV6,
+		.family		= NFPROTO_UNSPEC,
 		.matchsize	= sizeof(struct xt_weburl_info),
 		.checkentry	= checkentry,
 		.me		= THIS_MODULE,
