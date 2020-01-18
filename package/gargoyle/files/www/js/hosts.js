@@ -74,10 +74,22 @@ function resetVariables()
 		}
 		tableContainer.appendChild(table);
         	reregisterTableSort('lease_table', 's', 'p', 's', 's');
+
+		document.getElementById("dhcp6_data").style.display="block";
+		var columnNames=[UI.HsNm, hostsStr.HostIP, hostsStr.HostDUID, hostsStr.LeaseExp];
+		var table = createTable(columnNames, parseDhcp6(dhcp6LeaseLines), "lease6_table", false, false);
+		var tableContainer = document.getElementById('lease6_table_container');
+		if(tableContainer.firstChild != null)
+		{
+			tableContainer.removeChild(tableContainer.firstChild);
+		}
+		tableContainer.appendChild(table);
+        	reregisterTableSort('lease6_table', 's', 'p', 's', 's');
 	}
 	else
 	{
 		document.getElementById("dhcp_data").style.display="none";
+		document.getElementById("dhcp6_data").style.display="none";
 	}
 
 	var arpHash = parseArp(arpLines, dhcpLeaseLines);
@@ -176,6 +188,48 @@ function parseDhcp(leases)
 		var exp = expHours + "h " + expMinutes + "m";
 
 		dhcpTableData.push( [hostname, ip, mac, exp ] );
+	}
+	sort2dStrArr(dhcpTableData, 1);
+	return dhcpTableData;
+}
+
+function parseDhcp6(leases)
+{
+	//# br-lan DUID ?? HostName Expiry Suffix NetMask Address1 [, Address2, Address3...]
+	var dhcpTableData = [];
+	var lineIndex=0;
+	for(lineIndex=0; lineIndex < leases.length; lineIndex++)
+	{
+		var leaseLine = leases[lineIndex];
+		var splitLease = leaseLine.split(/[\t ]+/);
+		var ip = [];
+		for(var x = 8; x < splitLease.length; x++)
+		{
+			ip.push(ip6_splitmask(splitLease[x]).address);
+		}
+		var ipTxt = ip.join("\n");
+		var hostname = getHostname(ip[0]);
+		var duid = splitLease[2];
+
+		var expTime = splitLease[5];
+		var exp = "";
+		if(expTime == "-1")
+		{
+			exp = "N/A";
+		}
+		else
+		{
+			var seconds = expTime - currentTime;
+			var expHours = Math.floor(seconds/(60*60));
+			var expMinutes = Math.floor((seconds-(expHours*60*60))/(60));
+			if(expMinutes < 10)
+			{
+				expMinutes = "0" + expMinutes;
+			}
+			exp = expHours + "h " + expMinutes + "m";
+		}
+
+		dhcpTableData.push( [hostname, ipTxt, duid, exp ] );
 	}
 	sort2dStrArr(dhcpTableData, 1);
 	return dhcpTableData;
@@ -331,12 +385,19 @@ function parseConntrack(arpHash, currentWanIp, lines)
 		var srcIpPart = splitLine[1];
 		var splitSrcIp = srcIpPart.split(/[\t ]+/);
 		var srcIp = splitSrcIp[0];
+		if(getIPFamily(srcIp) == "IPv6")
+		{
+			srcIp = ip6_canonical(srcIp);
+		}
 
 		splitLine = nextLine.split(/dst=/); //we want FIRST dst definition
 		var dstIpPart = splitLine[1];
 		var splitDstIp = dstIpPart.split(/[\t ]+/);
 		var dstIp = splitDstIp[0];
-
+		if(getIPFamily(dstIp) == "IPv6")
+		{
+			dstIp = ip6_canonical(dstIp);
+		}
 
 
 		splitLine=nextLine.split(/[\t ]+/);

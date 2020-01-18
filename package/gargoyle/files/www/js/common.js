@@ -3466,3 +3466,19 @@ function ip6_scope(address)
 
 	return retVal;
 }
+
+function getIPFamily(address)
+{
+	var retVal = null;
+
+	if(validateIP(address) == 0)
+	{
+		retVal = "IPv4";
+	}
+	else if(validateIP6(address) == 0)
+	{
+		retVal = "IPv6";
+	}
+
+	return retVal;
+}
