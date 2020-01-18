@@ -1,4 +1,4 @@
-/*  timerange --	An iptables extension to match multiple timeranges within a week
+/*  timerange --	An xtables extension to match multiple timeranges within a week
  *  			Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
  *
  *
@@ -233,20 +233,7 @@ static struct xtables_match timerange_mt_reg[] =
 	{
 	 	.name		= "timerange",
 		.version	= XTABLES_VERSION,
-		.family		= NFPROTO_IPV4,
-		.size		= XT_ALIGN(sizeof(struct xt_timerange_info)),
-		.userspacesize	= XT_ALIGN(sizeof(struct xt_timerange_info)),
-		.help		= &help,
-		.parse		= &parse,
-		.final_check	= &final_check,
-		.print		= &print,
-		.save		= &save,
-		.extra_opts	= opts
-	},
-	{
-		.name		= "timerange",
-		.version	= XTABLES_VERSION,
-		.family		= NFPROTO_IPV6,
+		.family		= NFPROTO_UNSPEC,
 		.size		= XT_ALIGN(sizeof(struct xt_timerange_info)),
 		.userspacesize	= XT_ALIGN(sizeof(struct xt_timerange_info)),
 		.help		= &help,
