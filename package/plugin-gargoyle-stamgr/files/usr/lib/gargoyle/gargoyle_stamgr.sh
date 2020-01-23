@@ -115,11 +115,15 @@ check_sta()
 	sta_radio="$(uci_get "wireless" "$stacfgsec" "device")"
 	sta_wlan="$(echo $sta_radio | sed 's/radio/wlan/g')"
 	wireless_info="$(iwinfo $sta_wlan i 2>/dev/null)"
+	if [ -z "$(echo $wireless_info | grep Client)" ]; then
+		wireless_info=""
+	fi
 	
 	
 	sta_connected="$(echo "$wireless_info" | awk '/ESSID:/ {print $3}; /Channel:/ {print $4};' | grep -v "unknown")"
 	[ -z "$sta_connected" ] && sta_connected=false || sta_connected=true
 	sta_quality="$(echo "$wireless_info" | awk -F "[ ]" '/Link Quality:/{split($NF,var0,"/");printf "%i\n",(var0[1]*100/var0[2])}')"
+	[ -z "$sta_quality" ] && sta_quality=0
 	sta_ssid="$(uci_get "wireless" "$stacfgsec" "ssid")"
 	sta_bssid="$(uci_get "wireless" "$stacfgsec" "bssid")"
 	sta_encryption="$(uci_get "wireless" "$stacfgsec" "encryption")"
