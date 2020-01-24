@@ -29,6 +29,6 @@ stamgrStr.Password="Hasło";
 stamgrStr.AErr="Nie można dodać wiersza.";
 stamgrStr.upErr="Nie można zaktualizować wiersza.";
 stamgrStr.discontoohighErr="Jakość rozłączenia musi być poniżej 90%";
-stamgrStr.contoolowErr="Jakość rozłączenia musi być powyżej 30%";
+stamgrStr.contoolowErr="Jakość połączenia musi być powyżej 30%";
 stamgrStr.discongtconErr="Jakość rozłączenia musi być poniżej jakości połączenia";
 
