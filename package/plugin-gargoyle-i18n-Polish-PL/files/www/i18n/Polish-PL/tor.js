@@ -37,6 +37,7 @@ torS.GlbMsg="na globalnej liście";
 torS.TDDir="Folder danych";
 torS.TDDrv="Miejsce przechowywania";
 torS.CacheWarn="Tor przechowuje duży zestaw danych, zwykle 5-50MB. Konfiguracja przekaźnika lub mostu wymaga więcej danych niż konfiguracja klienta. Domyślnie ten zestaw danych przechowywany jest w pamięci RAM. Jeżeli router ma ograniczoną ilość pamięci lub używany jest jako przekaźnik, polecane jest ustawienie folderu danych na podłączony nośnik USB.";
+torS.tordirincompat="System plików tego nośnika nie umożliwia na użycie go jako folderu danych dla Tor. Można zmienić system plików na zgodny w dodatku Nośniki USB.";
 
 //javascript
 torS.ConProb="OSTRZEŻENIE: Tor jest aktywny, ale może mieć problem z połączeniem - należy sprawdzić ustawienia połączenia";
