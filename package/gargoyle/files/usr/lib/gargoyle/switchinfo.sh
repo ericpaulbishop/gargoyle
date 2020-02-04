@@ -15,7 +15,9 @@
 
 json_load_file "/etc/board.json"
 json_get_keys BOARDKEYS
-SWITCHTEST=$(echo $BOARDKEYS | grep "\"switch\":")
+for KEY in $BOARDKEYS; do
+	[ "$KEY" = "switch" ] && SWITCHTEST="1"
+done
 [ -n "$SWITCHTEST" ] || exit 0
 
 json_select switch
