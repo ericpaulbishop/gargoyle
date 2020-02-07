@@ -137,7 +137,7 @@
 				</div>
 
 				<div id='tor_relay_status_link_container' class="row form-group">
-					<span class='col-xs-12'><%~ VisMsg %> <a href="http://torstatus.blutmagie.de/"><%~ GlbMsg %></a></span>
+					<span class='col-xs-12'><%~ VisMsg %> <a href="http://torstatus.rueckgr.at/"><%~ GlbMsg %></a></span>
 				</div>
 			</div>
 		</div>
