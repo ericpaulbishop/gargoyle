@@ -41,17 +41,23 @@
 
 #define WEBMON_SET              3064
 
+union xt_webmon_ipany
+{
+  struct in_addr ip4;
+  struct in6_addr ip6;
+};
+
 struct xt_webmon_ip_range
 {
-	uint32_t start;
-	uint32_t end;
+	union xt_webmon_ipany start;
+	union xt_webmon_ipany end;
 };
 
 struct xt_webmon_info
 {
 	uint32_t max_domains;
 	uint32_t max_searches;
-	uint32_t exclude_ips[WEBMON_MAX_IPS];
+	union xt_webmon_ipany exclude_ips[WEBMON_MAX_IPS];
 	struct xt_webmon_ip_range exclude_ranges[WEBMON_MAX_IP_RANGES];
 	uint32_t num_exclude_ips;
 	uint32_t num_exclude_ranges;
