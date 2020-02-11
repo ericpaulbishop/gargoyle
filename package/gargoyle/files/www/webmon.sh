@@ -60,15 +60,28 @@
 						</span>
 					</div>
 
-					<div id="add_ip_container">
-						<div class="row form-group">
-							<span class="col-xs-12">
-								<input type="text" id="add_ip" onkeyup="proofreadMultipleIps(this)" size="30" />
-								<button class="btn btn-default btn-add" id="add_ip_button" onclick="addAddressesToTable(document, 'add_ip', 'ip_table_container', 'ip_table', false, 3, 1, 250)"><%~ Add %></button>
-							</span>
-							<em class="col-xs-12"><%~ SpcIP %></em>
+					<div class="row form-group">
+						<div id="add_ip_container" class="col-md-6">
+							<div class="row form-group">
+								<span class="col-xs-12">
+									<input class="form-control" type="text" id="add_ip" onkeyup="proofreadMultipleIps(this)" size="30" />
+									<button class="btn btn-default btn-add" id="add_ip_button" onclick="addAddressesToTable(document, 'add_ip', 'ip_table_container', 'ip_table', false, 3, 1, 250)"><%~ Add %></button>
+								</span>
+								<em class="col-xs-12"><%~ SpcIP %></em>
+							</div>
+							<div id="ip_table_container" class="table-responsive"></div>
 						</div>
-						<div id="ip_table_container" class="table-responsive"></div>
+
+						<div id="add_ip6_container" class="col-md-6">
+							<div class="row form-group">
+								<span class="col-xs-12">
+									<input class="form-control" type="text" id="add_ip6" onkeyup="proofreadMultipleIp6s(this)" size="30" />
+									<button class="btn btn-default btn-add" id="add_ip6_button" onclick="addAddressesToTable(document, 'add_ip6', 'ip6_table_container', 'ip6_table', false, 6, 1, 250)"><%~ Add %></button>
+								</span>
+								<em class="col-xs-12"><%~ SpcIP %></em>
+							</div>
+							<div id="ip6_table_container" class="table-responsive"></div>
+						</div>
 					</div>
 				</div>
 

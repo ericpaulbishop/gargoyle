@@ -3482,3 +3482,39 @@ function getIPFamily(address)
 
 	return retVal;
 }
+
+function validateMultipleIp6s(ips)
+{
+	ips = ips.replace(/^[\t ]+/g, "");
+	ips = ips.replace(/[\t ]+$/g, "");
+	var splitIps = ips.split(/[\t ]*,[\t ]*/);
+	var valid = splitIps.length > 0 ? 0 : 1; //1= error, 0=true
+	while(valid == 0 && splitIps.length > 0)
+	{
+		var nextIp = splitIps.pop();
+		if(nextIp.match(/-/))
+		{
+			var nextSplit = nextIp.split(/[\t ]*-[\t ]*/);
+			if( nextSplit.length==2 && validateIP6(nextSplit[0]) == 0 && validateIP6(nextSplit[1]) == 0)
+			{
+				var ipFull1 = ip6_full(nextSplit[0]);
+				var ipFull2 = ip6_full(nextSplit[1]);
+				valid = ipFull1 <= ipFull2 ? 0 : 1;
+			}
+			else
+			{
+				valid = 1;
+			}
+		}
+		else
+		{
+			valid = validateIP6Range(nextIp);
+		}
+	}
+	return valid;
+}
+
+function proofreadMultipleIp6s(input)
+{
+	proofreadText(input, validateMultipleIp6s, 0);
+}
