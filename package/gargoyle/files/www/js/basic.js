@@ -1063,12 +1063,15 @@ function setToWepKey(id, length)
 function proofreadAll()
 {
 	var vlr1 = function(text){return validateLengthRange(text,1,999);};
-	var vlr8 = function(text){return validateLengthRange(text,8,999);};
 	var vip = validateIP;
 	var vnm = validateNetMask;
 	var vm = validateMac;
 	var vn = validateNumeric;
 	var vw = validateWep;
+	var vp = function(text){ return validatePass(text, 'wifi_encryption1'); }
+	var vpg = function(text){ return validatePass(text, 'wifi_guest_encryption1'); }
+	var vp2 = function(text){ return validatePass(text, 'wifi_encryption2'); }
+	var vpb = function(text){ return validatePass(text, 'bridge_encryption'); }
 	var vtp = function(text){ return validateNumericRange(text, 0, getMaxTxPower("G")); };
 	var vtpa = function(text){ return validateNumericRange(text, 0, getMaxTxPower("A")); };
 
@@ -1088,7 +1091,7 @@ function proofreadAll()
 	{
 		var inputIds = ['wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle', 'wan_pppoe_reconnect_pings', 'wan_pppoe_interval', 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_mac', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway', 'wifi_txpower', 'wifi_txpower_5ghz', 'wifi_ssid1', 'wifi_pass1', 'wifi_wep1', 'wifi_guest_pass1', 'wifi_guest_wep1', 'wifi_server1', 'wifi_port1', 'wifi_ssid2', 'wifi_pass2', 'wifi_wep2', 'wan_3g_device', 'wan_3g_apn'];
 
-		var functions= [vlr1, vlr1, vn, vn, vn, vip, vnm, vip, vm, vn, vip, vnm, vip, vtp, vtpa, vlr1, vlr8, vw, vlr8, vw, vip, vn, vlr1, vlr8, vw, vlr1, vlr1];
+		var functions= [vlr1, vlr1, vn, vn, vn, vip, vnm, vip, vm, vn, vip, vnm, vip, vtp, vtpa, vlr1, vp, vw, vpg, vw, vip, vn, vlr1, vp2, vw, vlr1, vlr1];
 
 		var optInputIds = ['wifi_ssid1a', 'wifi_guest_ssid1', 'wifi_guest_ssid1a']
 		for(index in optInputIds)
@@ -1125,7 +1128,7 @@ function proofreadAll()
 	else
 	{
 		var inputIds = ['bridge_ip', 'bridge_mask', 'bridge_gateway', 'bridge_txpower', 'bridge_ssid', 'bridge_pass', 'bridge_wep', 'bridge_broadcast_ssid'];
-		var functions = [vip, vnm, vip, vtp, vlr1,vlr8,vw,vlr1];
+		var functions = [vip, vnm, vip, vtp, vlr1,vpb,vw,vlr1];
 		var returnCodes=[];
 		var visibilityIds=[];
 		var labelIds=[];
@@ -2376,6 +2379,24 @@ function proofreadWep(input)
 	proofreadText(input, validateWep, 0);
 }
 
+function validatePass(text, encryption)
+{
+	if(getSelectedValue(encryption).match(/psk/))
+	{
+		return validateLengthRange(text, 8, 63) == 0 || (text.length == 64 && validateHex(text) == 0) ? 0 : 1;
+	}
+	else
+	{
+		return validateLengthRange(text, 8, 999);
+	}
+}
+
+function proofreadPass(input, encryption)
+{
+	input = typeof input === 'string' ? document.getElementById(input) : input;
+	encryption = typeof encryption === 'string' ? encryption : encryption.id;
+	proofreadText(input, function(text){return validatePass(text, encryption);}, 0);
+}
 
 function addTextToSingleColumnTable(textId, tableContainerId, validator, preprocessor, validReturn, duplicatesAllowed, columnName)
 {

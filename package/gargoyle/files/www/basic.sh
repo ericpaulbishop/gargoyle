@@ -351,7 +351,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="bridge_encryption_container" class="row form-group">
 					<label class="col-xs-5" for="bridge_encryption" id="bridge_encryption_label"><%~ Encr %>:</label>
 					<span class="col-xs-7">
-						<select id="bridge_encryption" class="form-control" onchange="setBridgeVisibility()">
+						<select id="bridge_encryption" class="form-control" onchange="setBridgeVisibility(); proofreadPass('bridge_pass', this)">
 							<option value="none"><%~ None %></option>
 							<option value="sae-mixed">WPA3/WPA2 SAE/PSK</option>
 							<option value="sae">WPA3 SAE</option>
@@ -371,8 +371,8 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="bridge_pass_container" class="row form-group">
 					<label class="col-xs-5" for="bridge_pass" id="bridge_pass_label"><%~ Pswd %>:</label>
 					<span class="col-xs-7">
-						<input type="password" id="bridge_pass" class="form-control" size="20" onkeyup="proofreadLengthRange(this,8,999)"/>
-						<input type="checkbox" id="show_bridge_pass" onclick="togglePass('bridge_pass')" />
+						<input type="password" id="bridge_pass" class="form-control" size="20" onkeyup="proofreadPass(this, 'bridge_encryption')"/>
+						<input type="checkbox" id="show_bridge_pass" onclick="togglePass('bridge_pass')" autocomplete="off"/>
 						<label for="show_bridge_pass" id="show_bridge_pass_label"><%~ rvel %></label>
 					</span>
 				</div>
@@ -885,7 +885,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="wifi_encryption2_container" class="row indent">
 					<label class="col-xs-5" for="wifi_encryption2" id="wifi_encryption2_label"><%~ Encr %>:</label>
 					<span class="col-xs-7">
-						<select class="form-control" id="wifi_encryption2" onchange="setWifiVisibility()">
+						<select class="form-control" id="wifi_encryption2" onchange="setWifiVisibility(); proofreadPass('wifi_pass2', this)">
 							<option value="none"><%~ None %></option>
 							<option value="psk2">WPA2 PSK</option>
 							<option value="psk">WPA PSK</option>
@@ -902,8 +902,8 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="wifi_pass2_container" class="row indent">
 					<label class="col-xs-5" for="wifi_pass2" id="wifi_pass2_label"><%~ Pswd %>:</label>
 					<span class="col-xs-7">
-						<input type="password" id="wifi_pass2" class="form-control" size="20" onkeyup="proofreadLengthRange(this,8,999)"/>&nbsp;&nbsp;
-						<input type="checkbox" id="show_pass2" onclick="togglePass('wifi_pass2')"/>
+						<input type="password" id="wifi_pass2" class="form-control" size="20" onkeyup="proofreadPass(this, 'wifi_encryption2')"/>&nbsp;&nbsp;
+						<input type="checkbox" id="show_pass2" onclick="togglePass('wifi_pass2')" autocomplete="off"/>
 						<label for="show_pass2" id="show_pass2_label"><%~ rvel %></label><br/>
 					</span>
 				</div>
@@ -978,7 +978,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="wifi_encryption1_container" class="row indent">
 					<label class="col-xs-5" for="wifi_encryption1" id="wifi_encryption1_label"><%~ Encr %>:</label>
 					<span class="col-xs-7" >
-						<select id="wifi_encryption1" class="form-control" onchange="setWifiVisibility()">
+						<select id="wifi_encryption1" class="form-control" onchange="setWifiVisibility(); proofreadPass('wifi_pass1', this)">
 							<option value="none"><%~ None %></option>
 							<option value="sae-mixed">WPA3/WPA2 SAE/PSK</option>
 							<option value="sae">WPA3 SAE</option>
@@ -995,8 +995,8 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="wifi_pass1_container" class="row indent">
 					<label class="col-xs-5" for="wifi_pass1" id="wifi_pass1_label"><%~ Pswd %>:</label>
 					<span class="col-xs-7" >
-						<input type="password" id="wifi_pass1" class="form-control" size="20" onkeyup="proofreadLengthRange(this,8,999)"/>&nbsp;&nbsp;
-						<input type="checkbox" id="show_pass1" onclick="togglePass('wifi_pass1')"/>
+						<input type="password" id="wifi_pass1" class="form-control" size="20" onkeyup="proofreadPass(this, 'wifi_encryption1')"/>&nbsp;&nbsp;
+						<input type="checkbox" id="show_pass1" onclick="togglePass('wifi_pass1')" autocomplete="off"/>
 						<label for="show_pass1" id="show_pass1_label"><%~ rvel %></label><br/>
 					</span>
 				</div>
@@ -1093,7 +1093,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					<div id="wifi_guest_encryption1_container" class="row indent">
 						<label class="col-xs-5" for="wifi_guest_encryption1" id="wifi_guest_encryption1_label"><%~ Encr %>:</label>
 						<span class="col-xs-7">
-							<select class="form-control" id="wifi_guest_encryption1" onchange="setWifiVisibility()">
+							<select class="form-control" id="wifi_guest_encryption1" onchange="setWifiVisibility(); proofreadPass('wifi_guest_pass1', this)">
 								<option value="none"><%~ None %></option>
 								<option value="psk2">WPA2 PSK</option>
 								<option value="psk">WPA PSK</option>
@@ -1105,8 +1105,8 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					<div id="wifi_guest_pass1_container" class="row indent">
 						<label class="col-xs-5" for="wifi_guest_pass1" id="wifi_guest_pass1_label"><%~ Pswd %>:</label>
 						<span class="col-xs-7">
-							<input type="password" id="wifi_guest_pass1" class="form-control" size="20" onkeyup="proofreadLengthRange(this,8,999)"/>&nbsp;&nbsp;
-							<input type="checkbox" id="show_guest_pass1" onclick="togglePass('wifi_guest_pass1')"/>
+							<input type="password" id="wifi_guest_pass1" class="form-control" size="20" onkeyup="proofreadPass(this, 'wifi_guest_encryption1')"/>&nbsp;&nbsp;
+							<input type="checkbox" id="show_guest_pass1" onclick="togglePass('wifi_guest_pass1')" autocomplete="off"/>
 							<label for="show_guest_pass1" id="show_guest_pass1_label"><%~ rvel %></label><br/>
 						</span>
 					</div>
