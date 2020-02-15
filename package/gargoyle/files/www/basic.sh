@@ -1026,6 +1026,28 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					</span>
 				</div>
 
+				<div id="wifi_ft_container" class="row indent">
+					<label class="col-xs-5" id="wifi_ft_label" for="wifi_ft"><%~ FstTr %>:</label>
+					<span class="col-xs-7" >
+						<select id="wifi_ft" class="form-control" onchange="setWifiVisibility()">
+							<option value="disabled"><%~ Disabled %></option>
+							<option value="enabled"><%~ Enabled %></option>
+						</select>
+					</span>
+				</div>
+
+				<div id="wifi_ft_key_container" class="row indent">
+					<label class="col-xs-5" for="wifi_ft_key" id="wifi_ft_key_label"><%~ FtKey %>:</label>
+					<span class="col-xs-7" >
+						<input type="password" id="wifi_ft_key" class="form-control" size="20" maxLength="64" onkeyup="proofreadFtKey(this)" placeholder="64 <%~ HexCh %>"/>&nbsp;&nbsp;
+						<input type="checkbox" id="show_ft_key" onclick="togglePass('wifi_ft_key')" autocomplete="off"/>
+						<label for="show_ft_key" id="show_ft_key_label"><%~ rvel %></label><br/>
+						<div class="second_row_right_column">
+							<button class="btn btn-default" id="wifi_ft_key_gen" onclick="setToFtKey('wifi_ft_key')"><%~ Rndm %></button>
+						</div>
+					</span>
+				</div>
+
 				<div id="wifi_hidden_container" class="row indent">
 					<label  class="col-xs-5" id="wifi_hidden_label" for="wifi_hidden"><%~ BcsID %>:</label>
 					<span class="col-xs-7" >
@@ -1119,6 +1141,16 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 								<button class="btn btn-default" id="guestwep1gen40" onclick="setToWepKey('wifi_guest_wep1',10)"><%~ Rndm %> 40/64 Bit WEP Key</button>
 								<button class="btn btn-default" id="guestwep1gen104" onclick="setToWepKey('wifi_guest_wep1',26)"><%~ Rndm %> 104/128 Bit WEP Key</button>
 							</div>
+						</span>
+					</div>
+
+					<div id="wifi_guest_ft_container" class="row indent">
+						<label class="col-xs-5" id="wifi_guest_ft_label" for="wifi_guest_ft"><%~ FstTr %>:</label>
+						<span class="col-xs-7" >
+							<select id="wifi_guest_ft" class="form-control" onchange="setWifiVisibility()">
+								<option value="disabled"><%~ Disabled %></option>
+								<option value="enabled"><%~ Enabled %></option>
+							</select>
 						</span>
 					</div>
 
