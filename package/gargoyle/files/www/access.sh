@@ -44,12 +44,12 @@
 			<div class="panel-body">
 			<div class="row form-group">
 				<label class="col-xs-5" for="password1" id="password1_label"><%~ NewPass %>:</label>
-				<span class="col-xs-7"><input type="password" class="form-control" id="password1" size="25"/></span>
+				<span class="col-xs-7"><input type="password" class="form-control" id="password1" size="25" autocomplete="new-password"/></span>
 			</div>
 
 			<div class="row form-group">
 				<label class="col-xs-5" for="password2" id="password2_label"><%~ ConfirmPass %>:</label>
-				<span class="col-xs-7"><input type="password" class="form-control" id="password2" size="25"/></span>
+				<span class="col-xs-7"><input type="password" class="form-control" id="password2" size="25" autocomplete="new-password"/></span>
 			</div>
 			</div>
 		</div>

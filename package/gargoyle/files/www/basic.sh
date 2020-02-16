@@ -371,7 +371,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="bridge_pass_container" class="row form-group">
 					<label class="col-xs-5" for="bridge_pass" id="bridge_pass_label"><%~ Pswd %>:</label>
 					<span class="col-xs-7">
-						<input type="password" id="bridge_pass" class="form-control" size="20" onkeyup="proofreadPass(this, 'bridge_encryption')"/>
+						<input type="password" id="bridge_pass" class="form-control" size="20" onkeyup="proofreadPass(this, 'bridge_encryption')" autocomplete="new-password"/>
 						<input type="checkbox" id="show_bridge_pass" onclick="togglePass('bridge_pass')" autocomplete="off"/>
 						<label for="show_bridge_pass" id="show_bridge_pass_label"><%~ rvel %></label>
 					</span>
@@ -463,7 +463,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 
 				<div id="wan_pppoe_pass_container" class="row form-group">
 					<label class="col-xs-5" for="wan_pppoe_pass" id="wan_pppoe_pass_label"><%~ Pswd %>:</label>
-					<span class="col-xs-7"><input type="password" class="form-control" id="wan_pppoe_pass" size="20" onkeyup="proofreadLengthRange(this,1,999)"/></span>
+					<span class="col-xs-7"><input type="password" class="form-control" id="wan_pppoe_pass" size="20" onkeyup="proofreadLengthRange(this,1,999)" autocomplete="new-password"/></span>
 				</div>
 
 				<div id="wan_pppoe_reconnect_mode_container" class="row form-group">
@@ -902,7 +902,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="wifi_pass2_container" class="row indent">
 					<label class="col-xs-5" for="wifi_pass2" id="wifi_pass2_label"><%~ Pswd %>:</label>
 					<span class="col-xs-7">
-						<input type="password" id="wifi_pass2" class="form-control" size="20" onkeyup="proofreadPass(this, 'wifi_encryption2')"/>&nbsp;&nbsp;
+						<input type="password" id="wifi_pass2" class="form-control" size="20" onkeyup="proofreadPass(this, 'wifi_encryption2')" autocomplete="new-password"/>&nbsp;&nbsp;
 						<input type="checkbox" id="show_pass2" onclick="togglePass('wifi_pass2')" autocomplete="off"/>
 						<label for="show_pass2" id="show_pass2_label"><%~ rvel %></label><br/>
 					</span>
@@ -995,7 +995,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="wifi_pass1_container" class="row indent">
 					<label class="col-xs-5" for="wifi_pass1" id="wifi_pass1_label"><%~ Pswd %>:</label>
 					<span class="col-xs-7" >
-						<input type="password" id="wifi_pass1" class="form-control" size="20" onkeyup="proofreadPass(this, 'wifi_encryption1')"/>&nbsp;&nbsp;
+						<input type="password" id="wifi_pass1" class="form-control" size="20" onkeyup="proofreadPass(this, 'wifi_encryption1')" autocomplete="new-password"/>&nbsp;&nbsp;
 						<input type="checkbox" id="show_pass1" onclick="togglePass('wifi_pass1')" autocomplete="off"/>
 						<label for="show_pass1" id="show_pass1_label"><%~ rvel %></label><br/>
 					</span>
@@ -1039,7 +1039,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="wifi_ft_key_container" class="row indent">
 					<label class="col-xs-5" for="wifi_ft_key" id="wifi_ft_key_label"><%~ FtKey %>:</label>
 					<span class="col-xs-7" >
-						<input type="password" id="wifi_ft_key" class="form-control" size="20" maxLength="64" onkeyup="proofreadFtKey(this)" placeholder="64 <%~ HexCh %>"/>&nbsp;&nbsp;
+						<input type="password" id="wifi_ft_key" class="form-control" size="20" maxLength="64" onkeyup="proofreadFtKey(this)" placeholder="64 <%~ HexCh %>" autocomplete="new-password"/>&nbsp;&nbsp;
 						<input type="checkbox" id="show_ft_key" onclick="togglePass('wifi_ft_key')" autocomplete="off"/>
 						<label for="show_ft_key" id="show_ft_key_label"><%~ rvel %></label><br/>
 						<div class="second_row_right_column">
@@ -1127,7 +1127,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					<div id="wifi_guest_pass1_container" class="row indent">
 						<label class="col-xs-5" for="wifi_guest_pass1" id="wifi_guest_pass1_label"><%~ Pswd %>:</label>
 						<span class="col-xs-7">
-							<input type="password" id="wifi_guest_pass1" class="form-control" size="20" onkeyup="proofreadPass(this, 'wifi_guest_encryption1')"/>&nbsp;&nbsp;
+							<input type="password" id="wifi_guest_pass1" class="form-control" size="20" onkeyup="proofreadPass(this, 'wifi_guest_encryption1')" autocomplete="new-password"/>&nbsp;&nbsp;
 							<input type="checkbox" id="show_guest_pass1" onclick="togglePass('wifi_guest_pass1')" autocomplete="off"/>
 							<label for="show_guest_pass1" id="show_guest_pass1_label"><%~ rvel %></label><br/>
 						</span>
