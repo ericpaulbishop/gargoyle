@@ -8,6 +8,17 @@ upS.Warn="Domyślnie aktualizacja firmware spowoduje kompletne usunięcie całej
 upS.CGV="Aktualna wersja Gargoyle";
 upS.SelF="Wybierz plik z firmware";
 upS.Prsv="Zachowaj ustawienia";
+upS.UploadFrm="Pobierz firmware";
+upS.ConfirmNext="Aktualizacja firmware nie rozpocznie się, dopóki nie zostanie potwierdzona na następnej stronie.";
+upS.EHash="Wprowadź hash";
+upS.ValidFw="Prawidłowy plik firmware";
+upS.DevMatch="Firmware pasuje do urządzenia";
+upS.SuppDevs="Wspierane urządzenia";
+upS.FwFitFlash="Firmware mieści się w pamięci flash";
+upS.ChksumMatch="Dopasowanie sumy kontrolnej";
+upS.NoPrsv="Zachowanie ustawień w tym firmware nie jest dozwolone";
+upS.ForceWarn="Firmware zostało wykryte jako niezgodne z tym urządzeniem (złe urządzenie LUB zbyt duży plik LUB nieprawidłowy format oprogramowania). Wymuszenie aktualizacji firmware może spowodować uszkodzenie urządzenia. Upewnij się, że to firmware jest prawidłowe dla twojego urządzenia!</p><p>Jeśli chcesz wymusić aktualizację, zaznacz <em>Wymuś aktualizację</em> poniżej.";
+upS.ForceUpg="Wymuś aktualizację";
 
 //javascript
 upS.SelErr="BŁĄD: Należy wskazać plik firmware.";
@@ -16,6 +27,7 @@ upS.Uping="Pobieranie firmware";
 upS.UWait="Aktualizacja, proszę czekać";
 upS.Rbtg="Wykonano aktualizację, nastąpi restart urządzenia...";
 upS.UErr="Wystąpił błąd: nie można zaktualizować routera.";
+upS.UpConfirm="Aktualizacja";
 upS.UErrBB="Firmware zawiera bootloader. Nie można zaktualizować routera.";
 upS.brcmT="Firmware powinno być plikiem *.bin lub *.trx";
 upS.ar71xxT="Firmware powinno być plikiem *-sysupgrade.bin";

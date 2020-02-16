@@ -133,6 +133,8 @@ basicS.RnwL="Pobieranie nowej dzierżawy DHCP";
 basicS.RlsL="Zwalnianie dzierżawy DHCP";
 basicS.ScnMo="Poszukiwanie urządzeń mobilnych";
 basicS.NoDv="Nie znaleziono urządzeń";
+basicS.SameChanSeg="Segmenty kanałów 80+80MHz nie mogą być takie same";
+basicS.ContigChanSeg="Segmenty kanałów 80+80MHz nie mogą być ciągłe";
 
 basicS.WANIntr="Interfejs WAN";
 basicS.Mo3gQMI="Modem USB (QMI)";

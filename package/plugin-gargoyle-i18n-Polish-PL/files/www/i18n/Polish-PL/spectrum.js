@@ -9,5 +9,5 @@ spectrum.BSSID="BSSID";
 spectrum.Channel="Kanał";
 spectrum.Width="Szerokość kanału";
 spectrum.Mode="Tryb";
-spectrum.Signal="Sygnału";
+spectrum.Signal="Sygnał";
 
