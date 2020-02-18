@@ -136,7 +136,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="bridge_ip_container" class="row form-group">
 					<label class="col-xs-5" for="bridge_ip" id="bridge_ip_label"><%~ BrIP %>:</label>
 					<span class="col-xs-7">
-						<input type="text" class="form-control" name="bridge_ip" id="bridge_ip" onkeyup="proofreadIp(this)" size="20" maxlength="15" />
+						<input type="text" class="form-control" name="bridge_ip" id="bridge_ip" oninput="proofreadIp(this)" size="20" maxlength="15" />
 						<em id="bridge_note"><%~ BrNoteClient %></em>
 					</span>
 				</div>
@@ -144,14 +144,14 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="bridge_gateway_container" class="row form-group">
 					<label class="col-xs-5" for="bridge_gateway" id="bridge_gateway_label"><%~ GwIP %>:</label>
 					<span class="col-xs-7">
-						<input type="text" class="form-control" name="bridge_gateway" id="bridge_gateway" onkeyup="proofreadIp(this)" size="20" maxlength="15" />
+						<input type="text" class="form-control" name="bridge_gateway" id="bridge_gateway" oninput="proofreadIp(this)" size="20" maxlength="15" />
 					</span>
 				</div>
 
 				<div id="bridge_mask_container" class="row form-group">
 					<label class="col-xs-5" for="bridge_mask" id="bridge_mask_label"><%~ SMsk %>:</label>
 					<span class="col-xs-7">
-						<input type="text" class="form-control" name="bridge_mask" id="bridge_mask" onkeyup="proofreadMask(this)" size="20" maxlength="15" />
+						<input type="text" class="form-control" name="bridge_mask" id="bridge_mask" oninput="proofreadMask(this)" size="20" maxlength="15" />
 						<em><%~ SMNote %></em>
 					</span>
 				</div>
@@ -175,7 +175,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 						</select>
 						<span id="bridge_dns_custom_container">
 							<div class="second_row_right_column">
-								<input type="text" id="add_bridge_dns" onkeyup="proofreadIp(this)" class="form-control" size="20" maxlength="17" />
+								<input type="text" id="add_bridge_dns" oninput="proofreadIp(this)" class="form-control" size="20" maxlength="17" />
 								<button class="btn btn-default btn-add" id="add_bridge_dns_button" onclick="addDns('bridge')"><%~ Add %></button>
 							</div>
 							<div id="bridge_dns_table_container" class="second_row_right_column form-group"></div>
@@ -237,7 +237,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 							<option value="custom"><%~ Cstm %></option>
 						</select>
 						&nbsp;
-						<input type="text" id="bridge_txpower" class="form-control" onkeyup="proofreadNumericRange(this,0,getMaxTxPower('G'))" size="10" />
+						<input type="text" id="bridge_txpower" class="form-control" oninput="proofreadNumericRange(this,0,getMaxTxPower('G'))" size="10" />
 						<em>
 							<span id="bridge_dbm">dBm</span>
 						</em>
@@ -268,7 +268,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 							<option value="custom"><%~ Cstm %></option>
 						</select>
 						&nbsp;
-						<input type="text" id="bridge_txpower_5ghz" onkeyup="proofreadNumericRange(this,0,getMaxTxPower('A'));" size="10" />
+						<input type="text" id="bridge_txpower_5ghz" oninput="proofreadNumericRange(this,0,getMaxTxPower('A'));" size="10" />
 						<em><span id="bridge_dbm_5ghz">dBm</span></em>
 					</span>
 				</div>
@@ -281,7 +281,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 						</select>
 						<button class="btn btn-default" id="bridge_rescan_button" onclick="scanWifi('bridge_custom_ssid')"><%~ RScn %></button>
 						<div id="bridge_custom_ssid_container" class="second_row_right_column form-group">
-							<input type="text" class="form-control" id="bridge_custom_ssid" size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
+							<input type="text" class="form-control" id="bridge_custom_ssid" size="20" oninput="proofreadLengthRange(this,1,999)"/>
 						</div>
 
 					</span>
@@ -291,7 +291,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="bridge_ssid_container" class="row form-group">
 					<label class="col-xs-5" for="bridge_ssid" id="bridge_ssid_label"><%~ Join %>:</label>
 					<span class="col-xs-7">
-						<input style="float:left;" type="text" id="bridge_ssid" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
+						<input style="float:left;" type="text" id="bridge_ssid" class="form-control" size="20" oninput="proofreadLengthRange(this,1,999)"/>
 						<button style="float:left;" class="btn btn-default" id="bridge_scan_button" onclick="scanWifi('bridge_ssid')"><%~ Scan %></button>
 					</span>
 				</div>
@@ -299,7 +299,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="bridge_broadcast_ssid_container" class="row form-group">
 					<label class="col-xs-5" for="bridge_broadcast_ssid" id="bridge_broadcast_ssid_label"><%~ Bcst %>:</label>
 					<span class="col-xs-7">
-						<input type="text" id="bridge_broadcast_ssid" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
+						<input type="text" id="bridge_broadcast_ssid" class="form-control" size="20" oninput="proofreadLengthRange(this,1,999)"/>
 					</span>
 				</div>
 
@@ -359,7 +359,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="bridge_pass_container" class="row form-group">
 					<label class="col-xs-5" for="bridge_pass" id="bridge_pass_label"><%~ Pswd %>:</label>
 					<span class="col-xs-7">
-						<input type="password" id="bridge_pass" class="form-control" size="20" onkeyup="proofreadPass(this, 'bridge_encryption')" autocomplete="new-password"/>
+						<input type="password" id="bridge_pass" class="form-control" size="20" oninput="proofreadPass(this, 'bridge_encryption')" autocomplete="new-password"/>
 						<input type="checkbox" id="show_bridge_pass" onclick="togglePass('bridge_pass')" autocomplete="off"/>
 						<label for="show_bridge_pass" id="show_bridge_pass_label"><%~ rvel %></label>
 					</span>
@@ -368,7 +368,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="bridge_wep_container" class="row form-group">
 					<label class="col-xs-5" for="bridge_wep" id="bridge_wep_label" ><%~ HexK %>:</label>
 					<span class="col-xs-7">
-						<input type="text" id="bridge_wep" class="form-control" size="30" maxLength="26" onkeyup="proofreadWep(this)"/>
+						<input type="text" id="bridge_wep" class="form-control" size="30" maxLength="26" oninput="proofreadWep(this)"/>
 					</span>
 				</div>
 
@@ -380,7 +380,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="bridge_wds_container" class="row form-group">
 					<label class="col-xs-5"  for="bridge_wds_label" id="bridge_wds_label"><%~ OWDS %>:</label>
 					<span class="col-xs-7">
-						<input type="text" id="add_bridge_wds_mac" class="form-control" onkeyup="proofreadMac(this)" size="20" maxlength="17"/>
+						<input type="text" id="add_bridge_wds_mac" class="form-control" oninput="proofreadMac(this)" size="20" maxlength="17"/>
 						<button class="btn btn-default btn-add" id="add_bridge_wds_mac_button" onclick="addMacToWds('bridge')"><%~ Add %></button>
 						<div id="bridge_wds_mac_table_container" class="second_row_right_column form-group"></div>
 					</span>
@@ -446,12 +446,12 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 
 				<div id="wan_pppoe_user_container" class="row form-group">
 					<label class="col-xs-5" for="wan_pppoe_user" id="wan_pppoe_user_label"><%~ UNam %>:</label>
-					<span class="col-xs-7"><input type="text" class="form-control" id="wan_pppoe_user" size="20" onkeyup="proofreadLengthRange(this,1,999)"/></span>
+					<span class="col-xs-7"><input type="text" class="form-control" id="wan_pppoe_user" size="20" oninput="proofreadLengthRange(this,1,999)"/></span>
 				</div>
 
 				<div id="wan_pppoe_pass_container" class="row form-group">
 					<label class="col-xs-5" for="wan_pppoe_pass" id="wan_pppoe_pass_label"><%~ Pswd %>:</label>
-					<span class="col-xs-7"><input type="password" class="form-control" id="wan_pppoe_pass" size="20" onkeyup="proofreadLengthRange(this,1,999)" autocomplete="new-password"/></span>
+					<span class="col-xs-7"><input type="password" class="form-control" id="wan_pppoe_pass" size="20" oninput="proofreadLengthRange(this,1,999)" autocomplete="new-password"/></span>
 				</div>
 
 				<div id="wan_pppoe_reconnect_mode_container" class="row form-group">
@@ -467,7 +467,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="wan_pppoe_max_idle_container" class="row form-group" >
 					<label class="col-xs-5" for="wan_pppoe_max_idle" id="wan_pppoe_max_idle_label"><%~ MIdl %>:</label>
 					<span class="col-xs-7">
-						<input type="text" class="form-control" id="wan_pppoe_max_idle" onkeyup="proofreadNumeric(this)" size="20" maxlength="4" />
+						<input type="text" class="form-control" id="wan_pppoe_max_idle" oninput="proofreadNumeric(this)" size="20" maxlength="4" />
 						<em>(<%~ minutes %>)</em>
 					</span>
 				</div>
@@ -475,31 +475,31 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="wan_pppoe_reconnect_pings_container" class="row form-group">
 					<label class="col-xs-5" for="wan_pppoe_reconnect_pings" id="wan_pppoe_reconnect_pings_label"><%~ FPngs %>:</label>
 					<span class="col-xs-7">
-						<input type="text" id="wan_pppoe_reconnect_pings" onkeyup="proofreadNumeric(this)" class="form-control" size="20" maxlength="4" />
+						<input type="text" id="wan_pppoe_reconnect_pings" oninput="proofreadNumeric(this)" class="form-control" size="20" maxlength="4" />
 					</span>
 				</div>
 
 				<div id="wan_pppoe_interval_container" class="row form-group">
 					<label class="col-xs-5" for="wan_pppoe_interval" id="wan_pppoe_interval_label"><%~ PngI %>:</label>
 					<span class="col-xs-7">
-						<input type="text" id="wan_pppoe_interval" onkeyup="proofreadNumeric(this)" class="form-control" size="20" maxlength="4" />
+						<input type="text" id="wan_pppoe_interval" oninput="proofreadNumeric(this)" class="form-control" size="20" maxlength="4" />
 						<em>(<%~ seconds %>)</em>
 					</span>
 				</div>
 
 				<div id="wan_static_ip_container" class="row form-group">
 					<label class="col-xs-5" for="wan_static_ip" id="wan_static_ip_label"><%~ StIP %>:</label>
-					<span class="col-xs-7"><input type="text" class="form-control" name="wan_static_ip" id="wan_static_ip" onkeyup="proofreadIp(this)" size="20" maxlength="15" /></span>
+					<span class="col-xs-7"><input type="text" class="form-control" name="wan_static_ip" id="wan_static_ip" oninput="proofreadIp(this)" size="20" maxlength="15" /></span>
 				</div>
 
 				<div id="wan_static_mask_container" class="row form-group">
 					<label class="col-xs-5" for="wan_static_mask" id="wan_static_mask_label"><%~ SMsk %>:</label>
-					<span class="col-xs-7"><input type="text" class="form-control" name="wan_static_mask" id="wan_static_mask" onkeyup="proofreadMask(this)" size="20" maxlength="15" /></span>
+					<span class="col-xs-7"><input type="text" class="form-control" name="wan_static_mask" id="wan_static_mask" oninput="proofreadMask(this)" size="20" maxlength="15" /></span>
 				</div>
 
 				<div id="wan_static_gateway_container" class="row form-group">
 					<label class="col-xs-5" for="wan_static_gateway" id="wan_static_gateway_label"><%~ Gtwy %>:</label>
-					<span class="col-xs-7"><input type="text" class="form-control" name="wan_static_gateway" id="wan_static_gateway" onkeyup="proofreadIp(this)" size="20" maxlength="15" /></span>
+					<span class="col-xs-7"><input type="text" class="form-control" name="wan_static_gateway" id="wan_static_gateway" oninput="proofreadIp(this)" size="20" maxlength="15" /></span>
 				</div>
 
 				<div id="wan_3g_service_container" class="row form-group">
@@ -520,7 +520,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					<label class="col-xs-5" for="wan_3g_device" id="wan_3g_device_label"><%~ Dvic %>:</label>
 					<span class="col-xs-7">
 						<select style="display:none;float:left;max-width:180px" id="wan_3g_list_device" onchange="set3GDevice(this.value)"></select>
-						<input style="float:left;" type="text" class="form-control" id="wan_3g_device" size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
+						<input style="float:left;" type="text" class="form-control" id="wan_3g_device" size="20" oninput="proofreadLengthRange(this,1,999)"/>
 						<button style="float:left;" class="btn btn-default" id="wan_3g_scan_button" onclick="scan3GDevice('wan_3g_list_device')"><%~ Scan %></button>
 					</span>
 				</div>
@@ -528,7 +528,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="wan_3g_pincode_container" class="row form-group">
 					<label class="col-xs-5" for="wan_3g_pincode" id="wan_3g_pincode_label"><%~ Pncd %>:</label>
 					<span class="col-xs-7">
-						<input type="text" class="form-control" id="wan_3g_pincode"  size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
+						<input type="text" class="form-control" id="wan_3g_pincode"  size="20" oninput="proofreadLengthRange(this,1,999)"/>
 						<em>(<%~ optl %>)</em>
 					</span>
 				</div>
@@ -544,13 +544,13 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 
 				<div id="wan_3g_apn_container" class="row form-group">
 					<label class="col-xs-5" for="wan_3g_apn" id="wan_3g_apn_label">APN:</label>
-					<span class="col-xs-7"><input type="text" class="form-control" id="wan_3g_apn" size="20" onkeyup="proofreadLengthRange(this,1,999)"/></span>
+					<span class="col-xs-7"><input type="text" class="form-control" id="wan_3g_apn" size="20" oninput="proofreadLengthRange(this,1,999)"/></span>
 				</div>
 
 				<div id="wan_3g_user_container" class="row form-group">
 					<label class="col-xs-5" for="wan_3g_user" id="wan_3g_user_label"><%~ UNam %>:</label>
 					<span class="col-xs-7">
-						<input type="text" class="form-control" id="wan_3g_user" size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
+						<input type="text" class="form-control" id="wan_3g_user" size="20" oninput="proofreadLengthRange(this,1,999)"/>
 						<em>(<%~ optl %>)</em>
 					</span>
 				</div>
@@ -558,7 +558,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="wan_3g_pass_container" class="row form-group">
 					<label class="col-xs-5" for="wan_3g_pass" id="wan_3g_pass_label"><%~ Pswd %>:</label>
 					<span class="col-xs-7">
-						<input type="text" class="form-control" id="wan_3g_pass" size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
+						<input type="text" class="form-control" id="wan_3g_pass" size="20" oninput="proofreadLengthRange(this,1,999)"/>
 						<em>(<%~ optl %>)</em>
 					</span>
 				</div>
@@ -579,7 +579,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 						<input type="checkbox" id="wan_use_mac" onclick="enableAssociatedField(this, 'wan_mac', defaultWanMac)"/>
 						<label class="short-left-pad" for="wan_use_mac" id="wan_mac_label"><%~ CustMAC %>:</label>
 					</span>
-					<span class="col-xs-7"><input type="text" name="wan_mac" id="wan_mac" class="form-control" onkeyup="proofreadMac(this)" size="20" maxlength="17"/></span>
+					<span class="col-xs-7"><input type="text" name="wan_mac" id="wan_mac" class="form-control" oninput="proofreadMac(this)" size="20" maxlength="17"/></span>
 				</div>
 
 				<div id="wan_mtu_container" class="row form-group">
@@ -587,7 +587,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 						<input type="checkbox" id="wan_use_mtu" onclick="enableAssociatedField(this, 'wan_mtu', 1500)"/>
 						<label class="short-left-pad" for="wan_use_mtu" id="wan_mtu_label"><%~ CustMTU %>:</label>
 					</span>
-					<span class="col-xs-7"><input type="text" name="wan_mtu" id="wan_mtu" class="form-control" onkeyup="proofreadNumeric(this)" size="20" maxlength="4"/></span>
+					<span class="col-xs-7"><input type="text" name="wan_mtu" id="wan_mtu" class="form-control" oninput="proofreadNumeric(this)" size="20" maxlength="4"/></span>
 				</div>
 
 				<div id="wan_ping_container" class="row form-group">
@@ -610,17 +610,17 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 
 				<div id="lan_ip_container" class="row form-group">
 					<label  class="col-xs-5" for="lan_ip" id="lan_ip_label"><%~ RtrIP %>:</label>
-					<span class="col-xs-7"><input type="text" class="form-control" name="lan_ip" id="lan_ip" onkeyup="proofreadIp(this)" size="20" maxlength="15" /></span>
+					<span class="col-xs-7"><input type="text" class="form-control" name="lan_ip" id="lan_ip" oninput="proofreadIp(this)" size="20" maxlength="15" /></span>
 				</div>
 
 				<div id="lan_mask_container" class="row form-group">
 					<label  class="col-xs-5" for="lan_mask" id="lan_mask_label"><%~ SMsk %>:</label>
-					<span class="col-xs-7"><input type="text" class="form-control" name="lan_mask" id="lan_mask" onkeyup="proofreadMask(this)" size="20" maxlength="15" /></span>
+					<span class="col-xs-7"><input type="text" class="form-control" name="lan_mask" id="lan_mask" oninput="proofreadMask(this)" size="20" maxlength="15" /></span>
 				</div>
 
 				<div id="lan_gateway_container" class="row form-group">
 					<label  class="col-xs-5" for="lan_gateway" id="lan_gateway_label"><%~ Gtwy %>:</label>
-					<span class="col-xs-7"><input type="text" class="form-control" name="lan_gateway" id="lan_gateway" onkeyup="proofreadIp(this)" size="20" maxlength="15" /></span>
+					<span class="col-xs-7"><input type="text" class="form-control" name="lan_gateway" id="lan_gateway" oninput="proofreadIp(this)" size="20" maxlength="15" /></span>
 				</div>
 
 				<div id="lan_dns_source_container" class="row form-group">
@@ -635,7 +635,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 							<option value="custom"><%~ CstDSrv %></option>
 						</select>
 						<div id="lan_dns_custom_container" class="second_row_right_column">
-							<input  type="text" id="add_lan_dns" class="form-control" onkeyup="proofreadIp(this)" size="20" maxlength="17" />
+							<input  type="text" id="add_lan_dns" class="form-control" oninput="proofreadIp(this)" size="20" maxlength="17" />
 							<button class="btn btn-default btn-add" id="add_lan_dns_button" onclick="addDns('lan')"><%~ Add %></button>
 							<div id="lan_dns_table_container" class="form-group second_row_right_column"></div>
 						</div>
@@ -718,7 +718,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 							<option value="custom"><%~ Cstm %></option>
 						</select>
 						&nbsp;
-						<input type="text" id="wifi_txpower" class="form-control" onkeyup="proofreadNumericRange(this,0,getMaxTxPower('G'))" size="10"/>
+						<input type="text" id="wifi_txpower" class="form-control" oninput="proofreadNumericRange(this,0,getMaxTxPower('G'))" size="10"/>
 						<em><span id="wifi_dbm">dBm</span></em>
 					</span>
 				</div>
@@ -758,7 +758,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 							<option value="custom"><%~ Cstm %></option>
 						</select>
 						&nbsp;
-						<input type="text" id="wifi_txpower_5ghz" class="form-control" onkeyup="proofreadNumericRange(this,0,getMaxTxPower('A'));" size="10" />
+						<input type="text" id="wifi_txpower_5ghz" class="form-control" oninput="proofreadNumericRange(this,0,getMaxTxPower('A'));" size="10" />
 						<em><span id="wifi_dbm_5ghz">dBm</span></em>
 					</span>
 				</div>
@@ -782,7 +782,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 						</select>
 						<div class="second_row_right_column"><em><%~ FltrInfo %></em></div>
 						<div class="second_row_right_column">
-							<input type="text" id="add_mac" class="form-control" onkeyup="proofreadMac(this)" size="20" maxlength="17"/>
+							<input type="text" id="add_mac" class="form-control" oninput="proofreadMac(this)" size="20" maxlength="17"/>
 							<button class="btn btn-default btn-add" id="add_mac_button" onclick="addMacToFilter()"><%~ Add %></button>
 						</div>
 						<div id="mac_table_container" class="form-group second_row_right_column"></div>
@@ -810,7 +810,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 						</select>
 						<button class="btn btn-default" id="wifi_rescan_button" onclick="scanWifi('wifi_custom_ssid2')"><%~ RScn %></button>
 						<div id="wifi_custom_ssid2_container" class="second_row_right_column" >
-							<input type="text" id="wifi_custom_ssid2" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
+							<input type="text" id="wifi_custom_ssid2" class="form-control" size="20" oninput="proofreadLengthRange(this,1,999)"/>
 						</div>
 
 					</span>
@@ -820,7 +820,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="wifi_ssid2_container" class="row form-group">
 					<label  class="col-xs-5" for="wifi_ssid2" id="wifi_ssid2_label">SSID:</label>
 					<span class="col-xs-7">
-						<input type="text" id="wifi_ssid2" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
+						<input type="text" id="wifi_ssid2" class="form-control" size="20" oninput="proofreadLengthRange(this,1,999)"/>
 						<button class="btn btn-default" id="wifi_scan_button" onclick="scanWifi('wifi_ssid2')"><%~ Scan %></button>
 					</span>
 				</div>
@@ -889,7 +889,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="wifi_pass2_container" class="row indent">
 					<label class="col-xs-5" for="wifi_pass2" id="wifi_pass2_label"><%~ Pswd %>:</label>
 					<span class="col-xs-7">
-						<input type="password" id="wifi_pass2" class="form-control" size="20" onkeyup="proofreadPass(this, 'wifi_encryption2')" autocomplete="new-password"/>&nbsp;&nbsp;
+						<input type="password" id="wifi_pass2" class="form-control" size="20" oninput="proofreadPass(this, 'wifi_encryption2')" autocomplete="new-password"/>&nbsp;&nbsp;
 						<input type="checkbox" id="show_pass2" onclick="togglePass('wifi_pass2')" autocomplete="off"/>
 						<label for="show_pass2" id="show_pass2_label"><%~ rvel %></label><br/>
 					</span>
@@ -898,7 +898,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="wifi_wep2_container" class="row indent">
 					<label class="col-xs-5" for="wifi_wep2" id="wifi_wep2_label"><%~ HexK %>:</label>
 					<span class="col-xs-7">
-						<input type="text" id="wifi_wep2" class="form-control" size="30" maxLength="26" onkeyup="proofreadWep(this)"/>
+						<input type="text" id="wifi_wep2" class="form-control" size="30" maxLength="26" oninput="proofreadWep(this)"/>
 					</span>
 				</div>
 
@@ -907,14 +907,14 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="wifi_ssid1_container" class="row form-group">
 					<label class="col-xs-5" for="wifi_ssid1" id="wifi_ssid1_label"><%~ AcPtID %>:</label>
 					<span class="col-xs-7">
-						<input type="text" id="wifi_ssid1" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/><br/>
+						<input type="text" id="wifi_ssid1" class="form-control" size="20" oninput="proofreadLengthRange(this,1,999)"/><br/>
 					</span>
 				</div>
 
 				<div id="wifi_ssid1a_container" class="row form-group">
 					<label class="col-xs-5" for="wifi_ssid1a" id="wifi_ssid1a_label">AP 5GHz SSID:</label>
 					<span class="col-xs-7">
-						<input type="text" id="wifi_ssid1a" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/>
+						<input type="text" id="wifi_ssid1a" class="form-control" size="20" oninput="proofreadLengthRange(this,1,999)"/>
 					</span>
 				</div>
 
@@ -971,7 +971,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="wifi_pass1_container" class="row indent">
 					<label class="col-xs-5" for="wifi_pass1" id="wifi_pass1_label"><%~ Pswd %>:</label>
 					<span class="col-xs-7" >
-						<input type="password" id="wifi_pass1" class="form-control" size="20" onkeyup="proofreadPass(this, 'wifi_encryption1')" autocomplete="new-password"/>&nbsp;&nbsp;
+						<input type="password" id="wifi_pass1" class="form-control" size="20" oninput="proofreadPass(this, 'wifi_encryption1')" autocomplete="new-password"/>&nbsp;&nbsp;
 						<input type="checkbox" id="show_pass1" onclick="togglePass('wifi_pass1')" autocomplete="off"/>
 						<label for="show_pass1" id="show_pass1_label"><%~ rvel %></label><br/>
 					</span>
@@ -980,7 +980,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="wifi_wep1_container" class="row indent">
 					<label class="col-xs-5" for="wifi_wep1" id="wifi_wep1_label"><%~ HexK %>:</label>
 					<span class="col-xs-7" >
-						<input type="text" id="wifi_wep1" class="form-control" size="30" maxLength="26" onkeyup="proofreadWep(this)"/>
+						<input type="text" id="wifi_wep1" class="form-control" size="30" maxLength="26" oninput="proofreadWep(this)"/>
 						<div class="second_row_right_column">	
 							<button class="btn btn-default" id="wep1gen40" onclick="setToWepKey('wifi_wep1',10)"><%~ Rndm %> 40/64 Bit WEP Key</button>
 							<button class="btn btn-default" id="wep1gen104" onclick="setToWepKey('wifi_wep1',26)"><%~ Rndm %> 104/128 Bit WEP Key</button>
@@ -991,14 +991,14 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="wifi_server1_container" class="row indent">
 					<label class="col-xs-5" for="wifi_server1" id="wifi_server1_label">RADIUS <%~ Srvr %> IP:</label>
 					<span class="col-xs-7" >
-						<input type="text" id="wifi_server1" class="form-control" size="20" onkeyup="proofreadIp(this)"/>
+						<input type="text" id="wifi_server1" class="form-control" size="20" oninput="proofreadIp(this)"/>
 					</span>
 				</div>
 
 				<div id="wifi_port1_container" class="row indent">
 					<label class="col-xs-5" for="wifi_port1" id="wifi_port1_label">RADIUS <%~ SrvPt %>:</label>
 					<span class="col-xs-7" >
-						<input type="text" id="wifi_port1" class="form-control" size="20" maxlength="5" onkeyup="proofreadNumeric(this)"/><br/>
+						<input type="text" id="wifi_port1" class="form-control" size="20" maxlength="5" oninput="proofreadNumeric(this)"/><br/>
 					</span>
 				</div>
 
@@ -1015,7 +1015,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="wifi_ft_key_container" class="row indent">
 					<label class="col-xs-5" for="wifi_ft_key" id="wifi_ft_key_label"><%~ FtKey %>:</label>
 					<span class="col-xs-7" >
-						<input type="password" id="wifi_ft_key" class="form-control" size="20" maxLength="64" onkeyup="proofreadFtKey(this)" placeholder="64 <%~ HexCh %>" autocomplete="new-password"/>&nbsp;&nbsp;
+						<input type="password" id="wifi_ft_key" class="form-control" size="20" maxLength="64" oninput="proofreadFtKey(this)" placeholder="64 <%~ HexCh %>" autocomplete="new-password"/>&nbsp;&nbsp;
 						<input type="checkbox" id="show_ft_key" onclick="togglePass('wifi_ft_key')" autocomplete="off"/>
 						<label for="show_ft_key" id="show_ft_key_label"><%~ rvel %></label><br/>
 						<div class="second_row_right_column">
@@ -1052,7 +1052,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="wifi_wds_container" class="row indent">
 					<label  class="col-xs-5" for="wifi_wds_label" id="wifi_wds_label"><%~ OWDS %>:</label>
 					<span class="col-xs-7">
-						<input type="text" id="add_wifi_wds_mac" class="form-control" onkeyup="proofreadMac(this)" size="20" maxlength="17"/>
+						<input type="text" id="add_wifi_wds_mac" class="form-control" oninput="proofreadMac(this)" size="20" maxlength="17"/>
 						<button class="btn btn-default btn-add" id="add_wifi_wds_mac_button" onclick="addMacToWds('wifi')"><%~ Add %></button>
 						<div id="wifi_wds_mac_table_container" class="second_row_right_column form-group"></div>
 					</span>
@@ -1075,7 +1075,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					<div id="wifi_guest_ssid1_container" class="row form-group">
 						<label class="col-xs-5" for="wifi_guest_ssid1" id="wifi_guest_ssid1_label"><%~ GNetID %>:</label>
 						<span class="col-xs-7">
-							<input type="text" id="wifi_guest_ssid1" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/><br/>
+							<input type="text" id="wifi_guest_ssid1" class="form-control" size="20" oninput="proofreadLengthRange(this,1,999)"/><br/>
 							<input type="text" id="wifi_guest_mac_g" class="form-control" style="display: none"/>
 						</span>
 					</div>
@@ -1083,7 +1083,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					<div id="wifi_guest_ssid1a_container" class="row form-group">
 						<label class="col-xs-5" for="wifi_guest_ssid1a" id="wifi_guest_ssid1a_label"><%~ GNet5ID %></label>
 						<span class="col-xs-7">
-							<input type="text" id="wifi_guest_ssid1a" class="form-control" size="20" onkeyup="proofreadLengthRange(this,1,999)"/><br/>
+							<input type="text" id="wifi_guest_ssid1a" class="form-control" size="20" oninput="proofreadLengthRange(this,1,999)"/><br/>
 							<input type="text" id="wifi_guest_mac_a" class="form-control" style="display: none"/>
 						</span>
 					</div>
@@ -1103,7 +1103,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					<div id="wifi_guest_pass1_container" class="row indent">
 						<label class="col-xs-5" for="wifi_guest_pass1" id="wifi_guest_pass1_label"><%~ Pswd %>:</label>
 						<span class="col-xs-7">
-							<input type="password" id="wifi_guest_pass1" class="form-control" size="20" onkeyup="proofreadPass(this, 'wifi_guest_encryption1')" autocomplete="new-password"/>&nbsp;&nbsp;
+							<input type="password" id="wifi_guest_pass1" class="form-control" size="20" oninput="proofreadPass(this, 'wifi_guest_encryption1')" autocomplete="new-password"/>&nbsp;&nbsp;
 							<input type="checkbox" id="show_guest_pass1" onclick="togglePass('wifi_guest_pass1')" autocomplete="off"/>
 							<label for="show_guest_pass1" id="show_guest_pass1_label"><%~ rvel %></label><br/>
 						</span>
@@ -1112,7 +1112,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					<div id="wifi_guest_wep1_container" class="row indent">
 						<label class="col-xs-5" for="wifi_guest_wep1" id="wifi_guest_wep1_label"><%~ HexK %>:</label>
 						<span class="col-xs-7">
-							<input type="text" id="wifi_guest_wep1" class="form-control" size="30" maxLength="26" onkeyup="proofreadWep(this)"/>
+							<input type="text" id="wifi_guest_wep1" class="form-control" size="30" maxLength="26" oninput="proofreadWep(this)"/>
 							<div class="second_row_right_column form-group">
 								<button class="btn btn-default" id="guestwep1gen40" onclick="setToWepKey('wifi_guest_wep1',10)"><%~ Rndm %> 40/64 Bit WEP Key</button>
 								<button class="btn btn-default" id="guestwep1gen104" onclick="setToWepKey('wifi_guest_wep1',26)"><%~ Rndm %> 104/128 Bit WEP Key</button>

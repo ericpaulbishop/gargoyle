@@ -104,7 +104,7 @@
 				<div id="upnp_up_container" class="row form-group">
 					<label class="col-xs-5" for="upnp_up" id="upnp_up_label"><%~ USpd %>:</label>
 					<span class="col-xs-7">
-						<input type="text" id="upnp_up" class="form-control" onkeyup="proofreadNumeric(this)" size="5" maxlength="5" />
+						<input type="text" id="upnp_up" class="form-control" oninput="proofreadNumeric(this)" size="5" maxlength="5" />
 						<em><%~ KBs %></em>
 					</span>
 				</div>
@@ -112,7 +112,7 @@
 				<div id="upnp_down_container" class="row form-group">
 					<label class="col-xs-5" for="upnp_down" id="upnp_down_label"><%~ DSpd %>:</label>
 					<span class="col-xs-7">
-						<input type="text" id="upnp_down" class="form-control" onkeyup="proofreadNumeric(this)" size="5" maxlength="5" />
+						<input type="text" id="upnp_down" class="form-control" oninput="proofreadNumeric(this)" size="5" maxlength="5" />
 						<em><%~ KBs %></em>
 					</span>
 				</div>
@@ -141,7 +141,7 @@
 
 				<div id="dmz_ip_container" class="row form-group">
 					<label class="col-xs-5" for="dmz_ip" id="dmz_ip_label"><%~ DMZIP %>:</label>
-					<span class="col-xs-7"><input type="text" class="form-control" name="dmz_ip" id="dmz_ip" onkeyup="proofreadIp(this)" size="20" maxlength="15" /></span>
+					<span class="col-xs-7"><input type="text" class="form-control" name="dmz_ip" id="dmz_ip" oninput="proofreadIp(this)" size="20" maxlength="15" /></span>
 				</div>
 			</div>
 		</div>

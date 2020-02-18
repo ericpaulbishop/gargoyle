@@ -14,13 +14,13 @@
 				</div>
 				<div class="row form-group">
 					<label class="col-xs-5" id='add_fp_label' for='add_fp'><%~ FPrt %></label>
-					<span class="col-xs-7"><input type='text' id='add_fp' onkeyup='proofreadNumericRange(this,1,65535)' maxLength='5' class='form-control' /></span>
+					<span class="col-xs-7"><input type='text' id='add_fp' oninput='proofreadNumericRange(this,1,65535)' maxLength='5' class='form-control' /></span>
 				</div>
 				<div class="row form-group">
 					<label class="col-xs-5" id='add_ip_label' for='add_ip'><%~ TIP %></label>
-					<span class="col-xs-7"><input type='text' id='add_ip' onkeyup='proofreadIp(this)' maxLength='15' class='form-control' /></span>
+					<span class="col-xs-7"><input type='text' id='add_ip' oninput='proofreadIp(this)' maxLength='15' class='form-control' /></span>
 				</div>
 				<div class="row form-group">
 					<label class="col-xs-5" id='add_dp_label' for='add_dp'><%~ TPrt %></label>
-					<span class="col-xs-7"><input type='text' id='add_dp' onkeyup='proofreadNumeric(this,1,65535)' maxLength='5' class='form-control' /></span>
+					<span class="col-xs-7"><input type='text' id='add_dp' oninput='proofreadNumeric(this,1,65535)' maxLength='5' class='form-control' /></span>
 				</div>

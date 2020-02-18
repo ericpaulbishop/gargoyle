@@ -42,12 +42,12 @@
 				<div>
 					<div class="row form-group">
 						<label class="col-xs-5" for="num_domains" id="num_domains_label"><%~ NumSt %>:</label>
-						<span class="col-xs-7"><input type="text" class="form-control" id="num_domains" onkeyup="proofreadNumericRange(this,1,9999)" size="6" maxlength="4" /></span>
+						<span class="col-xs-7"><input type="text" class="form-control" id="num_domains" oninput="proofreadNumericRange(this,1,9999)" size="6" maxlength="4" /></span>
 					</div>
 
 					<div class="row form-group">
 						<label class="col-xs-5" for="num_searches" id="num_searches_label"><%~ NumSr %>:</label>
-						<span class="col-xs-7"><input type="text" class="form-control" id="num_searches" onkeyup="proofreadNumericRange(this,1,9999)" size="6" maxlength="4" /></span>
+						<span class="col-xs-7"><input type="text" class="form-control" id="num_searches" oninput="proofreadNumericRange(this,1,9999)" size="6" maxlength="4" /></span>
 					</div>
 
 					<div class="row form-group">
@@ -63,7 +63,7 @@
 					<div id="add_ip_container">
 						<div class="row form-group">
 							<span class="col-xs-12">
-								<input type="text" id="add_ip" onkeyup="proofreadMultipleIps(this)" size="30" />
+								<input type="text" id="add_ip" oninput="proofreadMultipleIps(this)" size="30" />
 								<button class="btn btn-default btn-add" id="add_ip_button" onclick="addAddressesToTable(document, 'add_ip', 'ip_table_container', 'ip_table', false, 3, 1, 250)"><%~ Add %></button>
 							</span>
 							<em class="col-xs-12"><%~ SpcIP %></em>

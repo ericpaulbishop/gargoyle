@@ -17,7 +17,7 @@
 <div id="rule_applies_to_container" class="row form-group">
 	<div class="col-xs-offset-5 col-xs-7" id="rule_applies_to_table_container"></div>
 	<div class="col-xs-offset-5 col-xs-7">
-		<input type='text' id='rule_applies_to_addr' size='30' onkeyup='proofreadMultipleIpsOrMacs(this)' class='form-control' />
+		<input type='text' id='rule_applies_to_addr' size='30' oninput='proofreadMultipleIpsOrMacs(this)' class='form-control' />
 		<button type="button" class="btn btn-default btn-add" id="rule_add_applies_to_addr" onclick='addAddressesToTable("rule_applies_to_addr","rule_applies_to_table_container","rule_applies_to_table",true)'><%~ Add %></button>
 	</div>
 	<div class="col-xs-offset-5 col-xs-7">
@@ -52,7 +52,7 @@
 
 <div id="rule_hours_active_container" class="indent">
 	<label class="col-xs-5" for='rule_hours_active' id='rule_hours_active_label'><%~ HActv %>:</label>
-	<span class="col-xs-offset-5 col-xs-7"><input type='text' id='rule_hours_active' size='30' onkeyup='proofreadHours(this)' class='form-control' /></span>
+	<span class="col-xs-offset-5 col-xs-7"><input type='text' id='rule_hours_active' size='30' oninput='proofreadHours(this)' class='form-control' /></span>
 	<div class="col-xs-offset-5 col-xs-7">
 		<em><%~ SSample %> 00:30-13:15, 14:00-15:00</em>
 	</div>
@@ -60,7 +60,7 @@
 
 <div id="rule_days_and_hours_active_container" class="indent">
 	<label class="col-xs-5" for='rule_days_and_hours_active' id='rule_days_and_hours_active_label'><%~ DHActv %>:</label>
-	<span class="col-xs-offset-5 col-xs-7"><input type='text' id='rule_days_and_hours_active' size='30' onkeyup='proofreadWeeklyRange(this)' class='form-control' /></span>
+	<span class="col-xs-offset-5 col-xs-7"><input type='text' id='rule_days_and_hours_active' size='30' oninput='proofreadWeeklyRange(this)' class='form-control' /></span>
 	<div class="col-xs-offset-5 col-xs-7">
 		<em><%~ Sample %></em>
 	</div>
@@ -85,7 +85,7 @@
 	<div id="rule_remote_ip_container" class="row form-group">
 		<div class="col-xs-offset-5 col-xs-7" id="rule_remote_ip_table_container"></div>
 		<div class="col-xs-offset-5 col-xs-7">
-			<input type='text' id='rule_remote_ip' size='30' onkeyup='proofreadMultipleIps(this)' class='form-control' />
+			<input type='text' id='rule_remote_ip' size='30' oninput='proofreadMultipleIps(this)' class='form-control' />
 			<button type="button" class="btn btn-default btn-add" id="rule_add_remote_ip" onclick='addAddressesToTable("rule_remote_ip","rule_remote_ip_table_container","rule_remote_ip_table",false)'><%~ Add %></button>
 		</div>
 	</div>
@@ -100,7 +100,7 @@
 			</select>
 		</span>
 		<span class='col-xs-offset-5 col-xs-7'>
-			<input type='text' id='rule_remote_port' onkeyup='proofreadMultiplePorts(this)' size='20' class='form-control' />
+			<input type='text' id='rule_remote_port' oninput='proofreadMultiplePorts(this)' size='20' class='form-control' />
 		</span>
 	</div>
 	<div class="row form-group">
@@ -113,7 +113,7 @@
 			</select>
 		</span>
 		<span class="col-xs-offset-5 col-xs-7">
-			<input class='form-control' type='text' id='rule_local_port' onkeyup='proofreadMultiplePorts(this)' size='20'/>
+			<input class='form-control' type='text' id='rule_local_port' oninput='proofreadMultiplePorts(this)' size='20'/>
 		</span>
 	</div>
 

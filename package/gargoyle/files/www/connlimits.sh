@@ -39,21 +39,21 @@
 				<div class="row form-group">
 					<label class="col-xs-5" for="max_connections" id="max_connections_label"><%~ MaxC %>:</label>
 					<span class="col-xs-7">
-						<input type="text" class="form-control" onkeyup="proofreadNumericRange(this,1,16384)" id="max_connections" size="10" maxlength="5" />
+						<input type="text" class="form-control" oninput="proofreadNumericRange(this,1,16384)" id="max_connections" size="10" maxlength="5" />
 						<em>(<%~ max %> 16384)</em>
 					</span>
 				</div>
 				<div class="row form-group">
 					<label class="col-xs-5" for="tcp_timeout" id="tcp_timeout_label"><%~ TTout %>:</label>
 					<span class="col-xs-7">
-						<input type="text" class="form-control" onkeyup="proofreadNumericRange(this,1,3600)" id="tcp_timeout" size="10" maxlength="4" />
+						<input type="text" class="form-control" oninput="proofreadNumericRange(this,1,3600)" id="tcp_timeout" size="10" maxlength="4" />
 						<em><%~ seconds %> (<%~ max %> 3600)</em>
 					</span>
 				</div>
 				<div class="row form-group">
 					<label class="col-xs-5" for="udp_timeout" id="udp_timeout_label"><%~ UTout %>:</label>
 					<span class="col-xs-7">
-						<input type="text" class="form-control" onkeyup="proofreadNumericRange(this,1,3600)" id="udp_timeout" size="10" maxlength="4" />
+						<input type="text" class="form-control" oninput="proofreadNumericRange(this,1,3600)" id="udp_timeout" size="10" maxlength="4" />
 						<em><%~ seconds %> (<%~ max %> 3600)</em>
 					</span>
 				</div>
