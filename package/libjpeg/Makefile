@@ -8,14 +8,14 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=jpeg
-PKG_VERSION:=9a
-PKG_RELEASE:=1
+PKG_VERSION:=9c
+PKG_RELEASE:=2
 
 PKG_SOURCE:=$(PKG_NAME)src.v$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=http://www.ijg.org/files
-PKG_MD5SUM:=3353992aecaee1805ef4109aadd433e7
+PKG_HASH:=650250979303a649e21f87b5ccd02672af1ea6954b911342ea491f351ceb7122
 
-PKG_MAINTAINER:=Jo-Philipp Wich <jow@openwrt.org>
+PKG_MAINTAINER:=Jo-Philipp Wich <jo@mein.io>
 PKG_LICENSE:=IJG
 PKG_LICENSE_FILES:=README
 
@@ -41,6 +41,7 @@ define Package/jpeg-tools
   $(call Package/jpeg/Default)
   SECTION:=utils
   CATEGORY:=Utilities
+  SUBMENU:=Image Manipulation
   DEPENDS:=+libjpeg
   TITLE+= manipulation tools
 endef
@@ -73,6 +74,8 @@ define Build/InstallDev
 	$(CP) $(PKG_INSTALL_DIR)/usr/include/j{config,error,morecfg}.h $(1)/usr/include/
 	$(INSTALL_DIR) $(1)/usr/lib
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libjpeg.{a,so*} $(1)/usr/lib/
+	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/pkgconfig/libjpeg.pc $(1)/usr/lib/pkgconfig/
 endef
 
 define Package/libjpeg/install

@@ -38,7 +38,7 @@ $(cat /etc/openvpn/client_conf/$GET_id/ta.key)
 $(echo -e '</tls-auth>')
 EOF
 	#few ugly hacks to fix heredoc
-	sed -i '/^ca\|^cert\|^key\|^tls-auth/d' /tmp/vpn.ac.tmp.ovpn
+	sed -i '/^ca\s\|^cert\s\|^key\s\|^tls-auth\s/d' /tmp/vpn.ac.tmp.ovpn
 	sed -i 's/^ key-direction/key-direction/g' /tmp/vpn.ac.tmp.ovpn
 	echo "Content-type: application/octet-stream"
 	echo "Content-Disposition: attachment; filename=openvpn-credentials-$GET_id.ovpn"

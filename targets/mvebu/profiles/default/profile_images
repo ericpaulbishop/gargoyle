@@ -1,6 +1,6 @@
--wrt1900ac-squashfs
--wrt1900acv2-squashfs
--wrt1200ac-squashfs
--wrt1900acs-squashfs
--wrt3200acm-squashfs
--wrt32x-squashfs
+linksys_wrt1200ac-squashfs
+linksys_wrt1900ac-squashfs
+linksys_wrt1900acs-squashfs
+linksys_wrt1900acv2-squashfs
+linksys_wrt3200acm-squashfs
+linksys_wrt32x-squashfs

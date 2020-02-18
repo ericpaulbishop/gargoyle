@@ -2,27 +2,22 @@
 # Copyright (C) 2008-2012 OpenWrt.org
 
 START=60
+USE_PROCD=1
 
 found_sambashare="0"
 
-smb_header() 
-{
-	local interface
-	config_get interface $1 interface "loopback lan"
+smb_header() {
+	config_get samba_iface $1 interface "loopback lan"
 
 	# resolve interfaces
 	local interfaces=$(
 		. /lib/functions/network.sh
 
 		local net
-		for net in $interface; do
+		for net in $samba_iface; do
 			local device
-			network_get_device device "$net" && {
-				local subnet
-				network_get_subnet  subnet "$net" && echo -n "$subnet "
-				network_get_subnet6 subnet "$net" && echo -n "$subnet "
-			}
-
+			network_is_up $net || continue
+			network_get_device device "$net"
 			echo -n "${device:-$net} "
 		done
 	)
@@ -82,8 +77,7 @@ add_user_to_lists()
 	all_user_list="$all_user_list$all_comma$user"
 }
 
-smb_add_share() 
-{
+smb_add_share() {
 	local name
 	local path
 	local users
@@ -93,19 +87,16 @@ smb_add_share()
 	local all_comma
 	local create_mask
 	local dir_mask
-	local public
 	local browseable
 
 	config_get name $1 name
 	config_get path $1 path
+	config_get users $1 users
 	config_get read_only $1 read_only
 	config_get guest_ok $1 guest_ok
 	config_get create_mask $1 create_mask
 	config_get dir_mask $1 dir_mask
-	
-	config_get public $1 public
 	config_get browseable $1 browseable
-
 
 	rw_user_list=""
 	ro_user_list=""
@@ -129,29 +120,43 @@ smb_add_share()
 	[ -n "$guest_ok" ] && echo -e "\tguest ok = $guest_ok" >> /var/etc/smb.conf
 	[ -n "$create_mask" ] && echo -e "\tcreate mask = $create_mask" >> /var/etc/smb.conf
 	[ -n "$dir_mask" ] && echo -e "\tdirectory mask = $dir_mask" >> /var/etc/smb.conf
+	[ -n "$browseable" ] && echo -e "\tbrowseable = $browseable" >> /var/etc/smb.conf
 
-	[ -n "$public" ]      && echo -e "\tpublic = $public" >> /var/etc/smb.conf
-	[ -n "$browseable" ]  && echo -e "\tbrowseable = $browseable" >> /var/etc/smb.conf
-
-	
 	found_sambashare="1"
 }
 
-
-start() 
-{
+init_config() {
 	config_load samba
+	CONFIG_APPEND=1 UCI_CONFIG_DIR=/var/run/config config_load samba
+
 	config_foreach smb_header samba
 	config_foreach smb_add_share sambashare
-
-	if [ "$found_sambashare" = "1" ] ; then
-		service_start /usr/sbin/smbd -D
-		service_start /usr/sbin/nmbd -D
-	fi
 }
 
-stop() 
-{
-	service_stop /usr/sbin/smbd
-	service_stop /usr/sbin/nmbd
+service_triggers() {
+	procd_add_reload_trigger samba
+
+	local i
+	for i in $samba_iface; do
+		procd_add_reload_interface_trigger $i
+	done
+}
+
+start_service() {
+	init_config
+
+	if [ "$found_sambashare" = "1" ] ; then
+		procd_open_instance
+		procd_add_mdns "smb" "tcp" "445"
+		procd_set_param command /usr/sbin/smbd -F
+		procd_set_param respawn
+		procd_set_param file /var/etc/smb.conf
+		procd_close_instance
+
+		procd_open_instance
+		procd_set_param command /usr/sbin/nmbd -F
+		procd_set_param respawn
+		procd_set_param file /var/etc/smb.conf
+		procd_close_instance
+	fi
 }

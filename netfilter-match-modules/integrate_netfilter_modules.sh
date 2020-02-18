@@ -205,7 +205,7 @@ EOF
 	
 
 	echo 'all:' >> nf-patch-build/iptables-download-make
-	echo '	if [ ! -e "$(DL_DIR)/$(PKG_SOURCE)" ] ; then  TOPDIR="$(TOPDIR)" $(SCRIPT_DIR)/download.pl $(DL_DIR) $(PKG_SOURCE) $(PKG_MIRROR_HASH)  $(PKG_SOURCE)  $(PKG_SOURCE_URL) ; fi ; ' >> nf-patch-build/iptables-download-make
+	echo '	if [ ! -e "$(DL_DIR)/$(PKG_SOURCE)" ] ; then  TOPDIR="$(TOPDIR)" $(SCRIPT_DIR)/download.pl $(DL_DIR) $(PKG_SOURCE) $(PKG_HASH)  $(PKG_SOURCE)  $(PKG_SOURCE_URL) ; fi ; ' >> nf-patch-build/iptables-download-make
 	echo '	cp $(DL_DIR)/$(PKG_SOURCE) . ' >>nf-patch-build/iptables-download-make
 	echo '	tar xf $(PKG_SOURCE)' >>nf-patch-build/iptables-download-make
 	echo '	rm -rf *.bz2 *.xz' >>nf-patch-build/iptables-download-make

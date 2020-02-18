@@ -1,5 +1,5 @@
--squashfs-rootfs.bin
--squashfs-sysupgrade.bin
 -kernel.lzma
 -kernel.gz
 -kernel.elf
+-squashfs-rootfs.bin
+-squashfs-sysupgrade.bin

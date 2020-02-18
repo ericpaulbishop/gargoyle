@@ -6,24 +6,23 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=gargoyle-mjpg-streamer
-PKG_REV:=182
-PKG_VERSION:=r$(PKG_REV)
-PKG_RELEASE:=10
+PKG_VERSION:=2018-10-25
+PKG_RELEASE:=2
 PKG_MAINTAINER:=Roger D <rogerdammit@gmail.com>, \
 		Ted Hess <thess@kitschensync.net>
 
-PKG_SOURCE:=mjpg-streamer-$(PKG_VERSION).1.tar.xz
-PKG_SOURCE_URL:=https://svn.code.sf.net/p/mjpg-streamer/code/mjpg-streamer-experimental
-PKG_SOURCE_SUBDIR:=mjpg-streamer-$(PKG_VERSION)
-PKG_SOURCE_VERSION:=$(PKG_REV)
-PKG_SOURCE_PROTO:=svn
-PKG_MIRROR_HASH:=ccff417d0a34f7cee12c7984f77788267b1da0f2a7d849bc1b2e3614e670078b
-PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_SOURCE_SUBDIR)
+PKG_SOURCE_PROTO:=git
+PKG_SOURCE_URL:=https://github.com/jacksonliam/mjpg-streamer.git
+PKG_SOURCE_VERSION:=ddb69b7b4f114f3c2ca01adf55712792ca8aed43
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
+PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
+PKG_MIRROR_HASH:=d87ebff5de0c17a35a5b81adad5aa234bc70fe2bb17d1c6277c726845dc043bb
 
 PKG_LICENSE:=GPL-2.0
 PKG_LICENSE_FILES:=LICENSE
 
 include $(INCLUDE_DIR)/package.mk
+include $(INCLUDE_DIR)/cmake.mk
 
 PKG_BUILD_DEPENDS:=MJPG_STREAMER_V4L2:libv4l
 
@@ -32,7 +31,7 @@ define Package/gargoyle-mjpg-streamer
   CATEGORY:=Multimedia
   TITLE:=MJPG-streamer
   DEPENDS:=+libpthread +libjpeg +MJPG_STREAMER_V4L2:libv4l
-  URL:=http://mjpg-streamer.wiki.sourceforge.net/
+  URL:=https://github.com/jacksonliam/mjpg-streamer
   MENU:=1
 endef
 
@@ -43,8 +42,6 @@ endef
 define Package/gargoyle-mjpg-streamer/config
   source "$(SOURCE)/Config.in"
 endef
-
-EXTRA_CFLAGS += $(TARGET_CPPFLAGS) $(TARGET_LDFLAGS)
 
 define Package/gargoyle-mjpg-streamer/conffiles
 /etc/config/mjpg-streamer
@@ -61,13 +58,18 @@ define Download/cambozola
   MD5SUM:=35c45188aa9635aef2b745c35c311396
 endef
 
-# Fetch latest cambozola that works with latest Java(s)
-# Yes, I know this is ugly
+# redefine prepare to extract to our build dir
+# apply patches
 define Build/Prepare
-    $(call Build/Prepare/Default)
+	rm -rf $(PKG_BUILD_DIR)/
+	mkdir -p $(PKG_BUILD_DIR)/
+	$(TAR) -xJf $(DL_DIR)/$(PKG_SOURCE) -C $(PKG_BUILD_DIR) --strip=2
+	$(Build/Patch)
+    # Fetch latest cambozola that works with latest Java(s)
+    # Yes, I know this is ugly
     ifeq ($(CONFIG_MJPG_STREAMER_WWW),y)
 	$(eval $(call Download,cambozola))
-	$(TAR) -xvf $(DL_DIR)/$(CAMBOZOLA) --strip=2 --wildcards \
+	$(TAR) -xf $(DL_DIR)/$(CAMBOZOLA) --strip=2 --wildcards \
 		-C $(PKG_BUILD_DIR)/www */dist/cambozola.jar
     endif
 endef
@@ -75,6 +77,8 @@ endef
 define Build/Configure
     $(RM) $(PKG_BUILD_DIR)/plugins/input_uvc/uvcvideo.h
 endef
+
+    TARGET_LDFLAGS+= -ljpeg
 
 ifeq ($(CONFIG_MJPG_STREAMER_V4L2),y)
     TARGET_CFLAGS+= -DUSE_LIBV4L2
@@ -97,8 +101,14 @@ endif
 ifeq ($(CONFIG_MJPG_STREAMER_INPUT_UVC),y)
 	$(CP) $(PKG_BUILD_DIR)/input_uvc.so $(1)/usr/lib
 endif
-ifeq ($(CONFIG_MJPG_STREAMER_INPUT_TESTPICTURE),y)
-	$(CP) $(PKG_BUILD_DIR)/input_testpicture.so $(1)/usr/lib
+ifeq ($(CONFIG_MJPG_STREAMER_INPUT_HTTP),y)
+	$(CP) $(PKG_BUILD_DIR)/input_http.so $(1)/usr/lib
+endif
+ifeq ($(CONFIG_MJPG_STREAMER_OUTPUT_RTSP),y)
+	$(CP) $(PKG_BUILD_DIR)/output_rtsp.so $(1)/usr/lib
+endif
+ifeq ($(CONFIG_MJPG_STREAMER_OUTPUT_UDP),y)
+	$(CP) $(PKG_BUILD_DIR)/output_udp.so $(1)/usr/lib
 endif
 ifeq ($(CONFIG_MJPG_STREAMER_OUTPUT_FILE),y)
 	$(CP) $(PKG_BUILD_DIR)/output_file.so $(1)/usr/lib

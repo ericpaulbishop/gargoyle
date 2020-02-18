@@ -9,21 +9,21 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=msmtp
-PKG_VERSION:=1.6.6
-PKG_RELEASE:=2
+PKG_VERSION:=1.8.4
+PKG_RELEASE:=3
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
-PKG_SOURCE_URL:=@SF/msmtp
-PKG_HASH:=da15db1f62bd0201fce5310adb89c86188be91cd745b7cb3b62b81a501e7fb5e
+PKG_SOURCE_URL:=https://marlam.de/msmtp/releases
+PKG_HASH:=e5dd7fe95bc8e2f5eea3e4894ec9628252f30bd700a7fd1a568b10efa91129f7
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(BUILD_VARIANT)/$(PKG_NAME)-$(PKG_VERSION)
 
+PKG_MAINTAINER:=Rosen Penev <rosenp@gmail.com>
 PKG_LICENSE:=GPL-3.0+
 PKG_LICENSE_FILES:=COPYING
-PKG_MAINTAINER:=Nicolas Thill <nico@openwrt.org>
+PKG_CPE_ID:=cpe:/a:marlam:msmtp
 
-PKG_FIXUP:=autoreconf
+PKG_BUILD_PARALLEL:=1
 PKG_INSTALL:=1
-
-PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(BUILD_VARIANT)/$(PKG_NAME)-$(PKG_VERSION)
 
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/nls.mk
@@ -33,7 +33,7 @@ define Package/msmtp/Default
   CATEGORY:=Mail
   DEPENDS:=$(INTL_DEPENDS)
   TITLE:=Simple sendmail SMTP forwarding
-  URL:=http://msmtp.sourceforge.net/
+  URL:=https://marlam.de/msmtp
 endef
 
 define Package/msmtp/Default/description
@@ -101,21 +101,12 @@ CONFIGURE_ARGS += \
 	--without-libidn \
 	--without-libsecret \
 	--without-macosx-keyring \
-
-ifneq ($(CONFIG_USE_UCLIBC),)
-  CONFIGURE_ARGS += --disable-gai-idn
-endif
-
-MAKE_FLAGS :=
+	--without-msmtpd
 
 ifeq ($(BUILD_VARIANT),ssl)
-	CONFIGURE_ARGS += \
-		--with-tls=openssl
-endif
-
-ifeq ($(BUILD_VARIANT),nossl)
-	CONFIGURE_ARGS += \
-		--with-tls=no
+	CONFIGURE_ARGS += --with-tls=openssl
+else
+	CONFIGURE_ARGS += --without-tls
 endif
 
 define Package/msmtp/install
@@ -124,6 +115,9 @@ define Package/msmtp/install
 		$(1)/etc/msmtprc
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(CP) $(PKG_INSTALL_DIR)/usr/bin/msmtp $(1)/usr/bin/
+	$(INSTALL_DIR) $(1)/usr/sbin $(1)/usr/lib
+	ln -sf ../bin/msmtp $(1)/usr/sbin/sendmail
+	ln -sf ../bin/msmtp $(1)/usr/lib/sendmail
 endef
 
 define Package/msmtp-mta/install
@@ -145,4 +139,3 @@ $(eval $(call BuildPackage,msmtp))
 $(eval $(call BuildPackage,msmtp-nossl))
 $(eval $(call BuildPackage,msmtp-queue))
 $(eval $(call BuildPackage,msmtp-mta))
-

@@ -9,18 +9,23 @@ ext_version=$3
 extroot=$4
 
 if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ]  ; then
-	echo "Usage: $0 [disk] [percent_swap] [ext_version]"
+	echo "Usage: $0 [disk] [percent_swap] [ext_version] [extroot]"
 	exit
 fi
 
+prefix=""
+case $disk in
+"/dev/mmcblk"*) prefix="p";;
+esac
+
 touch /tmp/usb_restart.lock
 
-partition_num_list=$( fdisk -l $disk | grep "^$disk" | awk ' { print $1 } ' | egrep  -o "[0-9]"  | sort -r )
-num_partitions=$(     fdisk -l $disk | grep "^$disk" | awk ' { print $1 } ' | egrep  -o "[0-9]"  | wc -l )
+partition_num_list=$( fdisk -l $disk | grep "^$disk" | awk ' { print $1 } ' | egrep  -o "[0-9]$" | sort -r )
+num_partitions=$(     fdisk -l $disk | grep "^$disk" | awk ' { print $1 } ' | egrep  -o "[0-9]$" | wc -l )
 pcount=0
 for p in $partition_num_list ; do
-	swapoff "$disk$p" >/dev/null 2>&1
-	umount  "$disk$p" >/dev/null 2>&1
+	swapoff "$disk$prefix$p" >/dev/null 2>&1
+	umount  "$disk$prefix$p" >/dev/null 2>&1
 done
 for p in $partition_num_list ; do
 	pcount=$(( $pcount + 1 ))
@@ -32,16 +37,15 @@ for p in $partition_num_list ; do
 done
 
 
-
 if [ "$percent_swap" = "100" ] ; then
 	printf "n\np\n1\n\n\nt\n82\nw\n" | fdisk "$disk" >/dev/null 2>&1
 	sleep 10
-	swapoff "$disk"1 >/dev/null 2>&1
-	mkswap "$disk"1
+	swapoff "$disk$prefix"1 >/dev/null 2>&1
+	mkswap "$disk$prefix"1
 elif [ "$percent_swap" = "0" ] ; then
 	printf "n\np\n1\n\n\nt\n83\nw\n" | fdisk "$disk" >/dev/null 2>&1
 	sleep 10
-	mkfs.ext$ext_version "$disk"1
+	mkfs.ext$ext_version -F "$disk$prefix"1
 else
 	sectors=$(fdisk -l "$disk" | awk ' $0 ~ /^Disk.*sectors/ { print $7 } ' )
 	ext_sectors=$((  (100-$percent_swap)*$sectors/100 ))
@@ -55,16 +59,16 @@ else
 	sleep 10
 
 	
-	umount  "$disk"1 >/dev/null 2>&1
-	echo mkfs.ext$ext_version "$disk"1
-	mkfs.ext$ext_version "$disk"1
+	umount  "$disk$prefix"1 >/dev/null 2>&1
+	echo mkfs.ext$ext_version "$disk$prefix"1
+	mkfs.ext$ext_version -F "$disk$prefix"1
 
-	swapoff "$disk"2 >/dev/null 2>&1
-	mkswap "$disk"2
+	swapoff "$disk$prefix"2 >/dev/null 2>&1
+	mkswap "$disk$prefix"2
 fi
 
 if [ "$percent_swap" != "100" -a "x$extroot" = "x1" ] ; then
-	UUID=$(blkid | awk -F\" '/'$(echo "$disk"1 | sed 's|/|\\/|g')'/ {print $2}')
+	UUID=$(blkid | awk -F\" '/'$(echo "$disk$prefix"1 | sed 's|/|\\/|g')'/ {sub(/.* UUID="/,"");sub(/".*/,"");print $0}')
 	if [ -n "$UUID" ]; then
 		uci set fstab.@global[0].anon_mount=0
 		uci set fstab.@global[0].check_fs=1
@@ -80,10 +84,10 @@ if [ "$percent_swap" != "100" -a "x$extroot" = "x1" ] ; then
 
 		# copy all data
 		DIR=$(mktemp -d)
-		mount -t ext$ext_version "$disk"1 $DIR
+		mount -t ext$ext_version "$disk$prefix"1 $DIR
 		tar -C /overlay -cvf - . | tar -C $DIR -xf -
 		sync
-		umount "$disk"1
+		umount "$disk$prefix"1
 	fi
 fi
 

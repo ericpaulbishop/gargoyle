@@ -384,8 +384,7 @@ int use_iec = 0;
 int resolve_hosts = 0;
 
 
-int print_class(const struct sockaddr_nl *who,
-               struct nlmsghdr *n, void *arg)
+int print_class(struct nlmsghdr *n, void *arg)
 {
     struct tcmsg *t = NLMSG_DATA(n);
     int len = n->nlmsg_len;

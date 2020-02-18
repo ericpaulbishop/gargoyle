@@ -1,0 +1,58 @@
+				<div class="row form-group">
+					<div class="col-lg-12">
+						<div class="alert alert-warning" role="alert">
+							<%~ Warn %>
+						</div>
+					</div>
+
+				</div>
+				<div class="row form-group">
+					<label class="col-xs-5" id='firmware_valid_label' for='firmware_valid'><%~ ValidFw %>:</label>
+					<span class="col-xs-7" id='firmware_valid'></span>
+				</div>
+				<div class="row form-group">
+					<label class="col-xs-5" id='firmware_dev_match_label' for='firmware_dev_match'><%~ DevMatch %>:</label>
+					<span class="col-xs-7" id='firmware_dev_match'></span>
+				</div>
+				<div class="row form-group">
+					<label class="col-xs-5" id='supported_devs_label' for='supported_devs'><%~ SuppDevs %>:</label>
+					<span class="col-xs-7" id='supported_devs'></span>
+				</div>
+				<div class="row form-group">
+					<label class="col-xs-5" id='size_ok_label' for='size_ok'><%~ FwFitFlash %>:</label>
+					<span class="col-xs-7" id='size_ok'></span>
+				</div>
+				<div class="row form-group">
+					<label class="col-xs-5" id='checksum_match_label' for='checksum_match'><%~ ChksumMatch %>:</label>
+					<span class="col-xs-7" id='checksum_match'></span>
+				</div>
+				<div class="form-group indent">
+					<ul class="list-group">
+						<li class="list-group-item">
+							<span class="list-group-item-title">MD5:</span>
+							<span id="md5sum"></span>
+						</li>
+						<li class="list-group-item">
+							<span class="list-group-item-title">SHA-1:</span>
+							<span id="sha1sum"></span>
+						</li>
+						<li class="list-group-item">
+							<span class="list-group-item-title">SHA-256:</span>
+							<span id="sha256sum"></span>
+						</li>
+					</ul>
+				</div>
+				<div class="row form-group">
+					<div class="col-lg-12">
+						<div class="alert alert-danger hidden" role="alert" id="preserve_settings_warning"><%~ NoPrsv %></div>
+					</div>
+					<label class="col-xs-5" id='preserve_settings_label' for='preserve_settings'><%~ Prsv %>:</label>
+					<span class="col-xs-7"><input type="checkbox" id="preserve_settings" disabled/></span>
+				</div>
+				<div class="row form-group">
+					<div class="col-lg-12">
+						<div class="alert alert-danger hidden" role="alert" id="force_upgrade_warning"><%~ ForceWarn %></div>
+					</div>
+					<label class="col-xs-5" id='force_upgrade_label' for='force_upgrade'><%~ ForceUpg %>:</label>
+					<span class="col-xs-7"><input type="checkbox" id="force_upgrade" onclick="forceUpgradeToggle()" disabled/></span>
+				</div>

@@ -20,6 +20,7 @@ stamgrStr.CurrAP="Current AP";
 stamgrStr.Connected="Connected";
 stamgrStr.BlacklistAP="Blacklisted APs";
 stamgrStr.NoStacfgErr="Wireless must be set to Client or Client+AP mode to use STA Manager";
+stamgrStr.ScanWifi="Scan Wifi";
 
 //Javascript
 stamgrStr.cfgid="Config ID";
@@ -31,4 +32,8 @@ stamgrStr.upErr="Could not update row.";
 stamgrStr.discontoohighErr="Disconnect quality must be below 90%";
 stamgrStr.contoolowErr="Connect quality must be above 30%";
 stamgrStr.discongtconErr="Disconnect quality must be below Connect quality";
+stamgrStr.CurWanCfg="Current WAN Network";
+stamgrStr.Other="Other";
+stamgrStr.Scanning="Scanning... Please Wait.";
+stamgrStr.NoWifi="No networks found!";
 
