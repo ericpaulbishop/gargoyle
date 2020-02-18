@@ -75,12 +75,12 @@
 				<div>
 					<div id="local_http_port_container" class="row form-group">
 						<label class="col-xs-5" for="local_http_port" id="local_http_port_label"><%~ LocalPort %>:</label>
-						<span class="col-xs-7"><input type="text" class="form-control" id="local_http_port" size="7" maxlength="5" onkeyup="proofreadNumericRange(this,1,65535)"/></span>
+						<span class="col-xs-7"><input type="text" class="form-control" id="local_http_port" size="7" maxlength="5" oninput="proofreadNumericRange(this,1,65535)"/></span>
 					</div>
 
 					<div id="local_https_port_container" class="row form-group">
 						<label class="col-xs-5" for="local_https_port" id="local_https_port_label"><%~ Local_S_Port %>:</label>
-						<span class="col-xs-7"><input type="text" class="form-control" id="local_https_port" size="7" maxlength="5" onkeyup="proofreadNumericRange(this,1,65535)"/></span>
+						<span class="col-xs-7"><input type="text" class="form-control" id="local_https_port" size="7" maxlength="5" oninput="proofreadNumericRange(this,1,65535)"/></span>
 					</div>
 				</div>
 
@@ -99,12 +99,12 @@
 				<div id="remote_web_ports_container">
 					<div id="remote_http_port_container" class="row form-group">
 						<label class="col-xs-5" for="remote_http_port" id="remote_http_port_label"><%~ RemotePort %>:</label>
-						<span class="col-xs-7"><input type="text" class="form-control" id="remote_http_port" size="7" maxlength="5" onkeyup="proofreadNumericRange(this,1,65535)"/></span>
+						<span class="col-xs-7"><input type="text" class="form-control" id="remote_http_port" size="7" maxlength="5" oninput="proofreadNumericRange(this,1,65535)"/></span>
 					</div>
 
 					<div id="remote_https_port_container" class="row form-group">
 						<label class="col-xs-5" for="remote_https_port" id="remote_https_port_label"><%~ Remote_S_Port %>:</label>
-						<span class="col-xs-7"><input type="text" class="form-control" id="remote_https_port" size="7" maxlength="5" onkeyup="proofreadNumericRange(this,1,65535)"/></span>
+						<span class="col-xs-7"><input type="text" class="form-control" id="remote_https_port" size="7" maxlength="5" oninput="proofreadNumericRange(this,1,65535)"/></span>
 					</div>
 				</div>
 
@@ -142,7 +142,7 @@
 
 				<div class="row form-group">
 					<label class="col-xs-5" for="local_ssh_port" id="local_ssh_port_label"><%~ LocalSSHPort %>:</label>
-					<span class="col-xs-7"><input type="text" class="form-control" id="local_ssh_port" size="7" maxlength="5" onkeyup="proofreadNumericRange(this,1,65535)"/></span>
+					<span class="col-xs-7"><input type="text" class="form-control" id="local_ssh_port" size="7" maxlength="5" oninput="proofreadNumericRange(this,1,65535)"/></span>
 				</div>
 
 				<div class="row form-group" id="remote_ssh_enabled_container">
@@ -154,7 +154,7 @@
 
 				<div class="row form-group" id="remote_ssh_port_container">
 					<label class="col-xs-5" for="remote_ssh_port" id="remote_ssh_port_label"><%~ RemoteSSHPort %>:</label>
-					<span class="col-xs-7"><input type="text" class="form-control" id="remote_ssh_port"  size="7" maxlength="5" onkeyup="proofreadNumericRange(this,1,65535)"/></span>
+					<span class="col-xs-7"><input type="text" class="form-control" id="remote_ssh_port"  size="7" maxlength="5" oninput="proofreadNumericRange(this,1,65535)"/></span>
 				</div>
 
 				<div class="row form-group" id="remote_ssh_attempts_container">

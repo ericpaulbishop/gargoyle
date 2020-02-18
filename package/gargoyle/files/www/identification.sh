@@ -26,12 +26,12 @@
 			<div class="panel-body">
 				<div class="row form-group">
 					<label class="col-xs-5" for="hostname" id="hostname_label"><%~ HsNm %></label>
-					<span class="col-xs-7"><input type="text" id="hostname" class="form-control" onkeyup="proofreadLengthRange(this,1,999)"  size="35" maxlength="25"/></span>
+					<span class="col-xs-7"><input type="text" id="hostname" class="form-control" oninput="proofreadLengthRange(this,1,999)"  size="35" maxlength="25"/></span>
 				</div>
 				
 				<div id="domain_container" class="row form-group">
 					<label class="col-xs-5" for="domain" id="domain_label"><%~ Domn %></label>
-					<span class="col-xs-7"><input type="text" id="domain" class="form-control" onkeyup="proofreadLengthRange(this,1,999)" size="35" maxlength="100"/></span>
+					<span class="col-xs-7"><input type="text" id="domain" class="form-control" oninput="proofreadLengthRange(this,1,999)" size="35" maxlength="100"/></span>
 				</div>
 			</div>
 		</div>
