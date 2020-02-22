@@ -197,6 +197,8 @@ function saveChanges()
 		{
 			if(req.readyState == 4)
 			{
+				uciOriginal = uci.clone();
+				resetData();
 				setControlsEnabled(true);
 				stopRedirect=true;
 			}
