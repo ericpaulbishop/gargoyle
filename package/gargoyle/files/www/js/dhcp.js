@@ -20,9 +20,10 @@ function saveChanges()
 	else
 	{
 		setControlsEnabled(false, true);
-
+	
 		uci = uciOriginal.clone();
 		uci.remove('dhcp', dhcpSection, 'ignore');
+		uci.remove('dhcp', dhcpSection, 'dhcp_option');
 		uci.set('dhcp', dhcpSection, 'interface', 'lan');
 		dhcpIds =  ['dhcp_start', ['dhcp_start','dhcp_end'], 'dhcp_lease'];
 		dhcpVisIds = ['dhcp_start', 'dhcp_end', 'dhcp_lease'];
@@ -32,13 +33,18 @@ function saveChanges()
 
 		dhcpFunctions = [setVariableFromValue, setVariableFromCombined, setVariableFromModifiedValue];
 		limitParams =  [false, function(values){ return (parseInt(values[1]) - parseInt(values[0]) + 1); }];
-		leaseParams = [false, function(value){ return value + "h"; }];
+		leaseParams = [false, function(value){ return value + "m"; }];
 		dhcpParams = [false, limitParams,leaseParams];
 
 		setVariables(dhcpIds, dhcpVisIds, uci, dhcpPkgs, dhcpSections, dhcpOptions, dhcpFunctions, dhcpParams);
-
+		
+		if(document.getElementById("dhcp_use_alt_gateway").checked && document.getElementById('alt_gateway').value != defaultAltGateway)
+		{
+			uci.set('dhcp', dhcpSection, 'dhcp_option', '3,' + subnet + document.getElementById('alt_gateway').value)
+		}
+		
 		dhcpWillBeEnabled = true;
-		if(document.getElementById("dhcp_enabled").checked )
+		if (document.getElementById("dhcp_enabled").checked )
 		{
 			uci.remove("dhcp", "lan", "ignore");
 		}
@@ -148,40 +154,55 @@ function resetData()
 	tableContainer.appendChild(staticIpTable);
 
 
-	dhcpIds =  ['dhcp_start', 'dhcp_end', 'dhcp_lease'];
-	dhcpPkgs = ['dhcp',['dhcp','dhcp'],'dhcp'];
-	dhcpSections = [dhcpSection,[dhcpSection,dhcpSection],dhcpSection];
-	dhcpOptions = ['start', ['start','limit'], 'leasetime'];
+	dhcpIds =  ['dhcp_start', 'dhcp_end', 'dhcp_lease', 'dhcp_use_alt_gateway', 'alt_gateway'];
+	dhcpPkgs = ['dhcp',['dhcp','dhcp'],'dhcp','dhcp','dhcp'];
+	dhcpSections = [dhcpSection,[dhcpSection,dhcpSection],dhcpSection,dhcpSection,dhcpSection];
+	dhcpOptions = ['start', ['start','limit'], 'leasetime', 'dhcp_option', 'dhcp_option'];
 
+	defaultAltGateway = ((uciOriginal.get("network", "lan", "ipaddr")).split("."))[3];
 	enabledTest = function(value){return value != 1;};
 	endCombineFunc= function(values) { return (parseInt(values[0])+parseInt(values[1])-1); };
+	useAltGatewayTest=function(v){v = (v== null ? '' : (v.split(","))[0]); return (v=='' || v!='3' ? false : true);};
 	leaseModFunc = function(value)
 	{
-		var leaseHourValue;
+		var leaseMinValue;
 		if(value.match(/.*h/))
 		{
-			leaseHourValue=value.substr(0,value.length-1);
+			leaseMinValue=value.substr(0,value.length-1)*60;
 		}
 		else if(value.match(/.*m/))
 		{
-			leaseHourValue=value.substr(0,value.length-1)/(60);
+			leaseMinValue=value.substr(0,value.length-1);
 		}
 		else if(value.match(/.*s/))
 		{
-			leaseHourValue=value.substr(0,value.length-1)/(60*60);
+			leaseMinValue=value.substr(0,value.length-1)/(60);
 		}
-		return leaseHourValue;
+		return leaseMinValue;
+	};
+	GWModFunc = function(v)
+	{
+		v = (v== null ? '' : v.split(","));
+		v = (v.length < 2 ? '' : v[1].split("."));
+		v = (v.length < 4 ? '' : v[3]);
+		if (v!='')
+		{
+			v = (parseInt(v) < 1 || parseInt(v) > 254 ? '' : v);
+		}
+		return v;
 	};
 
-	dhcpParams = [100, [endCombineFunc,150],[12,leaseModFunc]];
-	dhcpFunctions = [loadValueFromVariable, loadValueFromMultipleVariables, loadValueFromModifiedVariable];
+	dhcpParams = [100, [endCombineFunc,150],[720,leaseModFunc], useAltGatewayTest, [defaultAltGateway,GWModFunc]];
+	dhcpFunctions = [loadValueFromVariable, loadValueFromMultipleVariables, loadValueFromModifiedVariable, loadChecked, loadValueFromModifiedVariable];
 
 	loadVariables(uciOriginal, dhcpIds, dhcpPkgs, dhcpSections, dhcpOptions, dhcpParams, dhcpFunctions);
 
 
 	document.getElementById("dhcp_enabled").checked = dhcpEnabled;
 	setEnabled(document.getElementById('dhcp_enabled').checked);
-
+	enableAssociatedField(document.getElementById('dhcp_use_alt_gateway'), 'alt_gateway', defaultAltGateway);
+	
+	
 	var firewallDefaultSections = uciOriginal.getAllSectionsOfType("firewall", "defaults");
 	var blockMismatches = uciOriginal.get("firewall", firewallDefaultSections[0], "enforce_dhcp_assignments") == "1" ? true : false;
 	document.getElementById("block_mismatches").checked = blockMismatches;
@@ -233,19 +254,19 @@ function resetHostnameMacList()
 
 function setEnabled(enabled)
 {
-	var ids=['dhcp_start', 'dhcp_end', 'dhcp_lease', 'block_mismatches', 'add_host', 'add_mac', 'add_ip', 'add_button'];
+	var ids=['dhcp_start', 'dhcp_end', 'dhcp_use_alt_gateway', 'alt_gateway', 'dhcp_lease', 'block_mismatches', 'add_host', 'add_mac', 'add_ip', 'add_button'];
+	var altgwchk = document.getElementById('dhcp_use_alt_gateway').checked;
 	var idIndex;
 	for (idIndex in ids)
 	{
 		var element = document.getElementById(ids[idIndex]);
-		setElementEnabled(element, enabled, "");
+		setElementEnabled(element, (element.id == 'alt_gateway' ? altgwchk && enabled : enabled), (element.type == 'text' ? element.value : ''));
 	}
 
 	var staticIpTable = document.getElementById('staticip_table_container').firstChild;
 	setRowClasses(staticIpTable, enabled);
 
 	resetHostnameMacList();
-
 
 }
 
@@ -330,10 +351,10 @@ function proofreadStatic(excludeRow)
 
 function proofreadAll()
 {
-	dhcpIds = ['dhcp_start', 'dhcp_end', 'dhcp_lease'];
-	labelIds= ['dhcp_start_label', 'dhcp_end_label', 'dhcp_lease_label'];
-	functions = [validateNumeric, validateNumeric, validateNumeric];
-	returnCodes = [0,0,0];
+	dhcpIds = ['dhcp_start', 'dhcp_end', 'dhcp_lease', 'alt_gateway'];
+	labelIds= ['dhcp_start_label', 'dhcp_end_label', 'dhcp_lease_label', 'alt_gateway_label'];
+	functions = [validateNumeric, validateNumeric, validateNumeric, validateNumeric];
+	returnCodes = [0,0,0,0];
 	visibilityIds= dhcpIds;
 	errors = proofreadFields(dhcpIds, labelIds, functions, returnCodes, visibilityIds);
 
@@ -345,15 +366,37 @@ function proofreadAll()
 		var ip = uciOriginal.get("network", "lan", "ipaddr");
 		var start = parseInt(document.getElementById("dhcp_start").value);
 		var end = parseInt(document.getElementById("dhcp_end").value );
+		var gate = parseInt(document.getElementById("alt_gateway").value );
+		var lease = parseInt(document.getElementById("dhcp_lease").value );
+		
 		if(!rangeInSubnet(mask, ip, start, end))
 		{
 			errors.push(dhcpS.dsubErr);
 		}
 
+		if(lease < 1 || lease > 71582788)
+		{
+			errors.push(dhcpS.leaseERR);
+		}
+		
 		var ipEnd = parseInt( (ip.split("."))[3] );
+		
 		if(ipEnd >= start && ipEnd <= end)
 		{
 			errors.push(dhcpS.dipErr);
+		}
+		
+		if(document.getElementById("dhcp_use_alt_gateway").checked)
+		{
+			var range = getSubnetRange(mask, ip);
+			if(gate <= range[0] || gate >= range[1])
+			{
+				errors.push(dhcpS.rangeGWErr);
+			}
+			if(gate >= start && gate <= end)
+			{
+				errors.push(dhcpS.leaseGWErr);
+			}
 		}
 	}
 
