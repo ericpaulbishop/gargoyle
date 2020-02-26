@@ -1,5 +1,5 @@
 ﻿/*
- * UTF-8 (with BOM) English-EN text strings for access.sh html elements
+ * UTF-8 (with BOM) Norwegian-NO text strings for access.sh html elements
  */
 
 accessStr.mAccess="Ruter Tilgang";
@@ -10,7 +10,14 @@ accessStr.Local_S_Port="Lokal HTTPS Port";
 accessStr.RemoteWebAccess="Ekstern Web Admin Tilgang";
 accessStr.RemotePort="Ekstern HTTP Port";
 accessStr.Remote_S_Port="Ekstern HTTPS Port";
+accessStr.LockoutWarning="<b>FORSIKTIG:</b> Du er i ferd med å låse deg ut!";
+accessStr.ReverseProxySmooth="For en jevn overgang";
+accessStr.ReverseProxySelect="Velg";
+accessStr.ReverseProxySaveCh="og lagre endringer";
+accessStr.ReverseProxySwitch="Bytt omvendt proxy's oppstrømsprotokoll til";
+accessStr.AccessChain="Din tilgangskjede";
 accessStr.Session="Web Innloggingstid";
+accessStr.DisableRFC1918Filter="Aktiver tilgang fra privat IP-adresse (RFC 1918) til offentlig IP-adresse";
 accessStr.DisablePassword="Deaktivere Passordbeskyttelse av Webgrensesnitt";
 accessStr.warning="Anbefales Ikke!";
 accessStr.SSHAccess="SSH Tilgang";
