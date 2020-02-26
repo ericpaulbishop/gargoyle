@@ -784,6 +784,7 @@ function setDescriptionVisibility(descriptionId, defaultDisplay, displayText, hi
 	if(ref.firstChild.data == displayText)
 	{
 		txt.style.display=defaultDisplay;
+		txt.scrollIntoView(false);
 		ref.firstChild.data = hideText;
 		command = command + "1\n";
 	}
@@ -809,13 +810,20 @@ function initializeDescriptionVisibility(testUci, descriptionId, defaultDisplay,
 
 	var descLinkText = displayText;
 	var descDisplay = "none";
-	if(testUci.get("gargoyle", "help", descriptionId) == "1")
+	var help = testUci.get("gargoyle", "help", descriptionId);
+	if(help == "1")
 	{
-		descLinkText = hideText
+		descLinkText = hideText;
 		descDisplay = defaultDisplay;
 	}
-	document.getElementById(descriptionId + "_ref").firstChild.data = descLinkText;
-	document.getElementById(descriptionId + "_txt").style.display = descDisplay;
+	// don't try to re-initialize after we've already removed the help section
+	if(help)
+	{
+		document.getElementById(descriptionId + "_ref").firstChild.data = descLinkText;
+		document.getElementById(descriptionId + "_txt").style.display = descDisplay;
+		// necessary, or we overwrite the help settings when we save changes
+		testUci.removeSection("gargoyle", "help");
+	}
 }
 
 
@@ -872,6 +880,27 @@ function rangeInSubnet(mask, ip, start, end)
 	return false;
 }
 
+function parseIp(ip)
+{
+	var ip = ip.split(".");
+	return ((((((+ip[0])*256)+(+ip[1]))*256)+(+ip[2]))*256)+(+ip[3]);
+}
+function ipInRange(ip, start, end)
+{
+	var ip = parseIp(ip);
+	return parseIp(start) <= ip && ip <= parseIp(end);
+}
+function ipInClassA(ip) { return ipInRange(ip, "0.0.0.0", "127.255.255.255"); }
+function ipInClassB(ip) { return ipInRange(ip, "128.0.0.0", "191.255.255.255"); }
+function ipInClassC(ip) { return ipInRange(ip, "192.0.0.0", "223.255.255.255"); }
+function ipInClassD(ip) { return ipInRange(ip, "224.0.0.0", "239.255.255.255"); }
+function ipInClassE(ip) { return ipInRange(ip, "240.0.0.0", "255.255.255.255"); }
+function ipInPrivateClassA(ip) { return ipInRange(ip, "10.0.0.0", "10.255.255.255"); }
+function ipInPrivateClassB(ip) { return ipInRange(ip, "172.16.0.0", "172.31.255.255"); }
+function ipInPrivateClassC(ip) { return ipInRange(ip, "192.168.0.0", "192.168.255.255"); }
+function ipInPrivate(ip) { return ipInPrivateClassA(ip) || ipInPrivateClassB(ip) || ipInPrivateClassC(ip); }
+function ipInLinkLocal(ip) { return ipInRange(ip, "169.254.0.0", "169.254.255.255"); }
+function ipInLocalhost(ip) { return ipInRange(ip, "127.0.0.0", "127.255.255.255"); }
 
 function proofreadFields(inputIds, labelIds, functions, validReturnCodes, visibilityIds, fieldDocument )
 {
@@ -913,6 +942,13 @@ function proofreadFields(inputIds, labelIds, functions, validReturnCodes, visibi
 		}
 	}
 	return errorArray;
+}
+function resetProofreadFields(inputIds)
+{
+	for (var i = 0; i < inputIds.length; i++)
+	{
+		resetProofreadText(document.getElementById(inputIds[i]));
+	}
 }
 
 function parseBytes(bytes, units, abbr, dDgt)
@@ -998,7 +1034,7 @@ function setElementEnabled(element, enabled, defaultValue)
 		element.disabled=false;
 		if(element.type == "text" || element.type == "textarea")
 		{
-			element.style.color="#000000";
+			element.style.color="";
 			element.className="form-control" ;
 		}
 		else if(element.type == "select-one" || element.type == "select-multiple" || element.type == "select" )
@@ -1035,7 +1071,32 @@ function setElementEnabled(element, enabled, defaultValue)
 	}
 }
 
+function setElementReadOnly(element, readOnly, associate = null)
+{
+	if(associate == null)
+	{
+		element.style.backgroundColor = "transparent";
+		element.style.borderStyle = readOnly ? "dashed" : "solid";
+		element.disabled = readOnly ? false : element.disabled;
+	}
+	else
+	{
+		element.style.backgroundColor = associate.style.backgroundColor;
+		element.style.borderStyle = associate.style.borderStyle;
+		element.disabled = associate.disabled;
+	}
+	element.readOnly = readOnly;
+}
 
+function updateReadOnlyAssociate(associate, element)
+{
+	var associate = document.getElementById(associate);
+	if(associate.readOnly && !associate.disabled)
+	{
+		associate.value = element.value;
+		associate.style.color = element.style.color;
+	}
+}
 
 function getSelectedValue(selectId, controlDocument)
 {
@@ -1994,7 +2055,10 @@ function proofreadText(input, proofFunction, validReturnCode)
 		input.style.color = (proofFunction(input.value) == validReturnCode) ? "" : "red";
 	}
 }
-
+function resetProofreadText(input)
+{
+	input.style.color = "";
+}
 
 function getEmbeddedSvgWindow(embeddedId, controlDocument)
 {

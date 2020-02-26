@@ -31,6 +31,13 @@
 		if [ -e /etc/dropbear/authorized_keys ] ; then
 			cat /etc/dropbear/authorized_keys | awk -F' ' ' $0 ~ /./ {print "authorizedKeyMap[\""$NF"\"]=\""$0"\";"}'
 		fi
+
+		echo "const REMOTE_ADDR = \"$REMOTE_ADDR\";";
+		echo "const SERVER_ADDR = \"$SERVER_ADDR\";";
+
+		echo "const HTTPS = \"$HTTPS\";";
+		echo "const HTTP_HOST = \"$HTTP_HOST\";";
+		echo "const SERVER_PORT = \"$SERVER_PORT\";";
 %>
 //-->
 </script>
@@ -66,12 +73,16 @@
 					<label class="col-xs-5" id="local_web_protocol_label" for="local_web_protocol"><%~ WebProtocol %>:</label>
 					<span class="col-xs-7">
 						<select class="form-control" id="local_web_protocol" onchange="updateVisibility()">
-							<option value="https">HTTPS</option>
 							<option value="http">HTTP</option>
 							<option value="both">HTTP & HTTPS</option>
+							<option value="redirect">HTTP ➔ HTTPS</option>
+							<option value="https">HTTPS</option>
 						</select>
 					</span>
 				</div>
+
+				<div id="local_web_protocol_lockout_container" class="row form-group" style="display: none"></div>
+
 				<div>
 					<div id="local_http_port_container" class="row form-group">
 						<label class="col-xs-5" for="local_http_port" id="local_http_port_label"><%~ LocalPort %>:</label>
@@ -80,21 +91,26 @@
 
 					<div id="local_https_port_container" class="row form-group">
 						<label class="col-xs-5" for="local_https_port" id="local_https_port_label"><%~ Local_S_Port %>:</label>
-						<span class="col-xs-7"><input type="text" class="form-control" id="local_https_port" size="7" maxlength="5" oninput="proofreadNumericRange(this,1,65535)"/></span>
+						<span class="col-xs-7"><input type="text" class="form-control" id="local_https_port" size="7" maxlength="5" onkeyup="proofreadNumericRange(this,1,65535); updateReadOnlyAssociate('remote_https_port', this)"/></span>
 					</div>
 				</div>
+
+				<div style="display: block;" id="remote_web_divider" class="internal_divider"></div>
 
 				<div id="remote_web_protocol_container" class="row form-group">
 					<label class="col-xs-5" id="remote_web_protocol_label" for="remote_web_protocol"><%~ RemoteWebAccess %>:</label>
 					<span class="col-xs-7">
 						<select class="form-control" id="remote_web_protocol" onchange="updateVisibility()">
-							<option value="disabled"><%~ disabled %></option>
-							<option value="https">HTTPS</option>
 							<option value="http">HTTP</option>
 							<option value="both">HTTP & HTTPS</option>
+							<option value="redirect">HTTP ➔ HTTPS</option>
+							<option value="https">HTTPS</option>
+							<option value="disabled"><%~ disabled %></option>
 						</select>
 					</span>
 				</div>
+
+				<div id="remote_web_protocol_lockout_container" class="row form-group" style="display: none"></div>
 
 				<div id="remote_web_ports_container">
 					<div id="remote_http_port_container" class="row form-group">
@@ -107,6 +123,17 @@
 						<span class="col-xs-7"><input type="text" class="form-control" id="remote_https_port" size="7" maxlength="5" oninput="proofreadNumericRange(this,1,65535)"/></span>
 					</div>
 				</div>
+
+				<div id="disable_rfc1918_filter_container" class="row form-group">
+					<span class="col-xs-12">
+						<input type="checkbox" id="disable_rfc1918_filter" onclick="updateVisibility()"/>
+						<label id="disable_rfc1918_filter_label" for="disable_rfc1918_filter"><%~ DisableRFC1918Filter %> <em>(<%~ warning %>)</em></label>
+					</span>
+				</div>
+
+				<div id="rfc1918_filter_lockout_container" class="row form-group" style="display: none"></div>
+
+				<div style="display: block;" id="common_web_divider" class="internal_divider"></div>
 
 				<div id="session_length_container" class="row form-group">
 					<label class="col-xs-5" id="session_length_label" for="session_length"><%~ Session %>:</label>
@@ -129,6 +156,22 @@
 						<label id="disable_web_password_label" for="disable_web_password"><%~ DisablePassword %> <em>(<%~ warning %>)</em></label>
 					</span>
 				</div>
+
+				<div id="lockout_template" class="row form-group" style="display: none">
+					<span class="alert alert-danger col-xs-12" role="alert" name="lockout">
+						<p><%~ LockoutWarning %></p>
+						<span name="reverse_proxy_smooth" style="display: none">
+							<p><%~ ReverseProxySmooth %>:</p>
+							<ol>
+								<li><%~ ReverseProxySelect %> <i>HTTP & HTTPS</i> <%~ ReverseProxySaveCh %>.</li>
+								<li><%~ ReverseProxySwitch %> <i><span name="reverse_proxy_switch"></span></i>.</li>
+								<li><%~ ReverseProxySelect %> <i><span name="reverse_proxy_select"></span></i> <%~ ReverseProxySaveCh %>.</li>
+							</ol>
+						</span>
+						<p><%~ AccessChain %>:</p>
+						<p><span name="access_chain"></span></p>
+					</span>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -144,6 +187,8 @@
 					<label class="col-xs-5" for="local_ssh_port" id="local_ssh_port_label"><%~ LocalSSHPort %>:</label>
 					<span class="col-xs-7"><input type="text" class="form-control" id="local_ssh_port" size="7" maxlength="5" oninput="proofreadNumericRange(this,1,65535)"/></span>
 				</div>
+
+				<div style="display: block;" id="remote_ssh_divider" class="internal_divider"></div>
 
 				<div class="row form-group" id="remote_ssh_enabled_container">
 					<span class="col-xs-12">
@@ -171,7 +216,8 @@
 					</span>
 				</div>
 
-				<div style="display: block;" id="internal_divider1" class="internal_divider"></div>
+				<div style="display: block;" id="ssh_pwd_auth_divider" class="internal_divider"></div>
+
 				<div class="row form-group" id="pwd_enabled_container">
 					<span class="col-xs-12">
 						<input type="checkbox" id="pwd_auth_enabled" />
@@ -179,7 +225,7 @@
 					</span>
 				</div>
 
-				<div style="display: block;" id="internal_divider2" class="internal_divider"></div>
+				<div style="display: block;" id="ssh_key_auth_divider" class="internal_divider"></div>
 
 				<div class="row form-group" id="authorized_keys_container">
 					<label class="col-xs-5" for="add_key" id="add_key_label"><%~ SSHExistKey %>:</label>
@@ -199,6 +245,7 @@
 					<label id="authorized_keys_label" class="col-xs-5" for="authorized_keys_table_container"><%~ SSHKeys %>:</label>
 					<div id="authorized_keys_table_container" class="col-xs-7 table-responsive"></div>
 					<div id="ssh_help">
+						<span class="col-xs-12"><a id="ssh_help_ref" href="javascript:setDescriptionVisibility('ssh_help')"><%~ MoreInfo %></a></span>
 						<span class="col-xs-12" id="ssh_help_txt" style="display:none">
 							<p><%~ SSHHelp1 %></p>
 							<p><%~ SSHHelp2 %></p>
@@ -209,7 +256,6 @@
 							</ul>
 							<p><%~ SSHHelp4 %></p>
 						</span>
-						<span class="col-xs-12"><a onclick="setDescriptionVisibility('ssh_help')"  id="ssh_help_ref" href="#ssh_help"><%~ MoreInfo %></a></span>
 					</div>
 				</div>
 			</div>
