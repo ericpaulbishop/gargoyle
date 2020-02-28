@@ -21,6 +21,8 @@ function saveChanges()
 	{
 		setControlsEnabled(false, true);
 
+		var uciCompare = uciOriginal.clone();
+
 		var oldLocalHttpPort  = getHttpPort(uciOriginal);
 		var oldLocalHttpsPort = getHttpsPort(uciOriginal);
 
@@ -36,11 +38,11 @@ function saveChanges()
 			var localPort = uciOriginal.get("firewall", lastSection, "local_port");
 			if(localPort == oldLocalSshPort || localPort == oldLocalHttpsPort || localPort == oldLocalHttpPort)
 			{
-				uciOriginal.removeSection("firewall", lastSection);
+				uciCompare.removeSection("firewall", lastSection);
 				firewallSectionCommands.push("uci del firewall." + lastSection);
 			}
 		}
-		var uci = uciOriginal.clone();
+		var uci = uciCompare.clone();
 
 
 
@@ -246,15 +248,12 @@ function saveChanges()
 		commands += httpsCommands.join("\n") + "\n";
 		commands += firewallSectionCommands.join("\n") + "\n";
 		commands += uciPreCommands.join("\n") + "\n";
-		commands += uci.getScriptCommands(uciOriginal) + "\n";
+		commands += uci.getScriptCommands(uciCompare) + "\n";
 		commands += sshKeysCommands.join("\n") + "\n";
 		commands += restartFirewall ? "sh /usr/lib/gargoyle/restart_firewall.sh ;\n" : "";
 		commands += restartDropbear ? "/etc/init.d/dropbear restart\n" : "";
 		commands += restartUhttpd ? "killall uhttpd\n/etc/init.d/uhttpd restart\n" : "";
 		//document.getElementById("output").value = commands;
-
-		uciOriginal = uci.clone();
-		resetData();
 
 		// Exceptional timeout.
 		run_commands = setTimeout(doRedirect, 120000);
@@ -264,6 +263,8 @@ function saveChanges()
 			if(req.readyState == 4)
 			{
 				clearTimeout(run_commands);
+				uciOriginal = uci.clone();
+				resetData();
 				// Restarting uhttpd takes roughly 333 ms when idle.
 				setTimeout(function() { needRedirect ? doRedirect() : setControlsEnabled(true); }, restartUhttpd ? 1000: 0);
 			}
