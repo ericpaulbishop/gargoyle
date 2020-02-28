@@ -66,7 +66,7 @@ function saveChanges()
 		{
 			remoteHttpPort = "";
 		}
-		if(oldRemoteHttpPort != remoteHttpPort) restartFirewall = true;
+		if(oldRemoteHttpPort != remoteHttpPort) { restartFirewall = true; }
 		var localHttpsPort = document.getElementById("local_https_port").value;
 		var remoteHttpsPort = document.getElementById("remote_https_port").value;
 		if(document.getElementById("remote_https_port_container").style.display != "none")
@@ -77,7 +77,7 @@ function saveChanges()
 		{
 			remoteHttpsPort = "";
 		}
-		if(oldRemoteHttpsPort != remoteHttpsPort) restartFirewall = true;
+		if(oldRemoteHttpsPort != remoteHttpsPort) { restartFirewall = true; }
 		var localSshPort = document.getElementById("local_ssh_port").value;
 		var remoteSshPort = document.getElementById("remote_ssh_port").value;
 		if(!document.getElementById("remote_ssh_port").disabled)
@@ -88,7 +88,7 @@ function saveChanges()
 		{
 			remoteSshPort = "";
 		}
-		if(oldRemoteSshPort != remoteSshPort) restartFirewall = true;
+		if(oldRemoteSshPort != remoteSshPort) { restartFirewall = true; }
 
 		//recreate dropbear config section if anonymous-- anonymous uci section can cause problems saving
 		var remoteAttempts =  document.getElementById("remote_ssh_attempts").disabled ? "" : getSelectedValue("remote_ssh_attempts");
