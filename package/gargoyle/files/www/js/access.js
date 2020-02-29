@@ -626,25 +626,36 @@ function updateVisibility()
 	var rfc1918FilterLockoutContainer = document.getElementById("rfc1918_filter_lockout_container");
 	rfc1918FilterLockoutContainer.style.display = "none";
 	rfc1918FilterLockoutContainer.innerHTML = "";
-	// Help avoid lockout with reverse proxy. Avoid IDs as these elements will be duplicated.
-	document.getElementsByName("reverse_proxy_smooth")[0].style.display = reverseProxyLockout ? "block" : "none";
-	document.getElementsByName("reverse_proxy_switch")[0].innerText = allOptionValueHash[serverProt == "http" ? "https" : "http"];
-	document.getElementsByName("reverse_proxy_select")[0].innerText = allOptionValueHash[accessWebProtocol];
-	// Web access trace of domains and/or IP addresses from client, possibly over reverse proxy, to server.
-	var lastOccurrence = function(value, index, self) { return value && self.lastIndexOf(value) === index; };
-	var webAccessChain = [window.location.hostname, REMOTE_ADDR, HTTP_HOST, SERVER_ADDR].filter(lastOccurrence);
-	document.getElementsByName("access_chain")[0].innerText = webAccessChain.join(" ➔ ");
-	if(protocolLockout || reverseProxyLockout)
+	var lockoutTemplate =
+	'<span class="alert alert-danger col-xs-12" role="alert" id="lockout">' +
+		'<p>' +  accessStr.LockoutWarning + '</p>' +
+		'<span id="reverse_proxy_smooth" style="display: none">' +
+			'<p>' + accessStr.ReverseProxySmooth + ':</p>' +
+			'<ol>' +
+				'<li>' + accessStr.ReverseProxySelect + ' <i>HTTP & HTTPS</i> ' + accessStr.ReverseProxySaveCh + '.</li>' +
+				'<li>' + accessStr.ReverseProxySwitch + ' <i><span id="reverse_proxy_switch"></span></i>.</li>' +
+				'<li>' + accessStr.ReverseProxySelect + ' <i><span id="reverse_proxy_select"></span></i> ' + accessStr.ReverseProxySaveCh + '.</li>' +
+			'</ol>' +
+		'</span>' +
+		'<p>' + accessStr.AccessChain + ':</p>' +
+		'<p><span id="access_chain"></span></p>' +
+	'</span>';
+	if(protocolLockout || reverseProxyLockout || rfc1918FilterLockout)
 	{
-		// Display warning at either local or remote web protocol.
-		accessWebProtocolLockoutContainer.innerHTML = document.getElementById("lockout_template").innerHTML;
-		accessWebProtocolLockoutContainer.style.display = "block";
-	}
-	else if(rfc1918FilterLockout)
-	{
-		// Display warning at RFC 1918 filter checkbox.
-		rfc1918FilterLockoutContainer.innerHTML = document.getElementById("lockout_template").innerHTML;
-		rfc1918FilterLockoutContainer.style.display = "block";
+		var lockoutContainer = rfc1918FilterLockout ? rfc1918FilterLockoutContainer : accessWebProtocolLockoutContainer;
+		lockoutContainer.innerHTML = lockoutTemplate;
+
+		// Help avoid lockout with reverse proxy.
+		document.getElementById("reverse_proxy_smooth").style.display = reverseProxyLockout ? "block" : "none";
+		document.getElementById("reverse_proxy_switch").innerText = allOptionValueHash[serverProt == "http" ? "https" : "http"];
+		document.getElementById("reverse_proxy_select").innerText = allOptionValueHash[accessWebProtocol];
+
+		// Web access trace of domains and/or IP addresses from client, possibly over reverse proxy, to server.
+		var lastOccurrence = function(value, index, self) { return value && self.lastIndexOf(value) === index; };
+		var webAccessChain = [window.location.hostname, REMOTE_ADDR, HTTP_HOST, SERVER_ADDR].filter(lastOccurrence);
+		document.getElementById("access_chain").innerText = webAccessChain.join(" ➔ ");
+
+		lockoutContainer.style.display = "block";
 	}
 
 	var ids= ["local_https_port", "local_http_port", "remote_https_port", "remote_http_port"];

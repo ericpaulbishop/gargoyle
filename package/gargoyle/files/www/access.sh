@@ -156,22 +156,6 @@
 						<label id="disable_web_password_label" for="disable_web_password"><%~ DisablePassword %> <em>(<%~ warning %>)</em></label>
 					</span>
 				</div>
-
-				<div id="lockout_template" class="row form-group" style="display: none">
-					<span class="alert alert-danger col-xs-12" role="alert" name="lockout">
-						<p><%~ LockoutWarning %></p>
-						<span name="reverse_proxy_smooth" style="display: none">
-							<p><%~ ReverseProxySmooth %>:</p>
-							<ol>
-								<li><%~ ReverseProxySelect %> <i>HTTP & HTTPS</i> <%~ ReverseProxySaveCh %>.</li>
-								<li><%~ ReverseProxySwitch %> <i><span name="reverse_proxy_switch"></span></i>.</li>
-								<li><%~ ReverseProxySelect %> <i><span name="reverse_proxy_select"></span></i> <%~ ReverseProxySaveCh %>.</li>
-							</ol>
-						</span>
-						<p><%~ AccessChain %>:</p>
-						<p><span name="access_chain"></span></p>
-					</span>
-				</div>
 			</div>
 		</div>
 	</div>
