@@ -572,7 +572,7 @@ function updateVisibility()
 	var remoteWebProtocol = getSelectedValue("remote_web_protocol");
 	var remoteHttpsElement = document.getElementById("remote_https_port");
 	var remoteHttpElement = document.getElementById("remote_http_port");
-	setElementReadOnly(remoteHttpsElement, false, localHttpsElement);
+	setElementReadOnly(remoteHttpsElement, false);
 	if(remoteWebProtocol == "both")
 	{
 		remoteHttpsElement.value = remoteHttpsElement.value == "" ? localHttpsElement.value : remoteHttpsElement.value;

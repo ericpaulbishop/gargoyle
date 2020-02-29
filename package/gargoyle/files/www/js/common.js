@@ -1071,19 +1071,11 @@ function setElementEnabled(element, enabled, defaultValue)
 	}
 }
 
-function setElementReadOnly(element, readOnly, associate = null)
+function setElementReadOnly(element, readOnly)
 {
-	if(associate == null)
+	if(readOnly)
 	{
-		element.style.backgroundColor = "transparent";
-		element.style.borderStyle = readOnly ? "dashed" : "solid";
-		element.disabled = readOnly ? false : element.disabled;
-	}
-	else
-	{
-		element.style.backgroundColor = associate.style.backgroundColor;
-		element.style.borderStyle = associate.style.borderStyle;
-		element.disabled = associate.disabled;
+		element.disabled = false;
 	}
 	element.readOnly = readOnly;
 }
