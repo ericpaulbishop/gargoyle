@@ -37,12 +37,12 @@
 
 				<div class="row form-group">
 					<label class="col-xs-4 col-md-3 col-lg-2" for="password1" id="password1_label"><%~ NPass %>:</label>
-					<span class="col-xs-7 col-md-8 col-lg-8"><input type="password" id="password1" class="form-control" size="25" /></span>
+					<span class="col-xs-7 col-md-8 col-lg-8"><input type="password" id="password1" class="form-control" size="25" autocomplete="new-password"/></span>
 				</div>
 
 				<div class="row form-group">
 					<label class="col-xs-4 col-md-3 col-lg-2" for="password2" id="password2_label"><%~ CPass %>:</label>
-					<span class="col-xs-7 col-md-8 col-lg-8"><input type="password" id="password2" class="form-control" size="25" /></span>
+					<span class="col-xs-7 col-md-8 col-lg-8"><input type="password" id="password2" class="form-control" size="25" autocomplete="new-password"/></span>
 				</div>
 
 				<p><strong><%~ Stz %>:</strong></p>
