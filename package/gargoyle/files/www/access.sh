@@ -91,7 +91,7 @@
 
 					<div id="local_https_port_container" class="row form-group">
 						<label class="col-xs-5" for="local_https_port" id="local_https_port_label"><%~ Local_S_Port %>:</label>
-						<span class="col-xs-7"><input type="text" class="form-control" id="local_https_port" size="7" maxlength="5" onkeyup="proofreadNumericRange(this,1,65535); updateReadOnlyAssociate('remote_https_port', this)"/></span>
+						<span class="col-xs-7"><input type="text" class="form-control" id="local_https_port" size="7" maxlength="5" oninput="proofreadNumericRange(this,1,65535); updateReadOnlyAssociate('remote_https_port', this)"/></span>
 					</div>
 				</div>
 
