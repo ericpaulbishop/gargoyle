@@ -4,9 +4,9 @@
 				</div>
 				<div class="row form-group">
 					<label class="col-xs-5" id='add_mac_label' for='add_mac'>MAC</label>
-					<span class="col-xs-7"><input type='text' id='add_mac' onkeyup='proofreadMac(this)' maxLength='17' class='form-control' /></span>
+					<span class="col-xs-7"><input type='text' id='add_mac' oninput='proofreadMac(this)' maxLength='17' class='form-control' /></span>
 				</div>
 				<div class="row form-group">
 					<label class="col-xs-5" id='add_ip_label' for='add_ip'>IP</label>
-					<span class="col-xs-7"><input type='text' id='add_ip' onkeyup='proofreadIp(this)' maxLength='15' class='form-control' /></span>
+					<span class="col-xs-7"><input type='text' id='add_ip' oninput='proofreadIp(this)' maxLength='15' class='form-control' /></span>
 				</div>
