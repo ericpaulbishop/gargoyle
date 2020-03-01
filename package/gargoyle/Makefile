@@ -74,9 +74,6 @@ endef
 
 define Package/gargoyle/postinst
 
-	cat $${IPKG_INSTROOT}/etc/config/system | sed -r 's/timezone.*UTC/timezone \"GMT0BST\,M3\.5\.0\/2,M10\.5\.0\/2\"/' > $${IPKG_INSTROOT}/etc/config/system.tmp
-	mv $${IPKG_INSTROOT}/etc/config/system.tmp $${IPKG_INSTROOT}/etc/config/system
-
 	#if this is brcm-2.4, remove client bridge hotplug script, this isn't necessary for brcm-2.4
 	if [ -e $${IPKG_INSTROOT}/usr/sbin/nas ] ; then
 		rm $${IPKG_INSTROOT}/etc/hotplug.d/net/20-client_bridge 
