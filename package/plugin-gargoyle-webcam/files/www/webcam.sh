@@ -75,7 +75,7 @@ var webcams = [];
 
 				<div class="row form-group">
 					<label class="col-xs-5" id="webcam_fps_label" for="webcam_fps"><%~ WebCFPS %>:</label>
-					<span class="col-xs-7"><input id="webcam_fps" class="form-control" type="text" size='20' maxlength='2' onkeyup='proofreadNumericRange(this,1,59)'/></span>
+					<span class="col-xs-7"><input id="webcam_fps" class="form-control" type="text" size='20' maxlength='2' oninput='proofreadNumericRange(this,1,59)'/></span>
 				</div>
 
 				<div class="row form-group">
@@ -87,7 +87,7 @@ var webcams = [];
 
 				<div class="row form-group">
 					<label class="col-xs-5" id="webcam_port_label" for="webcam_port"><%~ WebCPort %>:</label>
-					<span class="col-xs-7"><input id="webcam_port" class="form-control" type="text" size='20' maxlength='5' onkeyup='proofreadPort(this)'/></span>
+					<span class="col-xs-7"><input id="webcam_port" class="form-control" type="text" size='20' maxlength='5' oninput='proofreadPort(this)'/></span>
 				</div>
 
 				<div class="row form-group">

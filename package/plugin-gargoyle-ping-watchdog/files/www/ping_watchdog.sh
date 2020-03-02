@@ -27,7 +27,7 @@
 				<div class="row form-group">
 					<label class="col-xs-5" for='address_to_ping' id='address_to_ping_label'><%~ PgIP %>:</label>
 					<span class="col-xs-7">
-						<input type='text' id='address_to_ping' class="form-control" size='20' onkeyup='proofreadIp(this)'/>
+						<input type='text' id='address_to_ping' class="form-control" size='20' oninput='proofreadIp(this)'/>
 						<em class="help-block"><%~ IPAd %></em>
 					</span>
 				</div>
@@ -35,7 +35,7 @@
 				<div class="row form-group">
 					<label class="col-xs-5" for='ping_interval' id='ping_interval_label'><%~ Intv %>:</label>
 					<span class="col-xs-7">
-						<input type='text' id='ping_interval' class="form-control" size='20' onkeyup='proofreadNumericRange(this,1,59)'/>
+						<input type='text' id='ping_interval' class="form-control" size='20' oninput='proofreadNumericRange(this,1,59)'/>
 						<em class="help-block">1 - 59 <%~ minutes %></em>
 					</span>
 				</div>
@@ -43,7 +43,7 @@
 				<div class="row form-group">
 					<label class="col-xs-5" for='startup_delay' id='startup_delay_label'><%~ StDly %>:</label>
 					<span class="col-xs-7">
-						<input type='text' id='startup_delay' class="form-control" size='20' onkeyup='proofreadNumericRange(this,1,999)'/>
+						<input type='text' id='startup_delay' class="form-control" size='20' oninput='proofreadNumericRange(this,1,999)'/>
 						<em class="help-block">1 - 999 <%~ seconds %></em>
 					</span>
 				</div>
@@ -51,7 +51,7 @@
 				<div class="row form-group">
 					<label class="col-xs-5" for='failure_count' id='failure_count_label'><%~ FlCnt %>:</label>
 					<span class="col-xs-7">
-						<input type='text' id='failure_count' class="form-control" size='20' onkeyup='proofreadNumericRange(this,1,10)'/>
+						<input type='text' id='failure_count' class="form-control" size='20' oninput='proofreadNumericRange(this,1,10)'/>
 						<em class="help-block">1 - 10</em>
 					</span>
 				</div>

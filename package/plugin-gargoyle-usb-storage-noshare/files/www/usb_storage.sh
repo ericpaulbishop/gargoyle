@@ -87,8 +87,8 @@
 						<label id='ftp_wan_access_label' for='ftp_wan_pasv'><%~ WpFTP %></label>
 					</span>
 					<span class="col-xs-7">
-						<input class="form-control" type="text" size='7' maxLength='5' onkeyup='proofreadPort(this)' id='pasv_min_port' />&nbsp;-&nbsp;
-						<input class="form-control" type="text" size='7' maxLength='5' onkeyup='proofreadPort(this)' id='pasv_max_port' />
+						<input class="form-control" type="text" size='7' maxLength='5' oninput='proofreadPort(this)' id='pasv_min_port' />&nbsp;-&nbsp;
+						<input class="form-control" type="text" size='7' maxLength='5' oninput='proofreadPort(this)' id='pasv_max_port' />
 					</span>
 				</div>
 
@@ -183,14 +183,14 @@
 				<div id="swap_percent_container" class="row form-group">
 					<label class="col-xs-5" id="swap_percent_label" for="swap_percent"><%~ PSwap %>:</label>
 					<span class="col-xs-7">
-						<input id="swap_percent" class="form-control" type="text" onkeyup="updateFormatPercentages(this.id)" /><em><span id="swap_size"></span></em>
+						<input id="swap_percent" class="form-control" type="text" oninput="updateFormatPercentages(this.id)" /><em><span id="swap_size"></span></em>
 					</span>
 				</div>
 
 				<div id="storage_percent_container" class="row form-group">
 					<label class="col-xs-5" id="storage_percent_label" for="storage_percent"><%~ PStor %>:</label>
 					<span class="col-xs-7">
-						<input id="storage_percent" class="form-control" type="text" onkeyup="updateFormatPercentages(this.id)" /><em><span id="storage_size"></span></em>
+						<input id="storage_percent" class="form-control" type="text" oninput="updateFormatPercentages(this.id)" /><em><span id="storage_size"></span></em>
 					</span>
 				</div>
 

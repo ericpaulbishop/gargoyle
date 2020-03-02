@@ -85,7 +85,7 @@
 				<div class="row form-group">
 					<label class="col-xs-5" id="total_bandwidth_label" for="total_bandwidth"><%~ UTotBand %>:</label>
 					<span class="col-xs-7">
-						<input type="text" class="rightcolumn" id="total_bandwidth" class="rightcolumn" onkeyup="proofreadNumeric(this)"  size="10" maxlength="10" />
+						<input type="text" class="rightcolumn" id="total_bandwidth" class="rightcolumn" oninput="proofreadNumeric(this)"  size="10" maxlength="10" />
 						<em><%~ Kbs %></em>
 					</span>
 				</div>

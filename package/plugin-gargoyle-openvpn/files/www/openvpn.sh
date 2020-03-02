@@ -92,17 +92,17 @@
 			<div class="panel-body">
 				<div id="openvpn_server_ip_container" class="row form-group">
 					<label class="col-xs-5" for='openvpn_server_ip' id='openvpn_server_ip_label'><%~ OInIP %>:</label>
-					<span class="col-xs-7"><input type='text' class="form-control" name='openvpn_server_ip' id='openvpn_server_ip' onkeyup='proofreadIp(this)' size='20' maxlength='15' /></span>
+					<span class="col-xs-7"><input type='text' class="form-control" name='openvpn_server_ip' id='openvpn_server_ip' oninput='proofreadIp(this)' size='20' maxlength='15' /></span>
 				</div>
 
 				<div id="openvpn_server_mask_container" class="row form-group">
 					<label class="col-xs-5" for='openvpn_server_mask' id='openvpn_server_mask_label'><%~ OIMsk %>:</label>
-					<span class="col-xs-7"><input type='text' class="form-control" name='openvpn_server_mask' id='openvpn_server_mask' onkeyup='proofreadMask(this)' size='20' maxlength='15' /></span>
+					<span class="col-xs-7"><input type='text' class="form-control" name='openvpn_server_mask' id='openvpn_server_mask' oninput='proofreadMask(this)' size='20' maxlength='15' /></span>
 				</div>
 
 				<div id="openvpn_server_port_container" class="row form-group">
 					<label class="col-xs-5" for='openvpn_server_port' id='openvpn_server_port_label'><%~ OPrt %>:</label>
-					<span class="col-xs-7"><input type='text' class="form-control"  id='openvpn_server_port'  size='20' maxlength='5' onkeyup='proofreadPort(this)'/><br/></span>
+					<span class="col-xs-7"><input type='text' class="form-control"  id='openvpn_server_port'  size='20' maxlength='5' oninput='proofreadPort(this)'/><br/></span>
 				</div>
 
 				<div id="openvpn_server_protocol_container" class="row form-group">
@@ -268,12 +268,12 @@
 					<div id="openvpn_client_manual_controls">
 						<div id='openvpn_client_remote_container' class="row form-group">
 							<label class="col-xs-5" for='openvpn_client_remote' id='openvpn_client_remote_label'><%~ OSrvAddr %>:</label>
-							<span class="col-xs-7"><input type='text' class="form-control" name='openvpn_client_remote' onkeyup="updateClientConfigTextFromControls()" id='openvpn_client_remote' size='30' /></span>
+							<span class="col-xs-7"><input type='text' class="form-control" name='openvpn_client_remote' oninput="updateClientConfigTextFromControls()" id='openvpn_client_remote' size='30' /></span>
 						</div>
 
 						<div id='openvpn_client_port_container' class="row form-group">
 							<label class="col-xs-5" for='openvpn_client_port' id='openvpn_client_port_label'><%~ OSrvPrt %>:</label>
-							<span class="col-xs-7"><input type='text' class="form-control" name='openvpn_client_port' onkeyup="updateClientConfigTextFromControls();proofreadPort(this);" id='openvpn_client_port' size='30' /></span>
+							<span class="col-xs-7"><input type='text' class="form-control" name='openvpn_client_port' oninput="updateClientConfigTextFromControls();proofreadPort(this);" id='openvpn_client_port' size='30' /></span>
 						</div>
 
 						<div id='openvpn_client_protocol_container' class="row form-group">
@@ -300,7 +300,7 @@
 						</div>
 
 						<div id='openvpn_client_cipher_other_container' class="row form-group">
-							<span class="col-xs-7 col-xs-offset-5"><input type='text' class="form-control" onkeyup="updateClientConfigTextFromControls()" id="openvpn_client_cipher_other" />&nbsp;<em><%~ Cphr %></em></span>
+							<span class="col-xs-7 col-xs-offset-5"><input type='text' class="form-control" oninput="updateClientConfigTextFromControls()" id="openvpn_client_cipher_other" />&nbsp;<em><%~ Cphr %></em></span>
 						</div>
 
 						<div id='openvpn_client_block_nonovpn_container' class="row form-group">
@@ -320,23 +320,23 @@
 							<br/>
 							<span class="col-xs-12"><em><%~ CfgUpd %></em></span>
 							<br/>
-							<span class="col-xs-7 col-xs-offset-5"><textarea class="form-control textarea-lg" id='openvpn_client_conf_text' name='openvpn_client_conf_text' onkeyup='updateClientControlsFromConfigText()'></textarea></span>
+							<span class="col-xs-7 col-xs-offset-5"><textarea class="form-control textarea-lg" id='openvpn_client_conf_text' name='openvpn_client_conf_text' oninput='updateClientControlsFromConfigText()'></textarea></span>
 						</div>
 
 						<div id="openvpn_client_ca_text_container" class="row form-group">
 							<label class="col-xs-5" for='openvpn_client_ca_text' id='openvpn_client_ca_text_label'><%~ CACert %>:</label>
 							<br/>
-							<span class="col-xs-7"><textarea class="form-control textarea-lg" id='openvpn_client_ca_text' name='openvpn_client_ca_text' onkeyup='updateClientControlsFromConfigText()'></textarea></span>
+							<span class="col-xs-7"><textarea class="form-control textarea-lg" id='openvpn_client_ca_text' name='openvpn_client_ca_text' oninput='updateClientControlsFromConfigText()'></textarea></span>
 						</div>
 						<div id="openvpn_client_cert_text_container" class="row form-group">
 							<label class="col-xs-5" for='openvpn_client_cert_text' id='openvpn_client_cert_text_label'><%~ CCert %>:</label>
 							<br/>
-							<span class="col-xs-7"><textarea class="form-control textarea-lg" id='openvpn_client_cert_text' name='openvpn_client_cert_text' onkeyup='updateClientControlsFromConfigText()'></textarea></span>
+							<span class="col-xs-7"><textarea class="form-control textarea-lg" id='openvpn_client_cert_text' name='openvpn_client_cert_text' oninput='updateClientControlsFromConfigText()'></textarea></span>
 						</div>
 						<div id="openvpn_client_key_text_container" class="row form-group">
 							<label class="col-xs-5" for='openvpn_client_key_text' id='openvpn_client_key_text_label'><%~ CKey %>:</label>
 							<br/>
-							<span class="col-xs-7"><textarea class="form-control textarea-lg" id='openvpn_client_key_text' name='openvpn_client_key_text' onkeyup='updateClientControlsFromConfigText()'></textarea></span>
+							<span class="col-xs-7"><textarea class="form-control textarea-lg" id='openvpn_client_key_text' name='openvpn_client_key_text' oninput='updateClientControlsFromConfigText()'></textarea></span>
 						</div>
 
 						<div id="openvpn_client_ta_key_text_container">
