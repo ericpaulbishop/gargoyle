@@ -91,7 +91,7 @@
 				<div class="row form-group">
 					<label class="col-xs-5" id="total_bandwidth_label" for="total_bandwidth"><%~ DTotBand %>:</label>
 					<span class="col-xs-7">
-						<input type="text" id="total_bandwidth" class="form-control" onkeyup="proofreadNumeric(this)" size="10" maxlength="10" />
+						<input type="text" id="total_bandwidth" class="form-control" oninput="proofreadNumeric(this)" size="10" maxlength="10" />
 						<em><%~ Kbs %></em>
 					</span>
 				</div>
@@ -146,7 +146,7 @@
 						<label for="use_ptarget_ip" id="ptarget_ip_label"><%~ ACC_Pt %>:</label>
 					</span>
 					<span class="col-xs-6">
-						<input type="text" name="ptarget_ip" id="ptarget_ip" class="form-control" onkeyup="proofreadIpRange(this)" size="17" maxlength="31" aria-labelledby="ptarget_ip_label"/>
+						<input type="text" name="ptarget_ip" id="ptarget_ip" class="form-control" oninput="proofreadIpRange(this)" size="17" maxlength="31" aria-labelledby="ptarget_ip_label"/>
 					</span>
 				</div>
 
@@ -156,7 +156,7 @@
 						<label for="use_auto_pinglimit" id="pinglimit_label"><%~ ACC_con %>:</label>
 					</span>
 					<span class="col-xs-6">
-						<input type="text" name="pinglimit" id="pinglimit" class="form-control" onkeyup="proofreadNumericRange(this, 10, 250)" size="4" maxlength="4" aria-labelledby="pinglimit_label"/>
+						<input type="text" name="pinglimit" id="pinglimit" class="form-control" oninput="proofreadNumericRange(this, 10, 250)" size="4" maxlength="4" aria-labelledby="pinglimit_label"/>
 					</span>
 				</div>
 
