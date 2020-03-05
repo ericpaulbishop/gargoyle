@@ -140,59 +140,57 @@ EOF
 
 do_js_compress()
 {
-	echo "Compressing and mangling JavaScript files..."
-	terser_arg1="$1"
-	terser_arg2="$2"
-
-	rm -rf "$compress_js_dir"
-	mkdir "$compress_js_dir"
-	escaped_package_dir=$(echo "$top_dir/package-prepare/" | sed 's/\//\\\//g' | sed 's/\-/\\-/g' ) ;
-	terser_batch=""
-	for jsdir in $(find "${top_dir}/package-prepare" -path "*/www/js") ; do
-		pkg_rel_path=$(echo $jsdir | sed "s/$escaped_package_dir//g");
-		mkdir -p "$compress_js_dir/$pkg_rel_path"
-
-		for jsf in "$jsdir/"*.js ; do
-			compress_jsf=$compress_js_dir/$pkg_rel_path/$(basename "$jsf")
-			terser_batch="$terser_batch $jsf -o $compress_jsf -c -m"
-		done
-	done
 	num_terser_threads=1
 	if [ "$num_build_threads" != "unspecified" ]; then
 		num_terser_threads=$num_build_threads
 	fi
-	echo "$terser_batch" | xargs -n 5 -P $num_terser_threads $terser_arg1 $terser_arg2
-	cp -r "$compress_js_dir"/* "$top_dir/package-prepare/"
+	echo "Compressing/Mangling JavaScript files ($num_terser_threads threads)..."
+	terser_arg1="$1"
+	terser_arg2="$2"
+	package_dir="$top_dir/package-prepare"
+	rm -rf "$compress_js_dir"
+	mkdir "$compress_js_dir"
 
+	terser_batch=""
+	cd "$package_dir"
+	for jsf in $(find . -path '*.js' -a -not -path '*/www/i18n/*')
+	do
+		compress_jsf="$compress_js_dir/$jsf"
+		terser_batch="$terser_batch $package_dir/$jsf -o $compress_jsf -c -m"
+		mkdir -p "$(dirname "$compress_jsf")"
+	done
+	cd "$top_dir"
+
+	echo "$terser_batch" | xargs -n 5 -P $num_terser_threads $terser_arg1 $terser_arg2
+	cp -r "$compress_js_dir"/* "$package_dir"
 	echo "Done!"
 }
 
 do_css_compress()
 {
-	echo "Compressing CSS files..."
-	uglifycss_arg1="$1"
-	uglifycss_arg2="$2"
-
-	rm -rf "$compress_css_dir"
-	mkdir "$compress_css_dir"
-	escaped_package_dir=$(echo "$top_dir/package-prepare/" | sed 's/\//\\\//g' | sed 's/\-/\\-/g' ) ;
-	uglifycss_batch=""
-	for cssdir in $(find "${top_dir}/package-prepare" -maxdepth 5 -path "*/www/themes/*") ; do
-		pkg_rel_path=$(echo $cssdir | sed "s/$escaped_package_dir//g");
-		mkdir -p "$compress_css_dir/$pkg_rel_path"
-
-		for cssf in "$cssdir/"*.css ; do
-			compress_cssf=$compress_css_dir/$pkg_rel_path/$(basename "$cssf")
-			uglifycss_batch="$uglifycss_batch --output $compress_cssf $cssf"
-		done
-	done
 	num_uglifycss_threads=1
 	if [ "$num_build_threads" != "unspecified" ]; then
 		num_uglifycss_threads=$num_build_threads
 	fi
-	echo "$uglifycss_batch" | xargs -n 3 -P $num_uglifycss_threads $uglifycss_arg1 $uglifycss_arg2
-	cp -r "$compress_css_dir"/* "$top_dir/package-prepare/"
+	echo "Compressing CSS files ($num_uglifycss_threads threads)..."
+	uglifycss_arg1="$1"
+	uglifycss_arg2="$2"
+	package_dir="$top_dir/package-prepare"
+	rm -rf "$compress_css_dir"
+	mkdir "$compress_css_dir"
 
+	uglifycss_batch=""
+	cd "$package_dir"
+	for cssf in $(find . -path "*.css")
+	do
+		compress_cssf="$compress_css_dir/$cssf"
+		uglifycss_batch="$uglifycss_batch --output $compress_cssf $package_dir/$cssf"
+		mkdir -p "$(dirname "$compress_cssf")"
+	done
+	cd "$top_dir"
+
+	echo "$uglifycss_batch" | xargs -n 3 -P $num_uglifycss_threads $uglifycss_arg1 $uglifycss_arg2
+	cp -r "$compress_css_dir"/* "$package_dir"
 	echo "Done!"
 }
 
