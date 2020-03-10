@@ -282,7 +282,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 						</select>
 						<button class="btn btn-default" id="bridge_rescan_button" onclick="scanWifi('bridge_custom_ssid')"><%~ RScn %></button>
 						<div id="bridge_custom_ssid_container" class="second_row_right_column form-group">
-							<input type="text" class="form-control" id="bridge_custom_ssid" size="20" oninput="proofreadLengthRange(this,1,999)"/>
+							<input type="text" class="form-control" id="bridge_custom_ssid" size="20" maxlength="32" oninput="proofreadSsid(this)"/>
 						</div>
 
 					</span>
@@ -292,7 +292,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="bridge_ssid_container" class="row form-group">
 					<label class="col-xs-5" for="bridge_ssid" id="bridge_ssid_label"><%~ Join %>:</label>
 					<span class="col-xs-7">
-						<input style="float:left;" type="text" id="bridge_ssid" class="form-control" size="20" oninput="proofreadLengthRange(this,1,999)"/>
+						<input style="float:left;" type="text" id="bridge_ssid" class="form-control" size="20" maxlength="32" oninput="proofreadSsid(this)"/>
 						<button style="float:left;" class="btn btn-default" id="bridge_scan_button" onclick="scanWifi('bridge_ssid')"><%~ Scan %></button>
 					</span>
 				</div>
@@ -300,7 +300,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="bridge_broadcast_ssid_container" class="row form-group">
 					<label class="col-xs-5" for="bridge_broadcast_ssid" id="bridge_broadcast_ssid_label"><%~ Bcst %>:</label>
 					<span class="col-xs-7">
-						<input type="text" id="bridge_broadcast_ssid" class="form-control" size="20" oninput="proofreadLengthRange(this,1,999)"/>
+						<input type="text" id="bridge_broadcast_ssid" class="form-control" size="20" maxlength="32" oninput="proofreadSsid(this)"/>
 					</span>
 				</div>
 
@@ -823,7 +823,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 						</select>
 						<button class="btn btn-default" id="wifi_rescan_button" onclick="scanWifi('wifi_custom_ssid2')"><%~ RScn %></button>
 						<div id="wifi_custom_ssid2_container" class="second_row_right_column" >
-							<input type="text" id="wifi_custom_ssid2" class="form-control" size="20" oninput="proofreadLengthRange(this,1,999)"/>
+							<input type="text" id="wifi_custom_ssid2" class="form-control" size="20" maxlength="32" oninput="proofreadSsid(this)"/>
 						</div>
 
 					</span>
@@ -833,7 +833,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="wifi_ssid2_container" class="row form-group">
 					<label  class="col-xs-5" for="wifi_ssid2" id="wifi_ssid2_label">SSID:</label>
 					<span class="col-xs-7">
-						<input type="text" id="wifi_ssid2" class="form-control" size="20" oninput="proofreadLengthRange(this,1,999)"/>
+						<input type="text" id="wifi_ssid2" class="form-control" size="20" maxlength="32" oninput="proofreadSsid(this)"/>
 						<button class="btn btn-default" id="wifi_scan_button" onclick="scanWifi('wifi_ssid2')"><%~ Scan %></button>
 					</span>
 				</div>
@@ -920,14 +920,14 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="wifi_ssid1_container" class="row form-group">
 					<label class="col-xs-5" for="wifi_ssid1" id="wifi_ssid1_label"><%~ AcPtID %>:</label>
 					<span class="col-xs-7">
-						<input type="text" id="wifi_ssid1" class="form-control" size="20" oninput="proofreadLengthRange(this,1,999)"/><br/>
+						<input type="text" id="wifi_ssid1" class="form-control" size="20" maxlength="32" oninput="proofreadSsid(this)"/><br/>
 					</span>
 				</div>
 
 				<div id="wifi_ssid1a_container" class="row form-group">
 					<label class="col-xs-5" for="wifi_ssid1a" id="wifi_ssid1a_label">AP 5GHz SSID:</label>
 					<span class="col-xs-7">
-						<input type="text" id="wifi_ssid1a" class="form-control" size="20" oninput="proofreadLengthRange(this,1,999)"/>
+						<input type="text" id="wifi_ssid1a" class="form-control" size="20" maxlength="32" oninput="proofreadSsid(this)"/>
 					</span>
 				</div>
 
@@ -1022,7 +1022,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 				<div id="wifi_port1_container" class="row indent">
 					<label class="col-xs-5" for="wifi_port1" id="wifi_port1_label">RADIUS <%~ SrvPt %>:</label>
 					<span class="col-xs-7" >
-						<input type="text" id="wifi_port1" class="form-control" size="20" maxlength="5" oninput="proofreadNumeric(this)"/><br/>
+						<input type="text" id="wifi_port1" class="form-control" size="20" maxlength="5" oninput="proofreadPort(this)"/><br/>
 					</span>
 				</div>
 
@@ -1099,7 +1099,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					<div id="wifi_guest_ssid1_container" class="row form-group">
 						<label class="col-xs-5" for="wifi_guest_ssid1" id="wifi_guest_ssid1_label"><%~ GNetID %>:</label>
 						<span class="col-xs-7">
-							<input type="text" id="wifi_guest_ssid1" class="form-control" size="20" oninput="proofreadLengthRange(this,1,999)"/><br/>
+							<input type="text" id="wifi_guest_ssid1" class="form-control" size="20" maxlength="32" oninput="proofreadSsid(this)"/><br/>
 							<input type="text" id="wifi_guest_mac_g" class="form-control" style="display: none"/>
 						</span>
 					</div>
@@ -1107,7 +1107,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					<div id="wifi_guest_ssid1a_container" class="row form-group">
 						<label class="col-xs-5" for="wifi_guest_ssid1a" id="wifi_guest_ssid1a_label"><%~ GNet5ID %></label>
 						<span class="col-xs-7">
-							<input type="text" id="wifi_guest_ssid1a" class="form-control" size="20" oninput="proofreadLengthRange(this,1,999)"/><br/>
+							<input type="text" id="wifi_guest_ssid1a" class="form-control" size="20" maxlength="32" oninput="proofreadSsid(this)"/><br/>
 							<input type="text" id="wifi_guest_mac_a" class="form-control" style="display: none"/>
 						</span>
 					</div>

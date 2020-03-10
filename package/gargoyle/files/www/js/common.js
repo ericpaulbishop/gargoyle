@@ -1941,6 +1941,14 @@ function validateHex(text)
 }
 
 
+function validateSsid(ssid)
+{
+	return validateLengthRange(ssid, 1, 32)
+}
+function proofreadSsid(input)
+{
+	proofreadText(input, validateSsid, 0);
+}
 
 function validateHours(hoursStr)
 {

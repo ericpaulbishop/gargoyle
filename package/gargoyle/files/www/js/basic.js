@@ -1087,10 +1087,12 @@ function proofreadAll()
 {
 	var vlr1 = function(text){return validateLengthRange(text,1,999);};
 	var vip = validateIP;
+	var vnp = validatePort;
 	var vnm = validateNetMask;
 	var vm = validateMac;
 	var vn = validateNumeric;
 	var vw = validateWep;
+	var vid = validateSsid;
 	var vp = function(text){ return validatePass(text, 'wifi_encryption1'); }
 	var vpg = function(text){ return validatePass(text, 'wifi_guest_encryption1'); }
 	var vp2 = function(text){ return validatePass(text, 'wifi_encryption2'); }
@@ -1115,7 +1117,7 @@ function proofreadAll()
 	{
 		var inputIds = ['wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle', 'wan_pppoe_reconnect_pings', 'wan_pppoe_interval', 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_mac', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway', 'wifi_txpower', 'wifi_txpower_5ghz', 'wifi_ssid1', 'wifi_pass1', 'wifi_wep1', 'wifi_ft_key', 'wifi_guest_pass1', 'wifi_guest_wep1', 'wifi_server1', 'wifi_port1', 'wifi_ssid2', 'wifi_pass2', 'wifi_wep2', 'wan_3g_device', 'wan_3g_apn'];
 
-		var functions= [vlr1, vlr1, vn, vn, vn, vip, vnm, vip, vm, vn, vip, vnm, vip, vtp, vtpa, vlr1, vp, vw, vfk, vpg, vw, vip, vn, vlr1, vp2, vw, vlr1, vlr1];
+		var functions= [vlr1, vlr1, vn, vn, vn, vip, vnm, vip, vm, vn, vip, vnm, vip, vtp, vtpa, vid, vp, vw, vfk, vpg, vw, vip, vnp, vid, vp2, vw, vlr1, vlr1];
 
 		var optInputIds = ['wifi_ssid1a', 'wifi_guest_ssid1', 'wifi_guest_ssid1a']
 		for(index in optInputIds)
@@ -1124,7 +1126,7 @@ function proofreadAll()
 			if(document.getElementById(input + "_container").style.display == "block")
 			{
 				inputIds.push(input);
-				functions.push(vlr1);
+				functions.push(vid);
 			}
 		}
 
@@ -1152,7 +1154,7 @@ function proofreadAll()
 	else
 	{
 		var inputIds = ['bridge_ip', 'bridge_mask', 'bridge_gateway', 'bridge_txpower', 'bridge_ssid', 'bridge_pass', 'bridge_wep', 'bridge_broadcast_ssid'];
-		var functions = [vip, vnm, vip, vtp, vlr1,vpb,vw,vlr1];
+		var functions = [vip, vnm, vip, vtp, vid, vpb, vw, vid];
 		var returnCodes=[];
 		var visibilityIds=[];
 		var labelIds=[];
