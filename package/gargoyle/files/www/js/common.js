@@ -821,8 +821,6 @@ function initializeDescriptionVisibility(testUci, descriptionId, defaultDisplay,
 	{
 		document.getElementById(descriptionId + "_ref").firstChild.data = descLinkText;
 		document.getElementById(descriptionId + "_txt").style.display = descDisplay;
-		// necessary, or we overwrite the help settings when we save changes
-		testUci.removeSection("gargoyle", "help");
 	}
 }
 
