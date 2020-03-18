@@ -23,9 +23,9 @@
 				</div>
 
 				<div class="row form-group">
+					<span class="col-xs-12"><a id="ddns_1_ref" href="javascript:setDescriptionVisibility('ddns_1')"><%~ Hide %></a></span>
 					<span class="col-xs-12" id="ddns_1_txt">
 						<p><%~ HelpCI %></p>
 						<p><%~ HelpFI %></p>
 					</span>
-					<span class="col-xs-12"><a onclick="setDescriptionVisibility('ddns_1')"  id="ddns_1_ref" href="#ddns_1"><%~ Hide %></a></span>
 				</div>

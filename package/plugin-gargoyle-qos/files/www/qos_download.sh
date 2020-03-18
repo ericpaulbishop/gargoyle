@@ -57,13 +57,13 @@
 				</div>
 
 				<div id="qos_down_1" class="row form-group">
+					<span class="col-xs-12"><a id="qos_down_1_ref" href="javascript:setDescriptionVisibility('qos_down_1')"><%~ Hide %></a></span>
 					<span class="col-xs-12" id="qos_down_1_txt">
 						<p><%~ PackAbout %></p>
 
 						<p><%~ DefServClassAbout %></p>
 
 					</span>
-					<span class="col-xs-12"><a onclick="setDescriptionVisibility('qos_down_1')"  id="qos_down_1_ref" href="#qos_down_1"><%~ Hide %></a></span>
 				</div>
 
 				<div class="internal_divider"></div>
@@ -97,6 +97,7 @@
 				</div>
 
 				<div id="qos_down_2" class="row form-group">
+					<span class="col-xs-12"><a id="qos_down_2_ref" href="javascript:setDescriptionVisibility('qos_down_2')"><%~ Hide %></a></span>
 					<span id="qos_down_2_txt" class="col-xs-12">
 						<p><%~ DSCAbout %></p>
 
@@ -113,7 +114,6 @@
 						<p><%~ MinSpeedWarn %></p>
 					</span>
 
-					<span class="col-xs-12"><a onclick="setDescriptionVisibility('qos_down_2')"  id="qos_down_2_ref" href="#qos_down_2"><%~ Hide %></a></span>
 				</div>
 
 				<div class="internal_divider"></div>
@@ -167,10 +167,10 @@
 				</div>
 
 				<div id="qos_down_3" class="row form-group">
+					<span class="col-xs-12"><a id="qos_down_3_ref" href="javascript:setDescriptionVisibility('qos_down_3')"><%~ Hide %></a></span>
 					<span class="col-xs-12" id="qos_down_3_txt">
 						<%~ AbACC %>
 					</span>
-					<span class="col-xs-12"><a onclick="setDescriptionVisibility('qos_down_3')" id="qos_down_3_ref" href="#qos_down_3"><%~ Hide %></a></span>
 				</div>
 
 				<div class="internal_divider"></div>
@@ -192,6 +192,7 @@
 				</div>
 
 				<div class="row form-group" id="qos_down_4">
+					<span class="col-xs-12"><a id="qos_down_4_ref" href="javascript:setDescriptionVisibility('qos_down_4')"><%~ Hide %></a></span>
 					<span class="col-xs-8" id="qos_down_4_txt">
 						<table class="table table-responsive">
 							<tr><td><strong>Status Help</strong></td></tr>
@@ -210,7 +211,6 @@
 							<tr><td>Active Classes</td><td><%~ ACC_L_AC %></td></tr>
 						</table>
 					</span>
-					<span class="col-xs-12"><a onclick="setDescriptionVisibility('qos_down_4')"  id="qos_down_4_ref" href="#qos_down_4"><%~ Hide %></a></span>
 				</div>
 			</div>
 		</div>
