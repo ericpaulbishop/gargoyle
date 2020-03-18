@@ -771,6 +771,28 @@ function getWirelessMode(uciTest)
 	return wirelessMode;
 }
 
+function scrollUntilInView(element)
+{
+	var bounding = element.getBoundingClientRect();
+	// Consider header of fixed position.
+	var contentTop = document.getElementById("content").getBoundingClientRect().top;
+	// Only scroll element if not already in view.
+	if(bounding.top < contentTop || bounding.bottom > window.innerHeight)
+	{
+		// Scroll element just until its bottom is in view but only if its top is not truncated.
+		var alignToTop = bounding.height > window.innerHeight - contentTop;
+		try
+		{
+			// Try it smoothly.
+			element.scrollIntoView({ behavior: "smooth", block: alignToTop ? "start" : "end" });
+		}
+		catch(error)
+		{
+			// IE, Safari...
+			element.scrollIntoView(alignToTop);
+		}
+	}
+}
 
 function setDescriptionVisibility(descriptionId, defaultDisplay, displayText, hideText)
 {
@@ -780,12 +802,13 @@ function setDescriptionVisibility(descriptionId, defaultDisplay, displayText, hi
 
 	var ref = document.getElementById( descriptionId + "_ref" );
 	var txt = document.getElementById( descriptionId + "_txt" );
+	var box = document.getElementById( descriptionId );
 	var command = "uci set gargoyle.help." + descriptionId + "=";
 	if(ref.firstChild.data == displayText)
 	{
-		txt.style.display=defaultDisplay;
-		txt.scrollIntoView(false);
 		ref.firstChild.data = hideText;
+		txt.style.display = defaultDisplay;
+		scrollUntilInView(box);
 		command = command + "1\n";
 	}
 	else
