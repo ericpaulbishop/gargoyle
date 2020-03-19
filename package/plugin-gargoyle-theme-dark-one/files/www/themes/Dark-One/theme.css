@@ -548,6 +548,10 @@ input
 	padding:2px;
 	display:inline;
 }
+input.form-control[readonly]
+{
+	border-color: #333
+}
 select
 {
 	font-size:11px;
