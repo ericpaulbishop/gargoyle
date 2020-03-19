@@ -14,7 +14,9 @@ WebC.WebCPort="Port";
 WebC.WebCUName="Benutzername";
 WebC.WebCPass="Passwort";
 WebC.PrevWebC="Vorschau";
+WebC.WebCSnapshot="Webcam-Schnappschuss";
+WebC.WebCStream="Webcam-Stream";
+WebC.WebCAlert="<b>Vorschau nicht möglich.</b><br/>Versuchen Sie, den Stream manuell zu öffnen.";
 WebC.WebCOpt="optional";
 
 WebC.ErrorPortWebC="Webcam Serverport steht im Konflikt mit ";
-WebC.AvelAtWebC="Webcam ist verfügbar über ";

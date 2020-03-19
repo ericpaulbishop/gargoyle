@@ -14,7 +14,9 @@ WebC.WebCPort="Port";
 WebC.WebCUName="Brukernavn";
 WebC.WebCPass="Passord";
 WebC.PrevWebC="Forhåndsvisning";
+WebC.WebCSnapshot="Øyeblikksbilde av Webcam";
+WebC.WebCStream="Webcam-strøm";
+WebC.WebCAlert="<b>Forhåndsvisning ikke mulig.</b><br/>Prøv å åpne strømmen manuelt.";
 WebC.WebCOpt="valgfritt";
 
 WebC.ErrorPortWebC="Webcam server port er i konflikt med ";
-WebC.AvelAtWebC="Webcam er tilgjengelig på ";

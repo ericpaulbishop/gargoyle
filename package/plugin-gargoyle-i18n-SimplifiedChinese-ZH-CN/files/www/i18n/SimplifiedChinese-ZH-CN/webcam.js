@@ -14,7 +14,9 @@ WebC.WebCPort="端口";
 WebC.WebCUName="用户名";
 WebC.WebCPass="密码";
 WebC.PrevWebC="预览";
+WebC.WebCSnapshot="网络摄像头快照";
+WebC.WebCStream="网络摄像头流";
+WebC.WebCAlert="<b>无法预览。</b><br/>尝试手动打开视频流。";
 WebC.WebCOpt="选项";
 
 WebC.ErrorPortWebC="网络摄像头端口号冲突";
-WebC.AvelAtWebC="网络摄像头可用";

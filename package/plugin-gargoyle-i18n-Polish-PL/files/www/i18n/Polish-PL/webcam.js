@@ -14,7 +14,9 @@ WebC.WebCPort="Port";
 WebC.WebCUName="Nazwa użytkownika";
 WebC.WebCPass="Hasło";
 WebC.PrevWebC="Podgląd obrazu";
+WebC.WebCSnapshot="Migawka Kamery";
+WebC.WebCStream="Strumień Kamery";
+WebC.WebCAlert="<b>Podgląd nie jest możliwy.</b><br/>Spróbuj otworzyć strumień ręcznie.";
 WebC.WebCOpt="opcjonalne";
 
 WebC.ErrorPortWebC="Nie można włączyć obsługi kamery - konflikt portu z wartością wpisaną w polu ";
-WebC.AvelAtWebC="Obraz z kamery dostępny jest pod adresem ";

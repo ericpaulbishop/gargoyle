@@ -14,7 +14,9 @@ WebC.WebCPort="Port";
 WebC.WebCUName="Nom utilisateur";
 WebC.WebCPass="Mot de passe";
 WebC.PrevWebC="Prévisualisation";
+WebC.WebCSnapshot="Instantané de la Webcam";
+WebC.WebCStream="Flux Webcam";
+WebC.WebCAlert="<b>Aperçu impossible.</b><br/>Essayez d'ouvrir le flux manuellement.";
 WebC.WebCOpt="optionnel";
 
 WebC.ErrorPortWebC="Le port du serveur Webcam entre en conflit avec ";
-WebC.AvelAtWebC="La Webcam est joignable à ";

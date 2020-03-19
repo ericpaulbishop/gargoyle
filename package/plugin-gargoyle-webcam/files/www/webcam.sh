@@ -22,6 +22,13 @@ var webcams = [];
 
 	lan_ip=$(uci -p /tmp/state get network.lan.ipaddr 2>/dev/null)
 	echo "currentLanIp=\"$lan_ip\";"
+
+	echo "const REMOTE_ADDR = \"$REMOTE_ADDR\";";
+	echo "const SERVER_ADDR = \"$SERVER_ADDR\";";
+
+	echo "const HTTPS = \"$HTTPS\";";
+	echo "const HTTP_HOST = \"$HTTP_HOST\";";
+	echo "const SERVER_PORT = \"$SERVER_PORT\";";
 %>
 //-->
 </script>
@@ -42,7 +49,7 @@ var webcams = [];
 </div>
 
 <div id="webcam" class="row">
-	<div class="col-lg-6">
+	<div id="webcam_fieldset" class="col-lg-6">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ webcam.WebC %></h3>
@@ -108,19 +115,42 @@ var webcams = [];
 			</div>
 		</div>
 	</div>
-</div>
-
-<div id="webcam_preview" class="row">
-	<div class="col-lg-6">
+	<div id="webcam_preview" class="col-lg-6">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ PrevWebC %></h3>
 			</div>
 
-			<div class="panel-body">
-				<em><span id="webcam_info"></span></em>
-				<div>
-					<iframe id="videoframe" scrolling="no" border="0" width="320" height="240" frameBorder="0" src="about:blank" align="center"></iframe>
+			<div class="panel-body text-center">
+				<div class="row form-group">
+					<span class="col-xs-12">
+						<a id="webcam_snapshot" href="" target="_blank"><%~ WebCSnapshot %></a>
+					</span>
+				</div>
+				<div class="row form-group">
+					<span class="col-xs-12">
+						<input id="webcam_snapshot_url" class="form-control text-center" style="width: 100%" type="text" readonly="readonly" onclick="copy(this)"/>
+					</span>
+				</div>
+				<div class="row form-group">
+					<span class="col-xs-12">
+						<a id="webcam_stream" href="" target="_blank"><%~ WebCStream %></a>
+					</span>
+				</div>
+				<div class="row form-group">
+					<span class="col-xs-12">
+						<input id="webcam_stream_url" class="form-control text-center" style="width: 100%" type="text" readonly="readonly" onclick="copy(this)"/>
+					</span>
+				</div>
+				<div class="row form-group">
+					<span class="col-xs-12">
+						<a id="webcam_frame" href="" target="_blank">
+							<img alt="<%~ PrevWebC %>" src="" style="max-width: 100%"/>
+						</a>
+						<div id="webcam_alert" class="alert alert-info" role="alert">
+							<%~ WebCAlert %>
+						</div>
+					</span>
 				</div>
 			</div>
 		</div>
