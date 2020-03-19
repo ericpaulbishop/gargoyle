@@ -129,13 +129,8 @@ legend
 }
 #sidebar
 {
-	z-index: 4;
-	height: 100%;
-	padding-left: 0;
-	padding-right: 0;
+	padding: 0;
 	background: #FFFFFF;
-	margin-top: 58px;
-	border: 1px dashed #C9C9C9;
 }
 .sidebar-item.active>a 
 {
@@ -265,16 +260,17 @@ ul.sidebar .sidebar-list a
 }
 ul.sidebar 
 {
-	position: relative;
-	padding-top: 100px;
+	position: absolute;
+	top: 0;
 	bottom: 0;
-	padding: 0;
-	margin: 0;
-	list-style: none;
+	left: 0;
+	right: 0;
 	overflow-x: hidden;
 	overflow-y: auto;
-	width: 100%;
+	margin: 58px 0 0 0;
+	padding: 0;
 	background: #FFFFFF;
+	border: 1px dashed #C9C9C9;
 }
 ul.sidebar li a 
 {
