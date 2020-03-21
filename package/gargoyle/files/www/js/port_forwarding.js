@@ -569,6 +569,7 @@ function resetData()
 
 	setUpnpEnabled();
 	initializeDescriptionVisibility(uciOriginal, "upnp_help");
+	uciOriginal.removeSection("gargoyle", "help");
 
 
 	if (upnpdEnabled) {

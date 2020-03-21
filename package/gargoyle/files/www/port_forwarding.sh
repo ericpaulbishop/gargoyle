@@ -119,7 +119,9 @@
 
 				<div id="upnp_help" class="row form-group">
 					<span class="col-xs-12"><a id="upnp_help_ref" href="javascript:setDescriptionVisibility('upnp_help')"><%~ Hide %></a></span>
-					<span class="col-xs-12" id="upnp_help_txt"><%~ UPHelp %></span>
+					<span class="col-xs-12" id="upnp_help_txt">
+						<p><%~ UPHelp %></p>
+					</span>
 				</div>
 			</div>
 		</div>

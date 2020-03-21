@@ -53,13 +53,13 @@
 				</div>
 
 				<div id="qos_up_1" class="row form-group">
+					<span class="col-xs-12"><a id="qos_up_1_ref" href="javascript:setDescriptionVisibility('qos_up_1')"><%~ Hide %></a></span>
 					<span class="col-xs-12" id="qos_up_1_txt">
 						<p><%~ PackAbout %></p>
 
 						<p><%~ DefServClassAbout %></p>
 
 					</span>
-					<span class="col-xs-12"><a onclick="setDescriptionVisibility('qos_up_1')" id="qos_up_1_ref" href="#qos_up_1"><%~ Hide %></a></span>
 				</div>
 
 				<div class="internal_divider"></div>
@@ -91,6 +91,7 @@
 				</div>
 
 				<div id="qos_up_2" class="row form-group">
+					<span class="col-xs-12"><a id="qos_up_2_ref" href="javascript:setDescriptionVisibility('qos_up_2')"><%~ Hide %></a></span>
 					<span class="col-xs-12" id="qos_up_2_txt">
 						<p><%~ USCAbout %></p>
 
@@ -102,7 +103,6 @@
 
 						<p><%~ UTotBandAbout %></p>
 					</span>
-					<span class="col-xs-12"><a onclick="setDescriptionVisibility('qos_up_2')"  id="qos_up_2_ref" href="#qos_up_2"><%~ Hide %></a></span>
 				</div>
 
 				<div class="internal_divider"></div>

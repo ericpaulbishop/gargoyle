@@ -489,6 +489,7 @@ function resetData()
 
 	//initialize help settings
 	initializeDescriptionVisibility(uciOriginal, "ssh_help");
+	uciOriginal.removeSection("gargoyle", "help");
 
 	//enable/disable proper fields
 	updateVisibility();

@@ -228,19 +228,19 @@
 				<div class="row form-group" id="authorised_keys_table_container">
 					<label id="authorized_keys_label" class="col-xs-5" for="authorized_keys_table_container"><%~ SSHKeys %>:</label>
 					<div id="authorized_keys_table_container" class="col-xs-7 table-responsive"></div>
-					<div id="ssh_help">
-						<span class="col-xs-12"><a id="ssh_help_ref" href="javascript:setDescriptionVisibility('ssh_help')"><%~ MoreInfo %></a></span>
-						<span class="col-xs-12" id="ssh_help_txt" style="display:none">
-							<p><%~ SSHHelp1 %></p>
-							<p><%~ SSHHelp2 %></p>
-							<p><%~ SSHHelp3 %></p>
-							<ul>
-								<li><%~ SSHHelp3a %></li>
-								<li><%~ SSHHelp3b %></li>
-							</ul>
-							<p><%~ SSHHelp4 %></p>
-						</span>
-					</div>
+				</div>
+				<div class="row form-group" id="ssh_help">
+					<span class="col-xs-12"><a id="ssh_help_ref" href="javascript:setDescriptionVisibility('ssh_help')"><%~ MoreInfo %></a></span>
+					<span class="col-xs-12" id="ssh_help_txt" style="display:none">
+						<p><%~ SSHHelp1 %></p>
+						<p><%~ SSHHelp2 %></p>
+						<p><%~ SSHHelp3 %></p>
+						<ul>
+							<li><%~ SSHHelp3a %></li>
+							<li><%~ SSHHelp3b %></li>
+						</ul>
+						<p><%~ SSHHelp4 %></p>
+					</span>
 				</div>
 			</div>
 		</div>
