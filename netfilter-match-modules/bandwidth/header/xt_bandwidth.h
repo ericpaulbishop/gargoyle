@@ -73,14 +73,19 @@
 #define BANDWIDTH_QUERY_LENGTH		1205 
 #define BANDWIDTH_ENTRY_LENGTH		  12
 
+union xt_bandwidth_ipany
+{
+	struct in_addr ip4;
+	struct in6_addr ip6;
+};
 
 struct xt_bandwidth_info
 {
 	char id[BANDWIDTH_MAX_ID_LENGTH];
 	unsigned char type;
 	unsigned char check_type;
-	uint32_t local_subnet;
-	uint32_t local_subnet_mask;
+	union xt_bandwidth_ipany local_subnet;
+	union xt_bandwidth_ipany local_subnet_mask;
 
 	unsigned char cmp;
 	unsigned char reset_is_constant_interval;

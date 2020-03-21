@@ -27,6 +27,7 @@
 #include <linux/spinlock.h>
 #include <linux/interrupt.h>
 #include <asm/uaccess.h>
+#include <net/ip.h>
 
 #include <linux/time.h>
 
@@ -48,7 +49,7 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Eric Bishop");
 MODULE_DESCRIPTION("Match bandwidth used, designed for use with Gargoyle web interface (www.gargoyle-router.com)");
 MODULE_ALIAS("ipt_bandwidth");
-//MODULE_ALIAS("ip6t_bandwidth");
+MODULE_ALIAS("ip6t_bandwidth");
 
 /* 
  * WARNING: accessing the sys_tz variable takes FOREVER, and kills performance 
@@ -205,7 +206,7 @@ static void adjust_ip_for_backwards_time_shift(unsigned long key, void* value)
 		bw_history* new_history = initialize_history(old_history->max_nodes);
 		if(new_history == NULL)
 		{
-			printk("ipt_bandwidth: warning, kmalloc failure!\n");
+			printk("xt_bandwidth: warning, kmalloc failure!\n");
 			return;
 		}
 
@@ -303,7 +304,7 @@ static void check_for_backwards_time_shift(time_t now)
 	spin_lock_bh(&bandwidth_lock);
 	if(now < backwards_check && backwards_check != 0)
 	{
-		printk("ipt_bandwidth: backwards time shift detected, adjusting\n");
+		printk("xt_bandwidth: backwards time shift detected, adjusting\n");
 
 		/* adjust */
 		down(&userspace_lock);
@@ -477,7 +478,7 @@ static void check_for_timezone_shift(time_t now, int already_locked)
 			
 			if(already_locked == 0) { down(&userspace_lock); }
 
-			printk("ipt_bandwidth: timezone shift of %d minutes detected, adjusting\n", adj_minutes);
+			printk("xt_bandwidth: timezone shift of %d minutes detected, adjusting\n", adj_minutes);
 			printk("               old minutes west=%d, new minutes west=%d\n", old_minutes_west, local_minutes_west);
 			
 			/* this function is always called with absolute time, not time adjusted for timezone.  Correct that before adjusting */
@@ -1126,10 +1127,8 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, unsigned long
 	return new_bw;
 }
 
-
-static bool match(const struct sk_buff *skb, struct xt_action_param *par)
+static bool bandwidth_mt4(const struct sk_buff *skb, struct xt_action_param *par)
 {
-
 	struct xt_bandwidth_info *info = ((const struct xt_bandwidth_info*)(par->matchinfo))->non_const_self;
 	
 	time_t now;
@@ -1275,13 +1274,13 @@ static bool match(const struct sk_buff *skb, struct xt_action_param *par)
 			uint32_t dst_ip = iph->daddr;
 			if(info->type == BANDWIDTH_INDIVIDUAL_LOCAL)
 			{
-				bw_ips[0] = ((info->local_subnet_mask & src_ip) == info->local_subnet) ? src_ip : 0;
-				bw_ips[1] = ((info->local_subnet_mask & dst_ip) == info->local_subnet) ? dst_ip : 0;
+				bw_ips[0] = ((info->local_subnet_mask.ip4.s_addr & src_ip) == info->local_subnet.ip4.s_addr) ? src_ip : 0;
+				bw_ips[1] = ((info->local_subnet_mask.ip4.s_addr & dst_ip) == info->local_subnet.ip4.s_addr) ? dst_ip : 0;
 			}
 			else if(info->type == BANDWIDTH_INDIVIDUAL_REMOTE)
 			{
-				bw_ips[0] = ((info->local_subnet_mask & src_ip) != info->local_subnet ) ? src_ip : 0;
-				bw_ips[1] = ((info->local_subnet_mask & dst_ip) != info->local_subnet ) ? dst_ip : 0;
+				bw_ips[0] = ((info->local_subnet_mask.ip4.s_addr & src_ip) != info->local_subnet.ip4.s_addr ) ? src_ip : 0;
+				bw_ips[1] = ((info->local_subnet_mask.ip4.s_addr & dst_ip) != info->local_subnet.ip4.s_addr ) ? dst_ip : 0;
 			}
 		}
 		
@@ -1354,6 +1353,16 @@ static bool match(const struct sk_buff *skb, struct xt_action_param *par)
 
 	
 
+
+	return match_found;
+}
+
+static bool bandwidth_mt6(const struct sk_buff *skb, struct xt_action_param *par)
+{
+	struct xt_bandwidth_info *info = ((const struct xt_bandwidth_info*)(par->matchinfo))->non_const_self;
+	
+	time_t now;
+	int match_found;
 
 	return match_found;
 }
@@ -2186,7 +2195,7 @@ static int checkentry(const struct xt_mtchk_param *par)
 
 		if(info->ref_count == NULL) /* deal with kmalloc failure */
 		{
-			printk("ipt_bandwidth: kmalloc failure in checkentry!\n");
+			printk("xt_bandwidth: kmalloc failure in checkentry!\n");
 			return 0;
 		}
 		*(info->ref_count) = 1;
@@ -2233,7 +2242,7 @@ static int checkentry(const struct xt_mtchk_param *par)
 			iam = (info_and_maps*)get_string_map_element(id_map, info->id);
 			if(iam != NULL)
 			{
-				printk("ipt_bandwidth: error, \"%s\" is a duplicate id\n", info->id); 
+				printk("xt_bandwidth: error, \"%s\" is a duplicate id\n", info->id); 
 				spin_unlock_bh(&bandwidth_lock);
 				up(&userspace_lock);
 				return 0;
@@ -2280,7 +2289,7 @@ static int checkentry(const struct xt_mtchk_param *par)
 			iam = (info_and_maps*)kmalloc( sizeof(info_and_maps), GFP_ATOMIC);
 			if(iam == NULL) /* handle kmalloc failure */
 			{
-				printk("ipt_bandwidth: kmalloc failure in checkentry!\n");
+				printk("xt_bandwidth: kmalloc failure in checkentry!\n");
 				spin_unlock_bh(&bandwidth_lock);
 				up(&userspace_lock);
 				return 0;
@@ -2288,7 +2297,7 @@ static int checkentry(const struct xt_mtchk_param *par)
 			iam->ip_map = initialize_long_map();
 			if(iam->ip_map == NULL) /* handle kmalloc failure */
 			{
-				printk("ipt_bandwidth: kmalloc failure in checkentry!\n");
+				printk("xt_bandwidth: kmalloc failure in checkentry!\n");
 				spin_unlock_bh(&bandwidth_lock);
 				up(&userspace_lock);
 				return 0;
@@ -2299,7 +2308,7 @@ static int checkentry(const struct xt_mtchk_param *par)
 				iam->ip_history_map = initialize_long_map();
 				if(iam->ip_history_map == NULL) /* handle kmalloc failure */
 				{
-					printk("ipt_bandwidth: kmalloc failure in checkentry!\n");
+					printk("xt_bandwidth: kmalloc failure in checkentry!\n");
 					spin_unlock_bh(&bandwidth_lock);
 					up(&userspace_lock);
 					return 0;
@@ -2435,8 +2444,17 @@ static struct xt_match bandwidth_mt_reg[] __read_mostly =
 {
 	{
 		.name		= "bandwidth",
-		.match		= match,
+		.match		= bandwidth_mt4,
 		.family		= NFPROTO_IPV4,
+		.matchsize	= sizeof(struct xt_bandwidth_info),
+		.checkentry	= checkentry,
+		.destroy	= destroy,
+		.me		= THIS_MODULE,
+	},
+	{
+		.name		= "bandwidth",
+		.match		= bandwidth_mt6,
+		.family		= NFPROTO_IPV6,
 		.matchsize	= sizeof(struct xt_bandwidth_info),
 		.checkentry	= checkentry,
 		.destroy	= destroy,
