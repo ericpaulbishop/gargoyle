@@ -21,7 +21,19 @@
 						<em><%~ days %></em>
 					</span>
 				</div>
-
+				<div class="row form-group">
+					<label class="col-xs-5" for="ip_from" id="ip_from_label">ip_from:</label>
+					<span class="col-xs-7">
+						<select id="ip_from" name="ip_from">
+						<option value="internet">internet</option>
+						<%
+							wan_iface=$(uci -q -P /var/state get network.wan.ifname)
+							echo "<option value=\"$wan_iface\">$wan_iface</option>"
+						%>
+						</select>
+						
+					</span>
+				</div>
 				<div class="row form-group" id="ddns_1">
 					<span class="col-xs-12"><a id="ddns_1_ref" href="javascript:setDescriptionVisibility('ddns_1')"><%~ Hide %></a></span>
 					<span class="col-xs-12" id="ddns_1_txt">

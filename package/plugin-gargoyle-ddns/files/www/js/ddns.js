@@ -424,7 +424,14 @@ function setUciFromDocument(dstUci, pkg, section)
 	dstUci.set("ddns_gargoyle", section, "", "service");
 	dstUci.set("ddns_gargoyle", section, "enabled", "1");
 	dstUci.set("ddns_gargoyle", section, "service_provider", providerName);
-	dstUci.set("ddns_gargoyle", section, "ip_source", "internet");
+	var ip_from=document.getElementById("ip_from").value;//select or  input? input is easy
+	if(ip_from!="internet"){
+		dstUci.set("ddns_gargoyle", section, "ip_source", "interface");
+		dstUci.set("ddns_gargoyle", section, "ip_interface", ip_from);
+	}else{
+		dstUci.set("ddns_gargoyle", section, "ip_source", "internet");
+	}
+	//dstUci.set("ddns_gargoyle", section, "ip_source", "internet");
 	dstUci.set("ddns_gargoyle", section, "force_interval", document.getElementById("ddns_force").value  );
 	dstUci.set("ddns_gargoyle", section, "force_unit", "days");
 	dstUci.set("ddns_gargoyle", section, "check_interval", document.getElementById("ddns_check").value );
@@ -535,6 +542,20 @@ function setDocumentFromUci(srcUci, pkg, section)
 	var forceDays = (getMultipleFromUnit( srcUci.get("ddns_gargoyle", section, "force_unit") ) * srcUci.get("ddns_gargoyle", section, "force_interval"))/(24*60*60);
 	forceDays = (forceDays > 0) ? forceDays : 3;
 	document.getElementById( "ddns_force" ).value = forceDays;
+	
+	var ip_from=srcUci.get("ddns_gargoyle",section,"ip_interface");//2020-03-21
+	var selectip = document.getElementById("ip_from");
+	if(ip_from){
+		for (var i = 0; i < selectip.options.length; i++){  
+			if (selectip.options[i].value == ip_from){  
+				selectip.options[i].selected = true;  
+				break;  
+			}
+		} 
+	}
+	else{
+		selectip.options[0].selected=true;
+	}
 }
 
 function setProvider()
