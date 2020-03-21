@@ -194,7 +194,7 @@ input.text_disabled, select.select_disabled
 }
 input.form-control[readonly]
 {
-	background-color: transparent;
+	background-color: #fff;
 	border-style: dashed
 }
 #bottom_button_container
