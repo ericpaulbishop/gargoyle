@@ -588,20 +588,20 @@ function UCIContainer()
 							for(vi=0; vi< newValue.length ; vi++)
 							{
 								var nv = "" + newValue[vi] + "";
-								commandArray.push( "uci add_list " + key + "=\'" + nv.replace(/'/, "'\\''") + "\'" );
+								commandArray.push( "uci add_list " + key + "=\'" + nv.replace(/'/g, "'\\''") + "\'" );
 							}
 						}
 					}
 					else
 					{
 						newValue = "" + newValue + ""
-						commandArray.push( "uci set " + key + "=\'" + newValue.replace(/'/, "'\\''") + "\'" );
+						commandArray.push( "uci set " + key + "=\'" + newValue.replace(/'/g, "'\\''") + "\'" );
 					}
 				}
 				else if(oldValue != newValue && (newValue != null && newValue !=''))
 				{
 					newValue = "" + newValue + ""
-					commandArray.push( "uci set " + key + "=\'" + newValue.replace(/'/, "'\\''") + "\'" );
+					commandArray.push( "uci set " + key + "=\'" + newValue.replace(/'/g, "'\\''") + "\'" );
 				}
 			}
 			catch(e)
