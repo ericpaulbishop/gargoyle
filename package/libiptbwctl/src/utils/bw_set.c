@@ -2,7 +2,7 @@
  *  			Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
  *
  *
- *  Copyright Â© 2009 by Eric Bishop <eric@gargoyle-router.com>
+ *  Copyright © 2009 by Eric Bishop <eric@gargoyle-router.com>
  *
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -130,14 +130,17 @@ int main(int argc, char **argv)
 		num_data_parts = argc - optind;
 	
 	
-		unsigned long num_ips = num_data_parts/2;
+		unsigned long num_ips = num_data_parts/3;
        		ip_bw* buffer = (ip_bw*)malloc(num_ips*sizeof(ip_bw));
 		unsigned long data_index = 0;
 		unsigned long buffer_index = 0;
 		while(data_index < num_data_parts)
 		{
 			ip_bw next;
+			uint32_t family;
 			struct in_addr ipaddr;
+			sscanf(data_parts[data_index], "%d", &family);
+			data_index++;
 			int valid = inet_aton(data_parts[data_index], &ipaddr);
 			if((!valid) && (!last_backup_from_cl))
 			{
@@ -147,7 +150,11 @@ int main(int argc, char **argv)
 	
 			if(valid && data_index < num_data_parts)
 			{
-				next.ip = ipaddr.s_addr;
+				next.family = family;
+				next.ip[0] = ipaddr.s_addr;
+				next.ip[1] = 0;
+				next.ip[2] = 0;
+				next.ip[3] = 0;
 				valid = sscanf(data_parts[data_index], "%lld", (long long int*)&(next.bw) );
 				data_index++;
 			}
@@ -183,4 +190,3 @@ int main(int argc, char **argv)
 
 	return 0;
 }
-

@@ -146,7 +146,7 @@ static inline int is_leap(unsigned int y);
 static time_t get_next_reset_time(struct xt_bandwidth_info *info, time_t now, time_t previous_reset);
 static time_t get_nominal_previous_reset_time(struct xt_bandwidth_info *info, time_t current_next_reset);
 
-static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, char* ip, uint64_t initial_bandwidth, int* family);
+static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, char* ip, uint64_t initial_bandwidth, uint32_t family);
 
 int free_null_terminated_string_array(char** strs);
 
@@ -1063,7 +1063,7 @@ static time_t get_next_reset_time(struct xt_bandwidth_info *info, time_t now, ti
 
 
 
-static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, char* ip, uint64_t initial_bandwidth, int* family)
+static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, char* ip, uint64_t initial_bandwidth, uint32_t family)
 {
 	#ifdef BANDWIDTH_DEBUG
 		printk("initializing entry for ip, bw=%lld\n", initial_bandwidth);
@@ -1075,6 +1075,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, char* ip, uin
 
 
 	uint64_t* new_bw = NULL;
+	uint32_t* fam = NULL;
 	if(iam != NULL) /* should never happen, but let's be certain */
 	{
 		struct xt_bandwidth_info *info = iam->info;
@@ -1123,12 +1124,14 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, char* ip, uin
 					}
 				}
 			}
-			if(new_bw != NULL) /* check for kmalloc failure */
+			fam = (uint32_t*)kmalloc(sizeof(uint32_t), GFP_ATOMIC);
+			if(new_bw != NULL && fam != NULL) /* check for kmalloc failure */
 			{
 				uint64_t* old_bw;
 				*new_bw = initial_bandwidth;
-			       	old_bw = set_string_map_element(ip_map, ip, (void*)new_bw );
-				set_string_map_element(ip_family_map, ip, family);
+			    old_bw = set_string_map_element(ip_map, ip, (void*)new_bw );
+				*fam = family;
+				set_string_map_element(ip_family_map, ip, fam);
 				
 				/* only free old_bw if num_intervals_to_save is zero -- otherwise it already got freed above when we wiped the old history */
 				if(old_bw != NULL && info->num_intervals_to_save == 0)
@@ -1173,7 +1176,6 @@ static bool bandwidth_mt4(const struct sk_buff *skb, struct xt_action_param *par
 	info_and_maps* iam = NULL;
 	string_map* ip_map = NULL;
 	int family = NFPROTO_IPV4;
-	int* familyptr = &family;
 	
 	uint64_t* bws[2] = {NULL, NULL};
 
@@ -1262,7 +1264,7 @@ static bool bandwidth_mt4(const struct sk_buff *skb, struct xt_action_param *par
 			
 			if(info->combined_bw == NULL)
 			{
-				bws[0] = initialize_map_entries_for_ip(iam, "0.0.0.0", skb->len, familyptr);
+				bws[0] = initialize_map_entries_for_ip(iam, "0.0.0.0", skb->len, family);
 			}
 			else
 			{
@@ -1341,7 +1343,7 @@ static bool bandwidth_mt4(const struct sk_buff *skb, struct xt_action_param *par
 			uint64_t* combined_oldval = info->combined_bw;
 			if(combined_oldval == NULL)
 			{
-				combined_oldval = initialize_map_entries_for_ip(iam, "0.0.0.0", (uint64_t)skb->len, familyptr);
+				combined_oldval = initialize_map_entries_for_ip(iam, "0.0.0.0", (uint64_t)skb->len, family);
 			}
 			else
 			{
@@ -1358,7 +1360,7 @@ static bool bandwidth_mt4(const struct sk_buff *skb, struct xt_action_param *par
 				if(!is_check)
 				{
 					/* may return NULL on malloc failure but that's ok */
-					oldval = initialize_map_entries_for_ip(iam, bw_ip, (uint64_t)skb->len, familyptr);
+					oldval = initialize_map_entries_for_ip(iam, bw_ip, (uint64_t)skb->len, family);
 				}
 			}
 			else
@@ -1422,9 +1424,6 @@ static bool bandwidth_mt6(const struct sk_buff *skb, struct xt_action_param *par
 /**********************
  * Get functions
  *********************/
-
-#define MAX_IP_STR_LENGTH 16
-
 #define ERROR_NONE 0
 #define ERROR_NO_ID 1
 #define ERROR_BUFFER_TOO_SHORT 2
@@ -1432,7 +1431,9 @@ static bool bandwidth_mt6(const struct sk_buff *skb, struct xt_action_param *par
 #define ERROR_UNKNOWN 4
 typedef struct get_req_struct 
 {
-	uint32_t ip;
+	uint32_t family;
+	uint32_t ip[4];
+	//uint32_t ip;
 	uint32_t next_ip_index;
 	unsigned char return_history;
 	char id[BANDWIDTH_MAX_ID_LENGTH];
@@ -1441,7 +1442,8 @@ typedef struct get_req_struct
 static char** output_ip_list = NULL;
 static unsigned long output_ip_list_length = 0;
 
-static char add_ip_block(	uint32_t ip, 
+static char add_ip_block(uint32_t family,
+			uint32_t* ip, 
 			unsigned char full_history_requested,
 			info_and_maps* iam,
 			unsigned char* output_buffer, 
@@ -1456,7 +1458,8 @@ static int handle_get_failure(int ret_value, int unlock_user_sem, int unlock_ban
  * returns whether we succeeded in adding ip block, 0= success, 
  * otherwise error code of problem that we found
  */
-static char add_ip_block(	uint32_t ip, 
+static char add_ip_block(uint32_t family,
+				uint32_t* ip, 
 				unsigned char full_history_requested,
 				info_and_maps* iam,
 				unsigned char* output_buffer, 
@@ -1464,8 +1467,15 @@ static char add_ip_block(	uint32_t ip,
 				uint32_t output_buffer_length 
 				)
 {
-	char ipstr[INET_ADDRSTRLEN];
-	sprintf(ipstr, STRIP, NIPQUAD(ip));
+	char ipstr[INET6_ADDRSTRLEN];
+	if(family == NFPROTO_IPV4)
+	{
+		sprintf(ipstr, STRIP, NIPQUAD(*ip));
+	}
+	else
+	{
+		sprintf(ipstr, STRIP6, NIP6(*ip));
+	}
 	#ifdef BANDWIDTH_DEBUG
 		printk("doing output for ip = %s\n", ipstr);
 	#endif
@@ -1484,14 +1494,23 @@ static char add_ip_block(	uint32_t ip,
 			#endif
 
 
-			uint32_t block_length = (2*4) + (3*8);
+			uint32_t block_length = (2*4) + (3*8) + (1*16);
 			uint64_t *bw;
 
 			if(*current_output_index + block_length > output_buffer_length)
 			{
 				return ERROR_BUFFER_TOO_SHORT;
 			}
-			*( (uint32_t*)(output_buffer + *current_output_index) ) = ip;
+			*( (uint32_t*)(output_buffer + *current_output_index) ) = family;
+			*current_output_index = *current_output_index + 4;
+			
+			*( (uint32_t*)(output_buffer + *current_output_index) ) = *ip;
+			*current_output_index = *current_output_index + 4;
+			*( (uint32_t*)(output_buffer + *current_output_index) ) = *(ip+1);
+			*current_output_index = *current_output_index + 4;
+			*( (uint32_t*)(output_buffer + *current_output_index) ) = *(ip+2);
+			*current_output_index = *current_output_index + 4;
+			*( (uint32_t*)(output_buffer + *current_output_index) ) = *(ip+3);
 			*current_output_index = *current_output_index + 4;
 	
 			*( (uint32_t*)(output_buffer + *current_output_index) ) = 1;
@@ -1520,7 +1539,7 @@ static char add_ip_block(	uint32_t ip,
 		}
 		else
 		{
-			uint32_t block_length = (2*4) + (3*8) + (8*history->num_nodes);
+			uint32_t block_length = (2*4) + (3*8) + (1*16) + (8*history->num_nodes);
 			uint64_t last_reset;
 			uint32_t node_num;
 			uint32_t next_index;
@@ -1530,7 +1549,16 @@ static char add_ip_block(	uint32_t ip,
 				return ERROR_BUFFER_TOO_SHORT;
 			}
 		
-			*( (uint32_t*)(output_buffer + *current_output_index) ) = ip;
+			*( (uint32_t*)(output_buffer + *current_output_index) ) = family;
+			*current_output_index = *current_output_index + 4;
+			
+			*( (uint32_t*)(output_buffer + *current_output_index) ) = *ip;
+			*current_output_index = *current_output_index + 4;
+			*( (uint32_t*)(output_buffer + *current_output_index) ) = *(ip+1);
+			*current_output_index = *current_output_index + 4;
+			*( (uint32_t*)(output_buffer + *current_output_index) ) = *(ip+2);
+			*current_output_index = *current_output_index + 4;
+			*( (uint32_t*)(output_buffer + *current_output_index) ) = *(ip+3);
 			*current_output_index = *current_output_index + 4;
 	
 			*( (uint32_t*)(output_buffer + *current_output_index) )= history->num_nodes;
@@ -1578,12 +1606,21 @@ static char add_ip_block(	uint32_t ip,
 	else
 	{
 		uint64_t *bw;
-		if(*current_output_index + 8 > output_buffer_length)
+		if(*current_output_index + 28 > output_buffer_length)
 		{
 			return ERROR_BUFFER_TOO_SHORT;
 		}
 
-		*( (uint32_t*)(output_buffer + *current_output_index) ) = ip;
+		*( (uint32_t*)(output_buffer + *current_output_index) ) = family;
+		*current_output_index = *current_output_index + 4;
+		
+		*( (uint32_t*)(output_buffer + *current_output_index) ) = *ip;
+		*current_output_index = *current_output_index + 4;
+		*( (uint32_t*)(output_buffer + *current_output_index) ) = *(ip+1);
+		*current_output_index = *current_output_index + 4;
+		*( (uint32_t*)(output_buffer + *current_output_index) ) = *(ip+2);
+		*current_output_index = *current_output_index + 4;
+		*( (uint32_t*)(output_buffer + *current_output_index) ) = *(ip+3);
 		*current_output_index = *current_output_index + 4;
 
 
@@ -1618,27 +1655,51 @@ static int handle_get_failure(int ret_value, int unlock_user_sem, int unlock_ban
 
 /* 
  * request structure: 
- * bytes 1:4 is ip (uint32_t)
- * bytes 4:8 is the next ip index (uint32_t)
- * byte  9   is whether to return full history or just current usage (unsigned char)
- * bytes 10:10+MAX_ID_LENGTH are the id (a string)
+ * bytes 1:4 is family (uint32_t)
+ * bytes 5:20 is ip (uint32_t * 4) (left aligned i.e. ipv4 takes up 5:8, not 17:20)
+ * bytes 21:24 is the next ip index (uint32_t)
+ * byte  25   is whether to return full history or just current usage (unsigned char)
+ * bytes 26:26+MAX_ID_LENGTH are the id (a string)
  */
 static void parse_get_request(unsigned char* request_buffer, get_request* parsed_request)
 {
-	uint32_t* ip = (uint32_t*)(request_buffer+0);
-	uint32_t* next_ip_index = (uint32_t*)(request_buffer+4);
-	unsigned char* return_history = (unsigned char*)(request_buffer+8);
+	uint32_t* family = (uint32_t*)(request_buffer+0);
+	uint32_t* ip = (uint32_t*)(request_buffer+4);
+	uint32_t* next_ip_index = (uint32_t*)(request_buffer+20);
+	unsigned char* return_history = (unsigned char*)(request_buffer+24);
 
 	
-
-	parsed_request->ip = *ip;
+	parsed_request->family = *family;
+	if(parsed_request->family == NFPROTO_IPV4)
+	{
+		parsed_request->ip[0] = *ip;
+		parsed_request->ip[1] = 0;
+		parsed_request->ip[2] = 0;
+		parsed_request->ip[3] = 0;
+	}
+	else
+	{
+		parsed_request->ip[0] = *ip;
+		parsed_request->ip[1] = *(ip+1);
+		parsed_request->ip[2] = *(ip+2);
+		parsed_request->ip[3] = *(ip+3);
+	}
 	parsed_request->next_ip_index = *next_ip_index;
 	parsed_request->return_history = *return_history;
-	memcpy(parsed_request->id, request_buffer+9, BANDWIDTH_MAX_ID_LENGTH);
+	memcpy(parsed_request->id, request_buffer+25, BANDWIDTH_MAX_ID_LENGTH);
 	(parsed_request->id)[BANDWIDTH_MAX_ID_LENGTH-1] = '\0'; /* make sure id is null terminated no matter what */
 	
 	#ifdef BANDWIDTH_DEBUG
-		printk("ip = %u.%u.%u.%u\n", *((char*)ip), *(((char*)ip)+1), *(((char*)ip)+2), *(((char*)ip)+3) );
+		if(parsed_request->family == NFPROTO_IPV4)
+		{
+			printk("ip = "STRIP"\n", NIPQUAD(*ip));
+			printk("ip = "STRIP"\n", NIPQUAD(*parsed_request->ip));
+		}
+		else
+		{
+			printk("ip6 = "STRIP6"\n", NIP6(*ip));
+			printk("ip6 = "STRIP6"\n", NIP6(*parsed_request->ip));
+		}
 		printk("next ip index = %d\n", *next_ip_index);
 		printk("return_history = %d\n", *return_history);
 	#endif
@@ -1670,7 +1731,7 @@ static int xt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 	
 	
 	/* first check that query buffer is big enough to hold the info needed to parse the query */
-	if(*len < BANDWIDTH_MAX_ID_LENGTH + 9)
+	if(*len < BANDWIDTH_MAX_ID_LENGTH + 25)
 	{
 
 		return handle_get_failure(0, 1, 0, ERROR_BUFFER_TOO_SHORT, user, NULL);
@@ -1704,7 +1765,7 @@ static int xt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 	{
 		return handle_get_failure(0, 1, 1, ERROR_NO_ID, user, buffer);
 	}
-	if(iam->info == NULL || iam->ip_map == NULL)
+	if(iam->info == NULL || iam->ip_map == NULL || iam->ip_family_map == NULL)
 	{
 		return handle_get_failure(0, 1, 1, ERROR_NO_ID, user, buffer);
 	}
@@ -1714,7 +1775,9 @@ static int xt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 	}
 	
 	/* allocate ip list if this is first query */
-	if(query.next_ip_index == 0 && query.ip == 0)
+	uint32_t testblk[4];
+	memset(&testblk, 0, sizeof(uint32_t)*4);
+	if(query.next_ip_index == 0 && memcmp(&testblk, &(query.ip), sizeof(uint32_t)*4) == 0)
 	{
 		if(output_ip_list != NULL)
 		{
@@ -1776,19 +1839,21 @@ static int xt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 	 * format is dependent on whether history was queried
 	 * 
 	 * if history was NOT queried we have
-	 * bytes 1-4 : ip
-	 * bytes 5-12 : bandwidth
+	 * bytes 1-4 : family
+	 * bytes 5-20 : ip
+	 * bytes 21-28 : bandwidth
 	 *
 	 * if history WAS queried we have
 	 *   (note we are using 64 bit integers for time here
 	 *   even though time_t is 32 bits on most 32 bit systems
 	 *   just to be on the safe side)
-	 * bytes 1-4 : ip
-	 * bytes 4-8 : history_length number of history values (including current)
-	 * bytes 9-16 : first start
-	 * bytes 17-24 : first end
-	 * bytes 25-32 : recent end 
-	 * 33 onward : list of 64 bit integers of length history_length
+	 * bytes 1-4 : family
+	 * bytes 5-20 : ip
+	 * bytes 21-24 : history_length number of history values (including current)
+	 * bytes 25-32 : first start
+	 * bytes 33-40 : first end
+	 * bytes 41-48 : recent end 
+	 * 49 onward : list of 64 bit integers of length history_length
 	 *
 	 */
 	error = buffer;
@@ -1804,9 +1869,10 @@ static int xt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 	*reset_is_constant_interval = iam->info->reset_is_constant_interval;
 
 	current_output_index = 30;
-	if(query.ip != 0)
+	if(memcmp(&testblk, &(query.ip), sizeof(uint32_t)*4) != 0)
 	{
-		*error = add_ip_block(	query.ip, 
+		*error = add_ip_block(query.family,
+					query.ip, 
 					query.return_history,
 					iam,
 					buffer, 
@@ -1829,7 +1895,8 @@ static int xt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 		{
 			uint32_t next_ip;
 			in4_pton(output_ip_list[next_index], -1, (u8 *)&next_ip, '\0', NULL);
-			*error = add_ip_block(	next_ip, 
+			*error = add_ip_block(NFPROTO_IPV4,
+						&next_ip, 
 						query.return_history,
 						iam,
 						buffer, 
@@ -1948,26 +2015,36 @@ static void set_single_ip_data(unsigned char history_included, info_and_maps* ia
 	 * that is equal to the wall-clock time in the current time-zone.  Incoming values must 
 	 * be adjusted similarly
 	 */
-	uint32_t ip = *( (uint32_t*)(buffer + *buffer_index) );
-	char ipstr[INET_ADDRSTRLEN];
-	sprintf(ipstr, STRIP, NIPQUAD(ip));
+	uint32_t family = *( (uint32_t*)(buffer + *buffer_index) );
+	uint32_t ip[4];
+	ip[0] = *( (uint32_t*)(buffer + *buffer_index+4) );
+	ip[1] = *( (uint32_t*)(buffer + *buffer_index+8) );
+	ip[2] = *( (uint32_t*)(buffer + *buffer_index+12) );
+	ip[3] = *( (uint32_t*)(buffer + *buffer_index+16) );
+	char ipstr[INET6_ADDRSTRLEN];
+	if(family == NFPROTO_IPV4)
+	{
+		sprintf(ipstr, STRIP, NIPQUAD(ip));
+	}
+	else
+	{
+		sprintf(ipstr, STRIP6, NIP6(ip));
+	}
 			
 	#ifdef BANDWIDTH_DEBUG
 		printk("doing set for ip = %s\n", ipstr);
 		printk("ip index = %d\n", *buffer_index);
 	#endif
 	
-	int family = NFPROTO_IPV4;
-	int* familyptr = &family;
+	uint32_t testblk[4];
+	memset(&testblk, 0, sizeof(uint32_t)*4);
 
 	if(history_included)
 	{
-		uint32_t num_history_nodes = *( (uint32_t*)(buffer + *buffer_index+4));
+		uint32_t num_history_nodes = *( (uint32_t*)(buffer + *buffer_index+20));
 		if(iam->info->num_intervals_to_save > 0 && iam->ip_history_map != NULL)
 		{
-			time_t first_start = (time_t) *( (uint64_t*)(buffer + *buffer_index+8));
-			/* time_t first_end   = (time_t) *( (uint64_t*)(buffer + *buffer_index+16)); //not used */
-			/* time_t last_end    = (time_t) *( (uint64_t*)(buffer + *buffer_index+24)); //not used */
+			time_t first_start = (time_t) *( (uint64_t*)(buffer + *buffer_index+24));
 			time_t next_start;
 			time_t next_end;
 			uint32_t node_index;
@@ -1980,7 +2057,7 @@ static void set_single_ip_data(unsigned char history_included, info_and_maps* ia
 			#endif
 
 
-			*buffer_index = *buffer_index + (2*4) + (3*8);
+			*buffer_index = *buffer_index + (2*4) + (1*16) + (3*8);
 			
 			/* adjust for timezone */
 			next_start = first_start - (60 * local_minutes_west);
@@ -2000,7 +2077,7 @@ static void set_single_ip_data(unsigned char history_included, info_and_maps* ia
 				
 				if(node_index == 0 || history == NULL)
 				{
-					initialize_map_entries_for_ip(iam, ipstr, next_bw, familyptr);
+					initialize_map_entries_for_ip(iam, ipstr, next_bw, family);
 					history = get_string_map_element(iam->ip_history_map, ipstr);
 				}
 				else if(next_end < now) /* if this is most recent node, don't do update since last node is current bandwidth */ 
@@ -2043,7 +2120,7 @@ static void set_single_ip_data(unsigned char history_included, info_and_maps* ia
 				set_string_map_element(iam->ip_map, ipstr, (history->history_data + history->current_index) );
 				iam->info->previous_reset = next_start;
 				iam->info->next_reset = next_end;
-				if(ip == 0)
+				if(memcmp(&testblk, &ip, sizeof(uint32_t)*4) == 0)
 				{
 					iam->info->current_bandwidth = (history->history_data)[history->current_index];
 				}
@@ -2052,11 +2129,11 @@ static void set_single_ip_data(unsigned char history_included, info_and_maps* ia
 		else
 		{
 			uint64_t bw;
-			*buffer_index = *buffer_index + (2*4) + (3*8) + ((num_history_nodes-1)*8);
+			*buffer_index = *buffer_index + (2*4) + (1*16) + (3*8) + ((num_history_nodes-1)*8);
 			bw = *( (uint64_t*)(buffer + *buffer_index));
-			initialize_map_entries_for_ip(iam, ipstr, bw, familyptr); /* automatically frees existing values if they exist */
+			initialize_map_entries_for_ip(iam, ipstr, bw, family); /* automatically frees existing values if they exist */
 			*buffer_index = *buffer_index + 8;
-			if(ip == 0)
+			if(memcmp(&testblk, &ip, sizeof(uint32_t)*4) == 0)
 			{
 				iam->info->current_bandwidth = bw;
 			}
@@ -2065,16 +2142,16 @@ static void set_single_ip_data(unsigned char history_included, info_and_maps* ia
 	}
 	else
 	{
-		uint64_t bw = *( (uint64_t*)(buffer + *buffer_index+4) );
+		uint64_t bw = *( (uint64_t*)(buffer + *buffer_index+20) );
 		#ifdef BANDWIDTH_DEBUG
 			printk("  setting bw to %lld\n", bw );
 		#endif
 
 		
-		initialize_map_entries_for_ip(iam, ipstr, bw, familyptr); /* automatically frees existing values if they exist */
-		*buffer_index = *buffer_index + 12;
+		initialize_map_entries_for_ip(iam, ipstr, bw, family); /* automatically frees existing values if they exist */
+		*buffer_index = *buffer_index + 28;
 
-		if(ip == 0)
+		if(memcmp(&testblk, &ip, sizeof(uint32_t)*4) == 0)
 		{
 			iam->info->current_bandwidth = bw;
 		}
@@ -2132,7 +2209,7 @@ static int xt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t 
 	{
 		return handle_set_failure(0, 1, 1, buffer);
 	}
-	if(iam->info == NULL || iam->ip_map == NULL)
+	if(iam->info == NULL || iam->ip_map == NULL || iam->ip_family_map == NULL)
 	{
 		return handle_set_failure(0, 1, 1, buffer);
 	}
@@ -2162,8 +2239,10 @@ static int xt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t 
 				for(ip_index = 0; ip_index < num_ips; ip_index++)
 				{
 					remove_string_map_element(iam->ip_map, iplist[ip_index]);
+					uint32_t* fam = remove_string_map_element(iam->ip_family_map, iplist[ip_index]);
+					kfree(fam);
 				}
-				/* ignore return value -- it's actually malloced in history, not here */
+				/* ignore return value for bw -- it's actually malloced in history, not here */
 				free_null_terminated_string_array(iplist);
 			}
 			if(iam->ip_history_map->num_elements > 0)
@@ -2191,6 +2270,8 @@ static int xt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t 
 				{
 					uint64_t *bw = remove_string_map_element(iam->ip_map, iplist[ip_index]);
 					kfree(bw);
+					uint32_t* fam = remove_string_map_element(iam->ip_family_map, iplist[ip_index]);
+					kfree(fam);
 				}
 				free_null_terminated_string_array(iplist);
 			}
