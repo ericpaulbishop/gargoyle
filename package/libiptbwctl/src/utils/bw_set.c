@@ -139,22 +139,42 @@ int main(int argc, char **argv)
 			ip_bw next;
 			uint32_t family;
 			struct in_addr ipaddr;
+			struct in6_addr ip6addr;
 			sscanf(data_parts[data_index], "%d", &family);
 			data_index++;
-			int valid = inet_aton(data_parts[data_index], &ipaddr);
+			int valid = 0;
+			if(family == AF_INET)
+			{
+				valid = inet_pton(family, data_parts[data_index], &ipaddr);
+			}
+			else
+			{
+				valid = inet_pton(family, data_parts[data_index], &ip6addr);
+			}
+			
 			if((!valid) && (!last_backup_from_cl))
 			{
 				sscanf(data_parts[data_index], "%ld", &last_backup);
 			}
 			data_index++;
-	
+
 			if(valid && data_index < num_data_parts)
 			{
 				next.family = family;
-				next.ip[0] = ipaddr.s_addr;
-				next.ip[1] = 0;
-				next.ip[2] = 0;
-				next.ip[3] = 0;
+				if(next.family == AF_INET)
+				{
+					*next.ip = ipaddr.s_addr;
+					*(next.ip+1) = 0;
+					*(next.ip+2) = 0;
+					*(next.ip+3) = 0;
+				}
+				else
+				{
+					*next.ip = ip6addr.s6_addr32[0];
+					*(next.ip+1) = ip6addr.s6_addr32[1];
+					*(next.ip+2) = ip6addr.s6_addr32[2];
+					*(next.ip+3) = ip6addr.s6_addr32[3];
+				}
 				valid = sscanf(data_parts[data_index], "%lld", (long long int*)&(next.bw) );
 				data_index++;
 			}

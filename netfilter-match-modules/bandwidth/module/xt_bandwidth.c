@@ -1409,6 +1409,272 @@ static bool bandwidth_mt6(const struct sk_buff *skb, struct xt_action_param *par
 	time_t now;
 	int match_found;
 
+
+	unsigned char is_check = info->cmp == BANDWIDTH_CHECK ? 1 : 0;
+	unsigned char do_src_dst_swap = 0;
+	info_and_maps* iam = NULL;
+	string_map* ip_map = NULL;
+	int family = NFPROTO_IPV6;
+	
+	uint64_t* bws[2] = {NULL, NULL};
+
+	/* if we're currently setting this id, ignore new data until set is complete */
+	if(set_in_progress == 1)
+	{
+		if(strcmp(info->id, set_id) == 0)
+		{
+			return 0;
+		}
+	}
+	
+
+	
+
+	/* 
+	 * BEFORE we lock, check for timezone shift 
+	 * this will almost always be be very,very quick,
+	 * but in the event there IS a shift this
+	 * function will lock both kernel update spinlock 
+	 * and userspace i/o semaphore,  and do a lot of 
+	 * number crunching so we shouldn't 
+	 * already be locked.
+	 */
+	now = get_seconds();
+	
+
+	if(now != last_local_mw_update )
+	{
+		check_for_timezone_shift(now, 0);
+		check_for_backwards_time_shift(now);
+	}
+	now = now -  local_seconds_west;  /* Adjust for local timezone */
+
+	spin_lock_bh(&bandwidth_lock);
+	
+	if(is_check)
+	{
+		info_and_maps* check_iam;
+		do_src_dst_swap = info->check_type == BANDWIDTH_CHECK_SWAP ? 1 : 0;
+		check_iam = (info_and_maps*)get_string_map_element_with_hashed_key(id_map, info->hashed_id);
+		if(check_iam == NULL)
+		{
+			spin_unlock_bh(&bandwidth_lock);
+			return 0;
+		}
+		info = check_iam->info;
+	}
+
+
+
+	if(info->reset_interval != BANDWIDTH_NEVER)
+	{
+		if(info->next_reset < now)
+		{
+			//do reset
+			//iam = (info_and_maps*)get_string_map_element_with_hashed_key(id_map, info->hashed_id);
+			iam = (info_and_maps*)info->iam;
+			if(iam != NULL) /* should never be null, but let's be sure */
+			{
+				handle_interval_reset(iam, now);
+				ip_map = iam->ip_map;
+			}
+			else
+			{
+				/* even in case of malloc failure or weird error we can update these params */
+				info->current_bandwidth = 0;
+				info->next_reset = get_next_reset_time(info, now, info->previous_reset);
+			}
+		}
+	}
+
+	if(info->type == BANDWIDTH_COMBINED)
+	{
+		if(iam == NULL)
+		{
+			//iam = (info_and_maps*)get_string_map_element_with_hashed_key(id_map, info->hashed_id);
+			iam = (info_and_maps*)info->iam;
+			if(iam != NULL)
+			{
+				ip_map = iam->ip_map;
+			}
+		}
+		if(ip_map != NULL) /* if this ip_map != NULL iam can never be NULL, so we don't need to check this */
+		{
+			
+			if(info->combined_bw == NULL)
+			{
+				bws[0] = initialize_map_entries_for_ip(iam, "0.0.0.0", skb->len, NFPROTO_IPV4);
+			}
+			else
+			{
+				bws[0] = info->combined_bw;
+				*(bws[0]) = ADD_UP_TO_MAX(*(bws[0]), (uint64_t)skb->len, is_check);
+			}
+		}
+		else
+		{
+			#ifdef BANDWIDTH_DEBUG
+				printk("error: ip_map is null in match!\n");
+			#endif
+		}
+		info->current_bandwidth = ADD_UP_TO_MAX(info->current_bandwidth, (uint64_t)skb->len, is_check);
+	}
+	else
+	{
+		uint32_t bw_ip_index;
+		char* bw_ip = NULL;
+		char bw_ips[2][INET6_ADDRSTRLEN];
+		strcpy(bw_ips[0], "0.0.0.0");
+		strcpy(bw_ips[1], "0.0.0.0");
+		struct ipv6hdr* iph = (struct ipv6hdr*)(skb_network_header(skb));
+		if(info->type == BANDWIDTH_INDIVIDUAL_SRC)
+		{
+			//src ip
+			sprintf(bw_ips[0], STRIP6, NIP6(iph->saddr.s6_addr));
+			if(do_src_dst_swap)
+			{
+				sprintf(bw_ips[0], STRIP6, NIP6(iph->daddr.s6_addr));
+			}
+		}
+		else if (info->type == BANDWIDTH_INDIVIDUAL_DST)
+		{
+			//dst ip
+			sprintf(bw_ips[0], STRIP6, NIP6(iph->daddr.s6_addr));
+			if(do_src_dst_swap)
+			{
+				sprintf(bw_ips[0], STRIP6, NIP6(iph->saddr.s6_addr));
+			}
+		}
+		else if(info->type ==  BANDWIDTH_INDIVIDUAL_LOCAL ||  info->type == BANDWIDTH_INDIVIDUAL_REMOTE)
+		{
+			//remote or local ip -- need to test both src && dst
+			struct in6_addr src_ip = iph->saddr;
+			struct in6_addr dst_ip = iph->daddr;
+			struct in6_addr tsrc_ip;
+			struct in6_addr tdst_ip;
+			unsigned int x;
+			if(info->type == BANDWIDTH_INDIVIDUAL_LOCAL)
+			{
+				for(x = 0; x < 16; x++)
+				{
+					tsrc_ip.s6_addr[x] = (src_ip.s6_addr[x] & info->local_subnet.ip6.s6_addr[x]);
+					tdst_ip.s6_addr[x] = (dst_ip.s6_addr[x] & info->local_subnet.ip6.s6_addr[x]);
+				}
+				if(memcmp(&(tsrc_ip.s6_addr),&(info->local_subnet.ip6.s6_addr),sizeof(unsigned char)*128) == 0)
+				{
+					tsrc_ip = src_ip;
+				}
+				else
+				{
+					memset(&tsrc_ip,0,sizeof(unsigned char)*128);
+				}
+				if(memcmp(&(tdst_ip.s6_addr),&(info->local_subnet.ip6.s6_addr),sizeof(unsigned char)*128) == 0)
+				{
+					tdst_ip = dst_ip;
+				}
+				else
+				{
+					memset(&tdst_ip,0,sizeof(unsigned char)*128);
+				}
+				sprintf(bw_ips[0], STRIP6, NIP6(tsrc_ip.s6_addr));
+				sprintf(bw_ips[1], STRIP6, NIP6(tdst_ip.s6_addr));
+			}
+			else if(info->type == BANDWIDTH_INDIVIDUAL_REMOTE)
+			{
+				for(x = 0; x < 16; x++)
+				{
+					tsrc_ip.s6_addr[x] = (src_ip.s6_addr[x] & info->local_subnet.ip6.s6_addr[x]);
+					tdst_ip.s6_addr[x] = (dst_ip.s6_addr[x] & info->local_subnet.ip6.s6_addr[x]);
+				}
+				if(memcmp(&(tsrc_ip.s6_addr),&(info->local_subnet.ip6.s6_addr),sizeof(unsigned char)*128) != 0)
+				{
+					sprintf(bw_ips[0], STRIP6, NIP6(src_ip.s6_addr));
+				}
+				else
+				{
+					sprintf(bw_ips[0], "%s", "0.0.0.0");
+				}
+				if(memcmp(&(tdst_ip.s6_addr),&(info->local_subnet.ip6.s6_addr),sizeof(unsigned char)*128) != 0)
+				{
+					sprintf(bw_ips[1], STRIP6, NIP6(dst_ip.s6_addr));
+				}
+				else
+				{
+					sprintf(bw_ips[1], "%s", "0.0.0.0");
+				}
+			}
+		}
+		
+		if(ip_map == NULL)
+		{
+			//iam = (info_and_maps*)get_string_map_element_with_hashed_key(id_map, info->hashed_id);
+			iam = (info_and_maps*)info->iam;
+			if(iam != NULL)
+			{
+				ip_map = iam->ip_map;
+			}	
+		}
+		if(!is_check && info->cmp == BANDWIDTH_MONITOR)
+		{
+			uint64_t* combined_oldval = info->combined_bw;
+			if(combined_oldval == NULL)
+			{
+				combined_oldval = initialize_map_entries_for_ip(iam, "0.0.0.0", (uint64_t)skb->len, family);
+			}
+			else
+			{
+				*combined_oldval = ADD_UP_TO_MAX(*combined_oldval, (uint64_t)skb->len, is_check);
+			}
+		}
+		bw_ip_index = strcmp(bw_ips[0], "0.0.0.0") == 0 ? 1 : 0;
+		bw_ip = bw_ips[bw_ip_index];
+		if(strcmp(bw_ip, "0.0.0.0") != 0 && ip_map != NULL)
+		{
+			uint64_t* oldval = get_string_map_element(ip_map, bw_ip);
+			if(oldval == NULL)
+			{
+				if(!is_check)
+				{
+					/* may return NULL on malloc failure but that's ok */
+					oldval = initialize_map_entries_for_ip(iam, bw_ip, (uint64_t)skb->len, family);
+				}
+			}
+			else
+			{
+				*oldval = ADD_UP_TO_MAX(*oldval, (uint64_t)skb->len, is_check);
+			}
+			
+			/* this is fine, setting bws[bw_ip_index] to NULL on check for undefined value or kmalloc failure won't crash anything */
+			bws[bw_ip_index] = oldval;
+		}
+		
+	}
+
+
+	match_found = 0;
+	if(info->cmp != BANDWIDTH_MONITOR)
+	{
+		if(info->cmp == BANDWIDTH_GT)
+		{
+			match_found = bws[0] != NULL ? ( *(bws[0]) > info->bandwidth_cutoff ? 1 : match_found ) : match_found;
+			match_found = bws[1] != NULL ? ( *(bws[1]) > info->bandwidth_cutoff ? 1 : match_found ) : match_found;
+			match_found = info->current_bandwidth > info->bandwidth_cutoff ? 1 : match_found;
+		}
+		else if(info->cmp == BANDWIDTH_LT)
+		{
+			match_found = bws[0] != NULL ? ( *(bws[0]) < info->bandwidth_cutoff ? 1 : match_found ) : match_found;
+			match_found = bws[1] != NULL ? ( *(bws[1]) < info->bandwidth_cutoff ? 1 : match_found ) : match_found;
+			match_found = info->current_bandwidth < info->bandwidth_cutoff ? 1 : match_found;
+		}
+	}
+	
+	
+	spin_unlock_bh(&bandwidth_lock);
+
+
+	
+
+
 	return match_found;
 }
 
@@ -1433,7 +1699,6 @@ typedef struct get_req_struct
 {
 	uint32_t family;
 	uint32_t ip[4];
-	//uint32_t ip;
 	uint32_t next_ip_index;
 	unsigned char return_history;
 	char id[BANDWIDTH_MAX_ID_LENGTH];
@@ -1893,16 +2158,31 @@ static int xt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 		*num_ips_in_response = 0;
 		while(*error == ERROR_NONE && next_index < output_ip_list_length)
 		{
-			uint32_t next_ip;
-			in4_pton(output_ip_list[next_index], -1, (u8 *)&next_ip, '\0', NULL);
-			*error = add_ip_block(NFPROTO_IPV4,
-						&next_ip, 
+			uint32_t next_ip[4] = {0};
+			uint32_t family = NFPROTO_IPV4;
+			int ret;
+			ret = in4_pton(output_ip_list[next_index], -1, (u8 *)next_ip, '\0', NULL);
+			if(ret == 0)
+			{
+				family = NFPROTO_IPV6;
+				ret = in6_pton(output_ip_list[next_index], -1, (u8 *)next_ip, '\0', NULL);
+			}
+			if(ret == 0)
+			{
+				*error = ERROR_UNKNOWN;
+			}
+			else
+			{
+				*error = add_ip_block(family,
+						next_ip, 
 						query.return_history,
 						iam,
 						buffer, 
 						&current_output_index, 
 						*len
 						);
+			}
+			
 			if(*error == ERROR_NONE)
 			{
 				*num_ips_in_response = *num_ips_in_response + 1;
@@ -2542,7 +2822,7 @@ static void destroy(const struct xt_mtdtor_param *par)
 				bw_history** histories_to_free;
 				
 				destroy_string_map(iam->ip_map, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
-				destroy_string_map(iam->ip_family_map, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
+				destroy_string_map(iam->ip_family_map, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 				
 				histories_to_free = (bw_history**)destroy_string_map(iam->ip_history_map, DESTROY_MODE_RETURN_VALUES, &num_destroyed);
 				
