@@ -1301,7 +1301,7 @@ void print_usage(FILE* out, ip_bw* usage, unsigned long num_ips)
 				ipaddr.s_addr = *(next.ip);
 				char ipstr[INET_ADDRSTRLEN];
 				inet_ntop(next.family, &ipaddr, ipstr, INET_ADDRSTRLEN);
-				fprintf(out, "%-15s\t%lld\n", ipstr, (long long int)next.bw);
+				fprintf(out, "%-39s\t%lld\n", ipstr, (long long int)next.bw);
 			}
 			else
 			{
@@ -1312,12 +1312,12 @@ void print_usage(FILE* out, ip_bw* usage, unsigned long num_ips)
 				ipaddr.s6_addr32[3] = *(next.ip+3);
 				char ipstr[INET6_ADDRSTRLEN];
 				inet_ntop(next.family, &ipaddr, ipstr, INET6_ADDRSTRLEN);
-				fprintf(out, "%-15s\t%lld\n", ipstr, (long long int)next.bw);
+				fprintf(out, "%-39s\t%lld\n", ipstr, (long long int)next.bw);
 			}
 		}
 		else
 		{
-			fprintf(out, "%-15s\t%lld\n", "COMBINED", (long long int)next.bw);
+			fprintf(out, "%-39s\t%lld\n", "COMBINED", (long long int)next.bw);
 		}
 	}
 	fprintf(out, "\n");
@@ -1370,7 +1370,7 @@ void print_histories(FILE* out, char* id, ip_bw_history* histories, unsigned lon
 		
 			if(output_type == 'm' || output_type == 'h')
 			{
-				fprintf(out, "%s %-15s\n", id, ip_str);
+				fprintf(out, "%s %-39s\n", id, ip_str);
 			}
 
 			if(output_type == 'm')

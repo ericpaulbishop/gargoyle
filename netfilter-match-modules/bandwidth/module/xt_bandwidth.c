@@ -84,13 +84,15 @@ DEFINE_SEMAPHORE(userspace_lock);
 
 static string_map* id_map = NULL;
 
-
 typedef struct info_and_maps_struct
 {
 	struct xt_bandwidth_info* info;
 	string_map* ip_map;
 	string_map* ip_history_map;
 	string_map* ip_family_map;
+	uint8_t info_family;
+	uint8_t other_info_family;
+	struct xt_bandwidth_info* other_info;
 }info_and_maps;
 
 typedef struct history_struct
@@ -1066,7 +1068,7 @@ static time_t get_next_reset_time(struct xt_bandwidth_info *info, time_t now, ti
 static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, char* ip, uint64_t initial_bandwidth, uint32_t family)
 {
 	#ifdef BANDWIDTH_DEBUG
-		printk("initializing entry for ip, bw=%lld\n", initial_bandwidth);
+		printk("initializing entry for ip: %s, bw=%lld\n", ip, initial_bandwidth);
 	#endif
 	
 	#ifdef BANDWIDTH_DEBUG
@@ -2601,7 +2603,7 @@ static int xt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t 
 	return 0;
 }
 
-static int checkentry(const struct xt_mtchk_param *par)
+static int checkentry(const struct xt_mtchk_param *par, int family)
 {
 	struct xt_bandwidth_info *info = (struct xt_bandwidth_info*)(par->matchinfo);
 
@@ -2617,7 +2619,7 @@ static int checkentry(const struct xt_mtchk_param *par)
 		if(info->ref_count == NULL) /* deal with kmalloc failure */
 		{
 			printk("xt_bandwidth: kmalloc failure in checkentry!\n");
-			return 0;
+			return -ENOMEM;
 		}
 		*(info->ref_count) = 1;
 		info->non_const_self = master_info;
@@ -2663,10 +2665,68 @@ static int checkentry(const struct xt_mtchk_param *par)
 			iam = (info_and_maps*)get_string_map_element(id_map, info->id);
 			if(iam != NULL)
 			{
-				printk("xt_bandwidth: error, \"%s\" is a duplicate id\n", info->id); 
-				spin_unlock_bh(&bandwidth_lock);
-				up(&userspace_lock);
-				return 0;
+				// Duplicate ID, we will allow this only if one references IPv4 and the other is IPv6
+				#ifdef BANDWIDTH_DEBUG
+					printk("iam is not null during checkentry!\n");
+				#endif
+				if(iam->info_family == family)
+				{
+					printk("xt_bandwidth: error, \"%s\" is a duplicate id in this IP family\n", info->id); 
+					spin_unlock_bh(&bandwidth_lock);
+					up(&userspace_lock);
+					return -EINVAL;
+				}
+				
+				#ifdef BANDWIDTH_DEBUG
+					printk("not a duplicate, other protocol\n");
+				#endif
+				iam->other_info = master_info;
+				iam->other_info_family = family;
+			}
+			else
+			{
+				iam = (info_and_maps*)kmalloc( sizeof(info_and_maps), GFP_ATOMIC);
+				if(iam == NULL) /* handle kmalloc failure */
+				{
+					printk("xt_bandwidth: kmalloc failure in checkentry!\n");
+					spin_unlock_bh(&bandwidth_lock);
+					up(&userspace_lock);
+					return -ENOMEM;
+				}
+				iam->ip_map = initialize_string_map(1);
+				if(iam->ip_map == NULL) /* handle kmalloc failure */
+				{
+					printk("xt_bandwidth: kmalloc failure in checkentry!\n");
+					spin_unlock_bh(&bandwidth_lock);
+					up(&userspace_lock);
+					return -ENOMEM;
+				}
+				iam->ip_history_map = NULL;
+				if(info->num_intervals_to_save > 0)
+				{
+					iam->ip_history_map = initialize_string_map(1);
+					if(iam->ip_history_map == NULL) /* handle kmalloc failure */
+					{
+						printk("xt_bandwidth: kmalloc failure in checkentry!\n");
+						spin_unlock_bh(&bandwidth_lock);
+						up(&userspace_lock);
+						return -ENOMEM;
+					}
+				}
+				iam->ip_family_map = initialize_string_map(1);
+				if(iam->ip_family_map == NULL) /* handle kmalloc failure */
+				{
+					printk("xt_bandwidth: kmalloc failure in checkentry!\n");
+					spin_unlock_bh(&bandwidth_lock);
+					up(&userspace_lock);
+					return -ENOMEM;
+				}
+				
+				iam->info = master_info;
+				set_string_map_element(id_map, info->id, iam);
+				iam->info_family = family;
+				iam->other_info = NULL;
+				iam->other_info_family = 0;
 			}
 
 			if(info->reset_interval != BANDWIDTH_NEVER)
@@ -2706,47 +2766,6 @@ static int checkentry(const struct xt_mtchk_param *par)
 					}
 				}
 			}
-	
-			iam = (info_and_maps*)kmalloc( sizeof(info_and_maps), GFP_ATOMIC);
-			if(iam == NULL) /* handle kmalloc failure */
-			{
-				printk("xt_bandwidth: kmalloc failure in checkentry!\n");
-				spin_unlock_bh(&bandwidth_lock);
-				up(&userspace_lock);
-				return 0;
-			}
-			iam->ip_map = initialize_string_map(1);
-			if(iam->ip_map == NULL) /* handle kmalloc failure */
-			{
-				printk("xt_bandwidth: kmalloc failure in checkentry!\n");
-				spin_unlock_bh(&bandwidth_lock);
-				up(&userspace_lock);
-				return 0;
-			}
-			iam->ip_history_map = NULL;
-			if(info->num_intervals_to_save > 0)
-			{
-				iam->ip_history_map = initialize_string_map(1);
-				if(iam->ip_history_map == NULL) /* handle kmalloc failure */
-				{
-					printk("xt_bandwidth: kmalloc failure in checkentry!\n");
-					spin_unlock_bh(&bandwidth_lock);
-					up(&userspace_lock);
-					return 0;
-				}
-			}
-			iam->ip_family_map = initialize_string_map(1);
-			if(iam->ip_family_map == NULL) /* handle kmalloc failure */
-			{
-				printk("xt_bandwidth: kmalloc failure in checkentry!\n");
-				spin_unlock_bh(&bandwidth_lock);
-				up(&userspace_lock);
-				return 0;
-			}
-
-
-			iam->info = master_info;
-			set_string_map_element(id_map, info->id, iam);
 
 			info->iam = (void*)iam;
 			master_info->iam = (void*)iam;
@@ -2756,7 +2775,6 @@ static int checkentry(const struct xt_mtchk_param *par)
 			up(&userspace_lock);
 		}
 	}
-	
 	else
 	{
 		/* info->non_const_self = info; */
@@ -2791,9 +2809,22 @@ static int checkentry(const struct xt_mtchk_param *par)
 	return 0;
 }
 
-static void destroy(const struct xt_mtdtor_param *par)
+static int checkentry_mt4(const struct xt_mtchk_param *par)
+{
+	int retval = checkentry(par, NFPROTO_IPV4);
+	return retval;
+}
+
+static int checkentry_mt6(const struct xt_mtchk_param *par)
+{
+	int retval = checkentry(par, NFPROTO_IPV6);
+	return retval;
+}
+
+static void destroy(const struct xt_mtdtor_param *par, int family)
 {
 	struct xt_bandwidth_info *info = (struct xt_bandwidth_info*)(par->matchinfo);
+	struct xt_bandwidth_info *other_info = NULL;
 
 	#ifdef BANDWIDTH_DEBUG
 		printk("destroy called\n");
@@ -2811,41 +2842,96 @@ static void destroy(const struct xt_mtdtor_param *par)
 		down(&userspace_lock);
 		spin_lock_bh(&bandwidth_lock);
 		
-		info->combined_bw = NULL;
-		iam = (info_and_maps*)remove_string_map_element(id_map, info->id);
-		if(iam != NULL && info->cmp != BANDWIDTH_CHECK)
+		// Check if we need to preserve iam due to other protocol rule
+		iam = (info_and_maps*)get_string_map_element(id_map, info->id);
+		int destroying_primary = 0;
+		if(iam != NULL)
 		{
-			unsigned long num_destroyed;
-			if(iam->ip_map != NULL && iam->ip_history_map != NULL && iam->ip_family_map != NULL)
+			if(iam->info_family == family)
 			{
-				unsigned long history_index = 0;
-				bw_history** histories_to_free;
+				#ifdef BANDWIDTH_DEBUG
+					printk("info is primary info\n");
+				#endif
+				destroying_primary = 1;
+			}
+			else
+			{
+				#ifdef BANDWIDTH_DEBUG
+					printk("info is other info\n");
+				#endif
+			}
+			other_info = iam->other_info;
+		}
+		
+		if(other_info != NULL)
+		{
+			if(destroying_primary == 1)
+			{
+				#ifdef BANDWIDTH_DEBUG
+					printk("destroying primary, copying data from info to other_info\n");
+				#endif
+				//We need to copy info to it
+				//current_bandwidth, next_reset, previous_reset, last_backup_time, combined_bw
+				other_info->current_bandwidth          = info->current_bandwidth;
+				other_info->next_reset                 = info->next_reset;
+				other_info->previous_reset             = info->previous_reset;
+				other_info->last_backup_time           = info->last_backup_time;
+				other_info->combined_bw                = info->combined_bw;
 				
-				destroy_string_map(iam->ip_map, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
-				destroy_string_map(iam->ip_family_map, DESTROY_MODE_FREE_VALUES, &num_destroyed);
-				
-				histories_to_free = (bw_history**)destroy_string_map(iam->ip_history_map, DESTROY_MODE_RETURN_VALUES, &num_destroyed);
-				
-				/* num_destroyed will be 0 if histories_to_free is null after malloc failure, so this is safe */
-				for(history_index = 0; history_index < num_destroyed; history_index++) 
+				iam->info = other_info;
+				iam->other_info = NULL;
+				iam->info_family = iam->other_info_family;
+				iam->other_info_family = 0;
+			}
+			else
+			{
+				#ifdef BANDWIDTH_DEBUG
+					printk("destroying other_info\n");
+				#endif
+
+				iam->other_info = NULL;
+				iam->other_info_family = 0;
+			}
+		}
+		else
+		{
+			iam = (info_and_maps*)remove_string_map_element(id_map, info->id);
+			if(iam != NULL && info->cmp != BANDWIDTH_CHECK)
+			{
+				unsigned long num_destroyed;
+				if(iam->ip_map != NULL && iam->ip_history_map != NULL && iam->ip_family_map != NULL)
 				{
-					bw_history* h = histories_to_free[history_index];
-					if(h != NULL)
+					unsigned long history_index = 0;
+					bw_history** histories_to_free;
+					
+					destroy_string_map(iam->ip_map, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
+					destroy_string_map(iam->ip_family_map, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+					
+					histories_to_free = (bw_history**)destroy_string_map(iam->ip_history_map, DESTROY_MODE_RETURN_VALUES, &num_destroyed);
+					
+					/* num_destroyed will be 0 if histories_to_free is null after malloc failure, so this is safe */
+					for(history_index = 0; history_index < num_destroyed; history_index++) 
 					{
-						kfree(h->history_data);
-						kfree(h);
+						bw_history* h = histories_to_free[history_index];
+						if(h != NULL)
+						{
+							kfree(h->history_data);
+							kfree(h);
+						}
 					}
+					
 				}
-				
+				else if(iam->ip_map != NULL && iam->ip_family_map != NULL)
+				{
+					destroy_string_map(iam->ip_map, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+					destroy_string_map(iam->ip_family_map, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+				}
+				kfree(iam);
+				/* info portion of iam gets taken care of automatically */
 			}
-			else if(iam->ip_map != NULL && iam->ip_family_map != NULL)
-			{
-				destroy_string_map(iam->ip_map, DESTROY_MODE_FREE_VALUES, &num_destroyed);
-				destroy_string_map(iam->ip_family_map, DESTROY_MODE_FREE_VALUES, &num_destroyed);
-			}
-			kfree(iam);
-			/* info portion of iam gets taken care of automatically */
-		}	
+		}
+		
+		info->combined_bw = NULL;
 		kfree(info->ref_count);
 		kfree(info->non_const_self);
 
@@ -2856,6 +2942,16 @@ static void destroy(const struct xt_mtdtor_param *par)
 	#ifdef BANDWIDTH_DEBUG
 		printk("destroy complete\n");
 	#endif
+}
+
+static void destroy_mt4(const struct xt_mtdtor_param *par)
+{
+	destroy(par, NFPROTO_IPV4);
+}
+
+static void destroy_mt6(const struct xt_mtdtor_param *par)
+{
+	destroy(par, NFPROTO_IPV6);
 }
 
 static struct nf_sockopt_ops xt_bandwidth_sockopts = 
@@ -2877,8 +2973,8 @@ static struct xt_match bandwidth_mt_reg[] __read_mostly =
 		.match		= bandwidth_mt4,
 		.family		= NFPROTO_IPV4,
 		.matchsize	= sizeof(struct xt_bandwidth_info),
-		.checkentry	= checkentry,
-		.destroy	= destroy,
+		.checkentry	= checkentry_mt4,
+		.destroy	= destroy_mt4,
 		.me		= THIS_MODULE,
 	},
 	{
@@ -2886,8 +2982,8 @@ static struct xt_match bandwidth_mt_reg[] __read_mostly =
 		.match		= bandwidth_mt6,
 		.family		= NFPROTO_IPV6,
 		.matchsize	= sizeof(struct xt_bandwidth_info),
-		.checkentry	= checkentry,
-		.destroy	= destroy,
+		.checkentry	= checkentry_mt6,
+		.destroy	= destroy_mt6,
 		.me		= THIS_MODULE,
 	},
 };
