@@ -85,12 +85,17 @@ start()
 	iptables -t $download_table -N $download_chain
 	iptables -t $download_table -I INPUT $filter_insert_index  -i $bw_if -j $download_chain
 	iptables -t $download_table -I FORWARD $filter_insert_index -i $bw_if -j $download_chain
+	ip6tables -t $download_table -N $download_chain
+	ip6tables -t $download_table -I INPUT $filter_insert_index  -i $bw_if -j $download_chain
+	ip6tables -t $download_table -I FORWARD $filter_insert_index -i $bw_if -j $download_chain
 
 
 	
 	delete_chain_from_table $upload_table $upload_chain
 	iptables -t $upload_table -N $upload_chain
 	iptables -t $upload_table -A POSTROUTING -o $bw_if -j $upload_chain
+	ip6tables -t $upload_table -N $upload_chain
+	ip6tables -t $upload_table -A POSTROUTING -o $bw_if -j $upload_chain
 	
 
 	lan_mask=$(uci -p /tmp/state get network.lan.netmask 2>/dev/null)
@@ -178,7 +183,9 @@ start()
 		if [ -n "$bdist_reset_time" ] ; then bdist_reset_time="--reset_time $bdist_reset_time" ; fi
 		if [ -n "$lan_mask" ] && [ -n "$lan_ip" ] ; then
 			iptables -t $download_table -A $download_chain -m bandwidth --id "bdist"$n"-download-$bdist_interval-$bdist_num_intervals" --type "individual_dst" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
+			ip6tables -t $download_table -A $download_chain -m bandwidth --id "bdist"$n"-download-$bdist_interval-$bdist_num_intervals" --type "individual_dst" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
 			iptables -t $upload_table   -A $upload_chain   -m bandwidth --id "bdist"$n"-upload-$bdist_interval-$bdist_num_intervals"   --type "individual_src" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
+			ip6tables -t $upload_table   -A $upload_chain   -m bandwidth --id "bdist"$n"-upload-$bdist_interval-$bdist_num_intervals"   --type "individual_src" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
 			ids="bdist"$n"-download-$bdist_interval-$bdist_num_intervals bdist"$n"-upload-$bdist_interval-$bdist_num_intervals" 
 		fi
 	else
@@ -204,7 +211,9 @@ start()
 
 		if [ $n -lt 6 ] ; then
 			iptables -t $download_table -A $download_chain -m bandwidth --id "total"$n"-download-$total_interval-$total_num_intervals" --reset_interval $total_interval --intervals_to_save $total_num_intervals $total_reset_time
+			ip6tables -t $download_table -A $download_chain -m bandwidth --id "total"$n"-download-$total_interval-$total_num_intervals" --reset_interval $total_interval --intervals_to_save $total_num_intervals $total_reset_time
 			iptables -t $upload_table   -A $upload_chain   -m bandwidth --id "total"$n"-upload-$total_interval-$total_num_intervals"   --reset_interval $total_interval --intervals_to_save $total_num_intervals $total_reset_time
+			ip6tables -t $upload_table   -A $upload_chain   -m bandwidth --id "total"$n"-upload-$total_interval-$total_num_intervals"   --reset_interval $total_interval --intervals_to_save $total_num_intervals $total_reset_time
 
 			next_ids="total"$n"-download-$total_interval-$total_num_intervals total"$n"-upload-$total_interval-$total_num_intervals"
 			if [ -z "$ids" ] ; then
@@ -216,7 +225,9 @@ start()
 
 		if [ -n "$lan_mask" ] && [ -n "$lan_ip" ] ; then
 			iptables -t $download_table -A $download_chain -m bandwidth --id "bdist"$n"-download-$bdist_interval-$bdist_num_intervals" --type "individual_dst" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
+			ip6tables -t $download_table -A $download_chain -m bandwidth --id "bdist"$n"-download-$bdist_interval-$bdist_num_intervals" --type "individual_dst" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
 			iptables -t $upload_table   -A $upload_chain   -m bandwidth --id "bdist"$n"-upload-$bdist_interval-$bdist_num_intervals"   --type "individual_src" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
+			ip6tables -t $upload_table   -A $upload_chain   -m bandwidth --id "bdist"$n"-upload-$bdist_interval-$bdist_num_intervals"   --type "individual_src" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
 			ids="$ids bdist"$n"-download-$bdist_interval-$bdist_num_intervals bdist"$n"-upload-$bdist_interval-$bdist_num_intervals" 
 		fi
 
@@ -296,7 +307,9 @@ stop()
 	#check that we aren't already stopped before backing up data
 	have_up=$(iptables   -t "$upload_table"   -L "$upload_chain" 2>/dev/null)
 	have_down=$(iptables -t "$download_table" -L "$download_chain" 2>/dev/null)
-	if [ -n "$have_up" ] || [ -n "$have_down" ] ; then
+	have_up6=$(ip6tables   -t "$upload_table"   -L "$upload_chain" 2>/dev/null)
+	have_down6=$(ip6tables -t "$download_table" -L "$download_chain" 2>/dev/null)
+	if [ -n "$have_up" ] || [ -n "$have_down" ] || [ -n "$have_up6" ] || [ -n "$have_down6" ] ; then
 		sh "$backup_script" 2>/dev/null
 		rm -rf "$backup_script"
 
@@ -304,10 +317,10 @@ stop()
 		grep -v "$backup_script" /etc/crontabs/root > "$tmp_cron"
 		update_cron
 	
-		if [ -n "$have_up" ] ; then
+		if [ -n "$have_up" ] || [ -n "$have_up6" ] ; then
 			delete_chain_from_table $upload_table $upload_chain >/dev/null 2>&1
 		fi
-		if [ -n "$have_down" ] ; then
+		if [ -n "$have_down" ] || [ -n "$have_down6" ] ; then
 			delete_chain_from_table $download_table $download_chain >/dev/null 2>&1
 		fi
 	fi

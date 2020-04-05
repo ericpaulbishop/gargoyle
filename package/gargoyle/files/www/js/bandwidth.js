@@ -287,19 +287,36 @@ function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphLowRes)
 	return selectedName;
 }
 
-
 function getHostnameList(ipList)
 {
-	var hostnameList = [];
+	var hostnameList = [[],[]];
 	var ipIndex =0;
 	for(ipIndex=0; ipIndex < ipList.length; ipIndex++)
 	{
 		var ip = ipList[ipIndex];
 		var host = ipToHostname[ip] == null ? ip : ipToHostname[ip];
 		host = host.length < 25 ? host : host.substr(0,22)+"...";
-		hostnameList.push(host);
+		if(hostnameList[1].indexOf(host) < 0)
+		{
+			hostnameList[0].push(ip);
+			hostnameList[1].push(host);
+		}
 	}
 	return hostnameList;
+}
+
+function getAllIPForHostname(hostname)
+{
+	var ipList = [];
+	for(ip in ipToHostname)
+	{
+		if(ipToHostname[ip] == hostname)
+		{
+			ipList.push(ip);
+		}
+	}
+	
+	return ipList;
 }
 
 function resetPlots()
@@ -336,11 +353,12 @@ function resetPlots()
 
 			if(plotType == "ip" || plotType == "hostname")
 			{
-				if(plotId.match(/^[0-9]+\./) == null)
+				if(plotId.match(/^[0-9]+[\.:]/) == null)
 				{
 					if(plotType == "hostname")
 					{
-						setAllowableSelections(plotIdName, ipsWithData, getHostnameList(ipsWithData));
+						var selOpts = getHostnameList(ipsWithData);
+						setAllowableSelections(plotIdName, selOpts[0], selOpts[1]);
 					}
 					else
 					{
@@ -614,7 +632,8 @@ function doUpdate()
 										//if new ip list differs from allowable selections, update
 										if(selectedPlotType == "hostname")
 										{
-											setAllowableSelections(plotIdName, ipList, getHostnameList(ipList));
+											var selOpts = getHostnameList(ipList);
+											setAllowableSelections(plotIdName, selOpts[0], selOpts[1]);
 										}
 										else
 										{
@@ -628,7 +647,34 @@ function doUpdate()
 									}
 
 									ip = ip == null ? "" : getRealIp(ip);
-									var points = monitorData[ip][0]
+									var points;
+									if(ipToHostname[ip] !== undefined && selectedPlotType == "hostname")
+									{
+										var ipList = getAllIPForHostname(ipToHostname[ip]);
+										pointsInitialised = 0;
+										for(ipIdx = 0; ipIdx < ipList.length; ipIdx++)
+										{
+											if(monitorData[ipList[ipIdx]] !== undefined)
+											{
+												if(pointsInitialised == 0)
+												{
+													(points = []).length = monitorData[ipList[ipIdx]][0].length; points.fill("0");
+													pointsInitialised = 1;
+												}
+												addPoints = monitorData[ipList[ipIdx]][0];
+												for(var x = 0; x < points.length; x++)
+												{
+													points[x] = parseInt(points[x]) + parseInt(addPoints[x]);
+													points[x] = points[x].toString();
+												}
+											}
+										}
+									}
+									else
+									{
+										points = monitorData[ip][0];
+									}
+									
 									if(monitorIndex < 3)
 									{
 										plotLastTimePoint = monitorData[ip][1];
