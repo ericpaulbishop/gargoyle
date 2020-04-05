@@ -1,11 +1,13 @@
 config uhttpd main
 	list listen_http	0.0.0.0:80
+	list listen_http	[::]:80
 	option 'index_file'	'login.sh'
 	option 'index_page'	'login.sh'
 	option 'error_page'	'/login.sh'
 	option 'no_dirlists'	'1'
 	
 	list listen_https	0.0.0.0:443
+	list listen_https	[::]:443
 	option home		/www
 	option rfc1918_filter	1
 	option max_requests	50
