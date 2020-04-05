@@ -288,6 +288,10 @@ static void adjust_ip_for_backwards_time_shift(char* key, void* value)
 		if(strcmp(key,"0.0.0.0") == 0)
 		{
 			backwards_adjust_iam->info->combined_bw = (uint64_t*)(old_history->history_data + old_history->current_index);
+			if(backwards_adjust_iam->other_info != NULL)
+			{
+				backwards_adjust_iam->other_info->combined_bw = backwards_adjust_iam->info->combined_bw;
+			}
 		}
 		
 		/* 
@@ -821,6 +825,10 @@ static void handle_interval_reset(info_and_maps* iam, time_t now)
 		}
 	}
 	info->combined_bw = (uint64_t*)get_string_map_element(iam->ip_map, "0.0.0.0");
+	if(iam->other_info != NULL)
+	{
+		iam->other_info->combined_bw = info->combined_bw;
+	}
 	info->current_bandwidth = 0;
 }
 
@@ -1144,6 +1152,10 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, char* ip, uin
 				if(strcmp(ip, "0.0.0.0") == 0)
 				{
 					info->combined_bw = new_bw;
+					if(iam->other_info != NULL)
+					{
+						iam->other_info->combined_bw = info->combined_bw;
+					}
 				}
 
 				#ifdef BANDWIDTH_DEBUG
@@ -2505,6 +2517,10 @@ static int xt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t 
 	 * if combined data (ip=0) exists after set exits cleanly, we will restore it
 	 */
 	iam->info->combined_bw = NULL;
+	if(iam->other_info != NULL)
+	{
+		iam->other_info->combined_bw = NULL;
+	}
 
 	//if zero_unset_ips == 1 && next_ip_index == 0
 	//then clear data for all ips for this id
@@ -2596,6 +2612,10 @@ static int xt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t 
 
 	/* set combined_bw */
 	iam->info->combined_bw = (uint64_t*)get_string_map_element(iam->ip_map, "0.0.0.0");
+	if(iam->other_info != NULL)
+	{
+		iam->other_info->combined_bw = iam->info->combined_bw;
+	}
 
 	kfree(buffer);
 	spin_unlock_bh(&bandwidth_lock);
@@ -2680,8 +2700,27 @@ static int checkentry(const struct xt_mtchk_param *par, int family)
 				#ifdef BANDWIDTH_DEBUG
 					printk("not a duplicate, other protocol\n");
 				#endif
+				// Check that they are the exact same rule (except for some allowed differences)
+				// Otherwise, we don't want to allow this
+				if(iam->info->type != master_info->type ||
+					iam->info->check_type != master_info->check_type ||
+					iam->info->cmp != master_info->cmp ||
+					iam->info->reset_is_constant_interval != master_info->reset_is_constant_interval ||
+					iam->info->reset_interval != master_info->reset_interval ||
+					iam->info->reset_time != master_info->reset_time ||
+					iam->info->bandwidth_cutoff != master_info->bandwidth_cutoff ||
+					iam->info->num_intervals_to_save != master_info->num_intervals_to_save
+				)
+				{
+					printk("xt_bandwidth: error, \"%s\" is already used in the other IP family, but this rule is not substantially the same\n", info->id); 
+					spin_unlock_bh(&bandwidth_lock);
+					up(&userspace_lock);
+					return -EINVAL;
+				}
+				
 				iam->other_info = master_info;
 				iam->other_info_family = family;
+				master_info->combined_bw = iam->info->combined_bw;
 			}
 			else
 			{
