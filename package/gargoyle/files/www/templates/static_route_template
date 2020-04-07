@@ -1,6 +1,6 @@
 				<div class="row form-group">
 					<label class="col-xs-5" id='add_dest_label' for='add_dest'><%~ routing.DstnM %></label>
-					<span class="col-xs-7"><input type='text' id='add_dest' class='form-control' onkeyup='proofreadRouteIp(this)' maxLength='35' /></span>
+					<span class="col-xs-7"><input type='text' id='add_dest' class='form-control' oninput='proofreadRouteIp(this)' maxLength='35' /></span>
 				</div>
 				<div class="row form-group">
 					<label class="col-xs-5" id='add_iface_label' for='add_iface'><%~ Ntwk %></label>
@@ -13,5 +13,5 @@
 				</div>
 				<div class="row form-group">
 					<label class="col-xs-5" id='add_gateway_label' for='add_gateway'><%~ Gtwy %></label>
-					<span class="col-xs-7"><input type='text' id='add_gateway' onkeyup='proofreadGatewayIp(this)' maxLength='15' class='form-control' /></span>
+					<span class="col-xs-7"><input type='text' id='add_gateway' oninput='proofreadGatewayIp(this)' maxLength='15' class='form-control' /></span>
 				</div>

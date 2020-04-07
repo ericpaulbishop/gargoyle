@@ -11,7 +11,7 @@ upS.Prsv="Pokus zachovať nastavenia";
 
 //javascript
 upS.SelErr="CHYBA: Muíte vybrať súbor firmvéru.";
-upS.Warn2="Vymažú sa vaše aktuálne nastavenia, a môžete úplne znefunkčniť (\ "brick \") váš smerovač ak súbor firmvéru nie je platný. Ste si istí, že chcete pokračovať?";
+upS.Warn2="Vymažú sa vaše aktuálne nastavenia, a môžete úplne znefunkčniť (\"brick\") váš smerovač ak súbor firmvéru nie je platný. Ste si istí, že chcete pokračovať?";
 upS.Uping="Nahrávanie firmvéru";
 upS.UWait="Aktualizácia, prosím čakajte.";
 upS.Rbtg="Aktualizácia je dokončená, reštartuje sa...";

@@ -14,7 +14,9 @@ WebC.WebCPort="Port";
 WebC.WebCUName="Názov užívateľa";
 WebC.WebCPass="Heslo";
 WebC.PrevWebC="Náhľad";
+WebC.WebCSnapshot="Snímka z Webkamera";
+WebC.WebCStream="Prúd Webkamera";
+WebC.WebCAlert="<b>Ukážka nie je možná.</b><br/>Pokúste sa prúd otvoriť ručne.";
 WebC.WebCOpt="voliteľný";
 
 WebC.ErrorPortWebC="Port servera webcamery koliduje s ";
-WebC.AvelAtWebC="Webkamera je dostupná na ";

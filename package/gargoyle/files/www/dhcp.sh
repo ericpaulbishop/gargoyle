@@ -106,7 +106,7 @@ ipHostHash["::1"] = "localhost6";
 					<label class="col-xs-5" for="dhcp_start" id="dhcp_start_label"><%~ Strt %>:</label>
 					<span class="col-xs-7">
 						<% echo -n "$subnet" %>
-						<input type="text" class="form-control" id="dhcp_start" onkeyup="proofreadNumeric(this)" size="5" maxlength="3" />
+						<input type="text" class="form-control" id="dhcp_start" oninput="proofreadNumeric(this)" size="5" maxlength="3" />
 					</span>
 				</div>
 
@@ -114,14 +114,14 @@ ipHostHash["::1"] = "localhost6";
 					<label class="col-xs-5" for="dhcp_end" id="dhcp_end_label"><%~ End %>:</label>
 					<span class="col-xs-7">
 						<% echo -n "$subnet" %>
-						<input type="text" class="form-control" id="dhcp_end" onkeyup="proofreadNumeric(this)" size="5" maxlength="3" />
+						<input type="text" class="form-control" id="dhcp_end" oninput="proofreadNumeric(this)" size="5" maxlength="3" />
 					</span>
 				</div>
 
 				<div id="dhcp_lease_container" class="row form-group">
 					<label class="col-xs-5" for="dhcp_lease" id="dhcp_lease_label"><%~ LsTm %>:</label>
 					<span class="col-xs-7">
-						<input type="text" class="form-control" onkeyup="proofreadNumeric(this)" id="dhcp_lease" size="5" maxlength="4" />
+						<input type="text" class="form-control" oninput="proofreadNumeric(this)" id="dhcp_lease" size="5" maxlength="4" />
 						<em>(<%~ hours %>)</em>
 					</span>
 				</div>

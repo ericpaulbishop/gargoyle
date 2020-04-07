@@ -14,7 +14,9 @@ WebC.WebCPort="Porta";
 WebC.WebCUName="Nome de Usuário";
 WebC.WebCPass="Senha";
 WebC.PrevWebC="Pre-Visualização";
+WebC.WebCSnapshot="Instantâneo da Câmera";
+WebC.WebCStream="Fluxo de Câmera";
+WebC.WebCAlert="<b>Visualização não possível.</b><br/>Tente abrir o fluxo manualmente.";
 WebC.WebCOpt="opcional";
 
 WebC.ErrorPortWebC="Porta do servidor da Câmera em conflito com ";
-WebC.AvelAtWebC="A Câmera USB está disponível em ";

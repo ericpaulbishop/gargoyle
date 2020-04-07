@@ -157,27 +157,85 @@ function saveChanges()
 
 function showPreview(enabled, port, username, password)
 {
-	if(enabled==1)
+	// Webcam elements.
+	var preview = document.getElementById("webcam_preview");
+	var snapshot = document.getElementById("webcam_snapshot");
+	var snapshot_url = document.getElementById("webcam_snapshot_url");
+	var stream = document.getElementById("webcam_stream");
+	var stream_url = document.getElementById("webcam_stream_url");
+	var frame = document.getElementById("webcam_frame");
+	var image = frame.firstElementChild;
+	var alert = document.getElementById("webcam_alert");
+	// Hide preview panel.
+	preview.style.display = "none";
+	// Hide alert info.
+	alert.style.display = "none";
+	// Force reload in case URL is unchanged but other parameters have changed.
+	image.src = "";
+	// Finish here if disabled.
+	if(enabled == "0")
 	{
-		if(username != "" && password != "")
-		{
-			auth=username + ":" + password + "@";
-		}
-		else
-		{
-			auth="";
-		}
-		var webcam_url = 'http://' + auth + currentLanIp + ':' + port + '/?action=stream';
-		document.getElementById("webcam_preview").style.display = "block";
-		setChildText("webcam_info", WebC.AvelAtWebC + webcam_url);
-		document.getElementById('videoframe').src = webcam_url;
+		return;
+	}
+
+	// TODO Deprecated but widely supported. Consider token based authentication in the future.
+	if(username != "" && password != "")
+	{
+		auth=username + ":" + password + "@";
 	}
 	else
 	{
-		document.getElementById("webcam_preview").style.display = "none";
-		setChildText("webcam_info", "");
-		document.getElementById('videoframe').src ='about:blank';
+		auth="";
 	}
+	// What client (browser) sees.
+	var clientProt = window.location.protocol.slice(0, -1);
+	var clientHost = window.location.hostname;
+	var clientPort = window.location.port ? window.location.port : clientProt == "http" ? 80 : 443;
+	// What server (uhttpd) sees.
+	var serverProt = HTTPS == "on" ? "https" : "http";
+	var serverHost = HTTP_HOST ? HTTP_HOST : SERVER_ADDR;
+	var serverPort = SERVER_PORT;
+	// Whether client sees what server sees.
+	var directView = clientProt == serverProt && clientHost == serverHost && clientPort == serverPort;
+	// Use saved port except when there is a reverse proxy. In that case use clientPort and simply
+	// assume that reverse proxy passes the queries `?action=snapshot` and `?action=stream` to the
+	// saved port. There is no reason for a reverse proxy to use a separate port on its own and we
+	// cannot know it anyway since the port we see here is its web port and not its webcam port.
+	var targetPort = directView ? port : clientPort;
+	// Hide default ports for browsers which don't (in case of a reverse proxy).
+	targetPort = targetPort == "80" || targetPort == "443" ? "" : ":" + targetPort;
+	// Final URL without action value.
+	var targetHref = clientProt + '://' + auth + clientHost + targetPort + '/?action=';
+
+	// Setup snapshot URL, the `a` and `input` tag.
+	snapshot.href = targetHref + 'snapshot';
+	snapshot_url.value = snapshot.href;
+	// Setup stream URL, the `a` and `input` tag.
+	stream.href = targetHref + 'stream';
+	stream_url.value = stream.href;
+	// Setup preview frame, the `a` and `img` tag.
+	frame.href = stream.href;
+	image.src = stream.href;
+	// As soon as stream is loaded, show frame.
+	image.onload = function()
+	{
+		frame.style.display = "";
+	};
+	// If it fails to load, show alert info and hint at opening it manually. It could be that the
+	// browser blocked this *subresource* URL due to embedded login credentials which is deprecated.
+	image.onerror = function()
+	{
+		frame.style.display = "none";
+		alert.style.display = "";
+	};
+	// Show preview panel.
+	preview.style.display = "block";
+}
+
+function copy(input)
+{
+	input.select();
+	document.execCommand("copy");
 }
 
 function updateWebcamWanAccess()

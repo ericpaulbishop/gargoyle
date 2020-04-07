@@ -3,7 +3,7 @@
 START=75
 
 BIN=tor
-RUN_D=/var/run
+RUN_D=/var/run/tor
 KEY_D=/etc/tor
 PID_F=$RUN_D/$BIN.pid
 OPID_F=$RUN_D/obfsproxy.pid

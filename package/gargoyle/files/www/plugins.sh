@@ -87,7 +87,7 @@
 
 						<div class="row form-group">
 							<label class="col-xs-5" for="add_source_name"><%~ ANam %>:</label>
-							<span class="col-xs-7"><input type="text" id="add_source_name" class="form-control" onkeyup="proofreadSourceName(this)"/></span>
+							<span class="col-xs-7"><input type="text" id="add_source_name" class="form-control" oninput="proofreadSourceName(this)"/></span>
 						</div>
 
 						<div class="row form-group">

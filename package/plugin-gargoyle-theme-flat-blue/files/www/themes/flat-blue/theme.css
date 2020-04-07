@@ -803,3 +803,9 @@ code
 {
 	color: #4FB765;
 }
+.modal-content
+{
+	background-color: #4e5d6b;
+	border-color: #4e5d6b;
+	border-radius: 0;
+}

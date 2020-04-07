@@ -51,10 +51,10 @@
 				</div>
 
 				<div id="adblock_help" class="row">
+					<span class="col-xs-12"><a id="adblock_help_ref" href="javascript:setDescriptionVisibility('adblock_help')"><%~ Hide %></a></span>
 					<span class="col-xs-12" id="adblock_help_txt">
 						<p><%~ ADBLOCKHelp %></p>
 					</span>
-					<span class="col-xs-12"><a id="adblock_help_ref" onclick='setDescriptionVisibility("adblock_help")' href="#adblock_help"><%~ Hide %></a></span>
 				</div>
 
 				<div class="internal_divider"></div>
@@ -103,10 +103,10 @@
 					</span>
 				</div>
 				<div id="adblock_help2" class="row">
+					<span class="col-xs-12"><a id="adblock_help2_ref" href="javascript:setDescriptionVisibility('adblock_help2')"><%~ Hide %></a></span>
 					<span class="col-xs-12" id="adblock_help2_txt">
 						<p><%~ ADBLOCKHelp2 %></p>
 					</span>
-					<span class="col-xs-12"><a id="adblock_help2_ref" onclick='setDescriptionVisibility("adblock_help2")' href="#adblock_help2"><%~ Hide %></a></span>
 				</div>
 			</div>
 		</div>

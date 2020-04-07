@@ -3003,6 +3003,7 @@ CONFIG_ATH_USER_REGD=y
 CONFIG_PACKAGE_ATH_DFS=y
 # CONFIG_PACKAGE_kmod-ath10k is not set
 # CONFIG_PACKAGE_kmod-ath10k-ct is not set
+# CONFIG_PACKAGE_kmod-ath10k-ct-smallbuffers is not set
 CONFIG_PACKAGE_kmod-ath5k=y
 # CONFIG_PACKAGE_kmod-ath6kl-sdio is not set
 # CONFIG_PACKAGE_kmod-ath6kl-usb is not set

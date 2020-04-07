@@ -52,11 +52,11 @@
 				<div class="indent">
 					<div id='tor_client_bridge_ip_container' class="row form-group">
 						<label class="col-xs-5" for='tor_client_bridge_ip' id='tor_client_bridge_ip_label'><%~ BrIP %>:</label>
-						<span class="col-xs-7"><input type="text" class="form-control" id='tor_client_bridge_ip' onkeyup='proofreadIp(this)'/></span>
+						<span class="col-xs-7"><input type="text" class="form-control" id='tor_client_bridge_ip' oninput='proofreadIp(this)'/></span>
 					</div>
 					<div id='tor_client_bridge_port_container' class="row form-group">
 						<label class="col-xs-5" for='tor_client_bridge_port' id='tor_client_bridge_port_label'><%~ BrPrt %>:</label>
-						<span class="col-xs-7"><input type="text" class="form-control" id='tor_client_bridge_port' onkeyup='proofreadPort(this)'/></span>
+						<span class="col-xs-7"><input type="text" class="form-control" id='tor_client_bridge_port' oninput='proofreadPort(this)'/></span>
 					</div>
 				</div>
 
@@ -72,11 +72,11 @@
 
 				<div id='tor_hidden_subnet_container' class="row form-group">
 					<label class="col-xs-5" for='tor_hidden_subnet' id='tor_hidden_subnet_label'><%~ HSSub %>:</label>
-					<span class="col-xs-7"><input type="text" class="form-control" id='tor_hidden_subnet' onkeyup='proofreadIp(this)' /></span>
+					<span class="col-xs-7"><input type="text" class="form-control" id='tor_hidden_subnet' oninput='proofreadIp(this)' /></span>
 				</div>
 				<div id='tor_hidden_mask_container' class="row form-group">
 					<label class="col-xs-5" for='tor_hidden_mask' id='tor_hidden_mask_label'><%~ HSMsk %>:</label>
-					<span class="col-xs-7"><input type="text" class="form-control" id='tor_hidden_mask' onkeyup='proofreadMask(this)' /></span>
+					<span class="col-xs-7"><input type="text" class="form-control" id='tor_hidden_mask' oninput='proofreadMask(this)' /></span>
 				</div>
 			</div>
 		</div>
@@ -103,17 +103,17 @@
 
 				<div id='tor_relay_port_container' class="row form-group">
 					<label class="col-xs-5" for='tor_relay_port' id='tor_relay_port_label'><%~ BrRPrt %>:</label>
-					<span class="col-xs-7"><input type="text" class="form-control" id='tor_relay_port' size='9' onkeyup='proofreadPort(this)' /></span>
+					<span class="col-xs-7"><input type="text" class="form-control" id='tor_relay_port' size='9' oninput='proofreadPort(this)' /></span>
 				</div>
 
 				<div id='tor_obfsproxy_port_container' class="row form-group">
 					<label class="col-xs-5" for='tor_obfsproxy_port' id='tor_obfsproxy_port_label'><%~ ObfPrt %>:</label>
-					<span class="col-xs-7"><input type="text" class="form-control" id='tor_obfsproxy_port' size='9' onkeyup='proofreadPort(this)' /></span>
+					<span class="col-xs-7"><input type="text" class="form-control" id='tor_obfsproxy_port' size='9' oninput='proofreadPort(this)' /></span>
 				</div>
 
 				<div id='tor_relay_max_bw_container' class="row form-group">
 					<label class="col-xs-5" for='tor_relay_max_bw' id='tor_relay_max_bw_label'><%~ MaxRB %>:</label>
-					<span class="col-xs-7"><input type="text" class="form-control" id='tor_relay_max_bw' size='9' onkeyup='proofreadNumeric(this)' /><em>&nbsp;&nbsp;<%~ KBs %></em></span>
+					<span class="col-xs-7"><input type="text" class="form-control" id='tor_relay_max_bw' size='9' oninput='proofreadNumeric(this)' /><em>&nbsp;&nbsp;<%~ KBs %></em></span>
 				</div>
 
 				<div id='tor_relay_publish_container' class="row form-group">
@@ -137,7 +137,7 @@
 				</div>
 
 				<div id='tor_relay_status_link_container' class="row form-group">
-					<span class='col-xs-12'><%~ VisMsg %> <a href="http://torstatus.blutmagie.de/"><%~ GlbMsg %></a></span>
+					<span class='col-xs-12'><%~ VisMsg %> <a href="http://torstatus.rueckgr.at/"><%~ GlbMsg %></a></span>
 				</div>
 			</div>
 		</div>
@@ -156,12 +156,13 @@
 					<span class="col-xs-5"><%~ TDDir %>:</span>
 					<span class="col-xs-7" id="tor_dir_ramdisk_static">/var/tor</span>
 					<span class="col-xs-7" id="tor_dir_root_static">/usr/lib/tor</span>
-					<span class="col-xs-7"><input type="text" id="tor_dir_text" style="display:none" /></span>
+					<span class="col-xs-7"><input type="text" id="tor_dir_text" style="display:none" class="form-control" /></span>
 				</div>
 				<div class="row form-group">
 					<span class="col-xs-5"><%~ TDDrv %>:</span>
 					<span class="col-xs-7"><select id="tor_dir_drive_select" onchange="setTorVisibility()" class="form-control"></select></span>
 				</div>
+				<div class="alert alert-danger" role="alert" id="tor_dir_incompatible"><%~ tordirincompat %></div>
 				<div>
 					<span class="col-xs-12">
 						<em><%~ CacheWarn %></em>

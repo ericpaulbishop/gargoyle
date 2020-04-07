@@ -548,12 +548,10 @@ function UCIContainer()
 				var matches = oldValue.length == newValue.length;
 				if(matches)
 				{
-					var sortedOld = oldValue.sort()
-					var sortedNew = newValue.sort()
-					var sortedIndex;
-					for(sortedIndex=0; matches && sortedIndex <sortedOld.length; sortedIndex++)
+					var matchIndex;
+					for(matchIndex=0; matches && matchIndex < oldValue.length; matchIndex++)
 					{
-						matches = sortedOld[sortedIndex] == sortedNew[sortedIndex] ? true : false
+						matches = oldValue[matchIndex] == newValue[matchIndex] ? true : false
 					}
 				}
 				if(matches)
@@ -773,6 +771,28 @@ function getWirelessMode(uciTest)
 	return wirelessMode;
 }
 
+function scrollUntilInView(element)
+{
+	var bounding = element.getBoundingClientRect();
+	// Consider header of fixed position.
+	var contentTop = document.getElementById("content").getBoundingClientRect().top;
+	// Only scroll element if not already in view.
+	if(bounding.top < contentTop || bounding.bottom > window.innerHeight)
+	{
+		// Scroll element just until its bottom is in view but only if its top is not truncated.
+		var alignToTop = bounding.height > window.innerHeight - contentTop;
+		try
+		{
+			// Try it smoothly.
+			element.scrollIntoView({ behavior: "smooth", block: alignToTop ? "start" : "end" });
+		}
+		catch(error)
+		{
+			// IE, Safari...
+			element.scrollIntoView(alignToTop);
+		}
+	}
+}
 
 function setDescriptionVisibility(descriptionId, defaultDisplay, displayText, hideText)
 {
@@ -782,11 +802,13 @@ function setDescriptionVisibility(descriptionId, defaultDisplay, displayText, hi
 
 	var ref = document.getElementById( descriptionId + "_ref" );
 	var txt = document.getElementById( descriptionId + "_txt" );
+	var box = document.getElementById( descriptionId );
 	var command = "uci set gargoyle.help." + descriptionId + "=";
 	if(ref.firstChild.data == displayText)
 	{
-		txt.style.display=defaultDisplay;
 		ref.firstChild.data = hideText;
+		txt.style.display = defaultDisplay;
+		scrollUntilInView(box);
 		command = command + "1\n";
 	}
 	else
@@ -811,13 +833,18 @@ function initializeDescriptionVisibility(testUci, descriptionId, defaultDisplay,
 
 	var descLinkText = displayText;
 	var descDisplay = "none";
-	if(testUci.get("gargoyle", "help", descriptionId) == "1")
+	var help = testUci.get("gargoyle", "help", descriptionId);
+	if(help == "1")
 	{
-		descLinkText = hideText
+		descLinkText = hideText;
 		descDisplay = defaultDisplay;
 	}
-	document.getElementById(descriptionId + "_ref").firstChild.data = descLinkText;
-	document.getElementById(descriptionId + "_txt").style.display = descDisplay;
+	// don't try to re-initialize after we've already removed the help section
+	if(help)
+	{
+		document.getElementById(descriptionId + "_ref").firstChild.data = descLinkText;
+		document.getElementById(descriptionId + "_txt").style.display = descDisplay;
+	}
 }
 
 
@@ -874,6 +901,27 @@ function rangeInSubnet(mask, ip, start, end)
 	return false;
 }
 
+function parseIp(ip)
+{
+	var ip = ip.split(".");
+	return ((((((+ip[0])*256)+(+ip[1]))*256)+(+ip[2]))*256)+(+ip[3]);
+}
+function ipInRange(ip, start, end)
+{
+	var ip = parseIp(ip);
+	return parseIp(start) <= ip && ip <= parseIp(end);
+}
+function ipInClassA(ip) { return ipInRange(ip, "0.0.0.0", "127.255.255.255"); }
+function ipInClassB(ip) { return ipInRange(ip, "128.0.0.0", "191.255.255.255"); }
+function ipInClassC(ip) { return ipInRange(ip, "192.0.0.0", "223.255.255.255"); }
+function ipInClassD(ip) { return ipInRange(ip, "224.0.0.0", "239.255.255.255"); }
+function ipInClassE(ip) { return ipInRange(ip, "240.0.0.0", "255.255.255.255"); }
+function ipInPrivateClassA(ip) { return ipInRange(ip, "10.0.0.0", "10.255.255.255"); }
+function ipInPrivateClassB(ip) { return ipInRange(ip, "172.16.0.0", "172.31.255.255"); }
+function ipInPrivateClassC(ip) { return ipInRange(ip, "192.168.0.0", "192.168.255.255"); }
+function ipInPrivate(ip) { return ipInPrivateClassA(ip) || ipInPrivateClassB(ip) || ipInPrivateClassC(ip); }
+function ipInLinkLocal(ip) { return ipInRange(ip, "169.254.0.0", "169.254.255.255"); }
+function ipInLocalhost(ip) { return ipInRange(ip, "127.0.0.0", "127.255.255.255"); }
 
 function proofreadFields(inputIds, labelIds, functions, validReturnCodes, visibilityIds, fieldDocument )
 {
@@ -915,6 +963,13 @@ function proofreadFields(inputIds, labelIds, functions, validReturnCodes, visibi
 		}
 	}
 	return errorArray;
+}
+function resetProofreadFields(inputIds)
+{
+	for (var i = 0; i < inputIds.length; i++)
+	{
+		resetProofreadText(document.getElementById(inputIds[i]));
+	}
 }
 
 function parseBytes(bytes, units, abbr, dDgt)
@@ -1000,7 +1055,7 @@ function setElementEnabled(element, enabled, defaultValue)
 		element.disabled=false;
 		if(element.type == "text" || element.type == "textarea")
 		{
-			element.style.color="#000000";
+			element.style.color="";
 			element.className="form-control" ;
 		}
 		else if(element.type == "select-one" || element.type == "select-multiple" || element.type == "select" )
@@ -1037,7 +1092,24 @@ function setElementEnabled(element, enabled, defaultValue)
 	}
 }
 
+function setElementReadOnly(element, readOnly)
+{
+	if(readOnly)
+	{
+		element.disabled = false;
+	}
+	element.readOnly = readOnly;
+}
 
+function updateReadOnlyAssociate(associate, element)
+{
+	var associate = document.getElementById(associate);
+	if(associate.readOnly && !associate.disabled)
+	{
+		associate.value = element.value;
+		associate.style.color = element.style.color;
+	}
+}
 
 function getSelectedValue(selectId, controlDocument)
 {
@@ -1890,6 +1962,14 @@ function validateHex(text)
 }
 
 
+function validateSsid(ssid)
+{
+	return validateLengthRange(ssid, 1, 32)
+}
+function proofreadSsid(input)
+{
+	proofreadText(input, validateSsid, 0);
+}
 
 function validateHours(hoursStr)
 {
@@ -1996,7 +2076,10 @@ function proofreadText(input, proofFunction, validReturnCode)
 		input.style.color = (proofFunction(input.value) == validReturnCode) ? "" : "red";
 	}
 }
-
+function resetProofreadText(input)
+{
+	input.style.color = "";
+}
 
 function getEmbeddedSvgWindow(embeddedId, controlDocument)
 {

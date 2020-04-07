@@ -57,13 +57,13 @@
 				</div>
 
 				<div id="qos_down_1" class="row form-group">
+					<span class="col-xs-12"><a id="qos_down_1_ref" href="javascript:setDescriptionVisibility('qos_down_1')"><%~ Hide %></a></span>
 					<span class="col-xs-12" id="qos_down_1_txt">
 						<p><%~ PackAbout %></p>
 
 						<p><%~ DefServClassAbout %></p>
 
 					</span>
-					<span class="col-xs-12"><a onclick="setDescriptionVisibility('qos_down_1')"  id="qos_down_1_ref" href="#qos_down_1"><%~ Hide %></a></span>
 				</div>
 
 				<div class="internal_divider"></div>
@@ -91,12 +91,13 @@
 				<div class="row form-group">
 					<label class="col-xs-5" id="total_bandwidth_label" for="total_bandwidth"><%~ DTotBand %>:</label>
 					<span class="col-xs-7">
-						<input type="text" id="total_bandwidth" class="form-control" onkeyup="proofreadNumeric(this)" size="10" maxlength="10" />
+						<input type="text" id="total_bandwidth" class="form-control" oninput="proofreadNumeric(this)" size="10" maxlength="10" />
 						<em><%~ Kbs %></em>
 					</span>
 				</div>
 
 				<div id="qos_down_2" class="row form-group">
+					<span class="col-xs-12"><a id="qos_down_2_ref" href="javascript:setDescriptionVisibility('qos_down_2')"><%~ Hide %></a></span>
 					<span id="qos_down_2_txt" class="col-xs-12">
 						<p><%~ DSCAbout %></p>
 
@@ -113,7 +114,6 @@
 						<p><%~ MinSpeedWarn %></p>
 					</span>
 
-					<span class="col-xs-12"><a onclick="setDescriptionVisibility('qos_down_2')"  id="qos_down_2_ref" href="#qos_down_2"><%~ Hide %></a></span>
 				</div>
 
 				<div class="internal_divider"></div>
@@ -146,7 +146,7 @@
 						<label for="use_ptarget_ip" id="ptarget_ip_label"><%~ ACC_Pt %>:</label>
 					</span>
 					<span class="col-xs-6">
-						<input type="text" name="ptarget_ip" id="ptarget_ip" class="form-control" onkeyup="proofreadIpRange(this)" size="17" maxlength="31" aria-labelledby="ptarget_ip_label"/>
+						<input type="text" name="ptarget_ip" id="ptarget_ip" class="form-control" oninput="proofreadIpRange(this)" size="17" maxlength="31" aria-labelledby="ptarget_ip_label"/>
 					</span>
 				</div>
 
@@ -156,7 +156,7 @@
 						<label for="use_auto_pinglimit" id="pinglimit_label"><%~ ACC_con %>:</label>
 					</span>
 					<span class="col-xs-6">
-						<input type="text" name="pinglimit" id="pinglimit" class="form-control" onkeyup="proofreadNumericRange(this, 10, 250)" size="4" maxlength="4" aria-labelledby="pinglimit_label"/>
+						<input type="text" name="pinglimit" id="pinglimit" class="form-control" oninput="proofreadNumericRange(this, 10, 250)" size="4" maxlength="4" aria-labelledby="pinglimit_label"/>
 					</span>
 				</div>
 
@@ -167,10 +167,10 @@
 				</div>
 
 				<div id="qos_down_3" class="row form-group">
+					<span class="col-xs-12"><a id="qos_down_3_ref" href="javascript:setDescriptionVisibility('qos_down_3')"><%~ Hide %></a></span>
 					<span class="col-xs-12" id="qos_down_3_txt">
 						<%~ AbACC %>
 					</span>
-					<span class="col-xs-12"><a onclick="setDescriptionVisibility('qos_down_3')" id="qos_down_3_ref" href="#qos_down_3"><%~ Hide %></a></span>
 				</div>
 
 				<div class="internal_divider"></div>
@@ -192,6 +192,7 @@
 				</div>
 
 				<div class="row form-group" id="qos_down_4">
+					<span class="col-xs-12"><a id="qos_down_4_ref" href="javascript:setDescriptionVisibility('qos_down_4')"><%~ Hide %></a></span>
 					<span class="col-xs-8" id="qos_down_4_txt">
 						<table class="table table-responsive">
 							<tr><td><strong>Status Help</strong></td></tr>
@@ -210,7 +211,6 @@
 							<tr><td>Active Classes</td><td><%~ ACC_L_AC %></td></tr>
 						</table>
 					</span>
-					<span class="col-xs-12"><a onclick="setDescriptionVisibility('qos_down_4')"  id="qos_down_4_ref" href="#qos_down_4"><%~ Hide %></a></span>
 				</div>
 			</div>
 		</div>

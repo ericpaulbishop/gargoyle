@@ -17,7 +17,7 @@
 <div id="exception_applies_to_container" class="row form-group">
 	<div class="col-xs-offset-5 col-xs-7" id="exception_applies_to_table_container"></div>
 	<div class="col-xs-offset-5 col-xs-7">
-		<input type='text' id='exception_applies_to_addr' size='30' onkeyup='proofreadMultipleIpsOrMacs(this)' class='form-control' />
+		<input type='text' id='exception_applies_to_addr' size='30' oninput='proofreadMultipleIpsOrMacs(this)' class='form-control' />
 		<button type="button" class="btn btn-default btn-add" id="exception_add_applies_to_addr" onclick='addAddressesToTable("exception_applies_to_addr","exception_applies_to_table_container","exception_applies_to_table",true)'><%~ Add %></button>
 	</div>
 	<div class="col-xs-offset-5 col-xs-7">
@@ -52,7 +52,7 @@
 
 <div id="exception_hours_active_container" class="indent">
 	<label class='col-xs-5' for='exception_hours_active' id='exception_hours_active_label'><%~ HActv %>:</label>
-	<span class="col-xs-offset-5 col-xs-7"><input type='text' id='exception_hours_active' size='30' onkeyup='proofreadHours(this)' class='form-control' /></span>
+	<span class="col-xs-offset-5 col-xs-7"><input type='text' id='exception_hours_active' size='30' oninput='proofreadHours(this)' class='form-control' /></span>
 	<div class="col-xs-offset-5 col-xs-7">
 		<em><%~ SSample %> 00:30-13:15, 14:00-15:00</em>
 	</div>
@@ -60,7 +60,7 @@
 
 <div id="exception_days_and_hours_active_container" class="indent">
 	<label class='col-xs-5' for='exception_days_and_hours_active' id='exception_days_and_hours_active_label'><%~ DHActv %>:</label>
-	<span class="col-xs-offset-5 col-xs-7"><input type='text' id='exception_days_and_hours_active' size='30' onkeyup='proofreadWeeklyRange(this)' class='form-control' /></span>
+	<span class="col-xs-offset-5 col-xs-7"><input type='text' id='exception_days_and_hours_active' size='30' oninput='proofreadWeeklyRange(this)' class='form-control' /></span>
 	<div class="col-xs-offset-5 col-xs-7">
 		<em><%~ Sample %></em>
 	</div>
@@ -85,7 +85,7 @@
 	<div id="exception_remote_ip_container" class="row form-group">
 		<div class="col-xs-offset-5 col-xs-7" id="exception_remote_ip_table_container"></div>
 		<div class="col-xs-offset-5 col-xs-7">
-			<input type='text' id='exception_remote_ip' size='30' onkeyup='proofreadMultipleIps(this)' class='form-control' />
+			<input type='text' id='exception_remote_ip' size='30' oninput='proofreadMultipleIps(this)' class='form-control' />
 			<button type="button" class="btn btn-default btn-add" id="exception_add_remote_ip" onclick='addAddressesToTable("exception_remote_ip","exception_remote_ip_table_container","exception_remote_ip_table",false)'><%~ Add %></button>
 		</div>
 	</div>
@@ -100,7 +100,7 @@
 			</select>
 		</span>
 		<span class='col-xs-offset-5 col-xs-7'>
-			<input type='text' id='exception_remote_port' onkeyup='proofreadMultiplePorts(this)' size='20' class='form-control' />
+			<input type='text' id='exception_remote_port' oninput='proofreadMultiplePorts(this)' size='20' class='form-control' />
 		</span>
 	</div>
 	<div class="row form-group">
@@ -113,7 +113,7 @@
 			</select>
 		</span>
 		<span class="col-xs-offset-5 col-xs-7">
-			<input class='form-control' type='text' id='exception_local_port' onkeyup='proofreadMultiplePorts(this)' size='20'/>
+			<input class='form-control' type='text' id='exception_local_port' oninput='proofreadMultiplePorts(this)' size='20'/>
 		</span>
 	</div>
 

@@ -20,6 +20,7 @@ stamgrStr.CurrAP="Bieżący AP";
 stamgrStr.Connected="Połączony";
 stamgrStr.BlacklistAP="Zabronione AP";
 stamgrStr.NoStacfgErr="Sieć Wi-Fi musi być ustawiona jako klient lub klient+AP aby móc używać Menedżera połączeń";
+stamgrStr.ScanWifi="Skanuj";
 
 //Javascript
 stamgrStr.cfgid="ID konfiguracji";
@@ -29,6 +30,9 @@ stamgrStr.Password="Hasło";
 stamgrStr.AErr="Nie można dodać wiersza.";
 stamgrStr.upErr="Nie można zaktualizować wiersza.";
 stamgrStr.discontoohighErr="Jakość rozłączenia musi być poniżej 90%";
-stamgrStr.contoolowErr="Jakość rozłączenia musi być powyżej 30%";
+stamgrStr.contoolowErr="Jakość połączenia musi być powyżej 30%";
 stamgrStr.discongtconErr="Jakość rozłączenia musi być poniżej jakości połączenia";
-
+stamgrStr.CurWanCfg="Bieżąca sieć WAN";
+stamgrStr.Other="Inna";
+stamgrStr.Scanning="Poszukiwanie sieci bezprzewodowych";
+stamgrStr.NoWifi="Nie znaleziono sieci!";

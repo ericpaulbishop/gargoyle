@@ -315,7 +315,7 @@ function createTableFilter()
 			filterTxt.value = TFilter_Store[x];
 		}
 
-		filterTxt.onkeyup = function(){applyTableFilter(this.parentNode.parentNode.parentNode.parentNode.id);};
+		filterTxt.oninput = function(){applyTableFilter(this.parentNode.parentNode.parentNode.parentNode.id);};
 
 		filterCol.appendChild(filterTxt);
 		filterRow.appendChild(filterCol);
