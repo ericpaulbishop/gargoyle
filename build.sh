@@ -33,7 +33,7 @@ set_version_variables()
 	# set precise commit in repo to use 
 	# you can set this to an alternate commit 
 	# or empty to checkout latest
-	openwrt_commit="cff3795450b77d4ee40a0079505375fc50c4c21a"
+	openwrt_commit="36373c5ddb1b6fc81fa239a1f898c5abc3f24f40"
 	openwrt_abbrev_commit=$( echo "$openwrt_commit" | cut -b 1-7 )
 	
 
