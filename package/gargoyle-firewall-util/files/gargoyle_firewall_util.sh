@@ -12,6 +12,19 @@ death_mark="$death_mask"
 
 wan_if=""
 
+apply_xtables_rule()
+{
+	rule="$1"
+	family="${2:-ipv4}"
+
+	if [ "$family" = "ipv4" ] || [ "$family" = "any" ] ; then
+		iptables ${rule}
+	fi
+	if [ "$family" = "ipv6" ] || [ "$family" = "any" ] ; then
+		ip6tables ${rule}
+	fi
+}
+
 mask_to_cidr()
 {
 	mask="$1"
@@ -78,43 +91,59 @@ insert_remote_accept_rules()
 	#add rules for remote_accepts
 	parse_remote_accept_config()
 	{
-		vars="local_port remote_port start_port end_port proto zone"
+		vars="local_port remote_port start_port end_port proto zone family"
 		proto="tcp udp"
 		zone="wan"
+		family="ipv4"
 		for var in $vars ; do
 			config_get $var $1 $var
 		done
 		if [ "$proto" = "tcpudp" ] || [ -z "$proto" ] ; then
 			proto="tcp udp"
 		fi
+		if [ "$family" = "any" ] ; then
+			family="ipv4 ipv6"
+		fi
+		if [ -z "$family" ] ; then
+			family="ipv4"
+		fi 
 
-		for prot in $proto ; do
-			if [ -n "$local_port" ] ; then
+		for fam in $family ; do
+			for prot in $proto ; do
+				if [ -n "$local_port" ] ; then
+					if [ -z "$remote_port"  ] ; then
+						remote_port="$local_port"
+					fi
 
-				if [ -z "$remote_port"  ] ; then
-					remote_port="$local_port"
+					#Discourage brute force attacks on ssh from the WAN by limiting failed conneciton attempts.
+					#Each attempt gets a maximum of 10 password tries by dropbear.
+					if   [ -n "$ssh_max_attempts"  ] && [ "$local_port" = "$ssh_port" ] && [ "$prot" = "tcp" ] ; then
+						apply_xtables_rule "-t filter -A "input_${zone}_rule" -p "$prot" --dport $ssh_port -m recent --set --name SSH_CHECK" "$fam"
+						apply_xtables_rule "-t filter -A "input_${zone}_rule" -m recent --update --seconds 300 --hitcount $ssh_max_attempts --name SSH_CHECK -j DROP" "$fam"
+					fi
+
+					if [ "$remote_port" != "$local_port" ] ; then
+						if [ "$fam" = "ipv4" ] ; then
+							#since we're inserting with -I, insert redirect rule first which will then be hit second, after setting connmark
+							apply_xtables_rule "-t nat -I "zone_${zone}_prerouting" -p "$prot" --dport "$remote_port" -j REDIRECT --to-ports "$local_port"" "$fam"
+							apply_xtables_rule "-t nat -I "zone_${zone}_prerouting" -p "$prot" --dport "$remote_port" -j CONNMARK --set-mark "$ra_mark"" "$fam"
+							apply_xtables_rule "-t filter -A "input_${zone}_rule" -p $prot --dport "$local_port" -m connmark --mark "$ra_mark" -j ACCEPT" "$fam"
+						else
+							logger -t "gargoyle_firewall_util" "Port Redirect not supported for IPv6"
+						fi
+					else
+						if [ "$fam" = "ipv4" ] ; then
+							apply_xtables_rule "-t nat -I "zone_${zone}_prerouting" -p "$prot" --dport "$remote_port" -j REDIRECT --to-ports "$local_port"" "$fam"
+						fi
+						apply_xtables_rule "-t filter -A "input_${zone}_rule" -p "$prot" --dport "$local_port" -j ACCEPT" "$fam"
+					fi
+				elif [ -n "$start_port" ] && [ -n "$end_port" ] ; then
+					if [ "$fam" = "ipv4" ] ; then
+						apply_xtables_rule "-t nat -I "zone_${zone}_prerouting" -p "$prot" --dport "$start_port:$end_port" -j REDIRECT" "$fam"
+					fi
+					apply_xtables_rule "-t filter -A "input_${zone}_rule" -p "$prot" --dport "$start_port:$end_port" -j ACCEPT" "$fam"
 				fi
-
-				#Discourage brute force attacks on ssh from the WAN by limiting failed conneciton attempts.
-				#Each attempt gets a maximum of 10 password tries by dropbear.
-				if   [ -n "$ssh_max_attempts"  ] && [ "$local_port" = "$ssh_port" ] && [ "$prot" = "tcp" ] ; then
-					iptables -t filter -A "input_${zone}_rule" -p "$prot" --dport $ssh_port -m recent --set --name SSH_CHECK
-					iptables -t filter -A "input_${zone}_rule" -m recent --update --seconds 300 --hitcount $ssh_max_attempts --name SSH_CHECK -j DROP
-				fi
-
-				if [ "$remote_port" != "$local_port" ] ; then
-					#since we're inserting with -I, insert redirect rule first which will then be hit second, after setting connmark
-					iptables -t nat -I "zone_"$zone"_prerouting" -p "$prot" --dport "$remote_port" -j REDIRECT --to-ports "$local_port"
-					iptables -t nat -I "zone_"$zone"_prerouting" -p "$prot" --dport "$remote_port" -j CONNMARK --set-mark "$ra_mark"
-					iptables -t filter -A "input_${zone}_rule" -p $prot --dport "$local_port" -m connmark --mark "$ra_mark" -j ACCEPT
-				else
-					iptables -t nat -I "zone_"$zone"_prerouting" -p "$prot" --dport "$remote_port" -j REDIRECT --to-ports "$local_port"
-					iptables -t filter -A "input_${zone}_rule" -p "$prot" --dport "$local_port" -j ACCEPT
-				fi
-			elif [ -n "$start_port" ] && [ -n "$end_port" ] ; then
-				iptables -t nat -I "zone_"$zone"_prerouting" -p "$prot" --dport "$start_port:$end_port" -j REDIRECT
-				iptables -t filter -A "input_${zone}_rule" -p "$prot" --dport "$start_port:$end_port" -j ACCEPT
-			fi
+			done
 		done
 	}
 	config_load "$config_name"
