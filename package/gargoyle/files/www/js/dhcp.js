@@ -424,7 +424,7 @@ function proofreadStatic(excludeRow)
 	{
 		var hostid = document.getElementById("add_hostid").value;
 		var duid = document.getElementById('add_duid').value;
-		if((hostid != "" || hostid != "-") && (duid == "" || duid == "-"))
+		if((hostid != "" && hostid != "-") && (duid == "" || duid == "-"))
 		{
 			errors.push(dhcpS.NoDUID);
 		}
@@ -490,12 +490,15 @@ function editStatic(editRow)
 	}
 	else
 	{
+		var add_host = document.getElementById("add_host").value;
+		var add_hostid = document.getElementById("add_hostid").value;
+		var add_duid = document.getElementById("add_duid").value;
 		//update document with new data
-		editRow.childNodes[0].firstChild.data = document.getElementById("add_host").value;
+		editRow.childNodes[0].firstChild.data = add_host == "" ? "-" : add_host;
 		editRow.childNodes[1].firstChild.data = document.getElementById("add_mac").value;
 		editRow.childNodes[2].firstChild.data = document.getElementById("add_ip").value;
-		editRow.childNodes[3].firstChild.data = document.getElementById("add_hostid").value;
-		editRow.childNodes[4].firstChild.data = document.getElementById("add_duid").value;
+		editRow.childNodes[3].firstChild.data = add_hostid == "" ? "-" : add_hostid;
+		editRow.childNodes[4].firstChild.data = add_duid == "" ? "-" : add_duid;
 
 		closeModalWindow('static_ip_modal');
 
