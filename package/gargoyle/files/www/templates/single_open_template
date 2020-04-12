@@ -1,0 +1,22 @@
+				<div class="row form-group">
+					<label class="col-xs-5" id='addo_desc_label' for='addo_desc'><%~ port.Desc %> <em><%~ optl %></em></label>
+					<span class="col-xs-7"><input type='text' id='addo_desc' maxLength='32' class='form-control' /></span>
+				</div>
+				<div class="row form-group">
+					<label class="col-xs-5" id='addo_prot_label' for='addo_prot'><%~ Proto %></label>
+					<span class="col-xs-7">
+						<select id='addo_prot' class='form-control'>
+							<option value='<%~ both %>'><%~ both %></option>
+							<option value='TCP'>TCP</option>
+							<option value='UDP'>UDP</option>
+						</select>
+					</span>
+				</div>
+				<div class="row form-group">
+					<label class="col-xs-5" id='addo_ip_label' for='addo_ip'>IP</label>
+					<span class="col-xs-7"><input type='text' id='addo_ip' oninput='proofreadIp6Range(this)' maxLength='40' class='form-control' /></span>
+				</div>
+				<div class="row form-group">
+					<label class="col-xs-5" id='addo_dp_label' for='addo_dp'><%~ Port %></label>
+					<span class="col-xs-7"><input type='text' id='addo_dp' oninput='proofreadNumeric(this,1,65535)' maxLength='5' class='form-control' /></span>
+				</div>

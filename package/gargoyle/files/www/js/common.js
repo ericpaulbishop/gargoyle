@@ -3399,7 +3399,7 @@ function validateIP6Range(range)
 		if(split.length == 2)
 		{
 			var ipValid = validateIP6(split[0]);
-			var maskValid = split[1] < 1 || split[1] > 128 ? 1 : 0;
+			var maskValid = split[1] < -128 || split[1] > 128 ? 1 : 0;
 			errorCode = ipValid == 0 && maskValid == 0 ? 0 : 1;
 		}
 	}

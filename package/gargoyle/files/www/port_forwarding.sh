@@ -76,6 +76,52 @@
 </div>
 
 <div class="row">
+	<div class="col-lg-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ port.POISect %></h3>
+			</div>
+
+			<div class="panel-body">
+				<div id="porto_add_heading_container" class="row form-group">
+					<label class="col-xs-12" id="porto_add_heading_label" style="text-decoration:underline"><%~ OpeIPort %>:</label>
+				</div>
+
+				<div class="row form-group">
+					<div id="porto_add_container" class="col-xs-12">
+						<button type="button" id="addo_button" class="btn btn-default btn-add" onclick="addPortOModal(true)"><%~ Add %></button>
+					</div>
+				</div>
+
+				<div id="porto_table_container" class="col-xs-12 table-responsive"></div>
+			</div>
+		</div>
+	</div>
+
+	<div class="col-lg-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ port.PORSect %></h3>
+			</div>
+
+			<div class="panel-body">
+				<div id="portorange_add_heading_container" class="row form-group">
+					<label class="col-xs-12" id="portorange_add_heading_label" style="text-decoration:underline"><%~ OpeRPort %>:</label>
+				</div>
+
+				<div class="row form-group">
+					<div id="portorange_add_container" class="col-xs-12">
+						<button type="button" id="addor_button" class="btn btn-default btn-add" onclick="addPortOModal(false)"><%~ Add %></button>
+					</div>
+				</div>
+
+				<div id="portorange_table_container" class="col-xs-12 table-responsive"></div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="row">
 	<div id="upnp_fieldset" class="col-lg-6">
 		<div class="panel panel-default">
 			<div class="panel-heading">
@@ -180,6 +226,36 @@
 				<%in templates/multi_forward_template %>
 			</div>
 			<div class="modal-footer" id="multi_forward_modal_button_container">
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="single_open_modal" aria-hidden="true" aria-labelledby="single_open_modal_title">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 id="single_open_modal_title" class="panel-title"><%~ OpeIPort %></h3>
+			</div>
+			<div class="modal-body">
+				<%in templates/single_open_template %>
+			</div>
+			<div class="modal-footer" id="single_open_modal_button_container">
+			</div>
+		</div>
+	</div>
+</div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="multi_open_modal" aria-hidden="true" aria-labelledby="multi_open_modal_title">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 id="multi_open_modal_title" class="panel-title"><%~ OpeIPort %></h3>
+			</div>
+			<div class="modal-body">
+				<%in templates/multi_open_template %>
+			</div>
+			<div class="modal-footer" id="multi_open_modal_button_container">
 			</div>
 		</div>
 	</div>

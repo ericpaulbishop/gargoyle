@@ -1,0 +1,26 @@
+				<div class="row form-group">
+					<label class="col-xs-5" id='addor_desc_label' for='addor_desc'><%~ port.Desc %> <em><%~ optl %></em></label>
+					<span class="col-xs-7"><input type='text' id='addor_desc' maxLength='32' class='form-control' /></span>
+				</div>
+				<div class="row form-group">
+					<label class="col-xs-5" id='addor_prot_label' for='addor_prot'><%~ Proto %></label>
+					<span class="col-xs-7">
+						<select id='addor_prot' class='form-control'>
+							<option value='<%~ both %>'><%~ both %></option>
+							<option value='TCP'>TCP</option>
+							<option value='UDP'>UDP</option>
+						</select>
+					</span>
+				</div>
+				<div class="row form-group">
+					<label class="col-xs-5" id='addor_sp_label' for='addor_sp'><%~ SPrt %></label>
+					<span class="col-xs-7"><input type='text' id='addor_sp' oninput='proofreadNumericRange(this,1,65535)' maxLength='5' class='form-control' /></span>
+				</div>
+				<div class="row form-group">
+					<label class="col-xs-5" id='addor_ep_label' for='addor_ep'><%~ EPrt %></label>
+					<span class="col-xs-7"><input type='text' id='addor_ep' oninput='proofreadNumeric(this,1,65535)' maxLength='5' class='form-control' /></span>
+				</div>
+				<div class="row form-group">
+					<label class="col-xs-5" id='addor_ip_label' for='addor_ip'>IP</label>
+					<span class="col-xs-7"><input type='text' id='addor_ip' oninput='proofreadIp6Range(this)' maxLength='40' class='form-control' /></span>
+				</div>
