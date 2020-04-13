@@ -1,9 +1,20 @@
 				<div class="row form-group">
+					<label class="col-xs-5" id="ip_family_label" for="ip_family" ><%~ IPFam %>:</label>
+					<span class="col-xs-7">
+						<select id="ip_family" class="form-control" aria-labelledby="ip_family_label" onchange="updateIPControls(this)">
+							<option value="any"><%~ both %></option>
+							<option value="ipv4">IPv4</option>
+							<option value="ipv6">IPv6</option>
+						</select>
+					</span>
+				</div>
+
+				<div class="row form-group">
 					<span class="col-xs-5">
 						<input type="checkbox" id="use_source_ip" onclick="enableAssociatedField(this,'source_ip', '')" />
 						<label id="source_ip_label" for="use_source_ip"><%~ SrcIP %>:</label>
 					</span>
-					<span class="col-xs-7"><input class="form-control" type="text" id="source_ip" onkeyup="proofreadIpRange(this)" size="17" maxlength="31" aria-labelledby="source_ip_label"/></span>
+					<span class="col-xs-7"><input class="form-control" type="text" id="source_ip" onkeyup="proofreadQOSIPRange(this)" size="17" maxlength="50" aria-labelledby="source_ip_label"/></span>
 				</div>
 
 				<div class="row form-group">
@@ -19,7 +30,7 @@
 						<input type="checkbox" id="use_dest_ip" onclick="enableAssociatedField(this,'dest_ip', '')" />
 						<label id="dest_ip_label" for="use_dest_ip"><%~ DstIP %>:</label>
 					</span>
-					<span class="col-xs-7"><input class="form-control" type="text" id="dest_ip" onkeyup="proofreadIpRange(this)" size="17" maxlength="31" aria-labelledby="dest_ip_label"/></span>
+					<span class="col-xs-7"><input class="form-control" type="text" id="dest_ip" onkeyup="proofreadQOSIPRange(this)" size="17" maxlength="50" aria-labelledby="dest_ip_label"/></span>
 				</div>
 
 				<div class="row form-group">

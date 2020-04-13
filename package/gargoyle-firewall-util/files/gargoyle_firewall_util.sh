@@ -25,6 +25,15 @@ apply_xtables_rule()
 	fi
 }
 
+ip_family()
+{
+	ip="$1"
+	ip4=$(echo "$ip" | grep -E "^\d+\.\d+\.\d+\.\d+$")
+	[ -n "$ip4" ] && echo "ipv4"
+	ip6=$(echo "$ip" | grep -E "^([0-9a-fA-F]{0,4}:){1,7}[0-9a-fA-F]{0,4}$")
+	[ -n "$ip6" ] && echo "ipv6"
+}
+
 mask_to_cidr()
 {
 	mask="$1"

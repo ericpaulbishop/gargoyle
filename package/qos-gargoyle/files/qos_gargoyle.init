@@ -136,6 +136,7 @@ apply_all_rules()
 
 	local need_proto
 	local tmp_proto
+	local fam
 
 	# add filter rules
 	rule_list=$(load_and_sort_all_config_sections "$config_file_name" "$rule_type" "test_order")
@@ -192,6 +193,9 @@ apply_all_rules()
 				connbytes_kb)
 					match_str="$match_str -m connbytes --connbytes $(($option_value*1024)): --connbytes-dir both --connbytes-mode bytes"
 				;;
+				family)
+					fam=$option_value
+				;;
 			esac
 		done
 
@@ -202,17 +206,19 @@ apply_all_rules()
 			match_str="$match_str -m length --length $min_pkt_size:$max_pkt_size"
 		fi
 
+		[ -z "$fam" ] && fam="ipv4"
+
 		if [ -n "$class" ] ; then
 			if [ -n "$proto" ] || [ -n "$match_str" ] ; then
 				next_mark=$(get_classname_mark "$class" "$class_mark_list" )
 
 				#We need to specify both udp and tcp if the user indicated a port
-				#and he did not indiate a protocal.
+				#and he did not indicate a protocol.
 				if [ -z "$proto" ] && [ -n "$need_proto" ] ; then
 
 					$echo_on
-					iptables -t $table -I $chain -p tcp $match_str -j MARK --set-mark $next_mark
-					iptables -t $table -I $chain -p udp $match_str -j MARK --set-mark $next_mark
+					apply_xtables_rule "-t $table -I $chain -p tcp $match_str -j MARK --set-mark $next_mark" "$fam"
+					apply_xtables_rule "-t $table -I $chain -p udp $match_str -j MARK --set-mark $next_mark" "$fam"
 					$echo_off
 
 				else
@@ -226,7 +232,7 @@ apply_all_rules()
 					fi
 
 					$echo_on
-					iptables -t $table -I $chain $tmp_proto $match_str -j MARK --set-mark $next_mark
+					apply_xtables_rule "-t $table -I $chain $tmp_proto $match_str -j MARK --set-mark $next_mark" "$fam"
 					$echo_off
 				fi
 
@@ -491,8 +497,8 @@ initialize_qos()
 		tc qdisc change dev $qos_interface $overhead root handle 1:0 hfsc default $def_upload_idx
 
 		# Set up egress chain
-		iptables -t mangle -N qos_egress
-		iptables -t mangle -A POSTROUTING -o $qos_interface -j qos_egress
+		apply_xtables_rule "-t mangle -N qos_egress" "any"
+		apply_xtables_rule "-t mangle -A POSTROUTING -o $qos_interface -j qos_egress" "any"
 
 		#Next the user entered rules.
 		$echo_off
@@ -500,14 +506,14 @@ initialize_qos()
 		$echo_on
 
 		#set default class mark first in case we don't match anything
-		iptables -t mangle -I qos_egress -j MARK --set-mark $def_upload_class
+		apply_xtables_rule "-t mangle -I qos_egress -j MARK --set-mark $def_upload_class" "any"
 
 		#if we already set a mark in quota chain, we need to save that mark to the connmark, then return so it doesn't get over-written
-		iptables -t mangle -I qos_egress -m mark ! --mark 0x0 -j RETURN
-		iptables -t mangle -I qos_egress -m mark ! --mark 0x0 -j CONNMARK --save-mark --mask $upload_mask
+		apply_xtables_rule "-t mangle -I qos_egress -m mark ! --mark 0x0 -j RETURN" "any"
+		apply_xtables_rule "-t mangle -I qos_egress -m mark ! --mark 0x0 -j CONNMARK --save-mark --mask $upload_mask" "any"
 
 		# save current mark to connmark at end of chain
-		iptables -t mangle -A qos_egress -j CONNMARK --save-mark --mask $upload_mask
+		apply_xtables_rule "-t mangle -A qos_egress -j CONNMARK --save-mark --mask $upload_mask" "any"
 	fi
 
 
@@ -635,11 +641,11 @@ initialize_qos()
 		tc qdisc change dev imq0 $overhead root handle 1:0 hfsc default $def_download_idx
 
 		# Create ingress chain
-		iptables -t mangle -N qos_ingress
+		apply_xtables_rule "-t mangle -N qos_ingress" "any"
 
 		# Mark ingress in FORWARD and INPUT chains to make sure any DNAT (virt. server) is taken into account
-		iptables -t mangle -A FORWARD -i $qos_interface -j qos_ingress
-		iptables -t mangle -A INPUT -i $qos_interface -j qos_ingress
+		apply_xtables_rule "-t mangle -A FORWARD -i $qos_interface -j qos_ingress" "any"
+		apply_xtables_rule "-t mangle -A INPUT -i $qos_interface -j qos_ingress" "any"
 
 		#Now the rest of the user entered rules.
 		$echo_off
@@ -647,17 +653,17 @@ initialize_qos()
 		$echo_on
 
 		#set default class mark first in case we don't match anything
-		iptables -t mangle -I qos_ingress -j MARK --set-mark $def_download_class
+		apply_xtables_rule "-t mangle -I qos_ingress -j MARK --set-mark $def_download_class" "any"
 
 		#If we already set a mark in quota chain, we need to save that mark to the connmark, then return so it doesn't get over-written
-		iptables -t mangle -I qos_ingress -m mark ! --mark 0x0 -j RETURN
-		iptables -t mangle -I qos_ingress -m mark ! --mark 0x0 -j CONNMARK --save-mark --mask $download_mask
+		apply_xtables_rule "-t mangle -I qos_ingress -m mark ! --mark 0x0 -j RETURN" "any"
+		apply_xtables_rule "-t mangle -I qos_ingress -m mark ! --mark 0x0 -j CONNMARK --save-mark --mask $download_mask" "any"
 
 		#Make sure all packets get sent through IMQ
-		iptables -t mangle -I qos_ingress -j IMQ --todev 0
+		apply_xtables_rule "-t mangle -I qos_ingress -j IMQ --todev 0" "any"
 
 		#save current mark to connmark at end of chain
-		iptables -t mangle -A qos_ingress -j CONNMARK --save-mark --mask $download_mask
+		apply_xtables_rule "-t mangle -A qos_ingress -j CONNMARK --save-mark --mask $download_mask" "any"
 
 		$echo_off
 
@@ -700,7 +706,12 @@ initialize_qos()
 
 		
 		#Ping responses from the ping target never go to ingress QoS (IMQ0 device).
-		iptables -t mangle -I qos_ingress -p icmp --icmp-type 0 -s $ptarget_ip -j RETURN
+		if [ "$(ip_family $ptarget_ip)" == "ipv4" ] ; then
+			apply_xtables_rule "-t mangle -I qos_ingress -p icmp --icmp-type 0 -s $ptarget_ip -j RETURN" "ipv4"
+		fi
+		if [ "$(ip_family $ptarget_ip)" == "ipv6" ] ; then
+			apply_xtables_rule "-t mangle -I qos_ingress -p icmp --icmp-type 0 -s $ptarget_ip -j RETURN" "ipv6"
+		fi
 
 		#Make a class to handle the outgoing ping requests from the router.
 		#These pings 84 bytes each for ethernet plus 22 more for PPPoE connections, allowing a maximum rate of 200ms we get 2.6kbps
@@ -709,7 +720,12 @@ initialize_qos()
 		tc filter add dev $qos_interface parent 1:0 prio 1 protocol ip handle 127 fw flowid 1:127
 
 		#Mark all ping requests from the router to the ptarget to the above special class overriding any other mark.
-		iptables -t mangle -I qos_egress -p icmp --icmp-type 8 -s $wan_ip -d $ptarget_ip -j MARK --set-mark 127
+		if [ "$(ip_family $wan_ip)" == "ipv4" ] && [ "$(ip_family $ptarget_ip)" == "ipv4" ] ; then
+			apply_xtables_rule "-t mangle -I qos_egress -p icmp --icmp-type 8 -s $wan_ip -d $ptarget_ip -j MARK --set-mark 127" "ipv4"
+		fi
+		if [ "$(ip_family $wan_ip)" == "ipv6" ] && [ "$(ip_family $ptarget_ip)" == "ipv6" ] ; then
+			apply_xtables_rule "-t mangle -I qos_egress -p icmp --icmp-type 8 -s $wan_ip -d $ptarget_ip -j MARK --set-mark 127" "ipv6"
+		fi
 
 		#Start the monitor
 		if [ -n "$pinglimit" ] ; then
@@ -848,12 +864,14 @@ show()
 
 	echo "Egress configuration on $qos_interface"
 	iptables -t mangle -vnL qos_egress 2>/dev/null
+	ip6tables -t mangle -vnL qos_egress 2>/dev/null
 	tc -s qdisc show dev $qos_interface
 	tc -s class show dev $qos_interface
 	tc -s filter show dev $qos_interface
 
 	echo "Ingress configuration in imq0"
 	iptables -t mangle -vnL qos_ingress 2>/dev/null
+	ip6tables -t mangle -vnL qos_ingress 2>/dev/null
 	tc -s qdisc show dev imq0
 	tc -s class show dev imq0
 	tc -s filter show dev imq0

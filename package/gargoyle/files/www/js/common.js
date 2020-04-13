@@ -3554,11 +3554,11 @@ function getIPFamily(address)
 {
 	var retVal = null;
 
-	if(validateIP(address) == 0)
+	if(validateIpRange(address) == 0)
 	{
 		retVal = "IPv4";
 	}
-	else if(validateIP6(address) == 0)
+	else if(validateIP6Range(address) == 0)
 	{
 		retVal = "IPv6";
 	}

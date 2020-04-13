@@ -180,7 +180,7 @@ function saveChanges()
 			uci.set("qos_gargoyle", ruleId, "class", classId);
 			uci.set("qos_gargoyle", ruleId, "test_order", rulePriority);
 
-			optionList = ["source", "srcport", "destination", "dstport", "max_pkt_size","min_pkt_size",  "proto", "connbytes_kb", "comment"];
+			optionList = ["family", "source", "srcport", "destination", "dstport", "max_pkt_size","min_pkt_size",  "proto", "connbytes_kb", "comment"];
 
 			matchCriteria = parseRuleMatchCriteria(ruleData[ruleIndex][0]);
 			matchCriteria.splice(-1, 0, ruleData[ruleIndex][2].lastChild.innerHTML);
@@ -190,6 +190,11 @@ function saveChanges()
 				{
 					value = matchCriteria[criteriaIndex];
 					value = optionList[criteriaIndex] == "proto" ? value.toLowerCase() : value;
+					if(optionList[criteriaIndex] == "family")
+					{
+						value = value == UI.both ? "any" : value;
+						value = value.toLowerCase();
+					}
 					uci.set("qos_gargoyle", ruleId, optionList[criteriaIndex], value);
 				}
 			}
@@ -450,8 +455,8 @@ function resetData()
 		rulePriorities.push(rulePriority + "," + ruleIndex);
 
 
-		optionList = ["source", "srcport", "destination", "dstport", "max_pkt_size", "min_pkt_size", "proto", "connbytes_kb"];
-		displayOptionList = [qosStr.Src+": $", qosStr.SrcP+": $", qosStr.Dst+": $", qosStr.DstP+": $", qosStr.MaxPktLen+": $ "+UI.byt, qosStr.MinPktLen+": $ "+UI.byt, qosStr.TrProto+": $", qosStr.Connb+": $ "+UI.KBy];
+		optionList = ["family", "source", "srcport", "destination", "dstport", "max_pkt_size", "min_pkt_size", "proto", "connbytes_kb"];
+		displayOptionList = [qosStr.IPFam + ": $", qosStr.Src+": $", qosStr.SrcP+": $", qosStr.Dst+": $", qosStr.DstP+": $", qosStr.MaxPktLen+": $ "+UI.byt, qosStr.MinPktLen+": $ "+UI.byt, qosStr.TrProto+": $", qosStr.Connb+": $ "+UI.KBy];
 
 		ruleText = "";
 		for (optionIndex = 0; optionIndex < optionList.length; optionIndex++)
@@ -467,6 +472,21 @@ function resetData()
 				else
 				{
 					optionValue = optionValue.toUpperCase();
+				}
+			}
+			else if(optionList[optionIndex] == "family")
+			{
+				if(optionValue == "any")
+				{
+					optionValue = UI.both;
+				}
+				else if(optionValue == "ipv4")
+				{
+					optionValue = "IPv4";
+				}
+				else if(optionValue == "ipv6")
+				{
+					optionValue = "IPv6";
 				}
 			}
 			if(optionValue != "")
@@ -587,7 +607,7 @@ function qosQuotasExist()
 function setQosEnabled()
 {
 	enabled = document.getElementById("qos_enabled").checked;
-	controlIds = ["default_class", "source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "connbytes_kb", "app_protocol", "use_source_ip", "use_source_port", "use_dest_ip", "use_dest_port", "use_max_pktsize", "use_min_pktsize", "use_transport_protocol", "use_connbytes_kb", "use_app_protocol", "classification", "add_rule_button", "class_name", "percent_bandwidth", "min_radio1", "min_radio2", "min_bandwidth", "max_radio1", "max_radio2", "max_bandwidth", "add_class_button"];
+	controlIds = ["default_class", "ip_family", "source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "connbytes_kb", "app_protocol", "use_source_ip", "use_source_port", "use_dest_ip", "use_dest_port", "use_max_pktsize", "use_min_pktsize", "use_transport_protocol", "use_connbytes_kb", "use_app_protocol", "classification", "add_rule_button", "class_name", "percent_bandwidth", "min_radio1", "min_radio2", "min_bandwidth", "max_radio1", "max_radio2", "max_bandwidth", "add_class_button"];
 
 	setElementEnabled( document.getElementById("total_bandwidth"), enabled, uciOriginal.get("qos_gargoyle", direction, "total_bandwidth") );
 	for(controlIndex = 0; controlIndex < controlIds.length; controlIndex++)
@@ -672,7 +692,26 @@ function proofreadClassificationRule()
 	validateCBSize = function(text){ return validateNumericRange(text, 0, 4194393); };
 	validateBlank = function(text){ return (text == "" ? 1: 0); };
 	alwaysValid = function(text){return 0;};
-	ruleValidationFunctions = [ validateIpRange, validatePortOrPortRange, validateIpRange, validatePortOrPortRange, validatePktSize, validatePktSize, alwaysValid, validateCBSize, alwaysValid, validateBlank ];
+	validateQOSIPRangeAndFamily = function(ipstr)
+	{
+		var retVal = 0;
+		var ipfam = getIPFamily(ipstr);
+		var selfam = document.getElementById("ip_family").value;
+		if(ipfam == "IPv6")
+		{
+			retVal = validateIP6Range(ipstr);
+		}
+		else
+		{
+			retVal = validateIpRange(ipstr);
+		}
+		if(ipfam.toLowerCase() != selfam.toLowerCase())
+		{
+			retVal = 1;
+		}
+		return retVal;
+	};
+	ruleValidationFunctions = [ validateQOSIPRangeAndFamily, validatePortOrPortRange, validateQOSIPRangeAndFamily, validatePortOrPortRange, validatePktSize, validatePktSize, alwaysValid, validateCBSize, alwaysValid, validateBlank ];
 	labelIds = new Array();
 	returnCodes = new Array();
 	toggledMatchCriteria = 0;
@@ -698,6 +737,9 @@ function resetRuleControls()
 {
 	ruleControlIds = ["source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol","connbytes_kb", "app_protocol", "comment_rule"];
 	document.getElementById("classification").selectedIndex = document.getElementById("default_class").selectedIndex;
+	document.getElementById("ip_family").selectedIndex = 0;
+	document.getElementById("use_source_ip").disabled = true;
+	document.getElementById("use_dest_ip").disabled = true;
 
 	for(ruleControlIndex=0; ruleControlIndex < ruleControlIds.length; ruleControlIndex++)
 	{
@@ -863,8 +905,8 @@ function editRuleTableRow(editRuleWindowRow)
 	}
 	else
 	{
-		addRuleMatchControls = ["source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "connbytes_kb", "app_protocol"];
-		displayList = [qosStr.Src+": $", qosStr.SrcP+": $", qosStr.Dst+": $", qosStr.DstP+": $",  qosStr.MaxPktLen+": $ "+UI.byt, qosStr.MinPktLen+": $ "+UI.byt, qosStr.TrProto+": $", qosStr.Connb+": $ "+UI.KBy, qosStr.APro+": $"];
+		addRuleMatchControls = ["ip_family", "source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "connbytes_kb", "app_protocol"];
+		displayList = [qosStr.IPFam+": $", qosStr.Src+": $", qosStr.SrcP+": $", qosStr.Dst+": $", qosStr.DstP+": $",  qosStr.MaxPktLen+": $ "+UI.byt, qosStr.MinPktLen+": $ "+UI.byt, qosStr.TrProto+": $", qosStr.Connb+": $ "+UI.KBy, qosStr.APro+": $"];
 		ruleText = ""
 		for (controlIndex = 0; controlIndex <addRuleMatchControls.length; controlIndex++)
 		{
@@ -1019,7 +1061,7 @@ function parseRuleMatchCriteria(matchText)
 	splitText = matchText.split(/[\t ]*,[\t ]*/);
 	criteria = [];
 
-	possibleCriteria = [qosStr.Src+": (.*)", qosStr.SrcP+": (.*)", qosStr.Dst+": (.*)", qosStr.DstP+": (.*)", qosStr.MaxPktLen+": (.*) "+UI.byt, qosStr.MinPktLen+": (.*) "+UI.byt,  qosStr.TrProto+": (.*)", qosStr.Connb+": (.*) "+UI.KBy, qosStr.APro+": (.*)"];
+	possibleCriteria = [qosStr.IPFam+": (.*)", qosStr.Src+": (.*)", qosStr.SrcP+": (.*)", qosStr.Dst+": (.*)", qosStr.DstP+": (.*)", qosStr.MaxPktLen+": (.*) "+UI.byt, qosStr.MinPktLen+": (.*) "+UI.byt,  qosStr.TrProto+": (.*)", qosStr.Connb+": (.*) "+UI.KBy, qosStr.APro+": (.*)"];
 
 	for(possibleCriteriaIndex=0; possibleCriteriaIndex < possibleCriteria.length; possibleCriteriaIndex++)
 	{
@@ -1231,7 +1273,7 @@ function editRuleModal(triggerEl)
 		addOptionToSelectElement("classification", serviceClassOptions[classIndex].text, serviceClassOptions[classIndex].text, null, document);
 	}
 
-	ruleControlIds = ["source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "connbytes_kb", "app_protocol", "comment_rule"];
+	ruleControlIds = ["ip_family", "source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "connbytes_kb", "app_protocol", "comment_rule"];
 
 	criteria = parseRuleMatchCriteria(editRow.firstChild.firstChild.data);
 	criteria.push(editRow.children[2].firstChild.lastChild.innerHTML);
@@ -1250,15 +1292,25 @@ function editRuleModal(triggerEl)
 			{
 				setSelectedText( ruleControlId, criteria[ruleControlIndex], document);
 			}
-			ruleControlCheckbox.checked = true;
+			if(ruleControlCheckbox != null)
+			{
+				ruleControlCheckbox.checked = true;
+			}
 		}
 		else
 		{
-			ruleControlCheckbox.checked = false;
+			if(ruleControlCheckbox != null)
+			{
+				ruleControlCheckbox.checked = false;
+			}
 		}
-		enableAssociatedField(ruleControlCheckbox, ruleControlId, "", document);
+		if(ruleControlCheckbox != null)
+		{
+			enableAssociatedField(ruleControlCheckbox, ruleControlId, "", document);
+		}
 	}
 	setSelectedText("classification", editRow.childNodes[1].firstChild.data, document);
+	updateIPControls(document.getElementById("ip_family"));
 
 	modalPrepare('qos_rule_modal', qosStr.QERulClass, modalElements, modalButtons);
 	openModalWindow('qos_rule_modal');
@@ -1343,4 +1395,37 @@ function editClassModal(triggerEl)
 		}
 	}
 	checkUpdateInProgress();
+}
+
+function updateIPControls(triggerEl)
+{
+	selVal = triggerEl.value;
+	elArr = ['source_ip', 'dest_ip'];
+	for(x = 0; x < elArr.length; x++)
+	{
+		var checkEl = document.getElementById("use_" + elArr[x]);
+		if(selVal == "any")
+		{
+			checkEl.checked = false;
+			checkEl.disabled = true;
+		}
+		else
+		{
+			checkEl.disabled = false;
+		}
+		enableAssociatedField(checkEl,elArr[x], '');
+	}
+}
+
+function proofreadQOSIPRange(triggerEl)
+{
+	var ipfam = getIPFamily(triggerEl.value);
+	if(ipfam == "IPv6")
+	{
+		proofreadIp6Range(triggerEl);
+	}
+	else
+	{
+		proofreadIpRange(triggerEl);
+	}
 }
