@@ -189,7 +189,8 @@ function saveChanges()
 		var shareData = sharePathToShareData[fullMountPath]
 		if( shareData[3] != "" )
 		{
-			makeDirCmds.push("mkdir -p \""  + fullMountPath + "\"" )
+			makeDirCmds.push("mkdir -p \""  + fullMountPath + "\"" );
+			makeDirCmds.push("chmod 777 \""  + fullMountPath + "\"" );
 		}
 
 
