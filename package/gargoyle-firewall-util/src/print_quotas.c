@@ -146,15 +146,31 @@ int main(void)
 					{
 						ip_bw next = ip_buf[ip_index];
 						char* next_ip = NULL;
-						if(next.ip == 0)
+						if(*next.ip == 0)
 						{
 							next_ip = strdup(ip);
 						}
 						else
 						{
-							struct in_addr addr;
-							addr.s_addr = next.ip;
-							next_ip = strdup(inet_ntoa(addr));
+							if(next.family == AF_INET)
+							{
+								char ipstr[INET_ADDRSTRLEN];
+								struct in_addr addr;
+								addr.s_addr = *next.ip;
+								inet_ntop(next.family, &addr, ipstr, INET_ADDRSTRLEN);
+								next_ip = strdup(ipstr);
+							}
+							else
+							{
+								char ipstr[INET6_ADDRSTRLEN];
+								struct in6_addr addr;
+								addr.s6_addr32[0] = *(next.ip);
+								addr.s6_addr32[1] = *(next.ip+1);
+								addr.s6_addr32[2] = *(next.ip+2);
+								addr.s6_addr32[3] = *(next.ip+3);
+								inet_ntop(next.family, &addr, ipstr, INET6_ADDRSTRLEN);
+								next_ip = strdup(ipstr);
+							}
 						}
 						
 						
