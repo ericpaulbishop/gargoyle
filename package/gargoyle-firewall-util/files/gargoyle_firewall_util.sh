@@ -516,7 +516,22 @@ initialize_quota_qos()
 		ifconfig imq0 down  >/dev/null 2>&1
 		ifconfig imq1 down  >/dev/null 2>&1
 		rmmod  imq          >/dev/null 2>&1
+		# Allow IMQ to fail to load 3 times (15 seconds) before we bail out
+		# No particularly graceful way to get out of this one. Quotas will be active but speed limits won't be enforced.
 		insmod imq numdevs=1 hook_chains="INPUT,FORWARD" hook_tables="mangle,mangle" >/dev/null 2>&1
+		cnt=0
+		while [ "$(ls -d /proc/sys/net/ipv4/conf/imq* 2>&- | wc -l)" -eq "0" ]
+			do
+				logger -t "gargoyle_firewall_util" "insmod imq failed. Waiting and trying again..."
+				sleep 5
+				cnt=`expr $cnt + 1`
+				if [ $cnt -ge 3 ] ; then
+					logger -t "gargoyle_firewall_util" "Could not insmod imq, too many retries. Stopping."
+					cleanup_old_quota_qos
+					return
+				fi
+				insmod imq numdevs=1 hook_chains="INPUT,FORWARD" hook_tables="mangle,mangle" >/dev/null 2>&1
+			done
 		ip link set imq0 up
 
 		#egress/upload

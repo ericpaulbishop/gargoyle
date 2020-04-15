@@ -301,7 +301,23 @@ initialize_qos()
 	# Now, load/insert necessary kernel modules
 	# The following packages are required for the modules:
 	rmmod  imq >&- 2>&-
+	# Allow IMQ to fail to load 3 times (15 seconds) before we bail out gracefully
 	insmod imq numdevs=1 hook_chains="INPUT,FORWARD" hook_tables="mangle,mangle" >&- 2>&-
+	cnt=0
+	while [ "$(ls -d /proc/sys/net/ipv4/conf/imq* 2>&- | wc -l)" -eq "0" ]
+		do
+			logger -t "qos_gargoyle" "insmod imq failed. Waiting and trying again..."
+			sleep 5
+			cnt=`expr $cnt + 1`
+			if [ $cnt -ge 3 ] ; then
+				logger -t "qos_gargoyle" "Could not insmod imq, too many retries. Stopping."
+				rm -rf "$lock_file"
+				stop
+				exit
+			fi
+			insmod imq numdevs=1 hook_chains="INPUT,FORWARD" hook_tables="mangle,mangle" >&- 2>&-
+		done
+
 	ip link set dev imq0 mtu 1500
 
 	# Make sure the other kernel modules we need are loaded
