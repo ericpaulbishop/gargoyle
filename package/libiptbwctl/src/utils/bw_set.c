@@ -2,7 +2,7 @@
  *  			Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
  *
  *
- *  Copyright Â© 2009 by Eric Bishop <eric@gargoyle-router.com>
+ *  Copyright © 2009 by Eric Bishop <eric@gargoyle-router.com>
  *
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -130,24 +130,51 @@ int main(int argc, char **argv)
 		num_data_parts = argc - optind;
 	
 	
-		unsigned long num_ips = num_data_parts/2;
+		unsigned long num_ips = num_data_parts/3;
        		ip_bw* buffer = (ip_bw*)malloc(num_ips*sizeof(ip_bw));
 		unsigned long data_index = 0;
 		unsigned long buffer_index = 0;
 		while(data_index < num_data_parts)
 		{
 			ip_bw next;
+			uint32_t family;
 			struct in_addr ipaddr;
-			int valid = inet_aton(data_parts[data_index], &ipaddr);
+			struct in6_addr ip6addr;
+			sscanf(data_parts[data_index], "%d", &family);
+			data_index++;
+			int valid = 0;
+			if(family == AF_INET)
+			{
+				valid = inet_pton(family, data_parts[data_index], &ipaddr);
+			}
+			else
+			{
+				valid = inet_pton(family, data_parts[data_index], &ip6addr);
+			}
+			
 			if((!valid) && (!last_backup_from_cl))
 			{
 				sscanf(data_parts[data_index], "%ld", &last_backup);
 			}
 			data_index++;
-	
+
 			if(valid && data_index < num_data_parts)
 			{
-				next.ip = ipaddr.s_addr;
+				next.family = family;
+				if(next.family == AF_INET)
+				{
+					*next.ip = ipaddr.s_addr;
+					*(next.ip+1) = 0;
+					*(next.ip+2) = 0;
+					*(next.ip+3) = 0;
+				}
+				else
+				{
+					*next.ip = ip6addr.s6_addr32[0];
+					*(next.ip+1) = ip6addr.s6_addr32[1];
+					*(next.ip+2) = ip6addr.s6_addr32[2];
+					*(next.ip+3) = ip6addr.s6_addr32[3];
+				}
 				valid = sscanf(data_parts[data_index], "%lld", (long long int*)&(next.bw) );
 				data_index++;
 			}
@@ -183,4 +210,3 @@ int main(int argc, char **argv)
 
 	return 0;
 }
-

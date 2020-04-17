@@ -11,6 +11,11 @@ if [ -e /tmp/dhcp.leases ] ; then
 	cat /tmp/dhcp.leases | awk '{print "dhcpLeaseLines.push(\""$0"\");"}'
 fi
 
+echo "dhcp6LeaseLines = new Array();"
+if [ -e /tmp/hosts/odhcpd ] ; then
+	cat /tmp/hosts/odhcpd | grep "^#" | awk '{print "dhcp6LeaseLines.push(\""$0"\");"}'
+fi
+
 echo "wlanLines = new Array();"
 iwinfo | awk '/^wlan/ { printf "wlanLines.push(\""$1" "} /ESSID:/ {gsub(/"/,"",$3); printf ""$3" "} /Access Point:/ {printf ""$3"\");" }'
 
@@ -38,7 +43,7 @@ echo "conntrackLines = new Array();"
 cat /proc/net/nf_conntrack | awk '{print "conntrackLines.push(\""substr($0,index($0,$3))"\");"}'
 
 echo "arpLines = new Array();"
-cat /proc/net/arp | awk '{print "arpLines.push(\""$0"\");"}'
+ip neigh | grep -v "FAILED" | awk '{print "arpLines.push(\""$0"\");"}'
 
 current_time=$(date +%s)
 echo "currentTime=$current_time;"

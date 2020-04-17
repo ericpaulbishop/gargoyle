@@ -22,8 +22,8 @@
 
 
 
-#ifndef _IPT_WEBMON_H
-#define _IPT_WEBMON_H
+#ifndef _XT_WEBMON_H
+#define _XT_WEBMON_H
 
 
 #define WEBMON_MAX_IPS           256
@@ -41,18 +41,24 @@
 
 #define WEBMON_SET              3064
 
-struct ipt_webmon_ip_range
+union xt_webmon_ipany
 {
-	uint32_t start;
-	uint32_t end;
+  struct in_addr ip4;
+  struct in6_addr ip6;
 };
 
-struct ipt_webmon_info
+struct xt_webmon_ip_range
+{
+	union xt_webmon_ipany start;
+	union xt_webmon_ipany end;
+};
+
+struct xt_webmon_info
 {
 	uint32_t max_domains;
 	uint32_t max_searches;
-	uint32_t exclude_ips[WEBMON_MAX_IPS];
-	struct ipt_webmon_ip_range exclude_ranges[WEBMON_MAX_IP_RANGES];
+	union xt_webmon_ipany exclude_ips[WEBMON_MAX_IPS];
+	struct xt_webmon_ip_range exclude_ranges[WEBMON_MAX_IP_RANGES];
 	uint32_t num_exclude_ips;
 	uint32_t num_exclude_ranges;
 	unsigned char exclude_type;
@@ -60,4 +66,4 @@ struct ipt_webmon_info
 
 };
 
-#endif /*_IPT_WEBMON_H*/
+#endif /*_XT_WEBMON_H*/

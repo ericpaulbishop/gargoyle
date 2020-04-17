@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "connection" -p "dhcp" -j "gs_sortable.js table.js dhcp.js" -z "dhcp.js" network wireless dhcp firewall
+	gargoyle_header_footer -h -i -s "connection" -p "dhcp" -j "gs_sortable.js table.js dhcp.js" -z "dhcp.js" network wireless dhcp firewall
 	subnet=$(ifconfig br-lan | awk 'BEGIN {FS=":"}; $0 ~ /inet.addr/ {print $2}' | awk 'BEGIN {FS="."}; {print $1"\."$2"\."$3"\."}')
 %>
 
@@ -22,36 +22,61 @@
 		awk ' $0 ~ /^[\t ]*[0-9]/ {print "hostData.push([\""$1"\",\""$2"\"]);"};' /etc/hosts
 	fi
 
-	echo "";
-	echo "var etherData = new Array();";
-	if [ -e /etc/ethers ] ; then
-		awk ' $0 ~ /^[\t ]*[0-9abcdefABCDEF]/ {print "etherData.push([\""$1"\",\""$2"\"]);"};' /etc/ethers
+	echo "var host6Data = new Array();"
+	if [ -e /tmp/hosts/dhcp.* ] ; then
+		awk ' $0 ~ /^[\t ]*[0-9a-fA-F]/ {print "host6Data.push([\""$1"\",\""$2"\"]);"};' /tmp/hosts/dhcp.*
 	fi
 
-	echo "";
 	echo "var leaseData = new Array();";
 	if [ -e /tmp/dhcp.leases ] ; then
 		awk ' $0 ~ /[a-z,A-Z,0-9]+/ {print "leaseData.push([\""$2"\",\""$3"\",\""$4"\"]);"};' /tmp/dhcp.leases
 	fi
 
+	echo "var ip6leaseData = new Array();";
+	if [ -e /tmp/hosts/odhcpd ] ; then
+		while read lease; do
+			wcnt="$(echo $lease | wc -w)"
+			idx=9
+			while [ "$idx" -le "$wcnt" ]
+			do
+				echo "$lease" | awk -v idx="$idx" ' $0 ~ /#.*[a-z,A-Z,0-9]+/ {print "ip6leaseData.push([\""$3"\",\""$idx"\",\""$5"\"]);"};'
+				idx=$(($idx+1))
+			done
+		done </tmp/hosts/odhcpd
+	fi
+
+	echo "var ip6neighData = new Array();";
+	ip -6 neigh | grep -v "FAILED" | grep -v "^fe80:" | awk '{print "ip6neighData[\""$1"\"] = \""$5"\";"};'
 %>
 
 var ipHostHash = new Array();
+var ipMacHash = new Array();
+var ipDUIDHash = new Array();
 for (hostIndex in hostData)
 {
 	host=hostData[hostIndex];
 	ipHostHash[ host[0] ] = host[1];
 }
-
-var staticIpTableData = new Array();
-for (etherIndex in etherData)
+for (host6Index in host6Data)
 {
-	ether=etherData[etherIndex];
-	mac=ether[0].toUpperCase();
-	ip=ether[1];
-	host= ipHostHash[ip] == null ? '-' : ipHostHash[ip];
-	staticIpTableData.push([host, mac, ip]);
+	host=host6Data[host6Index];
+	ipHostHash[ host[0] ] = host[1];
 }
+for (leaseIndex in leaseData)
+{
+	host = leaseData[leaseIndex];
+	ipHostHash[host[1]] = host[2];
+	ipMacHash[host[1]] = host[0];
+}
+for (ip6leaseIndex in ip6leaseData)
+{
+	host = ip6leaseData[ip6leaseIndex];
+	ipHostHash[ip6_splitmask(host[1]).address] = host[2];
+	ipMacHash[ip6_splitmask(host[1]).address] = ip6neighData[ip6_splitmask(host[1]).address];
+	ipDUIDHash[ip6_splitmask(host[1]).address] = host[0];
+}
+ipHostHash["127.0.0.1"] = "localhost";
+ipHostHash["::1"] = "localhost6";
 
 //-->
 </script>
@@ -61,6 +86,10 @@ for (etherIndex in etherData)
 <div class="row">
 	<div class="col-lg-6">
 		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">IPv4</h3>
+			</div>
+
 			<div class="panel-body">
 				<div class="row form-group" id="dhcp_enabled_container">
 					<span class="col-xs-12">
@@ -97,6 +126,54 @@ for (etherIndex in etherData)
 					</span>
 				</div>
 
+			</div>
+		</div>
+	</div>
+
+	<div class="col-lg-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title">IPv6</h3>
+			</div>
+
+			<div class="panel-body">
+				<div id="dhcpv6_container" class="row form-group">
+					<label class="col-xs-5" for="dhcpv6" id="dhcpv6_label">DHCPv6:</label>
+					<span class="col-xs-7">
+						<select class="form-control" id="dhcpv6">
+							<option value="server">Enabled</option>
+							<option value="relay" disabled>Relayed</option>
+							<option value="disabled">Disabled</option>
+						</select>
+					</span>
+				</div>
+
+				<div id="ra_container" class="row form-group">
+					<label class="col-xs-5" for="ra" id="ra_label">Router Advertisements:</label>
+					<span class="col-xs-7">
+						<select class="form-control" id="ra">
+							<option value="server">Enabled</option>
+							<option value="relay" disabled>Relayed</option>
+							<option value="disabled">Disabled</option>
+						</select>
+					</span>
+				</div>
+
+				<div id="ra_management_container" class="row form-group">
+					<label class="col-xs-5" for="ra_management" id="ra_management_label">Router Advertisements Management:</label>
+					<span class="col-xs-7">
+						<select class="form-control" id="ra_management">
+							<option value="2">Stateful</option>
+							<option value="1">Stateful+Stateless</option>
+							<option value="0">Stateless</option>
+						</select>
+					</span>
+				</div>
+
+				<div id="ip6prefix_container" class="row form-group">
+					<label class="col-xs-5" for="ip6prefix" id="ip6prefix_label"><%~ IP6Prefs %>:</label>
+					<span class="col-xs-7" id="ip6prefix"></span>
+				</div>
 			</div>
 		</div>
 	</div>

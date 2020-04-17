@@ -66,6 +66,10 @@ var wlanLines;
 				<div id="dhcp_data" class="form-group form-inline">
 					<div id="lease_table_container" class="table-responsive"></div>
 				</div>
+
+				<div id="dhcp6_data" class="form-group form-inline">
+					<div id="lease6_table_container" class="table-responsive"></div>
+				</div>
 			</div>
 		</div>
 	</div>

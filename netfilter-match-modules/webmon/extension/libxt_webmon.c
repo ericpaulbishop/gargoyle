@@ -28,46 +28,15 @@
 
 #include <arpa/inet.h>
 
-/*
- * in iptables 1.4.0 and higher, iptables.h includes xtables.h, which
- * we can use to check whether we need to deal with the new requirements
- * in pre-processor directives below
- */
-#include <iptables.h>  
-#include <linux/netfilter_ipv4/ipt_webmon.h>
-
-#ifdef _XTABLES_H
-	#define iptables_rule_match	xtables_rule_match
-	#define iptables_match		xtables_match
-	#define iptables_target		xtables_target
-	#define ipt_tryload		xt_tryload
-#endif
-
-/* 
- * XTABLES_VERSION_CODE is only defined in versions 1.4.1 and later, which
- * also require the use of xtables_register_match
- * 
- * Version 1.4.0 uses register_match like previous versions
- */
-#ifdef XTABLES_VERSION_CODE 
-	#define register_match          xtables_register_match
-#endif
-
-
-#define STRIP "%d.%d.%d.%d"
-#define NIPQUAD(addr) \
-	((unsigned char *)&addr)[0], \
-	((unsigned char *)&addr)[1], \
-	((unsigned char *)&addr)[2], \
-	((unsigned char *)&addr)[3]
-
-
+#include <xtables.h>
+#include <linux/netfilter.h>
+#include <linux/netfilter/xt_webmon.h>
 
 /* utility functions necessary for module to work across multiple iptables versions */
 static void param_problem_exit_error(char* msg);
 
 
-void parse_ips_and_ranges(char* addr_str, struct ipt_webmon_info *info);
+void parse_ips_and_ranges(int family, char* addr_str, struct xt_webmon_info *info);
 
 char** split_on_separators(char* line, char* separators, int num_separators, int max_pieces, int include_remainder_at_max);
 char* trim_flanking_whitespace(char* str);
@@ -88,7 +57,7 @@ static uint32_t global_max_searches = DEFAULT_MAX;
 /* Function which prints out usage message. */
 static void help(void)
 {
-	printf(	"webmon options:\n");
+	printf(	"webmon options:\n --[exclude|include]_ips [ip[,ip,ip...]|ipstart-ipend|ip/mask]\n --max_domains [num]\n --max_searches [num]\n --search_load_file [path]\n --domain_load_file [path]\n --clear_search\n --clear_domain");
 }
 
 static struct option opts[] = 
@@ -106,14 +75,10 @@ static struct option opts[] =
 };
 
 static void webmon_init(
-#ifdef _XTABLES_H
 	struct xt_entry_match *match
-#else
-	struct ipt_entry_match *match, unsigned int *nfcache
-#endif
 	)
 {
-	struct ipt_webmon_info *info = (struct ipt_webmon_info *)match->data;
+	struct xt_webmon_info *info = (struct xt_webmon_info *)match->data;
 	info->max_domains=DEFAULT_MAX;
 	info->max_searches=DEFAULT_MAX;
 	info->num_exclude_ips=0;
@@ -124,30 +89,89 @@ static void webmon_init(
 
 
 /* Function which parses command options; returns true if it ate an option */
-static int parse(	int c, 
+static int parse_mt4(	int c, 
 			char **argv,
 			int invert,
 			unsigned int *flags,
-#ifdef _XTABLES_H
-			const void *entry,
-#else
-			const struct ipt_entry *entry,
-			unsigned int *nfcache,
-#endif			
-			struct ipt_entry_match **match
+			const void *entry,			
+			struct xt_entry_match **match
 			)
 {
-	struct ipt_webmon_info *info = (struct ipt_webmon_info *)(*match)->data;
+	struct xt_webmon_info *info = (struct xt_webmon_info *)(*match)->data;
 	int valid_arg = 1;
 	long max;
 	switch (c)
 	{
 		case WEBMON_EXCLUDE:
-			parse_ips_and_ranges(optarg, info);
+			parse_ips_and_ranges(NFPROTO_IPV4, optarg, info);
 			info->exclude_type = WEBMON_EXCLUDE;
 			break;
 		case WEBMON_INCLUDE:
-			parse_ips_and_ranges(optarg, info);
+			parse_ips_and_ranges(NFPROTO_IPV4, optarg, info);
+			info->exclude_type = WEBMON_INCLUDE;
+			break;
+		case WEBMON_MAXSEARCH:
+			if( sscanf(argv[optind-1], "%ld", &max) == 0)
+			{
+				info->max_searches = DEFAULT_MAX ;
+				valid_arg = 0;
+			}
+			else
+			{
+				info->max_searches = (uint32_t)max;
+				global_max_searches = info->max_searches;
+			}
+			break;
+		case WEBMON_MAXDOMAIN:
+			if( sscanf(argv[optind-1], "%ld", &max) == 0)
+			{
+				info->max_domains = DEFAULT_MAX ;
+				valid_arg = 0;
+			}
+			else
+			{
+				info->max_domains = (uint32_t)max;
+				global_max_domains = info->max_domains;
+			}
+			break;
+		case SEARCH_LOAD_FILE:
+			search_load_file = strdup(optarg);
+			break;
+		case DOMAIN_LOAD_FILE:
+			domain_load_file = strdup(optarg);
+			break;
+		case CLEAR_SEARCH:
+			search_load_file = strdup("/dev/null");
+			break;
+		case CLEAR_DOMAIN:
+			domain_load_file = strdup("/dev/null");
+			break;
+		default:
+			valid_arg = 0;
+	}
+	return valid_arg;
+
+}
+
+static int parse_mt6(	int c, 
+			char **argv,
+			int invert,
+			unsigned int *flags,
+			const void *entry,			
+			struct xt_entry_match **match
+			)
+{
+	struct xt_webmon_info *info = (struct xt_webmon_info *)(*match)->data;
+	int valid_arg = 1;
+	long max;
+	switch (c)
+	{
+		case WEBMON_EXCLUDE:
+			parse_ips_and_ranges(NFPROTO_IPV6, optarg, info);
+			info->exclude_type = WEBMON_EXCLUDE;
+			break;
+		case WEBMON_INCLUDE:
+			parse_ips_and_ranges(NFPROTO_IPV6, optarg, info);
 			info->exclude_type = WEBMON_INCLUDE;
 			break;
 		case WEBMON_MAXSEARCH:
@@ -195,7 +219,7 @@ static int parse(	int c,
 
 
 	
-static void print_webmon_args(	struct ipt_webmon_info* info )
+static void print_webmon_args(int family,	struct xt_webmon_info* info)
 {
 	printf("--max_domains %ld ", (unsigned long int)info->max_domains);
 	printf("--max_searches %ld ", (unsigned long int)info->max_searches);
@@ -206,13 +230,29 @@ static void print_webmon_args(	struct ipt_webmon_info* info )
 		printf("--%s ", (info->exclude_type == WEBMON_EXCLUDE ? "exclude_ips" : "include_ips"));
 		for(ip_index=0; ip_index < info->num_exclude_ips; ip_index++)
 		{
-			printf("%s"STRIP, comma, NIPQUAD((info->exclude_ips)[ip_index]) );
+      if(family == NFPROTO_IPV4)
+      {
+        printf("%s%s", comma, xtables_ipaddr_to_numeric(&(((info->exclude_ips)[ip_index]).ip4)));
+      }
+      else
+      {
+        printf("%s%s", comma, xtables_ip6addr_to_numeric(&(((info->exclude_ips)[ip_index]).ip6)));
+      }
 			sprintf(comma, ",");
 		}
 		for(ip_index=0; ip_index < info->num_exclude_ranges; ip_index++)
 		{
-			struct ipt_webmon_ip_range r = (info->exclude_ranges)[ip_index];
-			printf("%s"STRIP"-"STRIP, comma, NIPQUAD(r.start), NIPQUAD(r.end) );
+			struct xt_webmon_ip_range r = (info->exclude_ranges)[ip_index];
+      if(family == NFPROTO_IPV4)
+      {
+			  printf("%s%s-", comma, xtables_ipaddr_to_numeric(&(r.start.ip4)) );
+        printf("%s", xtables_ipaddr_to_numeric(&(r.end.ip4)) );
+      }
+      else
+      {
+        printf("%s%s-", comma, xtables_ip6addr_to_numeric(&(r.start.ip6)) );
+        printf("%s", xtables_ip6addr_to_numeric(&(r.end.ip6)) );
+      }
 			sprintf(comma, ",");
 		}
 		printf(" ");
@@ -275,52 +315,72 @@ static void final_check(unsigned int flags)
 }
 
 /* Prints out the matchinfo. */
-#ifdef _XTABLES_H
-static void print(const void *ip, const struct xt_entry_match *match, int numeric)
-#else	
-static void print(const struct ipt_ip *ip, const struct ipt_entry_match *match, int numeric)
-#endif
+static void print_mt4(const void *ip, const struct xt_entry_match *match, int numeric)
 {
 	printf("WEBMON ");
-	struct ipt_webmon_info *info = (struct ipt_webmon_info *)match->data;
+	struct xt_webmon_info *info = (struct xt_webmon_info *)match->data;
 
-	print_webmon_args(info);
+	print_webmon_args(NFPROTO_IPV4, info);
 }
 
-/* Saves the union ipt_matchinfo in parsable form to stdout. */
-#ifdef _XTABLES_H
-static void save(const void *ip, const struct xt_entry_match *match)
-#else
-static void save(const struct ipt_ip *ip, const struct ipt_entry_match *match)
-#endif
+static void print_mt6(const void *ip, const struct xt_entry_match *match, int numeric)
 {
-	struct ipt_webmon_info *info = (struct ipt_webmon_info *)match->data;
-	print_webmon_args(info);
+	printf("WEBMON ");
+	struct xt_webmon_info *info = (struct xt_webmon_info *)match->data;
+
+	print_webmon_args(NFPROTO_IPV6, info);
 }
 
-static struct iptables_match webmon = 
-{ 
-	.next		= NULL,
- 	.name		= "webmon",
-	#ifdef XTABLES_VERSION_CODE
-		.version = XTABLES_VERSION,
-	#else
-		.version = IPTABLES_VERSION,
-	#endif
-	.size		= XT_ALIGN(sizeof(struct ipt_webmon_info)),
-	.userspacesize	= XT_ALIGN(sizeof(struct ipt_webmon_info)),
-	.help		= &help,
-	.init           = &webmon_init,
-	.parse		= &parse,
-	.final_check	= &final_check,
-	.print		= &print,
-	.save		= &save,
-	.extra_opts	= opts
+/* Saves the union xt_matchinfo in parsable form to stdout. */
+static void save_mt4(const void *ip, const struct xt_entry_match *match)
+{
+	struct xt_webmon_info *info = (struct xt_webmon_info *)match->data;
+	print_webmon_args(NFPROTO_IPV4, info);
+}
+
+static void save_mt6(const void *ip, const struct xt_entry_match *match)
+{
+	struct xt_webmon_info *info = (struct xt_webmon_info *)match->data;
+	print_webmon_args(NFPROTO_IPV6, info);
+}
+
+static struct xtables_match webmon_mt_reg[] = 
+{
+	{
+		.next		= NULL,
+	 	.name		= "webmon",
+		.family		= NFPROTO_IPV4,
+		.version	= XTABLES_VERSION,
+		.size		= XT_ALIGN(sizeof(struct xt_webmon_info)),
+		.userspacesize	= XT_ALIGN(sizeof(struct xt_webmon_info)),
+		.help		= &help,
+		.init           = &webmon_init,
+		.parse		= &parse_mt4,
+		.final_check	= &final_check,
+		.print		= &print_mt4,
+		.save		= &save_mt4,
+		.extra_opts	= opts
+	},
+  {
+		.next		= NULL,
+	 	.name		= "webmon",
+		.family		= NFPROTO_IPV6,
+		.version	= XTABLES_VERSION,
+		.size		= XT_ALIGN(sizeof(struct xt_webmon_info)),
+		.userspacesize	= XT_ALIGN(sizeof(struct xt_webmon_info)),
+		.help		= &help,
+		.init           = &webmon_init,
+		.parse		= &parse_mt6,
+		.final_check	= &final_check,
+		.print		= &print_mt6,
+		.save		= &save_mt6,
+		.extra_opts	= opts
+	},
 };
 
 void _init(void)
 {
-	register_match(&webmon);
+	xtables_register_matches(webmon_mt_reg, ARRAY_SIZE(webmon_mt_reg));
 }
 
 
@@ -331,23 +391,13 @@ void _init(void)
 #define FALSE 0
 #endif
 
-
-
-
-
-
-
 static void param_problem_exit_error(char* msg)
 {
-	#ifdef xtables_error
-		xtables_error(PARAMETER_PROBLEM, "%s", msg);
-	#else
-		exit_error(PARAMETER_PROBLEM, msg);
-	#endif
+	xtables_error(PARAMETER_PROBLEM, "%s", msg);
 }
 
 
-void parse_ips_and_ranges(char* addr_str, struct ipt_webmon_info *info)
+void parse_ips_and_ranges(int family, char* addr_str, struct xt_webmon_info *info)
 {
 	char** addr_parts = split_on_separators(addr_str, ",", 1, -1, 0);
 
@@ -363,26 +413,65 @@ void parse_ips_and_ranges(char* addr_str, struct ipt_webmon_info *info)
 			char** range_parts = split_on_separators(next_str, "-", 1, 2, 1);
 			char* start = trim_flanking_whitespace(range_parts[0]);
 			char* end = trim_flanking_whitespace(range_parts[1]);
-			int start_ip[4];
-			int end_ip[4];
-			int start_valid = sscanf(start, "%d.%d.%d.%d", start_ip, start_ip+1, start_ip+2, start_ip+3);
-			int end_valid = sscanf(end, "%d.%d.%d.%d", end_ip, end_ip+1, end_ip+2, end_ip+3);
-			
-			if(start_valid == 4 && end_valid == 4)
-			{
-				struct ipt_webmon_ip_range r;
-				struct in_addr sip, eip;
-				inet_pton(AF_INET, start, &sip);
-				inet_pton(AF_INET, end, &eip);
-				r.start = (uint32_t)sip.s_addr;
-				r.end   = (uint32_t)eip.s_addr;
-
-				if(info->num_exclude_ranges <  WEBMON_MAX_IP_RANGES  && (unsigned long)ntohl(r.start) < (unsigned long)ntohl(r.end) )
-				{
-					(info->exclude_ranges)[ info->num_exclude_ranges ] = r;
-					info->num_exclude_ranges = info->num_exclude_ranges + 1;
-				}
-			}
+      struct in_addr sip, eip;
+      struct in6_addr sip6, eip6;
+      
+      if(family == NFPROTO_IPV4)
+      {
+        struct in_addr* tsip = NULL;
+        struct in_addr* teip = NULL;
+        tsip = xtables_numeric_to_ipaddr(start);
+        if(tsip != NULL)
+        {
+          sip = *tsip;
+        }
+        teip = xtables_numeric_to_ipaddr(end);
+        if(teip != NULL)
+        {
+          eip = *teip;
+        }
+        
+        if(tsip != NULL && teip != NULL)
+  			{
+  				struct xt_webmon_ip_range r;
+  				r.start.ip4 = sip;
+  				r.end.ip4   = eip;
+  
+  				if(info->num_exclude_ranges <  WEBMON_MAX_IP_RANGES  && (unsigned long)ntohl(r.start.ip4.s_addr) < (unsigned long)ntohl(r.end.ip4.s_addr) )
+  				{
+  					(info->exclude_ranges)[ info->num_exclude_ranges ] = r;
+  					info->num_exclude_ranges = info->num_exclude_ranges + 1;
+  				}
+  			}
+      }
+      else
+      {
+        struct in6_addr* tsip6 = NULL;
+        struct in6_addr* teip6 = NULL;
+        tsip6 = xtables_numeric_to_ip6addr(start);
+        if(tsip6 != NULL)
+        {
+          sip6 = *tsip6;
+        }
+        teip6 = xtables_numeric_to_ip6addr(end);
+        if(teip6 != NULL)
+        {
+          eip6 = *teip6;
+        }
+        
+        if(tsip6 != NULL && teip6 != NULL)
+  			{
+  				struct xt_webmon_ip_range r;
+          r.start.ip6 = sip6;
+          r.end.ip6 = eip6;
+  
+  				if(info->num_exclude_ranges <  WEBMON_MAX_IP_RANGES  && (memcmp(&(r.start.ip6.s6_addr), &(r.end.ip6.s6_addr), sizeof(unsigned char)*16) < 0))
+  				{
+  					(info->exclude_ranges)[ info->num_exclude_ranges ] = r;
+  					info->num_exclude_ranges = info->num_exclude_ranges + 1;
+  				}
+  			}
+      }
 
 			free(start);
 			free(end);	
@@ -393,90 +482,151 @@ void parse_ips_and_ranges(char* addr_str, struct ipt_webmon_info *info)
 			char** range_parts = split_on_separators(next_str, "/", 1, 2, 1);
 			char* start = trim_flanking_whitespace(range_parts[0]);
 			char* end = trim_flanking_whitespace(range_parts[1]);
-			int base_ip[4];
-			int base_valid = sscanf(start, "%d.%d.%d.%d", base_ip, base_ip+1, base_ip+2, base_ip+3);
-			if(base_valid == 4)
-			{
-				int mask_valid = 0;
-				uint32_t mask;
-				if(strchr(end, '.') != NULL)
-				{
-					uint32_t mask_ip[4];
-					int mask_test = sscanf(end, "%d.%d.%d.%d", mask_ip, mask_ip+1, mask_ip+2, mask_ip+3);
-					if(mask_test == 4)
-					{
-						struct in_addr mask_add;
-						inet_pton(AF_INET, end, &mask_add);
-						mask = (uint32_t)mask_add.s_addr;
-						mask_valid = 1;
-					}
-				}
-				else
-				{
-					int mask_bits;
-					if( sscanf(end, "%d", &mask_bits) > 0)
-					{
-						if(mask_bits >=0 && mask_bits <= 32)
-						{
-							uint32_t byte = 0;
-							mask = 0;
-							for(byte=0; byte < 4; byte++)
-							{
-								unsigned char byte_bits = mask_bits > 8 ? 8 : mask_bits;
-								uint32_t byte_mask = 0;
-								mask_bits = mask_bits - byte_bits;
-								
-								while(byte_bits > 0)
-								{
-									byte_mask = byte_mask | (256 >> byte_bits);
-									byte_bits--;
-								}
-								mask = mask | ((uint32_t)byte_mask << (byte*8));
-								printf("mask = "STRIP"\n", NIPQUAD(mask));	
-							}
-							mask_valid = 1;
-						}
-					}
-				}
-				if(mask_valid)
-				{
-					struct ipt_webmon_ip_range r;
-					struct in_addr bip;
-					inet_pton(AF_INET, start, &bip);
-					r.start = ( ((uint32_t)bip.s_addr) & mask );
-					r.end   = ( ((uint32_t)bip.s_addr) | (~mask) );
-					if(info->num_exclude_ranges <  WEBMON_MAX_IP_RANGES && ntohl(r.start) <= ntohl(r.end) )
-					{
-						(info->exclude_ranges)[ info->num_exclude_ranges ] = r;
-						info->num_exclude_ranges = info->num_exclude_ranges + 1;
-					}
-				}
-			}
+      struct in_addr bip;
+      struct in6_addr bip6;
+      
+      if(family == NFPROTO_IPV4)
+      {
+        struct in_addr* tbip = NULL;
+        tbip = xtables_numeric_to_ipaddr(start);
+        if(tbip != NULL)
+        {
+          bip = *tbip;
+          int mask_valid = 0;
+  				uint32_t mask;
+  				if(strchr(end, '.') != NULL)
+  				{
+            struct in_addr* mask_add;
+            mask_add = xtables_numeric_to_ipaddr(end);
+  
+  					if(mask_add != NULL)
+  					{
+  						mask = (uint32_t)mask_add->s_addr;
+  						mask_valid = 1;
+  					}
+  				}
+  				else
+  				{
+  					int mask_bits;
+  					if( sscanf(end, "%d", &mask_bits) > 0)
+  					{
+  						if(mask_bits >=0 && mask_bits <= 32)
+  						{
+  							mask = 0;
+  							mask = htonl(0xFFFFFFFF << (32 - mask_bits));
+  							mask_valid = 1;
+  						}
+  					}
+  				}
+  				if(mask_valid)
+  				{
+            struct xt_webmon_ip_range r;
+  
+  					r.start.ip4.s_addr = ( ((uint32_t)bip.s_addr) & mask );
+  					r.end.ip4.s_addr   = ( ((uint32_t)bip.s_addr) | (~mask) );
+  					if(info->num_exclude_ranges <  WEBMON_MAX_IP_RANGES && ntohl(r.start.ip4.s_addr) <= ntohl(r.end.ip4.s_addr) )
+  					{
+  						(info->exclude_ranges)[ info->num_exclude_ranges ] = r;
+  						info->num_exclude_ranges = info->num_exclude_ranges + 1;
+  					}           
+  				}
+  			}
+      }
+      else
+      {
+        struct in6_addr* tbip6 = NULL;
+        tbip6 = xtables_numeric_to_ip6addr(start);
+        if(tbip6 != NULL)
+        {
+          bip6 = *tbip6;
+          int mask_valid = 0;
+          struct in6_addr mask_add;
+          
+  				if(strchr(end, ':') != NULL)
+  				{
+            struct in6_addr* tmask_add = NULL;
+            tmask_add = xtables_numeric_to_ip6addr(end);
+            if(tmask_add != NULL)
+            {
+              mask_add = *tmask_add;
+              mask_valid = 1;
+            }
+  				}
+  				else
+  				{
+  					int mask_bits;
+  					if( sscanf(end, "%d", &mask_bits) > 0)
+  					{
+  						if(mask_bits >=0 && mask_bits <= 128)
+  						{
+                char* p = (void *)&mask_add;
+  							memset(p, 0xff, mask_bits/8);
+  							memset(p + ((mask_bits+7)/8), 0, (128-mask_bits)/8);
+  							if(mask_bits < 128)
+  							{
+  							  p[mask_bits/8] = 0xff << (8-(mask_bits & 7));
+  							}
+  							mask_valid = 1;
+  						}
+  					}
+  				}
+  				if(mask_valid)
+  				{
+            struct xt_webmon_ip_range r;
+            r.start.ip6 = bip6;
+            r.end.ip6 = bip6;
+            for(unsigned int x = 0; x < 16; x++)
+            {
+              r.start.ip6.s6_addr[x] = ( r.start.ip6.s6_addr[x] & mask_add.s6_addr[x] );
+              r.end.ip6.s6_addr[x] = ( r.start.ip6.s6_addr[x] | (~mask_add.s6_addr[x]) );
+            }
+  					if(info->num_exclude_ranges <  WEBMON_MAX_IP_RANGES && (memcmp(&(r.start.ip6.s6_addr), &(r.end.ip6.s6_addr), sizeof(unsigned char)*16) < 0))
+  					{
+  						(info->exclude_ranges)[ info->num_exclude_ranges ] = r;
+  						info->num_exclude_ranges = info->num_exclude_ranges + 1;
+  					}
+  				}
+  			}
+      }
+      
 			free(start);
 			free(end);	
 			free(range_parts);
 		}
 		else
 		{
-			int parsed_ip[4];
-			int valid = sscanf(next_str, "%d.%d.%d.%d", parsed_ip, parsed_ip+1, parsed_ip+2, parsed_ip+3);
-			if(valid == 4)
-			{
-				struct in_addr ip;
-				trim_flanking_whitespace(next_str);
-				inet_pton(AF_INET, next_str, &ip);
-				
-				if(info->num_exclude_ranges <  WEBMON_MAX_IPS)
-				{
-					(info->exclude_ips)[ info->num_exclude_ips ] = (uint32_t)ip.s_addr;
-					info->num_exclude_ips = info->num_exclude_ips + 1;
-				}
-			}
+      struct in_addr* ip = NULL;
+      struct in6_addr* ip6 = NULL;
+      trim_flanking_whitespace(next_str);
+      
+      if(family == NFPROTO_IPV4)
+      {
+        ip = xtables_numeric_to_ipaddr(next_str);
+        if(ip != NULL)
+  			{
+  				if(info->num_exclude_ranges <  WEBMON_MAX_IPS)
+  				{
+  					((info->exclude_ips)[ info->num_exclude_ips ]).ip4 = *ip;
+  					info->num_exclude_ips = info->num_exclude_ips + 1;
+  				}
+  			}
+      }
+      else
+      {
+        ip6 = xtables_numeric_to_ip6addr(next_str);
+        if(ip6 != NULL)
+  			{
+  				if(info->num_exclude_ranges <  WEBMON_MAX_IPS)
+  				{
+            ((info->exclude_ips)[ info->num_exclude_ips ]).ip6 = *ip6;
+  					info->num_exclude_ips = info->num_exclude_ips + 1;
+  				}
+  			}
+      }		
 		}
 		free(next_str);
 	}
 	free(addr_parts);
-	
 }
 
 

@@ -2,7 +2,7 @@
  *  			Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
  *
  *
- *  Copyright Â© 2009 by Eric Bishop <eric@gargoyle-router.com>
+ *  Copyright © 2009 by Eric Bishop <eric@gargoyle-router.com>
  *
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -61,7 +61,8 @@
 #pragma pack(push, 1)
 typedef struct ip_bw_struct
 {
-	uint32_t ip;
+	uint32_t family;
+	uint32_t ip[4];
 	uint64_t bw;
 }ip_bw;
 
@@ -79,7 +80,8 @@ typedef struct ip_bw_struct
 */
 typedef struct ip_bw_kernel_data_item_struct
 {
-    uint32_t ip;
+	uint32_t family;
+    uint32_t ip[4];
     uint32_t num_nodes;
     uint64_t first_start;
     uint64_t first_end;
@@ -102,7 +104,8 @@ typedef struct
 
 typedef struct history_struct
 {
-	uint32_t ip;
+	uint32_t family;
+	uint32_t ip[4];
 	uint32_t num_nodes;
 
 	time_t reset_interval;

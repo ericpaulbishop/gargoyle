@@ -26,6 +26,7 @@ backup_quotas >/dev/null 2>&1
 /etc/init.d/miniupnpd stop >/dev/null 2>&1
 /etc/init.d/firewall stop >/dev/null 2>&1 
 /etc/init.d/dnsmasq stop >/dev/null 2>&1 
+/etc/init.d/odhcpd stop >/dev/null 2>&1
 
 #ugly, ugly hack... marvell switch in fon+ and fon2
 #won't come up properly if switch (which is necessary in dir300)
@@ -65,6 +66,7 @@ sleep 1
 
 service_start_if_enabled miniupnpd
 service_start_if_enabled dnsmasq
+service_start_if_enabled odhcpd
 service_start_if_enabled webmon_gargoyle
 
 lan_gateway=$(uci -P /var/state get network.lan.gateway)

@@ -7,8 +7,8 @@
  */
 var connTS=new Object(); //part of i18n
 
-var TSort_Data = new Array('connection_table', 's', 's', 'm', 's', 's');
-var TFilter_Data = [['connection_table', [true, true, false, true, true], [], []]];
+var TSort_Data = new Array('connection_table', 's', 's', 's', 'm', 's', 's');
+var TFilter_Data = [['connection_table', [true, true, true, false, true, true], [], []]];
 
 var updateInProgress;
 var timeSinceUpdate;
@@ -126,6 +126,10 @@ function getHostDisplay(ip)
 		host = ipToHostname[ip] != null ? ipToHostname[ip] : ipToOVPNHostname[ip];
 		host = host.length < 25 ? host : host.substr(0,22)+"...";
 	}
+	if(host == ip && getIPFamily(host) == "IPv6")
+	{
+		host = "[" + host + "]";
+	}
 	return host;
 }
 
@@ -151,6 +155,7 @@ function updateConnectionTable()
 					var line = conntrackLines[conntrackIndex];
 					try
 					{
+						var ipFamily= (line.split(/[\t ]+/))[0] == "ipv4" ? "IPv4" : "IPv6";
 						var protocol= (line.split(/[\t ]+/))[2];
 						var srcIp   = (line.match(/src=([^ \t]*)[\t ]+/))[1];
 						var srcPort = (line.match(/sport=([^ \t]*)[\t ]+/))[1];
@@ -165,42 +170,76 @@ function updateConnectionTable()
 						var dstPort2 = (line.match(/dport=([^ \t]*)[\t ]+.*dport=([^ \t]*)[\t ]+/))[2];
 						var bytes2 = (line.match(/bytes=([^ \t]*)[\t ]+.*bytes=([^ \t]*)[\t ]+/))[2];
 
+						if(ipFamily == "IPv6")
+						{
+							srcIp = ip6_canonical(srcIp);
+							dstIp = ip6_canonical(dstIp);
+							srcIp2 = ip6_canonical(srcIp2);
+							dstIp2 = ip6_canonical(dstIp2);
+						}
+
 						var wan_connection = true;
 						var ovpn_match = uciOriginal.get('openvpn_gargoyle','server','internal_ip');
 						ovpn_match = ovpn_match == "" ? "10.8.0.1" : ovpn_match;
 						ovpn_match = ovpn_match.split('.',3).join('.') + '.';
 
 						//Connections are weird in that they list src/dest while we are interested in upload/download.
-						//Based on the location of the router WanIP in the connection record we can determine traffic direction
-						if (dstIp2 == currentWanIp) {
-							downloadBytes = bytes2;
-							uploadBytes = bytes;
-							localIp = srcIp;
-							localPort = srcPort;
-							WanIp = srcIp2;
-							WanPort = srcPort2;
-						} else if (dstIp == currentWanIp) {
-							downloadBytes = bytes;
-							uploadBytes = bytes2;
-							localIp = srcIp2;
-							localPort = srcPort2;
-							WanIp = dstIp2;
-							WanPort = dstPort2;
-						//Openvpn connections. These only appear if Openvpn is active
-						} else if ((dstIp2.indexOf(ovpn_match) === 0) && (srcIp.indexOf(ovpn_match) !== 0)) {
-							downloadBytes = bytes2;
-							uploadBytes = bytes;
-							localIp = srcIp;
-							localPort = srcPort;
-							WanIp = dstIp;
-							WanPort = dstPort;
-						} else {	// filter out LAN-LAN connections
-							wan_connection = false;
+						//IPv4: Based on the location of the router WanIP in the connection record we can determine traffic direction
+						if(ipFamily == "IPv4")
+						{
+							if (dstIp2 == currentWanIp) {
+								downloadBytes = bytes2;
+								uploadBytes = bytes;
+								localIp = srcIp;
+								localPort = srcPort;
+								WanIp = srcIp2;
+								WanPort = srcPort2;
+							} else if (dstIp == currentWanIp) {
+								downloadBytes = bytes;
+								uploadBytes = bytes2;
+								localIp = srcIp2;
+								localPort = srcPort2;
+								WanIp = dstIp2;
+								WanPort = dstPort2;
+							//Openvpn connections. These only appear if Openvpn is active
+							} else if ((dstIp2.indexOf(ovpn_match) === 0) && (srcIp.indexOf(ovpn_match) !== 0)) {
+								downloadBytes = bytes2;
+								uploadBytes = bytes;
+								localIp = srcIp;
+								localPort = srcPort;
+								WanIp = dstIp;
+								WanPort = dstPort;
+							} else {	// filter out LAN-LAN connections
+								wan_connection = false;
+							}
+						}
+						//IPv6: Based on the location of the local machine IP in the connection record we can determine traffic direction. We also need to grab router connections separately.
+						else if(ipFamily == "IPv6")
+						{
+							if((checkIP6Local(srcIp) || currentWanIp6.indexOf(srcIp) > -1) && currentLanIp6.indexOf(srcIp) < 0 && currentLanIp6.indexOf(dstIp) < 0)
+							{
+								downloadBytes = bytes2;
+								uploadBytes = bytes;
+								localIp = srcIp;
+								localPort = srcPort;
+								WanIp = srcIp2;
+								WanPort = srcPort2;
+							} else if ((checkIP6Local(srcIp2) || currentWanIp6.indexOf(srcIp2) > -1) && currentLanIp6.indexOf(srcIp2) < 0 && currentLanIp6.indexOf(dstIp2) < 0) {
+								downloadBytes = bytes;
+								uploadBytes = bytes2;
+								localIp = srcIp2;
+								localPort = srcPort2;
+								WanIp = dstIp2;
+								WanPort = dstPort2;
+							} else {
+								wan_connection = false;
+							}
 						}
 
 						if (wan_connection)
 						{
-							var tableRow =[parseInt(uploadBytes) + parseInt(downloadBytes),
+							var tableRow =[	parseInt(uploadBytes) + parseInt(downloadBytes),
+								ipFamily,
 								protocol,
 								textListToSpanElement([ getHostDisplay(localIp) + ":" + localPort, getHostDisplay(WanIp) + ":" + WanPort]),
 								textListToSpanElement([parseBytes(uploadBytes, bwUnits),parseBytes(downloadBytes, bwUnits)])
@@ -234,7 +273,7 @@ function updateConnectionTable()
 				}
 
 
-				var columnNames= [connTS.PrNm, connTS.WLNm, connTS.UDNm ];
+				var columnNames= [connTS.IPFam, connTS.PrNm, connTS.WLNm, connTS.UDNm ];
 				if(qosEnabled) { columnNames.push(connTS.QSNm); };
 				columnNames.push(connTS.LPNm);
 
@@ -244,7 +283,7 @@ function updateConnectionTable()
 					var headerIndex;
 					try
 					{
-						for(headerIndex=0; headerIndex < 5; headerIndex++){ connTable.firstChild.firstChild.childNodes[headerIndex].style.textAlign="left"; }
+						for(headerIndex=0; headerIndex < 6; headerIndex++){ connTable.firstChild.firstChild.childNodes[headerIndex].style.textAlign="left"; }
 					}
 					catch(e){}
 				}
@@ -256,7 +295,7 @@ function updateConnectionTable()
 					tableContainer.removeChild(tableContainer.firstChild);
 				}
 				tableContainer.appendChild(connTable);
-				reregisterTableSort('connection_table', 's', 's', 'm', 's', 's');
+				reregisterTableSort('connection_table', 's', 's', 's', 'm', 's', 's');
 				createTableFilter(TFilter_Data[getTFilterIDX('connection_table')]);
 
 				updateInProgress = false;
@@ -264,4 +303,23 @@ function updateConnectionTable()
 		}
 		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 	}
+}
+
+function checkIP6Local(address)
+{
+	retVal = false;
+
+	for(var x = 0; x < currentLanIp6.length; x++)
+	{
+		var maskedLan = ip6_mask(currentLanIp6[x], currentLanMask6[x]);
+		var maskedAddr = ip6_mask(address, currentLanMask6[x]);
+
+		if(maskedLan == maskedAddr)
+		{
+			retVal = true;
+			break;
+		}
+	}
+
+	return retVal;
 }

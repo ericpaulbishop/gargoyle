@@ -282,6 +282,12 @@ function getIpFromDocument()
 		{
 			ipList.push( ipData[rowIndex][0] );
 		}
+		table = document.getElementById("quota_ip6_table_container").firstChild;
+		ipData = table != null ? getTableDataArray(table, true, false) : [];
+		for(rowIndex=0; rowIndex < ipData.length; rowIndex++)
+		{
+			ipList.push( ipData[rowIndex][0] );
+		}
 		ip = ipList.join(",");
 	}
 	return ip;
@@ -294,6 +300,11 @@ function setDocumentIp(ip)
 
 	/* clear ip table */
 	var tableContainer = document.getElementById("quota_ip_table_container");
+	while(tableContainer.firstChild != null)
+	{
+		tableContainer.removeChild(tableContainer.firstChild);
+	}
+	tableContainer = document.getElementById("quota_ip6_table_container");
 	while(tableContainer.firstChild != null)
 	{
 		tableContainer.removeChild(tableContainer.firstChild);
@@ -315,11 +326,31 @@ function setDocumentIp(ip)
 	else
 	{
 		setSelectedValue("applies_to_type", "only", document);
-		document.getElementById("add_ip").value = ip;
+		var ip4 = [];
+		var ip6 = [];
+		ipGroups = ip.split(",");
+		for(var x = 0; x < ipGroups.length; x++)
+		{
+			if(getIPFamily(ipGroups[x].split("-")[0]) == "IPv4")
+			{
+				ip4.push(ipGroups[x]);
+			}
+			else if(getIPFamily(ipGroups[x].split("-")[0]) == "IPv6")
+			{
+				ip6.push(ipGroups[x]);
+			}
+		}
+		document.getElementById("add_ip").value = ip4.join(",");
 		var valid = addAddressesToTable(document,"add_ip","quota_ip_table_container","quota_ip_table",false, 3, false,250);
 		if(!valid)
 		{
 			document.getElementById("add_ip").value = "";
+		}
+		document.getElementById("add_ip6").value = ip6.join(",");
+		var valid = addAddressesToTable(document,"add_ip6","quota_ip6_table_container","quota_ip6_table",false, 6, false,250);
+		if(!valid)
+		{
+			document.getElementById("add_ip6").value = "";
 		}
 	}
 }
@@ -363,6 +394,7 @@ function addNewQuota()
 function setVisibility()
 {
 	setInvisibleIfIdMatches("applies_to_type", ["all","others_combined", "others_individual"], "quota_ip_container", "inline", document);
+	setInvisibleIfIdMatches("applies_to_type", ["all","others_combined", "others_individual"], "quota_ip6_container", "inline", document);
 	setInvisibleIfIdMatches("quota_reset", ["hour", "day"], "quota_day_container", "block", document);
 	setInvisibleIfIdMatches("quota_reset", ["hour"], "quota_hour_container", "block", document);
 	setInvisibleIfIdMatches("max_up_type", ["unlimited"], "max_up_container", "inline", document);

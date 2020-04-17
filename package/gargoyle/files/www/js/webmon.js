@@ -68,6 +68,28 @@ function saveChanges()
 			{
 				uci.set("webmon_gargoyle", "webmon", "include_ips", ipList.join(","));
 			}
+
+			var ipTable = document.getElementById('ip6_table_container').firstChild;
+			var ipArrayList = getTableDataArray(ipTable, true, false);
+			var ipList = [];
+			var ipi;
+			for(ipi = 0; ipi < ipArrayList.length; ipi++)
+			{
+				ipList.push( (ipArrayList[ipi][0]).replace(/[\t ]+/,"") );
+			}
+
+
+			uci.remove("webmon_gargoyle", "webmon", "include_ip6s");
+			uci.remove("webmon_gargoyle", "webmon", "exclude_ip6s");
+			var include_exclude_type = getSelectedValue("include_exclude");
+			if(include_exclude_type == "exclude" && ipList.length > 0)
+			{
+				uci.set("webmon_gargoyle", "webmon", "exclude_ip6s", ipList.join(","));
+			}
+			else if(include_exclude_type == "include" && ipList.length > 0)
+			{
+				uci.set("webmon_gargoyle", "webmon", "include_ip6s", ipList.join(","));
+			}
 			startStopCommand = "/etc/init.d/webmon_gargoyle restart\n";
 		}
 
@@ -188,14 +210,17 @@ function resetData()
 	document.getElementById("num_searches").value = numSearches == "" ? 300 : numSearches;
 
 	var ips = [];
+	var ip6s = [];
 	if(uciOriginal.get("webmon_gargoyle", "webmon", "exclude_ips") != "")
 	{
 		ips = (uciOriginal.get("webmon_gargoyle", "webmon", "exclude_ips")).split(/,/);
+		ip6s = (uciOriginal.get("webmon_gargoyle", "webmon", "exclude_ip6s")).split(/,/);
 		setSelectedValue("include_exclude", "exclude");
 	}
 	else if(uciOriginal.get("webmon_gargoyle", "webmon", "include_ips") != "")
 	{
 		ips = (uciOriginal.get("webmon_gargoyle", "webmon", "include_ips")).split(/,/);
+		ip6s = (uciOriginal.get("webmon_gargoyle", "webmon", "include_ip6s")).split(/,/);
 		setSelectedValue("include_exclude", "include");
 	}
 	else
@@ -208,6 +233,11 @@ function resetData()
 	{
 		ipTableData.push( [ ips.shift() ] );
 	}
+	var ip6TableData = [];
+	while(ip6s.length > 0)
+	{
+		ip6TableData.push( [ ip6s.shift() ] );
+	}
 
 
 	var ipTable=createTable([""], ipTableData, "ip_table", true, false);
@@ -217,6 +247,14 @@ function resetData()
 		tableContainer.removeChild(tableContainer.firstChild);
 	}
 	tableContainer.appendChild(ipTable);
+
+	var ip6Table=createTable([""], ip6TableData, "ip6_table", true, false);
+	var tableContainer = document.getElementById('ip6_table_container');
+	if(tableContainer.firstChild != null)
+	{
+		tableContainer.removeChild(tableContainer.firstChild);
+	}
+	tableContainer.appendChild(ip6Table);
 
 
 	setIncludeExclude();
@@ -253,12 +291,13 @@ function resetData()
 function setIncludeExclude()
 {
 	document.getElementById("add_ip_container").style.display = (getSelectedValue("include_exclude")=="all") ? "none" : "block";
+	document.getElementById("add_ip6_container").style.display = (getSelectedValue("include_exclude")=="all") ? "none" : "block";
 }
 
 function setWebmonEnabled()
 {
 	var enabled = document.getElementById("webmon_enabled").checked;
-	var ids=[ 'num_domains', 'num_searches', 'include_exclude', 'add_ip'];
+	var ids=[ 'num_domains', 'num_searches', 'include_exclude', 'add_ip', 'add_ip6'];
 	for (idIndex in ids)
 	{
 		element = document.getElementById(ids[idIndex]);
@@ -268,11 +307,18 @@ function setWebmonEnabled()
 	}
 	var addButton = document.getElementById('add_ip_button');
 	setElementEnabled(addButton, enabled);
+	var addButton = document.getElementById('add_ip6_button');
+	setElementEnabled(addButton, enabled);
 
 	addIpTable = document.getElementById('ip_table_container').firstChild;
 	if(addIpTable != null)
 	{
 		setRowClasses(addIpTable, enabled);
+	}
+	addIp6Table = document.getElementById('ip6_table_container').firstChild;
+	if(addIp6Table != null)
+	{
+		setRowClasses(addIp6Table, enabled);
 	}
 }
 
@@ -325,8 +371,10 @@ function updateMonitorTable()
 							lastVisit = systemDateFormat == "hungary" ? m + "." + d + h : lastVisit;
 							lastVisit = systemDateFormat == "iso8601" ? m + "-" + d + h : lastVisit;
 
-							var host = getHostDisplay(splitLine[1], hostDisplayType);
-							var value = splitLine[2];
+							var ip = splitLine[2];
+							ip = getIPFamily(ip) == "IPv6" ? ip6_canonical(ip) : ip;
+							var host = getHostDisplay(ip, hostDisplayType);
+							var value = splitLine[3];
 
 							if(type == "domains")
 							{

@@ -30,8 +30,7 @@
 #include <net/ip.h>
 #include <net/tcp.h>
 
-#include <linux/netfilter_ipv4/ip_tables.h>
-#include <linux/netfilter_ipv4/ipt_weburl.h>
+#include <linux/netfilter/xt_weburl.h>
 
 #include "weburl_deps/regexp.c"
 #include "weburl_deps/tree_map.h"
@@ -47,6 +46,8 @@
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Eric Bishop");
 MODULE_DESCRIPTION("Match URL in HTTP(S) requests, designed for use with Gargoyle web interface (www.gargoyle-router.com)");
+MODULE_ALIAS("ipt_weburl");
+MODULE_ALIAS("ip6t_weburl");
 
 string_map* compiled_map = NULL;
 
@@ -139,7 +140,7 @@ int do_match_test(unsigned char match_type,  const char* reference, char* query)
 	return matches;
 }
 
-int http_match(const struct ipt_weburl_info* info, const unsigned char* packet_data, int packet_length)
+int http_match(const struct xt_weburl_info* info, const unsigned char* packet_data, int packet_length)
 {
 	int test = 0; 
 
@@ -298,7 +299,7 @@ int http_match(const struct ipt_weburl_info* info, const unsigned char* packet_d
 	return test;
 }
 
-int https_match(const struct ipt_weburl_info* info, const unsigned char* packet_data, int packet_length)
+int https_match(const struct xt_weburl_info* info, const unsigned char* packet_data, int packet_length)
 {
 	int test = 0;
 
@@ -437,10 +438,10 @@ int https_match(const struct ipt_weburl_info* info, const unsigned char* packet_
 }
 
 
-static bool match(const struct sk_buff *skb, struct xt_action_param *par)
+static bool weburl_mt4(const struct sk_buff *skb, struct xt_action_param *par)
 {
 
-	const struct ipt_weburl_info *info = (const struct ipt_weburl_info*)(par->matchinfo);
+	const struct xt_weburl_info *info = (const struct xt_weburl_info*)(par->matchinfo);
 
 	
 	int test = 0;
@@ -499,33 +500,108 @@ static bool match(const struct sk_buff *skb, struct xt_action_param *par)
 	return test;
 }
 
+static bool weburl_mt6(const struct sk_buff *skb, struct xt_action_param *par)
+{
+
+	const struct xt_weburl_info *info = (const struct xt_weburl_info*)(par->matchinfo);
+
+	
+	int test = 0;
+	struct ipv6hdr* iph;	
+
+	/* linearize skb if necessary */
+	struct sk_buff *linear_skb;
+	int skb_copied;
+	if(skb_is_nonlinear(skb))
+	{
+		linear_skb = skb_copy(skb, GFP_ATOMIC);
+		skb_copied = 1;
+	}
+	else
+	{
+		linear_skb = (struct sk_buff*)skb;
+		skb_copied = 0;
+	}
+
+	
+
+	/* ignore packets that are not TCP */
+	iph = (struct ipv6hdr*)(skb_network_header(skb));
+	int thoff = 0;
+	int ip6proto = ipv6_find_hdr(skb, &thoff, -1, NULL, NULL);
+	if(ip6proto == IPPROTO_TCP)
+	{
+		/* get payload */
+		struct tcphdr* tcp_hdr;
+		tcp_hdr = skb_header_pointer(skb, thoff, sizeof(struct tcphdr), tcp_hdr);
+		if(tcp_hdr != NULL)
+		{
+			unsigned short payload_offset 	= (tcp_hdr->doff*4) + thoff;
+			unsigned char* payload 		= ((unsigned char*)iph) + payload_offset;
+			unsigned short payload_length	= ntohs(iph->payload_len);
+
+			/* if payload length <= 10 bytes don't bother doing a check, otherwise check for match */
+			if(payload_length > 10)
+			{
+				if(strnicmp((char*)payload, "GET ", 4) == 0 || strnicmp(  (char*)payload, "POST ", 5) == 0 || strnicmp((char*)payload, "HEAD ", 5) == 0)
+				{
+					test = http_match(info, payload, payload_length);
+				}
+				else if ((unsigned short)ntohs(tcp_hdr->dest) == 443)
+				{
+					test = https_match(info, payload, payload_length);
+				}
+			}
+		}
+	}
+	
+	/* free skb if we made a copy to linearize it */
+	if(skb_copied == 1)
+	{
+		kfree_skb(linear_skb);
+	}
+
+
+	/* printk("returning %d from weburl\n\n\n", test); */
+	return test;
+}
+
 
 static int checkentry(const struct xt_mtchk_param *par)
 {
 	return 0;
 }
 
-
-static struct xt_match weburl_match  __read_mostly  = 
+static struct xt_match xt_weburl_mt_reg[]  __read_mostly  = 
 {
-	.name		= "weburl",
-	.match		= match,
-	.family		= AF_INET,
-	.matchsize	= sizeof(struct ipt_weburl_info),
-	.checkentry	= checkentry,
-	.me		= THIS_MODULE,
+	{
+		.name		= "weburl",
+		.match		= weburl_mt4,
+		.family		= NFPROTO_IPV4,
+		.matchsize	= sizeof(struct xt_weburl_info),
+		.checkentry	= checkentry,
+		.me		= THIS_MODULE,
+	},
+	{
+		.name		= "weburl",
+		.match		= weburl_mt6,
+		.family		= NFPROTO_IPV6,
+		.matchsize	= sizeof(struct xt_weburl_info),
+		.checkentry	= checkentry,
+		.me		= THIS_MODULE,
+	},
 };
 
 static int __init init(void)
 {
 	compiled_map = NULL;
-	return xt_register_match(&weburl_match);
+	return xt_register_matches(xt_weburl_mt_reg, ARRAY_SIZE(xt_weburl_mt_reg));
 
 }
 
 static void __exit fini(void)
 {
-	xt_unregister_match(&weburl_match);
+	xt_unregister_matches(xt_weburl_mt_reg, ARRAY_SIZE(xt_weburl_mt_reg));
 	if(compiled_map != NULL)
 	{
 		unsigned long num_destroyed;
@@ -535,3 +611,4 @@ static void __exit fini(void)
 
 module_init(init);
 module_exit(fini);
+

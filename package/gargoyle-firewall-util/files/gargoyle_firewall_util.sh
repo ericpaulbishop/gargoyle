@@ -2,6 +2,7 @@
 # This is free software licensed under the terms of the GNU GPL v2.0
 #
 . /lib/functions.sh
+. /lib/functions/network.sh
 include /lib/network
 
 ra_mask="0x0080"
@@ -11,6 +12,28 @@ death_mask=0x8000
 death_mark="$death_mask"
 
 wan_if=""
+
+apply_xtables_rule()
+{
+	rule="$1"
+	family="${2:-ipv4}"
+
+	if [ "$family" = "ipv4" ] || [ "$family" = "any" ] ; then
+		iptables ${rule}
+	fi
+	if [ "$family" = "ipv6" ] || [ "$family" = "any" ] ; then
+		ip6tables ${rule}
+	fi
+}
+
+ip_family()
+{
+	ip="$1"
+	ip4=$(echo "$ip" | grep -E "^\d+\.\d+\.\d+\.\d+$")
+	[ -n "$ip4" ] && echo "ipv4"
+	ip6=$(echo "$ip" | grep -E "^([0-9a-fA-F]{0,4}:){1,7}[0-9a-fA-F]{0,4}$")
+	[ -n "$ip6" ] && echo "ipv6"
+}
 
 mask_to_cidr()
 {
@@ -78,43 +101,59 @@ insert_remote_accept_rules()
 	#add rules for remote_accepts
 	parse_remote_accept_config()
 	{
-		vars="local_port remote_port start_port end_port proto zone"
+		vars="local_port remote_port start_port end_port proto zone family"
 		proto="tcp udp"
 		zone="wan"
+		family="ipv4"
 		for var in $vars ; do
 			config_get $var $1 $var
 		done
 		if [ "$proto" = "tcpudp" ] || [ -z "$proto" ] ; then
 			proto="tcp udp"
 		fi
+		if [ "$family" = "any" ] ; then
+			family="ipv4 ipv6"
+		fi
+		if [ -z "$family" ] ; then
+			family="ipv4"
+		fi 
 
-		for prot in $proto ; do
-			if [ -n "$local_port" ] ; then
+		for fam in $family ; do
+			for prot in $proto ; do
+				if [ -n "$local_port" ] ; then
+					if [ -z "$remote_port"  ] ; then
+						remote_port="$local_port"
+					fi
 
-				if [ -z "$remote_port"  ] ; then
-					remote_port="$local_port"
+					#Discourage brute force attacks on ssh from the WAN by limiting failed conneciton attempts.
+					#Each attempt gets a maximum of 10 password tries by dropbear.
+					if   [ -n "$ssh_max_attempts"  ] && [ "$local_port" = "$ssh_port" ] && [ "$prot" = "tcp" ] ; then
+						apply_xtables_rule "-t filter -A "input_${zone}_rule" -p "$prot" --dport $ssh_port -m recent --set --name SSH_CHECK" "$fam"
+						apply_xtables_rule "-t filter -A "input_${zone}_rule" -m recent --update --seconds 300 --hitcount $ssh_max_attempts --name SSH_CHECK -j DROP" "$fam"
+					fi
+
+					if [ "$remote_port" != "$local_port" ] ; then
+						if [ "$fam" = "ipv4" ] ; then
+							#since we're inserting with -I, insert redirect rule first which will then be hit second, after setting connmark
+							apply_xtables_rule "-t nat -I "zone_${zone}_prerouting" -p "$prot" --dport "$remote_port" -j REDIRECT --to-ports "$local_port"" "$fam"
+							apply_xtables_rule "-t nat -I "zone_${zone}_prerouting" -p "$prot" --dport "$remote_port" -j CONNMARK --set-mark "$ra_mark"" "$fam"
+							apply_xtables_rule "-t filter -A "input_${zone}_rule" -p $prot --dport "$local_port" -m connmark --mark "$ra_mark" -j ACCEPT" "$fam"
+						else
+							logger -t "gargoyle_firewall_util" "Port Redirect not supported for IPv6"
+						fi
+					else
+						if [ "$fam" = "ipv4" ] ; then
+							apply_xtables_rule "-t nat -I "zone_${zone}_prerouting" -p "$prot" --dport "$remote_port" -j REDIRECT --to-ports "$local_port"" "$fam"
+						fi
+						apply_xtables_rule "-t filter -A "input_${zone}_rule" -p "$prot" --dport "$local_port" -j ACCEPT" "$fam"
+					fi
+				elif [ -n "$start_port" ] && [ -n "$end_port" ] ; then
+					if [ "$fam" = "ipv4" ] ; then
+						apply_xtables_rule "-t nat -I "zone_${zone}_prerouting" -p "$prot" --dport "$start_port:$end_port" -j REDIRECT" "$fam"
+					fi
+					apply_xtables_rule "-t filter -A "input_${zone}_rule" -p "$prot" --dport "$start_port:$end_port" -j ACCEPT" "$fam"
 				fi
-
-				#Discourage brute force attacks on ssh from the WAN by limiting failed conneciton attempts.
-				#Each attempt gets a maximum of 10 password tries by dropbear.
-				if   [ -n "$ssh_max_attempts"  ] && [ "$local_port" = "$ssh_port" ] && [ "$prot" = "tcp" ] ; then
-					iptables -t filter -A "input_${zone}_rule" -p "$prot" --dport $ssh_port -m recent --set --name SSH_CHECK
-					iptables -t filter -A "input_${zone}_rule" -m recent --update --seconds 300 --hitcount $ssh_max_attempts --name SSH_CHECK -j DROP
-				fi
-
-				if [ "$remote_port" != "$local_port" ] ; then
-					#since we're inserting with -I, insert redirect rule first which will then be hit second, after setting connmark
-					iptables -t nat -I "zone_"$zone"_prerouting" -p "$prot" --dport "$remote_port" -j REDIRECT --to-ports "$local_port"
-					iptables -t nat -I "zone_"$zone"_prerouting" -p "$prot" --dport "$remote_port" -j CONNMARK --set-mark "$ra_mark"
-					iptables -t filter -A "input_${zone}_rule" -p $prot --dport "$local_port" -m connmark --mark "$ra_mark" -j ACCEPT
-				else
-					iptables -t nat -I "zone_"$zone"_prerouting" -p "$prot" --dport "$remote_port" -j REDIRECT --to-ports "$local_port"
-					iptables -t filter -A "input_${zone}_rule" -p "$prot" --dport "$local_port" -j ACCEPT
-				fi
-			elif [ -n "$start_port" ] && [ -n "$end_port" ] ; then
-				iptables -t nat -I "zone_"$zone"_prerouting" -p "$prot" --dport "$start_port:$end_port" -j REDIRECT
-				iptables -t filter -A "input_${zone}_rule" -p "$prot" --dport "$start_port:$end_port" -j ACCEPT
-			fi
+			done
 		done
 	}
 	config_load "$config_name"
@@ -364,6 +403,8 @@ initialize_quotas()
 
 	lan_mask=$(uci -p /tmp/state get network.lan.netmask)
 	lan_ip=$(uci -p /tmp/state get network.lan.ipaddr)
+	network_get_subnet6 lan_ipmask6 lan
+	[ -z "$lan_ipmask6" ] && lan_ipmask6="2001:db8::/32"
 	full_qos_enabled=$(ls /etc/rc.d/*qos_gargoyle 2>/dev/null)
 
 	if [ -n "$full_qos_enabled" ] ; then
@@ -381,10 +422,10 @@ initialize_quotas()
 	# have up and down speeds defined for when quota is exceeded
 	# and full qos is not enabled
 	if [ -z "$full_qos_enabled" ] ; then
-		restore_quotas    -w $wan_if -d $death_mark -m $death_mask -s "$lan_ip/$lan_mask" -c "0 0,4,8,12,16,20 * * * /usr/bin/backup_quotas >/dev/null 2>&1"
+		restore_quotas    -w $wan_if -d $death_mark -m $death_mask -s "$lan_ip/$lan_mask" -t $lan_ipmask6 -c "0 0,4,8,12,16,20 * * * /usr/bin/backup_quotas >/dev/null 2>&1"
 		initialize_quota_qos
 	else
-		restore_quotas -q -w $wan_if -d $death_mark -m $death_mask -s "$lan_ip/$lan_mask" -c "0 0,4,8,12,16,20 * * * /usr/bin/backup_quotas >/dev/null 2>&1"
+		restore_quotas -q -w $wan_if -d $death_mark -m $death_mask -s "$lan_ip/$lan_mask" -t $lan_ipmask6 -c "0 0,4,8,12,16,20 * * * /usr/bin/backup_quotas >/dev/null 2>&1"
 		cleanup_old_quota_qos
 	fi
 
@@ -478,7 +519,22 @@ initialize_quota_qos()
 		ifconfig imq0 down  >/dev/null 2>&1
 		ifconfig imq1 down  >/dev/null 2>&1
 		rmmod  imq          >/dev/null 2>&1
+		# Allow IMQ to fail to load 3 times (15 seconds) before we bail out
+		# No particularly graceful way to get out of this one. Quotas will be active but speed limits won't be enforced.
 		insmod imq numdevs=1 hook_chains="INPUT,FORWARD" hook_tables="mangle,mangle" >/dev/null 2>&1
+		cnt=0
+		while [ "$(ls -d /proc/sys/net/ipv4/conf/imq* 2>&- | wc -l)" -eq "0" ]
+			do
+				logger -t "gargoyle_firewall_util" "insmod imq failed. Waiting and trying again..."
+				sleep 5
+				cnt=`expr $cnt + 1`
+				if [ $cnt -ge 3 ] ; then
+					logger -t "gargoyle_firewall_util" "Could not insmod imq, too many retries. Stopping."
+					cleanup_old_quota_qos
+					return
+				fi
+				insmod imq numdevs=1 hook_chains="INPUT,FORWARD" hook_tables="mangle,mangle" >/dev/null 2>&1
+			done
 		ip link set imq0 up
 
 		#egress/upload

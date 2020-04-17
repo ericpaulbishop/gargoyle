@@ -21,7 +21,7 @@ function saveChanges()
 		setControlsEnabled(false, true);
 
 		var firewallSectionCommands = [];
-		var redirectSectionTypes = ["redirect", "redirect_disabled", "dmz"];
+		var redirectSectionTypes = ["redirect", "redirect_disabled", "dmz", "rule", "rule_disabled"];
 		for(typeIndex=0; typeIndex < redirectSectionTypes.length; typeIndex++)
 		{
 			var sectionType = redirectSectionTypes[typeIndex];
@@ -29,6 +29,10 @@ function saveChanges()
 			while(sections.length > 0)
 			{
 				var lastSection = sections.pop();
+				if((sectionType == "rule" || sectionType == "rule_disabled") && lastSection.match("^portopen_rule_(en|dis)abled") == null)
+				{
+					continue;
+				}
 				uciOriginal.removeSection("firewall", lastSection);
 				firewallSectionCommands.push("uci del firewall." + lastSection);
 			}
@@ -58,6 +62,7 @@ function saveChanges()
 				uci.set("firewall", id, "name", rowData[0]);
 				uci.set("firewall", id, "src", "wan");
 				uci.set("firewall", id, "dest", "lan");
+				uci.set("firewall", id, "family", "ipv4");
 				uci.set("firewall", id, "proto", protos[protoIndex]);
 				uci.set("firewall", id, "src_dport", rowData[2]);
 				uci.set("firewall", id, "dest_ip", rowData[3]);
@@ -85,6 +90,7 @@ function saveChanges()
 				uci.set("firewall", id, "name", rowData[0]);
 				uci.set("firewall", id, "src", "wan");
 				uci.set("firewall", id, "dest", "lan");
+				uci.set("firewall", id, "family", "ipv4");
 				uci.set("firewall", id, "proto", protos[protoIndex]);
 				uci.set("firewall", id, "src_dport", rowData[2] + "-" + rowData[3]);
 				uci.set("firewall", id, "dest_port", rowData[2] + "-" + rowData[3]);
@@ -135,6 +141,61 @@ function saveChanges()
 			}
 		}
 
+		singlePortTable = document.getElementById('porto_table_container').firstChild;
+		singlePortData= getTableDataArray(singlePortTable, true, false);
+		enabledIndex = 0;
+		disabledIndex = 0;
+		for(rowIndex = 0; rowIndex < singlePortData.length; rowIndex++)
+		{
+			var rowData = singlePortData[rowIndex];
+			var enabled = rowData[4].checked;
+
+			var protos = rowData[1].toLowerCase() == UI.both.toLowerCase() ? ["tcp", "udp"] : [ rowData[1].toLowerCase() ];
+			var protoIndex=0;
+			for(protoIndex=0;protoIndex < protos.length; protoIndex++)
+			{
+				var id = "portopen_rule_" + (enabled ? "enabled" : "disabled") + "_number_" +  (enabled ? enabledIndex : disabledIndex);
+				firewallSectionCommands.push("uci set firewall." + id + "=" + (enabled ? "rule" : "rule_disabled"));
+				uci.set("firewall", id, "", (enabled ? "rule" : "rule_disabled"));
+				uci.set("firewall", id, "name", rowData[0]);
+				uci.set("firewall", id, "src", "wan");
+				uci.set("firewall", id, "dest", "lan");
+				uci.set("firewall", id, "family", "ipv6");
+				uci.set("firewall", id, "target", "ACCEPT");
+				uci.set("firewall", id, "proto", protos[protoIndex]);
+				uci.set("firewall", id, "dest_ip", rowData[2]);
+				uci.set("firewall", id, "dest_port", rowData[3]);
+				enabledIndex = enabledIndex + (enabled ? 1 : 0);
+				disabledIndex = disabledIndex + (enabled ? 0 : 1);
+			}
+		}
+
+		portRangeTable = document.getElementById('portorange_table_container').firstChild;
+		portRangeData= getTableDataArray(portRangeTable, true, false);
+		for(rowIndex = 0; rowIndex < portRangeData.length; rowIndex++)
+		{
+			var rowData = portRangeData[rowIndex];
+			var enabled = rowData[5].checked;
+
+			var protos = rowData[1].toLowerCase() == UI.both.toLowerCase() ? ["tcp", "udp"] : [ rowData[1].toLowerCase() ];
+			var protoIndex=0;
+			for(protoIndex=0;protoIndex < protos.length; protoIndex++)
+			{
+				var id = "portopen_rule_" + (enabled ? "enabled" : "disabled") + "_number_" +  (enabled ? enabledIndex : disabledIndex);
+				firewallSectionCommands.push("uci set firewall." + id + "=" + (enabled ? "rule" : "rule_disabled"));
+				uci.set("firewall", id, "", (enabled ? "rule" : "rule_disabled"));
+				uci.set("firewall", id, "name", rowData[0]);
+				uci.set("firewall", id, "src", "wan");
+				uci.set("firewall", id, "dest", "lan");
+				uci.set("firewall", id, "family", "ipv6");
+				uci.set("firewall", id, "target", "ACCEPT");
+				uci.set("firewall", id, "proto", protos[protoIndex]);
+				uci.set("firewall", id, "dest_ip", rowData[4]);
+				uci.set("firewall", id, "dest_port", rowData[2] + "-" + rowData[3]);
+				enabledIndex = enabledIndex + (enabled ? 1 : 0);
+				disabledIndex = disabledIndex + (enabled ? 0 : 1);
+			}
+		}
 
 		commands = firewallSectionCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + upnpStartCommands.join("\n") + "\n" + restartFirewallCommand;
 		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
@@ -224,7 +285,7 @@ function addPortfRule()
 			checkbox = createInput('checkbox');
 			checkbox.checked = true;
 			values.push(checkbox);
-			values.push(createEditButton(true));
+			values.push(createEditButton(true, "forward"));
 			addTableRow(portfTable,values, true, false);
 		}
 		closeModalWindow('single_forward_modal');
@@ -289,7 +350,7 @@ function addPortfRangeRule()
 			checkbox = createInput('checkbox');
 			checkbox.checked = true;
 			values.push(checkbox);
-			values.push(createEditButton(false));
+			values.push(createEditButton(false, "forward"));
 
 			portfrangeTable = document.getElementById('portfrange_table_container').firstChild;
 			addTableRow(portfrangeTable,values, true, false);
@@ -385,7 +446,7 @@ function proofreadForwardSingle(excludeRow)
 
 		var portfRangeTable = document.getElementById('portfrange_table_container').firstChild;
 		var currentRangeData = getTableDataArray(portfRangeTable, true, false);
-		for (rowDataIndex=0; rowDataIndex < currentRangeData; rowDataIndex++)
+		for (rowDataIndex=0; rowDataIndex < currentRangeData.length; rowDataIndex++)
 		{
 			var rowData = currentRangeData[rowDataIndex];
 			if( (addProtocol == rowData[1] || addProtocol == UI.both || rowData[1] == UI.both) && rowData[2]*1 <= addPort*1 && rowData[3]*1 >= addPort*1)
@@ -457,7 +518,7 @@ function resetData()
 					}
 					else
 					{
-						var nextTableRowData = [name, proto.toUpperCase(), splitPorts[0], splitPorts[1], destip, checkbox, createEditButton(false)];
+						var nextTableRowData = [name, proto.toUpperCase(), splitPorts[0], splitPorts[1], destip, checkbox, createEditButton(false,"forward")];
 						portRangeTableData.push(nextTableRowData);
 						portRangeProtoHash[proto][hashStr] = nextTableRowData;
 						portRangeEnabledStatus.push(checkbox.checked);
@@ -473,7 +534,7 @@ function resetData()
 					}
 					else
 					{
-						var nextTableRowData = [name, proto.toUpperCase(), srcdport, destip, destport, checkbox, createEditButton(true)];
+						var nextTableRowData = [name, proto.toUpperCase(), srcdport, destip, destport, checkbox, createEditButton(true,"forward")];
 						singlePortTableData.push(nextTableRowData);
 						singlePortProtoHash[proto][hashStr] = nextTableRowData;
 						singlePortEnabledStatus.push(checkbox.checked);
@@ -595,8 +656,102 @@ function resetData()
 
 	}
 
+	singlePortTableData = new Array();
+	singlePortEnabledStatus = new Array();
+	portRangeTableData = new Array();
+	portRangeEnabledStatus = new Array();
+	singlePortProtoHash["tcp"] = [];
+	singlePortProtoHash["udp"] = [];
+	portRangeProtoHash["tcp"] = [];
+	portRangeProtoHash["udp"] = [];
+	// parse (both enabled & disabled) port open rules
+	// uci firewall doesn't parse rule_disabled sections, so we can store this info there
+	// without any complications.  Likewise we store rule name in "name" variable that doesn't
+	// get parsed by the uci firewall script.
+	var redirectSectionTypes = ["rule", "rule_disabled"];
+	for(typeIndex=0; typeIndex < redirectSectionTypes.length; typeIndex++)
+	{
+		var sectionType = redirectSectionTypes[typeIndex];
+		var portopenSections = uciOriginal.getAllSectionsOfType("firewall", redirectSectionTypes[typeIndex]);
+		for(poIndex=0; poIndex < portopenSections.length; poIndex++)
+		{
+			var poId = portopenSections[poIndex];
+			var match = poId.match("^portopen_rule_(en|dis)abled");
+			if(match == null)
+			{
+				continue;
+			}
+			
+			var name = uciOriginal.get("firewall", poId, "name");
+			name = name == "" ? "-" : name;
+			var proto	= uciOriginal.get("firewall", poId, "proto").toLowerCase();
+			var destip	= uciOriginal.get("firewall", poId, "dest_ip");
+			var destport	= uciOriginal.get("firewall", poId, "dest_port");
 
 
+			if(proto.toLowerCase() == "tcp" || proto.toLowerCase() == "udp")
+			{
+				checkbox = createInput('checkbox');
+				checkbox.checked = sectionType == "rule" ? true : false;
+
+				otherProto = proto == "tcp" ? "udp" : "tcp";
+				hashStr = name + "-" + destip + "-" + destport;
+				if(destport.match(/-/))
+				{
+					var splitPorts = destport.split(/-/);
+					// if same rule, different protocol exists, merge into one rule
+					// otherwise, add rule to table data
+					if(portRangeProtoHash[otherProto][hashStr] != null)
+					{
+						portRangeProtoHash[otherProto][hashStr][1] = UI.both;
+					}
+					else
+					{
+						var nextTableRowData = [name, proto.toUpperCase(), splitPorts[0], splitPorts[1], destip, checkbox, createEditButton(false,"open")];
+						portRangeTableData.push(nextTableRowData);
+						portRangeProtoHash[proto][hashStr] = nextTableRowData;
+						portRangeEnabledStatus.push(checkbox.checked);
+					}
+				}
+				else
+				{
+					// if same rule, different protocol exists, merge into one rule
+					// otherwise, add rule to table data
+					if(singlePortProtoHash[otherProto][hashStr] != null)
+					{
+						singlePortProtoHash[otherProto][hashStr][1] = UI.both;
+					}
+					else
+					{
+						var nextTableRowData = [name, proto.toUpperCase(), destip, destport, checkbox, createEditButton(true,"open")];
+						singlePortTableData.push(nextTableRowData);
+						singlePortProtoHash[proto][hashStr] = nextTableRowData;
+						singlePortEnabledStatus.push(checkbox.checked);
+					}
+				}
+			}
+		}
+	}
+
+
+	columnNames = [prtS.Desc, prtS.Proto, "IP", prtS.Port, UI.Enabled, '']
+	portoTable=createTable(columnNames, singlePortTableData, "porto_table", true, false);
+	table1Container = document.getElementById('porto_table_container');
+
+	if(table1Container.firstChild != null)
+	{
+		table1Container.removeChild(table1Container.firstChild);
+	}
+	table1Container.appendChild(portoTable);
+
+	columnNames = [prtS.Desc, prtS.Proto, prtS.SPrt, prtS.EPrt, prtS.TIP, UI.Enabled, '']
+	portorangeTable=createTable(columnNames, portRangeTableData, "porto_range_table", true, false);
+	table2Container = document.getElementById('portorange_table_container');
+	if(document.getElementById('portorange_table_container').firstChild != null)
+	{
+		table2Container.removeChild(table2Container.firstChild);
+	}
+	table2Container.appendChild(portorangeTable);
 }
 
 function setUpnpEnabled()
@@ -611,12 +766,19 @@ function setDmzEnabled()
 }
 
 
-function createEditButton(isSingle)
+function createEditButton(isSingle, forwardopen)
 {
 	var editButton = createInput("button");
 	editButton.textContent = UI.Edit;
 	editButton.className = "btn btn-default btn-edit";
-	editButton.onclick = isSingle ? function(){editPortFModal(true, this)} : function(){editPortFModal(false, this)};
+	if(forwardopen == "forward")
+	{
+		editButton.onclick = isSingle ? function(){editPortFModal(true, this)} : function(){editPortFModal(false, this)};
+	}
+	else
+	{
+		editButton.onclick = isSingle ? function(){editPortOModal(true, this)} : function(){editPortOModal(false, this)};
+	}
 	return editButton;
 }
 
@@ -811,4 +973,343 @@ function editPortFModal(isSingle, triggerEl)
 
 	modalPrepare(isSingle ? 'single_forward_modal' : 'multi_forward_modal', prtS.PESect, modalElements, modalButtons);
 	openModalWindow(isSingle ? 'single_forward_modal' : 'multi_forward_modal');
+}
+
+function proofreadOpenSingle(excludeRow)
+{
+	var addIds = ['addo_dp', 'addo_ip'];
+	var labelIds = ['addo_dp_label', 'addo_ip_label'];
+	var functions = [validateNumeric, validateIP6Range];
+	var returnCodes = [0,0];
+	var visibilityIds = addIds;
+
+	var errors = proofreadFields(addIds, labelIds, functions, returnCodes, visibilityIds, document);
+
+	if(errors.length == 0)
+	{
+		var portoTable = document.getElementById('porto_table_container').firstChild;
+		var currentPortoData = getTableDataArray(portoTable, true, false);
+		var addPort = document.getElementById('addo_dp').value;
+		var addProtocol = document.getElementById('addo_prot').value;
+		var addIP = document.getElementById('addo_ip').value;
+		var rowDataIndex=0;
+		for (rowDataIndex=0; rowDataIndex < currentPortoData.length; rowDataIndex++)
+		{
+			if(portoTable.rows[rowDataIndex+1] != excludeRow)
+			{
+				var rowData = currentPortoData[rowDataIndex];
+				if( (addProtocol == rowData[1] || addProtocol == UI.both || rowData[1] == UI.both) &&  addPort == rowData[3] && addIP == rowData[2])
+				{
+					errors.push(prtS.CopOErr);
+				}
+			}
+		}
+
+		var portoRangeTable = document.getElementById('portorange_table_container').firstChild;
+		var currentRangeData = getTableDataArray(portoRangeTable, true, false);
+		for (rowDataIndex=0; rowDataIndex < currentRangeData.length; rowDataIndex++)
+		{
+			var rowData = currentRangeData[rowDataIndex];
+			if( (addProtocol == rowData[1] || addProtocol == UI.both || rowData[1] == UI.both) && rowData[2]*1 <= addPort*1 && rowData[3]*1 >= addPort*1 && addIP == rowData[4])
+			{
+				errors.push(prtS.CopOErr);
+			}
+		}
+	}
+
+	return errors;
+}
+
+function proofreadOpenRange(excludeRow)
+{
+	var addIds = ['addor_sp', 'addor_ep', 'addor_ip'];
+	var labelIds = ['addor_sp_label', 'addor_ep_label', 'addor_ip_label'];
+	var functions = [validateNumeric, validateNumeric, validateIP6Range];
+	var returnCodes = [0,0,0];
+	var visibilityIds = addIds;
+	var errors = proofreadFields(addIds, labelIds, functions, returnCodes, visibilityIds, document);
+	if(errors.length == 0)
+	{
+		if( (1*document.getElementById('addor_sp').value) > (1*document.getElementById('addor_ep').value) )
+		{
+			errors.push(prtS.GTErr);
+		}
+
+
+		var portoTable = document.getElementById('porto_table_container').firstChild;
+		var currentPortoData = getTableDataArray(portoTable, true, false);
+		var addStartPort = document.getElementById('addor_sp').value;
+		var addEndPort = document.getElementById('addor_ep').value;
+		var addProtocol = document.getElementById('addor_prot').value;
+		var addIP = document.getElementById('addor_ip').value;
+		var rowDataIndex=0;
+		for (rowDataIndex=0; rowDataIndex < currentPortoData.length ; rowDataIndex++)
+		{
+			var rowData = currentPortoData[rowDataIndex];
+			if( (addProtocol == rowData[1] || addProtocol == UI.both || rowData[1] == UI.both) &&  addStartPort*1 <= rowData[3]*1 && addEndPort*1 >= rowData[3]*1 && addIP == rowData[2])
+			{
+				errors.push(prtS.DupOErr);
+			}
+		}
+
+		var portoRangeTable = document.getElementById('portorange_table_container').firstChild;
+		var currentRangeData = getTableDataArray(portoRangeTable, true, false);
+		for (rowDataIndex=0; rowDataIndex < currentRangeData.length; rowDataIndex++)
+		{
+			if(portoRangeTable.rows[rowDataIndex+1] != excludeRow)
+			{
+				var rowData = currentRangeData[rowDataIndex];
+				if( (addProtocol == rowData[1] || addProtocol == UI.both || rowData[1] == UI.both) && rowData[2]*1 <= addEndPort*1 && rowData[3]*1 >= addStartPort*1 && addIP == rowData[4])
+				{
+					errors.push(prtS.DupOErr);
+				}
+			}
+		}
+	}
+
+
+	return errors;
+
+}
+
+function addPortoRule()
+{
+	errors = proofreadOpenSingle();
+	if(errors.length > 0)
+	{
+		alert(errors.join("\n") + "\n\n"+prtS.AORErr);
+	}
+	else
+	{
+		values = new Array();
+		ids = ['addo_desc', 'addo_prot', 'addo_ip', 'addo_dp'];
+		for (idIndex in ids)
+		{
+			element = document.getElementById(ids[idIndex]);
+			v = element.value;
+			v = v== '' ? '-' : v;
+			values.push(v);
+			if(element.type == "text")
+			{
+				element.value = "";
+			}
+		}
+
+		//check if this is identical to another rule, but for a different protocol
+		//if so, just merge the two by setting the protocol on the old data to 'both'
+		portoTable = document.getElementById('porto_table_container').firstChild;
+		currentPortoData = getTableDataArray(portoTable, true, false);
+		otherProto = values[1] == 'TCP' ? 'UDP' : 'TCP';
+		mergedWithExistingRule = false;
+		for (rowDataIndex in currentPortoData)
+		{
+			rowData = currentPortoData[rowDataIndex];
+
+			if( otherProto == rowData[1] &&  values[2] == rowData[2] && values[3] == rowData[3])
+			{
+				portoTable.rows[(rowDataIndex*1)+1].childNodes[1].firstChild.data = UI.both;
+				if(values[0] != '-' && rowData[0] == '-')
+				{
+					portoTable.rows[(rowDataIndex*1)+1].childNodes[0].firstChild.data = values[0];
+				}
+
+				table1Container = document.getElementById('porto_table_container');
+				if(table1Container.firstChild != null)
+				{
+					table1Container.removeChild(table1Container.firstChild);
+				}
+				table1Container.appendChild(portoTable);
+
+				mergedWithExistingRule = true;
+			}
+		}
+
+		if(!mergedWithExistingRule)
+		{
+			checkbox = createInput('checkbox');
+			checkbox.checked = true;
+			values.push(checkbox);
+			values.push(createEditButton(true, "open"));
+			addTableRow(portoTable,values, true, false);
+		}
+		closeModalWindow('single_open_modal');
+	}
+}
+
+function addPortoRangeRule()
+{
+	errors = proofreadOpenRange();
+	if(errors.length > 0)
+	{
+		alert(errors.join("\n") + "\n\n"+prtS.AORErr);
+	}
+	else
+	{
+		values = new Array();
+		ids = ['addor_desc', 'addor_prot', 'addor_sp', 'addor_ep', 'addor_ip'];
+		for (idIndex in ids)
+		{
+			element = document.getElementById(ids[idIndex]);
+			v = element.value;
+			v = v== '' ? '-' : v;
+			values.push(v);
+			if(element.type == 'text')
+			{
+				element.value = "";
+			}
+		}
+
+		portoRangeTable = document.getElementById('portorange_table_container').firstChild;
+		currentRangeData = getTableDataArray(portoRangeTable, true, false);
+		otherProto = values[1] == 'TCP' ? 'UDP' : 'TCP';
+		mergedWithExistingRule = false;
+		for (rowDataIndex in currentRangeData)
+		{
+			rowData = currentRangeData[rowDataIndex];
+			if( otherProto == rowData[1] &&  values[2] == rowData[2] && values[3] == rowData[3] && values[4] == rowData[4])
+			{
+				portfRangeTable.rows[(rowDataIndex*1)+1].childNodes[1].firstChild.data = UI.both;
+				if(values[0] != '-' && rowData[0] == '-')
+				{
+					portoRangeTable.rows[(rowDataIndex*1)+1].childNodes[0].firstChild.data = values[0];
+				}
+
+				table2Container = document.getElementById('portorange_table_container');
+				if(table2Container.firstChild != null)
+				{
+					table2Container.removeChild(table2Container.firstChild);
+				}
+				table2Container.appendChild(portoRangeTable);
+
+				mergedWithExistingRule = true;
+
+			}
+		}
+
+
+		if(!mergedWithExistingRule)
+		{
+			checkbox = createInput('checkbox');
+			checkbox.checked = true;
+			values.push(checkbox);
+			values.push(createEditButton(false, "open"));
+
+			portorangeTable = document.getElementById('portorange_table_container').firstChild;
+			addTableRow(portorangeTable,values, true, false);
+		}
+		closeModalWindow('multi_open_modal');
+	}
+}
+
+function addPortOModal(isSingle)
+{
+	modalButtons = [
+		{"title" : UI.Add, "classes" : "btn btn-primary", "function" : isSingle ? addPortoRule : addPortoRangeRule},
+		"defaultDismiss"
+	];
+
+	var desc = "";
+	var prot = "both";
+	var dp = "";
+	var ip = "";
+	var sp = "";
+	var ep = "";
+
+	var r = isSingle ? "" : "r";
+	modalElements = [
+		{"id" : "addo" + r + "_desc", "value" : desc},
+		{"id" : "addo" + r + "_prot", "value" : prot},
+		{"id" : "addo" + r + "_ip", "value" : ip}
+	];
+
+	if(isSingle)
+	{
+		modalElements.push(
+			{"id" : "addo_dp", "value" : dp}
+		);
+	}
+	else
+	{
+		modalElements.push(
+			{"id" : "addor_sp", "value" : sp},
+			{"id" : "addor_ep", "value" : ep}
+		);
+	}
+
+	modalPrepare(isSingle ? 'single_open_modal' : 'multi_open_modal', isSingle ? prtS.OpeIPort : prtS.OpeRPort, modalElements, modalButtons);
+	openModalWindow(isSingle ? 'single_open_modal' : 'multi_open_modal');
+}
+
+function editOpen(isSingle, editRow)
+{
+	var errors;
+	errors = isSingle ? proofreadOpenSingle(editRow) : proofreadOpenRange(editRow);
+
+	if(errors.length > 0)
+	{
+		alert(errors.join("\n") + "\n"+prtS.UpErr);
+	}
+	else
+	{
+		var r = isSingle ? "" : "r";
+		//update document with new data
+		editRow.childNodes[0].firstChild.data = document.getElementById("addo" + r + "_desc").value;
+		editRow.childNodes[1].firstChild.data = getSelectedValue( "addo" + r + "_prot", document );
+		if(isSingle)
+		{
+			editRow.childNodes[2].firstChild.data = document.getElementById("addo_ip").value;
+			editRow.childNodes[3].firstChild.data = document.getElementById("addo_dp").value;
+		}
+		else
+		{
+			editRow.childNodes[2].firstChild.data = document.getElementById("addor_sp").value;
+			editRow.childNodes[3].firstChild.data = document.getElementById("addor_ep").value;
+			editRow.childNodes[4].firstChild.data = document.getElementById("addor_ip").value;
+		}
+		closeModalWindow(isSingle ? "single_open_modal" : "multi_open_modal");
+	}
+}
+
+
+function editPortOModal(isSingle, triggerEl)
+{
+	editRow=triggerEl.parentNode.parentNode;
+	modalButtons = [
+		{"title" : UI.CApplyChanges, "classes" : "btn btn-primary", "function" : function(){editOpen(isSingle ? true : false, editRow);}},
+		"defaultDiscard"
+	];
+
+	var desc = editRow.childNodes[0].firstChild.data;
+	var prot = editRow.childNodes[1].firstChild.data;
+
+	var r = isSingle ? "" : "r";
+	modalElements = [
+		{"id" : "addo" + r + "_desc", "value" : desc},
+		{"id" : "addo" + r + "_prot", "value" : prot},
+		
+	];
+
+	if(isSingle)
+	{
+		var ip = editRow.childNodes[2].firstChild.data;
+		var dp = editRow.childNodes[3].firstChild.data;
+		modalElements.push(
+			{"id" : "addo_ip", "value" : ip},
+			{"id" : "addo_dp", "value" : dp}
+		);
+	}
+	else
+	{
+		var sp = editRow.childNodes[2].firstChild.data;
+		var ep = editRow.childNodes[3].firstChild.data;
+		var ip = editRow.childNodes[4].firstChild.data;
+		modalElements.push(
+			{"id" : "addor_sp", "value" : sp},
+			{"id" : "addor_ep", "value" : ep},
+			{"id" : "addor_ip", "value" : ip}
+		);
+	}
+
+	modalPrepare(isSingle ? 'single_open_modal' : 'multi_open_modal', prtS.POESect, modalElements, modalButtons);
+	openModalWindow(isSingle ? 'single_open_modal' : 'multi_open_modal');
 }

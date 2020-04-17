@@ -1,4 +1,4 @@
-/*  timerange --	An iptables extension to match multiple timeranges within a week
+/*  timerange --	An xtables extension to match multiple timeranges within a week
  *  			Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
  *
  *
@@ -28,36 +28,12 @@
 #include <time.h>
 #include <sys/time.h>
 
-
-/*
- * in iptables 1.4.0 and higher, iptables.h includes xtables.h, which
- * we can use to check whether we need to deal with the new requirements
- * in pre-processor directives below
- */
 #include <iptables.h>  
-#include <linux/netfilter_ipv4/ipt_timerange.h>
-
-#ifdef _XTABLES_H
-	#define iptables_rule_match	xtables_rule_match
-	#define iptables_match		xtables_match
-	#define iptables_target		xtables_target
-	#define ipt_tryload		xt_tryload
-#endif
-
-/* 
- * XTABLES_VERSION_CODE is only defined in versions 1.4.1 and later, which
- * also require the use of xtables_register_match
- * 
- * Version 1.4.0 uses register_match like previous versions
- */
-#ifdef XTABLES_VERSION_CODE 
-	#define register_match          xtables_register_match
-#endif
+#include <linux/netfilter/xt_timerange.h>
 
 /* utility functions necessary for module to work across multiple iptables versions */
 static int  my_check_inverse(const char option[], int* invert, int *my_optind, int argc);
 static void param_problem_exit_error(char* msg);
-
 
 long* parse_time_ranges(char* time_ranges, unsigned char is_weekly_range);
 void merge_adjacent_time_ranges(long* time_ranges, unsigned char is_weekly_range);
@@ -91,16 +67,11 @@ static int parse(	int c,
 			char **argv,
 			int invert,
 			unsigned int *flags,
-#ifdef _XTABLES_H
-			const void *entry,
-#else
-			const struct ipt_entry *entry,
-			unsigned int *nfcache,
-#endif			
-			struct ipt_entry_match **match
+			const void *entry,			
+			struct xt_entry_match **match
 			)
 {
-	struct ipt_timerange_info *info = (struct ipt_timerange_info *)(*match)->data;
+	struct xt_timerange_info *info = (struct xt_timerange_info *)(*match)->data;
 	int valid_arg = 0;
 	if(*flags == 0)
 	{
@@ -180,7 +151,7 @@ static int parse(	int c,
 
 
 	
-static void print_timerange_args(	struct ipt_timerange_info* info )
+static void print_timerange_args(struct xt_timerange_info* info)
 {
 	int i;
 	
@@ -242,51 +213,41 @@ static void final_check(unsigned int flags)
 }
 
 /* Prints out the matchinfo. */
-#ifdef _XTABLES_H
-static void print(const void *ip, const struct xt_entry_match *match, int numeric)
-#else	
-static void print(const struct ipt_ip *ip, const struct ipt_entry_match *match, int numeric)
-#endif
+static void print(const void *entry, const struct xt_entry_match *match, int numeric)
 {
 	printf("timerange ");
-	struct ipt_timerange_info *info = (struct ipt_timerange_info *)match->data;
+	struct xt_timerange_info *info = (struct xt_timerange_info *)match->data;
 
 	print_timerange_args(info);
 }
 
-/* Saves the union ipt_matchinfo in parsable form to stdout. */
-#ifdef _XTABLES_H
-static void save(const void *ip, const struct xt_entry_match *match)
-#else
-static void save(const struct ipt_ip *ip, const struct ipt_entry_match *match)
-#endif
+/* Saves the union xt_matchinfo in parsable form to stdout. */
+static void save(const void *entry, const struct xt_entry_match *match)
 {
-	struct ipt_timerange_info *info = (struct ipt_timerange_info *)match->data;
+	struct xt_timerange_info *info = (struct xt_timerange_info *)match->data;
 	print_timerange_args(info);
 }
 
-static struct iptables_match timerange = 
-{ 
-	.next		= NULL,
- 	.name		= "timerange",
-	#ifdef XTABLES_VERSION_CODE
-		.version = XTABLES_VERSION, 
-	#else
-		.version = IPTABLES_VERSION,
-	#endif
-	.size		= XT_ALIGN(sizeof(struct ipt_timerange_info)),
-	.userspacesize	= XT_ALIGN(sizeof(struct ipt_timerange_info)),
-	.help		= &help,
-	.parse		= &parse,
-	.final_check	= &final_check,
-	.print		= &print,
-	.save		= &save,
-	.extra_opts	= opts
+static struct xtables_match timerange_mt_reg[] = 
+{
+	{
+	 	.name		= "timerange",
+		.version	= XTABLES_VERSION,
+		.family		= NFPROTO_UNSPEC,
+		.size		= XT_ALIGN(sizeof(struct xt_timerange_info)),
+		.userspacesize	= XT_ALIGN(sizeof(struct xt_timerange_info)),
+		.help		= &help,
+		.parse		= &parse,
+		.final_check	= &final_check,
+		.print		= &print,
+		.save		= &save,
+		.extra_opts	= opts
+	},
 };
 
 void _init(void)
 {
-	register_match(&timerange);
+	xtables_register_matches(timerange_mt_reg, ARRAY_SIZE(timerange_mt_reg));
 }
 
 #ifndef TRUE
@@ -318,11 +279,7 @@ static int  my_check_inverse(const char option[], int* invert, int *my_optind, i
 }
 static void param_problem_exit_error(char* msg)
 {
-	#ifdef xtables_error
-		xtables_error(PARAMETER_PROBLEM, "%s", msg);
-	#else
-		exit_error(PARAMETER_PROBLEM, msg);
-	#endif
+	xtables_error(PARAMETER_PROBLEM, "%s", msg);
 }
 
 /* takes a string of days e.g. "Monday, Tuesday, Friday", and turns into an array of 7 longs
