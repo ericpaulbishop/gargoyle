@@ -1574,21 +1574,21 @@ static bool bandwidth_mt6(const struct sk_buff *skb, struct xt_action_param *par
 					tsrc_ip.s6_addr[x] = (src_ip.s6_addr[x] & info->local_subnet.ip6.s6_addr[x]);
 					tdst_ip.s6_addr[x] = (dst_ip.s6_addr[x] & info->local_subnet.ip6.s6_addr[x]);
 				}
-				if(memcmp(&(tsrc_ip.s6_addr),&(info->local_subnet.ip6.s6_addr),sizeof(unsigned char)*128) == 0)
+				if(memcmp(tsrc_ip.s6_addr,info->local_subnet.ip6.s6_addr,sizeof(unsigned char)*16) == 0)
 				{
 					tsrc_ip = src_ip;
 				}
 				else
 				{
-					memset(&tsrc_ip,0,sizeof(unsigned char)*128);
+					memset(tsrc_ip.s6_addr,0,sizeof(unsigned char)*16);
 				}
-				if(memcmp(&(tdst_ip.s6_addr),&(info->local_subnet.ip6.s6_addr),sizeof(unsigned char)*128) == 0)
+				if(memcmp(tdst_ip.s6_addr,info->local_subnet.ip6.s6_addr,sizeof(unsigned char)*16) == 0)
 				{
 					tdst_ip = dst_ip;
 				}
 				else
 				{
-					memset(&tdst_ip,0,sizeof(unsigned char)*128);
+					memset(tdst_ip.s6_addr,0,sizeof(unsigned char)*16);
 				}
 				sprintf(bw_ips[0], STRIP6, NIP6(tsrc_ip.s6_addr));
 				sprintf(bw_ips[1], STRIP6, NIP6(tdst_ip.s6_addr));
@@ -1600,7 +1600,7 @@ static bool bandwidth_mt6(const struct sk_buff *skb, struct xt_action_param *par
 					tsrc_ip.s6_addr[x] = (src_ip.s6_addr[x] & info->local_subnet.ip6.s6_addr[x]);
 					tdst_ip.s6_addr[x] = (dst_ip.s6_addr[x] & info->local_subnet.ip6.s6_addr[x]);
 				}
-				if(memcmp(&(tsrc_ip.s6_addr),&(info->local_subnet.ip6.s6_addr),sizeof(unsigned char)*128) != 0)
+				if(memcmp(tsrc_ip.s6_addr,info->local_subnet.ip6.s6_addr,sizeof(unsigned char)*16) != 0)
 				{
 					sprintf(bw_ips[0], STRIP6, NIP6(src_ip.s6_addr));
 				}
@@ -1608,7 +1608,7 @@ static bool bandwidth_mt6(const struct sk_buff *skb, struct xt_action_param *par
 				{
 					sprintf(bw_ips[0], "%s", "0.0.0.0");
 				}
-				if(memcmp(&(tdst_ip.s6_addr),&(info->local_subnet.ip6.s6_addr),sizeof(unsigned char)*128) != 0)
+				if(memcmp(tdst_ip.s6_addr,info->local_subnet.ip6.s6_addr,sizeof(unsigned char)*16) != 0)
 				{
 					sprintf(bw_ips[1], STRIP6, NIP6(dst_ip.s6_addr));
 				}
@@ -2055,8 +2055,8 @@ static int xt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 	
 	/* allocate ip list if this is first query */
 	uint32_t testblk[4];
-	memset(&testblk, 0, sizeof(uint32_t)*4);
-	if(query.next_ip_index == 0 && memcmp(&testblk, &(query.ip), sizeof(uint32_t)*4) == 0)
+	memset(testblk, 0, sizeof(uint32_t)*4);
+	if(query.next_ip_index == 0 && memcmp(testblk, query.ip, sizeof(uint32_t)*4) == 0)
 	{
 		if(output_ip_list != NULL)
 		{
@@ -2148,7 +2148,7 @@ static int xt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 	*reset_is_constant_interval = iam->info->reset_is_constant_interval;
 
 	current_output_index = 30;
-	if(memcmp(&testblk, &(query.ip), sizeof(uint32_t)*4) != 0)
+	if(memcmp(testblk, query.ip, sizeof(uint32_t)*4) != 0)
 	{
 		*error = add_ip_block(query.family,
 					query.ip, 
@@ -2331,7 +2331,7 @@ static void set_single_ip_data(unsigned char history_included, info_and_maps* ia
 	#endif
 	
 	uint32_t testblk[4];
-	memset(&testblk, 0, sizeof(uint32_t)*4);
+	memset(testblk, 0, sizeof(uint32_t)*4);
 
 	if(history_included)
 	{
@@ -2414,7 +2414,7 @@ static void set_single_ip_data(unsigned char history_included, info_and_maps* ia
 				set_string_map_element(iam->ip_map, ipstr, (history->history_data + history->current_index) );
 				iam->info->previous_reset = next_start;
 				iam->info->next_reset = next_end;
-				if(memcmp(&testblk, &ip, sizeof(uint32_t)*4) == 0)
+				if(memcmp(testblk, ip, sizeof(uint32_t)*4) == 0)
 				{
 					iam->info->current_bandwidth = (history->history_data)[history->current_index];
 				}
@@ -2427,7 +2427,7 @@ static void set_single_ip_data(unsigned char history_included, info_and_maps* ia
 			bw = *( (uint64_t*)(buffer + *buffer_index));
 			initialize_map_entries_for_ip(iam, ipstr, bw, family); /* automatically frees existing values if they exist */
 			*buffer_index = *buffer_index + 8;
-			if(memcmp(&testblk, &ip, sizeof(uint32_t)*4) == 0)
+			if(memcmp(testblk, ip, sizeof(uint32_t)*4) == 0)
 			{
 				iam->info->current_bandwidth = bw;
 			}
@@ -2445,7 +2445,7 @@ static void set_single_ip_data(unsigned char history_included, info_and_maps* ia
 		initialize_map_entries_for_ip(iam, ipstr, bw, family); /* automatically frees existing values if they exist */
 		*buffer_index = *buffer_index + 28;
 
-		if(memcmp(&testblk, &ip, sizeof(uint32_t)*4) == 0)
+		if(memcmp(testblk, ip, sizeof(uint32_t)*4) == 0)
 		{
 			iam->info->current_bandwidth = bw;
 		}
@@ -3083,4 +3083,3 @@ static void __exit fini(void)
 
 module_init(init);
 module_exit(fini);
-

@@ -57,7 +57,7 @@ static void help(void)
 	printf("bandwidth options:\n");
 	printf("  --id [unique identifier for querying bandwidth]\n");
 	printf("  --type [combined|individual_src|individual_dst|individual_local|individual_remote]\n");
-	printf("  --subnet [a.b.c.d/mask] (0 < mask < 32)\n");
+	printf("  --subnet [a.b.c.d/mask] (0 < mask < 32) OR [a:b:c:d:e:f:g:h/mask] (0 < mask < 128)\n");
 	printf("  --greater_than [BYTES]\n");
 	printf("  --less_than [BYTES]\n");
 	printf("  --current_bandwidth [BYTES]\n");
@@ -628,9 +628,8 @@ int parse_sub(char* subnet_string, ipany* subnet, ipany* subnet_mask, int family
 			{
 				valid = 1;
 			}
+			free(tsub);
 		}
-		
-		free(tsub);
 
 		if(valid)
 		{
@@ -679,9 +678,8 @@ int parse_sub(char* subnet_string, ipany* subnet, ipany* subnet_mask, int family
 			{
 				valid = 1;
 			}
+			free(tsub);
 		}
-		
-		free(tsub);
 		
 		if(valid)
 		{
