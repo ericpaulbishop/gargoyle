@@ -2239,7 +2239,7 @@ function textListToSpanElement(textList, addCommas, controlDocument)
 
 function addAddressStringToTable(controlDocument, newAddrs, tableContainerId, tableId, macsValid, ipValidType, alertOnError, tableWidth)
 {
-	//ipValidType: 0=none, 1=ip only, 2=ip or ip subnet, 3>=ip, ip subnet or ip range
+	//ipValidType: 0=none, 1=ip only, 2=ip or ip subnet, 3=ip, ip subnet or ip range, 4=ip only, 5=ip or ipsubnet, 6>=ip, ip subnet or ip range
 	macsValid = macsValid == null ? true : macsValid;
 	ipValidType = ipValidType == null ? 3 : ipValidType;
 	var ipValidFunction;
@@ -2255,9 +2255,21 @@ function addAddressStringToTable(controlDocument, newAddrs, tableContainerId, ta
 	{
 		ipValidFunction = validateIpRange;
 	}
-	else
+	else if(ipValidType == 3)
 	{
 		ipValidFunction = validateMultipleIps;
+	}
+	else if(ipValidType == 4)
+	{
+		ipValidFunction = validateIP6;
+	}
+	else if(ipValidType == 5)
+	{
+		ipValidFunction = validateIp6Range;
+	}
+	else
+	{
+		ipValidFunction = validateMultipleIp6s;
 	}
 
 	var allCurrentMacs = [];

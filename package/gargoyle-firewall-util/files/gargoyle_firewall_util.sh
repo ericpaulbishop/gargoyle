@@ -2,6 +2,7 @@
 # This is free software licensed under the terms of the GNU GPL v2.0
 #
 . /lib/functions.sh
+. /lib/functions/network.sh
 include /lib/network
 
 ra_mask="0x0080"
@@ -402,6 +403,8 @@ initialize_quotas()
 
 	lan_mask=$(uci -p /tmp/state get network.lan.netmask)
 	lan_ip=$(uci -p /tmp/state get network.lan.ipaddr)
+	network_get_subnet6 lan_ipmask6 lan
+	[ -z "$lan_ipmask6" ] && lan_ipmask6="2001:db8::/32"
 	full_qos_enabled=$(ls /etc/rc.d/*qos_gargoyle 2>/dev/null)
 
 	if [ -n "$full_qos_enabled" ] ; then
@@ -419,10 +422,10 @@ initialize_quotas()
 	# have up and down speeds defined for when quota is exceeded
 	# and full qos is not enabled
 	if [ -z "$full_qos_enabled" ] ; then
-		restore_quotas    -w $wan_if -d $death_mark -m $death_mask -s "$lan_ip/$lan_mask" -c "0 0,4,8,12,16,20 * * * /usr/bin/backup_quotas >/dev/null 2>&1"
+		restore_quotas    -w $wan_if -d $death_mark -m $death_mask -s "$lan_ip/$lan_mask" -t $lan_ipmask6 -c "0 0,4,8,12,16,20 * * * /usr/bin/backup_quotas >/dev/null 2>&1"
 		initialize_quota_qos
 	else
-		restore_quotas -q -w $wan_if -d $death_mark -m $death_mask -s "$lan_ip/$lan_mask" -c "0 0,4,8,12,16,20 * * * /usr/bin/backup_quotas >/dev/null 2>&1"
+		restore_quotas -q -w $wan_if -d $death_mark -m $death_mask -s "$lan_ip/$lan_mask" -t $lan_ipmask6 -c "0 0,4,8,12,16,20 * * * /usr/bin/backup_quotas >/dev/null 2>&1"
 		cleanup_old_quota_qos
 	fi
 
