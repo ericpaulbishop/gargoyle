@@ -96,7 +96,9 @@ static void get_http_response(	void* connection_data,
 				http_response *reply, 
 				FILE* header_stream, 
 				FILE* body_stream, 
-				FILE* combined_stream);
+				FILE* combined_stream,
+				int follow_redirects,
+				char** redirect_url);
 static http_response* retrieve_http(	url_request *url, 
 					void* (*initialize_connection)(char*, int), 
 					int (*read_connection)(void*, char*, int),
@@ -106,7 +108,9 @@ static http_response* retrieve_http(	url_request *url,
 					FILE* body_stream,
 					FILE* combined_stream,
 					int alloc_response,
-					int* ret_val
+					int* ret_val,
+					int follow_redirects,
+					char** redirect_url
 					);
 
 
@@ -238,25 +242,51 @@ static void alarm_triggered(int sig);
 http_response* get_url(char* url_str, char* user_agent)
 {
 	url_request* url = parse_url(url_str, user_agent);
-	http_response *reply = get_url_request(url);
+	http_response *reply = get_url_request(&url);
 	free_url_request(url);
 	return reply;
 }
 
-http_response* get_url_request(url_request* url)
+http_response* get_url_request(url_request** url)
 {
 	http_response *reply = NULL;
 	int dummy_ret;
-	if(url->protocol == HTTP_PROTO)
+	// TODO: Make this configurable
+	int follow_redirects = 1;
+	int redirect_count = 0;
+	int redirect_max = 3;
+	char* redirect_url = NULL;
+	while(redirect_count < redirect_max)
 	{
-		reply = retrieve_http(url, initialize_connection_http, read_http, write_http, destroy_connection_http, NULL, NULL, NULL, 1, &dummy_ret);
-	}
-	#ifdef HAVE_SSL
-		if(url->protocol == HTTPS_PROTO)
+		if(redirect_url != NULL)
 		{
-			reply = retrieve_http(url, initialize_connection_https, read_https, write_https, destroy_connection_https, NULL, NULL, NULL, 1, &dummy_ret);
+			parse_redirect(url, redirect_url);
+			redirect_url = NULL;
 		}
-	#endif
+		if((*url)->protocol == HTTP_PROTO)
+		{
+			reply = retrieve_http(*url, initialize_connection_http, read_http, write_http, destroy_connection_http, NULL, NULL, NULL, 1, &dummy_ret, follow_redirects, &redirect_url);
+		}
+		#ifdef HAVE_SSL
+			if((*url)->protocol == HTTPS_PROTO)
+			{
+				reply = retrieve_http(*url, initialize_connection_https, read_https, write_https, destroy_connection_https, NULL, NULL, NULL, 1, &dummy_ret, follow_redirects, &redirect_url);
+			}
+		#endif
+		if(redirect_url != NULL)
+		{
+			//process redirect
+			redirect_count = redirect_count + 1;
+			if(redirect_count == redirect_max)
+			{
+				//printf("ERROR: Too many redirects\n"); //This might interfere with some regex processing in other processes. Best to not print it.
+			}
+		}
+		else
+		{
+			redirect_count = redirect_max;
+		}
+	}
 
 	return reply;
 }
@@ -266,24 +296,51 @@ int write_url_to_stream(char* url_str, char* user_agent, FILE* header_stream, FI
 {
 	int ret;
 	url_request* url = parse_url(url_str, user_agent);
-	ret = write_url_request_to_stream(url, header_stream, body_stream, combined_stream);
+	ret = write_url_request_to_stream(&url, header_stream, body_stream, combined_stream);
 	free_url_request(url);
 	return ret;
 }
 
-int write_url_request_to_stream(url_request* url, FILE* header_stream, FILE* body_stream, FILE* combined_stream)
+int write_url_request_to_stream(url_request** url, FILE* header_stream, FILE* body_stream, FILE* combined_stream)
 {
 	int ret = 1;
-	if(url->protocol == HTTP_PROTO)
+	// TODO: Make this configurable
+	int follow_redirects = 1;
+	int redirect_count = 0;
+	int redirect_max = 3;
+	char* redirect_url = NULL;
+	while(redirect_count < redirect_max)
 	{
-		retrieve_http(url, initialize_connection_http, read_http, write_http, destroy_connection_http, header_stream, body_stream, combined_stream, 0, &ret);
-	}
-	#ifdef HAVE_SSL
-		if(url->protocol == HTTPS_PROTO)
+		if(redirect_url != NULL)
 		{
-			retrieve_http(url, initialize_connection_https, read_https, write_https, destroy_connection_https, header_stream, body_stream, combined_stream, 0, &ret);
+			parse_redirect(url, redirect_url);
+			redirect_url = NULL;
 		}
-	#endif
+		if((*url)->protocol == HTTP_PROTO)
+		{
+			retrieve_http(*url, initialize_connection_http, read_http, write_http, destroy_connection_http, header_stream, body_stream, combined_stream, 0, &ret, follow_redirects, &redirect_url);
+		}
+		#ifdef HAVE_SSL
+			if((*url)->protocol == HTTPS_PROTO)
+			{
+				retrieve_http(*url, initialize_connection_https, read_https, write_https, destroy_connection_https, header_stream, body_stream, combined_stream, 0, &ret, follow_redirects, &redirect_url);
+			}
+		#endif
+		if(redirect_url != NULL)
+		{
+			//process redirect
+			redirect_count = redirect_count + 1;
+			if(redirect_count == redirect_max)
+			{
+				ret = 1;
+				//printf("ERROR: Too many redirects\n"); //This might interfere with some regex processing in other processes. Best to not print it.
+			}
+		}
+		else
+		{
+			redirect_count = redirect_max;
+		}
+	}
 
 	return ret;
 
@@ -574,7 +631,26 @@ static void alarm_triggered(int sig)
 	}
 }
 
-
+void parse_redirect(url_request** url, char* redirect_url)
+{
+	url_request* new_url = parse_url(redirect_url, (*url)->user_agent);
+	//transfer username and pass
+	if((*url)->user != NULL)
+	{
+		if(new_url->user != NULL) free(new_url->user);
+		new_url->user = (*url)->user;
+		(*url)->user = NULL;
+	}
+	if((*url)->password != NULL)
+	{
+		if(new_url->password != NULL) free(new_url->password);
+		new_url->password = (*url)->password;
+		(*url)->password = NULL;
+	}
+	free_url_request(*url);
+	
+	*url = new_url;
+}
 
 
 static http_response* retrieve_http(	url_request *url, 
@@ -586,14 +662,16 @@ static http_response* retrieve_http(	url_request *url,
 					FILE* body_stream,
 					FILE* combined_stream,
 					int alloc_response,
-					int* ret_val
+					int* ret_val,
+					int follow_redirects,
+					char** redirect_url
 					)
 {
 	http_response *reply = NULL;
 	*ret_val  = 1;
+
 	if(url->hostname != NULL && url->port >= 0 && url->path != NULL)
 	{
-		
 		void* connection_data = initialize_connection(url->hostname, url->port);
 		if(connection_data != NULL)
 		{
@@ -610,7 +688,14 @@ static http_response* retrieve_http(	url_request *url,
 					reply->header = NULL;
 				}
 				*ret_val = 0;
-				get_http_response(connection_data, read_connection, reply, header_stream, body_stream, combined_stream);
+				get_http_response(connection_data, read_connection, reply, header_stream, body_stream, combined_stream, follow_redirects, redirect_url);
+				if(*redirect_url != NULL)
+				{
+					//process redirect
+					free_http_response(reply);
+					reply = NULL;
+					*ret_val = 1;
+				}
 			}
 			free(request);
 			destroy_connection(connection_data);
@@ -682,7 +767,7 @@ static char* create_http_request(url_request* url)
 }
 
 
-static void get_http_response(void* connection_data, int (*read_connection)(void*, char*, int), http_response *reply, FILE* header_stream, FILE* body_stream, FILE* combined_stream)
+static void get_http_response(void* connection_data, int (*read_connection)(void*, char*, int), http_response *reply, FILE* header_stream, FILE* body_stream, FILE* combined_stream, int follow_redirects, char** redirect_url)
 {
 	unsigned long  read_buffer_size = __ewget_read_buffer_size ;
 	int bytes_read;
@@ -746,6 +831,43 @@ static void get_http_response(void* connection_data, int (*read_connection)(void
 			}
 			header_length = body_start != NULL ? (int)(body_start - read_buffer) : bytes_read;
 
+
+			/* check for redirects before continuing */
+			if(follow_redirects)
+			{
+				char* tmpheader = malloc((header_length+1)*sizeof(char));
+				if(tmpheader != NULL)
+				{
+					memcpy(tmpheader, read_buffer, header_length);
+					tmpheader[header_length] = '\0';
+	
+					char* statusline_start = strstr(tmpheader, "HTTP/1.");
+					if(statusline_start != NULL)
+					{
+						//Format should be: HTTP/1.x xxx Reason Phrase. We need to retrieve xxx which should always be at a standard offset...
+						int status_code = 0;
+						sscanf(statusline_start+9, "%3d", &status_code);
+						if(status_code == 301 || status_code == 302 || status_code == 307)
+						{
+							//There is also the Content-Location: field, which should always be after this, but we won't factor that in here.
+							char* location_start = strstr(tmpheader, "Location:");
+							if(location_start != NULL)
+							{
+								int location_end = char_index(location_start, '\r');
+								location_end = location_end - 10;
+								char* location = malloc((location_end+1)*sizeof(char));
+								memcpy(location, location_start+10, location_end);
+								location[location_end] = '\0';
+								*redirect_url = location;
+								free(tmpheader);
+								free(read_buffer);
+								return;
+							}
+						}
+					}
+					free(tmpheader);
+				}
+			}
 
 			/* write header data to streams and/or http response*/
 			if(header_stream != NULL)
