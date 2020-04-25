@@ -91,7 +91,7 @@ command_runner()
 	fi
 	
 	# check status
-	STATUS=$(grep '"success":true' $DATAFILE)
+	STATUS=$(grep '"success": \?true' $DATAFILE)
 	if [ -z "$STATUS" ]; then
 		logger -t cloudflare-ddns-helper "Cloudflare responded with an error"
 		logger -t cloudflare-ddns-helper $(cat $DATAFILE)
