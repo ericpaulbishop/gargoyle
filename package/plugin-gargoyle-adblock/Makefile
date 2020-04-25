@@ -52,7 +52,7 @@ endef
 define Package/plugin-gargoyle-adblock/prerm
 #!/bin/sh
 
-sh /usr/lib/runadblock.sh -disable
+sh /usr/lib/adblock/runadblock.sh -disable
 endef
 
 define Package/plugin-gargoyle-adblock/postrm
