@@ -2,7 +2,7 @@
  *  				Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
  *
  *
- *  Copyright Â© 2009 by Eric Bishop <eric@gargoyle-router.com>
+ *  Copyright © 2009 by Eric Bishop <eric@gargoyle-router.com>
  *
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -24,6 +24,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdarg.h>
+#include <arpa/inet.h>
 
 #include <math.h>
 
@@ -37,11 +38,11 @@
 #define MATCH_IP_RANGE_INDEX 1
 #define MATCH_MAC_INDEX 2
 
-string_map* get_rule_definition(char* config, char* section);
+string_map* get_rule_definition(char* config, char* section, char* family);
 char* get_option_value_string(struct uci_option* uopt);
-int parse_option(char* option_name, char* option_value, string_map* definition);
+int parse_option(char* option_name, char* option_value, string_map* definition, char* family);
 
-char*** parse_ips_and_macs(char* addr_str);
+char*** parse_ips_and_macs(char* addr_str, char* family);
 char** parse_ports(char* port_str);
 char** parse_marks(char* list_str, unsigned long max_mask);
 list* parse_quoted_list(char* list_str, char quote_char, char escape_char, char add_remainder_if_uneven_quotes);
@@ -60,10 +61,11 @@ int main(int argc, char **argv)
 	char* chain		= NULL;
 	char* target		= NULL;
 	char* target_options	= NULL;
+	char* family		= NULL;
 	int is_ingress		= 0;
 	int run_commands	= 0;
 	int usage_printed	= 0;
-	while((c = getopt(argc, argv, "P:p:S:s:T:t:C:c:G:g:O:o:IiRrUu")) != -1) //section, page, css includes, javascript includes, title, output interface variables
+	while((c = getopt(argc, argv, "P:p:S:s:T:t:C:c:G:g:O:o:F:f:IiRrUu")) != -1) //section, page, css includes, javascript includes, title, output interface variables
 	{
 		switch(c)
 		{
@@ -91,6 +93,9 @@ int main(int argc, char **argv)
 			case 'o':
 				target_options = strdup(optarg);
 				break;
+			case 'F':
+			case 'f':
+				family = strdup(optarg);
 			case 'I':
 			case 'i':
 				is_ingress = 1;
@@ -102,29 +107,55 @@ int main(int argc, char **argv)
 			case 'U':
 			case 'u':
 			default:
-				fprintf(stderr, "USAGE: %s -p [PACKAGE] -s [SECTION] -t [TABLE] -c [CHAIN] -g [TARGET] [OPTIONS]\n       -o [TARGET_OPTIONS]\n       -i indicates that this rule applies to ingress packets\n       -r implies computed commands should be executed instead of just printed\n       -u print usage and exit\n\n", argv[0]);
+				fprintf(stderr, "USAGE: %s -p [PACKAGE] -s [SECTION] -t [TABLE] -c [CHAIN] -g [TARGET] [OPTIONS]\n       -o [TARGET_OPTIONS]\n       -f [ipv4|ipv6|any]\n       -i indicates that this rule applies to ingress packets\n       -r implies computed commands should be executed instead of just printed\n       -u print usage and exit\n\n", argv[0]);
 				usage_printed = 1;
 				break;
 
 		}
 	}
-	if(package != NULL && section != NULL && table != NULL && chain != NULL && target != NULL)
+	if(family == NULL)
 	{
-		string_map* def = get_rule_definition(package, section);
+		family = strdup("any");
+	}
+	else if(safe_strcmp(family, "ipv4") != 0 && safe_strcmp(family, "ipv6") != 0 && safe_strcmp(family, "any") != 0)
+	{
+		free(family);
+		family = NULL;
+		fprintf(stderr, "ERROR: Invalid IP family\n");
+	}
+	if(package != NULL && section != NULL && table != NULL && chain != NULL && target != NULL && family != NULL)
+	{
+		string_map* def = get_rule_definition(package, section, family);
 		if(def !=  NULL)
 		{
 			char** rules = compute_rules(def, table, chain, 0, target, target_options);
 		
-			int rindex = 0;
-			for(rindex=0; rules[rindex] != NULL; rindex++)
-			{	
-				if(run_commands == 0)
-				{
-					printf("%s\n", rules[rindex]);
-				}
-				else
-				{
-					system(rules[rindex]);	
+			char* cmdarray[2];
+			int cmdcnt = 0;
+			if(safe_strcmp(family,"any") == 0 || safe_strcmp(family,"ipv4") == 0)
+			{
+				cmdarray[cmdcnt] = strdup("iptables");
+				cmdcnt += 1;
+			}
+			if(safe_strcmp(family,"any") == 0 || safe_strcmp(family,"ipv6") == 0)
+			{
+				cmdarray[cmdcnt] = strdup("ip6tables");
+				cmdcnt += 1;
+			}
+			int findex = 0;
+			for(findex = 0; findex < cmdcnt; findex++)
+			{
+				int rindex = 0;
+				for(rindex=0; rules[rindex] != NULL; rindex++)
+				{	
+					if(run_commands == 0)
+					{
+						printf("%s\n", dynamic_strcat(2, cmdarray[findex], rules[rindex]));
+					}
+					else
+					{
+						system(dynamic_strcat(2, cmdarray[findex], rules[rindex]));	
+					}
 				}
 			}
 		}
@@ -136,7 +167,7 @@ int main(int argc, char **argv)
 	}
 	else if(!usage_printed)
 	{
-		fprintf(stderr, "USAGE: %s -p [PACKAGE] -s [SECTION] -t [TABLE] -c [CHAIN] -g [TARGET] [OPTIONS]\n       -o [TARGET_OPTIONS]\n       -i indicates that this rule applies to ingress packets\n       -r implies computed commands should be executed instead of just printed\n       -u print usage and exit\n\n", argv[0]);
+		fprintf(stderr, "USAGE: %s -p [PACKAGE] -s [SECTION] -t [TABLE] -c [CHAIN] -g [TARGET] [OPTIONS]\n       -o [TARGET_OPTIONS]\n       -f [ipv4|ipv6|any]\n       -i indicates that this rule applies to ingress packets\n       -r implies computed commands should be executed instead of just printed\n       -u print usage and exit\n\n", argv[0]);
 
 	}
 
@@ -158,7 +189,7 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 {
 	list* multi_rules = initialize_list();
 	char* single_check = strdup("");
-	char* rule_prefix = dynamic_strcat(5, "iptables -t ", table, " -A ", chain, " ");
+	char* rule_prefix = dynamic_strcat(5, " -t ", table, " -A ", chain, " ");
 
 	target = strdup(target);
 	to_uppercase(target);
@@ -619,7 +650,7 @@ int compute_multi_rules(char** def, list* multi_rules, char** single_check, int 
 
 
 
-string_map* get_rule_definition(char* package, char* section)
+string_map* get_rule_definition(char* package, char* section, char* family)
 {
 	string_map* definition = NULL;
 	struct uci_context *ctx;
@@ -643,7 +674,7 @@ string_map* get_rule_definition(char* package, char* section)
 					char* option_name = strdup(e->name);
 					to_lowercase(option_name);
 					char* option_value = get_option_value_string(uci_to_option(e));
-					parse_option(option_name, option_value, definition);
+					parse_option(option_name, option_value, definition, family);
 					free(option_name);
 					free(option_value);
 				}
@@ -655,7 +686,7 @@ string_map* get_rule_definition(char* package, char* section)
 	return definition;
 }
 
-int parse_option(char* option_name, char* option_value, string_map* definition)
+int parse_option(char* option_name, char* option_value, string_map* definition, char* family)
 {
 	int valid_option = 0;
 	if(	safe_strcmp(option_name, "proto") == 0 ||
@@ -695,7 +726,7 @@ int parse_option(char* option_name, char* option_value, string_map* definition)
 			safe_strcmp(option_name, "not_local_addr") == 0 
 		       		)
 	{
-		char*** parsed_addr = parse_ips_and_macs(option_value);
+		char*** parsed_addr = parse_ips_and_macs(option_value, family);
 		if(parsed_addr != NULL)
 		{
 			valid_option = 1;
@@ -799,7 +830,7 @@ char* get_option_value_string(struct uci_option* uopt)
 
 
 
-char*** parse_ips_and_macs(char* addr_str)
+char*** parse_ips_and_macs(char* addr_str, char* family)
 {
 	unsigned long num_pieces;
 	char** addr_parts = split_on_separators(addr_str, ",", 1, -1, 0, &num_pieces);
@@ -811,44 +842,47 @@ char*** parse_ips_and_macs(char* addr_str)
 	for(ip_part_index=0; addr_parts[ip_part_index] != NULL; ip_part_index++)
 	{
 		char* next_str = addr_parts[ip_part_index];
+		//ipv4, ipv6 or any can be MAC address. Test it first
 		if(strchr(next_str, ':'))
 		{
 			trim_flanking_whitespace(next_str);
-			if(strlen(next_str) == 17)
+			int macaddr[6];
+			if(sscanf(next_str, "%2x:%2x:%2x:%2x:%2x:%2x", macaddr, macaddr+1, macaddr+2, macaddr+3, macaddr+4, macaddr+5) == 6)
 			{
 				push_list(mac_list, trim_flanking_whitespace(next_str));
 			}
 		}
-		else if(strchr(next_str, '-') != NULL)
+		
+		//if family is any, we don't want IP addresses
+		if(safe_strcmp(family, "any") != 0)
 		{
-			char** range_parts = split_on_separators(next_str, "-", 1, 2, 1, &num_pieces);
-			char* start = trim_flanking_whitespace(range_parts[0]);
-			char* end = trim_flanking_whitespace(range_parts[1]);
-			int start_ip[4];
-			int end_ip[4];
-			int start_valid = sscanf(start, "%d.%d.%d.%d", start_ip, start_ip+1, start_ip+2, start_ip+3);
-			int end_valid = sscanf(end, "%d.%d.%d.%d", end_ip, end_ip+1, end_ip+2, end_ip+3);
-			
-			if(start_valid == 4 && end_valid == 4)
+			if(strchr(next_str, '-') != NULL)
 			{
-				//get_ip_range_strs(start_ip, end_ip, "", 4, ip_list);
-				push_list(ip_range_list, trim_flanking_whitespace(next_str));
-			}
+				char** range_parts = split_on_separators(next_str, "-", 1, 2, 1, &num_pieces);
+				char* start = trim_flanking_whitespace(range_parts[0]);
+				char* end = trim_flanking_whitespace(range_parts[1]);
+				
+				char start_ip[16];
+				char end_ip[16];
+				if((inet_pton(AF_INET6, start, start_ip) && inet_pton(AF_INET6, end, end_ip)) || (inet_pton(AF_INET, start, start_ip) && inet_pton(AF_INET, end, end_ip)))
+				{
+					push_list(ip_range_list, trim_flanking_whitespace(next_str));
+				}
 
-			free(start);
-			free(end);	
-			free(range_parts);
-			//free(next_str);
-		}
-		else
-		{
-			int parsed_ip[4];
-			int valid = sscanf(next_str, "%d.%d.%d.%d", parsed_ip, parsed_ip+1, parsed_ip+2, parsed_ip+3);
-			if(valid == 4)
+				free(start);
+				free(end);	
+				free(range_parts);
+			}
+			else
 			{
-				push_list(ip_list, trim_flanking_whitespace(next_str));
+				char parsed_ip[16];
+				if(inet_pton(AF_INET6, next_str, parsed_ip) || inet_pton(AF_INET, next_str, parsed_ip))
+				{
+					push_list(ip_list, trim_flanking_whitespace(next_str));
+				}
 			}
 		}
+		
 	}
 	free(addr_parts);
 	

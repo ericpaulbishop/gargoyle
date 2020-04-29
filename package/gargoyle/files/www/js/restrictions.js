@@ -172,6 +172,8 @@ function addNewRule(ruleType, rulePrefix)
 
 function setVisibility(rulePrefix)
 {
+	updateIPControls(rulePrefix);
+
 	setInvisibleIfAnyChecked([rulePrefix + "all_access"], rulePrefix + "resources", "block");
 	setInvisibleIfAnyChecked([rulePrefix + "all_day"], rulePrefix + "hours_active_container", "block");
 	setInvisibleIfAnyChecked([rulePrefix + "every_day"], rulePrefix + "days_active", "block");
@@ -297,35 +299,6 @@ function editRule(editRuleType,editRulePrefix,editRow)
 
 }
 
-function addAddressesToTable(textId, tableContainerId, tableId, macsValid)
-{
-	var newAddrs = document.getElementById(textId).value;
-	var valid = macsValid ?  validateMultipleIpsOrMacs(newAddrs) : validateMultipleIps(newAddrs);
-	if(valid == 0)
-	{
-		var tableContainer = document.getElementById(tableContainerId);
-		var table = tableContainer.childNodes.length > 0 ? tableContainer.firstChild : createTable([""], [], tableId, true, false);
-		newAddrs = newAddrs.replace(/^[\t ]*/, "");
-		newAddrs = newAddrs.replace(/[\t ]*$/, "");
-		var addrs = newAddrs.split(/[\t ]*,[\t ]*/);
-
-		while(addrs.length > 0)
-		{
-			addTableRow(table, [ addrs.shift() ], true, false);
-		}
-
-		if(tableContainer.childNodes.length == 0)
-		{
-			tableContainer.appendChild(table);
-		}
-		document.getElementById(textId).value = "";
-	}
-	else
-	{
-		alert(restStr.IAErr+"\n");
-	}
-}
-
 function addUrlToTable(textId, selectId, tableContainerId, tableId)
 {
 	var newUrl = document.getElementById(textId).value;
@@ -370,61 +343,6 @@ function validateRule(rulePrefix)
 	}
 
 	return proofreadFields(inputIds, labelIds, functions, validReturnCodes, visibilityIds, document );
-}
-function validateMultipleIps(ips)
-{
-	ips = ips.replace(/^[\t ]+/g, "");
-	ips = ips.replace(/[\t ]+$/g, "");
-	var splitIps = ips.split(/[\t ]*,[\t ]*/);
-	var valid = splitIps.length > 0 ? 0 : 1;
-	while(valid == 0 && splitIps.length > 0)
-	{
-		var nextIp = splitIps.pop();
-		if(nextIp.match(/-/))
-		{
-			var nextSplit = nextIp.split(/[\t ]*-[\t ]*/);
-			valid = nextSplit.length==2 && validateIP(nextSplit[0]) == 0 && validateIP(nextSplit[1]) == 0 ? 0 : 1;
-		}
-		else
-		{
-			valid = validateIpRange(nextIp);
-		}
-	}
-	return valid;
-}
-function proofreadMultipleIps(input)
-{
-	proofreadText(input, validateMultipleIps, 0);
-}
-function proofreadMultipleIpsOrMacs(input)
-{
-	proofreadText(input, validateMultipleIpsOrMacs, 0);
-}
-function validateMultipleIpsOrMacs(addresses)
-{
-	var addr = addresses.replace(/^[\t ]+/g, "");
-	addr = addr.replace(/[\t ]+$/g, "");
-	var splitAddr = addr.split(/[\t ]*,[\t ]*/);
-	var valid = splitAddr.length > 0 ? 0 : 1;
-	while(valid == 0 && splitAddr.length > 0)
-	{
-		var nextAddr = splitAddr.pop();
-		if(nextAddr.match(/-/))
-		{
-			var nextSplit = nextAddr.split(/[\t ]*-[\t ]*/);
-			valid = nextSplit.length==2 && validateIP(nextSplit[0]) == 0 && validateIP(nextSplit[1]) == 0 ? 0 : 1;
-		}
-		else if(nextAddr.match(/:/))
-		{
-			valid = validateMac(nextAddr);
-		}
-		else
-		{
-			valid = validateIpRange(nextAddr);
-		}
-	}
-	return valid;
-
 }
 
 function validateMultiplePorts(portStr)
@@ -505,8 +423,20 @@ function setDocumentFromUci(sourceUci, sectionId, ruleType, rulePrefix)
 	description = description == "" ? sectionId : description;
 	document.getElementById(rulePrefix + "name").value = description;
 
-	setIpTableAndSelectFromUci(sourceUci, pkg, sectionId, "local_addr", rulePrefix + "applies_to_table_container", rulePrefix + "applies_to_table", rulePrefix + "applies_to", rulePrefix + "applies_to_addr");
+	var ipfam = sourceUci.get(pkg, sectionId, "family");
+	ipfam = ipfam == "" ? "any" : ipfam;
+	setSelectedValue(rulePrefix + "ip_family", ipfam, document);
 
+	var tabcontainer = "applies_to_table_container";
+	var tab = "applies_to_table";
+	var appaddr = "applies_to_addr";
+	if(ipfam == "ipv6")
+	{
+		tabcontainer = "applies_to6_table_container";
+		tab = "applies_to6_table";
+		appaddr = "applies_to6_addr";
+	}
+	setIpTableAndSelectFromUci(sourceUci, pkg, sectionId, "local_addr", rulePrefix + tabcontainer, rulePrefix + tab, rulePrefix + "applies_to", rulePrefix + appaddr);
 
 	var daysAndHours = sourceUci.get(pkg, sectionId, "active_weekly_ranges");
 	var hours = sourceUci.get(pkg, sectionId, "active_hours");
@@ -544,8 +474,16 @@ function setDocumentFromUci(sourceUci, sectionId, ruleType, rulePrefix)
 	}
 	document.getElementById(rulePrefix + "every_day").checked = everyDay;
 
-
-	setIpTableAndSelectFromUci(sourceUci, pkg, sectionId, "remote_addr", rulePrefix + "remote_ip_table_container", rulePrefix + "remote_ip_table", rulePrefix + "remote_ip_type", rulePrefix + "remote_ip");
+	tabcontainer = "remote_ip_table_container";
+	tab = "remote_ip_table";
+	appaddr = "remote_ip";
+	if(ipfam == "ipv6")
+	{
+		tabcontainer = "remote_ip6_table_container";
+		tab = "remote_ip6_table";
+		appaddr = "remote_ip6";
+	}
+	setIpTableAndSelectFromUci(sourceUci, pkg, sectionId, "remote_addr", rulePrefix + tabcontainer, rulePrefix + tab, rulePrefix + "remote_ip_type", rulePrefix + appaddr);
 	setTextAndSelectFromUci(sourceUci,  pkg, sectionId, "remote_port", rulePrefix + "remote_port", rulePrefix + "remote_port_type");
 	setTextAndSelectFromUci(sourceUci, pkg, sectionId, "local_port", rulePrefix + "local_port", rulePrefix + "local_port_type");
 
@@ -692,7 +630,15 @@ function setUciFromDocument(sectionId, ruleType, rulePrefix)
 	uci.set(pkg, sectionId, "", ruleType);
 	uci.set(pkg, sectionId, "description", document.getElementById(rulePrefix + "name").value);
 
-	setFromIpTable(pkg, sectionId, "local_addr", rulePrefix + "applies_to_table_container", rulePrefix + "applies_to");
+	ipfam = getSelectedValue(rulePrefix + "ip_family", document);
+	uci.set(pkg, sectionId, "family", ipfam);
+
+	var tabcontainer = "applies_to_table_container";
+	if(ipfam == "ipv6")
+	{
+		tabcontainer = "applies_to6_table_container";
+	}
+	setFromIpTable(pkg, sectionId, "local_addr", rulePrefix + tabcontainer, rulePrefix + "applies_to");
 
 	var daysActive = document.getElementById(rulePrefix + "days_active");
 	if(daysActive.style.display != "none")
@@ -717,7 +663,13 @@ function setUciFromDocument(sectionId, ruleType, rulePrefix)
 
 	if(!document.getElementById(rulePrefix + "all_access").checked)
 	{
-		setFromIpTable(pkg, sectionId, "remote_addr", rulePrefix + "remote_ip_table_container", rulePrefix + "remote_ip_type");
+		tabcontainer = "remote_ip_table_container";
+		if(ipfam == "ipv6")
+		{
+			tabcontainer = "remote_ip6_table_container";
+		}
+
+		setFromIpTable(pkg, sectionId, "remote_addr", rulePrefix + tabcontainer, rulePrefix + "remote_ip_type");
 		setIfVisible(pkg, sectionId, "remote_port", rulePrefix + "remote_port", rulePrefix + "remote_port", rulePrefix + "remote_port_type");
 		setIfVisible(pkg, sectionId, "local_port",  rulePrefix + "local_port",  rulePrefix + "local_port",  rulePrefix + "local_port_type");
 
@@ -812,6 +764,64 @@ function setFromIpTable(pkg, sectionId, optionId, containerId, prefixSelectId)
 			uci.set(pkg, sectionId, prefix + optionId, ipStr);
 		}
 	}
+}
+
+function updateIPControls(rulePrefix)
+{
+	var selectedVal = getSelectedValue(rulePrefix + "ip_family", document);
+	if(selectedVal == "any")
+	{
+		//Disable IP controls. Leave the IP4 container to allow them to enter MAC Addresses
+		setSelectedValue(rulePrefix + "remote_ip_type", "all", document);
+		document.getElementById(rulePrefix + "remote_ip_type").disabled = true;
+
+		document.getElementById(rulePrefix + "applies_to_6_container").style.display = "none";
+
+		//Filter out IPs from the IP4 table. We should only have MACs if in "any" mode
+		var tabContainer = document.getElementById(rulePrefix + "applies_to_table_container");
+		if(tabContainer.firstChild != null)
+		{
+			var tabData = getTableDataArray(tabContainer.firstChild, true, false);
+			tabContainer.removeChild(tabContainer.firstChild);
+			for(var x = 0; x < tabData.length; x++)
+			{
+				if(getIPFamily(tabData[x][0]) == null)
+				{
+					//Hacky use of the DOM to do this...
+					document.getElementById(rulePrefix + "applies_to_addr").value = tabData[x];
+					addAddressesToTable(document, rulePrefix + "applies_to_addr", rulePrefix + "applies_to_table_container", rulePrefix + "applies_to_table", true, 0, false);
+				}
+			}
+		}
+	}
+	else
+	{
+		document.getElementById(rulePrefix + "remote_ip_type").disabled = false;
+		document.getElementById(rulePrefix + "applies_to_4_container").style.display = selectedVal == "ipv4" ? "block" : "none";
+		document.getElementById(rulePrefix + "applies_to_6_container").style.display = selectedVal == "ipv4" ? "none" : "block";
+		document.getElementById(rulePrefix + "remote_ip_4_container").style.display = selectedVal == "ipv4" ? "block" : "none";
+		document.getElementById(rulePrefix + "remote_ip_6_container").style.display = selectedVal == "ipv4" ? "none" : "block";
+	}
+}
+
+function restriction_proofreadMultipleIpsOrMacs(rulePrefix, callingEl)
+{
+	var ipfam = getSelectedValue(rulePrefix + "ip_family");
+	if(ipfam == "any")
+	{
+		proofreadMac(callingEl);
+	}
+	else
+	{
+		proofreadMultipleIpsOrMacs(callingEl);
+	}
+}
+
+function restriction_addAddressesToTable(rulePrefix, controlDocument, textId, tableContainerId, tableId, macsValid, ipValidType, alertOnError)
+{
+	ipValidType = getSelectedValue(rulePrefix + "ip_family") == "any" ? 0 : ipValidType;
+
+	addAddressesToTable(controlDocument, textId, tableContainerId, tableId, macsValid, ipValidType, alertOnError);
 }
 
 function weekly_i18n(weekly_schd, source) { //this is part of i18n; TODO: best to have an uci get language to see if absent to just return daystrings
