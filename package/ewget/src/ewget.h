@@ -71,10 +71,11 @@ typedef struct
 
 
 url_request* parse_url(char* url, char* user_agent);
+void parse_redirect(url_request** url, char* redirect_url);
 void free_url_request(url_request*);
 
 http_response* get_url(char* url_str, char* user_agent);
-http_response* get_url_request(url_request* url);
+http_response* get_url_request(url_request** url);
 void free_http_response(http_response* page);
 
 
@@ -90,7 +91,7 @@ void set_ewget_timeout_seconds(unsigned long seconds);
  * return value is 0 on success, 1 on error
  */
 int write_url_to_stream(char* url_str, char* user_agent, FILE* header_stream, FILE* body_stream, FILE* combined_stream);
-int write_url_request_to_stream(url_request* url, FILE* header_stream, FILE* body_stream, FILE* combined_stream);
+int write_url_request_to_stream(url_request** url, FILE* header_stream, FILE* body_stream, FILE* combined_stream);
 
 
 

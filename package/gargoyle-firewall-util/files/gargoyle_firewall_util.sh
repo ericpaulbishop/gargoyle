@@ -308,6 +308,8 @@ insert_restriction_rules()
 
 	egress_exists=$(iptables -t filter -L egress_restrictions 2>/dev/null)
 	ingress_exists=$(iptables -t filter -L ingress_restrictions 2>/dev/null)
+	egress_exists=${egress_exists}$(ip6tables -t filter -L egress_restrictions 2>/dev/null)
+	ingress_exists=${ingress_exists}$(ip6tables -t filter -L ingress_restrictions 2>/dev/null)
 
 	if [ -n "$egress_exists" ] ; then
 		delete_chain_from_table filter egress_whitelist
@@ -318,16 +320,16 @@ insert_restriction_rules()
 		delete_chain_from_table filter ingress_restrictions
 	fi
 
-	iptables -t filter -N egress_restrictions
-	iptables -t filter -N ingress_restrictions
-	iptables -t filter -N egress_whitelist
-	iptables -t filter -N ingress_whitelist
+	apply_xtables_rule "-t filter -N egress_restrictions" "any"
+	apply_xtables_rule "-t filter -N ingress_restrictions" "any"
+	apply_xtables_rule "-t filter -N egress_whitelist" "any"
+	apply_xtables_rule "-t filter -N ingress_whitelist" "any"
 
-	iptables -t filter -I FORWARD -o $wan_if -j egress_restrictions
-	iptables -t filter -I FORWARD -i $wan_if -j ingress_restrictions
+	apply_xtables_rule "-t filter -I FORWARD -o $wan_if -j egress_restrictions" "any"
+	apply_xtables_rule "-t filter -I FORWARD -i $wan_if -j ingress_restrictions" "any"
 
-	iptables -t filter -I egress_restrictions  -j egress_whitelist
-	iptables -t filter -I ingress_restrictions -j ingress_whitelist
+	apply_xtables_rule "-t filter -I egress_restrictions  -j egress_whitelist" "any"
+	apply_xtables_rule "-t filter -I ingress_restrictions -j ingress_whitelist" "any"
 
 	package_name="firewall"
 	parse_rule_config()
@@ -378,8 +380,11 @@ insert_restriction_rules()
 				target="ACCEPT"
 			fi
 
-			make_iptables_rules -p "$package_name" -s "$section" -t "$table" -c "$chain" -g "$target" $ingress
-			make_iptables_rules -p "$package_name" -s "$section" -t "$table" -c "$chain" -g "$target" $ingress -r
+			config_get "family" "$section" "family"
+			[ -z "$family" ] && family="ipv4"
+
+			make_iptables_rules -p "$package_name" -s "$section" -t "$table" -c "$chain" -g "$target" -f "$family" $ingress
+			make_iptables_rules -p "$package_name" -s "$section" -t "$table" -c "$chain" -g "$target" -f "$family" $ingress -r
 
 			uci del "$package_name"."$section".connmark 2>/dev/null
 			uci del "$package_name"."$section".not_connmark	 2>/dev/null

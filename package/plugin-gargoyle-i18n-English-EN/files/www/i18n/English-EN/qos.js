@@ -70,7 +70,6 @@ qosStr.ACC_L_pg="The RTT of the last ping.";
 qosStr.ACC_L_Flt="The filtered RTT and the recent maximum RTT.";
 qosStr.ACC_L_plim="The RTT at which the controller will act to maintain fairness. [Active/Min RTT]";
 qosStr.ACC_L_AC="Number of download classes with load over 4kbps.";
-qosStr.IPFam="IP Family";
 
 //qos_edit_class.sh
 qosStr.QESrvClass="Edit QoS Service Class";

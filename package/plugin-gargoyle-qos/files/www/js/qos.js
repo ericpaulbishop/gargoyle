@@ -456,7 +456,7 @@ function resetData()
 
 
 		optionList = ["family", "source", "srcport", "destination", "dstport", "max_pkt_size", "min_pkt_size", "proto", "connbytes_kb"];
-		displayOptionList = [qosStr.IPFam + ": $", qosStr.Src+": $", qosStr.SrcP+": $", qosStr.Dst+": $", qosStr.DstP+": $", qosStr.MaxPktLen+": $ "+UI.byt, qosStr.MinPktLen+": $ "+UI.byt, qosStr.TrProto+": $", qosStr.Connb+": $ "+UI.KBy];
+		displayOptionList = [UI.IPFam + ": $", qosStr.Src+": $", qosStr.SrcP+": $", qosStr.Dst+": $", qosStr.DstP+": $", qosStr.MaxPktLen+": $ "+UI.byt, qosStr.MinPktLen+": $ "+UI.byt, qosStr.TrProto+": $", qosStr.Connb+": $ "+UI.KBy];
 
 		ruleText = "";
 		for (optionIndex = 0; optionIndex < optionList.length; optionIndex++)
@@ -906,7 +906,7 @@ function editRuleTableRow(editRuleWindowRow)
 	else
 	{
 		addRuleMatchControls = ["ip_family", "source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "connbytes_kb", "app_protocol"];
-		displayList = [qosStr.IPFam+": $", qosStr.Src+": $", qosStr.SrcP+": $", qosStr.Dst+": $", qosStr.DstP+": $",  qosStr.MaxPktLen+": $ "+UI.byt, qosStr.MinPktLen+": $ "+UI.byt, qosStr.TrProto+": $", qosStr.Connb+": $ "+UI.KBy, qosStr.APro+": $"];
+		displayList = [UI.IPFam+": $", qosStr.Src+": $", qosStr.SrcP+": $", qosStr.Dst+": $", qosStr.DstP+": $",  qosStr.MaxPktLen+": $ "+UI.byt, qosStr.MinPktLen+": $ "+UI.byt, qosStr.TrProto+": $", qosStr.Connb+": $ "+UI.KBy, qosStr.APro+": $"];
 		ruleText = ""
 		for (controlIndex = 0; controlIndex <addRuleMatchControls.length; controlIndex++)
 		{
@@ -1061,7 +1061,7 @@ function parseRuleMatchCriteria(matchText)
 	splitText = matchText.split(/[\t ]*,[\t ]*/);
 	criteria = [];
 
-	possibleCriteria = [qosStr.IPFam+": (.*)", qosStr.Src+": (.*)", qosStr.SrcP+": (.*)", qosStr.Dst+": (.*)", qosStr.DstP+": (.*)", qosStr.MaxPktLen+": (.*) "+UI.byt, qosStr.MinPktLen+": (.*) "+UI.byt,  qosStr.TrProto+": (.*)", qosStr.Connb+": (.*) "+UI.KBy, qosStr.APro+": (.*)"];
+	possibleCriteria = [UI.IPFam+": (.*)", qosStr.Src+": (.*)", qosStr.SrcP+": (.*)", qosStr.Dst+": (.*)", qosStr.DstP+": (.*)", qosStr.MaxPktLen+": (.*) "+UI.byt, qosStr.MinPktLen+": (.*) "+UI.byt,  qosStr.TrProto+": (.*)", qosStr.Connb+": (.*) "+UI.KBy, qosStr.APro+": (.*)"];
 
 	for(possibleCriteriaIndex=0; possibleCriteriaIndex < possibleCriteria.length; possibleCriteriaIndex++)
 	{

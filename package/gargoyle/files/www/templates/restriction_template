@@ -4,6 +4,17 @@
 </div>
 
 <div class="row form-group">
+	<label class="col-xs-5" id="rule_ip_family_label" for="rule_ip_family" ><%~ IPFam %>:</label>
+	<span class="col-xs-7">
+		<select id="rule_ip_family" class="form-control" aria-labelledby="rule_ip_family_label" onchange="setVisibility('rule_')">
+			<option value="any"><%~ both %></option>
+			<option value="ipv4">IPv4</option>
+			<option value="ipv6">IPv6</option>
+		</select>
+	</span>
+</div>
+
+<div class="row form-group">
 	<label class="col-xs-5" for='rule_applies_to' id='rule_applies_to_label'><%~ RAppl %>:</label>
 	<span class="col-xs-7">
 		<select class='form-control' id='rule_applies_to' onchange='setVisibility("rule_")'>
@@ -15,13 +26,25 @@
 </div>
 
 <div id="rule_applies_to_container" class="row form-group">
-	<div class="col-xs-offset-5 col-xs-7" id="rule_applies_to_table_container"></div>
-	<div class="col-xs-offset-5 col-xs-7">
-		<input type='text' id='rule_applies_to_addr' size='30' oninput='proofreadMultipleIpsOrMacs(this)' class='form-control' />
-		<button type="button" class="btn btn-default btn-add" id="rule_add_applies_to_addr" onclick='addAddressesToTable("rule_applies_to_addr","rule_applies_to_table_container","rule_applies_to_table",true)'><%~ Add %></button>
+	<div id="rule_applies_to_4_container">
+		<div class="col-xs-offset-5 col-xs-7" id="rule_applies_to_table_container"></div>
+		<div class="col-xs-offset-5 col-xs-7">
+			<input type='text' id='rule_applies_to_addr' size='30' oninput='restriction_proofreadMultipleIpsOrMacs("rule_", this)' class='form-control' />
+			<button type="button" class="btn btn-default btn-add" id="rule_add_applies_to_addr" onclick='restriction_addAddressesToTable("rule_",document, "rule_applies_to_addr","rule_applies_to_table_container","rule_applies_to_table",true,3,true)'><%~ Add %></button>
+		</div>
+		<div class="col-xs-offset-5 col-xs-7">
+			<em><%~ HstAddr %></em>
+		</div>
 	</div>
-	<div class="col-xs-offset-5 col-xs-7">
-		<em><%~ HstAddr %></em>
+	<div id="rule_applies_to_6_container">
+		<div class="col-xs-offset-5 col-xs-7" id="rule_applies_to6_table_container"></div>
+		<div class="col-xs-offset-5 col-xs-7">
+			<input type='text' id='rule_applies_to6_addr' size='30' oninput='proofreadMultipleIp6sOrMacs(this)' class='form-control' />
+			<button type="button" class="btn btn-default btn-add" id="rule_add_applies_to6_addr" onclick='addAddressesToTable(document,"rule_applies_to6_addr","rule_applies_to6_table_container","rule_applies_to6_table",true,6,true)'><%~ Add %></button>
+		</div>
+		<div class="col-xs-offset-5 col-xs-7">
+			<em><%~ HstAddr %></em>
+		</div>
 	</div>
 </div>
 
@@ -83,10 +106,19 @@
 		</span>
 	</div>
 	<div id="rule_remote_ip_container" class="row form-group">
-		<div class="col-xs-offset-5 col-xs-7" id="rule_remote_ip_table_container"></div>
-		<div class="col-xs-offset-5 col-xs-7">
-			<input type='text' id='rule_remote_ip' size='30' oninput='proofreadMultipleIps(this)' class='form-control' />
-			<button type="button" class="btn btn-default btn-add" id="rule_add_remote_ip" onclick='addAddressesToTable("rule_remote_ip","rule_remote_ip_table_container","rule_remote_ip_table",false)'><%~ Add %></button>
+		<div id="rule_remote_ip_4_container">
+			<div class="col-xs-offset-5 col-xs-7" id="rule_remote_ip_table_container"></div>
+			<div class="col-xs-offset-5 col-xs-7">
+				<input type='text' id='rule_remote_ip' size='30' oninput='proofreadMultipleIps(this)' class='form-control' />
+				<button type="button" class="btn btn-default btn-add" id="rule_add_remote_ip" onclick='addAddressesToTable(document,"rule_remote_ip","rule_remote_ip_table_container","rule_remote_ip_table",false,3,true)'><%~ Add %></button>
+			</div>
+		</div>
+		<div id="rule_remote_ip_6_container">
+			<div class="col-xs-offset-5 col-xs-7" id="rule_remote_ip6_table_container"></div>
+			<div class="col-xs-offset-5 col-xs-7">
+				<input type='text' id='rule_remote_ip6' size='30' oninput='proofreadMultipleIp6s(this)' class='form-control' />
+				<button type="button" class="btn btn-default btn-add" id="rule_add_remote_ip6" onclick='addAddressesToTable(document,"rule_remote_ip6","rule_remote_ip6_table_container","rule_remote_ip6_table",false,6,true)'><%~ Add %></button>
+			</div>
 		</div>
 	</div>
 

@@ -116,6 +116,10 @@ UI.prdr="port omdirigert til ruter";
 UI.puse="port i bruk av ruter";
 UI.pfwd="port videresendt til";
 UI.conn="tilkoblet";
+UI.YES="Yes";
+UI.NO="No";
+UI.optional="optional";
+UI.IPFam="IP Family";
 
 UI.AJAX="AJAX Nettleser Support Nødvendig";
 UI.AJAXUpg="Vennligst oppgrader til en AJAX kompatibel nettleser og prøv igjen. Nettlesere som f.eks. Firefox 2.0+, Safari and IE 6+.";

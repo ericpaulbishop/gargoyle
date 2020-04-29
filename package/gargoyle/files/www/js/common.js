@@ -1783,8 +1783,8 @@ function validateMultipleIpsOrMacs(addresses)
 			var nextSplit = nextAddr.split(/[\t ]*-[\t ]*/);
 			if( nextSplit.length==2 && validateIP(nextSplit[0]) == 0 && validateIP(nextSplit[1]) == 0)
 			{
-				var ipInt1 = getIpInt(nextSplit[0]);
-				var ipInt2 = getIpInt(nextSplit[1]);
+				var ipInt1 = getIpInteger(nextSplit[0]);
+				var ipInt2 = getIpInteger(nextSplit[1]);
 				valid = ipInt1 <= ipInt2 ? 0 : 1;
 			}
 			else
@@ -3612,4 +3612,47 @@ function validateMultipleIp6s(ips)
 function proofreadMultipleIp6s(input)
 {
 	proofreadText(input, validateMultipleIp6s, 0);
+}
+
+function validateMultipleIp6sOrMacs(ips)
+{
+	ips = ips.replace(/^[\t ]+/g, "");
+	ips = ips.replace(/[\t ]+$/g, "");
+	var splitIps = ips.split(/[\t ]*,[\t ]*/);
+	var valid = splitIps.length > 0 ? 0 : 1; //1= error, 0=true
+	while(valid == 0 && splitIps.length > 0)
+	{
+		var nextIp = splitIps.pop();
+		if(nextIp.match(/-/))
+		{
+			var nextSplit = nextIp.split(/[\t ]*-[\t ]*/);
+			if( nextSplit.length==2 && validateIP6(nextSplit[0]) == 0 && validateIP6(nextSplit[1]) == 0)
+			{
+				var ipFull1 = ip6_full(nextSplit[0]);
+				var ipFull2 = ip6_full(nextSplit[1]);
+				valid = ipFull1 <= ipFull2 ? 0 : 1;
+			}
+			else
+			{
+				valid = 1;
+			}
+		}
+		else
+		{
+			if(getIPFamily(nextIp) == null)
+			{
+				valid = validateMac(nextIp);
+			}
+			else
+			{
+				valid = validateIP6Range(nextIp);
+			}
+		}
+	}
+	return valid;
+}
+
+function proofreadMultipleIp6sOrMacs(input)
+{
+	proofreadText(input, validateMultipleIp6sOrMacs, 0);
 }

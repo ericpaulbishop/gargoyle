@@ -1,4 +1,4 @@
-/*  bandwidth --	An iptables extension for bandwidth monitoring/control
+/*  bandwidth --	An xtables extension for bandwidth monitoring/control
  *  			Can be used to efficiently monitor bandwidth and/or implement bandwidth quotas
  *  			Can be queried using the iptbwctl userspace library
  *  			Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
@@ -1139,7 +1139,7 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, char* ip, uin
 			{
 				uint64_t* old_bw;
 				*new_bw = initial_bandwidth;
-			    old_bw = set_string_map_element(ip_map, ip, (void*)new_bw );
+				old_bw = set_string_map_element(ip_map, ip, (void*)new_bw );
 				*fam = family;
 				set_string_map_element(ip_family_map, ip, fam);
 				

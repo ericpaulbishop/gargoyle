@@ -116,6 +116,10 @@ UI.prdr="Portumleitung zum Router";
 UI.puse="Port wird durch Router verwendet";
 UI.pfwd="Portweiterleitung nach";
 UI.conn="verbunden";
+UI.YES="Yes";
+UI.NO="No";
+UI.optional="optional";
+UI.IPFam="IP Family";
 
 UI.AJAX="AJAX Unterstützung des Browser wird benötigt";
 UI.AJAXUpg="Bitte aktualisieren sie zu einem AJAX-kompatiblen Browser und versuchen es erneut. Solche Browser sind z.B. Firefox 2.0+, Safari und IE 6+.";

@@ -116,6 +116,10 @@ UI.prdr="端口重定向到路由器";
 UI.puse="使用路由器的端口";
 UI.pfwd="端口转发到";
 UI.conn="已连接";
+UI.YES="Yes";
+UI.NO="No";
+UI.optional="optional";
+UI.IPFam="IP Family";
 
 UI.AJAX="需要浏览器支持AJAX";
 UI.AJAXUpg="请升级到兼容AJAX的浏览器并重试。这些浏览器包括Firefox 2.0+，Safari和IE 6+";
