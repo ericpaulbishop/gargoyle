@@ -114,7 +114,7 @@ CMDBASE="$CMDBASE --header 'Content-Type: application/json' "
 RUNCMD="$CMDBASE --request GET '$URLBASE/zones?name=$DOMAIN'"
 command_runner || exit 3
 
-ZONEID=$(grep -o '"id":"[^"]*' $DATAFILE | grep -o '[^"]*$' | head -1)
+ZONEID=$(grep -o '"id": \?"[^"]*' $DATAFILE | grep -o '[^"]*$' | head -1)
 if [ -z "$ZONEID" ] ; then
 	logger -t cloudflare-ddns-helper "Could not detect zone ID for domain: $DOMAIN"
 	exit 3
@@ -125,7 +125,7 @@ fi
 RUNCMD="$CMDBASE --request GET '$URLBASE/zones/$ZONEID/dns_records?name=$HOST&type=A'"
 command_runner || exit 3
 
-RECORDID=$(grep -o '"id":"[^"]*' $DATAFILE | grep -o '[^"]*$' | head -1)
+RECORDID=$(grep -o '"id": \?"[^"]*' $DATAFILE | grep -o '[^"]*$' | head -1)
 if [ -z "$RECORDID" ] ; then
 	logger -t cloudflare-ddns-helper "Could not detect record ID for host: $HOST"
 	exit 3
@@ -133,7 +133,7 @@ fi
 [ $VERBOSE -eq  1 ] && logger -t cloudflare-ddns-helper "Record ID for $HOST: $RECORDID"
 
 # if we got this far, we can check the data for the current IP address
-DATA=$(grep -o '"content":"[^"]*' $DATAFILE | grep -o '[^"]*$' | head -1)
+DATA=$(grep -o '"content": \?"[^"]*' $DATAFILE | grep -o '[^"]*$' | head -1)
 DATA=$(printf "%s" "$DATA" | grep -m 1 -o "$IPV4_REGEX")
 [ $VERBOSE -eq  1 ] && logger -t cloudflare-ddns-helper "Remote IP for $HOST: $DATA"
 
