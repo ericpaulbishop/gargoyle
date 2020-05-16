@@ -1,23 +1,32 @@
---- a/src/common/util.c	2017-07-26 12:53:38.000000000 -0400
-+++ b/src/common/util.c	2017-11-09 11:34:07.558858111 -0500
-@@ -123,6 +123,10 @@
-  #define DMALLOC_FN_ARGS
- #endif
+--- a/src/lib/fs/dir.c
++++ b/src/lib/fs/dir.c
+@@ -49,6 +49,8 @@
+ #include <errono.h>
+ #include <string.h>
  
 +#define O_NOFOLLOW 0
 +
-+
-+
- /** Allocate a chunk of <b>size</b> bytes of memory, and return a pointer to
-  * result.  On error, log and terminate the process.  (Same as malloc(size),
-  * but never returns NULL.)
---- a/src/common/sandbox.c	2017-07-27 08:23:37.000000000 -0400
-+++ b/src/common/sandbox.c	2017-11-09 11:33:21.206847584 -0500
-@@ -83,6 +83,9 @@
+ /** Check whether <b>dirname</b> exists and is private.  If yes return 0.
+  * If <b>dirname</b> does not exist:
+  *  - if <b>check</b>&CPD_CREATE, try to create it and return 0 on success.
+--- a/src/lib/fs/files.h
++++ b/src/lib/fs/files.h
+@@ -35,9 +35,7 @@
+ #ifndef O_TEXT
+ #define O_TEXT 0
+ #endif
+-#ifndef O_NOFOLLOW
+ #define O_NOFOLLOW 0
+-#endif
+ 
+ struct stat;
+ 
+--- a/src/lib/sandbox/sandbox.c
++++ b/src/lib/sandbox/sandbox.c
+@@ -90,6 +90,8 @@
  #include <execinfo.h>
  #endif
  
-+
 +#define O_NOFOLLOW 0
 +
  /**
