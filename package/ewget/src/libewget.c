@@ -1512,7 +1512,7 @@ static void* initialize_connection_https(char* host, int port)
 			SSL_library_init();
 			SSL_load_error_strings();
 			
-			meth = SSLv23_method();
+			meth = TLS_method();
 			ctx = SSL_CTX_new(meth);
     			ssl = SSL_new(ctx);
 			SSL_set_fd(ssl, socket);
@@ -1614,7 +1614,6 @@ static int read_https(void* connection_data, char* read_buffer, int read_length)
 {
 	ssl_connection_data *cd = (ssl_connection_data*)connection_data;
 	int bytes_read = -1;
-	
 	
 	alarm_socket = cd->socket;	
 	signal(SIGALRM, alarm_triggered );
