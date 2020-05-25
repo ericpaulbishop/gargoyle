@@ -1342,7 +1342,7 @@ int do_single_update(ddns_service_config *service_config, string_map *service_pr
 				{
 					char* url_str = do_url_substitution(def, service_config, local_ip);
 					if(verbose > 0) { printf("fetching: \"%s\"\n", url_str); }
-					http_response* page = get_url(url_str, NULL);
+					http_response* page = get_url(url_str, NULL, EW_INET);
 
 					if(page != NULL)
 					{
@@ -1618,7 +1618,7 @@ char* lookup_domain_ip(char* url_str)
 {
 	char* ip = NULL;
 
-	url_request* url = parse_url(url_str, NULL);
+	url_request* url = parse_url(url_str, NULL, EW_INET);
 	if(url !=  NULL)
 	{
 		struct hostent* host;
@@ -1742,7 +1742,7 @@ char* get_random_user_agent(void)
 char* get_ip_from_url(char* url)
 {
 	char* ip = NULL;
-	http_response* page = get_url(url, get_random_user_agent() );
+	http_response* page = get_url(url, get_random_user_agent(), EW_INET );
 	if(page != NULL)
 	{
 		if(page->data != NULL)
