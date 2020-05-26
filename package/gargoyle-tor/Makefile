@@ -120,14 +120,15 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=gargoyle-tor
-PKG_VERSION:=0.3.2.10
-PKG_RELEASE:=2
+PKG_VERSION:=0.4.2.7
+PKG_RELEASE:=1
 
 PKG_SOURCE:=tor-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=https://www.torproject.org/dist \
+PKG_SOURCE_URL:=https://dist.torproject.org/ \
 	https://archive.torproject.org/tor-package-archive
-PKG_MD5SUM:=a8b8b3db93f87a5c061109dbd8cd5309
+PKG_HASH:=06a1d835ddf382f6bca40a62e8fb40b71b2f73d56f0d53523c8bd5caf9b3026d
 PKG_INSTALL:=1
+PKG_FIXUP:=autoreconf
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/tor-$(PKG_VERSION)
 
@@ -173,31 +174,26 @@ endef
 
 CONFIGURE_ARGS += \
 	--with-libevent-dir="$(STAGING_DIR)/usr" \
-	--with-ssl-dir="$(STAGING_DIR)/usr" \
 	--disable-threads \
-	--disable-gcc-hardening \
-	--disable-asciidoc
-
-CONFIGURE_ARGS += \
-	--with-libevent-dir="$(STAGING_DIR)/usr" \
-	--with-ssl-dir="$(STAGING_DIR)/usr" \
+	--disable-asciidoc \
 	--with-openssl-dir="$(STAGING_DIR)/usr" \
 	--with-zlib-dir="$(STAGING_DIR)/usr" \
-	--disable-asciidoc \
 	--disable-seccomp \
 	--disable-libscrypt \
 	--disable-unittests \
-	--disable-largefile \
+	--disable-lzma \
+	--disable-zstd \
 	--with-tor-user=tor \
 	--with-tor-group=tor
 
-EXTRA_CFLAGS += -std=gnu99
+TARGET_CFLAGS += -ffunction-sections -fdata-sections -flto
+TARGET_LDFLAGS += -Wl,--gc-sections -flto
 
 ifneq ($(CONFIG_SSP_SUPPORT),y)
 	CONFIGURE_ARGS += \
 		--disable-gcc-hardening
 else
-	EXTRA_CFLAGS += -fPIC
+	EXTRA_CFLAGS += $(FPIC)
 endif
 
 
