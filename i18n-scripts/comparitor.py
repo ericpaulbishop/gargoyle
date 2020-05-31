@@ -18,7 +18,7 @@ else:
 	sys.stderr.write('Usage: %s lang_1 lang_2\n' % sys.argv[0])
 	sys.exit('  example: %s English-EN SimplifiedChinese-ZH-CN\n' % sys.argv[0])
 	
-g_base=os.path.dirname(os.path.dirname(sys.argv[0]))
+g_base=os.path.dirname(os.path.dirname(os.path.abspath(sys.argv[0])))
 	
 l1_pages = glob.glob('%s/package/plugin-gargoyle-i18n-%s/files/www/i18n/%s/*.js' % (g_base, lang1, lang1) )
 l2_pages = glob.glob('%s/package/plugin-gargoyle-i18n-%s/files/www/i18n/%s/*.js' % (g_base, lang2, lang2) )

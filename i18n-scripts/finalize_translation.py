@@ -24,7 +24,7 @@ else:
 #if localize, ensure hidden .config file is devoid of i18n
 #if internationalize, ensure the hidden .config file contains plugin-gargoyle-i18n and the target language package
 
-g_base=os.path.dirname(os.path.dirname(sys.argv[0]))
+g_base=os.path.dirname(os.path.dirname(os.path.abspath(sys.argv[0])))
 config_file=g_base+'/'+target_platform+'-src/.config'
 if os.path.exists(config_file):
 	if tran_type=='internationalize':
@@ -48,6 +48,8 @@ if os.path.exists(config_file):
 		if 'CONFIG_PACKAGE_plugin-gargoyle-i18n-'+target_lang in cline:
 			found_lang=True
 		
+		if cline.startswith('CONFIG_PACKAGE_gargoyle-i18n=y') and tran_type=='internationalize' :
+			found_gi18n=True
 		if cline.startswith('# CONFIG_PACKAGE_gargoyle-i18n is not set') and tran_type=='internationalize' :
 			anewline=cline[2:-12]+"=y\n"
 			found_gi18n=True
@@ -65,6 +67,10 @@ if os.path.exists(config_file):
 		
 		if cline.startswith('# CONFIG_PACKAGE_haserl-i18n is not set') and tran_type=='internationalize' :
 			anewline=cline[2:-12]+"=y\n"
+		if cline.startswith('CONFIG_PACKAGE_haserl=y') and tran_type=='internationalize' :
+			anewline='# '+cline[:-3]+" is not set\n"
+		if cline.startswith('CONFIG_PACKAGE_haserl=y') and tran_type=='localize' :
+			found_haserl=True
 		if cline.startswith('# CONFIG_PACKAGE_haserl') and tran_type=='localize' :
 			anewline=cline[2:-12]+"=y\n"
 			found_haserl=True
