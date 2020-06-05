@@ -1,0 +1,45 @@
+				<div id="cron_gargoyle" class="alert alert-danger" role="alert" style="display: none;"><%~ GargoyleCron %></div>
+				<div class="row form-group">
+					<span class="col-xs-5">
+						<input type="checkbox" id="use_task_minute" onclick="enableAssociatedField(this,'task_minute', '')" />
+						<label class="col-xs-5" for="task_minute" id="task_minute_label"><%~ Minute %>:</label>
+					</span>
+					<span class="col-xs-7"><select class="form-control" style="height:auto" id="task_minute" multiple></select></span>
+				</div>
+
+				<div class="row form-group">
+					<span class="col-xs-5">
+						<input type="checkbox" id="use_task_hour" onclick="enableAssociatedField(this,'task_hour', '')" />
+						<label class="col-xs-5" for="task_hour" id="task_hour_label"><%~ Hour %>:</label>
+					</span>
+					<span class="col-xs-7"><select class="form-control" style="height:auto" id="task_hour" multiple></select></span>
+				</div>
+
+				<div class="row form-group">
+					<span class="col-xs-5">
+						<input type="checkbox" id="use_task_day" onclick="enableAssociatedField(this,'task_day', '')" />
+						<label class="col-xs-5" for="task_day" id="task_day_label"><%~ Day %>:</label>
+					</span>
+					<span class="col-xs-7"><select class="form-control" style="height:auto" id="task_day" multiple></select></span>
+				</div>
+
+				<div class="row form-group">
+					<span class="col-xs-5">
+						<input type="checkbox" id="use_task_month" onclick="enableAssociatedField(this,'task_month', '')" />
+						<label class="col-xs-5" for="task_month" id="task_month_label"><%~ Month %>:</label>
+					</span>
+					<span class="col-xs-7"><select class="form-control" style="height:auto" id="task_month" multiple></select></span>
+				</div>
+
+				<div class="row form-group">
+					<span class="col-xs-5">
+						<input type="checkbox" id="use_task_dayweek" onclick="enableAssociatedField(this,'task_dayweek', '')" />
+						<label class="col-xs-5" for="task_dayweek" id="task_dayweek_label"><%~ DayWeek %>:</label>
+					</span>
+					<span class="col-xs-7"><select class="form-control" style="height:auto" id="task_dayweek" multiple></select></span>
+				</div>
+
+				<div class="row form-group">
+					<label class="col-xs-5" for="task_script" id="task_script_label"><%~ TaskScript %>:</label>
+					<span class="col-xs-7"><textarea class="form-control" rows="6" id="task_script"></textarea></span>
+				</div>

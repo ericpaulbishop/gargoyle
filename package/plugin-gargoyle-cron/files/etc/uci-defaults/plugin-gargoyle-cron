@@ -1,0 +1,6 @@
+#!/bin/sh
+
+uci set gargoyle.display.system_cron='Cron jobs'
+uci set gargoyle.scripts.system_cron='cron.sh'
+uci set gargoyle.system.cron='330'
+uci commit
