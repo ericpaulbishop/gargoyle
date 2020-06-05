@@ -3180,6 +3180,17 @@ function modalPrepare(modalID, title, elements, buttons)
 			{
 				inputEl.value = element.value;
 			}
+			if(element.values !== undefined)
+			{
+				for(var x = 0; x < inputEl.options.length; x++)
+				{
+					inputEl.options[x].selected = false;
+					if(element.values.indexOf(inputEl.options[x].value) > -1)
+					{
+						inputEl.options[x].selected = true;
+					}
+				}
+			}
 			if(element.innertext !== undefined)
 			{
 				inputEl.innerText = element.innertext;
