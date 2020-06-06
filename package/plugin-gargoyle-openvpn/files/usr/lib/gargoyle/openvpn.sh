@@ -206,9 +206,6 @@ tls-server
 ifconfig              $openvpn_server_internal_ip $openvpn_netmask
 topology              subnet
 client-config-dir     $OPENVPN_DIR/ccd
-script-security       2
-tls-verify	      "/usr/lib/gargoyle/ovpn-cn-check.sh /etc/openvpn/verified-userlist"
-crl-verify            $OPENVPN_DIR/crl.pem
 $openvpn_client_to_client
 
 $openvpn_duplicate_cn
@@ -677,4 +674,5 @@ regenerate_server_and_allowed_clients_from_uci()
 # apt-get install aptitude
 # aptitude install -y openvpn
 # generate_test_configuration
+
 
