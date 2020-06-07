@@ -12,7 +12,7 @@ status_menu_name="OpenVPN Status"
 uci set gargoyle.scripts.status_openvpn_connections="openvpn_connections.sh"
 uci set gargoyle.display.status_openvpn_connections="$status_menu_name"
 
-uci set openvpn.custom_config.script_security="3"
+uci set openvpn.custom_config.script_security="2"
 uci set openvpn.custom_config.up="/etc/openvpn.up"
 uci set openvpn.custom_config.down="/etc/openvpn.down"
 

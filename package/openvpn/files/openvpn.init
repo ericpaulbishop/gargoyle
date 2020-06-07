@@ -49,6 +49,40 @@ append_params() {
 	done
 }
 
+gargoyle_append_param() {
+	local s="$1"
+	local v="$2"
+	local c="$3"
+	case "$v" in
+		*_*_*_*) v=${v%%_*}-${v#*_}; v=${v%%_*}-${v#*_}; v=${v%%_*}-${v#*_} ;;
+		*_*_*)   v=${v%%_*}-${v#*_}; v=${v%%_*}-${v#*_} ;;
+		*_*)     v=${v%%_*}-${v#*_} ;;
+	esac
+	# remove old params that match
+	sed -i "/^$v\s.*$/d" "$c"
+	echo -n "$v" >> "$c"
+	return 0
+}
+
+gargoyle_append_params() {
+	local p; local v; local s="$1"; shift; local c="$1"; shift
+	# make sure we are on a new line
+	lastline="$(tail -n1 "$c")"
+	[ -n "$lastline" ] && echo -e "\n" >> "$c"
+	for p in $*; do
+		config_get v "$s" "$p"
+		IFS="$LIST_SEP"
+		for v in $v; do
+			[ -n "$v" ] && [ "$p" != "push" ] && [ "$p" != "tls_verify" ] && gargoyle_append_param "$s" "$p" "$c" && echo " $v" >> "$c"
+			[ -n "$v" ] && [ "$p" == "push" ] && gargoyle_append_param "$s" "$p" "$c" && echo " \"$v\"" >> "$c"
+			[ -n "$v" ] && [ "$p" == "tls_verify" ] && gargoyle_append_param "$s" "$p" "$c" && echo " \"$v\"" >> "$c"
+		done
+		unset IFS
+	done
+	# zap groups of blank lines
+	sed -i "N;/^\n$/D;P;D;" "$c"
+}
+
 section_enabled() {
 	config_get_bool enable  "$1" 'enable'  0
 	config_get_bool enabled "$1" 'enabled' 0
@@ -89,6 +123,7 @@ start_instance() {
 
 	if [ ! -z "$config" ]; then
 		append UCI_STARTED "$config" "$LIST_SEP"
+		gargoyle_append_params "$s" "$config" $OPENVPN_PARAMS
 		openvpn_add_instance "$s" "${config%/*}" "$config"
 		return
 	fi

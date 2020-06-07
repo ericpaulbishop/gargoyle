@@ -112,6 +112,11 @@ function saveChanges()
 			uci.set("gargoyle", "status", "openvpn_connections", "500")
 			uci.set("openvpn", "custom_config", "enabled", "1")
 			uci.set("openvpn", "custom_config", "config", "/etc/openvpn/server.conf")
+			uci.set("openvpn", "custom_config", "script_security", "2")
+			uci.set("openvpn", "custom_config", "up", "/etc/openvpn.up")
+			uci.set("openvpn", "custom_config", "down", "/etc/openvpn.down")
+			uci.set("openvpn", "custom_config", "tls_verify", "/usr/lib/gargoyle/ovpn-cn-check.sh /etc/openvpn/verified-userlist")
+			uci.set("openvpn", "custom_config", "crl_verify", "/etc/openvpn/crl.pem")
 
 			uci.set("openvpn_gargoyle", "server", "enabled", "true")
 			uci.set("openvpn_gargoyle", "client", "enabled", "false")
@@ -167,6 +172,11 @@ function saveChanges()
 		{
 			configureFirewall(true,false)
 			uci.remove("gargoyle", "status", "openvpn_connections")
+			uci.set("openvpn", "custom_config", "script_security", "2")
+			uci.set("openvpn", "custom_config", "up", "/etc/openvpn.up")
+			uci.set("openvpn", "custom_config", "down", "/etc/openvpn.down")
+			uci.remove("openvpn", "custom_config", "tls_verify")
+			uci.remove("openvpn", "custom_config", "crl_verify")
 
 			if (document.getElementById("openvpn_client_manual_controls").style.display != "none")
 			{

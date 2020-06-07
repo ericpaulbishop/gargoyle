@@ -682,7 +682,7 @@ function saveChanges() {
 	setControlsEnabled(false, true, UI.WaitSettings);
 	
 	//MSMTPRC config
-    command = 'echo -e "account default\\nhost ' + data['serverIP'] + "\\nport " + data['serverPort'] + "\\n from " + data['sender'] + "\\n timeout 30";
+    command = 'echo -e "account default\\nhost ' + data['serverIP'] + "\\nport " + data['serverPort'] + "\\ndomain " + data['domain'] + "\\n from " + data['sender'] + "\\n timeout 30";
 	
 	if(data['auth']){
 		command = command + '\\nauth plain\\nuser ' + data['username'] + '\\npassword ' + data['password'];
@@ -753,6 +753,15 @@ function getData(){
 	data['count'] = document.getElementById("count").value.trim();
 	data['certpath'] = "/etc/ssl/certs/ca-certificates.crt";
 	data['include'] = "";
+	matchres =  data['sender'].match(/.*@(.*)/);
+	if(matchres != null && matchres.length == 2)
+	{
+		data['domain'] = matchres[1];
+	}
+	else
+	{
+		data['domain'] = 'localhost';
+	}
 	
 	var e = document.getElementsByName('content');
 	
@@ -847,17 +856,17 @@ function testMail() {
     if (data['auth']) {
 		if(!data['encryption']){
 			//Authentication enabled and encryption disabled
-			command = command + 'echo -e "account default\\nhost '+data['serverIP']+"\\nport "+data['serverPort']+"\\nauth plain\\nuser " + data['username'] + "\\npassword " + data['password'] + "\\nauto_from off\\nfrom "+data['sender']+'" > /etc/msmtprc && ';
+			command = command + 'echo -e "account default\\nhost '+data['serverIP']+"\\nport "+data['serverPort']+"\\ndomain " + data['domain'] + "\\nauth plain\\nuser " + data['username'] + "\\npassword " + data['password'] + "\\nauto_from off\\nfrom "+data['sender']+'" > /etc/msmtprc && ';
 		}else{
-			command = command + 'echo -e "account default\\nhost '+data['serverIP']+"\\nport "+data['serverPort']+"\\ntls on"+"\\nauth plain\\nuser " + data['username'] + "\\npassword " + data['password'] + "\\nauto_from off\\nfrom "+data['sender']+'" > /etc/msmtprc && ';
+			command = command + 'echo -e "account default\\nhost '+data['serverIP']+"\\nport "+data['serverPort']+"\\ndomain " + data['domain'] + "\\ntls on"+"\\nauth plain\\nuser " + data['username'] + "\\npassword " + data['password'] + "\\nauto_from off\\nfrom "+data['sender']+'" > /etc/msmtprc && ';
 		}
 		command = command + body + 'sendmail '+data['receiver']+' --syslog --tls-trust-file '+data['certpath']+' --timeout 30 && rm /etc/msmtprc && mv /tmp/msmtprc.tmp /etc/msmtprc';
     } else {
 		if(!data['encryption']){
 			//Authentication and encryption disabled
-			command = body + 'sendmail --host='+data['serverIP']+' --port='+data['serverPort']+' --from '+data['sender']+' '+data['receiver']+' --timeout 30 --syslog';		
+			command = body + 'sendmail --host='+data['serverIP']+' --port='+data['serverPort']+' --domain='+data['domain']+' --from '+data['sender']+' '+data['receiver']+' --timeout 30 --syslog';		
 		}else{
-			command = body + 'sendmail --host='+data['serverIP']+' --port='+data['serverPort']+' --tls=on --tls-trust-file='+data['certpath']+' --from '+data['sender']+' '+data['receiver']+' --timeout 30 --syslog';		
+			command = body + 'sendmail --host='+data['serverIP']+' --port='+data['serverPort']+' --domain='+data['domain']+' --tls=on --tls-trust-file='+data['certpath']+' --from '+data['sender']+' '+data['receiver']+' --timeout 30 --syslog';		
 		}
     }
 	
