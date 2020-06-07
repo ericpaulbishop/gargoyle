@@ -2397,6 +2397,11 @@ CONFIG_PACKAGE_plugin-gargoyle-wol=y
 # CONFIG_PACKAGE_valgrind is not set
 
 #
+# Extra packages
+#
+# CONFIG_PACKAGE_wireguard-tools is not set
+
+#
 # Firmware
 #
 
@@ -3580,7 +3585,6 @@ CONFIG_PACKAGE_tc=y
 # CONFIG_PACKAGE_openvpn-gargoyle-nossl is not set
 # CONFIG_PACKAGE_openvpn-gargoyle-openssl is not set
 # CONFIG_PACKAGE_wireguard is not set
-# CONFIG_PACKAGE_wireguard-tools is not set
 
 #
 # WWAN
