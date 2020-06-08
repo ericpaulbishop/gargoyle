@@ -241,11 +241,11 @@ function editCronModal()
 	var crontime = editRow.childNodes[0].firstChild.data.split(" ");
 	var script = editRow.childNodes[1].firstChild.data;
 
-	var minute = crontime[0];
-	var hour = crontime[1];
-	var day = crontime[2];
-	var month = crontime[3];
-	var weekday = crontime[4];
+	var minute = crontime[0].split(",");
+	var hour = crontime[1].split(",");
+	var day = crontime[2].split(",");
+	var month = crontime[3].split(",");
+	var weekday = crontime[4].split(",");
 
 	modalElements = [
 		{"id" : "task_minute", "values" : minute},
