@@ -1,0 +1,19 @@
+#!/bin/sh
+
+uci set gargoyle.display.connection_wireguard="Wireguard"
+uci set gargoyle.scripts.connection_wireguard="wireguard.sh"
+uci set gargoyle.connection.wireguard="226"
+
+status_menu_name="Wireguard Status"
+[ -x /usr/bin/i18n-menu ] && {
+	translation=$(i18n-menu gargoyle.display.status_wireguard_connections)
+	[ -n "$translation" ] && status_menu_name="$translation"
+}
+uci set gargoyle.scripts.status_wireguard_connections="wireguard_connections.sh"
+uci set gargoyle.display.status_wireguard_connections="$status_menu_name"
+
+uci set firewall.wireguard_include_file=include
+uci set firewall.wireguard_include_file.path='/etc/wireguard.firewall'
+uci set firewall.wireguard_include_file.reload='1'
+
+uci commit
