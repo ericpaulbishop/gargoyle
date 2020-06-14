@@ -1,0 +1,12 @@
+#fallback is the string the web UI will use when the target language is not present
+
+fallback=Wireguard Status
+EN=Wireguard Status
+ES=Estado de Wireguard
+DE=Wireguard Status
+PL=Status Wireguard
+ZH-CN=Wireguard状态
+RU=Статус Wireguard
+NO=Wireguard Status
+BR=Status Wireguard
+CS=Wireguard Status

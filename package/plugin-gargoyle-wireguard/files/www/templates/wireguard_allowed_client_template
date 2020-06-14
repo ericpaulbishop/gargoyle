@@ -1,0 +1,74 @@
+				<div id='wireguard_allowed_client_name_container' class="row form-group" >
+					<label class="col-xs-5" for='wireguard_allowed_client_name' id='wireguard_allowed_client_name_label'><%~ openvpn.ClntN %>:</label>
+					<span class="col-xs-7"><input type='text' class="form-control" id='wireguard_allowed_client_name' size='30' /></span>
+				</div>
+
+				<div id="wireguard_allowed_client_have_privkey_container" class="row form-group" >
+					<label class="col-xs-5" id='wireguard_allowed_client_have_privkey_label' for='wireguard_allowed_client_have_privkey'><%~ ClntKeyMgt %>:</label>
+					<span class="col-xs-7">
+						<select class="form-control" id="wireguard_allowed_client_have_privkey" onchange='setAllowedClientVisibility(document)' >
+							<option value="true"><%~ ClntGKey %></option>
+							<option value="false"><%~ ClntCKey %></option>
+						</select>
+					</span>
+				</div>
+
+				<div id='wireguard_allowed_client_privkey_container' class="row form-group" >
+					<label class="col-xs-5" for='wireguard_allowed_client_privkey' id='wireguard_allowed_client_privkey_label'><%~ wgPrivKey %>:</label>
+					<span class="col-xs-7">
+						<input type='password' class="form-control" id='wireguard_allowed_client_privkey' style="width:100%" />
+						<input type="checkbox" id="show_allowed_client_privkey" onclick="togglePass('wireguard_allowed_client_privkey')" autocomplete="off"/>
+						<label for="show_allowed_client_privkey" id="show_allowed_client_privkey_label"><%~ rvel %></label>
+					</span>
+				</div>
+
+				<div id='wireguard_allowed_client_pubkey_container' class="row form-group" >
+					<label class="col-xs-5" for='wireguard_allowed_client_pubkey' id='wireguard_allowed_client_pubkey_label'><%~ wgPubKey %>:</label>
+					<span class="col-xs-7">
+						<input type='text' class="form-control" id='wireguard_allowed_client_pubkey' style="width:100%" />
+						<button class="btn btn-default" id="generate_allowed_client_keys_button" onclick="generateKeyPair('allowed_client')"><%~ keygen %></button>
+					</span>
+				</div>
+
+
+				<div id='wireguard_allowed_client_ip_container' class="row form-group" >
+					<label class="col-xs-5" for='wireguard_allowed_client_ip' id='wireguard_allowed_client_ip_label'><%~ ClntIP %>:</label>
+					<span class="col-xs-7"><input type='text' class="form-control" name='wireguard_allowed_client_ip' id='wireguard_allowed_client_ip' size='30' maxlength='15' /></span>
+				</div>
+
+				<div id="wireguard_allowed_client_remote_container" class="row form-group" >
+					<label class="col-xs-5" id='wireguard_allowed_client_remote_label' for='wireguard_allowed_client_remote'><%~ ClntConn %>:</label>
+					<span class="col-xs-7"><select class="form-control" id="wireguard_allowed_client_remote" onchange='setAllowedClientVisibility( document )' ></select></span>
+				</div>
+				<div id="wireguard_allowed_client_remote_custom_container" class="row form-group" >
+					<span class="col-xs-7 col-xs-offset-5">
+						<input type='text' class="form-control" id='wireguard_allowed_client_remote_custom' size='30' />
+					</span>
+					<span style="clear:both"></span>
+				</div>
+
+				<div id="wireguard_allowed_client_have_subnet_container" class="row form-group" >
+					<label class="col-xs-5" id='wireguard_allowed_client_have_subnet_label' for='wireguard_allowed_client_have_subnet'><%~ ClntSubN %>:</label>
+					<span class="col-xs-7">
+						<select class="form-control" id="wireguard_allowed_client_have_subnet" onchange='setAllowedClientVisibility( document )' >
+							<option value="false"><%~ NoSub %></option>
+							<option value="true"><%~ RtSub %></option>
+						</select>
+					</span>
+				</div>
+				<div id="wireguard_allowed_client_subnet_ip_container" class="row form-group" >
+					<span class="col-xs-7 col-xs-offset-5">
+						<input type='text' class="form-control" id='wireguard_allowed_client_subnet_ip' size='20' maxlength='15' />&nbsp;<em><%~ SubIP %></em>
+					</span>
+					<span style="clear:both"></span>
+				</div>
+				<div id="wireguard_allowed_client_subnet_mask_container" class="row form-group" >
+					<span class="col-xs-7 col-xs-offset-5">
+						<input type='text' class="form-control"  id='wireguard_allowed_client_subnet_mask' size='20' maxlength='15' />&nbsp;<em><%~ SubM %></em>
+					</span>
+					<span style="clear:both"></span>
+				</div>
+
+				<input class="form-control" style="display:none" id="wireguard_allowed_client_initial_id" />
+				<input class="form-control" style="display:none" id="wireguard_allowed_client_default_id" />
+

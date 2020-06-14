@@ -1743,7 +1743,8 @@ function localdate(ldate)
 
 function resetData()
 {
-	wanMacLoc = uciOriginal.get("network","wan_dev") != "" ? "wan_dev" : wanMacLoc;
+	wanMacAltLoc = defaultWanIf != "" ? ("wan_" + defaultWanIf.replace(".","_") + "_dev"): "wan_dev";
+	wanMacLoc = uciOriginal.get("network",wanMacAltLoc) != "" ? wanMacAltLoc : wanMacLoc;
 	var removeChannels = [];
 	var hwAmode = "disabled";
 	var hwGmode = "disabled";

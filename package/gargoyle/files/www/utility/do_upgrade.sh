@@ -44,7 +44,7 @@
 	is_tplink=$(awk 'BEGIN{FS="[ \t]+:[ \t]"} /machine/ {print $2}' /proc/cpuinfo | grep "TL\-[WM][DR]")
 	if [ -n "$is_tplink" ]; then
 		boot_size=$(dd bs=4 count=1 skip=37 if=/tmp/up/upgrade 2>/dev/null | hexdump -v -n 4 -e '1/1 "%02x"')
-		[ "$boot_size" != "00000000" ] && {
+		[ "$boot_size" != "00000000" ] && [ "$boot_size" != "ffffffff" ] && {
 			# Invalid image, it contains a bootloader
 			echo "<script type=\"text/javascript\">top.failureByBootloader();</script>"
 			echo "</body></html>"

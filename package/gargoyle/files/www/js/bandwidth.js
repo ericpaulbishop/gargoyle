@@ -139,6 +139,7 @@ function initializePlotsAndTable()
 	var haveQosDownload = false;
 	var haveTor = false;
 	var haveOpenvpn = false;
+	var haveWireguard = false;
 	var monitorIndex;
 	for(monitorIndex=0; monitorIndex < monitorNames.length; monitorIndex++)
 	{
@@ -173,6 +174,7 @@ function initializePlotsAndTable()
 		}
 		haveTor = monId.match(/tor/) ? true : haveTor;
 		haveOpenvpn = monId.match(/openvpn/) ? true : haveOpenvpn;
+		haveWireguard = monId.match(/wireguard/) ? true: haveWireguard;
 	}
 	var plotIdNames = ["plot1_type", "plot2_type", "plot3_type", "table_type"];
 	var idIndex;
@@ -194,6 +196,10 @@ function initializePlotsAndTable()
 		if(haveOpenvpn)
 		{
 			addOptionToSelectElement(plotIdName, "OpenVPN", "openvpn");
+		}
+		if(haveWireguard)
+		{
+			addOptionToSelectElement(plotIdName, "Wireguard", "wireguard");
 		}
 
 		addOptionToSelectElement(plotIdName, UI.HsNm, "hostname");
@@ -237,7 +243,7 @@ function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphLowRes)
 
 
 	var hr15m = uciOriginal.get("gargoyle", "bandwidth_display", "high_res_15m");
-	graphTimeFrameIndex = graphTimeFrameIndex == 1 && plotType != "total" && (!plotType.match(/tor/)) && (!plotType.match(/openvpn/)) && hr15m == "1" && (!graphLowRes) ? 0 : graphTimeFrameIndex;
+	graphTimeFrameIndex = graphTimeFrameIndex == 1 && plotType != "total" && (!plotType.match(/tor/)) && (!plotType.match(/openvpn/)) && (!plotType.match(/wireguard/)) && hr15m == "1" && (!graphLowRes) ? 0 : graphTimeFrameIndex;
 
 
 
@@ -264,6 +270,10 @@ function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphLowRes)
 	else if(plotType.match(/openvpn/))
 	{
 		match1 = graphLowRes ? "openvpn-lr" + graphTimeFrameIndex : "openvpn-hr" + graphTimeFrameIndex;
+	}
+	else if(plotType.match(/wireguard/))
+	{
+		match1 = graphLowRes ? "wireguard-lr" + graphTimeFrameIndex : "wireguard-hr" + graphTimeFrameIndex;
 	}
 	else if(plotType == "ip" || plotType == "hostname")
 	{
@@ -340,7 +350,7 @@ function resetPlots()
 		{
 			var t = getSelectedValue("plot" + plotNum + "_type");
 			var is15MHighRes = graphTimeFrameIndex == 1 && uciOriginal.get("gargoyle", "bandwidth_display", "high_res_15m") == "1";
-			graphLowRes = graphLowRes || (t != "total" && t != "none" && t != "tor" && t != "openvpn" && (!is15MHighRes));
+			graphLowRes = graphLowRes || (t != "total" && t != "none" && t != "tor" && t != "openvpn" && t != "wireguard" && (!is15MHighRes));
 		}
 		for(plotNum=1; plotNum<=4; plotNum++)
 		{
@@ -395,7 +405,7 @@ function resetPlots()
 
 			if(!plotsInitializedToDefaults)
 			{
-				if(plotType != "" && plotType != "none" && plotType != "total" && plotType != "tor" && plotType != "openvpn" )
+				if(plotType != "" && plotType != "none" && plotType != "total" && plotType != "tor" && plotType != "openvpn" && plotType != "wireguard" )
 				{
 					var idValue = bandwidthSettings.get(plotIdName, "none");
 					if(idValue != "" && (plotType == "ip" || plotType == "hostname") )
@@ -599,7 +609,7 @@ function doUpdate()
 								var ip;
 								for (ip in monitorData)
 								{
-									if( ((selectedPlotType == "total" || selectedPlotType.match("qos") || selectedPlotType.match("tor") || selectedPlotType.match("openvpn") ) && ip == "COMBINED") || (selectedPlotType != "total" && ip != "COMBINED") )
+									if( ((selectedPlotType == "total" || selectedPlotType.match("qos") || selectedPlotType.match("tor") || selectedPlotType.match("openvpn") || selectedPlotType.match("wireguard") ) && ip == "COMBINED") || (selectedPlotType != "total" && ip != "COMBINED") )
 									{
 										ipList.push(getDisplayIp(ip));
 									}

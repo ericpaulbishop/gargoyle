@@ -206,9 +206,6 @@ tls-server
 ifconfig              $openvpn_server_internal_ip $openvpn_netmask
 topology              subnet
 client-config-dir     $OPENVPN_DIR/ccd
-script-security       2
-tls-verify	      "/usr/lib/gargoyle/ovpn-cn-check.sh /etc/openvpn/verified-userlist"
-crl-verify            $OPENVPN_DIR/crl.pem
 $openvpn_client_to_client
 
 $openvpn_duplicate_cn
@@ -349,18 +346,14 @@ EOF
 		mkdir -p "$OPENVPN_DIR/client_conf/$openvpn_client_id"
 		cp "keys/$openvpn_client_id.crt" "keys/$openvpn_client_id.key" "$OPENVPN_DIR/ca.crt" "$OPENVPN_DIR/ta.key" "$client_conf_dir/"
 		cp "keys/index.txt" "keys/serial" "keys/crl.pem" "$OPENVPN_DIR/"
-		
-		if [ -n "$openvpn_client_local_subnet_ip" ] && [ -n "$openvpn_client_local_subnet_mask" ] ; then
-			echo "ipaddr    $openvpn_client_local_subnet_ip"    >'network'
-			echo "netmask   $openvpn_client_local_subnet_mask" >>'network'
-			mv network "$client_conf_dir/network"
-		fi
 	fi
 
-	
-	
-	
-	
+	if [ -n "$openvpn_client_local_subnet_ip" ] && [ -n "$openvpn_client_local_subnet_mask" ] ; then
+		echo "ipaddr    $openvpn_client_local_subnet_ip"    >'network'
+		echo "netmask   $openvpn_client_local_subnet_mask" >>'network'
+		mv network "$client_conf_dir/network"
+	fi
+
 	if [ "$client_enabled" != "false" ] && [ "$client_enabled" != "0" ] ; then
 		if [ ! -e "$OPENVPN_DIR/$openvpn_client_id.crt" ] ; then
 			ln -s "$OPENVPN_DIR/client_conf/$openvpn_client_id/$openvpn_client_id.crt" "$OPENVPN_DIR/$openvpn_client_id.crt"
@@ -677,4 +670,6 @@ regenerate_server_and_allowed_clients_from_uci()
 # apt-get install aptitude
 # aptitude install -y openvpn
 # generate_test_configuration
+
+
 
