@@ -27,7 +27,7 @@ function resetData()
 	setSelectedValue("wireguard_server_redirect_gateway",getServerVarWithDefault("all_client_traffic","true"));
 	document.getElementById("wireguard_server_privkey").value = getServerVarWithDefault("private_key","");
 	document.getElementById("wireguard_server_pubkey").value = getServerVarWithDefault("public_key","");
-	if(wgStatus != "Interface: wg0 not found")
+	if(wgStatus != "Interface wg0 not found")
 	{
 		var wgStatusJSON = JSON.parse(wgStatus);
 		var wgStatusStr = "";
@@ -193,13 +193,18 @@ function saveChanges()
 			}
 		}
 
-		configureAC = function(clientId,pubkey,ipArr)
+		configureAC = function(clientId,pubkey,ipArr,endpointHost,endpointPort)
 		{
 			uci.set("network", clientId, "",        "wireguard_wg0")
 			uci.set("network", clientId, "public_key", pubkey)
 			uci.createListOption("network", clientId, "allowed_ips", true)
 			uci.set("network", clientId, "allowed_ips", ipArr)
 			uci.set("network", clientId, "route_allowed_ips", "1")
+			if(endpointHost != null && endpointPort != null)
+			{
+				uci.set("network", clientId, "endpoint_host", endpointHost)
+				uci.set("network", clientId, "endpoint_port", endpointPort)
+			}
 		}
 
 		configureNetwork = function(enabled,wgPrivKey,wgIP,wgPort)
@@ -274,7 +279,7 @@ function saveChanges()
 						subnetmask = mask2cidr(subnetmask);
 						ipArr.push(subnetip + "/" + subnetmask);
 					}
-					configureAC(clientId,pubkey,ipArr);
+					configureAC(clientId,pubkey,ipArr,null,null);
 				}
 			}
 		}
@@ -297,12 +302,14 @@ function saveChanges()
 			var allowed_ips = document.getElementById(prefix + "allowed_ips").value;
 			uci.set("wireguard_gargoyle", "client", "allowed_ips", allowed_ips)
 			uci.set("wireguard_gargoyle", "client", "allow_nonwg_traffic", document.getElementById(prefix + "allow_nonwg_traffic").value)
-			uci.set("wireguard_gargoyle", "client", "server_host", document.getElementById(prefix + "server_host").value)
-			uci.set("wireguard_gargoyle", "client", "server_port", document.getElementById(prefix + "server_port").value)
+			var endpoint_host = document.getElementById(prefix + "server_host").value;
+			var endpoint_port = document.getElementById(prefix + "server_port").value;
+			uci.set("wireguard_gargoyle", "client", "server_host", endpoint_host)
+			uci.set("wireguard_gargoyle", "client", "server_port", endpoint_port)
 			var server_pubkey = document.getElementById(prefix + "server_pubkey").value;
 			uci.set("wireguard_gargoyle", "client", "server_public_key", server_pubkey)
 			uci.removeAllSectionsOfType("network","wireguard_wg0");
-			configureAC("wgserver",server_pubkey,[allowed_ips]);
+			configureAC("wgserver",server_pubkey,[allowed_ips],endpoint_host,endpoint_port);
 		}
 
 

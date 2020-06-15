@@ -18,7 +18,9 @@ var gargoyleDefault = [
 	'0 0,4,8,12,16,20 * * * /tmp/bw_backup/do_tor_bw_backup.sh',
 	'* * * * * /usr/sbin/update_tor_ipset',
 	'0 4 * * 0 sh /plugin_root/usr/lib/adblock/runadblock.sh',
-	'0 0,4,8,12,16,20 * * * /usr/bin/backup_quotas'
+	'0 0,4,8,12,16,20 * * * /usr/bin/backup_quotas',
+	'0 0,4,8,12,16,20 * * * /tmp/bw_backup/do_wireguard_bw_backup.sh',
+	'0,15,30,45 * * * * /usr/bin/wireguard_watchdog'
 ];
 
 function saveChanges()

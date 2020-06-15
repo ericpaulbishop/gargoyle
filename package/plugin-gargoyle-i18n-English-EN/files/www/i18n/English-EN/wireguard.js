@@ -5,6 +5,7 @@
 wgStr.wg="Wireguard";
 wgStr.wgCfg="Wireguard Config";
 wgStr.wgDis="Disabled";
+wgStr.WGClt="Wireguard Client";
 wgStr.wgClt="Client";
 wgStr.wgSrv="Server";
 wgStr.wgSts="Wireguard Status";
