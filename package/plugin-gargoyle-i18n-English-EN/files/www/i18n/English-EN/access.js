@@ -42,6 +42,7 @@ accessStr.SSHHelp3b="Windows has been known to keep private keys in <code>C:\Doc
 accessStr.SSHHelp4="The <b>private-key</b> should be stored securely and backed-up. Only the <b>public-key</b> (<i>gargoyle.pub</i>) should be uploaded to Gargoyle. Gargoyle will accept multiple public-keys.";
 accessStr.SSHInvalidKey="Invalid Key\nplease ensure that file contains a valid SSH public-key and try again.";
 accessStr.CnntDsblPwd="Cannot disable SSH passwords without setting private key(s)";
+accessStr.NoIP6Redi="Port redirection is not supported with IPv6. If you choose different local and remote ports, the web interface will not be accessible over IPv6 remotely.";
 
 //javascript
 accessStr.PasswordsDiffer="Administrator password cannot be confirmed. Specified passwords are not equal.";

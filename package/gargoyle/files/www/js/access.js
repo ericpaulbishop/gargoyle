@@ -43,20 +43,21 @@ function saveChanges()
 
 		// add updated remote accepts
 		var restartFirewall = false;
-		var addAccept = function(local,remote)
+		var addAccept = function(local,remote,family)
 		{
-			var id = "ra_" + local + "_" + remote;
+			var id = "ra_" + local + "_" + remote + "_" + family;
 			uci.set("firewall", id, "", "remote_accept");
 			uci.set("firewall", id, "local_port", local);
 			uci.set("firewall", id, "remote_port", remote);
 			uci.set("firewall", id, "proto", "tcp");
 			uci.set("firewall", id, "zone", "wan");
+			uci.set("firewall", id, "family", family);
 		};
 		var localHttpPort = document.getElementById("local_http_port").value;
 		var remoteHttpPort = document.getElementById("remote_http_port").value;
 		if(document.getElementById("remote_http_port_container").style.display != "none")
 		{
-			addAccept(localHttpPort, remoteHttpPort);
+			addAccept(localHttpPort, remoteHttpPort, localHttpPort == remoteHttpPort ? "any" : "ipv4");
 		}
 		else
 		{
@@ -67,7 +68,7 @@ function saveChanges()
 		var remoteHttpsPort = document.getElementById("remote_https_port").value;
 		if(document.getElementById("remote_https_port_container").style.display != "none")
 		{
-			addAccept(localHttpsPort, remoteHttpsPort);
+			addAccept(localHttpsPort, remoteHttpsPort, localHttpsPort == remoteHttpsPort ? "any" : "ipv4");
 		}
 		else
 		{
@@ -78,7 +79,7 @@ function saveChanges()
 		var remoteSshPort = document.getElementById("remote_ssh_port").value;
 		if(!document.getElementById("remote_ssh_port").disabled)
 		{
-			addAccept(localSshPort, remoteSshPort);
+			addAccept(localSshPort, remoteSshPort, localSshPort == remoteSshPort ? "any" : "ipv4");
 		}
 		else
 		{
@@ -146,7 +147,7 @@ function saveChanges()
 		localWebProtocol = getSelectedValue("local_web_protocol");
 		if(localWebProtocol == "https" || localWebProtocol == "redirect" || localWebProtocol == "both")
 		{
-			uci.set("uhttpd", "main", "listen_https", [ "0.0.0.0:" + document.getElementById("local_https_port").value ] );
+			uci.set("uhttpd", "main", "listen_https", [ "0.0.0.0:" + document.getElementById("local_https_port").value, "[::]:" + document.getElementById("local_https_port").value ] );
 		}
 		else
 		{
@@ -154,7 +155,7 @@ function saveChanges()
 		}
 		if(localWebProtocol == "http" || localWebProtocol == "redirect" || localWebProtocol == "both")
 		{
-			uci.set("uhttpd", "main", "listen_http",  [ "0.0.0.0:" + document.getElementById("local_http_port").value ] );
+			uci.set("uhttpd", "main", "listen_http",  [ "0.0.0.0:" + document.getElementById("local_http_port").value, "[::]:" + document.getElementById("local_http_port").value ] );
 		}
 		else
 		{
@@ -590,6 +591,7 @@ function updateVisibility()
 		remoteHttpsElement.value = "";
 		remoteHttpElement.value = "";
 	}
+	document.getElementById("noip6redi").style.display = remoteWebProtocol != "disabled" ? "block" : "none";
 
 	// RFC 1918 filter checkbox.
 	var disableRfc1918Filter = document.getElementById("disable_rfc1918_filter").checked;

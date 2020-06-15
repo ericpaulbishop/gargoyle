@@ -112,3 +112,4 @@ qosStr.UBSect="QoS Upload Bandwidth Distribution";
 qosStr.DBSect="QoS Download Bandwidth Distribution";
 qosStr.uTFrm="Upload Time Frame";
 qosStr.dTFrm="Download Time Frame";
+

@@ -12,7 +12,8 @@ int main(int argc, char** argv)
 	int c;
 	char* user_agent = NULL;
 	char* out_file = strdup("-");
-	while((c = getopt(argc, argv, "O:U:")) != -1)
+	int family = EW_UNSPEC;
+	while((c = getopt(argc, argv, "O:U:46")) != -1)
 	{	
 		switch(c)
 		{
@@ -22,6 +23,12 @@ int main(int argc, char** argv)
 				break;
 			case 'U':
 				user_agent = strdup(optarg);
+				break;
+			case '4':
+				family = EW_INET;
+				break;
+			case '6':
+				family = EW_INET6;
 				break;
 			default:
 				print_usage_and_exit(argv[0]);
@@ -38,48 +45,12 @@ int main(int argc, char** argv)
 		int ret;
 		set_ewget_timeout_seconds(10);
 		set_ewget_read_buffer_size(512);
-	       	ret = write_url_to_stream(argv[optind], user_agent, NULL, out_stream, NULL);
+	       	ret = write_url_to_stream(argv[optind], user_agent, family, NULL, out_stream, NULL);
 		fclose(out_stream);
 		if(ret == 1)
 		{
 			fprintf(stderr, "Could Not Fetch URL\n");
 		}
-	
-		/*
-		http_response* r = get_url(argv[optind], user_agent);
-		if(r == NULL)
-		{
-			fprintf(stderr, "Could Not Fetch URL\n");
-		}
-		else if(r->data == NULL)
-		{
-			fprintf(stderr, "URL contains no data\n");
-		}
-		else if(strcmp(out_file, "-") == 0)
-		{
-			//printf("%s", r->data);
-			fwrite(r->data, 1, r->length, stdout);
-		}
-		else 
-		{
-			FILE* out = fopen(out_file, "w");
-			if(out == NULL)
-			{
-				fprintf(stderr, "Could not write to specified file.\n");
-			}
-			else
-			{
-				//fprintf(out, "%s", r->data);
-				fwrite(r->data, 1, r->length, out);
-				fclose(out);
-			}
-		}
-		if(r != NULL)
-		{
-			free_http_response(r);
-		}
-		*/
-
 	}
 	printf("\n");
 	exit(0);
@@ -95,6 +66,8 @@ void print_usage_and_exit(char* pname)
 	fprintf(stderr, "USAGE: %s [OPTIONS] [URL]\n", pname);
 	fprintf(stderr, "\t-U User Agent String\n");
 	fprintf(stderr, "\t-O Output file, \'-\' for stdout, stdout is used if not specified\n");
+	fprintf(stderr, "\t-4 Force fetch over IPv4\n");
+	fprintf(stderr, "\t-6 Force fetch over IPv6\n");
 	fprintf(stderr, "\n\n");				
 	exit(1);
 }

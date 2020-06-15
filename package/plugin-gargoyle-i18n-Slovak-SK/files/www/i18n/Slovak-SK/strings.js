@@ -121,6 +121,10 @@ UI.prdr="port presmerovaný na smerovač";
 UI.puse="port je v používaní smerovača";
 UI.pfwd="port preposlaný na";
 UI.conn="pripojený";
+UI.YES="Yes";
+UI.NO="No";
+UI.optional="optional";
+UI.IPFam="IP Family";
 
 UI.AJAX="Nutná podpora prehliadača AJAX";
 UI.AJAXUpg="Prosím aktualizujte prehliadač na AJAX kompatibilný a skúste znova. K takýmto prehliadačom patrí Firefox 2.0+, Safari a IE 6+.";

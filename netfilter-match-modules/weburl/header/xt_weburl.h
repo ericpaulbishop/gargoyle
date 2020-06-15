@@ -1,8 +1,9 @@
-/*  timerange --	An iptables extension to match multiple timeranges within a week
- *  			Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
+/*  weburl --	A netfilter module to match URLs in HTTP(S) requests
+ *  		This module can match using string match or regular expressions
+ *  		Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
  *
  *
- *  Copyright © 2009 by Eric Bishop <eric@gargoyle-router.com>
+ *  Copyright © 2008 by Eric Bishop <eric@gargoyle-router.com>
  * 
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -21,23 +22,24 @@
 
 
 
-#ifndef _IPT_TIMERANGE_H
-#define _IPT_TIMERANGE_H
+#ifndef _XT_WEBURL_H
+#define _XT_WEBURL_H
 
 
-#define RANGE_LENGTH 51
+#define MAX_TEST_STR 1024
 
-#define HOURS 1
-#define WEEKDAYS 2
-#define DAYS_HOURS (HOURS+WEEKDAYS)
-#define WEEKLY_RANGE 4
+#define WEBURL_CONTAINS_TYPE 1
+#define WEBURL_REGEX_TYPE 2
+#define WEBURL_EXACT_TYPE 3
+#define WEBURL_ALL_PART 4
+#define WEBURL_DOMAIN_PART 5
+#define WEBURL_PATH_PART 6
 
-
-struct ipt_timerange_info
+struct xt_weburl_info
 {
-	long ranges[RANGE_LENGTH];
-	char days[7];
-	char type;
+	char test_str[MAX_TEST_STR];
+	unsigned char match_type;
+	unsigned char match_part;
 	unsigned char invert;
 };
-#endif /*_IPT_TIMERANGE_H*/
+#endif /*_XT_WEBURL_H*/

@@ -43,11 +43,12 @@
 
 
 void restore_backup_for_id(char* id, char* quota_backup_dir, unsigned char is_individual_other, list* defined_ip_groups);
-uint32_t ip_to_host_int(char* ip_str);
-uint32_t* ip_range_to_host_ints(char* ip_str);
+uint32_t* ip_to_host_int(char* ip_str, int* family);
+uint32_t* ip_range_to_host_ints(char* ip_str, int* family);
 list* filter_group_from_list(list** orig_ip_list, char* ip_group_str);
+int get_ipstr_family(char* ip_str);
 
-void delete_chain_from_table(char* table, char* delete_chain);
+void delete_chain_from_table(char* table, char* delete_chain, int family);
 void run_shell_command(char* command, int free_command_str);
 void free_split_pieces(char** split_pieces);
 
@@ -55,20 +56,23 @@ list* get_all_sections_of_type(struct uci_context *ctx, char* package, char* sec
 char* get_uci_option(struct uci_context* ctx,char* package_name, char* section_name, char* option_name);
 char* get_option_value_string(struct uci_option* uopt);
 
+int dry_run;
+
 int main(int argc, char** argv)
 {
 
 	char* wan_if = NULL;
 	char* local_subnet = NULL;
+	char* local_subnet6 = NULL;
 	char* death_mark = NULL;
 	char* death_mask = NULL;
 	char* crontab_line = NULL;
     int ret;
 	
 	unsigned char full_qos_active = 0;
-
+	dry_run = 0;
 	char c;
-	while((ret = getopt(argc, argv, "W:w:s:S:d:D:m:M:c:C:qQ")) != -1) //section, page, css includes, javascript includes, title, output interface variables
+	while((ret = getopt(argc, argv, "W:w:s:S:t:T:d:D:m:M:c:C:qQpP")) != -1) //section, page, css includes, javascript includes, title, output interface variables
 	{
         c = ret;
 		switch(c)
@@ -80,6 +84,10 @@ int main(int argc, char** argv)
 			case 'S':
 			case 's':
 				local_subnet = strdup(optarg);
+				break;
+			case 'T':
+			case 't':
+				local_subnet6 = strdup(optarg);
 				break;
 			case 'D':
 			case 'd':
@@ -97,6 +105,10 @@ int main(int argc, char** argv)
 			case 'q':
 				full_qos_active = 1;
 				break;
+			case 'P':
+			case 'p':
+				dry_run = 1;
+				break;
 		}
 	}
 
@@ -104,11 +116,11 @@ int main(int argc, char** argv)
 	char quota_table[] = "mangle";
 	char crontab_dir[] = "/etc/crontabs/";
 	char crontab_file_path[] = "/etc/crontabs/root";
-	delete_chain_from_table(quota_table, "egress_quotas");
-	delete_chain_from_table(quota_table, "ingress_quotas");
-	delete_chain_from_table(quota_table, "combined_quotas");
-	delete_chain_from_table(quota_table, "forward_quotas");
-	delete_chain_from_table("nat", "quota_redirects");
+	delete_chain_from_table(quota_table, "egress_quotas", AF_UNSPEC);
+	delete_chain_from_table(quota_table, "ingress_quotas", AF_UNSPEC);
+	delete_chain_from_table(quota_table, "combined_quotas", AF_UNSPEC);
+	delete_chain_from_table(quota_table, "forward_quotas", AF_UNSPEC);
+	delete_chain_from_table("nat", "quota_redirects", AF_UNSPEC);
 
 	if(wan_if == NULL)
 	{
@@ -118,6 +130,11 @@ int main(int argc, char** argv)
 	if(local_subnet == NULL)
 	{
 		fprintf(stderr, "ERRROR: No local subnet specified\n");
+		return 0;
+	}
+	if(local_subnet6 == NULL)
+	{
+		fprintf(stderr, "ERRROR: No local subnet6 specified\n");
 		return 0;
 	}
 	if(death_mark == NULL)
@@ -221,37 +238,44 @@ int main(int argc, char** argv)
 
 		
 		/* initialize chains */
-		run_shell_command(dynamic_strcat(3, "iptables -t ", quota_table, " -N forward_quotas 2>/dev/null"), 1);
-		run_shell_command(dynamic_strcat(3, "iptables -t ", quota_table, " -N egress_quotas 2>/dev/null"), 1);
-		run_shell_command(dynamic_strcat(3, "iptables -t ", quota_table, " -N ingress_quotas 2>/dev/null"), 1);
-		run_shell_command(dynamic_strcat(3, "iptables -t ", quota_table, " -N combined_quotas 2>/dev/null"), 1);
+		int cmdidx = 0;
+		char* cmdarray[2] = {"iptables","ip6tables"};
+		int cmdcnt = 2;
 		
-		run_shell_command("iptables -t nat -N quota_redirects 2>/dev/null", 0);
-		run_shell_command("iptables -t nat -A quota_redirects -j CONNMARK --set-mark 0x0/0xFF000000 2>/dev/null", 0);
-		run_shell_command("iptables -t nat -I zone_lan_prerouting -j quota_redirects 2>/dev/null", 0);
+		for(cmdidx = 0; cmdidx < cmdcnt; cmdidx++)
+		{
+			run_shell_command(dynamic_strcat(4, cmdarray[cmdidx], " -t ", quota_table, " -N forward_quotas 2>/dev/null"), 1);
+			run_shell_command(dynamic_strcat(4, cmdarray[cmdidx], " -t ", quota_table, " -N egress_quotas 2>/dev/null"), 1);
+			run_shell_command(dynamic_strcat(4, cmdarray[cmdidx], " -t ", quota_table, " -N ingress_quotas 2>/dev/null"), 1);
+			run_shell_command(dynamic_strcat(4, cmdarray[cmdidx], " -t ", quota_table, " -N combined_quotas 2>/dev/null"), 1);
+			
+			run_shell_command(dynamic_strcat(2, cmdarray[cmdidx], " -t nat -N quota_redirects 2>/dev/null"), 1);
+			run_shell_command(dynamic_strcat(2, cmdarray[cmdidx], " -t nat -A quota_redirects -j CONNMARK --set-mark 0x0/0xFF000000 2>/dev/null"), 1);
+			run_shell_command(dynamic_strcat(2, cmdarray[cmdidx], " -t nat -I zone_lan_prerouting -j quota_redirects 2>/dev/null"), 1);
 
-		char* no_death_mark_test = dynamic_strcat(3, " -m connmark --mark 0x0/", death_mask, " ");
-		run_shell_command(dynamic_strcat(6, "iptables -t ", quota_table, " -I INPUT  1 -i ", wan_if, no_death_mark_test, " -j ingress_quotas  2>/dev/null"), 1);
-		run_shell_command(dynamic_strcat(6, "iptables -t ", quota_table, " -I INPUT  2 -i ", wan_if, no_death_mark_test, " -j combined_quotas 2>/dev/null"), 1);
-		run_shell_command(dynamic_strcat(6, "iptables -t ", quota_table, " -I OUTPUT 1 -o ", wan_if, no_death_mark_test, " -j egress_quotas   2>/dev/null"), 1);
-		run_shell_command(dynamic_strcat(6, "iptables -t ", quota_table, " -I OUTPUT 2 -o ", wan_if, no_death_mark_test, " -j combined_quotas 2>/dev/null"), 1);
-	
+			char* no_death_mark_test = dynamic_strcat(3, " -m connmark --mark 0x0/", death_mask, " ");
+			run_shell_command(dynamic_strcat(7, cmdarray[cmdidx], " -t ", quota_table, " -I INPUT  1 -i ", wan_if, no_death_mark_test, " -j ingress_quotas  2>/dev/null"), 1);
+			run_shell_command(dynamic_strcat(7, cmdarray[cmdidx], " -t ", quota_table, " -I INPUT  2 -i ", wan_if, no_death_mark_test, " -j combined_quotas 2>/dev/null"), 1);
+			run_shell_command(dynamic_strcat(7, cmdarray[cmdidx], " -t ", quota_table, " -I OUTPUT 1 -o ", wan_if, no_death_mark_test, " -j egress_quotas   2>/dev/null"), 1);
+			run_shell_command(dynamic_strcat(7, cmdarray[cmdidx], " -t ", quota_table, " -I OUTPUT 2 -o ", wan_if, no_death_mark_test, " -j combined_quotas 2>/dev/null"), 1);
+		
 
-		run_shell_command(dynamic_strcat(3, "iptables -t ", quota_table, " -I FORWARD -j forward_quotas 2>/dev/null"), 1);
-		run_shell_command(dynamic_strcat(6, "iptables -t ", quota_table, " -A forward_quotas -o ", wan_if, no_death_mark_test, " -j egress_quotas  2>/dev/null"), 1);
-		run_shell_command(dynamic_strcat(6, "iptables -t ", quota_table, " -A forward_quotas -i ", wan_if, no_death_mark_test, " -j ingress_quotas  2>/dev/null"), 1);
-		run_shell_command(dynamic_strcat(6, "iptables -t ", quota_table, " -A forward_quotas -i ", wan_if, no_death_mark_test, " -j CONNMARK --set-mark 0x0F000000/0x0F000000  2>/dev/null"), 1);
-		run_shell_command(dynamic_strcat(6, "iptables -t ", quota_table, " -A forward_quotas -o ", wan_if, no_death_mark_test, " -j CONNMARK --set-mark 0x0F000000/0x0F000000  2>/dev/null"), 1);
-		run_shell_command(dynamic_strcat(3, "iptables -t ", quota_table, " -A forward_quotas -m connmark --mark 0x0F000000/0x0F000000 -j combined_quotas  2>/dev/null"), 1);
-		run_shell_command(dynamic_strcat(3, "iptables -t ", quota_table, " -A forward_quotas -j CONNMARK --set-mark 0x0/0x0F000000  2>/dev/null"), 1);
-		free(no_death_mark_test);
+			run_shell_command(dynamic_strcat(4, cmdarray[cmdidx], " -t ", quota_table, " -I FORWARD -j forward_quotas 2>/dev/null"), 1);
+			run_shell_command(dynamic_strcat(7, cmdarray[cmdidx], " -t ", quota_table, " -A forward_quotas -o ", wan_if, no_death_mark_test, " -j egress_quotas  2>/dev/null"), 1);
+			run_shell_command(dynamic_strcat(7, cmdarray[cmdidx], " -t ", quota_table, " -A forward_quotas -i ", wan_if, no_death_mark_test, " -j ingress_quotas  2>/dev/null"), 1);
+			run_shell_command(dynamic_strcat(7, cmdarray[cmdidx], " -t ", quota_table, " -A forward_quotas -i ", wan_if, no_death_mark_test, " -j CONNMARK --set-mark 0x0F000000/0x0F000000  2>/dev/null"), 1);
+			run_shell_command(dynamic_strcat(7, cmdarray[cmdidx], " -t ", quota_table, " -A forward_quotas -o ", wan_if, no_death_mark_test, " -j CONNMARK --set-mark 0x0F000000/0x0F000000  2>/dev/null"), 1);
+			run_shell_command(dynamic_strcat(4, cmdarray[cmdidx], " -t ", quota_table, " -A forward_quotas -m connmark --mark 0x0F000000/0x0F000000 -j combined_quotas  2>/dev/null"), 1);
+			run_shell_command(dynamic_strcat(4, cmdarray[cmdidx], " -t ", quota_table, " -A forward_quotas -j CONNMARK --set-mark 0x0/0x0F000000  2>/dev/null"), 1);
+			free(no_death_mark_test);
 
-		run_shell_command(dynamic_strcat(5, "iptables -t ", quota_table, " -A egress_quotas   -j CONNMARK --set-mark 0x0/", death_mask, "  2>/dev/null"), 1);
-		run_shell_command(dynamic_strcat(5, "iptables -t ", quota_table, " -A ingress_quotas  -j CONNMARK --set-mark 0x0/", death_mask, "  2>/dev/null"), 1);
-		run_shell_command(dynamic_strcat(5, "iptables -t ", quota_table, " -A combined_quotas -j CONNMARK --set-mark 0x0/", death_mask, "  2>/dev/null"), 1);
-		run_shell_command(dynamic_strcat(3, "iptables -t ", quota_table, " -A egress_quotas   -j CONNMARK --set-mark 0x0/0xFF000000 2>/dev/null"), 1);
-		run_shell_command(dynamic_strcat(3, "iptables -t ", quota_table, " -A ingress_quotas  -j CONNMARK --set-mark 0x0/0xFF000000 2>/dev/null"), 1);
-		run_shell_command(dynamic_strcat(3, "iptables -t ", quota_table, " -A combined_quotas -j CONNMARK --set-mark 0x0/0xFF000000 2>/dev/null"), 1);
+			run_shell_command(dynamic_strcat(6, cmdarray[cmdidx], " -t ", quota_table, " -A egress_quotas   -j CONNMARK --set-mark 0x0/", death_mask, "  2>/dev/null"), 1);
+			run_shell_command(dynamic_strcat(6, cmdarray[cmdidx], " -t ", quota_table, " -A ingress_quotas  -j CONNMARK --set-mark 0x0/", death_mask, "  2>/dev/null"), 1);
+			run_shell_command(dynamic_strcat(6, cmdarray[cmdidx], " -t ", quota_table, " -A combined_quotas -j CONNMARK --set-mark 0x0/", death_mask, "  2>/dev/null"), 1);
+			run_shell_command(dynamic_strcat(4, cmdarray[cmdidx], " -t ", quota_table, " -A egress_quotas   -j CONNMARK --set-mark 0x0/0xFF000000 2>/dev/null"), 1);
+			run_shell_command(dynamic_strcat(4, cmdarray[cmdidx], " -t ", quota_table, " -A ingress_quotas  -j CONNMARK --set-mark 0x0/0xFF000000 2>/dev/null"), 1);
+			run_shell_command(dynamic_strcat(4, cmdarray[cmdidx], " -t ", quota_table, " -A combined_quotas -j CONNMARK --set-mark 0x0/0xFF000000 2>/dev/null"), 1);
+		}
 
 		/* add rules */
 		char* set_death_mark = dynamic_strcat(5, " -j CONNMARK --set-mark ", death_mark, "/", death_mask, " ");
@@ -459,8 +483,10 @@ int main(int argc, char** argv)
 					for(type_index=0; type_index < 3; type_index++)
 					{
 						char** ip_egress_tests = NULL;
+						int* ip_egress_tests_family = NULL;
 						char* applies_to = strdup("combined");
 						char* subnet_definition = strdup("");
+						char* subnet6_definition = strdup("");
 
 						char* limit = get_uci_option(ctx, "firewall", next_quota, types[type_index]);
 					
@@ -478,18 +504,35 @@ int main(int argc, char** argv)
 						 * need to do ip test even if limit is null, because ALL_OTHERS quotas should not apply when any of the three types of explicit limit is defined
 						 * and we therefore need to use this test to set mark indicating an explicit quota has been checked
 						 */
-						char* ip_test = strdup(""); 
+						char* ip_test = strdup("");
+						char* ip6_test = NULL;
+						int foundip4 = 0;
+						int foundip6 = 0;
 						if( strcmp(ip, "ALL_OTHERS_COMBINED") != 0 && strcmp(ip, "ALL_OTHERS_INDIVIDUAL") != 0 && strcmp(ip, "ALL") != 0 )
 						{
 
 							char* src_test = strstr(ip, "-") == NULL ? dynamic_strcat(3, " --src ", ip, " ") : dynamic_strcat(3, " -m iprange --src-range ", ip, " ");
 							char* dst_test = strstr(ip, "-") == NULL ? dynamic_strcat(3, " --dst ", ip, " ") : dynamic_strcat(3, " -m iprange --dst-range ", ip, " ");
 							
+							// Check IPv4 or IPv6 in the single IP case. Multiple IPs will be checked later
+							if(strstr(ip, ",") == NULL && strstr(ip, " ") == NULL && strstr(ip, "\t") == NULL )
+							{
+								if(get_ipstr_family(ip) == 4)
+								{
+									foundip4 = 1;
+								}
+								else
+								{
+									foundip6 = 1;
+								}
+							}
+							
 							if(strstr(ip, ",") != NULL || strstr(ip, " ") != NULL || strstr(ip, "\t") != NULL )
 							{
 								char ip_breaks[] = { ',', ' ', '\t' };
 								unsigned long num_ips = 0;
 								char** ip_list = split_on_separators(ip, ip_breaks, 3, -1, 0, &num_ips);
+								int* ip_family_list = malloc(num_ips*sizeof(int));
 								unsigned long ip_index;
 								for(ip_index=0; ip_index < num_ips; ip_index++)
 								{
@@ -497,24 +540,49 @@ int main(int argc, char** argv)
 									char* egress_test = strstr(next_ip, "-") == NULL ? dynamic_strcat(3, " --src ", next_ip, " ") : dynamic_strcat(3, " -m iprange --src-range ", next_ip, " ");
 									char* ingress_test = strstr(next_ip, "-") == NULL ? dynamic_strcat(3, " --dst ", next_ip, " ") : dynamic_strcat(3, " -m iprange --dst-range ", next_ip, " ");
 
-									if(strcmp(types[type_index], "egress_limit") == 0)
+									if(get_ipstr_family(next_ip) == 4)
 									{
-										run_shell_command(dynamic_strcat(6, "iptables -t ", quota_table, " -A ", chains[type_index], egress_test, " -j CONNMARK --set-mark 0x0F000000/0x0F000000 2>/dev/null"), 1);
+										foundip4 = 1;
+										ip_family_list[ip_index] = 4;
+										if(strcmp(types[type_index], "egress_limit") == 0)
+										{
+											run_shell_command(dynamic_strcat(6, "iptables -t ", quota_table, " -A ", chains[type_index], egress_test, " -j CONNMARK --set-mark 0x0F000000/0x0F000000 2>/dev/null"), 1);
+										}
+										else if(strcmp(types[type_index], "ingress_limit") == 0)
+										{
+											run_shell_command(dynamic_strcat(6, "iptables -t ", quota_table, " -A ", chains[type_index], ingress_test, " -j CONNMARK --set-mark 0x0F000000/0x0F000000 2>/dev/null"), 1);
+										}
+										else if(strcmp(types[type_index], "combined_limit") == 0)
+										{
+											run_shell_command(dynamic_strcat(8, "iptables -t ", quota_table, " -A ", chains[type_index], " -i ", wan_if, ingress_test, " -j CONNMARK --set-mark 0x0F000000/0x0F000000 2>/dev/null"), 1);
+											run_shell_command(dynamic_strcat(8, "iptables -t ", quota_table, " -A ", chains[type_index], " -o ", wan_if, egress_test, " -j CONNMARK --set-mark 0x0F000000/0x0F000000 2>/dev/null"), 1);
+										}
 									}
-									else if(strcmp(types[type_index], "ingress_limit") == 0)
+									else
 									{
-										run_shell_command(dynamic_strcat(6, "iptables -t ", quota_table, " -A ", chains[type_index], ingress_test, " -j CONNMARK --set-mark 0x0F000000/0x0F000000 2>/dev/null"), 1);
+										foundip6 = 1;
+										ip_family_list[ip_index] = 6;
+										if(strcmp(types[type_index], "egress_limit") == 0)
+										{
+											run_shell_command(dynamic_strcat(6, "ip6tables -t ", quota_table, " -A ", chains[type_index], egress_test, " -j CONNMARK --set-mark 0x0F000000/0x0F000000 2>/dev/null"), 1);
+										}
+										else if(strcmp(types[type_index], "ingress_limit") == 0)
+										{
+											run_shell_command(dynamic_strcat(6, "ip6tables -t ", quota_table, " -A ", chains[type_index], ingress_test, " -j CONNMARK --set-mark 0x0F000000/0x0F000000 2>/dev/null"), 1);
+										}
+										else if(strcmp(types[type_index], "combined_limit") == 0)
+										{
+											run_shell_command(dynamic_strcat(8, "ip6tables -t ", quota_table, " -A ", chains[type_index], " -i ", wan_if, ingress_test, " -j CONNMARK --set-mark 0x0F000000/0x0F000000 2>/dev/null"), 1);
+											run_shell_command(dynamic_strcat(8, "ip6tables -t ", quota_table, " -A ", chains[type_index], " -o ", wan_if, egress_test, " -j CONNMARK --set-mark 0x0F000000/0x0F000000 2>/dev/null"), 1);
+										}
 									}
-									else if(strcmp(types[type_index], "combined_limit") == 0)
-									{
-										run_shell_command(dynamic_strcat(8, "iptables -t ", quota_table, " -A ", chains[type_index], " -i ", wan_if, ingress_test, " -j CONNMARK --set-mark 0x0F000000/0x0F000000 2>/dev/null"), 1);
-										run_shell_command(dynamic_strcat(8, "iptables -t ", quota_table, " -A ", chains[type_index], " -o ", wan_if, egress_test, " -j CONNMARK --set-mark 0x0F000000/0x0F000000 2>/dev/null"), 1);
-									}
+
 									ip_list[ip_index] = egress_test;
 									free(next_ip);
 									free(ingress_test);
 								}
 								ip_egress_tests = ip_list;
+								ip_egress_tests_family = ip_family_list;
 								char* rule_end = strdup(" -m connmark --mark 0x0F000000/0x0F000000 ");
 								ip_test = dcat_and_free(&ip_test, &rule_end, 1, 1);
 							}
@@ -528,12 +596,28 @@ int main(int argc, char** argv)
 							}
 							else if(strcmp(types[type_index], "combined_limit") == 0)
 							{
-								run_shell_command(dynamic_strcat(8, "iptables -t ", quota_table, " -A ", chains[type_index], " -i ", wan_if, dst_test, " -j CONNMARK --set-mark 0x0F000000/0x0F000000 2>/dev/null"), 1);
-								run_shell_command(dynamic_strcat(8, "iptables -t ", quota_table, " -A ", chains[type_index], " -o ", wan_if, src_test, " -j CONNMARK --set-mark 0x0F000000/0x0F000000 2>/dev/null"), 1);
+								if(foundip4)
+								{
+									run_shell_command(dynamic_strcat(8, "iptables -t ", quota_table, " -A ", chains[type_index], " -i ", wan_if, dst_test, " -j CONNMARK --set-mark 0x0F000000/0x0F000000 2>/dev/null"), 1);
+									run_shell_command(dynamic_strcat(8, "iptables -t ", quota_table, " -A ", chains[type_index], " -o ", wan_if, src_test, " -j CONNMARK --set-mark 0x0F000000/0x0F000000 2>/dev/null"), 1);
+								}
+								if(foundip6)
+								{
+									run_shell_command(dynamic_strcat(8, "ip6tables -t ", quota_table, " -A ", chains[type_index], " -i ", wan_if, dst_test, " -j CONNMARK --set-mark 0x0F000000/0x0F000000 2>/dev/null"), 1);
+									run_shell_command(dynamic_strcat(8, "ip6tables -t ", quota_table, " -A ", chains[type_index], " -o ", wan_if, src_test, " -j CONNMARK --set-mark 0x0F000000/0x0F000000 2>/dev/null"), 1);
+								}
+								
 								char* rule_end = strdup(" -m connmark --mark 0x0F000000/0x0F000000 ");
 								ip_test = dcat_and_free(&ip_test, &rule_end, 1, 1);
 							}
-							run_shell_command(dynamic_strcat(6, "iptables -t ", quota_table, " -A ", chains[type_index], ip_test, " -j CONNMARK --set-mark 0xF0000000/0xF0000000 2>/dev/null"), 1);
+							if(foundip4)
+							{
+								run_shell_command(dynamic_strcat(6, "iptables -t ", quota_table, " -A ", chains[type_index], ip_test, " -j CONNMARK --set-mark 0xF0000000/0xF0000000 2>/dev/null"), 1);
+							}
+							if(foundip6)
+							{
+								run_shell_command(dynamic_strcat(6, "ip6tables -t ", quota_table, " -A ", chains[type_index], ip_test, " -j CONNMARK --set-mark 0xF0000000/0xF0000000 2>/dev/null"), 1);
+							}
 							free(dst_test);
 							free(src_test);
 						}
@@ -543,17 +627,22 @@ int main(int argc, char** argv)
 							ip_test=dcat_and_free(&ip_test, &rule_end, 1, 1);
 							if(strcmp(ip, "ALL_OTHERS_INDIVIDUAL") == 0)
 							{
+								ip6_test=strdup(ip_test);
 								free(applies_to);
 								if(strcmp(types[type_index], "egress_limit") == 0)
 								{
 									char* subnet_test = dynamic_strcat(3, " -s ", local_subnet, " ");
 									ip_test = dcat_and_free(&subnet_test, &ip_test, 1, 1);
+									subnet_test = dynamic_strcat(3, " -s ", local_subnet6, " ");
+									ip6_test = dcat_and_free(&subnet_test, &ip6_test, 1, 1);
 									applies_to = strdup("individual_src");
 								}
 								else if(strcmp(types[type_index], "ingress_limit") == 0)
 								{
 									char* subnet_test = dynamic_strcat(3, " -d ", local_subnet, " ");
 									ip_test = dcat_and_free(&subnet_test, &ip_test, 1, 1);
+									subnet_test = dynamic_strcat(3, " -d ", local_subnet6, " ");
+									ip6_test = dcat_and_free(&subnet_test, &ip6_test, 1, 1);
 									applies_to = strdup("individual_dst");
 								}
 								else if(strcmp(types[type_index], "combined_limit") == 0)
@@ -562,11 +651,18 @@ int main(int argc, char** argv)
 								}
 									
 								char *subnet_option = strdup(" --subnet ");
-								subnet_definition = dcat_and_free(&subnet_definition, &subnet_option, 1, 1);
+								subnet_definition = dcat_and_free(&subnet_definition, &subnet_option, 1, 0);
 								subnet_definition = dcat_and_free(&subnet_definition, &local_subnet, 1, 0);
+								subnet6_definition = dcat_and_free(&subnet6_definition, &subnet_option, 1, 1);
+								subnet6_definition = dcat_and_free(&subnet6_definition, &local_subnet6, 1, 0);
 							}
+							foundip4 = 1;
+							foundip6 = 1;
 						}
-						
+						if(ip6_test == NULL)
+						{
+							ip6_test=strdup(ip_test);
+						}
 
 
 						if(up_qos_mark != NULL && down_qos_mark != NULL)
@@ -580,13 +676,27 @@ int main(int argc, char** argv)
 								if(other_limit != NULL)
 								{
 									char* other_type_id = dynamic_strcat(2, quota_base_id, postfixes[other_type_index] );
-									if(type_index == EGRESS_INDEX)
+									if(foundip4)
 									{
- 										run_shell_command(dynamic_strcat(10, "iptables -t ", quota_table, " -A ", chains[type_index], ip_test, time_match_str, " -m bandwidth --id \"", other_type_id, "\" --bcheck_with_src_dst_swap ", set_egress_mark), 1);  
+										if(type_index == EGRESS_INDEX)
+										{
+											run_shell_command(dynamic_strcat(10, "iptables -t ", quota_table, " -A ", chains[type_index], ip_test, time_match_str, " -m bandwidth --id \"", other_type_id, "\" --bcheck_with_src_dst_swap ", set_egress_mark), 1);  
+										}
+										else
+										{
+											run_shell_command(dynamic_strcat(10, "iptables -t ", quota_table, " -A ", chains[type_index], ip_test, time_match_str, " -m bandwidth --id \"", other_type_id, "\" --bcheck_with_src_dst_swap  ", set_ingress_mark), 1); 
+										}
 									}
-									else
+									if(foundip6)
 									{
-										run_shell_command(dynamic_strcat(10, "iptables -t ", quota_table, " -A ", chains[type_index], ip_test, time_match_str, " -m bandwidth --id \"", other_type_id, "\" --bcheck_with_src_dst_swap  ", set_ingress_mark), 1); 
+										if(type_index == EGRESS_INDEX)
+										{
+											run_shell_command(dynamic_strcat(10, "ip6tables -t ", quota_table, " -A ", chains[type_index], ip6_test, time_match_str, " -m bandwidth --id \"", other_type_id, "\" --bcheck_with_src_dst_swap ", set_egress_mark), 1);  
+										}
+										else
+										{
+											run_shell_command(dynamic_strcat(10, "ip6tables -t ", quota_table, " -A ", chains[type_index], ip6_test, time_match_str, " -m bandwidth --id \"", other_type_id, "\" --bcheck_with_src_dst_swap  ", set_ingress_mark), 1); 
+										}
 									}
 									free(other_type_id);
 								}
@@ -602,19 +712,39 @@ int main(int argc, char** argv)
 							{
 								char* set_egress_mark = dynamic_strcat(2, " -j MARK --set-mark ", up_qos_mark);
 								char* set_ingress_mark = dynamic_strcat(2, " -j MARK --set-mark ", down_qos_mark);	
-								if(strcmp(types[type_index], "egress_limit") == 0)
+								if(foundip4)
 								{
-									run_shell_command(dynamic_strcat(15, "iptables -t ", quota_table, " -A ", chains[type_index], ip_test, time_match_str, " -m bandwidth --id \"", type_id, "\" --type ", applies_to, subnet_definition, " --greater_than ", limit, reset, set_egress_mark), 1);
+									if(strcmp(types[type_index], "egress_limit") == 0)
+									{
+										run_shell_command(dynamic_strcat(15, "iptables -t ", quota_table, " -A ", chains[type_index], ip_test, time_match_str, " -m bandwidth --id \"", type_id, "\" --type ", applies_to, subnet_definition, " --greater_than ", limit, reset, set_egress_mark), 1);
+									}
+									else if(strcmp(types[type_index], "ingress_limit") == 0)
+									{
+										run_shell_command(dynamic_strcat(15, "iptables -t ", quota_table, " -A ", chains[type_index], ip_test, time_match_str, " -m bandwidth --id \"", type_id, "\" --type ", applies_to, subnet_definition, " --greater_than ", limit, reset, set_ingress_mark), 1);
+									}
+									else //combined
+									{
+										run_shell_command(dynamic_strcat(14, "iptables -t ", quota_table, " -A ", chains[type_index], ip_test, time_match_str, " -m bandwidth --id \"", type_id, "\" --type ", applies_to, subnet_definition, " --greater_than ", limit, reset), 1);
+										run_shell_command(dynamic_strcat(13, "iptables -t ", quota_table, " -A ", chains[type_index], " -o ", wan_if, " ", ip_test, time_match_str, " -m bandwidth --id \"", type_id, "\" --bcheck ", set_egress_mark), 1);                     //egress
+										run_shell_command(dynamic_strcat(13, "iptables -t ", quota_table, " -A ", chains[type_index], " -i ", wan_if, " ", ip_test, time_match_str, " -m bandwidth --id \"", type_id, "\" --bcheck_with_src_dst_swap  ", set_ingress_mark), 1); //ingress
+									}
 								}
-								else if(strcmp(types[type_index], "ingress_limit") == 0)
+								if(foundip6)
 								{
-									run_shell_command(dynamic_strcat(15, "iptables -t ", quota_table, " -A ", chains[type_index], ip_test, time_match_str, " -m bandwidth --id \"", type_id, "\" --type ", applies_to, subnet_definition, " --greater_than ", limit, reset, set_ingress_mark), 1);
-								}
-								else //combined
-								{
-									run_shell_command(dynamic_strcat(14, "iptables -t ", quota_table, " -A ", chains[type_index], ip_test, time_match_str, " -m bandwidth --id \"", type_id, "\" --type ", applies_to, subnet_definition, " --greater_than ", limit, reset), 1);
-									run_shell_command(dynamic_strcat(13, "iptables -t ", quota_table, " -A ", chains[type_index], " -o ", wan_if, " ", ip_test, time_match_str, " -m bandwidth --id \"", type_id, "\" --bcheck ", set_egress_mark), 1);                     //egress
-									run_shell_command(dynamic_strcat(13, "iptables -t ", quota_table, " -A ", chains[type_index], " -i ", wan_if, " ", ip_test, time_match_str, " -m bandwidth --id \"", type_id, "\" --bcheck_with_src_dst_swap  ", set_ingress_mark), 1); //ingress
+									if(strcmp(types[type_index], "egress_limit") == 0)
+									{
+										run_shell_command(dynamic_strcat(15, "ip6tables -t ", quota_table, " -A ", chains[type_index], ip6_test, time_match_str, " -m bandwidth --id \"", type_id, "\" --type ", applies_to, subnet6_definition, " --greater_than ", limit, reset, set_egress_mark), 1);
+									}
+									else if(strcmp(types[type_index], "ingress_limit") == 0)
+									{
+										run_shell_command(dynamic_strcat(15, "ip6tables -t ", quota_table, " -A ", chains[type_index], ip6_test, time_match_str, " -m bandwidth --id \"", type_id, "\" --type ", applies_to, subnet6_definition, " --greater_than ", limit, reset, set_ingress_mark), 1);
+									}
+									else //combined
+									{
+										run_shell_command(dynamic_strcat(14, "ip6tables -t ", quota_table, " -A ", chains[type_index], ip6_test, time_match_str, " -m bandwidth --id \"", type_id, "\" --type ", applies_to, subnet6_definition, " --greater_than ", limit, reset), 1);
+										run_shell_command(dynamic_strcat(13, "ip6tables -t ", quota_table, " -A ", chains[type_index], " -o ", wan_if, " ", ip6_test, time_match_str, " -m bandwidth --id \"", type_id, "\" --bcheck ", set_egress_mark), 1);                     //egress
+										run_shell_command(dynamic_strcat(13, "ip6tables -t ", quota_table, " -A ", chains[type_index], " -i ", wan_if, " ", ip6_test, time_match_str, " -m bandwidth --id \"", type_id, "\" --bcheck_with_src_dst_swap  ", set_ingress_mark), 1); //ingress
+									}
 								}
 								free(set_egress_mark);
 								free(set_ingress_mark);
@@ -622,37 +752,95 @@ int main(int argc, char** argv)
 							else
 							{
 								//insert quota block rule
-								run_shell_command(dynamic_strcat(15, "iptables -t ", quota_table, " -A ", chains[type_index], ip_test, time_match_str, " -m bandwidth --id \"", type_id, "\" --type ", applies_to, subnet_definition, " --greater_than ", limit, reset, set_death_mark), 1);
+								if(foundip4)
+								{
+									run_shell_command(dynamic_strcat(15, "iptables -t ", quota_table, " -A ", chains[type_index], ip_test, time_match_str, " -m bandwidth --id \"", type_id, "\" --type ", applies_to, subnet_definition, " --greater_than ", limit, reset, set_death_mark), 1);
 
-								
-								//insert redirect rule
-								if(strcmp(ip, "ALL") == 0 || strcmp(ip, "ALL_OTHERS_INDIVIDUAL") == 0)
-								{
-									char* check_str = (strcmp(types[type_index], "ingress_limit") == 0) ? strdup(" --bcheck_with_src_dst_swap ") : strdup(" --bcheck ");
-									run_shell_command(dynamic_strcat(7, "iptables -t nat -A quota_redirects -p tcp ", time_match_str, " -m multiport --destination-port 80,443 -m bandwidth ", check_str, " --id \"", type_id, "\" -j REDIRECT "), 1);
-									free(check_str);
-								}
-								else if(strcmp(ip, "ALL_OTHERS_COMBINED") == 0)
-								{
-									run_shell_command(dynamic_strcat(5, "iptables -t nat -A quota_redirects -p tcp ", time_match_str, " -m connmark --mark 0x0/0xF0000000 -m multiport --destination-port 80,443 -m bandwidth --bcheck --id \"", type_id, "\" -j REDIRECT "), 1);
-								}
-								else
-								{
-									if(ip_egress_tests != NULL)
+									
+									//insert redirect rule
+									if(strcmp(ip, "ALL") == 0 || strcmp(ip, "ALL_OTHERS_INDIVIDUAL") == 0)
 									{
-										unsigned long egress_test_index;
-										for(egress_test_index=0; ip_egress_tests[egress_test_index] != NULL; egress_test_index++ )
-										{
-											run_shell_command(dynamic_strcat(3, "iptables -t nat -A quota_redirects ", ip_egress_tests[egress_test_index], " -j CONNMARK --set-mark 0x0F000000/0x0F000000 2>/dev/null"), 1);
-										}
+										char* check_str = (strcmp(types[type_index], "ingress_limit") == 0) ? strdup(" --bcheck_with_src_dst_swap ") : strdup(" --bcheck ");
+										run_shell_command(dynamic_strcat(7, "iptables -t nat -A quota_redirects -p tcp ", time_match_str, " -m multiport --destination-port 80,443 -m bandwidth ", check_str, " --id \"", type_id, "\" -j REDIRECT "), 1);
+										free(check_str);
+									}
+									else if(strcmp(ip, "ALL_OTHERS_COMBINED") == 0)
+									{
+										run_shell_command(dynamic_strcat(5, "iptables -t nat -A quota_redirects -p tcp ", time_match_str, " -m connmark --mark 0x0/0xF0000000 -m multiport --destination-port 80,443 -m bandwidth --bcheck --id \"", type_id, "\" -j REDIRECT "), 1);
 									}
 									else
 									{
-										run_shell_command(dynamic_strcat(4, "iptables -t nat -A quota_redirects ", ( strstr(ip, "-") == NULL ? " --src " : " -m iprange --src-range "), ip, " -j CONNMARK --set-mark 0x0F000000/0x0F000000 2>/dev/null"), 1);
+										// Re-test for this
+										int refoundip4 = 0;
+										if(ip_egress_tests != NULL)
+										{
+											unsigned long egress_test_index;
+											for(egress_test_index=0; ip_egress_tests[egress_test_index] != NULL; egress_test_index++ )
+											{
+												if(ip_egress_tests_family[egress_test_index] == 6)
+												{
+													run_shell_command(dynamic_strcat(3, "iptables -t nat -A quota_redirects ", ip_egress_tests[egress_test_index], " -j CONNMARK --set-mark 0x0F000000/0x0F000000 2>/dev/null"), 1);
+													refoundip4 = 1;
+												}
+											}
+										}
+										else
+										{
+											run_shell_command(dynamic_strcat(4, "iptables -t nat -A quota_redirects ", ( strstr(ip, "-") == NULL ? " --src " : " -m iprange --src-range "), ip, " -j CONNMARK --set-mark 0x0F000000/0x0F000000 2>/dev/null"), 1);
+											refoundip4 = 1;
+										}
+										if(refoundip4)
+										{
+											run_shell_command(dynamic_strcat(5, "iptables -t nat -A quota_redirects -p tcp ", time_match_str, " -m connmark --mark 0x0F000000/0x0F000000 -m multiport --destination-port 80,443 -m bandwidth --bcheck --id \"", type_id, "\" -j REDIRECT "), 1);
+											run_shell_command("iptables -t nat -A quota_redirects -m connmark --mark 0x0F000000/0x0F000000 -j CONNMARK --set-mark 0xF0000000/0xF0000000 2>/dev/null", 0);
+											run_shell_command("iptables -t nat -A quota_redirects -j CONNMARK --set-mark 0x0/0x0F000000 2>/dev/null", 0);
+										}
 									}
-									run_shell_command(dynamic_strcat(5, "iptables -t nat -A quota_redirects -p tcp ", time_match_str, " -m connmark --mark 0x0F000000/0x0F000000 -m multiport --destination-port 80,443 -m bandwidth --bcheck --id \"", type_id, "\" -j REDIRECT "), 1);
-									run_shell_command("iptables -t nat -A quota_redirects -m connmark --mark 0x0F000000/0x0F000000 -j CONNMARK --set-mark 0xF0000000/0xF0000000 2>/dev/null", 0);
-									run_shell_command("iptables -t nat -A quota_redirects -j CONNMARK --set-mark 0x0/0x0F000000 2>/dev/null", 0);
+								}
+								if(foundip6)
+								{
+									run_shell_command(dynamic_strcat(15, "ip6tables -t ", quota_table, " -A ", chains[type_index], ip6_test, time_match_str, " -m bandwidth --id \"", type_id, "\" --type ", applies_to, subnet6_definition, " --greater_than ", limit, reset, set_death_mark), 1);
+
+									
+									//insert redirect rule
+									if(strcmp(ip, "ALL") == 0 || strcmp(ip, "ALL_OTHERS_INDIVIDUAL") == 0)
+									{
+										char* check_str = (strcmp(types[type_index], "ingress_limit") == 0) ? strdup(" --bcheck_with_src_dst_swap ") : strdup(" --bcheck ");
+										run_shell_command(dynamic_strcat(7, "ip6tables -t nat -A quota_redirects -p tcp ", time_match_str, " -m multiport --destination-port 80,443 -m bandwidth ", check_str, " --id \"", type_id, "\" -j REDIRECT "), 1);
+										free(check_str);
+									}
+									else if(strcmp(ip, "ALL_OTHERS_COMBINED") == 0)
+									{
+										run_shell_command(dynamic_strcat(5, "ip6tables -t nat -A quota_redirects -p tcp ", time_match_str, " -m connmark --mark 0x0/0xF0000000 -m multiport --destination-port 80,443 -m bandwidth --bcheck --id \"", type_id, "\" -j REDIRECT "), 1);
+									}
+									else
+									{
+										// Re-test for this
+										int refoundip6 = 0;
+										if(ip_egress_tests != NULL)
+										{
+											unsigned long egress_test_index;
+											for(egress_test_index=0; ip_egress_tests[egress_test_index] != NULL; egress_test_index++ )
+											{
+												if(ip_egress_tests_family[egress_test_index] == 6)
+												{
+													run_shell_command(dynamic_strcat(3, "ip6tables -t nat -A quota_redirects ", ip_egress_tests[egress_test_index], " -j CONNMARK --set-mark 0x0F000000/0x0F000000 2>/dev/null"), 1);
+													refoundip6 = 1;
+												}
+											}
+										}
+										else
+										{
+											run_shell_command(dynamic_strcat(4, "ip6tables -t nat -A quota_redirects ", ( strstr(ip, "-") == NULL ? " --src " : " -m iprange --src-range "), ip, " -j CONNMARK --set-mark 0x0F000000/0x0F000000 2>/dev/null"), 1);
+											refoundip6 = 1;
+										}
+										if(refoundip6)
+										{
+											run_shell_command(dynamic_strcat(5, "ip6tables -t nat -A quota_redirects -p tcp ", time_match_str, " -m connmark --mark 0x0F000000/0x0F000000 -m multiport --destination-port 80,443 -m bandwidth --bcheck --id \"", type_id, "\" -j REDIRECT "), 1);
+											run_shell_command("ip6tables -t nat -A quota_redirects -m connmark --mark 0x0F000000/0x0F000000 -j CONNMARK --set-mark 0xF0000000/0xF0000000 2>/dev/null", 0);
+											run_shell_command("ip6tables -t nat -A quota_redirects -j CONNMARK --set-mark 0x0/0x0F000000 2>/dev/null", 0);
+										}
+									}
 								}
 							}
 
@@ -667,13 +855,22 @@ int main(int argc, char** argv)
 						}
 						if(strstr(ip_test, "connmark") != NULL)
 						{
-							run_shell_command(dynamic_strcat(5, "iptables -t ", quota_table, " -A ", chains[type_index], " -j CONNMARK --set-mark 0x0/0x0F000000 2>/dev/null"), 1);
+							if(foundip4)
+							{
+								run_shell_command(dynamic_strcat(5, "iptables -t ", quota_table, " -A ", chains[type_index], " -j CONNMARK --set-mark 0x0/0x0F000000 2>/dev/null"), 1);
+							}
+							if(foundip6)
+							{
+								run_shell_command(dynamic_strcat(5, "ip6tables -t ", quota_table, " -A ", chains[type_index], " -j CONNMARK --set-mark 0x0/0x0F000000 2>/dev/null"), 1);
+							}
 						}
 
 
 						free(ip_test);
+						free(ip6_test);
 						free(applies_to);
 						free(subnet_definition);
+						free(subnet6_definition);
 						free(type_id);
 						if(full_qos_active)
 						{
@@ -683,6 +880,10 @@ int main(int argc, char** argv)
 						if(ip_egress_tests != NULL)
 						{
 							free_null_terminated_string_array(ip_egress_tests);
+						}
+						if(ip_egress_tests_family != NULL)
+						{
+							free(ip_egress_tests_family);
 						}
 					}
 					free(time_match_str);
@@ -696,11 +897,14 @@ int main(int argc, char** argv)
 
 		}
 
-		run_shell_command("iptables -t nat -A quota_redirects -j CONNMARK --set-mark 0x0/0xFF000000 2>/dev/null", 0);
-		run_shell_command(dynamic_strcat(3,"iptables -t ", quota_table, " -A egress_quotas -j CONNMARK --set-mark 0x0/0xFF000000 2>/dev/null"), 1);
-		run_shell_command(dynamic_strcat(3,"iptables -t ", quota_table, " -A ingress_quotas -j CONNMARK --set-mark 0x0/0xFF000000 2>/dev/null"), 1);
-		run_shell_command(dynamic_strcat(3,"iptables -t ", quota_table, " -A combined_quotas -j CONNMARK --set-mark 0x0/0xFF000000 2>/dev/null"), 1);
-		run_shell_command(dynamic_strcat(5,"iptables -t filter -I FORWARD -m connmark --mark ", death_mark, "/", death_mask, " -j REJECT 2>/dev/null"), 1);
+		for(cmdidx = 0; cmdidx < cmdcnt; cmdidx++)
+		{
+			run_shell_command(dynamic_strcat(2, cmdarray[cmdidx], " -t nat -A quota_redirects -j CONNMARK --set-mark 0x0/0xFF000000 2>/dev/null"), 1);
+			run_shell_command(dynamic_strcat(4, cmdarray[cmdidx], " -t ", quota_table, " -A egress_quotas -j CONNMARK --set-mark 0x0/0xFF000000 2>/dev/null"), 1);
+			run_shell_command(dynamic_strcat(4, cmdarray[cmdidx], " -t ", quota_table, " -A ingress_quotas -j CONNMARK --set-mark 0x0/0xFF000000 2>/dev/null"), 1);
+			run_shell_command(dynamic_strcat(4, cmdarray[cmdidx], " -t ", quota_table, " -A combined_quotas -j CONNMARK --set-mark 0x0/0xFF000000 2>/dev/null"), 1);
+			run_shell_command(dynamic_strcat(6, cmdarray[cmdidx], " -t filter -I FORWARD -m connmark --mark ", death_mark, "/", death_mask, " -j REJECT 2>/dev/null"), 1);
+		}
 
 		//make sure crontab is up to date
 		if(crontab_line != NULL)
@@ -874,19 +1078,34 @@ list* filter_group_from_list(list** orig_ip_bw_list, char* ip_group_str)
 	
 	for(group_index = 0; group_index < num_groups; group_index++)
 	{
-		uint32_t* range = ip_range_to_host_ints( split_group[group_index] );
+		int ip_family = 0;
+		uint32_t* range = ip_range_to_host_ints( split_group[group_index], &ip_family );
 		list* new_ip_bw_list = initialize_list();
 		while((*orig_ip_bw_list)->length > 0)
 		{
 			ip_bw* next_ip_bw = shift_list(*orig_ip_bw_list);
-			uint32_t test_ip = ntohl(next_ip_bw->ip);
-			if(test_ip >= range[0] && test_ip <= range[1])
+			uint32_t* test_ip = next_ip_bw->ip;
+			if(ip_family == AF_INET)
 			{
-				//overlap found! filter the ip by not adding it back!
+				if(ntohl(*test_ip) >= ntohl(range[0]) && ntohl(*test_ip) <= ntohl(range[4]))
+				{
+					//overlap found! filter the ip by not adding it back!
+				}
+				else
+				{
+					push_list(new_ip_bw_list, next_ip_bw);
+				}
 			}
 			else
 			{
-				push_list(new_ip_bw_list, next_ip_bw);
+				if(memcmp(test_ip,range,sizeof(uint32_t)*4) >= 0 && memcmp(test_ip,range+4,sizeof(uint32_t)*4) <= 0)
+				{
+					//overlap found! filter the ip by not adding it back!
+				}
+				else
+				{
+					push_list(new_ip_bw_list, next_ip_bw);
+				}
 			}
 		}
 		free(range);
@@ -901,117 +1120,239 @@ list* filter_group_from_list(list** orig_ip_bw_list, char* ip_group_str)
 
 }
 
-uint32_t* ip_range_to_host_ints(char* ip_str)
+uint32_t* ip_range_to_host_ints(char* ip_str, int* family)
 {
-	uint32_t* ret_val = (uint32_t*)malloc(2*sizeof(uint32_t));
-	uint32_t start = 0;
-	uint32_t end = 0;
+	uint32_t* ret_val = (uint32_t*)malloc(8*sizeof(uint32_t));
+	uint32_t* start = NULL;
+	uint32_t* end = NULL;
 	
-	
+	int ip_family = 0;
 	unsigned long num_pieces = 0;
 	char ip_breaks[] = "/-";
 	char** split_ip = split_on_separators(ip_str, ip_breaks, 2, -1, 0, &num_pieces);
-	start = ip_to_host_int(split_ip[0]);
-	if(strstr(ip_str, "/") != NULL)
+	start = ip_to_host_int(split_ip[0], &ip_family);
+	*family = ip_family;
+	if(ip_family == AF_INET)
 	{
-		uint32_t mask = -1;
-		if(strstr(split_ip[1], ".") != NULL)
+		if(strstr(ip_str, "/") != NULL)
 		{
-			mask = ip_to_host_int(split_ip[1]);
+			uint32_t mask = 0;
+			uint32_t* tmask = NULL;
+			if(strstr(split_ip[1], ".") != NULL)
+			{
+				tmask = ip_to_host_int(split_ip[1], &ip_family);
+				mask = *tmask;
+				free(tmask);
+			}
+			else
+			{
+				uint32_t mask_size;
+				sscanf(split_ip[1], "%d", &mask_size);
+				mask = htonl(0xFFFFFFFF << (32-mask_size));
+			}
+			*start = *start & mask;
+			*end = *start | ( ~mask );
+		}
+		else if(strstr(ip_str, "-") != NULL)
+		{
+			end = ip_to_host_int(split_ip[1], &ip_family);
 		}
 		else
 		{
-			uint32_t mask_size;
-			sscanf(split_ip[1], "%d", &mask_size);
-			mask = mask << (32-mask_size);
+			end = start;
 		}
-		start = start & mask;
-		end = start | ( ~mask );
-	}
-	else if(strstr(ip_str, "-") != NULL)
-	{
-		end = ip_to_host_int(split_ip[1]);
 	}
 	else
 	{
-		end = start;
+		if(strstr(ip_str, "/") != NULL)
+		{
+			uint32_t mask[4];
+			uint32_t* tmask = NULL;
+			if(strstr(split_ip[1], ":") != NULL)
+			{
+				tmask = ip_to_host_int(split_ip[1], &ip_family);
+				mask[0] = *tmask;
+				mask[1] = *(tmask+1);
+				mask[2] = *(tmask+2);
+				mask[3] = *(tmask+3);
+				free(tmask);
+			}
+			else
+			{
+				uint32_t mask_size;
+				sscanf(split_ip[1], "%d", &mask_size);
+				char* p = (void *)&mask;
+				memset(p, 0xFF, mask_size/8);
+				memset(p + ((mask_size+7)/8), 0, (128-mask_size)/8);
+				if(mask_size < 128)
+				{
+					p[mask_size/8] = 0xFF << (8-(mask_size & 7));
+				}
+			}
+			for(int x = 0; x < 4; x++)
+			{
+				*start = *(start+x) & mask[x];
+				*end = *(start+x) | (~mask[x]);
+			}
+		}
+		else if(strstr(ip_str, "-") != NULL)
+		{
+			end = ip_to_host_int(split_ip[1], &ip_family);
+		}
+		else
+		{
+			end = start;
+		}
 	}
+	
 	free_null_terminated_string_array(split_ip);
 
-	ret_val[0] = start;
-	ret_val[1] = end;
+	memcpy(ret_val, start, 4*sizeof(uint32_t));
+	memcpy(ret_val+4, end, 4*sizeof(uint32_t));
+	if(end != start)
+	{
+		free(end);
+	}
+	free(start);
 	return ret_val;
 }
 
 
-uint32_t ip_to_host_int(char* ip_str)
+uint32_t* ip_to_host_int(char* ip_str, int* family)
 {
-	struct in_addr inp;
-	inet_aton(ip_str, &inp);
-	return (uint32_t)ntohl(inp.s_addr);
+	int ret = 0;
+	uint32_t* retval = malloc(4*sizeof(uint32_t));
+	*family = 0;
+	struct in6_addr inp6;
+	ret = inet_pton(AF_INET6, ip_str, &inp6);
+	if(ret == 1)
+	{
+		*retval = inp6.s6_addr32[0];
+		*(retval+1) = inp6.s6_addr32[1];
+		*(retval+2) = inp6.s6_addr32[2];
+		*(retval+3) = inp6.s6_addr32[3];
+		*family = AF_INET6;
+	}
+	else
+	{
+		struct in_addr inp;
+		ret = inet_pton(AF_INET, ip_str, &inp);
+		*retval = inp.s_addr;
+		*(retval+1) = 0;
+		*(retval+2) = 0;
+		*(retval+3) = 0;
+		*family = AF_INET;
+	}
+	return retval;
+}
+
+int get_ipstr_family(char* ip_str)
+{
+	int retVal = 4;
+	int ret = 0;
+	struct in6_addr ipaddr;
+	char ip_breaks[] = { '-' };
+	unsigned long num_ips = 0;
+	char** ip_list = split_on_separators(ip_str, ip_breaks, 1, -1, 0, &num_ips);
+	//Always test first IP. This covers the single and range cases.
+	ret = inet_pton(AF_INET6, ip_list[0], &ipaddr);
+	if(ret == 1)
+	{
+		// Assume failure means IP is IPv4. If we are getting bad IPs passed in here that is a whole different problem...
+		retVal = 6;
+	}
+	
+	return retVal;
 }
 
 
-void delete_chain_from_table(char* table, char* delete_chain)
+void delete_chain_from_table(char* table, char* delete_chain, int family)
 {
-	char *command = dynamic_strcat(3, "iptables -t ", table, " -L -n --line-numbers 2>/dev/null");
-	unsigned long num_lines = 0;
-	char** table_dump = get_shell_command_output_lines(command, &num_lines );
-	free(command);	
-
-	unsigned long line_index;
-	char* current_chain = NULL;
-	list* delete_commands = initialize_list();
-
-
-	for(line_index=0; line_index < num_lines; line_index++)
+	int cmdidx = 0;
+	char* cmdarray[2];
+	int cmdcnt = 1;
+	if(family == AF_INET)
 	{
-		char* line = table_dump[line_index];
-		unsigned long num_pieces = 0;
-		char whitespace[] = { '\t', ' ', '\r', '\n' };
-		char** line_pieces = split_on_separators(line, whitespace, 4, -1, 0, &num_pieces);
-		if(strcmp(line_pieces[0], "Chain") == 0)
-		{
-			if(current_chain != NULL) { free(current_chain); }
-			current_chain = strdup(line_pieces[1]);
-		}
-		else 
-		{
-			unsigned long line_num;
-			int read = sscanf(line_pieces[0], "%ld", &line_num);
+		cmdarray[0] = strdup("iptables");
+	}
+	else if(family == AF_INET6)
+	{
+		cmdarray[0] = strdup("ip6tables");
+	}
+	else
+	{
+		cmdarray[0] = strdup("iptables");
+		cmdarray[1] = strdup("ip6tables");
+		cmdcnt = 2;
+	}
+	for(cmdidx = 0; cmdidx < cmdcnt; cmdidx++)
+	{
+		char *command = dynamic_strcat(4, cmdarray[cmdidx], " -t ", table, " -L -n --line-numbers 2>/dev/null");
+		unsigned long num_lines = 0;
+		char** table_dump = get_shell_command_output_lines(command, &num_lines );
+		free(command);	
 
-			if(read > 0 && current_chain != NULL && num_pieces >1)
+		unsigned long line_index;
+		char* current_chain = NULL;
+		list* delete_commands = initialize_list();
+
+
+		for(line_index=0; line_index < num_lines; line_index++)
+		{
+			char* line = table_dump[line_index];
+			unsigned long num_pieces = 0;
+			char whitespace[] = { '\t', ' ', '\r', '\n' };
+			char** line_pieces = split_on_separators(line, whitespace, 4, -1, 0, &num_pieces);
+			if(strcmp(line_pieces[0], "Chain") == 0)
 			{
-				if(strcmp(line_pieces[1], delete_chain) == 0)
+				if(current_chain != NULL) { free(current_chain); }
+				current_chain = strdup(line_pieces[1]);
+			}
+			else 
+			{
+				unsigned long line_num;
+				int read = sscanf(line_pieces[0], "%ld", &line_num);
+
+				if(read > 0 && current_chain != NULL && num_pieces >1)
 				{
-					char* delete_command = dynamic_strcat(7, "iptables -t ", table, " -D ", current_chain, " ", line_pieces[0], " 2>/dev/null");
-					push_list(delete_commands, delete_command);
+					if(strcmp(line_pieces[1], delete_chain) == 0)
+					{
+						char* delete_command = dynamic_strcat(8, cmdarray[cmdidx], " -t ", table, " -D ", current_chain, " ", line_pieces[0], " 2>/dev/null");
+						push_list(delete_commands, delete_command);
+					}
 				}
 			}
+
+			//free line_pieces
+			free_null_terminated_string_array(line_pieces);
 		}
+		free_null_terminated_string_array(table_dump);
+		
+		/* final two commands to flush chain being deleted and whack it */
+		unshift_list(delete_commands, dynamic_strcat(6, cmdarray[cmdidx], " -t ", table, " -F ", delete_chain, " 2>/dev/null"));
+		unshift_list(delete_commands, dynamic_strcat(6, cmdarray[cmdidx], " -t ", table, " -X ", delete_chain, " 2>/dev/null"));
 
-		//free line_pieces
-		free_null_terminated_string_array(line_pieces);
+		/* run delete commands */
+		while(delete_commands->length > 0)
+		{
+			char *next_command = (char*)pop_list(delete_commands);
+			run_shell_command(next_command, 1);
+		}
 	}
-	free_null_terminated_string_array(table_dump);
 	
-	/* final two commands to flush chain being deleted and whack it */
-	unshift_list(delete_commands, dynamic_strcat(5, "iptables -t ", table, " -F ", delete_chain, " 2>/dev/null"));
-	unshift_list(delete_commands, dynamic_strcat(5, "iptables -t ", table, " -X ", delete_chain, " 2>/dev/null"));
-
-	/* run delete commands */
-	while(delete_commands->length > 0)
-	{
-		char *next_command = (char*)pop_list(delete_commands);
-		run_shell_command(next_command, 1);
-	}
 
 }
 
 void run_shell_command(char* command, int free_command_str)
 {
-	//printf("%s\n", command);
-	system(command);
+	if(dry_run)
+	{
+		printf("%s\n", command);
+	}
+	else
+	{
+		system(command);
+	}
 	if(free_command_str)
 	{
 		free(command);
@@ -1101,5 +1442,4 @@ char* get_option_value_string(struct uci_option* uopt)
 
 	return opt_str;
 }
-
 

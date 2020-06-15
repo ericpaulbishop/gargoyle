@@ -4,6 +4,17 @@
 </div>
 
 <div class="row form-group">
+	<label class="col-xs-5" id="exception_ip_family_label" for="exception_ip_family" ><%~ IPFam %>:</label>
+	<span class="col-xs-7">
+		<select id="exception_ip_family" class="form-control" aria-labelledby="exception_ip_family_label" onchange="setVisibility('exception_')">
+			<option value="any"><%~ both %></option>
+			<option value="ipv4">IPv4</option>
+			<option value="ipv6">IPv6</option>
+		</select>
+	</span>
+</div>
+
+<div class="row form-group">
 	<label class='col-xs-5' for='exception_applies_to' id='exception_applies_to_label'><%~ EAppl %>:</label>
 	<span class="col-xs-7">
 		<select class='form-control' id='exception_applies_to' onchange='setVisibility("exception_")'>
@@ -15,13 +26,25 @@
 </div>
 
 <div id="exception_applies_to_container" class="row form-group">
-	<div class="col-xs-offset-5 col-xs-7" id="exception_applies_to_table_container"></div>
-	<div class="col-xs-offset-5 col-xs-7">
-		<input type='text' id='exception_applies_to_addr' size='30' oninput='proofreadMultipleIpsOrMacs(this)' class='form-control' />
-		<button type="button" class="btn btn-default btn-add" id="exception_add_applies_to_addr" onclick='addAddressesToTable("exception_applies_to_addr","exception_applies_to_table_container","exception_applies_to_table",true)'><%~ Add %></button>
+	<div id="exception_applies_to_4_container">
+		<div class="col-xs-offset-5 col-xs-7" id="exception_applies_to_table_container"></div>
+		<div class="col-xs-offset-5 col-xs-7">
+			<input type='text' id='exception_applies_to_addr' size='30' oninput='restriction_proofreadMultipleIpsOrMacs("exception_", this)' class='form-control' />
+			<button type="button" class="btn btn-default btn-add" id="exception_add_applies_to_addr" onclick='restriction_addAddressesToTable("exception_",document,"exception_applies_to_addr","exception_applies_to_table_container","exception_applies_to_table",true,3,true)'><%~ Add %></button>
+		</div>
+		<div class="col-xs-offset-5 col-xs-7">
+			<em><%~ HstAddr %></em>
+		</div>
 	</div>
-	<div class="col-xs-offset-5 col-xs-7">
-		<em><%~ HstAddr %></em>
+	<div id="exception_applies_to_6_container">
+		<div class="col-xs-offset-5 col-xs-7" id="exception_applies_to6_table_container"></div>
+		<div class="col-xs-offset-5 col-xs-7">
+			<input type='text' id='exception_applies_to6_addr' size='30' oninput='proofreadMultipleIp6sOrMacs(this)' class='form-control' />
+			<button type="button" class="btn btn-default btn-add" id="exception_add_applies_to6_addr" onclick='addAddressesToTable(document,"exception_applies_to6_addr","exception_applies_to6_table_container","exception_applies_to6_table",true,6,true)'><%~ Add %></button>
+		</div>
+		<div class="col-xs-offset-5 col-xs-7">
+			<em><%~ HstAddr %></em>
+		</div>
 	</div>
 </div>
 
@@ -83,10 +106,19 @@
 		</span>
 	</div>
 	<div id="exception_remote_ip_container" class="row form-group">
-		<div class="col-xs-offset-5 col-xs-7" id="exception_remote_ip_table_container"></div>
-		<div class="col-xs-offset-5 col-xs-7">
-			<input type='text' id='exception_remote_ip' size='30' oninput='proofreadMultipleIps(this)' class='form-control' />
-			<button type="button" class="btn btn-default btn-add" id="exception_add_remote_ip" onclick='addAddressesToTable("exception_remote_ip","exception_remote_ip_table_container","exception_remote_ip_table",false)'><%~ Add %></button>
+		<div id="exception_remote_ip_4_container">
+			<div class="col-xs-offset-5 col-xs-7" id="exception_remote_ip_table_container"></div>
+			<div class="col-xs-offset-5 col-xs-7">
+				<input type='text' id='exception_remote_ip' size='30' oninput='proofreadMultipleIps(this)' class='form-control' />
+				<button type="button" class="btn btn-default btn-add" id="exception_add_remote_ip" onclick='addAddressesToTable(document,"exception_remote_ip","exception_remote_ip_table_container","exception_remote_ip_table",false,3,true)'><%~ Add %></button>
+			</div>
+		</div>
+		<div id="exception_remote_ip_6_container">
+			<div class="col-xs-offset-5 col-xs-7" id="exception_remote_ip6_table_container"></div>
+			<div class="col-xs-offset-5 col-xs-7">
+				<input type='text' id='exception_remote_ip6' size='30' oninput='proofreadMultipleIp6s(this)' class='form-control' />
+				<button type="button" class="btn btn-default btn-add" id="exception_add_remote_ip6" onclick='addAddressesToTable(document,"exception_remote_ip6","exception_remote_ip6_table_container","exception_remote_ip6_table",false,6,true)'><%~ Add %></button>
+			</div>
 		</div>
 	</div>
 

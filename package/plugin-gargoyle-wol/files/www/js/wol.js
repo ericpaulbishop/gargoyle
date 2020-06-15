@@ -24,9 +24,9 @@ function initWolTable()
 	{
 		var nextLine = arpLines[lineIndex];
 		var splitLine = nextLine.split(/[\t ]+/);
-		var mac = splitLine[3].toUpperCase();
+		var mac = splitLine[4].toUpperCase();
 		var ip = splitLine[0];
-		if(mac != "00:00:00:00:00:00")
+		if(mac != "00:00:00:00:00:00" && ip6_scope(ip)[1] != "Link-local Address")
 		{
 			dataList.push( [ getHostname(ip), ip, mac, createWakeUpButton() ] );
 			ipToHostAndMac[ip] = 1;

@@ -329,7 +329,7 @@ char* get_random_user_agent(void)
 char* get_ip_from_url(char* url)
 {
 	char* ip = NULL;
-	http_response* page = get_url(url, get_random_user_agent());
+	http_response* page = get_url(url, get_random_user_agent(), EW_INET);
 	if(page != NULL)
 	{
 		if(page->data != NULL)

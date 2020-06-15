@@ -47,6 +47,10 @@
 #define EWGET_DEFAULT_TIMEOUT_SECONDS 5
 #define EWGET_DEFAULT_READ_BUFFER_SIZE 1024
 
+#define	EW_UNSPEC	AF_UNSPEC
+#define	EW_INET		AF_INET
+#define	EW_INET6	AF_INET6
+
 typedef struct
 {
 	int protocol;
@@ -56,6 +60,7 @@ typedef struct
 	int port;
 	char* path;
 	char* user_agent;
+	int family;
 } url_request;
 
 typedef struct
@@ -70,11 +75,11 @@ typedef struct
 
 
 
-url_request* parse_url(char* url, char* user_agent);
+url_request* parse_url(char* url, char* user_agent, int family);
 void parse_redirect(url_request** url, char* redirect_url);
 void free_url_request(url_request*);
 
-http_response* get_url(char* url_str, char* user_agent);
+http_response* get_url(char* url_str, char* user_agent, int family);
 http_response* get_url_request(url_request** url);
 void free_http_response(http_response* page);
 
@@ -90,7 +95,7 @@ void set_ewget_timeout_seconds(unsigned long seconds);
  *
  * return value is 0 on success, 1 on error
  */
-int write_url_to_stream(char* url_str, char* user_agent, FILE* header_stream, FILE* body_stream, FILE* combined_stream);
+int write_url_to_stream(char* url_str, char* user_agent, int family, FILE* header_stream, FILE* body_stream, FILE* combined_stream);
 int write_url_request_to_stream(url_request** url, FILE* header_stream, FILE* body_stream, FILE* combined_stream);
 
 

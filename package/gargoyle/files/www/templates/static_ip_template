@@ -10,3 +10,11 @@
 					<label class="col-xs-5" id='add_ip_label' for='add_ip'>IP</label>
 					<span class="col-xs-7"><input type='text' id='add_ip' oninput='proofreadIp(this)' maxLength='15' class='form-control' /></span>
 				</div>
+				<div class="row form-group">
+					<label class="col-xs-5" id='add_hostid_label' for='add_hostid'>IPv6 <%~ Suff %></em></label>
+					<span class="col-xs-7"><input type='text' id='add_hostid' oninput='proofreadIp6(this)' maxLength='11' class='form-control' /></span>
+				</div>
+				<div class="row form-group">
+					<label class="col-xs-5" id='add_duid_label' for='add_duid'>DUID</label>
+					<span class="col-xs-7"><input type='text' id='add_duid' class='form-control' /></span>
+				</div>

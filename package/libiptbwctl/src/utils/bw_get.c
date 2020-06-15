@@ -2,7 +2,7 @@
  *  			Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
  *
  *
- *  Copyright Â© 2009 by Eric Bishop <eric@gargoyle-router.com>
+ *  Copyright © 2009 by Eric Bishop <eric@gargoyle-router.com>
  *
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -39,6 +39,8 @@ int main(int argc, char **argv)
 
 	int c;
 	struct in_addr read_addr;
+	struct in6_addr read_addr6;
+
 	while((c = getopt(argc, argv, "i:I:a:A:f:F:tThHmMuU")) != -1)
 	{	
 		switch(c)
@@ -61,7 +63,7 @@ int main(int argc, char **argv)
 				{
 					address = strdup("0.0.0.0");
 				}
-				else if( inet_aton(optarg, &read_addr) )
+				else if(inet_pton(AF_INET,optarg,&read_addr) || inet_pton(AF_INET6,optarg,&read_addr6))
 				{
 					address = strdup(optarg);
 				}

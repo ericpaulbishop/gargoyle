@@ -29,6 +29,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <net/if.h>
+#include <ifaddrs.h>
 
 
 #include <erics_tools.h>
@@ -43,22 +44,24 @@
 #define DEFAULT_IF_FILE "/etc/gargoyle_default_ifs"
 
 void define_package_vars(char** package_vars_to_load);
-void print_interface_vars(void);
-void print_hostname_map(void);
+void print_interface_vars(char** ptr_lan_ip, char** ptr_wan_ip, list** ptr_lan_ip6, list** ptr_lan_mask6, list** ptr_wan_ip6, list** ptr_wan_mask6);
+void print_hostname_map(char* ptr_lan_ip, char* ptr_wan_ip, list* ptr_lan_ip6, list* ptr_lan_mask6, list* ptr_wan_ip6, list* ptr_wan_mask6);
 void print_js_var(char* var, char* value);
 void print_js_list_var(char* var, list** value);
 char* get_interface_mac(char* if_name);
-char* get_interface_ip(char* if_name);
-char* get_interface_netmask(char* if_name);
-char* get_interface_gateway(char* if_name);
+void* get_interface_ip(char* if_name, int family);
+void* get_interface_netmask(char* if_name, int family);
+char* get_interface_gateway(char* if_name, int family);
 int load_saved_default_interfaces( char** default_lan_if, char** default_wan_if, char** default_wan_mac);
 void save_default_interfaces(char* default_lan_if, char* default_wan_if, char* default_wan_mac);
 char** load_interfaces_from_proc_file(char* filename);
-string_map* get_hostnames(void);
+string_map* get_hostnames(char* ptr_lan_ip, char* ptr_wan_ip, list* ptr_lan_ip6, list* ptr_lan_mask6, list* ptr_wan_ip6, list* ptr_wan_mask6);
 char* get_option_value_string(struct uci_option* uopt);
 int get_uci_option(struct uci_context* ctx, struct uci_element** e, struct uci_package *p, char* package_name, char* section_name, char* option_name);
 char** ParseGHF_TranslationStrings(char* web_root, char* active_lang, char* fallback_lang);
 bool is_unusable_overlayfs(void);
+char* ip6_mask(char* addr, long mask);
+char* ip6_combine_prefix_hostid(char* ip6, char* hostid);
 
 
 
@@ -443,13 +446,19 @@ int main(int argc, char **argv)
 		printf("\tvar haveThemeJs = %d;\n", theme_js);
 
 
+		char* ptr_lan_ip = NULL;
+		char* ptr_wan_ip = NULL;
+		list* ptr_lan_ip6 = NULL;
+		list* ptr_lan_mask6 = NULL;
+		list* ptr_wan_ip6 = NULL;
+		list* ptr_wan_mask6 = NULL;
 		if(display_interface_vars == 1)
 		{
-			print_interface_vars();
+			print_interface_vars(&ptr_lan_ip, &ptr_wan_ip, &ptr_lan_ip6, &ptr_lan_mask6, &ptr_wan_ip6, &ptr_wan_mask6);
 		}
 		if(display_hostname_map == 1)
 		{
-			print_hostname_map();
+			print_hostname_map(ptr_lan_ip, ptr_wan_ip, ptr_lan_ip6, ptr_lan_mask6, ptr_wan_ip6, ptr_wan_mask6);
 		}
 		define_package_vars(package_variables_to_load);
 		printf("\n\tsetBrowserTimeCookie();\n"
@@ -870,10 +879,8 @@ void define_package_vars(char** package_vars_to_load)
         }
 }
 
-void print_interface_vars(void)
+void print_interface_vars(char** ptr_lan_ip, char** ptr_wan_ip, list** ptr_lan_ip6, list** ptr_lan_mask6, list** ptr_wan_ip6, list** ptr_wan_mask6)
 {
-
-
         list* wireless_ifs  = initialize_list();
         list* wireless_uci = initialize_list();
 
@@ -906,11 +913,15 @@ void print_interface_vars(void)
         char* uci_wan_bridge  = NULL;
         char* uci_wan_type    = NULL;
 
-        char* uci_wan_gateway = NULL;
-        char* uci_lan_ip      = NULL;
-        char* uci_lan_mask    = NULL;
-        char* uci_wan_ip      = NULL;
-        char* uci_wan_mask    = NULL;
+        char* uci_wan_gateway  = NULL;
+	char* uci_wan_gateway6 = NULL;
+        char* uci_lan_ip       = NULL;
+        char* uci_lan_mask     = NULL;
+        char* uci_wan_ip       = NULL;
+        char* uci_wan_mask     = NULL;
+
+	char* uci_ula_prefix  = NULL;
+	char* uci_ula_mask    = NULL;
 
 
 
@@ -992,6 +1003,10 @@ void print_interface_vars(void)
                 {
                         uci_wan_gateway=get_option_value_string(uci_to_option(e));
                 }
+		if(get_uci_option(state_ctx, &e, p, "network", "wan", "ip6gw") == UCI_OK)
+                {
+                        uci_wan_gateway6=get_option_value_string(uci_to_option(e));
+                }
                 if(get_uci_option(state_ctx, &e, p, "network", "lan", "ipaddr") == UCI_OK)
                 {
                         uci_lan_ip=get_option_value_string(uci_to_option(e));
@@ -1008,6 +1023,25 @@ void print_interface_vars(void)
                 {
                         uci_wan_mask=get_option_value_string(uci_to_option(e));
                 }
+		if(get_uci_option(state_ctx, &e, p, "network", "globals", "ula_prefix") == UCI_OK)
+		{
+			char* tmpulaprefix=get_option_value_string(uci_to_option(e));
+			char* subnet_sep = "/";
+			char* subnet = strstr(tmpulaprefix, subnet_sep);
+			if(subnet != NULL)
+			{
+				uci_ula_prefix = (char*)malloc((subnet-tmpulaprefix+1)*sizeof(char));
+				uci_ula_mask = (char*)malloc((strlen(tmpulaprefix)-(subnet-tmpulaprefix)+1)*sizeof(char));
+				strncpy(uci_ula_prefix, tmpulaprefix, (subnet-tmpulaprefix));
+				uci_ula_prefix[subnet-tmpulaprefix] = '\0';
+				strncpy(uci_ula_mask, tmpulaprefix+(subnet-tmpulaprefix)+1, strlen(tmpulaprefix)-(subnet-tmpulaprefix));
+				uci_ula_mask[strlen(tmpulaprefix)-(subnet-tmpulaprefix)] = '\0';
+			}
+			else
+			{
+				uci_ula_prefix = strdup(tmpulaprefix);
+			}
+		}
 
         }
 
@@ -1050,14 +1084,18 @@ void print_interface_vars(void)
 
 
 
-        char* current_lan_ip      = uci_lan_ip != NULL   ? strdup(uci_lan_ip)   : get_interface_ip(current_lan_bridge);
-        char* current_lan_mask    = uci_lan_mask != NULL ? strdup(uci_lan_mask) : get_interface_netmask(current_lan_bridge);
+        char* current_lan_ip      = uci_lan_ip != NULL   ? strdup(uci_lan_ip)   : (char*)get_interface_ip(current_lan_bridge, AF_INET);
+        char* current_lan_mask    = uci_lan_mask != NULL ? strdup(uci_lan_mask) : (char*)get_interface_netmask(current_lan_bridge, AF_INET);
+	list* current_lan_ip6     = (list*)get_interface_ip(current_lan_bridge, AF_INET6);
+	list* current_lan_mask6   = (list*)get_interface_netmask(current_lan_bridge, AF_INET6);
 
-        char* current_wan_ip      = uci_wan_ip != NULL   ? strdup(uci_wan_ip)   : get_interface_ip(current_wan_if);
-        char* current_wan_mask    = uci_wan_mask != NULL ? strdup(uci_wan_mask) : get_interface_netmask(current_wan_if);
+        char* current_wan_ip      = uci_wan_ip != NULL   ? strdup(uci_wan_ip)   : (char*)get_interface_ip(current_wan_if, AF_INET);
+        char* current_wan_mask    = uci_wan_mask != NULL ? strdup(uci_wan_mask) : (char*)get_interface_netmask(current_wan_if, AF_INET);
+	list* current_wan_ip6     = (list*)get_interface_ip(current_wan_if, AF_INET6);
+	list* current_wan_mask6   = (list*)get_interface_netmask(current_wan_if, AF_INET6);
 
-        char* current_wan_gateway = uci_wan_gateway != NULL ? strdup(uci_wan_gateway) : get_interface_gateway(current_wan_if);
-
+        char* current_wan_gateway  = uci_wan_gateway != NULL ? strdup(uci_wan_gateway)   : get_interface_gateway(current_wan_if, AF_INET);
+	char* current_wan_gateway6 = uci_wan_gateway6 != NULL ? strdup(uci_wan_gateway6) : get_interface_gateway(current_wan_if, AF_INET6);
 
         list* tmp_list = initialize_list();
         list* wireless_macs = initialize_list();
@@ -1094,6 +1132,10 @@ void print_interface_vars(void)
         print_js_var("currentLanMac", current_lan_mac);
         print_js_var("currentLanIp", current_lan_ip);
         print_js_var("currentLanMask", current_lan_mask);
+	print_js_list_var("currentLanIp6", &current_lan_ip6);
+	print_js_list_var("currentLanMask6", &current_lan_mask6);
+	print_js_var("currentULAPrefix", uci_ula_prefix);
+	print_js_var("currentULAMask", uci_ula_mask);
 
 
         print_js_var("defaultWanIf", default_wan_if);
@@ -1103,11 +1145,20 @@ void print_interface_vars(void)
         print_js_var("currentWanMac", current_wan_mac);
         print_js_var("currentWanIp", current_wan_ip);
         print_js_var("currentWanMask", current_wan_mask);
+	print_js_list_var("currentWanIp6", &current_wan_ip6);
+	print_js_list_var("currentWanMask6", &current_wan_mask6);
         print_js_var("currentWanGateway", current_wan_gateway);
+	print_js_var("currentWanGateway6", current_wan_gateway6);
 
         uci_free_context(ctx);
         uci_free_context(state_ctx);
 
+	*ptr_lan_ip = current_lan_ip;
+	*ptr_lan_ip6 = current_lan_ip6;
+	*ptr_lan_mask6 = current_lan_mask6;
+	*ptr_wan_ip = current_wan_ip;
+	*ptr_wan_ip6 = current_wan_ip6;
+	*ptr_wan_mask6 = current_wan_mask6;
         /* there are an assload of other variables to free... but, eh, fuck it, this thing doesn't run as a daemon
          *
          * variables are defined/copied with strdups, so we won't get any double-free errors if we do decide to implement
@@ -1116,9 +1167,9 @@ void print_interface_vars(void)
 }
 
 
-void print_hostname_map(void)
+void print_hostname_map(char* ptr_lan_ip, char* ptr_wan_ip, list* ptr_lan_ip6, list* ptr_lan_mask6, list* ptr_wan_ip6, list* ptr_wan_mask6)
 {
-        string_map* ip_to_hostname = get_hostnames();
+        string_map* ip_to_hostname = get_hostnames(ptr_lan_ip,ptr_wan_ip,ptr_lan_ip6,ptr_lan_mask6,ptr_wan_ip6,ptr_wan_mask6);
         printf("\tvar ipToHostname = [];\n");
         if(ip_to_hostname->num_elements == 0)
         {
@@ -1204,13 +1255,21 @@ char* get_interface_mac(char* if_name)
         return mac;
 }
 
-char* get_interface_gateway(char* if_name)
+char* get_interface_gateway(char* if_name, int family)
 {
         char* gateway = NULL;
         if(if_name != NULL)
         {
-
-                FILE* route_file = fopen("/proc/net/route", "r");
+		FILE* route_file = NULL;
+		if(family == AF_INET)
+		{
+			route_file = fopen("/proc/net/route", "r");
+		}
+		else if(family == AF_INET6)
+		{
+			route_file = fopen("/proc/net/ipv6_route", "r");
+		}
+                
                 if(route_file != NULL)
                 {
                         char newline_terminator[]= {'\n', '\r'};
@@ -1230,23 +1289,46 @@ char* get_interface_gateway(char* if_name)
                                 char** split_line;
                                 trim_flanking_whitespace(route_lines[line_index]);
                                 split_line = split_on_separators(route_lines[line_index], spaces, 2, -1, 0, &line_pieces);
-                                if(line_pieces >=4)
-                                {
-                                        if(strcmp(split_line[0], if_name) == 0)
-                                        {
-                                                unsigned int flags = 0;
-                                                if( sscanf(split_line[3], "%u", &flags) > 0)
-                                                {
-                                                        if((flags | 2) != 0)
-                                                        {
-                                                                unsigned int ip[4];
-                                                                sscanf(split_line[2], "%2X%2X%2X%2X", ip, ip+1, ip+2, ip+3);
-                                                                gateway = (char*)malloc(20);
-                                                                sprintf(gateway, "%u.%u.%u.%u", ip[0], ip[1], ip[2], ip[3]);
-                                                        }
-                                                }
-                                        }
-                                }
+				if(family == AF_INET)
+				{
+		                        if(line_pieces >=4)
+		                        {
+		                                if(strcmp(split_line[0], if_name) == 0)
+		                                {
+		                                        unsigned int flags = 0;
+		                                        if( sscanf(split_line[3], "%u", &flags) > 0)
+		                                        {
+		                                                if((flags | 2) != 0)
+		                                                {
+		                                                        unsigned int ip[4];
+		                                                        sscanf(split_line[2], "%2X%2X%2X%2X", ip, ip+1, ip+2, ip+3);
+		                                                        gateway = (char*)malloc(20);
+		                                                        sprintf(gateway, "%u.%u.%u.%u", ip[0], ip[1], ip[2], ip[3]);
+		                                                }
+		                                        }
+		                                }
+		                        }
+				}
+				else if(family == AF_INET6)
+				{
+					if(line_pieces >= 10)
+					{
+						if(strcmp(split_line[9], if_name) == 0 && strcmp(split_line[0], "00000000000000000000000000000000") == 0)
+						{
+							unsigned int flags = 0;
+							if(sscanf(split_line[8], "%u", &flags) > 0)
+							{
+								if((flags | 2) != 0)
+								{
+									unsigned int ip[8];
+									sscanf(split_line[4], "%4x%4x%4x%4x%4x%4x%4x%4x", ip, ip+1, ip+2, ip+3, ip+4, ip+5, ip+6, ip+7);
+									gateway = (char*)malloc(42);
+									sprintf(gateway, "%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x", ip[0], ip[1], ip[2], ip[3], ip[4], ip[5], ip[6], ip[7]);
+								}
+							}
+						}
+					}
+				}
                                 free_null_terminated_string_array(split_line);
                         }
                         free_null_terminated_string_array(route_lines);
@@ -1255,47 +1337,107 @@ char* get_interface_gateway(char* if_name)
         return gateway;
 }
 
-char* get_interface_ip(char* if_name)
+void* get_interface_ip(char* if_name, int family)
 {
-        char* ip = NULL;
-        if(if_name != NULL)
-        {
-                struct ifreq buffer;
-                int s = socket(PF_INET, SOCK_DGRAM, 0);
-                memset(&buffer, 0x00, sizeof(buffer));
-                strcpy(buffer.ifr_name, if_name);
+	struct ifaddrs* ifap;
+	struct ifaddrs* ifa;
+	struct sockaddr_in* in;
+	struct sockaddr_in6* in6;
+	void* ip = NULL;
+	char* addr = NULL;
 
-                if(ioctl(s, SIOCGIFADDR, &buffer) != -1)
-                {
-                        struct sockaddr_in *addr = (struct sockaddr_in*)(&buffer.ifr_addr);
-                        struct in_addr sin= (struct in_addr)addr->sin_addr;
-                        ip =  strdup((char*)inet_ntoa(sin));
-                }
-                close(s);
-        }
-        return ip;
+	if(family == AF_INET)
+	{
+		addr = (char*)malloc(INET_ADDRSTRLEN);
+	}
+	else if(family == AF_INET6)
+	{
+		addr = (char*)malloc(INET6_ADDRSTRLEN);
+		ip = initialize_list();
+	}
+
+	getifaddrs(&ifap);
+	for(ifa = ifap; ifa; ifa = ifa->ifa_next)
+	{
+		if(ifa->ifa_addr && ifa->ifa_addr->sa_family==AF_INET && (strcmp(ifa->ifa_name,if_name) == 0) && family==AF_INET)
+		{
+			in = (struct sockaddr_in*)ifa->ifa_addr;
+			inet_ntop(AF_INET, &in->sin_addr, addr, INET_ADDRSTRLEN);
+			ip = strdup(addr);
+		}
+		else if(ifa->ifa_addr && ifa->ifa_addr->sa_family==AF_INET6 && (strcmp(ifa->ifa_name,if_name) == 0) && family==AF_INET6)
+		{
+			in6 = (struct sockaddr_in6*)ifa->ifa_addr;
+			inet_ntop(AF_INET6, &in6->sin6_addr, addr, INET6_ADDRSTRLEN);
+			push_list(ip, (void*)strdup(addr));
+		}
+	}
+
+	freeifaddrs(ifap);
+	free(addr);
+	return ip;
 }
 
-char* get_interface_netmask(char* if_name)
+void* get_interface_netmask(char* if_name, int family)
 {
-        char* mask = NULL;
-        if(if_name != NULL)
-        {
-                struct ifreq buffer;
-                int s = socket(PF_INET, SOCK_DGRAM, 0);
-                memset(&buffer, 0x00, sizeof(buffer));
-                strcpy(buffer.ifr_name, if_name);
+	struct ifaddrs* ifap;
+	struct ifaddrs* ifa;
+	struct sockaddr_in* in;
+	struct sockaddr_in6* in6;
+	void* netmask = NULL;
+	char* addr = NULL;
 
-                if(ioctl(s, SIOCGIFNETMASK, &buffer) != -1)
-                {
-                        struct sockaddr_in *addr = (struct sockaddr_in*)(&buffer.ifr_addr);
-                        struct in_addr sin= (struct in_addr)addr->sin_addr;
-                        mask =  strdup((char*)inet_ntoa(sin));
-                }
-                close(s);
-        }
-        return mask;
+	if(family == AF_INET)
+	{
+		addr = (char*)malloc(INET_ADDRSTRLEN);
+	}
+	else if(family == AF_INET6)
+	{
+		addr = (char*)malloc(INET6_ADDRSTRLEN);
+		netmask = initialize_list();
+	}
 
+	getifaddrs(&ifap);
+	for(ifa = ifap; ifa; ifa = ifa->ifa_next)
+	{
+		if(ifa->ifa_addr && ifa->ifa_addr->sa_family==AF_INET && (strcmp(ifa->ifa_name,if_name) == 0) && family==AF_INET)
+		{
+			in = (struct sockaddr_in*)ifa->ifa_netmask;
+			inet_ntop(AF_INET, &in->sin_addr.s_addr, addr, INET_ADDRSTRLEN);
+			netmask = strdup(addr);
+		}
+		else if(ifa->ifa_addr && ifa->ifa_addr->sa_family==AF_INET6 && (strcmp(ifa->ifa_name,if_name) == 0) && family==AF_INET6)
+		{
+			in6 = (struct sockaddr_in6*)ifa->ifa_addr;
+			inet_ntop(AF_INET6, &in6->sin6_addr, addr, INET6_ADDRSTRLEN);
+
+			unsigned char* c = ((struct sockaddr_in6*)ifa->ifa_netmask)->sin6_addr.s6_addr;
+			int i = 0, j = 0;
+			unsigned char n = 0;
+			while(i < 16)
+			{
+				n = c[i];
+				while(n > 0)
+				{
+					if(n & 1)
+					{
+						j = j+1;
+					}
+
+					n = n/2;
+				}
+
+				i = i + 1;
+			}
+
+			sprintf(addr, "%d", j);
+			push_list(netmask, (void*)strdup(addr));
+		}
+	}
+
+	freeifaddrs(ifap);
+	free(addr);
+	return netmask;
 }
 
 void save_default_interfaces(char* default_lan_if, char* default_wan_if, char* default_wan_mac)
@@ -1418,13 +1560,14 @@ char** load_interfaces_from_proc_file(char* filename)
         return interfaces;
 }
 
-string_map* get_hostnames(void)
+string_map* get_hostnames(char* ptr_lan_ip, char* ptr_wan_ip, list* ptr_lan_ip6, list* ptr_lan_mask6, list* ptr_wan_ip6, list* ptr_wan_mask6)
 {
         string_map* ip_to_hostname = initialize_string_map(1);
 
-        char* hostname_files[] = { "/tmp/dhcp.leases", "/etc/hosts", NULL };
+        char* hostname_files[] = { "/tmp/dhcp.leases", "/tmp/hosts/odhcpd", NULL };
         int ip_indices[] = { 2, 0 };
         int name_indices[] = { 3, 1 };
+	char* subnet_sep = "/";
         int file_index;
         for(file_index = 0; hostname_files[file_index] != NULL; file_index++)
         {
@@ -1445,13 +1588,18 @@ string_map* get_hostnames(void)
                                 char* whitespace_seps = "\t ";
                                 char** line_pieces = split_on_separators(line, whitespace_seps, 2, -1, 0, &num_line_pieces);
                                 free(line);
-                                if(num_line_pieces >= min_line_pieces)
+                                if(num_line_pieces >= min_line_pieces && safe_strcmp(line_pieces[0], "#") != 0)
                                 {
                                         char *name = strdup(line_pieces[ name_index ]);
                                         trim_flanking_whitespace(name);
                                         if(name[0] != '*' && name[0] != '\0')
                                         {
                                                 char* ip  = line_pieces[ ip_index ];
+						char* subnet = strstr(ip, subnet_sep);
+						if(subnet != NULL)
+						{
+							ip[subnet - ip] = '\0';
+						}
                                                 set_string_map_element(ip_to_hostname, ip, name);
                                         }
                                         else
@@ -1465,6 +1613,118 @@ string_map* get_hostnames(void)
                 }
         }
 
+	//create prefixes
+	list* ip6_prefixes = initialize_list();
+	if(ptr_lan_ip6 != NULL)
+	{
+		char* local_ip6 = "fe80";
+		for(unsigned long idx = 0; idx < ptr_lan_ip6->length && idx < ptr_lan_mask6->length; idx++)
+		{
+			char* ip6 = (char*)list_element_at(ptr_lan_ip6, idx);
+			long mask6 = strtol((char*)list_element_at(ptr_lan_mask6, idx), NULL, 10);
+			if(strncmp(local_ip6, ip6, 4) != 0 && mask6 <= 96)
+			{
+				char* masked = ip6_mask(ip6, mask6);
+				if(masked != NULL)
+				{
+					push_list(ip6_prefixes, (void*)strdup(masked) );
+				}
+				free(masked);
+			}
+		}
+	}
+	//source assignments from dhcp config file
+        struct uci_context *ctx = uci_alloc_context();
+	struct uci_package *p = NULL;
+	struct uci_element *e;
+	if(uci_load(ctx, "dhcp", &p) == UCI_OK)
+	{
+		struct uci_ptr ptr;
+		int idx = 0;
+		char sIdx[4];
+		sprintf(sIdx, "%d", idx);
+		char* lookup_str = lookup_str = dynamic_strcat(5, "dhcp", ".", "@host[", sIdx, "]");
+		int ret_value = uci_lookup_ptr(ctx, &ptr, lookup_str, 1);
+		while(ret_value == UCI_OK)
+		{
+			char* ip4addr = NULL;
+			char* ip6addr = NULL;
+			char* hostname = NULL;
+
+			struct uci_section *s = ptr.s;
+			if(s != NULL)
+			{
+				uci_foreach_element(&s->options, e)
+				{
+					char* option_name = strdup(e->name);
+					to_lowercase(option_name);
+					if(safe_strcmp(option_name, "name") == 0)
+					{
+						hostname = get_option_value_string(uci_to_option(e));
+					}
+					else if(safe_strcmp(option_name, "ip") == 0)
+					{
+						ip4addr = get_option_value_string(uci_to_option(e));
+					}
+					else if(safe_strcmp(option_name, "hostid") == 0)
+					{
+						char* hostid = get_option_value_string(uci_to_option(e));
+						char tmpstr[12];
+						int len = strlen(hostid);
+						if(len > 4)
+						{
+							strncpy(tmpstr+2, hostid, len-4);
+							strncpy(tmpstr+len-2, ":", 1);
+							strncpy(tmpstr+len-1, hostid+len-4, 4);
+							tmpstr[len+3] = '\0';
+						}
+						else
+						{
+							strncpy(tmpstr+2, hostid, 4);
+							tmpstr[len+2] = '\0';
+						}
+						strncpy(tmpstr, "::", 2);
+						ip6addr = strdup(tmpstr);
+						free(hostid);
+					}
+					free(option_name);
+				}
+			}
+			else
+			{
+				break;
+			}
+
+			if(safe_strcmp(hostname, "") != 0 && hostname != NULL)
+			{
+				if(safe_strcmp(ip4addr, "") != 0 && ip4addr != NULL)
+				{
+					set_string_map_element(ip_to_hostname, ip4addr, strdup(hostname));
+				}
+				if(safe_strcmp(ip6addr, "") != 0 && ip6addr != NULL)
+				{
+					for(unsigned long idx = 0; idx < ip6_prefixes->length; idx++)
+					{
+						char* ip6 = (char*)list_element_at(ip6_prefixes, idx);
+						char* tmpip6 = ip6_combine_prefix_hostid(ip6, ip6addr);
+						if(tmpip6 != NULL)
+						{
+							set_string_map_element(ip_to_hostname, tmpip6, strdup(hostname));
+						}
+					}
+				}
+			}
+
+			idx = idx + 1;
+			sprintf(sIdx, "%d", idx);
+			lookup_str = dynamic_strcat(5, "dhcp", ".", "@host[", sIdx, "]");
+			ret_value = uci_lookup_ptr(ctx, &ptr, lookup_str, 1);
+		}
+	}
+	uci_free_context(ctx);
+	unsigned long num_destroyed;
+        destroy_list(ip6_prefixes, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+
         //make sure local ips get set to hostname
         FILE* hostname_file = fopen("/proc/sys/kernel/hostname", "r");
         if(hostname_file != NULL)
@@ -1475,31 +1735,44 @@ string_map* get_hostnames(void)
                 trim_flanking_whitespace(line);
                 if(strlen(line) > 0)
                 {
-                        //load lan ip & wan ip from uci
-                        struct uci_context *state_ctx = uci_alloc_context();
-                        struct uci_package *p = NULL;
-                        struct uci_element *e = NULL;
-                        uci_add_delta_path(state_ctx, state_ctx->savedir);
-                        uci_set_savedir(state_ctx, "/var/state");
-                        if(uci_load(state_ctx, "network", &p) == UCI_OK)
-                        {
-                                if(get_uci_option(state_ctx, &e, p, "network", "lan", "ipaddr") == UCI_OK)
-                                {
-                                        char* uci_lan_ip=get_option_value_string(uci_to_option(e));
-                                        set_string_map_element(ip_to_hostname, uci_lan_ip, strdup(line));
-                                        free(uci_lan_ip);
-                                }
-                                if(get_uci_option(state_ctx, &e, p, "network", "wan", "ipaddr") == UCI_OK)
-                                {
-                                        char* uci_wan_ip=get_option_value_string(uci_to_option(e));
-                                        set_string_map_element(ip_to_hostname, uci_wan_ip, strdup(line));
-                                        free(uci_wan_ip);
-                                }
-                        }
-                        uci_free_context(state_ctx);
+			//Load LAN IPs
+			if(ptr_lan_ip != NULL)
+			{
+				set_string_map_element(ip_to_hostname, ptr_lan_ip, strdup(line));
+			}
+			if(ptr_lan_ip6 != NULL)
+			{
+				char* local_ip6 = "fe80";
+				for(unsigned long idx = 0; idx < ptr_lan_ip6->length; idx++)
+				{
+					char* ip6 = (char*)list_element_at(ptr_lan_ip6, idx);
+					if(strncmp(local_ip6, ip6, 4) != 0)
+					{
+						set_string_map_element(ip_to_hostname, ip6, strdup(line));
+					}
+				}
+			}
+			//Load WAN IPs
+			if(ptr_wan_ip != NULL)
+			{
+				set_string_map_element(ip_to_hostname, ptr_wan_ip, strdup(line));
+			}
+			if(ptr_wan_ip6 != NULL)
+			{
+				char* local_ip6 = "fe80";
+				for(unsigned long idx = 0; idx < ptr_wan_ip6->length; idx++)
+				{
+					char* ip6 = (char*)list_element_at(ptr_wan_ip6, idx);
+					if(strncmp(local_ip6, ip6, 4) != 0)
+					{
+						set_string_map_element(ip_to_hostname, ip6, strdup(line));
+					}
+				}
+			}
 
-                        //127.0.0.1 is always local, so add it unconditionally
+                        //127.0.0.1 and ::1 are always local, so add it unconditionally
                         set_string_map_element(ip_to_hostname, "127.0.0.1", strdup(line));
+			set_string_map_element(ip_to_hostname, "::1", strdup(line));
 
                 }
                 free(line);
@@ -1511,6 +1784,70 @@ string_map* get_hostnames(void)
 
 
 
+}
+
+char* ip6_mask(char* addr, long mask)
+{
+	unsigned char address[sizeof(struct in6_addr)];
+	char addrstr[INET6_ADDRSTRLEN];
+	unsigned char maskbit[] = {0x00, 0x80, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc, 0xfe, 0xff};
+
+	int res = 0;
+	res = inet_pton(AF_INET6, addr, address);
+	if(res > 0)
+	{
+		int index = mask / 8;
+		if(index < 16)
+		{
+			unsigned char* ptr = address;
+			int offset = mask % 8;
+			ptr[index] &= maskbit[offset];
+			index++;
+
+			while(index < 16)
+			{
+				ptr[index++] = 0;
+			}
+		}
+
+		if(inet_ntop(AF_INET6, address, addrstr, INET6_ADDRSTRLEN) != NULL)
+		{
+			return strdup(addrstr);
+		}
+	}
+	
+	return NULL;
+}
+
+
+char* ip6_combine_prefix_hostid(char* ip6, char* hostid)
+{
+	unsigned char prefix[sizeof(struct in6_addr)];
+	unsigned char host[sizeof(struct in6_addr)];
+	char addrstr[INET6_ADDRSTRLEN];
+
+	int res = 0;
+	res = inet_pton(AF_INET6, ip6, prefix);
+	if(res > 0)
+	{
+		res = inet_pton(AF_INET6, hostid, host);
+		if(res > 0)
+		{
+			//This function assumes hostid is a maximum of 32bits (i.e. prefix is a maximum of 96)
+			//so we can just do this straight assignment. If we ever want to get more tricky, revisit this
+			prefix[12] = host[12];
+			prefix[13] = host[13];
+			prefix[14] = host[14];
+			prefix[15] = host[15];
+
+			if(inet_ntop(AF_INET6, prefix, addrstr, INET6_ADDRSTRLEN) != NULL)
+			{
+				return strdup(addrstr);
+			}
+		}
+	}
+	
+	return NULL;
 }
 
 bool is_unusable_overlayfs(void)

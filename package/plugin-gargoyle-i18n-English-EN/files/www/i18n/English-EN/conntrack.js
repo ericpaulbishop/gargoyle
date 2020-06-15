@@ -12,3 +12,5 @@ connTS.WLNm="LAN Host/WAN Host";
 connTS.UDNm="Bytes Up/Down";
 connTS.QSNm="QoS Up/Down";
 connTS.LPNm="L7 Proto";
+connTS.IPFam="IP Family";
+

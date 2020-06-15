@@ -763,6 +763,11 @@ for target in $targets ; do
 		done
 	fi
 
+	#copy build config info
+	if [ -e "bin/targets/$openwrt_target/$subtarget_arch/config.buildinfo" ] ; then
+		cp "bin/targets/$openwrt_target/$subtarget_arch/config.buildinfo" "$top_dir/images/$target/$target-$default_profile.buildinfo"
+	fi
+
 	#if we didn't build anything, die horribly
 	if [ -z "$image_files" ] ; then
 		exit
@@ -867,7 +872,10 @@ for target in $targets ; do
 			done
 		fi
 
-
+		#copy build config info
+		if [ -e "bin/targets/$openwrt_target/$subtarget_arch/config.buildinfo" ] ; then
+			cp "bin/targets/$openwrt_target/$subtarget_arch/config.buildinfo" "$top_dir/images/$target/$target-$profile_name.buildinfo"
+		fi
 	
 		if [ "$distribution" = "true" ] ; then
 			mkdir -p "$top_dir/Distribution/Images/$target-$profile_name"

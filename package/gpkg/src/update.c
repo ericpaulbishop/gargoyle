@@ -29,7 +29,7 @@ void update(opkg_conf* conf)
 			if(package_tmp_file != NULL)
 			{
 				printf("Downloading package list for %s source...\n", src_id);
-				read_err = write_url_to_stream(src_url, "gpkg", NULL, package_tmp_file, NULL);
+				read_err = write_url_to_stream(src_url, "gpkg", EW_UNSPEC, NULL, package_tmp_file, NULL);
 				fclose(package_tmp_file);
 			}
 			

@@ -15,7 +15,19 @@
 		<div style="padding:0px;margin-top:0px;margin-bottom:0px">
 			<span class="col-xs-offset-5 col-xs-7">
 				<input type='text' id='add_ip' oninput='proofreadMultipleIps(this)' style="width:250px;" class='form-control' />
-				<button type="button" class="btn btn-default btn-add" id="add_ip_button" onclick='addAddressesToTable(document,"add_ip","quota_ip_table_container","quota_ip_table",false,3,true,250)'><%~ Add %></button>
+				<button type="button" class="btn btn-default btn-add" id="add_ip_button" onclick='addAddressesToTable(document,"add_ip","quota_ip_table_container","quota_ip_table",false,3,true,250)'><%~ Add %> IPv4</button>
+			</span>
+		</div>
+		<div style="padding:0px;margin-top:0px;margin-bottom:5px;">
+			<span class="col-xs-offset-5 col-xs-7"><em><%~ IPorRange %></em></span>
+		</div>
+	</div>
+	<div id="quota_ip6_container">
+		<div class="col-xs-offset-5 col-xs-7" id="quota_ip6_table_container" style="margin-top:0px;margin-bottom:0px;"></div>
+		<div style="padding:0px;margin-top:0px;margin-bottom:0px">
+			<span class="col-xs-offset-5 col-xs-7">
+				<input type='text' id='add_ip6' oninput='proofreadMultipleIp6s(this)' style="width:250px;" class='form-control' />
+				<button type="button" class="btn btn-default btn-add" id="add_ip6_button" onclick='addAddressesToTable(document,"add_ip6","quota_ip6_table_container","quota_ip6_table",false,6,true,250)'><%~ Add %> IPv6</button>
 			</span>
 		</div>
 		<div style="padding:0px;margin-top:0px;margin-bottom:5px;">

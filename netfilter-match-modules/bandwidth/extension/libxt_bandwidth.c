@@ -1,4 +1,4 @@
-/*  bandwidth --	An iptables extension for bandwidth monitoring/control
+/*  bandwidth --	An xtables extension for bandwidth monitoring/control
  *  			Can be used to efficiently monitor bandwidth and/or implement bandwidth quotas
  *  			Can be queried using the iptbwctl userspace library
  *  			Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
@@ -31,38 +31,24 @@
 #include <sys/time.h>
 #include <limits.h>
 
-/*
- * in iptables 1.4.0 and higher, iptables.h includes xtables.h, which
- * we can use to check whether we need to deal with the new requirements
- * in pre-processor directives below
- */
-#include <iptables.h>  
-#include <linux/netfilter_ipv4/ipt_bandwidth.h>
+#include <arpa/inet.h>
 
-#ifdef _XTABLES_H
-	#define iptables_rule_match	xtables_rule_match
-	#define iptables_match		xtables_match
-	#define iptables_target		xtables_target
-	#define ipt_tryload		xt_tryload
-#endif
+#include <xtables.h>
+#include <linux/netfilter.h>
+#include <linux/netfilter/xt_bandwidth.h>
 
-/* 
- * XTABLES_VERSION_CODE is only defined in versions 1.4.1 and later, which
- * also require the use of xtables_register_match
- * 
- * Version 1.4.0 uses register_match like previous versions
- */
-#ifdef XTABLES_VERSION_CODE 
-	#define register_match          xtables_register_match
-#endif
-
-
+typedef union
+{
+	struct in_addr ip4;
+	struct in6_addr ip6;
+} ipany;
 
 int get_minutes_west(void);
 void set_kernel_timezone(void);
-int parse_sub(char* subnet_string, uint32_t* subnet, uint32_t* subnet_mask);
-static unsigned long get_pow(unsigned long base, unsigned long pow);
+int parse_sub(char* subnet_string, ipany* subnet, ipany* subnet_mask, int family);
 static void param_problem_exit_error(char* msg);
+char** split_on_separators(char* line, char* separators, int num_separators, int max_pieces, int include_remainder_at_max);
+char* trim_flanking_whitespace(char* str);
 
 
 /* Function which prints out usage message. */
@@ -71,13 +57,13 @@ static void help(void)
 	printf("bandwidth options:\n");
 	printf("  --id [unique identifier for querying bandwidth]\n");
 	printf("  --type [combined|individual_src|individual_dst|individual_local|individual_remote]\n");
-	printf("  --subnet [a.b.c.d/mask] (0 < mask < 32)\n");
+	printf("  --subnet [a.b.c.d/mask] (0 < mask < 32) OR [a:b:c:d:e:f:g:h/mask] (0 < mask < 128)\n");
 	printf("  --greater_than [BYTES]\n");
 	printf("  --less_than [BYTES]\n");
 	printf("  --current_bandwidth [BYTES]\n");
 	printf("  --reset_interval [minute|hour|day|week|month]\n");
 	printf("  --reset_time [OFFSET IN SECONDS]\n");
-	printf("  --intervals_to_save [NUMBER OF PREVIOS INTERVALS TO STORE IN MEMORY]\n");
+	printf("  --intervals_to_save [NUMBER OF PREVIOUS INTERVALS TO STORE IN MEMORY]\n");
 	printf("  --last_backup_time [UTC SECONDS SINCE 1970]\n");
 	printf("  --bcheck Check another bandwidth rule without incrementing it\n");
 	printf("  --bcheck_with_src_dst_swap Check another bandwidth rule without incrementing it, swapping src & dst ips for check\n");
@@ -107,16 +93,12 @@ static int parse(	int c,
 			char **argv,
 			int invert,
 			unsigned int *flags,
-#ifdef _XTABLES_H
-			const void *entry,
-#else
-			const struct ipt_entry *entry,
-			unsigned int *nfcache,
-#endif			
-			struct ipt_entry_match **match
+			const void *entry,		
+			struct xt_entry_match **match,
+			int family
 			)
 {
-	struct ipt_bandwidth_info *info = (struct ipt_bandwidth_info *)(*match)->data;
+	struct xt_bandwidth_info *info = (struct xt_bandwidth_info *)(*match)->data;
 	int valid_arg = 0;
 	long int num_read;
 	uint64_t read_64;
@@ -132,8 +114,8 @@ static int parse(	int c,
 
 		info->type = BANDWIDTH_COMBINED;
 		info->check_type = BANDWIDTH_CHECK_NOSWAP;
-		info->local_subnet = 0;
-		info->local_subnet_mask = 0;
+		memset(&info->local_subnet, 0, sizeof(info->local_subnet));
+		memset(&info->local_subnet_mask, 0, sizeof(info->local_subnet_mask));
 		info->cmp = BANDWIDTH_MONITOR; /* don't test greater/less than, just monitor bandwidth */
 		info->current_bandwidth = 0;
 		info->reset_is_constant_interval = 0;
@@ -193,7 +175,14 @@ static int parse(	int c,
 			break;
 
 		case BANDWIDTH_SUBNET:
-			valid_arg =  parse_sub(optarg, &(info->local_subnet), &(info->local_subnet_mask));
+			if(family == NFPROTO_IPV4)
+			{
+				valid_arg =  parse_sub(optarg, &(info->local_subnet), &(info->local_subnet_mask), NFPROTO_IPV4);
+			}
+			else
+			{
+				valid_arg =  parse_sub(optarg, &(info->local_subnet), &(info->local_subnet_mask), NFPROTO_IPV6);
+			}
 			break;
 		case BANDWIDTH_LT:
 			num_read = sscanf(argv[optind-1], "%lld", &read_64);
@@ -334,9 +323,37 @@ static int parse(	int c,
 	return valid_arg;
 }
 
+static int parse_mt4(	int c, 
+			char **argv,
+			int invert,
+			unsigned int *flags,
+			const void *entry,		
+			struct xt_entry_match **match
+			)
+{
+	int valid_arg = 0;
+	
+	valid_arg = parse(c, argv, invert, flags, entry, match, NFPROTO_IPV4);
 
+	return valid_arg;
+}
 
-static void print_bandwidth_args( struct ipt_bandwidth_info* info )
+static int parse_mt6(	int c, 
+			char **argv,
+			int invert,
+			unsigned int *flags,
+			const void *entry,		
+			struct xt_entry_match **match
+			)
+{
+	int valid_arg = 0;
+	
+	valid_arg = parse(c, argv, invert, flags, entry, match, NFPROTO_IPV6);
+
+	return valid_arg;
+}
+
+static void print_bandwidth_args(struct xt_bandwidth_info* info, int family)
 {
 	if(info->cmp == BANDWIDTH_CHECK)
 	{
@@ -382,19 +399,25 @@ static void print_bandwidth_args( struct ipt_bandwidth_info* info )
 			printf("--type individual_remote ");
 		}
 
-
-		if(info->local_subnet != 0)
+		if(family == NFPROTO_IPV4)
 		{
-			unsigned char* sub = (unsigned char*)(&(info->local_subnet));
-			int msk_bits=0;
-			int pow=0;
-			for(pow=0; pow<32; pow++)
+			struct in_addr testblk;
+			memset(&testblk, 0, sizeof(struct in_addr));
+			if(memcmp(&testblk, &(info->local_subnet.ip4), sizeof(struct in_addr)) != 0)
 			{
-				uint32_t test = get_pow(2, pow);
-				msk_bits = ( (info->local_subnet_mask & test) == test) ? msk_bits+1 : msk_bits;
+				printf("--subnet %s/%d ", xtables_ipaddr_to_numeric(&(info->local_subnet.ip4)), xtables_ipmask_to_cidr(&(info->local_subnet_mask.ip4))); 
 			}
-			printf("--subnet %u.%u.%u.%u/%u ", (unsigned char)sub[0], (unsigned char)sub[1], (unsigned char)sub[2], (unsigned char)sub[3], msk_bits); 
 		}
+		else
+		{
+			struct in6_addr testblk;
+			memset(&testblk, 0, sizeof(struct in6_addr));
+			if(memcmp(&testblk, &(info->local_subnet.ip6), sizeof(struct in6_addr)) != 0)
+			{
+				printf("--subnet %s/%d ", xtables_ip6addr_to_numeric(&(info->local_subnet.ip6)), xtables_ip6mask_to_cidr(&(info->local_subnet_mask.ip6))); 
+			}
+		}
+		
 		if(info->cmp == BANDWIDTH_GT)
 		{
 			printf("--greater_than %lld ", info->bandwidth_cutoff);
@@ -479,134 +502,376 @@ static void final_check(unsigned int flags)
 }
 
 /* Prints out the matchinfo. */
-#ifdef _XTABLES_H
-static void print(const void *ip, const struct xt_entry_match *match, int numeric)
-#else	
-static void print(const struct ipt_ip *ip, const struct ipt_entry_match *match, int numeric)
-#endif
+static void print_mt4(const void *ip, const struct xt_entry_match *match, int numeric)
 {
 	printf("bandwidth ");
-	struct ipt_bandwidth_info *info = (struct ipt_bandwidth_info *)match->data;
+	struct xt_bandwidth_info *info = (struct xt_bandwidth_info *)match->data;
 
-	print_bandwidth_args(info);
+	print_bandwidth_args(info, NFPROTO_IPV4);
 }
 
-/* Saves the union ipt_matchinfo in parsable form to stdout. */
-#ifdef _XTABLES_H
-static void save(const void *ip, const struct xt_entry_match *match)
-#else
-static void save(const struct ipt_ip *ip, const struct ipt_entry_match *match)
-#endif
+static void print_mt6(const void *ip, const struct xt_entry_match *match, int numeric)
 {
-	struct ipt_bandwidth_info *info = (struct ipt_bandwidth_info *)match->data;
+	printf("bandwidth ");
+	struct xt_bandwidth_info *info = (struct xt_bandwidth_info *)match->data;
+
+	print_bandwidth_args(info, NFPROTO_IPV6);
+}
+
+/* Saves the union xt_matchinfo in parsable form to stdout. */
+static void save_mt4(const void *ip, const struct xt_entry_match *match)
+{
+	struct xt_bandwidth_info *info = (struct xt_bandwidth_info *)match->data;
 	time_t now;
 	
-	print_bandwidth_args(info);
+	print_bandwidth_args(info, NFPROTO_IPV4);
 	
 	time(&now);
 	printf("--last_backup-time %ld ", now);
 }
 
-static struct iptables_match bandwidth = 
-{ 
-	.next		= NULL,
- 	.name		= "bandwidth",
-	#ifdef XTABLES_VERSION_CODE
-		.version = XTABLES_VERSION, 
-	#else
-		.version = IPTABLES_VERSION,
-	#endif
-	.size		= XT_ALIGN(sizeof(struct ipt_bandwidth_info)),
-	.userspacesize	= XT_ALIGN(sizeof(struct ipt_bandwidth_info)),
-	.help		= &help,
-	.parse		= &parse,
-	.final_check	= &final_check,
-	.print		= &print,
-	.save		= &save,
-	.extra_opts	= opts
+static void save_mt6(const void *ip, const struct xt_entry_match *match)
+{
+	struct xt_bandwidth_info *info = (struct xt_bandwidth_info *)match->data;
+	time_t now;
+	
+	print_bandwidth_args(info, NFPROTO_IPV6);
+	
+	time(&now);
+	printf("--last_backup-time %ld ", now);
+}
+
+static struct xtables_match bandwidth_mt_reg[] = 
+{
+	{
+		.next		= NULL,
+	 	.name		= "bandwidth",
+		.family		= NFPROTO_IPV4,
+		.version	= XTABLES_VERSION, 
+		.size		= XT_ALIGN(sizeof(struct xt_bandwidth_info)),
+		.userspacesize	= XT_ALIGN(sizeof(struct xt_bandwidth_info)),
+		.help		= &help,
+		.parse		= &parse_mt4,
+		.final_check	= &final_check,
+		.print		= &print_mt4,
+		.save		= &save_mt4,
+		.extra_opts	= opts
+	},
+	{
+		.next		= NULL,
+	 	.name		= "bandwidth",
+		.family		= NFPROTO_IPV6,
+		.version	= XTABLES_VERSION, 
+		.size		= XT_ALIGN(sizeof(struct xt_bandwidth_info)),
+		.userspacesize	= XT_ALIGN(sizeof(struct xt_bandwidth_info)),
+		.help		= &help,
+		.parse		= &parse_mt6,
+		.final_check	= &final_check,
+		.print		= &print_mt6,
+		.save		= &save_mt6,
+		.extra_opts	= opts
+	},
 };
 
 void _init(void)
 {
-	register_match(&bandwidth);
+	xtables_register_matches(bandwidth_mt_reg, ARRAY_SIZE(bandwidth_mt_reg));
 }
 
 static void param_problem_exit_error(char* msg)
 {
-	#ifdef xtables_error
-		xtables_error(PARAMETER_PROBLEM, "%s", msg);
-	#else
-		exit_error(PARAMETER_PROBLEM, msg);
-	#endif
+	xtables_error(PARAMETER_PROBLEM, "%s", msg);
 }
 
-/* 
- * implement a simple function to get positive powers of positive integers so we don't have to mess with math.h 
- * all we really need are powers of 2 for calculating netmask
- * This is only called a couple of times, so speed isn't an issue either
- */
-static unsigned long get_pow(unsigned long base, unsigned long pow)
+int parse_sub(char* subnet_string, ipany* subnet, ipany* subnet_mask, int family)
 {
-	unsigned long ret = pow == 0 ? 1 : base*get_pow(base, pow-1);
-	return ret;
-}
-
-
-int parse_sub(char* subnet_string, uint32_t* subnet, uint32_t* subnet_mask)
-{
-
+	char** sub_parts = split_on_separators(subnet_string,"/",1,2,1);
+	char* substr = trim_flanking_whitespace(sub_parts[0]);
+	char* mskstr = trim_flanking_whitespace(sub_parts[1]);
 	int valid = 0;
-	unsigned int A,B,C,D,E,F,G,H;
-	int read_int = sscanf(subnet_string, "%u.%u.%u.%u/%u.%u.%u.%u", &A, &B, &C, &D, &E, &F, &G, &H);
-	if(read_int >= 5)
+	
+	if(family == NFPROTO_IPV4)
 	{
-		if( A <= 255 && B <= 255 && C <= 255 && D <= 255)
+		struct in_addr* tsub = NULL;
+		tsub = xtables_numeric_to_ipaddr(substr);
+		if(tsub != NULL)
 		{
-			unsigned char* sub = (unsigned char*)(subnet);
-			unsigned char* msk = (unsigned char*)(subnet_mask);
-			
-			*( sub ) = (unsigned char)A;
-			*( sub + 1 ) = (unsigned char)B;
-			*( sub + 2 ) = (unsigned char)C;
-			*( sub + 3 ) = (unsigned char)D;
-
-			if(read_int == 5)
+			subnet->ip4 = *tsub;
+			int mask_valid = 0;
+			if(strchr(mskstr, '.') != NULL)
 			{
-				unsigned int mask = E;
-				if(mask <= 32)
+				struct in_addr* mask_add;
+				mask_add = xtables_numeric_to_ipaddr(mskstr);
+				
+				if(mask_add != NULL)
 				{
-					int msk_index;
-					for(msk_index=0; msk_index*8 < mask; msk_index++)
+					subnet_mask->ip4 = *mask_add;
+					mask_valid = 1;
+					free(mask_add);
+				}
+			}
+			else
+			{
+				int mask_bits;
+				if(sscanf(mskstr, "%d", &mask_bits) > 0)
+				{
+					if(mask_bits >= 0 && mask_bits <= 32)
 					{
-						int bit_index;
-						msk[msk_index] = 0;
-						for(bit_index=0; msk_index*8 + bit_index < mask && bit_index < 8; bit_index++)
-						{
-							msk[msk_index] = msk[msk_index] + get_pow(2, 7-bit_index);
-						}
+						subnet_mask->ip4.s_addr = 0;
+						subnet_mask->ip4.s_addr = htonl(0xFFFFFFFF << (32 - mask_bits));
+						mask_valid = 1;
 					}
 				}
+			}
+			
+			if(mask_valid)
+			{
 				valid = 1;
 			}
-			if(read_int == 8)
+			free(tsub);
+		}
+
+		if(valid)
+		{
+			subnet->ip4.s_addr = (subnet->ip4.s_addr & subnet_mask->ip4.s_addr);
+		}
+	}
+	else
+	{
+		struct in6_addr* tsub = NULL;
+		tsub = xtables_numeric_to_ip6addr(substr);
+		if(tsub != NULL)
+		{
+			subnet->ip6 = *tsub;
+			int mask_valid = 0;
+			if(strchr(mskstr, ':') != NULL)
 			{
-				if( E <= 255 && F <= 255 && G <= 255 && H <= 255)
-				*( msk ) = (unsigned char)E;
-				*( msk + 1 ) = (unsigned char)F;
-				*( msk + 2 ) = (unsigned char)G;
-				*( msk + 3 ) = (unsigned char)H;
+				struct in6_addr* mask_add;
+				mask_add = xtables_numeric_to_ip6addr(mskstr);
+				
+				if(mask_add != NULL)
+				{
+					subnet_mask->ip6 = *mask_add;
+					mask_valid = 1;
+					free(mask_add);
+				}
+			}
+			else
+			{
+				int mask_bits;
+				struct in6_addr mask_add;
+				if(sscanf(mskstr, "%d", &mask_bits) > 0)
+				{
+					char* p = (void *)&mask_add;
+					memset(p, 0xff, mask_bits/8);
+					memset(p+ ((mask_bits+7)/8), 0, (128-mask_bits)/8);
+					if(mask_bits < 128)
+					{
+						p[mask_bits/8] = 0xff << (8-(mask_bits & 7));
+					}
+					subnet_mask->ip6 = mask_add;
+					mask_valid = 1;
+				}
+			}
+			
+			if(mask_valid)
+			{
 				valid = 1;
+			}
+			free(tsub);
+		}
+		
+		if(valid)
+		{
+			for(unsigned int x = 0; x < 16; x++)
+			{
+				subnet->ip6.s6_addr[x] = (subnet->ip6.s6_addr[x] & subnet_mask->ip6.s6_addr[x]);
 			}
 		}
 	}
-	if(valid)
-	{
-		*subnet = (*subnet & *subnet_mask );
-	}
+	
 	return valid;
 }
 
+/*
+ * line_str is the line to be parsed -- it is not modified in any way
+ * max_pieces indicates number of pieces to return, if negative this is determined dynamically
+ * include_remainder_at_max indicates whether the last piece, when max pieces are reached, 
+ * 	should be what it would normally be (0) or the entire remainder of the line (1)
+ * 	if max_pieces < 0 this parameter is ignored
+ *
+ *
+ * returns all non-separator pieces in a line
+ * result is dynamically allocated, MUST be freed after call-- even if 
+ * line is empty (you still get a valid char** pointer to to a NULL char*)
+ */
+char** split_on_separators(char* line_str, char* separators, int num_separators, int max_pieces, int include_remainder_at_max)
+{
+	char** split;
 
+	if(line_str != NULL)
+	{
+		int split_index;
+		int non_separator_found;
+		char* dup_line;
+		char* start;
+
+		if(max_pieces < 0)
+		{
+			/* count number of separator characters in line -- this count + 1 is an upperbound on number of pieces */
+			int separator_count = 0;
+			int line_index;
+			for(line_index = 0; line_str[line_index] != '\0'; line_index++)
+			{
+				int sep_index;
+				int found = 0;
+				for(sep_index =0; found == 0 && sep_index < num_separators; sep_index++)
+				{
+					found = separators[sep_index] == line_str[line_index] ? 1 : 0;
+				}
+				separator_count = separator_count+ found;
+			}
+			max_pieces = separator_count + 1;
+		}
+		split = (char**)malloc((1+max_pieces)*sizeof(char*));
+		split_index = 0;
+		split[split_index] = NULL;
+
+
+		dup_line = strdup(line_str);
+		start = dup_line;
+		non_separator_found = 0;
+		while(non_separator_found == 0)
+		{
+			int matches = 0;
+			int sep_index;
+			for(sep_index =0; sep_index < num_separators; sep_index++)
+			{
+				matches = matches == 1 || separators[sep_index] == start[0] ? 1 : 0;
+			}
+			non_separator_found = matches==0 || start[0] == '\0' ? 1 : 0;
+			if(non_separator_found == 0)
+			{
+				start++;
+			}
+		}
+
+		while(start[0] != '\0' && split_index < max_pieces)
+		{
+			/* find first separator index */
+			int first_separator_index = 0;
+			int separator_found = 0;
+			while(	separator_found == 0 )
+			{
+				int sep_index;
+				for(sep_index =0; separator_found == 0 && sep_index < num_separators; sep_index++)
+				{
+					separator_found = separators[sep_index] == start[first_separator_index] || start[first_separator_index] == '\0' ? 1 : 0;
+				}
+				if(separator_found == 0)
+				{
+					first_separator_index++;
+				}
+			}
+			
+			/* copy next piece to split array */
+			if(first_separator_index > 0)
+			{
+				char* next_piece = NULL;
+				if(split_index +1 < max_pieces || include_remainder_at_max <= 0)
+				{
+					next_piece = (char*)malloc((first_separator_index+1)*sizeof(char));
+					memcpy(next_piece, start, first_separator_index);
+					next_piece[first_separator_index] = '\0';
+				}
+				else
+				{
+					next_piece = strdup(start);
+				}
+				split[split_index] = next_piece;
+				split[split_index+1] = NULL;
+				split_index++;
+			}
+
+
+			/* find next non-separator index, indicating start of next piece */
+			start = start+ first_separator_index;
+			non_separator_found = 0;
+			while(non_separator_found == 0)
+			{
+				int matches = 0;
+				int sep_index;
+				for(sep_index =0; sep_index < num_separators; sep_index++)
+				{
+					matches = matches == 1 || separators[sep_index] == start[0] ? 1 : 0;
+				}
+				non_separator_found = matches==0 || start[0] == '\0' ? 1 : 0;
+				if(non_separator_found == 0)
+				{
+					start++;
+				}
+			}
+		}
+		free(dup_line);
+	}
+	else
+	{
+		split = (char**)malloc((1)*sizeof(char*));
+		split[0] = NULL;
+	}
+	return split;
+}
+
+char* trim_flanking_whitespace(char* str)
+{
+	int new_start = 0;
+	int new_length = 0;
+
+	char whitespace[5] = { ' ', '\t', '\n', '\r', '\0' };
+	int num_whitespace_chars = 4;
+	
+	
+	int str_index = 0;
+	int is_whitespace = 1;
+	int test;
+	while( (test = str[str_index]) != '\0' && is_whitespace == 1)
+	{
+		int whitespace_index;
+		is_whitespace = 0;
+		for(whitespace_index = 0; whitespace_index < num_whitespace_chars && is_whitespace == 0; whitespace_index++)
+		{
+			is_whitespace = test == whitespace[whitespace_index] ? 1 : 0;
+		}
+		str_index = is_whitespace == 1 ? str_index+1 : str_index;
+	}
+	new_start = str_index;
+
+
+	str_index = strlen(str) - 1;
+	is_whitespace = 1;
+	while( str_index >= new_start && is_whitespace == 1)
+	{
+		int whitespace_index;
+		is_whitespace = 0;
+		for(whitespace_index = 0; whitespace_index < num_whitespace_chars && is_whitespace == 0; whitespace_index++)
+		{
+			is_whitespace = str[str_index] == whitespace[whitespace_index] ? 1 : 0;
+		}
+		str_index = is_whitespace == 1 ? str_index-1 : str_index;
+	}
+	new_length = str[new_start] == '\0' ? 0 : str_index + 1 - new_start;
+	
+
+	if(new_start > 0)
+	{
+		for(str_index = 0; str_index < new_length; str_index++)
+		{
+			str[str_index] = str[str_index+new_start];
+		}
+	}
+	str[new_length] = 0;
+	return str;
+}
 
 int get_minutes_west(void)
 {

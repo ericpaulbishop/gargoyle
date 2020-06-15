@@ -80,11 +80,11 @@ static int char_index(char* str, int chr);
 static char* encode_base_64_str( char* original, int linesize );
 static void encode_block_base64( unsigned char in[3], unsigned char out[4], int len );
 static char* escape_chars_to_hex(char* str, char* chars_to_escape);
-static int tcp_connect(char* hostname, int port);
+static int tcp_connect(char* hostname, int port, int family);
 
 
 /* http read/write functions */
-static void* initialize_connection_http(char* host, int port);
+static void* initialize_connection_http(char* host, int port, int family);
 static int read_http(void* connection_data, char* read_buffer, int read_length);
 static int write_http(void* connection_data, char* data, int data_length);
 static void destroy_connection_http(void* connection_data);
@@ -100,7 +100,7 @@ static void get_http_response(	void* connection_data,
 				int follow_redirects,
 				char** redirect_url);
 static http_response* retrieve_http(	url_request *url, 
-					void* (*initialize_connection)(char*, int), 
+					void* (*initialize_connection)(char*, int, int), 
 					int (*read_connection)(void*, char*, int),
 					int (*write_connection)(void*, char*, int),
 					void (*destroy_connection)(void*),
@@ -225,7 +225,7 @@ static void alarm_triggered(int sig);
 		SSL_CTX* ctx;
 	} ssl_connection_data;
 
-	static void* initialize_connection_https(char* host, int port);
+	static void* initialize_connection_https(char* host, int port, int family);
 	static int read_https(void* connection_data, char* read_buffer, int read_length);
 	static int write_https(void* connection_data, char* data, int data_length);
 	static void destroy_connection_https(void* connection_data);
@@ -239,9 +239,9 @@ static void alarm_triggered(int sig);
  * Externally available function definitions
  **********************************************/
 
-http_response* get_url(char* url_str, char* user_agent)
+http_response* get_url(char* url_str, char* user_agent, int family)
 {
-	url_request* url = parse_url(url_str, user_agent);
+	url_request* url = parse_url(url_str, user_agent, family);
 	http_response *reply = get_url_request(&url);
 	free_url_request(url);
 	return reply;
@@ -256,6 +256,7 @@ http_response* get_url_request(url_request** url)
 	int redirect_count = 0;
 	int redirect_max = 3;
 	char* redirect_url = NULL;
+
 	while(redirect_count < redirect_max)
 	{
 		if(redirect_url != NULL)
@@ -292,10 +293,10 @@ http_response* get_url_request(url_request** url)
 }
 
 
-int write_url_to_stream(char* url_str, char* user_agent, FILE* header_stream, FILE* body_stream, FILE* combined_stream)
+int write_url_to_stream(char* url_str, char* user_agent, int family, FILE* header_stream, FILE* body_stream, FILE* combined_stream)
 {
 	int ret;
-	url_request* url = parse_url(url_str, user_agent);
+	url_request* url = parse_url(url_str, user_agent, family);
 	ret = write_url_request_to_stream(&url, header_stream, body_stream, combined_stream);
 	free_url_request(url);
 	return ret;
@@ -309,6 +310,7 @@ int write_url_request_to_stream(url_request** url, FILE* header_stream, FILE* bo
 	int redirect_count = 0;
 	int redirect_max = 3;
 	char* redirect_url = NULL;
+
 	while(redirect_count < redirect_max)
 	{
 		if(redirect_url != NULL)
@@ -367,7 +369,7 @@ void free_http_response(http_response* page)
 
 
 
-url_request* parse_url(char* url, char* user_agent)
+url_request* parse_url(char* url, char* user_agent, int family)
 {
 	char* lower_url;
 	char* remainder;
@@ -379,6 +381,7 @@ url_request* parse_url(char* url, char* user_agent)
 	new_url->port = -1;
 	new_url->path = NULL;
 	new_url->user_agent = user_agent == NULL ? strdup("ewget 1.0") : strdup(user_agent);
+	new_url->family = family;
 
 
 	if(url == NULL)
@@ -419,6 +422,7 @@ url_request* parse_url(char* url, char* user_agent)
 	if(remainder != NULL) /* if protocol is defined as something we don't support (e.g. ftp) do not parse url and return NULL */
 	{
 		char escape_chars[] = "\n\r\t\"\\ []<>{}|^~`:,";
+		char escape_charsv6[] = "\n\r\t\"\\ <>{}|^~`,";
 		int port_begin;
 		
 		
@@ -463,16 +467,38 @@ url_request* parse_url(char* url, char* user_agent)
 		 * this will be included directly in GET request
 		 * this dynamicaly allocates memory , remember to free url at end
 		 */
-		port_begin = char_index(remainder, ':');
-		
-		
+		// Make sure we find the LAST ':' in the host section, in case this is IPv6
+		// If we find a ']' in the host portion, we expect this is ipv6 and treat it accordingly
+		port_begin = -1;
+		int portoffset = char_index(remainder, ']') + 1;
+		int chridx = 0;
+		while(portoffset < path_begin && chridx >= 0)
+		{
+			chridx = char_index(remainder+portoffset, ':');
+			if(chridx >= 0)
+			{
+				portoffset += chridx;
+			}
+			if(chridx >= 0 && portoffset < path_begin)
+			{
+				port_begin = portoffset;
+				portoffset += 1;
+			}
+		}
 		
 		if(port_begin >= 0 && port_begin < path_begin )
 		{
 			char* raw_host = (char*)malloc((port_begin+1)*sizeof(char));
+			char* tmp_host = NULL;
 			memcpy(raw_host, remainder, port_begin);
 			raw_host[port_begin] = '\0';
-			new_url->hostname = escape_chars_to_hex(raw_host, escape_chars);
+			tmp_host = dynamic_replace(raw_host, "[", "");
+			free(raw_host);
+			raw_host = tmp_host;
+			tmp_host = dynamic_replace(raw_host, "]", "");
+			free(raw_host);
+			raw_host = tmp_host;
+			new_url->hostname = escape_chars_to_hex(raw_host, escape_charsv6);
 			free(raw_host);
 
 			if(path_begin-port_begin-1 <= 5)
@@ -494,9 +520,16 @@ url_request* parse_url(char* url, char* user_agent)
 		else
 		{
 			char* raw_host = (char*)malloc((path_begin+1)*sizeof(char));
+			char* tmp_host = NULL;
 			memcpy(raw_host, remainder, path_begin);
 			raw_host[path_begin] = '\0';
-			new_url->hostname = escape_chars_to_hex(raw_host, escape_chars);
+			tmp_host = dynamic_replace(raw_host, "[", "");
+			free(raw_host);
+			raw_host = tmp_host;
+			tmp_host = dynamic_replace(raw_host, "]", "");
+			free(raw_host);
+			raw_host = tmp_host;
+			new_url->hostname = escape_chars_to_hex(raw_host, escape_charsv6);
 			free(raw_host);
 		}
 		
@@ -519,6 +552,7 @@ url_request* parse_url(char* url, char* user_agent)
 		free(url); /* free memory allocated from escaping characters */
 	
 	}
+
 	return new_url;
 }
 
@@ -633,7 +667,7 @@ static void alarm_triggered(int sig)
 
 void parse_redirect(url_request** url, char* redirect_url)
 {
-	url_request* new_url = parse_url(redirect_url, (*url)->user_agent);
+	url_request* new_url = parse_url(redirect_url, (*url)->user_agent, (*url)->family);
 	//transfer username and pass
 	if((*url)->user != NULL)
 	{
@@ -654,7 +688,7 @@ void parse_redirect(url_request** url, char* redirect_url)
 
 
 static http_response* retrieve_http(	url_request *url, 
-					void* (*initialize_connection)(char*, int), 
+					void* (*initialize_connection)(char*, int, int), 
 					int (*read_connection)(void*, char*, int),
 					int (*write_connection)(void*, char*, int),
 					void (*destroy_connection)(void*),
@@ -672,11 +706,10 @@ static http_response* retrieve_http(	url_request *url,
 
 	if(url->hostname != NULL && url->port >= 0 && url->path != NULL)
 	{
-		void* connection_data = initialize_connection(url->hostname, url->port);
+		void* connection_data = initialize_connection(url->hostname, url->port, url->family);
 		if(connection_data != NULL)
 		{
 			char* request = create_http_request(url);
-			
 			/* send request */
 			int test = write_connection(connection_data, request, strlen(request));
 			if(test == strlen(request))
@@ -713,17 +746,19 @@ static char* create_http_request(url_request* url)
 	char* req_str1;
 	char* req_str2;
 	char port_str[8];
+	int brackets_req;
 
 
 	url->user_agent = url->user_agent == NULL ? strdup("ewget 1.0") : url->user_agent;
+	brackets_req = char_index(url->hostname, ':');
 
 	req_str1 = dynamic_strcat(	
-					10,
+					12,
 					"GET ",	url->path, " HTTP/1.0\r\n", 
 					"User-Agent: ", url->user_agent, "\r\n", 
 					"Accept: */*\r\n", 
 					"Connection: close\r\n", 
-					"Host: ", url->hostname
+					"Host: ", (brackets_req >= 0 ? "[" : ""), url->hostname, (brackets_req >= 0 ? "]" : "")
 					);
 
 	if( (url->protocol == HTTP_PROTO && url->port != 80) || (url->protocol == HTTPS_PROTO && url->port != 443) )
@@ -787,7 +822,6 @@ static void get_http_response(void* connection_data, int (*read_connection)(void
 		reply->is_text = 0;
 		reply->length  = 0;
 	}
-
 
 	bytes_read = read_connection(connection_data, read_buffer, read_buffer_size);
 	bytes_read = bytes_read < 0 ? 0 : bytes_read;
@@ -1076,13 +1110,16 @@ static int char_index(char* str, int ch)
 }
 
 
-static int tcp_connect(char* hostname, int port)
+static int tcp_connect(char* hostname, int port, int family)
 {
-	struct hostent* host;
 	int sockfd;
-	struct sockaddr_in address;
+	struct addrinfo hints;
+	struct addrinfo* res;
+	struct addrinfo* ressave;
 	long arg = 0;
 	int connection;
+	char portstr[6];
+	int gairet;
 
 
 
@@ -1090,101 +1127,120 @@ static int tcp_connect(char* hostname, int port)
 	{
 		return -1;
 	}
-       	host = gethostbyname(hostname);
-	if(host == NULL)
+	snprintf(portstr, 6, "%d", port);
+	memset(&hints, 0, sizeof(struct addrinfo));
+	hints.ai_family = family;
+	hints.ai_socktype = SOCK_STREAM;
+
+	gairet = getaddrinfo(hostname, portstr, &hints, &res);
+	if(gairet != 0)
 	{
 		return -1;
 	}
+	ressave = res;
 
-	sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	if(sockfd < 0)
+	do
 	{
-		return -1;
-	}
-	
+		int should_break = 0;
 
-	address.sin_family= AF_INET;
-	address.sin_addr.s_addr = ((struct in_addr *)host->h_addr)->s_addr;
-	address.sin_port = htons(port); /* htons is necessary -- it makes sure byte ordering is correct */
+		sockfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
+		if(sockfd < 0)
+		{
+			continue;
+		}
 
-	/* Set non-blocking */
-	arg = 0;
-	if( (arg = fcntl(sockfd, F_GETFL, NULL)) < 0)
-	{
-	       	close(sockfd);
-		return -1;
-	}
-	arg |= O_NONBLOCK; 
-  	if( fcntl(sockfd, F_SETFL, arg) < 0)
-	{
-	       	close(sockfd);
-		return -1;
-	}	
-	
+		/* Set non-blocking */
+		arg = 0;
+		if( (arg = fcntl(sockfd, F_GETFL, NULL)) < 0)
+		{
+		       	close(sockfd);
+			continue;
+		}
+		arg |= O_NONBLOCK; 
+  		if( fcntl(sockfd, F_SETFL, arg) < 0)
+		{
+		       	close(sockfd);
+			continue;
+		}
 
-	connection = connect(sockfd, (struct sockaddr *)&address, sizeof(address));
-	if(connection < 0)
-	{
-		if (errno == EINPROGRESS)
-		{ 
-			fd_set myset; 
-			struct timeval tv;
-			int valopt;
-			
-      			tv.tv_sec = __ewget_timeout_seconds; 
-			tv.tv_usec = 0; 
-			FD_ZERO(&myset); 
-			FD_SET(sockfd, &myset); 
-			connection = select(sockfd+1, NULL, &myset, NULL, &tv); 
-			while(connection < 0 && errno != EINTR)
+		connection = connect(sockfd, res->ai_addr, res->ai_addrlen);
+		if(connection < 0)
+		{
+			if (errno == EINPROGRESS)
 			{
+				fd_set myset; 
+				struct timeval tv;
+				int valopt;
+				
+      				tv.tv_sec = __ewget_timeout_seconds; 
+				tv.tv_usec = 0; 
+				FD_ZERO(&myset); 
+				FD_SET(sockfd, &myset); 
 				connection = select(sockfd+1, NULL, &myset, NULL, &tv); 
-			}
-			
-           		if (connection > 0)
-			{
-				/* Socket selected for write */
-				socklen_t sock_len = sizeof(int); 
-				if (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (void*)(&valopt), &sock_len) < 0)
+				while(connection < 0 && errno != EINTR)
 				{
-					close(sockfd);
-					return -1;
+					connection = select(sockfd+1, NULL, &myset, NULL, &tv); 
 				}
-				/* Check the value returned... */
-				if (valopt) 
+				
+        	   		if (connection > 0)
+				{
+					/* Socket selected for write */
+					socklen_t sock_len = sizeof(int); 
+					if (getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (void*)(&valopt), &sock_len) < 0)
+					{
+						close(sockfd);
+						continue;
+					}
+					/* Check the value returned... */
+					if (valopt) 
+					{
+						close(sockfd);
+        	         			continue;
+					}
+					else
+					{
+						should_break = 1;
+					}
+				}
+				else
 				{
 					close(sockfd);
-                 			return -1;
+					continue;
 				}
 			}
 			else
 			{
 				close(sockfd);
-				return -1;
+				continue;
 			}
 		}
 		else
 		{
-			close(sockfd);
-			return -1;
+			should_break = 1;
 		}
-	
-	} 
-	
-
-	/* Set to blocking mode again... */
-	if( (arg = fcntl(sockfd, F_GETFL, NULL)) < 0)
+		/* Set to blocking mode again... */
+		if( (arg = fcntl(sockfd, F_GETFL, NULL)) < 0)
+		{
+			close(sockfd);
+			continue;	
+		} 
+		arg &= (~O_NONBLOCK); 
+		if( fcntl(sockfd, F_SETFL, arg) < 0)
+		{
+			close(sockfd);
+			continue;
+		}
+		if(should_break)
+		{
+			break;
+		}
+	} while((res = res->ai_next) != NULL);
+		
+	freeaddrinfo(ressave);
+	if(res == NULL)
 	{
-		close(sockfd);
-		return -1;	
-	} 
-	arg &= (~O_NONBLOCK); 
-	if( fcntl(sockfd, F_SETFL, arg) < 0)
-	{
-		close(sockfd);
 		return -1;
 	}
-
 
 	return sockfd;
 }
@@ -1401,7 +1457,7 @@ char* dynamic_strcat(int num_strs, ...)
 
 
 /* returns data upon success, NULL on failure */
-static void* initialize_connection_http(char* host, int port)
+static void* initialize_connection_http(char* host, int port, int family)
 {
 	int *socket = (int*)malloc(sizeof(int));
 	
@@ -1411,7 +1467,7 @@ static void* initialize_connection_http(char* host, int port)
 	* a timeout/close triggered on it
 	*/
 	alarm_socket_closed = 0;
-	*socket	= tcp_connect(host, port);
+	*socket	= tcp_connect(host, port, family);
 
 	if(*socket >= 0)
 	{	
@@ -1489,7 +1545,7 @@ static int ewget_urandom(void *ctx, unsigned char *out, size_t len)
 
 
 
-static void* initialize_connection_https(char* host, int port)
+static void* initialize_connection_https(char* host, int port, int family)
 {
 	ssl_connection_data* connection_data = NULL;
 	int socket;
@@ -1500,8 +1556,7 @@ static void* initialize_connection_https(char* host, int port)
 	* a timeout/close triggered on it
 	*/
 	alarm_socket_closed = 0;
-	socket = tcp_connect(host, port);
-
+	socket = tcp_connect(host, port, family);
 	if(socket >= 0)
 	{
 		int initialized = -1;
@@ -1512,7 +1567,7 @@ static void* initialize_connection_https(char* host, int port)
 			SSL_library_init();
 			SSL_load_error_strings();
 			
-			meth = SSLv23_method();
+			meth = TLS_method();
 			ctx = SSL_CTX_new(meth);
     			ssl = SSL_new(ctx);
 			SSL_set_fd(ssl, socket);
@@ -1614,7 +1669,6 @@ static int read_https(void* connection_data, char* read_buffer, int read_length)
 {
 	ssl_connection_data *cd = (ssl_connection_data*)connection_data;
 	int bytes_read = -1;
-	
 	
 	alarm_socket = cd->socket;	
 	signal(SIGALRM, alarm_triggered );

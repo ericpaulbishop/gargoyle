@@ -116,6 +116,10 @@ UI.prdr="puerto redireccionado al enrutador";
 UI.puse="puerto en uso por el enrutador";
 UI.pfwd="puerto redireccionado a";
 UI.conn="conectado";
+UI.YES="Yes";
+UI.NO="No";
+UI.optional="optional";
+UI.IPFam="IP Family";
 
 UI.AJAX="Se requiere un navegador con soporte de AJAX";
 UI.AJAXUpg="Por favor actualice a un navegador compatible con AJAX y vuelva a intentarlo. Estos navegadores incluyen Firefox 2.0+, Safari y IE 6+ entre otros.";

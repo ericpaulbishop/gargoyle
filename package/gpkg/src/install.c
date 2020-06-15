@@ -737,7 +737,7 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 		FILE* package_file = fopen(pkg_dest, "w");
 		if(package_file != NULL)
 		{
-			err = write_url_to_stream(src_url, "gpkg", NULL, package_file, NULL);
+			err = write_url_to_stream(src_url, "gpkg", EW_UNSPEC, NULL, package_file, NULL);
 			fclose(package_file);
 		}
 		else

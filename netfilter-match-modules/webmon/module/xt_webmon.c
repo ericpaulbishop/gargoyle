@@ -33,14 +33,12 @@
 #include <linux/spinlock.h>
 #include <linux/proc_fs.h>
 
-#include <linux/netfilter_ipv4/ip_tables.h>
-#include <linux/netfilter_ipv4/ipt_webmon.h>
+#include <linux/netfilter/xt_webmon.h>
 
 #include "webmon_deps/tree_map.h"
 
 
 #include <linux/ktime.h>
-
 
 #include <linux/ip.h>
 #include <linux/netfilter/x_tables.h>
@@ -49,6 +47,8 @@
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Eric Bishop");
 MODULE_DESCRIPTION("Monitor URL in HTTP(S) Requests, designed for use with Gargoyle web interface (www.gargoyle-router.com)");
+MODULE_ALIAS("ipt_webmon");
+MODULE_ALIAS("ip6t_webmon");
 
 #define NIPQUAD(addr) \
 	((unsigned char *)&addr)[0], \
@@ -56,10 +56,27 @@ MODULE_DESCRIPTION("Monitor URL in HTTP(S) Requests, designed for use with Gargo
 	((unsigned char *)&addr)[2], \
 	((unsigned char *)&addr)[3]
 #define STRIP "%u.%u.%u.%u"
+#define NIP6(addr) \
+	ntohs(((uint16_t*)&addr)[0]), \
+	ntohs(((uint16_t*)&addr)[1]), \
+	ntohs(((uint16_t*)&addr)[2]), \
+	ntohs(((uint16_t*)&addr)[3]), \
+	ntohs(((uint16_t*)&addr)[4]), \
+	ntohs(((uint16_t*)&addr)[5]), \
+	ntohs(((uint16_t*)&addr)[6]), \
+	ntohs(((uint16_t*)&addr)[7])
+#define STRIP6 "%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x"
+
+typedef union
+{
+  struct in_addr ip4;
+  struct in6_addr ip6;
+} ipany;
 
 typedef struct qn
 {
-	uint32_t src_ip;
+  int family;
+	ipany src_ip;
 	char* value;
 	struct timeval time;
 	struct qn* next;
@@ -113,7 +130,7 @@ static void update_queue_node_time(queue_node* update_node, queue* full_queue)
 	}
 }
 
-void add_queue_node(uint32_t src_ip, char* value, queue* full_queue, string_map* queue_index, char* queue_index_key, uint32_t max_queue_length )
+void add_queue_node(int family, ipany src_ip, char* value, queue* full_queue, string_map* queue_index, char* queue_index_key, uint32_t max_queue_length )
 {
 
 	queue_node *new_node = (queue_node*)kmalloc(sizeof(queue_node), GFP_ATOMIC);
@@ -133,6 +150,7 @@ void add_queue_node(uint32_t src_ip, char* value, queue* full_queue, string_map*
 
 	do_gettimeofday(&t);
 	new_node->time = t;
+  new_node->family = family;
 	new_node->src_ip = src_ip;
 	new_node->value = dyn_value;
 	new_node->previous = NULL;
@@ -154,7 +172,14 @@ void add_queue_node(uint32_t src_ip, char* value, queue* full_queue, string_map*
 		full_queue->first = old_node->previous == NULL ? NULL : full_queue->first; /*shouldn't be needed, but just in case...*/
 		full_queue->length = full_queue->length - 1;
 		
-		sprintf(queue_index_key, STRIP"@%s", NIPQUAD(old_node->src_ip), old_node->value);
+    if(family == NFPROTO_IPV4)
+    {
+      sprintf(queue_index_key, STRIP"@%s", NIPQUAD(old_node->src_ip.ip4.s_addr), old_node->value);
+    }
+		else
+    {
+      sprintf(queue_index_key, STRIP6"@%s", NIP6(old_node->src_ip.ip6.s6_addr), old_node->value);
+    }
 		remove_map_element(queue_index, queue_index_key);
 
 		kfree(old_node->value);
@@ -608,12 +633,10 @@ static void *webmon_proc_next(struct seq_file *seq, void *v, loff_t *pos)
 	return NULL;
 }
 
-
 static void webmon_proc_stop(struct seq_file *seq, void *v)
 {
 	//don't need to do anything
 }
-
 
 static int webmon_proc_domain_show(struct seq_file *s, void *v)
 {
@@ -623,7 +646,14 @@ static int webmon_proc_domain_show(struct seq_file *s, void *v)
 	next_node = recent_domains->last;
 	while(next_node != NULL)
 	{
-		seq_printf(s, "%ld\t"STRIP"\t%s\n", (unsigned long)(next_node->time).tv_sec, NIPQUAD(next_node->src_ip), next_node->value);
+    if(next_node->family == NFPROTO_IPV4)
+    {
+      seq_printf(s, "%ld\t%d\t"STRIP"\t%s\n", (unsigned long)(next_node->time).tv_sec, NFPROTO_IPV4, NIPQUAD(next_node->src_ip.ip4.s_addr), next_node->value);
+    }
+    else
+    {
+      seq_printf(s, "%ld\t%d\t"STRIP6"\t%s\n", (unsigned long)(next_node->time).tv_sec, NFPROTO_IPV6, NIP6(next_node->src_ip.ip6.s6_addr), next_node->value);
+    }
 		next_node = (queue_node*)next_node->previous;
 	}
 	spin_unlock_bh(&webmon_lock);
@@ -639,14 +669,20 @@ static int webmon_proc_search_show(struct seq_file *s, void *v)
 	next_node = recent_searches->last;
 	while(next_node != NULL)
 	{
-		seq_printf(s, "%ld\t"STRIP"\t%s\n", (unsigned long)(next_node->time).tv_sec, NIPQUAD(next_node->src_ip), next_node->value);
+    if(next_node->family == NFPROTO_IPV4)
+    {
+      seq_printf(s, "%ld\t%d\t"STRIP"\t%s\n", (unsigned long)(next_node->time).tv_sec, NFPROTO_IPV4, NIPQUAD(next_node->src_ip.ip4.s_addr), next_node->value);
+    }
+    else
+    {
+      seq_printf(s, "%ld\t%d\t"STRIP6"\t%s\n", (unsigned long)(next_node->time).tv_sec, NFPROTO_IPV6, NIP6(next_node->src_ip.ip6.s6_addr), next_node->value);
+    }
 		next_node = (queue_node*)next_node->previous;
 	}
 	spin_unlock_bh(&webmon_lock);
 
 	return 0;
 }
-
 
 static struct seq_operations webmon_proc_domain_sops = {
 	.start = webmon_proc_start,
@@ -662,7 +698,6 @@ static struct seq_operations webmon_proc_search_sops = {
 	.show  = webmon_proc_search_show
 };
 
-
 static int webmon_proc_domain_open(struct inode *inode, struct file* file)
 {
 	return seq_open(file, &webmon_proc_domain_sops);
@@ -671,8 +706,6 @@ static int webmon_proc_search_open(struct inode *inode, struct file* file)
 {
 	return seq_open(file, &webmon_proc_search_sops);
 }
-
-
 
 static struct file_operations webmon_proc_domain_fops = {
 	.owner   = THIS_MODULE,
@@ -689,15 +722,9 @@ static struct file_operations webmon_proc_search_fops = {
 	.release = seq_release
 };
 
-
 #endif
 
-
-
-
-
-
-static int ipt_webmon_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t len)
+static int xt_webmon_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t len)
 {
 
 	char* buffer = kmalloc(len, GFP_ATOMIC);
@@ -758,36 +785,67 @@ static int ipt_webmon_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t le
 					unsigned long num_pieces;
 					char** split = split_on_separators(line, whitespace_chars, 2, -1, 0, &num_pieces);
 				
-					//check that there are 3 pieces (time, src_ip, value)
+					//check that there are 4 pieces (time, family, src_ip, value)
 					int length;
 					for(length=0; split[length] != NULL ; length++){}
-					if(length == 3)
+					if(length == 4)
 					{
 						time_t time;
-						int parsed_ip[4];
-						int valid_ip = sscanf(split[1], "%d.%d.%d.%d", parsed_ip, parsed_ip+1, parsed_ip+2, parsed_ip+3);
-						if(valid_ip == 4)
-						{
-							valid_ip = parsed_ip[0] <= 255 && parsed_ip[1] <= 255 && parsed_ip[2] <= 255 && parsed_ip[3] <= 255 ? valid_ip : 0;
-						}
-						if(sscanf(split[0], "%ld", &time) > 0 && valid_ip == 4)
-						{
-							char* value = split[2];
-							char value_key[700];
-							uint32_t ip = (parsed_ip[0]<<24) + (parsed_ip[1]<<16) + (parsed_ip[2]<<8) +  (parsed_ip[3]) ;
-							ip = htonl(ip);
-							sprintf(value_key, STRIP"@%s", NIPQUAD(ip), value);
-							if(type == WEBMON_DOMAIN)
-							{
-								add_queue_node(ip, value, recent_domains, domain_map, value_key, max_domain_queue_length );
-								(recent_domains->first->time).tv_sec = time;
-							}
-							else if(type == WEBMON_SEARCH)
-							{
-								add_queue_node(ip, value, recent_searches, search_map, value_key, max_search_queue_length );
-								(recent_searches->first->time).tv_sec = time;
-							}
-						}
+            if(split[1] == NFPROTO_IPV4)
+            {
+              int parsed_ip[4];
+  						int valid_ip = sscanf(split[2], "%d.%d.%d.%d", parsed_ip, parsed_ip+1, parsed_ip+2, parsed_ip+3);
+  						if(valid_ip == 4)
+  						{
+  							valid_ip = parsed_ip[0] <= 255 && parsed_ip[1] <= 255 && parsed_ip[2] <= 255 && parsed_ip[3] <= 255 ? valid_ip : 0;
+  						}
+              if(sscanf(split[0], "%ld", &time) > 0 && valid_ip == 4)
+  						{
+  							char* value = split[3];
+  							char value_key[700];
+                ipany ip;
+                ip.ip4.s_addr = (parsed_ip[0]<<24) + (parsed_ip[1]<<16) + (parsed_ip[2]<<8) +  (parsed_ip[3]) ;
+							  ip.ip4.s_addr = htonl(ip.ip4.s_addr);
+  							sprintf(value_key, STRIP"@%s", NIPQUAD(ip.ip4.s_addr), value);
+  							if(type == WEBMON_DOMAIN)
+  							{
+  								add_queue_node(NFPROTO_IPV4, ip, value, recent_domains, domain_map, value_key, max_domain_queue_length );
+  								(recent_domains->first->time).tv_sec = time;
+  							}
+  							else if(type == WEBMON_SEARCH)
+  							{
+  								add_queue_node(NFPROTO_IPV4, ip, value, recent_searches, search_map, value_key, max_search_queue_length );
+  								(recent_searches->first->time).tv_sec = time;
+  							}
+  						}
+            }
+            else
+            {
+              uint16_t parsed_ip[8];
+  						int valid_ip = sscanf(split[2], STRIP6, parsed_ip, parsed_ip+1, parsed_ip+2, parsed_ip+3, parsed_ip+4, parsed_ip+5, parsed_ip+6, parsed_ip+7);
+  						if(valid_ip == 8)
+  						{
+  							valid_ip = parsed_ip[0] <= 65535 && parsed_ip[1] <= 65535 && parsed_ip[2] <= 65535 && parsed_ip[3] <= 65535 && parsed_ip[4] <= 65535 && parsed_ip[5] <= 65535 && parsed_ip[6] <= 65535 && parsed_ip[7] <= 65535 ? valid_ip : 0;
+  						}
+              if(sscanf(split[0], "%ld", &time) > 0 && valid_ip == 8)
+  						{
+  							char* value = split[3];
+  							char value_key[700];
+                ipany ip;
+                memcpy(ip.ip6.s6_addr, parsed_ip, sizeof(parsed_ip));
+  							sprintf(value_key, STRIP6"@%s", NIP6(ip.ip6.s6_addr), value);
+  							if(type == WEBMON_DOMAIN)
+  							{
+  								add_queue_node(NFPROTO_IPV6, ip, value, recent_domains, domain_map, value_key, max_domain_queue_length );
+  								(recent_domains->first->time).tv_sec = time;
+  							}
+  							else if(type == WEBMON_SEARCH)
+  							{
+  								add_queue_node(NFPROTO_IPV6, ip, value, recent_searches, search_map, value_key, max_search_queue_length );
+  								(recent_searches->first->time).tv_sec = time;
+  							}
+  						}
+            }
 					}
 					
 					for(length=0; split[length] != NULL ; length++)
@@ -802,29 +860,26 @@ static int ipt_webmon_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t le
 		}
 	}
 	kfree(buffer);
-	spin_unlock_bh(&webmon_lock);
-		
-	
+	spin_unlock_bh(&webmon_lock);	
+
 	return 1;
 }
-static struct nf_sockopt_ops ipt_webmon_sockopts = 
+
+static struct nf_sockopt_ops xt_webmon_sockopts = 
 {
 	.pf         = PF_INET,
 	.set_optmin = WEBMON_SET,
 	.set_optmax = WEBMON_SET+1,
-	.set        = ipt_webmon_set_ctl,
+	.set        = xt_webmon_set_ctl,
 };
 
-
-
-
-static bool match(const struct sk_buff *skb, struct xt_action_param *par)
+static bool webmon_mt4(const struct sk_buff *skb, struct xt_action_param *par)
 {
-
-	const struct ipt_webmon_info *info = (const struct ipt_webmon_info*)(par->matchinfo);
+  const struct xt_webmon_info *info = (const struct xt_webmon_info*)(par->matchinfo);
 
 	
 	struct iphdr* iph;
+  ipany src_ip;
 
 	/* linearize skb if necessary */
 	struct sk_buff *linear_skb;
@@ -852,7 +907,7 @@ static bool match(const struct sk_buff *skb, struct xt_action_param *par)
 		unsigned char* payload 		= ((unsigned char*)iph) + payload_offset;
 		unsigned short payload_length	= ntohs(iph->tot_len) - payload_offset;
 
-	
+    src_ip.ip4.s_addr = iph->saddr;
 
 		/* if payload length <= 10 bytes don't bother doing a check, otherwise check for match */
 		if(payload_length > 10)
@@ -869,15 +924,15 @@ static bool match(const struct sk_buff *skb, struct xt_action_param *par)
 			
 				for(ip_index = 0; ip_index < info->num_exclude_ips; ip_index++)
 				{
-					if( (info->exclude_ips)[ip_index] == iph->saddr )
+					if( ((info->exclude_ips)[ip_index]).ip4.s_addr == iph->saddr )
 					{
 						save = info->exclude_type == WEBMON_EXCLUDE ? 0 : 1;
 					}
 				}
 				for(ip_index=0; ip_index < info->num_exclude_ranges; ip_index++)
 				{
-					struct ipt_webmon_ip_range r = (info->exclude_ranges)[ip_index];
-					if( (unsigned long)ntohl( r.start) <= (unsigned long)ntohl(iph->saddr) && (unsigned long)ntohl(r.end) >= (unsigned long)ntohl(iph->saddr) )
+					struct xt_webmon_ip_range r = (info->exclude_ranges)[ip_index];
+					if( (unsigned long)ntohl( r.start.ip4.s_addr) <= (unsigned long)ntohl(iph->saddr) && (unsigned long)ntohl(r.end.ip4.s_addr) >= (unsigned long)ntohl(iph->saddr) )
 					{
 						save = info->exclude_type == WEBMON_EXCLUDE ? 0 : 1;
 					}
@@ -906,7 +961,7 @@ static bool match(const struct sk_buff *skb, struct xt_action_param *par)
 						else
 						{
 							//add
-							add_queue_node(iph->saddr, domain, recent_domains, domain_map, domain_key, max_domain_queue_length );
+							add_queue_node(NFPROTO_IPV4, src_ip, domain, recent_domains, domain_map, domain_key, max_domain_queue_length );
 						}
 						
 							
@@ -1087,7 +1142,7 @@ static bool match(const struct sk_buff *skb, struct xt_action_param *par)
 							 */
 							if(recent_node != NULL)
 							{
-								if(recent_node->src_ip == iph->saddr)
+								if(recent_node->src_ip.ip4.s_addr == iph->saddr)
 								{
 									struct timeval t;
 									do_gettimeofday(&t);
@@ -1095,7 +1150,7 @@ static bool match(const struct sk_buff *skb, struct xt_action_param *par)
 									{
 										char recent_key[700];
 										
-										sprintf(recent_key, STRIP"@%s", NIPQUAD(recent_node->src_ip), recent_node->value);
+										sprintf(recent_key, STRIP"@%s", NIPQUAD(recent_node->src_ip.ip4.s_addr), recent_node->value);
 										remove_map_element(search_map, recent_key);
 										
 										recent_searches->first = recent_node->next;
@@ -1121,7 +1176,7 @@ static bool match(const struct sk_buff *skb, struct xt_action_param *par)
 							else
 							{
 								//add
-								add_queue_node(iph->saddr, search, recent_searches, search_map, search_key, max_search_queue_length );
+								add_queue_node(NFPROTO_IPV4, src_ip, search, recent_searches, search_map, search_key, max_search_queue_length );
 							}
 						}
 						spin_unlock_bh(&webmon_lock);
@@ -1137,15 +1192,15 @@ static bool match(const struct sk_buff *skb, struct xt_action_param *par)
 
 				for(ip_index = 0; ip_index < info->num_exclude_ips; ip_index++)
 				{
-					if( (info->exclude_ips)[ip_index] == iph->saddr )
+					if( ((info->exclude_ips)[ip_index]).ip4.s_addr == iph->saddr )
 					{
 						save = info->exclude_type == WEBMON_EXCLUDE ? 0 : 1;
 					}
 				}
 				for(ip_index=0; ip_index < info->num_exclude_ranges; ip_index++)
 				{
-					struct ipt_webmon_ip_range r = (info->exclude_ranges)[ip_index];
-					if( (unsigned long)ntohl( r.start) <= (unsigned long)ntohl(iph->saddr) && (unsigned long)ntohl(r.end) >= (unsigned long)ntohl(iph->saddr) )
+					struct xt_webmon_ip_range r = (info->exclude_ranges)[ip_index];
+					if( (unsigned long)ntohl( r.start.ip4.s_addr) <= (unsigned long)ntohl(iph->saddr) && (unsigned long)ntohl(r.end.ip4.s_addr) >= (unsigned long)ntohl(iph->saddr) )
 					{
 						save = info->exclude_type == WEBMON_EXCLUDE ? 0 : 1;
 					}
@@ -1170,7 +1225,7 @@ static bool match(const struct sk_buff *skb, struct xt_action_param *par)
 						else
 						{
 							//add
-							add_queue_node(iph->saddr, domain, recent_domains, domain_map, domain_key, max_domain_queue_length );
+							add_queue_node(NFPROTO_IPV4, src_ip, domain, recent_domains, domain_map, domain_key, max_domain_queue_length );
 						}
 
 						spin_unlock_bh(&webmon_lock);
@@ -1191,12 +1246,389 @@ static bool match(const struct sk_buff *skb, struct xt_action_param *par)
 	return 0;
 }
 
+static bool webmon_mt6(const struct sk_buff *skb, struct xt_action_param *par)
+{
+  const struct xt_webmon_info *info = (const struct xt_webmon_info*)(par->matchinfo);
 
+	
+	struct ipv6hdr* iph;
+  ipany src_ip;
+
+	/* linearize skb if necessary */
+	struct sk_buff *linear_skb;
+	int skb_copied;
+	if(skb_is_nonlinear(skb))
+	{
+		linear_skb = skb_copy(skb, GFP_ATOMIC);
+		skb_copied = 1;
+	}
+	else
+	{
+		linear_skb = (struct sk_buff*)skb;
+		skb_copied = 0;
+	}
+
+	
+
+	/* ignore packets that are not TCP */
+	iph = (struct ipv6hdr*)(skb_network_header(skb));
+  int thoff = 0;
+	int ip6proto = ipv6_find_hdr(skb, &thoff, -1, NULL, NULL);
+	if(ip6proto == IPPROTO_TCP)
+	{
+		/* get payload */
+		struct tcphdr* tcp_hdr;
+    tcp_hdr = skb_header_pointer(skb, thoff, sizeof(struct tcphdr), tcp_hdr);
+    if(tcp_hdr != NULL)
+    {
+      unsigned short payload_offset 	= (tcp_hdr->doff*4) + thoff;
+  		unsigned char* payload 		= ((unsigned char*)iph) + payload_offset;
+  		unsigned short payload_length	= ntohs(iph->payload_len);
+     
+      memcpy(src_ip.ip6.s6_addr, iph->saddr.s6_addr, sizeof(iph->saddr.s6_addr));
+
+  		/* if payload length <= 10 bytes don't bother doing a check, otherwise check for match */
+  		if(payload_length > 10)
+  		{
+  			/* are we dealing with a web page request */
+  			if(strnicmp((char*)payload, "GET ", 4) == 0 || strnicmp(  (char*)payload, "POST ", 5) == 0 || strnicmp((char*)payload, "HEAD ", 5) == 0)
+  			{
+  				char domain[650];
+  				char path[650];
+  				char domain_key[700];
+  				unsigned char save = info->exclude_type == WEBMON_EXCLUDE ? 1 : 0;
+  				uint32_t ip_index;
+  
+  			
+  				for(ip_index = 0; ip_index < info->num_exclude_ips; ip_index++)
+  				{
+  					if( ((info->exclude_ips)[ip_index]).ip6.s6_addr == iph->saddr.s6_addr )
+  					{
+  						save = info->exclude_type == WEBMON_EXCLUDE ? 0 : 1;
+  					}
+  				}
+  				for(ip_index=0; ip_index < info->num_exclude_ranges; ip_index++)
+  				{
+  					struct xt_webmon_ip_range r = (info->exclude_ranges)[ip_index];
+            if( (memcmp(&(r.start.ip6.s6_addr), &(iph->saddr.s6_addr), sizeof(unsigned char)*16) <= 0) && (memcmp(&(r.end.ip6.s6_addr), &(iph->saddr.s6_addr), sizeof(unsigned char)*16) >= 0) )
+  					{
+  						save = info->exclude_type == WEBMON_EXCLUDE ? 0 : 1;
+  					}
+  				}
+  
+  
+  				if(save)
+  				{
+  					extract_url(payload, payload_length, domain, path);
+  
+  					
+  					sprintf(domain_key, STRIP6"@%s", NIP6(iph->saddr.s6_addr), domain);
+  					
+  					if(strlen(domain) > 0)
+  					{
+  						char *search_part = NULL;
+  						spin_lock_bh(&webmon_lock);
+  
+  						
+  
+  						if(get_string_map_element(domain_map, domain_key))
+  						{
+  							//update time
+  							update_queue_node_time( (queue_node*)get_map_element(domain_map, domain_key), recent_domains );
+  						}
+  						else
+  						{
+  							//add
+  							add_queue_node(NFPROTO_IPV6, src_ip, domain, recent_domains, domain_map, domain_key, max_domain_queue_length );
+  						}
+  						
+  							
+  						/* printk("domain,path=\"%s\", \"%s\"\n", domain, path); */
+  
+  						if(strnistr(domain, "google.", 625) != NULL)
+  						{
+  							search_part = strstr(path, "&q=");
+  							search_part = search_part == NULL ? strstr(path, "#q=") : search_part;
+  							search_part = search_part == NULL ? strstr(path, "?q=") : search_part;
+  							search_part = search_part == NULL ? search_part : search_part+3;
+  						}
+  						else if(strstr(domain, "bing.") != NULL)
+  						{
+  							search_part = strstr(path, "?q=");
+  							search_part = search_part == NULL ? strstr(path, "&q=") : search_part;
+  							search_part = search_part == NULL ? search_part : search_part+3;
+  						}
+  						else if(strstr(domain, "yahoo.") != NULL)
+  						{
+  							search_part = strstr(path, "?p=");
+  							search_part = search_part == NULL ? strstr(path, "&p=") : search_part;
+  							search_part = search_part == NULL ? search_part : search_part+3;
+  						}
+  						else if(strstr(domain, "lycos.") != NULL)
+  						{
+  							search_part = strstr(path, "&query=");
+  							search_part = search_part == NULL ? strstr(path, "?query=") : search_part;
+  							search_part = search_part == NULL ? search_part : search_part+7;
+  						}
+  						else if(strstr(domain, "altavista.") != NULL)
+  						{
+  							search_part = strstr(path, "&q=");
+  							search_part = search_part == NULL ? strstr(path, "?q=") : search_part;
+  							search_part = search_part == NULL ? search_part : search_part+3;
+  						}
+  						else if(strstr(domain, "duckduckgo.") != NULL)
+  						{
+  							search_part = strstr(path, "?q=");
+  							search_part = search_part == NULL ? strstr(path, "&q=") : search_part;
+  							search_part = search_part == NULL ? search_part : search_part+3;
+  						}
+  						else if(strstr(domain, "baidu.") != NULL)
+  						{
+  							search_part = strstr(path, "?wd=");
+  							search_part = search_part == NULL ? strstr(path, "&wd=") : search_part;
+  							search_part = search_part == NULL ? search_part : search_part+4;
+  						}
+  						else if(strstr(domain, "search.") != NULL)
+  						{
+  							search_part = strstr(path, "?q=");
+  							search_part = search_part == NULL ? strstr(path, "&q=") : search_part;
+  							search_part = search_part == NULL ? search_part : search_part+3;
+  						}
+  						else if(strstr(domain, "aol.") != NULL)
+  						{
+  							search_part = strstr(path, "&q=");
+  							search_part = search_part == NULL ? strstr(path, "?q=") : search_part;
+  							search_part = search_part == NULL ? search_part : search_part+3;
+  						}
+  						else if(strstr(domain, "ask.") != NULL)
+  						{
+  							search_part = strstr(path, "?q=");
+  							search_part = search_part == NULL ? strstr(path, "&q=") : search_part;
+  							search_part = search_part == NULL ? search_part : search_part+3;
+  						}
+  						else if(strstr(domain, "yandex.") != NULL)
+  						{
+  							search_part = strstr(path, "?text=");
+  							search_part = search_part == NULL ? strstr(path, "&text=") : search_part;
+  							search_part = search_part == NULL ? search_part : search_part+6;
+  						}
+  						else if(strstr(domain, "naver.") != NULL)
+  						{
+  							search_part = strstr(path, "&query=");
+  							search_part = search_part == NULL ? strstr(path, "?query=") : search_part;
+  							search_part = search_part == NULL ? search_part : search_part+7;
+  						}
+  						else if(strstr(domain, "daum.") != NULL)
+  						{
+  							search_part = strstr(path, "&q=");
+  							search_part = search_part == NULL ? strstr(path, "?q=") : search_part;
+  							search_part = search_part == NULL ? search_part : search_part+3;
+  						}
+  						else if(strstr(domain, "cuil.") != NULL)
+  						{
+  							search_part = strstr(path, "?q=");
+  							search_part = search_part == NULL ? strstr(path, "&q=") : search_part;
+  							search_part = search_part == NULL ? search_part : search_part+3;
+  						}
+  						else if(strstr(domain, "kosmix.") != NULL)
+  						{
+  							search_part = strstr(path, "/topic/");
+  							search_part = search_part == NULL ? search_part : search_part+7;
+  						}
+  						else if(strstr(domain, "yebol.") != NULL)
+  						{
+  							search_part = strstr(path, "?key=");
+  							search_part = search_part == NULL ? strstr(path, "&key=") : search_part;
+  							search_part = search_part == NULL ? search_part : search_part+5;
+  						}
+  						else if(strstr(domain, "sogou.") != NULL)
+  						{
+  							search_part = strstr(path, "&query=");
+  							search_part = search_part == NULL ? strstr(path, "?query=") : search_part;
+  							search_part = search_part == NULL ? search_part : search_part+7;
+  						}
+  						else if(strstr(domain, "youdao.") != NULL)
+  						{
+  							search_part = strstr(path, "?q=");
+  							search_part = search_part == NULL ? strstr(path, "&q=") : search_part;
+  							search_part = search_part == NULL ? search_part : search_part+3;
+  						}
+  						else if(strstr(domain, "metacrawler.") != NULL)
+  						{
+  							search_part = strstr(path, "/ws/results/Web/");
+  							search_part = search_part == NULL ? search_part : search_part+16;
+  						}
+  						else if(strstr(domain, "webcrawler.") != NULL)
+  						{
+  							search_part = strstr(path, "/ws/results/Web/");
+  							search_part = search_part == NULL ? search_part : search_part+16;
+  						}
+  						else if(strstr(domain, "thepiratebay.") != NULL)
+  						{
+  							search_part = strstr(path, "/search/");
+  							search_part = search_part == NULL ? search_part : search_part+8;
+  						}
+  
+  						
+  						if(search_part != NULL)
+  						{
+  							int spi, si;
+  							char search_key[700];
+  							char search[650];
+  							queue_node *recent_node = recent_searches->first;
+  							
+  							/*unescape, replacing whitespace with + */
+  							si = 0;
+  							for(spi=0; search_part[spi] != '\0' && search_part[spi] != '&' && search_part[spi] != '/'; spi++)
+  							{
+  								int parsed_hex = 0;
+  								if( search_part[spi] == '%')
+  								{
+  									if(search_part[spi+1]  != '\0' && search_part[spi+1] != '&' && search_part[spi+1] != '/')
+  									{
+  										if(search_part[spi+2]  != '\0' && search_part[spi+2] != '&' && search_part[spi+2] != '/')
+  										{
+  											char enc[3];
+  											int hex;
+  											enc[0] = search_part[spi+1];
+  											enc[1] = search_part[spi+2];
+  											enc[2] = '\0';
+  											if(sscanf(enc, "%x", &hex) > 0)
+  											{
+  												parsed_hex = 1;
+  												search[si] = hex == ' ' || hex == '\t' || hex == '\r' || hex == '\n' ? '+' : (char)hex;
+  												spi = spi+2;
+  											}
+  										}
+  									}
+  								}
+  								if(parsed_hex == 0)
+  								{
+  									search[si] = search_part[spi];
+  								}
+  								si++;
+  							}
+  							search[si] = '\0';
+  							
+  							
+  							
+  							sprintf(search_key, STRIP6"@%s", NIP6(iph->saddr.s6_addr), search);
+  							
+  							
+  							/* Often times search engines will initiate a search as you type it in, but these intermediate queries aren't the real search query
+  							 * So, if the most recent query is a substring of the current one, discard it in favor of this one
+  							 */
+  							if(recent_node != NULL)
+  							{
+  								if(recent_node->src_ip.ip6.s6_addr == iph->saddr.s6_addr)
+  								{
+  									struct timeval t;
+  									do_gettimeofday(&t);
+  									if( (recent_node->time).tv_sec + 1 >= t.tv_sec || ((recent_node->time).tv_sec + 5 >= t.tv_sec && within_edit_distance(search, recent_node->value, 2)))
+  									{
+  										char recent_key[700];
+  										
+  										sprintf(recent_key, STRIP6"@%s", NIP6(recent_node->src_ip.ip6.s6_addr), recent_node->value);
+  										remove_map_element(search_map, recent_key);
+  										
+  										recent_searches->first = recent_node->next;
+  										recent_searches->last = recent_searches->first == NULL ? NULL : recent_searches->last;
+  										if(recent_searches->first != NULL)
+  										{
+  											recent_searches->first->previous = NULL;
+  										}
+  										recent_searches->length = recent_searches->length - 1 ;
+  										free(recent_node->value);
+  										free(recent_node);
+  									}
+  								}
+  							}
+  
+  
+  							
+  							if(get_string_map_element(search_map, search_key))
+  							{
+  								//update time
+  								update_queue_node_time( (queue_node*)get_map_element(search_map, search_key), recent_searches );
+  							}
+  							else
+  							{
+  								//add
+  								add_queue_node(NFPROTO_IPV6, src_ip, search, recent_searches, search_map, search_key, max_search_queue_length );
+  							}
+  						}
+  						spin_unlock_bh(&webmon_lock);
+  					}
+  				}
+  			}
+  			else if ((unsigned short)ntohs(tcp_hdr->dest) == 443)	// broad assumption that traffic on 443 is HTTPS. make effort to return fast as soon as we know we are wrong to not slow down processing
+  			{
+  				char domain[650];
+  				char domain_key[700];
+  				unsigned char save = info->exclude_type == WEBMON_EXCLUDE ? 1 : 0;
+  				uint32_t ip_index;
+  
+  				for(ip_index = 0; ip_index < info->num_exclude_ips; ip_index++)
+  				{
+  					if( ((info->exclude_ips)[ip_index]).ip6.s6_addr == iph->saddr.s6_addr )
+  					{
+  						save = info->exclude_type == WEBMON_EXCLUDE ? 0 : 1;
+  					}
+  				}
+  				for(ip_index=0; ip_index < info->num_exclude_ranges; ip_index++)
+  				{
+  					struct xt_webmon_ip_range r = (info->exclude_ranges)[ip_index];
+  					if( (memcmp(&(r.start.ip6.s6_addr), &(iph->saddr.s6_addr), sizeof(unsigned char)*16) <= 0) && (memcmp(&(r.end.ip6.s6_addr), &(iph->saddr.s6_addr), sizeof(unsigned char)*16) >= 0) )
+  					{
+  						save = info->exclude_type == WEBMON_EXCLUDE ? 0 : 1;
+  					}
+  				}
+  
+  
+  				if(save)
+  				{
+  					extract_url_https(payload, payload_length, domain);
+  
+  					sprintf(domain_key, STRIP6"@%s", NIP6(iph->saddr.s6_addr), domain);
+  
+  					if(strlen(domain) > 0)
+  					{
+  						spin_lock_bh(&webmon_lock);
+  
+  						if(get_string_map_element(domain_map, domain_key))
+  						{
+  							//update time
+  							update_queue_node_time( (queue_node*)get_map_element(domain_map, domain_key), recent_domains );
+  						}
+  						else
+  						{
+  							//add
+  							add_queue_node(NFPROTO_IPV6, src_ip, domain, recent_domains, domain_map, domain_key, max_domain_queue_length );
+  						}
+  
+  						spin_unlock_bh(&webmon_lock);
+  					}
+  				}
+  			}
+  		}
+    }
+	}
+	
+	/* free skb if we made a copy to linearize it */
+	if(skb_copied == 1)
+	{
+		kfree_skb(linear_skb);
+	}
+
+
+	/* printk("returning %d from webmon\n\n\n", test); */
+	return 0;
+}
 
 static int checkentry(const struct xt_mtchk_param *par)
 {
 
-	struct ipt_webmon_info *info = (struct ipt_webmon_info*)(par->matchinfo);
+	struct xt_webmon_info *info = (struct xt_webmon_info*)(par->matchinfo);
 
 
 	spin_lock_bh(&webmon_lock);
@@ -1227,7 +1659,7 @@ static int checkentry(const struct xt_mtchk_param *par)
 
 static void destroy( const struct xt_mtdtor_param *par )
 {
-	struct ipt_webmon_info *info = (struct ipt_webmon_info*)(par->matchinfo);
+	struct xt_webmon_info *info = (struct xt_webmon_info*)(par->matchinfo);
 
 	spin_lock_bh(&webmon_lock);
 	*(info->ref_count) = *(info->ref_count) - 1;
@@ -1239,16 +1671,26 @@ static void destroy( const struct xt_mtdtor_param *par )
 
 }
 
-static struct xt_match webmon_match __read_mostly  = 
+static struct xt_match webmon_mt_reg[] __read_mostly  = 
 {
-
-	.name		= "webmon",
-	.match		= match,
-	.family		= AF_INET,
-	.matchsize	= sizeof(struct ipt_webmon_info),
-	.checkentry	= checkentry,
-	.destroy	= destroy,
-	.me		= THIS_MODULE,
+	{
+		.name		= "webmon",
+		.match		= webmon_mt4,
+		.family		= NFPROTO_IPV4,
+		.matchsize	= sizeof(struct xt_webmon_info),
+		.checkentry	= checkentry,
+		.destroy	= destroy,
+		.me		= THIS_MODULE,
+	},
+  {
+		.name		= "webmon",
+		.match		= webmon_mt6,
+		.family		= NFPROTO_IPV6,
+		.matchsize	= sizeof(struct xt_webmon_info),
+		.checkentry	= checkentry,
+		.destroy	= destroy,
+		.me		= THIS_MODULE,
+	},
 };
 
 static int __init init(void)
@@ -1280,15 +1722,15 @@ static int __init init(void)
 		proc_create("webmon_recent_searches", 0, NULL, &webmon_proc_search_fops);
 	#endif
 	
-	if (nf_register_sockopt(&ipt_webmon_sockopts) < 0)
+	if (nf_register_sockopt(&xt_webmon_sockopts) < 0)
 	{
-		printk("ipt_webmon: Can't register sockopts. Aborting\n");
+		printk("xt_webmon: Can't register sockopts. Aborting\n");
 		spin_unlock_bh(&webmon_lock);
 		return -1;
 	}
 	spin_unlock_bh(&webmon_lock);
 
-	return xt_register_match(&webmon_match);
+	return xt_register_matches(webmon_mt_reg, ARRAY_SIZE(webmon_mt_reg));
 }
 
 static void __exit fini(void)
@@ -1303,17 +1745,16 @@ static void __exit fini(void)
 		remove_proc_entry("webmon_recent_domains", NULL);
 		remove_proc_entry("webmon_recent_searches", NULL);
 	#endif
-	nf_unregister_sockopt(&ipt_webmon_sockopts);
-	xt_unregister_match(&webmon_match);
+	nf_unregister_sockopt(&xt_webmon_sockopts);
+	xt_unregister_matches(webmon_mt_reg, ARRAY_SIZE(webmon_mt_reg));
 	destroy_map(domain_map, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
 	destroy_map(search_map, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
 	destroy_queue(recent_domains);
 	destroy_queue(recent_searches);
 
 	spin_unlock_bh(&webmon_lock);
-
-
 }
 
 module_init(init);
 module_exit(fini);
+

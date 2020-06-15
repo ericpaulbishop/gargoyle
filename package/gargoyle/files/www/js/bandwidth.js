@@ -139,6 +139,7 @@ function initializePlotsAndTable()
 	var haveQosDownload = false;
 	var haveTor = false;
 	var haveOpenvpn = false;
+	var haveWireguard = false;
 	var monitorIndex;
 	for(monitorIndex=0; monitorIndex < monitorNames.length; monitorIndex++)
 	{
@@ -173,6 +174,7 @@ function initializePlotsAndTable()
 		}
 		haveTor = monId.match(/tor/) ? true : haveTor;
 		haveOpenvpn = monId.match(/openvpn/) ? true : haveOpenvpn;
+		haveWireguard = monId.match(/wireguard/) ? true: haveWireguard;
 	}
 	var plotIdNames = ["plot1_type", "plot2_type", "plot3_type", "table_type"];
 	var idIndex;
@@ -194,6 +196,10 @@ function initializePlotsAndTable()
 		if(haveOpenvpn)
 		{
 			addOptionToSelectElement(plotIdName, "OpenVPN", "openvpn");
+		}
+		if(haveWireguard)
+		{
+			addOptionToSelectElement(plotIdName, "Wireguard", "wireguard");
 		}
 
 		addOptionToSelectElement(plotIdName, UI.HsNm, "hostname");
@@ -237,7 +243,7 @@ function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphLowRes)
 
 
 	var hr15m = uciOriginal.get("gargoyle", "bandwidth_display", "high_res_15m");
-	graphTimeFrameIndex = graphTimeFrameIndex == 1 && plotType != "total" && (!plotType.match(/tor/)) && (!plotType.match(/openvpn/)) && hr15m == "1" && (!graphLowRes) ? 0 : graphTimeFrameIndex;
+	graphTimeFrameIndex = graphTimeFrameIndex == 1 && plotType != "total" && (!plotType.match(/tor/)) && (!plotType.match(/openvpn/)) && (!plotType.match(/wireguard/)) && hr15m == "1" && (!graphLowRes) ? 0 : graphTimeFrameIndex;
 
 
 
@@ -265,6 +271,10 @@ function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphLowRes)
 	{
 		match1 = graphLowRes ? "openvpn-lr" + graphTimeFrameIndex : "openvpn-hr" + graphTimeFrameIndex;
 	}
+	else if(plotType.match(/wireguard/))
+	{
+		match1 = graphLowRes ? "wireguard-lr" + graphTimeFrameIndex : "wireguard-hr" + graphTimeFrameIndex;
+	}
 	else if(plotType == "ip" || plotType == "hostname")
 	{
 		match1 = "bdist" + graphTimeFrameIndex;
@@ -287,19 +297,36 @@ function getMonitorId(isUp, graphTimeFrameIndex, plotType, plotId, graphLowRes)
 	return selectedName;
 }
 
-
 function getHostnameList(ipList)
 {
-	var hostnameList = [];
+	var hostnameList = [[],[]];
 	var ipIndex =0;
 	for(ipIndex=0; ipIndex < ipList.length; ipIndex++)
 	{
 		var ip = ipList[ipIndex];
 		var host = ipToHostname[ip] == null ? ip : ipToHostname[ip];
 		host = host.length < 25 ? host : host.substr(0,22)+"...";
-		hostnameList.push(host);
+		if(hostnameList[1].indexOf(host) < 0)
+		{
+			hostnameList[0].push(ip);
+			hostnameList[1].push(host);
+		}
 	}
 	return hostnameList;
+}
+
+function getAllIPForHostname(hostname)
+{
+	var ipList = [];
+	for(ip in ipToHostname)
+	{
+		if(ipToHostname[ip] == hostname)
+		{
+			ipList.push(ip);
+		}
+	}
+	
+	return ipList;
 }
 
 function resetPlots()
@@ -323,7 +350,7 @@ function resetPlots()
 		{
 			var t = getSelectedValue("plot" + plotNum + "_type");
 			var is15MHighRes = graphTimeFrameIndex == 1 && uciOriginal.get("gargoyle", "bandwidth_display", "high_res_15m") == "1";
-			graphLowRes = graphLowRes || (t != "total" && t != "none" && t != "tor" && t != "openvpn" && (!is15MHighRes));
+			graphLowRes = graphLowRes || (t != "total" && t != "none" && t != "tor" && t != "openvpn" && t != "wireguard" && (!is15MHighRes));
 		}
 		for(plotNum=1; plotNum<=4; plotNum++)
 		{
@@ -336,11 +363,12 @@ function resetPlots()
 
 			if(plotType == "ip" || plotType == "hostname")
 			{
-				if(plotId.match(/^[0-9]+\./) == null)
+				if(plotId.match(/^[0-9]+[\.:]/) == null)
 				{
 					if(plotType == "hostname")
 					{
-						setAllowableSelections(plotIdName, ipsWithData, getHostnameList(ipsWithData));
+						var selOpts = getHostnameList(ipsWithData);
+						setAllowableSelections(plotIdName, selOpts[0], selOpts[1]);
 					}
 					else
 					{
@@ -377,7 +405,7 @@ function resetPlots()
 
 			if(!plotsInitializedToDefaults)
 			{
-				if(plotType != "" && plotType != "none" && plotType != "total" && plotType != "tor" && plotType != "openvpn" )
+				if(plotType != "" && plotType != "none" && plotType != "total" && plotType != "tor" && plotType != "openvpn" && plotType != "wireguard" )
 				{
 					var idValue = bandwidthSettings.get(plotIdName, "none");
 					if(idValue != "" && (plotType == "ip" || plotType == "hostname") )
@@ -581,7 +609,7 @@ function doUpdate()
 								var ip;
 								for (ip in monitorData)
 								{
-									if( ((selectedPlotType == "total" || selectedPlotType.match("qos") || selectedPlotType.match("tor") || selectedPlotType.match("openvpn") ) && ip == "COMBINED") || (selectedPlotType != "total" && ip != "COMBINED") )
+									if( ((selectedPlotType == "total" || selectedPlotType.match("qos") || selectedPlotType.match("tor") || selectedPlotType.match("openvpn") || selectedPlotType.match("wireguard") ) && ip == "COMBINED") || (selectedPlotType != "total" && ip != "COMBINED") )
 									{
 										ipList.push(getDisplayIp(ip));
 									}
@@ -614,7 +642,8 @@ function doUpdate()
 										//if new ip list differs from allowable selections, update
 										if(selectedPlotType == "hostname")
 										{
-											setAllowableSelections(plotIdName, ipList, getHostnameList(ipList));
+											var selOpts = getHostnameList(ipList);
+											setAllowableSelections(plotIdName, selOpts[0], selOpts[1]);
 										}
 										else
 										{
@@ -628,7 +657,34 @@ function doUpdate()
 									}
 
 									ip = ip == null ? "" : getRealIp(ip);
-									var points = monitorData[ip][0]
+									var points;
+									if(ipToHostname[ip] !== undefined && selectedPlotType == "hostname")
+									{
+										var ipList = getAllIPForHostname(ipToHostname[ip]);
+										pointsInitialised = 0;
+										for(ipIdx = 0; ipIdx < ipList.length; ipIdx++)
+										{
+											if(monitorData[ipList[ipIdx]] !== undefined)
+											{
+												if(pointsInitialised == 0)
+												{
+													(points = []).length = monitorData[ipList[ipIdx]][0].length; points.fill("0");
+													pointsInitialised = 1;
+												}
+												addPoints = monitorData[ipList[ipIdx]][0];
+												for(var x = 0; x < points.length; x++)
+												{
+													points[x] = parseInt(points[x]) + parseInt(addPoints[x]);
+													points[x] = points[x].toString();
+												}
+											}
+										}
+									}
+									else
+									{
+										points = monitorData[ip][0];
+									}
+									
 									if(monitorIndex < 3)
 									{
 										plotLastTimePoint = monitorData[ip][1];

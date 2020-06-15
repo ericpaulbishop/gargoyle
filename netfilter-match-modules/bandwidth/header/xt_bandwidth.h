@@ -1,4 +1,4 @@
-/*  bandwidth --	An iptables extension for bandwidth monitoring/control
+/*  bandwidth --	An xtables extension for bandwidth monitoring/control
  *  			Can be used to efficiently monitor bandwidth and/or implement bandwidth quotas
  *  			Can be queried using the iptbwctl userspace library
  *  			Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
@@ -20,8 +20,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef _IPT_BANDWIDTH_H
-#define _IPT_BANDWIDTH_H
+#ifndef _XT_BANDWIDTH_H
+#define _XT_BANDWIDTH_H
 
 /*flags -- first three don't map to parameters the rest do */
 #define BANDWIDTH_INITIALIZED		   1
@@ -73,14 +73,19 @@
 #define BANDWIDTH_QUERY_LENGTH		1205 
 #define BANDWIDTH_ENTRY_LENGTH		  12
 
+union xt_bandwidth_ipany
+{
+	struct in_addr ip4;
+	struct in6_addr ip6;
+};
 
-struct ipt_bandwidth_info
+struct xt_bandwidth_info
 {
 	char id[BANDWIDTH_MAX_ID_LENGTH];
 	unsigned char type;
 	unsigned char check_type;
-	uint32_t local_subnet;
-	uint32_t local_subnet_mask;
+	union xt_bandwidth_ipany local_subnet;
+	union xt_bandwidth_ipany local_subnet_mask;
 
 	unsigned char cmp;
 	unsigned char reset_is_constant_interval;
@@ -98,9 +103,9 @@ struct ipt_bandwidth_info
 	unsigned long hashed_id;
 	void* iam;
 	uint64_t* combined_bw;
-	struct ipt_bandwidth_info* non_const_self;
+	struct xt_bandwidth_info* non_const_self;
 	unsigned long* ref_count;
 
 
 };
-#endif /*_IPT_BANDWIDTH_H*/
+#endif /*_XT_BANDWIDTH_H*/

@@ -2,7 +2,7 @@
  *  			Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
  *
  *
- *  Copyright Â© 2009 by Eric Bishop <eric@gargoyle-router.com>
+ *  Copyright © 2009 by Eric Bishop <eric@gargoyle-router.com>
  *
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -301,11 +301,24 @@ static void parse_returned_ip_data(	void *out_data,
 					unsigned char is_constant_interval
 					)
 {
-	uint32_t ip = *( (uint32_t*)(in_buffer + *in_index) );
+	uint32_t family = *( (uint32_t*)(in_buffer + *in_index) );
+	uint32_t ip[4];
+	*ip = *( (uint32_t*)(in_buffer + (*in_index) + 4) );
+	*(ip + 1) = *( (uint32_t*)(in_buffer + (*in_index) + 8) );
+	*(ip + 2) = *( (uint32_t*)(in_buffer + (*in_index) + 12) );
+	*(ip + 3) = *( (uint32_t*)(in_buffer + (*in_index) + 16) );
     ip_bw_kernel_data_item* ip_bw_data = (ip_bw_kernel_data*)(in_buffer + *in_index);
 	if(get_history == 0)
 	{
-		(((ip_bw*)out_data)[*out_index]).ip = ip;
+		(((ip_bw*)out_data)[*out_index]).family = family;
+		*in_index = *in_index + 4;
+		(((ip_bw*)out_data)[*out_index]).ip[0] = *ip;
+		*in_index = *in_index + 4;
+		(((ip_bw*)out_data)[*out_index]).ip[1] = *(ip + 1);
+		*in_index = *in_index + 4;
+		(((ip_bw*)out_data)[*out_index]).ip[2] = *(ip + 2);
+		*in_index = *in_index + 4;
+		(((ip_bw*)out_data)[*out_index]).ip[3] = *(ip + 3);
 		*in_index = *in_index + 4;
 		(((ip_bw*)out_data)[*out_index]).bw = *( (uint64_t*)(in_buffer + *in_index) );
 		*in_index = *in_index + 8;
@@ -317,7 +330,11 @@ static void parse_returned_ip_data(	void *out_data,
 			history->reset_time = reset_time;
 			history->is_constant_interval = is_constant_interval;
 
-            history->ip = ip_bw_data->ip;
+			history->family = ip_bw_data->family;
+            history->ip[0] = ip_bw_data->ip[0];
+            history->ip[1] = ip_bw_data->ip[1];
+            history->ip[2] = ip_bw_data->ip[2];
+            history->ip[3] = ip_bw_data->ip[3];
 			history->num_nodes = ip_bw_data->num_nodes;
 			history->first_start = ip_bw_data->first_start;
 			history->first_end   = ip_bw_data->first_end;
@@ -327,7 +344,7 @@ static void parse_returned_ip_data(	void *out_data,
 			
 			/* read bws */
 			int node_index = 0;
-            *in_index += 32;
+            *in_index += 48;
             for (node_index = 0; node_index < history->num_nodes; node_index++)
 			{
                 *in_index += 8;
@@ -360,7 +377,6 @@ static void parse_returned_ip_data(	void *out_data,
 
 static int get_bandwidth_data(char* id, unsigned char get_history, char* ip, unsigned long* num_ips, void** data, unsigned long max_wait_milliseconds)
 {	
-	
 	unsigned char buf[BANDWIDTH_QUERY_LENGTH];
 	memset(buf, '\0',  BANDWIDTH_QUERY_LENGTH);
 	int done = 0;
@@ -369,7 +385,6 @@ static int get_bandwidth_data(char* id, unsigned char get_history, char* ip, uns
 	*data = NULL;
 	*num_ips = 0;
 
-
 	int got_lock = lock(max_wait_milliseconds);
 	int sockfd = -1;
 	if(got_lock)
@@ -377,21 +392,43 @@ static int get_bandwidth_data(char* id, unsigned char get_history, char* ip, uns
 		sockfd = socket(AF_INET, SOCK_RAW, IPPROTO_RAW);
 	}
 
-
-	uint32_t* request_ip = (uint32_t*)buf;
-	uint32_t* request_index = (uint32_t*)(buf + 4);
-	unsigned char* request_history =(unsigned char*)(buf + 8);
-	char* request_id = (char*)(buf+9);
+	uint32_t* family = (uint32_t*)buf;
+	uint32_t* request_ip = (uint32_t*)(buf + 4);
+	uint32_t* request_index = (uint32_t*)(buf + 20);
+	unsigned char* request_history =(unsigned char*)(buf + 24);
+	char* request_id = (char*)(buf + 25);
 
 	if(strcmp(ip, "ALL") == 0)
 	{
+		*family = AF_INET;
 		*request_ip = 0;
+		*(request_ip + 1) = 0;
+		*(request_ip + 2) = 0;
+		*(request_ip + 3) = 0;
 	}
 	else
 	{
+		int ret;
+		*family = AF_INET;
 		struct in_addr addr;
-		inet_aton(ip, &addr);
-		*request_ip = (uint32_t)addr.s_addr;
+		struct in6_addr addr6;
+		ret = inet_pton(*family, ip, &addr);
+		if(ret == 0)
+		{
+			*family = AF_INET6;
+			inet_pton(*family, ip, &addr6);
+			*request_ip = (uint32_t)addr6.s6_addr32[0];
+			*(request_ip + 1) = (uint32_t)addr6.s6_addr32[1];
+			*(request_ip + 2) = (uint32_t)addr6.s6_addr32[2];
+			*(request_ip + 3) = (uint32_t)addr6.s6_addr32[3];
+		}
+		else
+		{
+			*request_ip = (uint32_t)addr.s_addr;
+			*(request_ip + 1) = 0;
+			*(request_ip + 2) = 0;
+			*(request_ip + 3) = 0;
+		}
 	}
 	*request_index = 0;
 	*request_history = get_history;
@@ -407,6 +444,7 @@ static int get_bandwidth_data(char* id, unsigned char get_history, char* ip, uns
 		uint32_t size = BANDWIDTH_QUERY_LENGTH;
 		getsockopt(sockfd, IPPROTO_IP, BANDWIDTH_GET, buf, &size);
 		error = (unsigned char)buf[0];
+		
 		if(error != 0)
 		{
 			done = 1;
@@ -450,13 +488,35 @@ static int get_bandwidth_data(char* id, unsigned char get_history, char* ip, uns
 
 				if(strcmp(ip, "ALL") == 0)
 				{
+					*family = AF_INET;
 					*request_ip = 0;
+					*(request_ip + 1) = 0;
+					*(request_ip + 2) = 0;
+					*(request_ip + 3) = 0;
 				}
 				else
 				{
+					int ret;
+					*family = AF_INET;
 					struct in_addr addr;
-					inet_aton(ip, &addr);
-					*request_ip = (uint32_t)addr.s_addr;
+					struct in6_addr addr6;
+					ret = inet_pton(*family, ip, &addr);
+					if(ret == 0)
+					{
+						*family = AF_INET6;
+						inet_pton(*family, ip, &addr6);
+						*request_ip = (uint32_t)addr6.s6_addr32[0];
+						*(request_ip + 1) = (uint32_t)addr6.s6_addr32[1];
+						*(request_ip + 2) = (uint32_t)addr6.s6_addr32[2];
+						*(request_ip + 3) = (uint32_t)addr6.s6_addr32[3];
+					}
+					else
+					{
+						*request_ip = (uint32_t)addr.s_addr;
+						*(request_ip + 1) = 0;
+						*(request_ip + 2) = 0;
+						*(request_ip + 3) = 0;
+					}
 				}
 				*request_index = next_request_index;
 				*request_history = get_history;
@@ -496,13 +556,22 @@ static int set_ip_block(void* ip_block_data, unsigned char is_history, unsigned 
 	if(is_history)
 	{
 		ip_bw_history* history = (ip_bw_history*)ip_block_data;
-		uint32_t block_length = (2*4) + (3*8) + (8*history->num_nodes);
+		uint32_t block_length = (2*4) + (1*16) + (3*8) + (8*history->num_nodes);
 		if(*current_output_index + block_length > output_buffer_length)
 		{
 			return 1;
 		}
 	
-		*( (uint32_t*)(output_buffer + *current_output_index) ) = history->ip;
+		*( (uint32_t*)(output_buffer + *current_output_index) ) = history->family;
+		*current_output_index = *current_output_index + 4;
+		
+		*( (uint32_t*)(output_buffer + *current_output_index) ) = *(history->ip);
+		*current_output_index = *current_output_index + 4;
+		*( (uint32_t*)(output_buffer + *current_output_index) ) = *(history->ip+1);
+		*current_output_index = *current_output_index + 4;
+		*( (uint32_t*)(output_buffer + *current_output_index) ) = *(history->ip+2);
+		*current_output_index = *current_output_index + 4;
+		*( (uint32_t*)(output_buffer + *current_output_index) ) = *(history->ip+3);
 		*current_output_index = *current_output_index + 4;
 
 		*( (uint32_t*)(output_buffer + *current_output_index) ) = history->num_nodes;
@@ -559,14 +628,22 @@ static int set_ip_block(void* ip_block_data, unsigned char is_history, unsigned 
 	}
 	else
 	{
-		if(*current_output_index + 12 > output_buffer_length)
+		if(*current_output_index + 28 > output_buffer_length)
 		{
 			return 1;
 		}
 	
 
 		ip_bw* ib = (ip_bw*)ip_block_data;
-		*( (uint32_t*)(output_buffer + *current_output_index) ) = ib->ip;
+		*( (uint32_t*)(output_buffer + *current_output_index) ) = ib->family;
+		*current_output_index = *current_output_index + 4;
+		*( (uint32_t*)(output_buffer + *current_output_index) ) = *(ib->ip);
+		*current_output_index = *current_output_index + 4;
+		*( (uint32_t*)(output_buffer + *current_output_index) ) = *(ib->ip+1);
+		*current_output_index = *current_output_index + 4;
+		*( (uint32_t*)(output_buffer + *current_output_index) ) = *(ib->ip+2);
+		*current_output_index = *current_output_index + 4;
+		*( (uint32_t*)(output_buffer + *current_output_index) ) = *(ib->ip+3);
 		*current_output_index = *current_output_index + 4;
 		*( (uint64_t*)(output_buffer + *current_output_index) ) = ib->bw;
 		
@@ -910,10 +987,26 @@ int save_usage_to_file(ip_bw* data, unsigned long num_ips, char* out_file_path)
 		int out_index=0;
 		for(out_index=0; out_index < num_ips; out_index++)
 		{
-			struct in_addr ipaddr;
 			ip_bw next = data[out_index];
-			ipaddr.s_addr = next.ip;
-			fprintf(out_file, "%-15s\t%lld\n", inet_ntoa(ipaddr), (long long int)next.bw);
+			if(next.family == AF_INET)
+			{
+				struct in_addr ipaddr;
+				ipaddr.s_addr = *next.ip;
+				char ipstr[INET_ADDRSTRLEN];
+				inet_ntop(next.family, &ipaddr, ipstr, INET_ADDRSTRLEN);
+				fprintf(out_file, "%u\t%-15s\t%lld\n", next.family, ipstr, (long long int)next.bw);
+			}
+			else
+			{
+				struct in6_addr ipaddr;
+				ipaddr.s6_addr32[0] = *(next.ip);
+				ipaddr.s6_addr32[1] = *(next.ip+1);
+				ipaddr.s6_addr32[2] = *(next.ip+2);
+				ipaddr.s6_addr32[3] = *(next.ip+3);
+				char ipstr[INET6_ADDRSTRLEN];
+				inet_ntop(next.family, &ipaddr, ipstr, INET6_ADDRSTRLEN);
+				fprintf(out_file, "%u\t%-15s\t%lld\n", next.family, ipstr, (long long int)next.bw);
+			}
 		}
 		fclose(out_file);
 		success = 1;
@@ -962,7 +1055,8 @@ int save_history_to_file(ip_bw_history* data, unsigned long num_ips, char* out_f
 		{
 			ip_bw_history next = data[out_index];
 			
-			fwrite( &(next.ip), 4, 1, out_file);
+			fwrite( &(next.family), 4, 1, out_file);
+			fwrite( &(next.ip), 16, 1, out_file);
 			fwrite( &(next.num_nodes), 4, 1, out_file);
 			if(next.num_nodes == 0)
 			{
@@ -1029,7 +1123,7 @@ ip_bw* load_usage_from_file(char* in_file_path, unsigned long* num_ips, time_t* 
 		char** data_parts = split_on_separators(file_data, whitespace, 4, -1, 0, &num_data_parts);
 		free(file_data);
 
-		*num_ips = (num_data_parts/2) + 1;
+		*num_ips = (num_data_parts/3) + 1;
        		data = (ip_bw*)malloc( (*num_ips) * sizeof(ip_bw) );
 		*num_ips = 0;
 		unsigned long data_index = 0;
@@ -1037,19 +1131,45 @@ ip_bw* load_usage_from_file(char* in_file_path, unsigned long* num_ips, time_t* 
 		while(data_part_index < num_data_parts)
 		{
 			ip_bw next;
+			uint32_t family = 0;
 			struct in_addr ipaddr;
+			struct in6_addr ip6addr;
 			if(data_part_index == 0)
 			{
 				sscanf(data_parts[data_part_index], "%ld", last_backup);
 				//printf("last_backup = %ld\n", *last_backup);
 				data_part_index++;
 			}
-			int valid = inet_aton(data_parts[data_part_index], &ipaddr);
+			sscanf(data_parts[data_part_index], "%ld", (long int*)&family );
+			data_part_index++;
+			int valid = 0;
+			if(family == AF_INET)
+			{
+				valid = inet_pton(family, data_parts[data_part_index], &ipaddr);
+			}
+			else
+			{
+				valid = inet_pton(family, data_parts[data_part_index], &ip6addr);
+			}
 			data_part_index++;
 
 			if(valid && data_index < num_data_parts)
 			{
-				next.ip = ipaddr.s_addr;
+				next.family = family;
+				if(next.family == AF_INET)
+				{
+					*next.ip = ipaddr.s_addr;
+					*(next.ip+1) = 0;
+					*(next.ip+2) = 0;
+					*(next.ip+3) = 0;
+				}
+				else
+				{
+					*next.ip = ip6addr.s6_addr32[0];
+					*(next.ip+1) = ip6addr.s6_addr32[1];
+					*(next.ip+2) = ip6addr.s6_addr32[2];
+					*(next.ip+3) = ip6addr.s6_addr32[3];
+				}
 				valid = sscanf(data_parts[data_part_index], "%lld", (long long int*)&(next.bw) );
 				data_part_index++;
 			}
@@ -1106,15 +1226,16 @@ ip_bw_history* load_history_from_file(char* in_file_path, unsigned long* num_ips
 		uint32_t ip_index;
 		for(ip_index=0; ip_index < *num_ips; ip_index++)
 		{
-
-			uint32_t ip;
+			uint32_t family;
+			uint32_t ip[4];
 			uint32_t num_nodes;
 			uint64_t first_start;	
 			uint64_t first_end;
 			uint64_t last_end;
 			unsigned char bw_bits;
 
-			fread(&ip, 4, 1, in_file);
+			fread(&family, 4, 1, in_file);
+			fread(&ip, 16, 1, in_file);
 			fread(&num_nodes, 4, 1, in_file);
 			fread(&first_start, 8, 1, in_file);
 			fread(&first_end, 8, 1, in_file);
@@ -1125,7 +1246,11 @@ ip_bw_history* load_history_from_file(char* in_file_path, unsigned long* num_ips
 			next.reset_interval       = (time_t)reset_interval;
 			next.reset_time           = (time_t)reset_time;
 			next.is_constant_interval = is_constant_interval;
-			next.ip                   = ip;
+			next.family               = family;
+			*next.ip                  = *ip;
+			*(next.ip+1)              = *(ip+1);
+			*(next.ip+2)              = *(ip+2);
+			*(next.ip+3)              = *(ip+3);
 			next.num_nodes            = num_nodes;
 			next.first_start          = (time_t)first_start;
 			next.first_end            = (time_t)first_end;
@@ -1163,18 +1288,36 @@ ip_bw_history* load_history_from_file(char* in_file_path, unsigned long* num_ips
 void print_usage(FILE* out, ip_bw* usage, unsigned long num_ips)
 {
 	unsigned long usage_index;
+	uint32_t testblk[4];
+	memset(&testblk, 0, sizeof(uint32_t)*4);
 	for(usage_index =0; usage_index < num_ips; usage_index++)
 	{
 		ip_bw next = usage[usage_index];
-		if(next.ip != 0)
+		if(memcmp(&testblk, next.ip, sizeof(uint32_t)*4) != 0)
 		{
-			struct in_addr ipaddr;
-			ipaddr.s_addr = next.ip;
-			fprintf(out, "%-15s\t%lld\n", inet_ntoa(ipaddr), (long long int)next.bw);
+			if(next.family == AF_INET)
+			{
+				struct in_addr ipaddr;
+				ipaddr.s_addr = *(next.ip);
+				char ipstr[INET_ADDRSTRLEN];
+				inet_ntop(next.family, &ipaddr, ipstr, INET_ADDRSTRLEN);
+				fprintf(out, "%-39s\t%lld\n", ipstr, (long long int)next.bw);
+			}
+			else
+			{
+				struct in6_addr ipaddr;
+				ipaddr.s6_addr32[0] = *(next.ip);
+				ipaddr.s6_addr32[1] = *(next.ip+1);
+				ipaddr.s6_addr32[2] = *(next.ip+2);
+				ipaddr.s6_addr32[3] = *(next.ip+3);
+				char ipstr[INET6_ADDRSTRLEN];
+				inet_ntop(next.family, &ipaddr, ipstr, INET6_ADDRSTRLEN);
+				fprintf(out, "%-39s\t%lld\n", ipstr, (long long int)next.bw);
+			}
 		}
 		else
 		{
-			fprintf(out, "%-15s\t%lld\n", "COMBINED", (long long int)next.bw);
+			fprintf(out, "%-39s\t%lld\n", "COMBINED", (long long int)next.bw);
 		}
 	}
 	fprintf(out, "\n");
@@ -1183,6 +1326,8 @@ void print_usage(FILE* out, ip_bw* usage, unsigned long num_ips)
 void print_histories(FILE* out, char* id, ip_bw_history* histories, unsigned long num_histories, char output_type)
 {
 	unsigned long history_index = 0;
+	uint32_t testblk[4];
+	memset(&testblk, 0, sizeof(uint32_t)*4);
 	for(history_index=0; history_index < num_histories; history_index++)
 	{
 		ip_bw_history history = histories[history_index];
@@ -1195,25 +1340,37 @@ void print_histories(FILE* out, char* id, ip_bw_history* histories, unsigned lon
 
 		if(history_initialized)
 		{
-			char *ip_str = NULL;
+			char ip_str[INET6_ADDRSTRLEN];
 			time_t *times = NULL;
 
 
-			if(history.ip != 0)
+			if(memcmp(&testblk, history.ip, sizeof(uint32_t)*4) != 0)
 			{
-				struct in_addr ipaddr;
-				ipaddr.s_addr = history.ip;
-				ip_str = strdup(inet_ntoa(ipaddr));
+				if(history.family == AF_INET)
+				{
+					struct in_addr ipaddr;
+					ipaddr.s_addr = *history.ip;
+					inet_ntop(history.family, &ipaddr, ip_str, INET6_ADDRSTRLEN);
+				}
+				else
+				{
+					struct in6_addr ipaddr;
+					ipaddr.s6_addr32[0] = *history.ip;
+					ipaddr.s6_addr32[1] = *(history.ip+1);
+					ipaddr.s6_addr32[2] = *(history.ip+2);
+					ipaddr.s6_addr32[3] = *(history.ip+3);
+					inet_ntop(history.family, &ipaddr, ip_str, INET6_ADDRSTRLEN);
+				}
 			}
 			else
 			{
-				ip_str = strdup("COMBINED");
+				sprintf(ip_str,"%s","COMBINED");
 			}
 		
 		
 			if(output_type == 'm' || output_type == 'h')
 			{
-				fprintf(out, "%s %-15s\n", id, ip_str);
+				fprintf(out, "%s %-39s\n", id, ip_str);
 			}
 
 			if(output_type == 'm')
@@ -1270,7 +1427,6 @@ void print_histories(FILE* out, char* id, ip_bw_history* histories, unsigned lon
 			}
 			fprintf(out, "\n");
 			if(times != NULL) { free(times); };
-			if(ip_str != NULL) { free(ip_str); };
 		}
 	}
 }

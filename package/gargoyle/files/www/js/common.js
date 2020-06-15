@@ -1783,8 +1783,8 @@ function validateMultipleIpsOrMacs(addresses)
 			var nextSplit = nextAddr.split(/[\t ]*-[\t ]*/);
 			if( nextSplit.length==2 && validateIP(nextSplit[0]) == 0 && validateIP(nextSplit[1]) == 0)
 			{
-				var ipInt1 = getIpInt(nextSplit[0]);
-				var ipInt2 = getIpInt(nextSplit[1]);
+				var ipInt1 = getIpInteger(nextSplit[0]);
+				var ipInt2 = getIpInteger(nextSplit[1]);
 				valid = ipInt1 <= ipInt2 ? 0 : 1;
 			}
 			else
@@ -2239,7 +2239,7 @@ function textListToSpanElement(textList, addCommas, controlDocument)
 
 function addAddressStringToTable(controlDocument, newAddrs, tableContainerId, tableId, macsValid, ipValidType, alertOnError, tableWidth)
 {
-	//ipValidType: 0=none, 1=ip only, 2=ip or ip subnet, 3>=ip, ip subnet or ip range
+	//ipValidType: 0=none, 1=ip only, 2=ip or ip subnet, 3=ip, ip subnet or ip range, 4=ip only, 5=ip or ipsubnet, 6>=ip, ip subnet or ip range
 	macsValid = macsValid == null ? true : macsValid;
 	ipValidType = ipValidType == null ? 3 : ipValidType;
 	var ipValidFunction;
@@ -2255,9 +2255,21 @@ function addAddressStringToTable(controlDocument, newAddrs, tableContainerId, ta
 	{
 		ipValidFunction = validateIpRange;
 	}
-	else
+	else if(ipValidType == 3)
 	{
 		ipValidFunction = validateMultipleIps;
+	}
+	else if(ipValidType == 4)
+	{
+		ipValidFunction = validateIP6;
+	}
+	else if(ipValidType == 5)
+	{
+		ipValidFunction = validateIp6Range;
+	}
+	else
+	{
+		ipValidFunction = validateMultipleIp6s;
 	}
 
 	var allCurrentMacs = [];
@@ -3168,6 +3180,17 @@ function modalPrepare(modalID, title, elements, buttons)
 			{
 				inputEl.value = element.value;
 			}
+			if(element.values !== undefined)
+			{
+				for(var x = 0; x < inputEl.options.length; x++)
+				{
+					inputEl.options[x].selected = false;
+					if(element.values.indexOf(inputEl.options[x].value) > -1)
+					{
+						inputEl.options[x].selected = true;
+					}
+				}
+			}
 			if(element.innertext !== undefined)
 			{
 				inputEl.innerText = element.innertext;
@@ -3205,4 +3228,442 @@ function modalPrepare(modalID, title, elements, buttons)
 			btnContainer.appendChild(btnEl);
 		}
 	});
+}
+
+//IPv6 library
+function ip6_full(address)
+{
+	var tmpAddr = ip6_splitmask(address);
+	//replace ipv4 address
+	var ipv4 = tmpAddr.address.match(/(.*:)([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$)/);
+	if (ipv4) {
+		tmpAddr.address = ipv4[1];
+		ipv4 = ipv4[2].match(/[0-9]+/g);
+		for (var i = 0;i < 4;i ++) {
+			var byte = parseInt(ipv4[i],10);
+			ipv4[i] = ("0" + byte.toString(16)).substr(-2);
+		}
+		tmpAddr.address += ipv4[0] + ipv4[1] + ':' + ipv4[2] + ipv4[3];
+	}
+
+	//leading and trailing ::
+	tmpAddr.address = tmpAddr.address.replace(/^:|:$/g, '');
+
+	var ipv6 = tmpAddr.address.split(':');
+
+	for (var i = 0; i < ipv6.length; i ++) {
+		var hex = ipv6[i];
+		if (hex != "") {
+			//normalize leading zeros
+			ipv6[i] = ("0000" + hex).substr(-4);
+		}
+		else {
+			//normalize grouped zeros ::
+			hex = [];
+			for (var j = ipv6.length; j <= 8; j ++) {
+				hex.push('0000');
+			}
+			ipv6[i] = hex.join(':');
+		}
+	}
+
+	tmpAddr.address = ipv6.join(':');
+
+	return (tmpAddr.bitmask == "" ? tmpAddr.address : tmpAddr.address + "/" + tmpAddr.bitmask);
+}
+
+function ip6_canonical(address)
+{
+	var fullAddress = ip6_full(address);
+	var tmpAddr = ip6_splitmask(fullAddress);
+	var components = tmpAddr.address.split(":");
+	
+	for(var componentIdx = 0; componentIdx < components.length; componentIdx++)
+	{
+		//suppress leading zeros
+		components[componentIdx] = components[componentIdx].replace(/^0+([1-9a-f]{1,3})/i,'$1');
+		//convert remaining all zero fields to a single zero
+		components[componentIdx] = components[componentIdx].replace(/^0+/,'0');
+	}
+
+	//Shorten longest run of all zeros (that is greater than 1 field)
+	var zeroCounts = [];
+	zeroCounts.length = components.length;
+	zeroCounts.fill(0);
+	inZeroChain = false;
+	firstZeroInChain = 0;
+	for(var componentIdx = 0; componentIdx < components.length; componentIdx++)
+	{
+		if(components[componentIdx] == "0")
+		{
+			if(inZeroChain)
+			{
+				for(var zeroIdx = componentIdx; zeroIdx >= firstZeroInChain; zeroIdx--)
+				{
+					zeroCounts[zeroIdx] = zeroCounts[zeroIdx] + 1;
+				}
+			}
+			else
+			{
+				inZeroChain = true;
+				firstZeroInChain = componentIdx;
+				zeroCounts[componentIdx] = zeroCounts[componentIdx] + 1;
+			}
+		}
+		else
+		{
+			inZeroChain = false;
+		}
+	}
+
+	maxZeroCount = Math.max.apply(null, zeroCounts);
+	maxZeroCountIdxs = [];
+	for(var idx = 0; (maxZeroCount > 1) && (idx < zeroCounts.length); idx++)
+	{
+		if(zeroCounts[idx] == maxZeroCount)
+		{
+			maxZeroCountIdxs.push(idx);
+		}
+	}
+
+	if(maxZeroCountIdxs.length > 0)
+	{
+		components.splice(maxZeroCountIdxs[0],maxZeroCount-1)
+		components[maxZeroCountIdxs[0]] = "";
+	}
+
+	if(components[0] == "" && components.length == 1)
+	{
+		components.splice(0,0,"");
+		components.splice(0,0,"");
+	}
+	else if(components[0] == "")
+	{
+		components.splice(0,0,"");
+	}
+	else if(components[components.length-1] == "")
+	{
+		components.push("");
+	}
+
+	return (tmpAddr.bitmask == "" ? components.join(':') : components.join(':') + "/" + tmpAddr.bitmask);
+}
+
+function ip6_splitmask(address)
+{
+	var ipv6 = {};
+	var tmp = address.split("/");
+	if(tmp.length == 2)
+	{
+		ipv6.address = tmp[0];
+		ipv6.bitmask = tmp[1];
+	}
+	else
+	{
+		ipv6.address = tmp[0];
+		ipv6.bitmask = "";
+	}
+
+	return ipv6;
+}
+
+function validateIP6(address)
+{
+	//return codes:
+	//0 == valid IP
+	//1 = improper format
+
+	var errorCode = 0;
+
+	var components = address.split(":");
+	if((address.match(/:{3,}/)) || (address.match(/::.+::/)) ||
+		(address.match(/[^:]:$/)) || (address.match(/^:(?!:)/)))
+	{
+		errorCode = 1;
+	}
+
+	if(components.length < 2 || components.length > 8)
+	{
+		errorCode = 1;
+	}
+
+	if(components.length < 8 && !address.match(/::/))
+	{
+		errorCode = 1;
+	}
+
+	for(var componentIdx = 0; componentIdx < components.length; componentIdx++)
+	{
+		if(!components[componentIdx].match(/^[0-9a-f]{0,4}$/i))
+		{
+			errorCode = 1;
+		}
+	}
+
+	return errorCode;
+}
+
+function proofreadIp6(input)
+{
+	proofreadText(input, validateIP6, 0);
+}
+
+function validateIP6Range(range)
+{
+	//return codes:
+	//0 == valid IP
+	//1 = improper format
+
+	var errorCode = 1;
+
+	if(range.indexOf("/") > 0)
+	{
+		var split=range.split("/");
+		if(split.length == 2)
+		{
+			var ipValid = validateIP6(split[0]);
+			var maskValid = split[1] < -128 || split[1] > 128 ? 1 : 0;
+			errorCode = ipValid == 0 && maskValid == 0 ? 0 : 1;
+		}
+	}
+	else
+	{
+		errorCode = validateIP6(range);
+	}
+
+	return errorCode;
+}
+
+function proofreadIp6Range(input)
+{
+	proofreadText(input, validateIP6Range, 0);
+}
+
+function validateIP6ForceRange(range)
+{
+	//return codes:
+	//0 == valid IP
+	//1 = improper format
+
+	var errorCode = 1;
+
+	if(range.indexOf("/") > 0)
+	{
+		var split=range.split("/");
+		if(split.length == 2)
+		{
+			var ipValid = validateIP6(split[0]);
+			var maskValid = split[1] < 1 || split[1] > 128 ? 1 : 0;
+			errorCode = ipValid == 0 && maskValid == 0 ? 0 : 1;
+		}
+	}
+
+	return errorCode;
+}
+
+function proofreadIp6ForceRange(input)
+{
+	proofreadText(input, validateIP6ForceRange, 0);
+}
+
+function ip6_mask(address, mask, direction)
+{
+	//direction = 0 : Mask from MSB
+	//direction = 1 : Mask from LSB
+	direction = typeof direction === 'undefined' ? 0 : direction;
+	var newAddr = "";
+	var tmpAddr = [];
+	var addr = ip6_full(address);
+	var addrArr = addr.split(":");
+
+	maskDiv = mask/4>>0;
+	maskRem = mask%4;
+	
+	maskStr = "f".repeat(maskDiv);
+	maskStr2 = parseInt("1".repeat(maskRem), 2).toString(16);
+	maskStr = maskStr + (isNaN(maskStr2) ? "" : maskStr2);
+
+	maskStr = maskStr.replace(/(.{4})/g,"$1:").replace(/:$/,"");
+
+	var maskArr = maskStr.split(":");
+
+	for(x = maskArr.length; x < 8; x++)
+	{
+		maskArr.push("0");
+	}
+
+	if(direction)
+	{
+		maskArr = maskArr.reverse();
+		for(x = 0; x < 8; x++)
+		{
+			maskArr[x] = maskArr[x].split("").reverse().join("");
+		}
+	}
+
+	for(x = 0; x < 8; x++)
+	{
+		var bAddr = parseInt(addrArr[x], 16).toString("2").padStart(16, "0").split("");
+		var bMask = [];
+		var maskArr2 = [];
+		if(direction == 0)
+		{
+			maskArr2 = maskArr[x].padEnd(4, "0").split("");
+		}
+		else
+		{
+			maskArr2 = maskArr[x].padStart(4, "0").split("");
+		}
+		for(y = 0; y < 4; y++)
+		{
+			hexDigit = maskArr2[y];
+			binaryDigits = parseInt(hexDigit, 16).toString("2").padStart(4, "0").split("");
+			if(direction == 0)
+			{
+				bindaryDigits = binaryDigits.reverse();
+			}
+			for(z = 0; z < 4; z++)
+			{
+				bMask.push(binaryDigits[z]);
+			}
+		}
+
+		bTmp = "";
+		for(y = 0; y < 16; y++)
+		{
+			bTmp = bTmp + String((bAddr[y] & bMask[y]));
+		}
+
+		tmpAddr[x] = parseInt(bTmp, 2).toString(16);
+	}
+
+	newAddr = ip6_canonical(tmpAddr.join(":"));
+
+	return newAddr;
+}
+
+function ip6_scope(address)
+{
+	var retVal = [null, null];
+	if(ip6_mask(address,3) == "2000::")
+	{
+		retVal = ["Global", "Global Unicast Address"];
+	}
+	if(ip6_mask(address,32) == "2001::")
+	{
+		retVal = ["Global", "Teredo Tunnel"];
+	}
+	if(ip6_mask(address,96) == "64:ff9b::")
+	{
+		retVal = ["Global", "IPv4/IPv6 Translation"];
+	}
+	if(ip6_mask(address,8) == "ff00::")
+	{
+		retVal = ["Global", "Global Multicast Address"];
+	}
+	if(ip6_mask(address,7) == "fc00::")
+	{
+		retVal = ["Global", "Unique Local Address"];
+	}
+	if(ip6_mask(address,10) == "fe80::")
+	{
+		retVal = ["Link", "Link-local Address"];
+	}
+
+	return retVal;
+}
+
+function getIPFamily(address)
+{
+	var retVal = null;
+
+	if(validateIpRange(address) == 0)
+	{
+		retVal = "IPv4";
+	}
+	else if(validateIP6Range(address) == 0)
+	{
+		retVal = "IPv6";
+	}
+
+	return retVal;
+}
+
+function validateMultipleIp6s(ips)
+{
+	ips = ips.replace(/^[\t ]+/g, "");
+	ips = ips.replace(/[\t ]+$/g, "");
+	var splitIps = ips.split(/[\t ]*,[\t ]*/);
+	var valid = splitIps.length > 0 ? 0 : 1; //1= error, 0=true
+	while(valid == 0 && splitIps.length > 0)
+	{
+		var nextIp = splitIps.pop();
+		if(nextIp.match(/-/))
+		{
+			var nextSplit = nextIp.split(/[\t ]*-[\t ]*/);
+			if( nextSplit.length==2 && validateIP6(nextSplit[0]) == 0 && validateIP6(nextSplit[1]) == 0)
+			{
+				var ipFull1 = ip6_full(nextSplit[0]);
+				var ipFull2 = ip6_full(nextSplit[1]);
+				valid = ipFull1 <= ipFull2 ? 0 : 1;
+			}
+			else
+			{
+				valid = 1;
+			}
+		}
+		else
+		{
+			valid = validateIP6Range(nextIp);
+		}
+	}
+	return valid;
+}
+
+function proofreadMultipleIp6s(input)
+{
+	proofreadText(input, validateMultipleIp6s, 0);
+}
+
+function validateMultipleIp6sOrMacs(ips)
+{
+	ips = ips.replace(/^[\t ]+/g, "");
+	ips = ips.replace(/[\t ]+$/g, "");
+	var splitIps = ips.split(/[\t ]*,[\t ]*/);
+	var valid = splitIps.length > 0 ? 0 : 1; //1= error, 0=true
+	while(valid == 0 && splitIps.length > 0)
+	{
+		var nextIp = splitIps.pop();
+		if(nextIp.match(/-/))
+		{
+			var nextSplit = nextIp.split(/[\t ]*-[\t ]*/);
+			if( nextSplit.length==2 && validateIP6(nextSplit[0]) == 0 && validateIP6(nextSplit[1]) == 0)
+			{
+				var ipFull1 = ip6_full(nextSplit[0]);
+				var ipFull2 = ip6_full(nextSplit[1]);
+				valid = ipFull1 <= ipFull2 ? 0 : 1;
+			}
+			else
+			{
+				valid = 1;
+			}
+		}
+		else
+		{
+			if(getIPFamily(nextIp) == null)
+			{
+				valid = validateMac(nextIp);
+			}
+			else
+			{
+				valid = validateIP6Range(nextIp);
+			}
+		}
+	}
+	return valid;
+}
+
+function proofreadMultipleIp6sOrMacs(input)
+{
+	proofreadText(input, validateMultipleIp6sOrMacs, 0);
 }

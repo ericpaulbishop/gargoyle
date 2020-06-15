@@ -124,6 +124,7 @@ UI.conn="connected";
 UI.YES="Yes";
 UI.NO="No";
 UI.optional="optional";
+UI.IPFam="IP Family";
 
 UI.AJAX="AJAX Browser Support Needed";
 UI.AJAXUpg="Please upgrade to an AJAX compatible browser and try again. Such browsers include Firefox 2.0+, Safari and IE 6+.";

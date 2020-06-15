@@ -116,6 +116,10 @@ UI.prdr="port redirigé vers le routeur";
 UI.puse="pport utilisé par le routeur";
 UI.pfwd="port transféré vers";
 UI.conn="connecté";
+UI.YES="Oui";
+UI.NO="Non";
+UI.optional="optional";
+UI.IPFam="IP Family";
 
 UI.AJAX="Navigateur avec support d&apos;AJAX nécessaire";
 UI.AJAXUpg="Veuillez utiliser un navigateur compatible avec AJAX et réessayez. Les navigateurs suivants sont compatibles: Firefox 2.0+, Safari and IE 6+.";
