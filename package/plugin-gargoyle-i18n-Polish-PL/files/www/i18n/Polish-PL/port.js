@@ -41,10 +41,10 @@ prtS.UpErr="Nie można zaktualizować przekierowania portu.";
 prtS.Prot="Protokół";
 prtS.LHst="Urządzenie";
 prtS.Port="Port";
-prtS.AORErr="Nie można dodać reguły otwarzenia portu.";
+prtS.AORErr="Nie można dodać reguły otworzenia portu.";
 prtS.DupOErr="Port(y) w zakresie jest/są już otworzone dla tego IP";
 prtS.CopOErr="Port jest już otworzony dla tego IP";
-prtS.UpOErr="Nie można zaktualizować otwarzenia portu.";
+prtS.UpOErr="Nie można zaktualizować otworzenia portu.";
 
 //edit.sh pages
 prtS.PESect="Edycja przekierowania portów";
