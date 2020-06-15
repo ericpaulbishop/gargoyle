@@ -12,3 +12,4 @@ connTS.WLNm="Adres LAN/adres WAN";
 connTS.UDNm="Bajtów wysł./pobr.";
 connTS.QSNm="QoS wysł./pobr.";
 connTS.LPNm="Protokół L7";
+connTS.IPFam="Rodzina IP";

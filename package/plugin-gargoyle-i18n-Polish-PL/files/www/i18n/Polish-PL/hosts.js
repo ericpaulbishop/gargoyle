@@ -13,6 +13,7 @@ hostsStr.ActiveHosts="Urządzenia z aktywnymi połączeniami";
 //javascript
 hostsStr.HostIP="Adres IP";
 hostsStr.HostMAC="Adres MAC";
+hostsStr.HostDUID="Identyfikator DUID";
 hostsStr.LeaseExp="Dzierżawa wygasa";
 hostsStr.Bitrate="Przepływność";
 hostsStr.Signal="Jakość sygnału";

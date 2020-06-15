@@ -17,6 +17,10 @@ prtS.USpd="Raportowana prędkość wysyłania";
 prtS.DSpd="Raportowana prędkość pobierania";
 prtS.UPHelp="UPnP (ang. Univeral Plug and Play) i NAT-PMP (ang. NAT Port Mapping Protocol) są to dwa protokoły, które pozwalają urządzeniom i aplikacjom w sieci LAN na automatyczną konfigurację routera w zakresie przekierowania portów w celu poprawnego działania. Jeżeli urządzenie wspiera jeden z tych protokołów to nie ma potrzeby ręcznego tworzenia reguł przekierowania, ponieważ urządzenie może wykonać je samodzielnie.</p><p>Kiedy jest to włączone, Gargoyle pokazuje tabelę z automatycznie utworzonymi przekierowanami, więc można łatwo sprawdzić czy ta usługa działa poprawnie. Natomiast mogą być z nią problemy, jeżeli konfiguracja sieci zawiera dwa routery (podwójny NAT). Jeżeli tabela zawiera tylko jeden wiersz z '***', to oznacza że nie ma żadnego zarejestrowanego przekierowania.</p><p>Jako część protokołu, urządzenia w sieci LAN mogą żądać prędkości połączenia WAN routera. Dwa pola odpowiadają za konfigurację takich zapytań. Aplikacja kliencka może używać tych informacji do optymalizowania jej wydajności. Należy zauważyć że router nie robi żadnych operacji bazując na tych danych, są one tylko zwracane do urządzenia pytającego. Jeżeli zostało wprowadzone zero jako wartość, zwykle zwracane jest 100MB lub 1GB w zależności od szybkości interfejsu routera.</p><p>Istnieją pewne problemy z bezpieczeństwem tych usług oraz wymagają one dodatkowej pamięci RAM do działania, co może mieć znaczenie dla niektórych routerów. Domyślnie są więc wyłączone.";
 prtS.NoMiniupnpdErr="Wymagana jest instalacja dodatkowego pakietu aby skorzystać z tej opcji!";
+prtS.POISect="Otworzenie portu";
+prtS.OpeIPort="Otworzenie portu z WAN do LAN";
+prtS.PORSect="Otworzenie zakresu portów";
+prtS.OpeRPort="Otworzenie zakresu portów z WAN do LAN";
 
 //templates
 prtS.Desc="Opis";
@@ -37,6 +41,11 @@ prtS.UpErr="Nie można zaktualizować przekierowania portu.";
 prtS.Prot="Protokół";
 prtS.LHst="Urządzenie";
 prtS.Port="Port";
+prtS.AORErr="Nie można dodać reguły otwarzenia portu.";
+prtS.DupOErr="Port(y) w zakresie jest/są już otworzone dla tego IP";
+prtS.CopOErr="Port jest już otworzony dla tego IP";
+prtS.UpOErr="Nie można zaktualizować otwarzenia portu.";
 
 //edit.sh pages
 prtS.PESect="Edycja przekierowania portów";
+prtS.POESect="Edycja otworzenia portów";

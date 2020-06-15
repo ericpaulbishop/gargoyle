@@ -118,6 +118,9 @@ basicS.DPing="Blokuj odpowiedzi na ping";
 basicS.WifiCountry="Kraj";
 basicS.WifiCountryWarning="Gargoyle próbowało ustalić twój region geograficzny. Jeśli nie jest on prawidłowy, zdecydowanie zaleca się pozostawienie tego ustawienia jako <i>World (Default)</i>.<br>Niepoprawne ustawienie tej wartości może spowodować naruszenie standardów regulacyjnych w twoim regionie. W razie wątpliwości wybierz opcję World (Default), która jest legalna we wszystkich regionach.<br>Ustawiając prawidłowo swój kraj, możesz mieć możliwość korzystania z dodatkowych kanałów, wyższej mocy nadawania lub szerszych szerokości kanałów.<br><br>Uwaga: Możesz zmienić to ustawienie tylko raz.";
 basicS.DFSWarning="Wybrany kanał oznaczony jest jako <i>DFS (dynamiczny wybór częstotliwości)</i>. Przed transmisją Gargoyle musi najpierw przeskanować przez 60 sekund sygnały z instalacji radarowych zajmujących tę częstotliwość. Jeśli zostaną wykryte, Gargoyle może przestawić na <u>inny</u> kanał niż wybrałeś lub może <u>wcale nie nadawać</u> w zależności od tego konkretnego urządzenia. Gargoyle będzie nadal monitorowało impulsy radarowe podczas pracy i może przełączać kanały lub przestać nadawać w dowolnym momencie.";
+basicS.Ip6AMsk="Maska przypisania prefiksu";
+basicS.Ip6SubPrfx="Sub-prefix";
+basicS.Ip6Ifaceid="Router Host ID";
 
 //javascript
 basicS.WaitRb="Proszę czekać na wprowadzenie zmian i restart urządzenia";
