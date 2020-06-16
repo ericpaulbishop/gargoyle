@@ -141,31 +141,31 @@ ipHostHash["::1"] = "localhost6";
 					<label class="col-xs-5" for="dhcpv6" id="dhcpv6_label">DHCPv6:</label>
 					<span class="col-xs-7">
 						<select class="form-control" id="dhcpv6">
-							<option value="server">Enabled</option>
-							<option value="relay" disabled>Relayed</option>
-							<option value="disabled">Disabled</option>
+							<option value="server"><%~ Enabled %></option>
+							<option value="relay" disabled><%~ Relayed %></option>
+							<option value="disabled"><%~ Disabled %></option>
 						</select>
 					</span>
 				</div>
 
 				<div id="ra_container" class="row form-group">
-					<label class="col-xs-5" for="ra" id="ra_label">Router Advertisements:</label>
+					<label class="col-xs-5" for="ra" id="ra_label"><%~ RtrAdv %>:</label>
 					<span class="col-xs-7">
 						<select class="form-control" id="ra">
-							<option value="server">Enabled</option>
-							<option value="relay" disabled>Relayed</option>
-							<option value="disabled">Disabled</option>
+							<option value="server"><%~ Enabled %></option>
+							<option value="relay" disabled><%~ Relayed %></option>
+							<option value="disabled"><%~ Disabled %></option>
 						</select>
 					</span>
 				</div>
 
 				<div id="ra_management_container" class="row form-group">
-					<label class="col-xs-5" for="ra_management" id="ra_management_label">Router Advertisements Management:</label>
+					<label class="col-xs-5" for="ra_management" id="ra_management_label"><%~ RtrAdvMgm %>:</label>
 					<span class="col-xs-7">
 						<select class="form-control" id="ra_management">
-							<option value="2">Stateful</option>
-							<option value="1">Stateful+Stateless</option>
-							<option value="0">Stateless</option>
+							<option value="2"><%~ Sttfl %></option>
+							<option value="1"><%~ Sttfl %>+<%~ Sttlss %></option>
+							<option value="0"><%~ Sttlss %></option>
 						</select>
 					</span>
 				</div>

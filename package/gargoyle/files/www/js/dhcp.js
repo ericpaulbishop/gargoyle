@@ -170,7 +170,7 @@ function resetData()
 
 		staticIpTableData.push(rowData);
 	}
-	columnNames=[UI.HsNm, 'MAC', 'IPv4', 'IPv6 Suffix', 'DUID', ''];
+	columnNames=[UI.HsNm, 'MAC', 'IPv4', dhcpS.Suff, 'DUID', ''];
 	staticIpTable=createTable(columnNames, staticIpTableData, "static_ip_table", true, false, removeStaticIp );
 	tableContainer = document.getElementById('staticip_table_container');
 	if(tableContainer.firstChild != null)
