@@ -13,7 +13,7 @@ cronStr.DayWeek="Dzień tygodnia";
 cronStr.TaskScript="Polecenie do wykonania";
 cronStr.EvMinute="Co podany okres minut";
 cronStr.EvHour="Co podany okres godzin";
-cronStr.EvDay="Co podanych dzień";
+cronStr.EvDay="Co podany dzień";
 cronStr.EdTask="Edycja zadania";
 cronStr.GargoyleCron="To jest zadanie cron generowane przez część systemu Gargoyle. <strong>Nie</strong> zaleca się edytować tych zadań; każda edycja może być nadpisana przez Gargoyle w dowolnym momencie.";
 

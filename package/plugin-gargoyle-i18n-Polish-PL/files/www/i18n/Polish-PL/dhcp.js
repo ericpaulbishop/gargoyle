@@ -25,6 +25,6 @@ dhcpS.subErr="Podany statyczny adres IP wykracza poza maskę podsieci.";
 dhcpS.ipErr="Specified static IP is current router IP.";
 dhcpS.dsubErr="Podany statyczny adres IP jest adresem routera.";
 dhcpS.dipErr="Podany zakres DHCP zawiera adres IP LAN.";
-dhcpS.NoDUID="DUID wymagany do ustawienia przyrostka IPv6";
+dhcpS.NoDUID="DUID jest wymagany do ustawienia przyrostka IPv6";
 dhcpS.upErr="Nie można zaktualizować statycznego IP.";
 dhcpS.AErr="Nie można dodać wiersza.";
