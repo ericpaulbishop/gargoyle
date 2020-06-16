@@ -115,6 +115,10 @@ function resetData()
 	document.getElementById("wireguard_client_pubkey").value = getClientVarWithDefault("public_key","");
 	document.getElementById("wireguard_client_allowed_ips").value = getClientVarWithDefault("allowed_ips","0.0.0.0/0");
 	setSelectedValue("wireguard_client_allow_nonwg_traffic",getClientVarWithDefault("allow_nonwg_traffic","true"));
+	if(uciOriginal.get("wireguard_gargoyle","client","enabled") == "1")
+	{
+		document.getElementById("wireguard_client_config_manual").checked = true;
+	}
 
 	setWireguardVisibility()
 }
@@ -977,10 +981,7 @@ function setClientVisibility()
 {
 	var upCheckEl  = document.getElementById("wireguard_client_config_upload");
 	var manCheckEl = document.getElementById("wireguard_client_config_manual");
-	if(uciOriginal.get("wireguard_gargoyle","client","enabled") == "1")
-	{
-		manCheckEl.checked = true;
-	}
+
 	if( (!upCheckEl.checked) && (!manCheckEl.checked) )
 	{
 		upCheckEl.checked = true;
