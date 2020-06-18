@@ -2525,7 +2525,7 @@ function doConfirmPassword(validatedFunc, invalidFunc)
 {
 	setControlsEnabled(false, true, UI.VPass);
 
-	var commands = "gargoyle_session_validator -p \"" + (document.getElementById("password").value).replace('$','\\$') + "\" -a \"dummy.browser\" -i \"127.0.0.1\""
+	var commands = "gargoyle_session_validator -p \"" + (document.getElementById("password").value).replace(/\$/g,'\\$') + "\" -a \"dummy.browser\" -i \"127.0.0.1\""
 	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 	var stateChangeFunction = function(req)
 	{
