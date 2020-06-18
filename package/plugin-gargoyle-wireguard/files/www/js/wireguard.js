@@ -109,7 +109,7 @@ function resetData()
 	}
 	document.getElementById("wireguard_client_ip").value = getClientVarWithDefault("ip","10.64.0.2");
 	document.getElementById("wireguard_client_server_pubkey").value = getClientVarWithDefault("server_public_key","");
-	document.getElementById("wireguard_client_server_host").value = getClientVarWithDefault("server_host","51820");
+	document.getElementById("wireguard_client_server_host").value = getClientVarWithDefault("server_host","");
 	document.getElementById("wireguard_client_server_port").value = getClientVarWithDefault("server_port","51820");
 	document.getElementById("wireguard_client_privkey").value = getClientVarWithDefault("private_key","");
 	document.getElementById("wireguard_client_pubkey").value = getClientVarWithDefault("public_key","");
