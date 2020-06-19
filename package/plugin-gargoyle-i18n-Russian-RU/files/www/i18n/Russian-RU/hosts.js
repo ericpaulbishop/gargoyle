@@ -13,6 +13,7 @@ hostsStr.ActiveHosts="Активные подключения";
 //javascript
 hostsStr.HostIP="IP-адрес";
 hostsStr.HostMAC="MAC-адрес";
+hostsStr.HostDUID="DUID";
 hostsStr.LeaseExp="Аренда заканчивается";
 hostsStr.Bitrate="Скорость";
 hostsStr.Signal="Сигнал";

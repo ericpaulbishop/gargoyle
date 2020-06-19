@@ -7,6 +7,6 @@ DE=Cron arbeitsplätze
 BR=Cron empregos
 PL=Zadania cron
 ZH-CN=Cron 职位
-RU=Cron работы
+RU=Cron планировщик
 NO=Cron arbeidsplasser
 CS=Cron pracovní místa

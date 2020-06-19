@@ -42,6 +42,7 @@ accessStr.SSHHelp3b="Windows хранит private-ключи в <code>C:\Documen
 accessStr.SSHHelp4="<b>Private-ключ</b> должен хранится в безопасном месте и иметь резервную копию. Только <b>public-ключ</b> (<i>gargoyle.pub</i>) необходимо загрузить в Gargoyle. В Gargoyle можно загрузить несколько public-ключей.";
 accessStr.SSHInvalidKey="Неправильный ключ\nпожалуйста, убедитесь что файл содержит рабочий SSH public-ключ и повторите попытку.";
 accessStr.CnntDsblPwd="Нельзя отключить пароль SSH не настроив private ключ(и)";
+accessStr.NoIP6Redi="Перенаправление портов не работает с IPv6. Если вы выберете разные локальные и дистанционные порты, то веб-интерфейс не будет доступен далённо по IPv6.";
 
 
 //javascript
