@@ -20,6 +20,7 @@ stamgrStr.CurrAP="Текущая ТД";
 stamgrStr.Connected="Подключено";
 stamgrStr.BlacklistAP="Запрещённые для подключения ТД";
 stamgrStr.NoStacfgErr="Режим беспроводной сети должен быть Клиент или Клиент+ТД для использования менеджера подключений";
+stamgrStr.ScanWifi="Сканировать Wifi";
 
 //Javascript
 stamgrStr.cfgid="ID-конфигурации";
@@ -31,4 +32,8 @@ stamgrStr.upErr="Не удаётся изменить строку.";
 stamgrStr.discontoohighErr="Порог качества связи для отключения должен быть меньше 90%";
 stamgrStr.contoolowErr="Порог качества связи для подключения должен быть больше 30%";
 stamgrStr.discongtconErr="Пороговое значение для отключения должно быть больше, чем для подключения";
+stamgrStr.CurWanCfg="Текущая WAN-сеть";
+stamgrStr.Other="Другое";
+stamgrStr.Scanning="Сканирование... Пожалуйста, подождите.";
+stamgrStr.NoWifi="Сети не найдены!";
 

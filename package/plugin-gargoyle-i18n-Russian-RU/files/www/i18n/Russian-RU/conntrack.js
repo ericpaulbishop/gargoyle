@@ -12,3 +12,4 @@ connTS.WLNm="Внешние/Локальные";
 connTS.UDNm="Байт Отдано/Получено";
 connTS.QSNm="QoS Отдано/Получено";
 connTS.LPNm="L7 Proto";
+connTS.IPFam="Семейство IP";
