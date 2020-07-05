@@ -124,7 +124,7 @@ UI.conn="połączony";
 UI.YES="Tak";
 UI.NO="Nie";
 UI.optional="opcja";
-UI.IPFam="IP Family";
+UI.IPFam="Rodzina IP";
 
 UI.AJAX="Wymagane wsparcie AJAX ze strony przeglądarki";
 UI.AJAXUpg="Niezbędne jest użycie przeglądarki ze wsparciem dla AJAX. Może to być jedna z wymienionych: Firefox 2.0+, Safari lub IE 6+.";
