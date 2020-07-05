@@ -21,6 +21,6 @@
 					<span class="col-xs-7"><input type='text' id='addor_ep' oninput='proofreadNumeric(this,1,65535)' maxLength='5' class='form-control' /></span>
 				</div>
 				<div class="row form-group">
-					<label class="col-xs-5" id='addor_ip_label' for='addor_ip'>IP</label>
+					<label class="col-xs-5" id='addor_ip_label' for='addor_ip'>IPv6</label>
 					<span class="col-xs-7"><input type='text' id='addor_ip' oninput='proofreadIp6Range(this)' maxLength='40' class='form-control' /></span>
 				</div>

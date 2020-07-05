@@ -992,6 +992,7 @@ function proofreadOpenSingle(excludeRow)
 		var addPort = document.getElementById('addo_dp').value;
 		var addProtocol = document.getElementById('addo_prot').value;
 		var addIP = document.getElementById('addo_ip').value;
+		addIP = ip6_canonical(addIP);
 		var rowDataIndex=0;
 		for (rowDataIndex=0; rowDataIndex < currentPortoData.length; rowDataIndex++)
 		{
@@ -1042,6 +1043,7 @@ function proofreadOpenRange(excludeRow)
 		var addEndPort = document.getElementById('addor_ep').value;
 		var addProtocol = document.getElementById('addor_prot').value;
 		var addIP = document.getElementById('addor_ip').value;
+		addIP = ip6_canonical(addIP);
 		var rowDataIndex=0;
 		for (rowDataIndex=0; rowDataIndex < currentPortoData.length ; rowDataIndex++)
 		{
@@ -1088,6 +1090,7 @@ function addPortoRule()
 			element = document.getElementById(ids[idIndex]);
 			v = element.value;
 			v = v== '' ? '-' : v;
+			v = ids[idIndex] == "addo_ip" ? ip6_canonical(v) : v;
 			values.push(v);
 			if(element.type == "text")
 			{
@@ -1152,6 +1155,7 @@ function addPortoRangeRule()
 			element = document.getElementById(ids[idIndex]);
 			v = element.value;
 			v = v== '' ? '-' : v;
+			v = ids[idIndex] == "addor_ip" ? ip6_canonical(v) : v;
 			values.push(v);
 			if(element.type == 'text')
 			{
