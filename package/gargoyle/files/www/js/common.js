@@ -2308,7 +2308,16 @@ function addAddressStringToTable(controlDocument, newAddrs, tableContainerId, ta
 		if(macValid || ipValid)
 		{
 			var currAddrs = macValid ? allCurrentMacs : allCurrentIps;
-			valid = currAddrs.length == 0 || (!testAddrOverlap(addr, currAddrs.join(","))) ? 0 : 1;
+			var treatipv6 = false;
+			if(macValid || ipValidType <= 3)
+			{
+				treatipv6 = false;
+			}
+			else
+			{
+				treatipv6 = true;
+			}
+			valid = currAddrs.length == 0 || (!testAddrOverlap(addr, currAddrs.join(","), treatipv6)) ? 0 : 1;
 			if(valid == 0)
 			{
 				currAddrs.push(addr); //if we're adding multiple addrs and there's overlap, this will allow us to detect it
@@ -2330,7 +2339,25 @@ function addAddressStringToTable(controlDocument, newAddrs, tableContainerId, ta
 
 		while(addrs.length > 0)
 		{
-			addTableRow(table, [ addrs.shift() ], true, false, null, null, controlDocument);
+			var tmpaddr = addrs.shift();
+			if(tmpaddr.indexOf("-") > -1)
+			{
+				var tmpaddrs = tmpaddr.split("-");
+				if(getIPFamily(tmpaddrs[0]) == "IPv6")
+				{
+					tmpaddrs[0] = ip6_canonical(tmpaddrs[0]);
+					tmpaddrs[1] = ip6_canonical(tmpaddrs[1]);
+					tmpaddr = tmpaddrs.join("-");
+				}
+			}
+			else
+			{
+				if(getIPFamily(tmpaddr) == "IPv6")
+				{
+					tmpaddr = ip6_canonical(tmpaddr);
+				}
+			}
+			addTableRow(table, [ tmpaddr ], true, false, null, null, controlDocument);
 		}
 
 		if(tableContainer.childNodes.length == 0)
@@ -2419,8 +2446,59 @@ function getIpRangeIntegers(ipStr)
 
 }
 
+function getIp6RangeStrings(ipStr)
+{
+	var startStr = "";
+	var endStr = "";
+	if(ipStr.match(/\//))
+	{
+		var split = ipStr.split(/[\t ]*\/[\t ]*/);
+		startStr = ip6_full(ip6_mask(split[0],split[1]));
+		var startBin = ip6addr2bin(startStr);
+		endStr = ip6bin2addr(startBin.substr(0,split[1]) + '1'.repeat(128-split[1]));
+	}
+	else if(ipStr.match(/-/))
+	{
+		var split = ipStr.split(/[\t ]*\-[\t ]*/);
+		startStr = ip6_full(split[0]);
+		endStr = ip6_full(split[1]);
+	}
+	else
+	{
+		startStr = ip6_full(ipStr);
+		endStr = startStr;
+	}
+	return [startStr, endStr];
 
-function testSingleAddrOverlap(addrStr1, addrStr2)
+}
+
+function ip6addr2bin(addr)
+{
+	var ip6addr = ip6_full(addr);
+	var sections = ip6addr.split(":");
+	var binaddr = "";
+	for(var x = 0; x < sections.length; x++)
+	{
+		binaddr += parseInt(sections[x],16).toString(2).padStart(16,'0');
+	}
+
+	return binaddr;
+}
+
+function ip6bin2addr(bin)
+{
+	var sections = [];
+	for(var x = 0; x < 8; x++)
+	{
+		var section = bin.substr(x*16, 16);
+		var hexsection = parseInt(section, 2).toString(16).padStart(4,'0');
+		sections.push(hexsection);
+	}
+
+	return sections.join(":");
+}
+
+function testSingleAddrOverlap(addrStr1, addrStr2, treatipv6)
 {
 	/*
 	 * this adjustment is useful in multiple places, particularly quotas
@@ -2446,22 +2524,40 @@ function testSingleAddrOverlap(addrStr1, addrStr2)
 	}
 	else //assume we're dealing with an actual IP / IP subnet / IP Range
 	{
-		if(validateMultipleIps(addrStr1) > 0 || validateMultipleIps(addrStr2) > 0 || addrStr1.match(",") || addrStr2.match(",") )
+		if(treatipv6)
 		{
-			matches = false;
+			if(validateMultipleIp6s(addrStr1) > 0 || validateMultipleIp6s(addrStr2) > 0 || addrStr1.match(",") || addrStr2.match(",") )
+			{
+				matches = false;
+			}
+			else
+			{
+				var parsed1 = getIp6RangeStrings(addrStr1);
+				var parsed2 = getIp6RangeStrings(addrStr2);
+				matches = parsed1[0] <= parsed2[1] && parsed1[1] >= parsed2[0]; //test range overlap, inclusive
+			}
 		}
 		else
 		{
-			var parsed1 = getIpRangeIntegers(addrStr1);
-			var parsed2 = getIpRangeIntegers(addrStr2);
-			matches = parsed1[0] <= parsed2[1] && parsed1[1] >= parsed2[0]; //test range overlap, inclusive
+			if(validateMultipleIps(addrStr1) > 0 || validateMultipleIps(addrStr2) > 0 || addrStr1.match(",") || addrStr2.match(",") )
+			{
+				matches = false;
+			}
+			else
+			{
+				var parsed1 = getIpRangeIntegers(addrStr1);
+				var parsed2 = getIpRangeIntegers(addrStr2);
+				matches = parsed1[0] <= parsed2[1] && parsed1[1] >= parsed2[0]; //test range overlap, inclusive
+			}
 		}
 	}
 	return matches;
 }
 
-function testAddrOverlap(addrStr1, addrStr2)
+function testAddrOverlap(addrStr1, addrStr2, treatipv6)
 {
+	treatipv6 = treatipv6 == true ? treatipv6 : false;
+
 	addrStr1 = addrStr1.replace(/^[\t ]+/, "");
 	addrStr1 = addrStr1.replace(/[\t ]+$/, "");
 	addrStr2 = addrStr2.replace(/^[\t ]+/, "");
@@ -2476,7 +2572,7 @@ function testAddrOverlap(addrStr1, addrStr2)
 		var index2;
 		for(index2=0; index2 <split2.length && (!overlapFound); index2++)
 		{
-			overlapFound = overlapFound || testSingleAddrOverlap(split1[index1], split2[index2]);
+			overlapFound = overlapFound || testSingleAddrOverlap(split1[index1], split2[index2], treatipv6);
 		}
 	}
 	return overlapFound;
@@ -2525,7 +2621,7 @@ function doConfirmPassword(validatedFunc, invalidFunc)
 {
 	setControlsEnabled(false, true, UI.VPass);
 
-	var commands = "gargoyle_session_validator -p \"" + (document.getElementById("password").value).replace('$','\\$') + "\" -a \"dummy.browser\" -i \"127.0.0.1\""
+	var commands = "gargoyle_session_validator -p \"" + (document.getElementById("password").value).replace(/\$/g,'\\$') + "\" -a \"dummy.browser\" -i \"127.0.0.1\""
 	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 	var stateChangeFunction = function(req)
 	{
@@ -3466,78 +3562,20 @@ function proofreadIp6ForceRange(input)
 	proofreadText(input, validateIP6ForceRange, 0);
 }
 
-function ip6_mask(address, mask, direction)
+function ip6_mask(address, mask)
 {
-	//direction = 0 : Mask from MSB
-	//direction = 1 : Mask from LSB
-	direction = typeof direction === 'undefined' ? 0 : direction;
 	var newAddr = "";
-	var tmpAddr = [];
-	var addr = ip6_full(address);
-	var addrArr = addr.split(":");
-
-	maskDiv = mask/4>>0;
-	maskRem = mask%4;
-	
-	maskStr = "f".repeat(maskDiv);
-	maskStr2 = parseInt("1".repeat(maskRem), 2).toString(16);
-	maskStr = maskStr + (isNaN(maskStr2) ? "" : maskStr2);
-
-	maskStr = maskStr.replace(/(.{4})/g,"$1:").replace(/:$/,"");
-
-	var maskArr = maskStr.split(":");
-
-	for(x = maskArr.length; x < 8; x++)
+	var binaddr = ip6addr2bin(address);
+	if(mask < 0)
 	{
-		maskArr.push("0");
+		newAddr = '0'.repeat(128+mask) + binaddr.substr(128+mask);
 	}
-
-	if(direction)
+	else
 	{
-		maskArr = maskArr.reverse();
-		for(x = 0; x < 8; x++)
-		{
-			maskArr[x] = maskArr[x].split("").reverse().join("");
-		}
+		newAddr = binaddr.substr(0,mask) + '0'.repeat(128-mask);
 	}
-
-	for(x = 0; x < 8; x++)
-	{
-		var bAddr = parseInt(addrArr[x], 16).toString("2").padStart(16, "0").split("");
-		var bMask = [];
-		var maskArr2 = [];
-		if(direction == 0)
-		{
-			maskArr2 = maskArr[x].padEnd(4, "0").split("");
-		}
-		else
-		{
-			maskArr2 = maskArr[x].padStart(4, "0").split("");
-		}
-		for(y = 0; y < 4; y++)
-		{
-			hexDigit = maskArr2[y];
-			binaryDigits = parseInt(hexDigit, 16).toString("2").padStart(4, "0").split("");
-			if(direction == 0)
-			{
-				bindaryDigits = binaryDigits.reverse();
-			}
-			for(z = 0; z < 4; z++)
-			{
-				bMask.push(binaryDigits[z]);
-			}
-		}
-
-		bTmp = "";
-		for(y = 0; y < 16; y++)
-		{
-			bTmp = bTmp + String((bAddr[y] & bMask[y]));
-		}
-
-		tmpAddr[x] = parseInt(bTmp, 2).toString(16);
-	}
-
-	newAddr = ip6_canonical(tmpAddr.join(":"));
+	newAddr = ip6bin2addr(newAddr);
+	newAddr = ip6_canonical(newAddr);
 
 	return newAddr;
 }

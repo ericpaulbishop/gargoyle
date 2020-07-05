@@ -652,8 +652,8 @@ function addClassificationRule()
 	else
 	{
 
-		addRuleMatchControls = ["source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "connbytes_kb", "app_protocol"];
-		displayList = [qosStr.Src+": $", qosStr.SrcP+": $", qosStr.Dst+": $", qosStr.DstP+": $", qosStr.MaxPktLen+": $ "+UI.byt, qosStr.MinPktLen+": $ "+UI.byt, qosStr.TrProto+": $", qosStr.Connb+": $ "+UI.KBy, qosStr.APro+": $"];
+		addRuleMatchControls = ["ip_family", "source_ip", "source_port", "dest_ip", "dest_port", "max_pktsize", "min_pktsize", "transport_protocol", "connbytes_kb", "app_protocol"];
+		displayList = [UI.IPFam+": $", qosStr.Src+": $", qosStr.SrcP+": $", qosStr.Dst+": $", qosStr.DstP+": $", qosStr.MaxPktLen+": $ "+UI.byt, qosStr.MinPktLen+": $ "+UI.byt, qosStr.TrProto+": $", qosStr.Connb+": $ "+UI.KBy, qosStr.APro+": $"];
 
 		ruleText = ""
 		for (controlIndex = 0; controlIndex <addRuleMatchControls.length; controlIndex++)
@@ -670,6 +670,7 @@ function addClassificationRule()
 			}
 			if(control.disabled == false)
 			{
+				controlValue = (addRuleMatchControls[controlIndex] == "source_ip" || addRuleMatchControls[controlIndex] == "dest_ip") && getIPFamily(controlValue) == "IPv6" ? ip6_canonical(controlValue) : controlValue;
 				substitution = displayList[controlIndex];
 				substitution = substitution.replace(/\$/, controlValue);
 				ruleText = ruleText == "" ? ruleText +substitution : ruleText + ", " + substitution;
@@ -922,6 +923,7 @@ function editRuleTableRow(editRuleWindowRow)
 			}
 			if(control.disabled == false)
 			{
+				controlValue = (addRuleMatchControls[controlIndex] == "source_ip" || addRuleMatchControls[controlIndex] == "dest_ip") && getIPFamily(controlValue) == "IPv6" ? ip6_canonical(controlValue) : controlValue;
 				substitution = displayList[controlIndex];
 				substitution = substitution.replace(/\$/, controlValue);
 				ruleText = ruleText == "" ? ruleText +substitution : ruleText + ", " + substitution;

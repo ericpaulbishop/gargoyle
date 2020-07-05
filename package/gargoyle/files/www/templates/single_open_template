@@ -13,7 +13,7 @@
 					</span>
 				</div>
 				<div class="row form-group">
-					<label class="col-xs-5" id='addo_ip_label' for='addo_ip'>IP</label>
+					<label class="col-xs-5" id='addo_ip_label' for='addo_ip'>IPv6</label>
 					<span class="col-xs-7"><input type='text' id='addo_ip' oninput='proofreadIp6Range(this)' maxLength='40' class='form-control' /></span>
 				</div>
 				<div class="row form-group">
