@@ -1270,6 +1270,7 @@ function editRuleModal(triggerEl)
 		togglePopup(editRuleWindowRow.children[2].firstChild);
 	}
 	serviceClassOptions = document.getElementById("default_class").options;
+	removeAllOptionsFromSelectElement(document.getElementById("classification"));
 	for(classIndex = 0; classIndex < serviceClassOptions.length; classIndex++)
 	{
 		addOptionToSelectElement("classification", serviceClassOptions[classIndex].text, serviceClassOptions[classIndex].text, null, document);
