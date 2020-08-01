@@ -1355,6 +1355,11 @@ void* get_interface_ip(char* if_name, int family)
 		addr = (char*)malloc(INET6_ADDRSTRLEN);
 		ip = initialize_list();
 	}
+	if(if_name == NULL)
+	{
+		free(addr);
+		return ip;
+	}
 
 	getifaddrs(&ifap);
 	for(ifa = ifap; ifa; ifa = ifa->ifa_next)
@@ -1395,6 +1400,11 @@ void* get_interface_netmask(char* if_name, int family)
 	{
 		addr = (char*)malloc(INET6_ADDRSTRLEN);
 		netmask = initialize_list();
+	}
+	if(if_name == NULL)
+	{
+		free(addr);
+		return netmask;
 	}
 
 	getifaddrs(&ifap);
