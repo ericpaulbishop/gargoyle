@@ -84,7 +84,7 @@ int main(int argc, char **argv)
 	char** package_variables_to_load = NULL;
 	int c;
 
-	while((c = getopt(argc, argv, "MmHhFfS:s:P:p:C:c:J:j:Z:z:T:t:IiNnUu")) != -1)         //section, page, css includes, javascript includes, title, output interface variables, hostnames, usage
+	while((c = getopt(argc, argv, "MmHhFfS:s:P:p:C:c:J:j:Z:z:T:t:IiNnUu")) != -1)	 //section, page, css includes, javascript includes, title, output interface variables, hostnames, usage
 	{
 		switch(c)
 		{
@@ -251,11 +251,11 @@ int main(int argc, char **argv)
 
 			/* adjust version to ensure it is valid query string */
 			int ri;
-			gargoyle_version = strdup(raw_version);                         /* just for allocating memory */
+			gargoyle_version = strdup(raw_version);			 /* just for allocating memory */
 			for(ri = 0; raw_version[ri] != '\0'; ri++)
 			{
 				unsigned char ch= raw_version[ri];
-				if( (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9') || ch == '.' || ch == '-' || ch == '_' || ch == '~' )                                 /* valid query string characters */
+				if( (ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z') || (ch >= '0' && ch <= '9') || ch == '.' || ch == '-' || ch == '_' || ch == '~' )				 /* valid query string characters */
 				{
 					gargoyle_version[ri] = (char)ch;
 				}
@@ -545,9 +545,9 @@ int main(int argc, char **argv)
 			}
 		}
 
-		printf("\t\t\t\t\t</div>\n"                                //col-lg-12
-			   "\t\t\t\t</div>\n"                                //row
-			   "\t\t\t</div>\n");                              //content
+		printf("\t\t\t\t\t</div>\n"				//col-lg-12
+			   "\t\t\t\t</div>\n"				//row
+			   "\t\t\t</div>\n");			      //content
 
 		printf("\t\t\t<div id=\"sidebar\" class=\"col-xs-12 col-md-2 col-lg-2 col-md-pull-10 col-lg-pull-10 full-height\">\n"
 			   "\t\t\t\t<ul class=\"nav sidebar\" >\n"
@@ -818,107 +818,107 @@ int main(int argc, char **argv)
 
 void define_package_vars(char** package_vars_to_load)
 {
-        int loaded = 0;
-        if(package_vars_to_load != NULL)
-        {
-                int package_index;
+	int loaded = 0;
+	if(package_vars_to_load != NULL)
+	{
+		int package_index;
 
-                for(package_index=0; package_vars_to_load[package_index] != NULL; package_index++)
-                {
-                        struct uci_context *ctx = uci_alloc_context();
-                        struct uci_package *p = NULL;
-                        struct uci_element *e = NULL;
-                        if(uci_load(ctx, package_vars_to_load[package_index], &p) == UCI_OK)
-                        {
-                                if(loaded == 0)
-                                {
-                                        printf("\tvar uciOriginal = new UCIContainer();\n");
-                                        loaded = 1;
-                                }
-                                uci_foreach_element( &p->sections, e)
-                                {
-                                        struct uci_section *section = uci_to_section(e);
+		for(package_index=0; package_vars_to_load[package_index] != NULL; package_index++)
+		{
+			struct uci_context *ctx = uci_alloc_context();
+			struct uci_package *p = NULL;
+			struct uci_element *e = NULL;
+			if(uci_load(ctx, package_vars_to_load[package_index], &p) == UCI_OK)
+			{
+				if(loaded == 0)
+				{
+					printf("\tvar uciOriginal = new UCIContainer();\n");
+					loaded = 1;
+				}
+				uci_foreach_element( &p->sections, e)
+				{
+					struct uci_section *section = uci_to_section(e);
 
-                                        printf("\tuciOriginal.set('%s', '%s', '', \"%s\");\n",package_vars_to_load[package_index], section->e.name, section->type);
+					printf("\tuciOriginal.set('%s', '%s', '', \"%s\");\n",package_vars_to_load[package_index], section->e.name, section->type);
 
-                                        struct uci_element *e2;
-                                        uci_foreach_element(&section->options, e2)
-                                        {
-                                                struct uci_option* uopt = uci_to_option(e2);
-                                                if(uopt->type == UCI_TYPE_STRING)
-                                                {
-                                                        printf("\tuciOriginal.set('%s', '%s', '%s', \"%s\");\n", package_vars_to_load[package_index], section->e.name, e2->name, get_option_value_string(uopt));
-                                                }
-                                                else if(uopt->type == UCI_TYPE_LIST)
-                                                {
-                                                        printf("\tuciOriginal.createListOption('%s', '%s', '%s', true);\n", package_vars_to_load[package_index], section->e.name, e2->name);
-                                                        struct uci_element* e;
-                                                        uci_foreach_element(&uopt->v.list, e)
-                                                        {
-                                                                char* list_str = strdup(e->name);
-                                                                char* tmp = list_str;
-                                                                list_str = dynamic_replace(list_str, "\\", "\\\\");
-                                                                free(tmp);
-                                                                tmp = list_str;
-                                                                list_str = dynamic_replace(list_str, "\"", "\\\"");
-                                                                free(tmp);
+					struct uci_element *e2;
+					uci_foreach_element(&section->options, e2)
+					{
+						struct uci_option* uopt = uci_to_option(e2);
+						if(uopt->type == UCI_TYPE_STRING)
+						{
+							printf("\tuciOriginal.set('%s', '%s', '%s', \"%s\");\n", package_vars_to_load[package_index], section->e.name, e2->name, get_option_value_string(uopt));
+						}
+						else if(uopt->type == UCI_TYPE_LIST)
+						{
+							printf("\tuciOriginal.createListOption('%s', '%s', '%s', true);\n", package_vars_to_load[package_index], section->e.name, e2->name);
+							struct uci_element* e;
+							uci_foreach_element(&uopt->v.list, e)
+							{
+								char* list_str = strdup(e->name);
+								char* tmp = list_str;
+								list_str = dynamic_replace(list_str, "\\", "\\\\");
+								free(tmp);
+								tmp = list_str;
+								list_str = dynamic_replace(list_str, "\"", "\\\"");
+								free(tmp);
 
-                                                                /* when last parameter of set is true, value gets appended to list instead of replacing it */
-                                                                printf("\tuciOriginal.set('%s', '%s', '%s', \"%s\", true);\n", package_vars_to_load[package_index], section->e.name, e2->name, list_str);
+								/* when last parameter of set is true, value gets appended to list instead of replacing it */
+								printf("\tuciOriginal.set('%s', '%s', '%s', \"%s\", true);\n", package_vars_to_load[package_index], section->e.name, e2->name, list_str);
 
-                                                                free(list_str);
-                                                        }
+								free(list_str);
+							}
 
-                                                }
-                                        }
+						}
+					}
 
-                                }
-                        }
-                        uci_free_context(ctx);
-                }
-        }
+				}
+			}
+			uci_free_context(ctx);
+		}
+	}
 }
 
 void print_interface_vars(char** ptr_lan_ip, char** ptr_wan_ip, list** ptr_lan_ip6, list** ptr_lan_mask6, list** ptr_wan_ip6, list** ptr_wan_mask6)
 {
-        list* wireless_ifs  = initialize_list();
-        list* wireless_uci = initialize_list();
+	list* wireless_ifs  = initialize_list();
+	list* wireless_uci = initialize_list();
 
-        char* default_lan_if  = NULL;
-        char* default_wan_if  = NULL;
-        char* default_wan_mac = NULL;
-        int loaded_default_ifs = load_saved_default_interfaces( &default_lan_if, &default_wan_if, &default_wan_mac);
+	char* default_lan_if  = NULL;
+	char* default_wan_if  = NULL;
+	char* default_wan_mac = NULL;
+	int loaded_default_ifs = load_saved_default_interfaces( &default_lan_if, &default_wan_if, &default_wan_mac);
 
-        /*
-         * A few notes on "if" vs "dev" vs "bridge" variable names:
-         * When doing load "if" is the ifname variable loaded from the /etc/config/network file,
-         * while "dev" is the "device" loaded from /var/state/network, and "bridge" is the
-         * "ifname" from /var/state/network.
-         *
-         * "Bridge" is labeled that way because if the interface
-         * is a bridge, this will be the only place the name of the bridge interface shows up, the
-         * other variables will just have the names of the interfaces within the bridge.
-         *
-         * Note also that "bridge" interface variables will contain the pppoe device name if we're using pppoe.
-         * Therefore we print these out in addition to the interface list as javascript variables labeled
-         * currentLanName and currentWanName
-         */
+	/*
+	 * A few notes on "if" vs "dev" vs "bridge" variable names:
+	 * When doing load "if" is the ifname variable loaded from the /etc/config/network file,
+	 * while "dev" is the "device" loaded from /var/state/network, and "bridge" is the
+	 * "ifname" from /var/state/network.
+	 *
+	 * "Bridge" is labeled that way because if the interface
+	 * is a bridge, this will be the only place the name of the bridge interface shows up, the
+	 * other variables will just have the names of the interfaces within the bridge.
+	 *
+	 * Note also that "bridge" interface variables will contain the pppoe device name if we're using pppoe.
+	 * Therefore we print these out in addition to the interface list as javascript variables labeled
+	 * currentLanName and currentWanName
+	 */
 
-        char* uci_wan_mac     = NULL;
-        char* uci_wan_if      = NULL;
-        char* uci_wan_dev     = NULL;
-        char* uci_lan_if      = NULL;
-        char* uci_lan_dev     = NULL;
-        char* uci_lan_bridge  = NULL;
-        char* uci_wan_bridge  = NULL;
-        char* uci_wan_type    = NULL;
+	char* uci_wan_mac     = NULL;
+	char* uci_wan_if      = NULL;
+	char* uci_wan_dev     = NULL;
+	char* uci_lan_if      = NULL;
+	char* uci_lan_dev     = NULL;
+	char* uci_lan_bridge  = NULL;
+	char* uci_wan_bridge  = NULL;
+	char* uci_wan_type    = NULL;
 
-        char* uci_wan_gateway  = NULL;
+	char* uci_wan_gateway  = NULL;
 	char* uci_wan_gateway6 = NULL;
-        char* uci_lan_ip       = NULL;
-        char* uci_lan_mask     = NULL;
-        char* uci_wan_ip       = NULL;
-        char* uci_wan_mask     = NULL;
+	char* uci_lan_ip       = NULL;
+	char* uci_lan_mask     = NULL;
+	char* uci_wan_ip       = NULL;
+	char* uci_wan_mask     = NULL;
 
 	char* uci_ula_prefix  = NULL;
 	char* uci_ula_mask    = NULL;
@@ -926,103 +926,103 @@ void print_interface_vars(char** ptr_lan_ip, char** ptr_wan_ip, list** ptr_lan_i
 
 
 
-        struct uci_context *ctx = uci_alloc_context();
-        struct uci_context *state_ctx = uci_alloc_context();
-        struct uci_package *p = NULL;
-        struct uci_element *e = NULL;
+	struct uci_context *ctx = uci_alloc_context();
+	struct uci_context *state_ctx = uci_alloc_context();
+	struct uci_package *p = NULL;
+	struct uci_element *e = NULL;
 
 
-        char** wireless_if_arr = load_interfaces_from_proc_file("/proc/net/wireless");
-        int wif_index;
-        for(wif_index = 0; wireless_if_arr[wif_index] != NULL; wif_index++)
-        {
-                push_list(wireless_ifs, (void*)strdup(wireless_if_arr[wif_index]));
-        }
-        free_null_terminated_string_array(wireless_if_arr);
+	char** wireless_if_arr = load_interfaces_from_proc_file("/proc/net/wireless");
+	int wif_index;
+	for(wif_index = 0; wireless_if_arr[wif_index] != NULL; wif_index++)
+	{
+		push_list(wireless_ifs, (void*)strdup(wireless_if_arr[wif_index]));
+	}
+	free_null_terminated_string_array(wireless_if_arr);
 
 
-        if(uci_load(ctx, "wireless", &p) == UCI_OK)
-        {
-                uci_foreach_element( &p->sections, e)
-                {
-                        struct uci_section *section = uci_to_section(e);
-                        if(strstr(section->type, "wifi-device") != NULL)
-                        {
-                                push_list(wireless_uci, (void*)strdup(section->e.name) );
-                        }
-                }
-        }
+	if(uci_load(ctx, "wireless", &p) == UCI_OK)
+	{
+		uci_foreach_element( &p->sections, e)
+		{
+			struct uci_section *section = uci_to_section(e);
+			if(strstr(section->type, "wifi-device") != NULL)
+			{
+				push_list(wireless_uci, (void*)strdup(section->e.name) );
+			}
+		}
+	}
 
-        if(uci_load(ctx, "network", &p) == UCI_OK)
-        {
-                if(get_uci_option(ctx, &e, p, "network", "wan", "macaddr") == UCI_OK)
-                {
-                        uci_wan_mac=get_option_value_string(uci_to_option(e));
-                }
-                else if(get_uci_option(ctx, &e, p, "network", "wan_dev", "macaddr") == UCI_OK)
-                {
-                        uci_wan_mac=get_option_value_string(uci_to_option(e));
-                }
-                if(get_uci_option(ctx, &e, p, "network", "wan", "ifname") == UCI_OK)
-                {
-                        uci_wan_if = get_option_value_string(uci_to_option(e));
-                }
-                if(get_uci_option(ctx, &e, p, "network", "wan", "type") == UCI_OK)
-                {
-                        uci_wan_type = get_option_value_string(uci_to_option(e));
-                }
-                if(get_uci_option(ctx, &e, p, "network", "lan", "ifname") == UCI_OK)
-                {
-                        uci_lan_if = get_option_value_string(uci_to_option(e));
-                }
-        }
+	if(uci_load(ctx, "network", &p) == UCI_OK)
+	{
+		if(get_uci_option(ctx, &e, p, "network", "wan", "macaddr") == UCI_OK)
+		{
+			uci_wan_mac=get_option_value_string(uci_to_option(e));
+		}
+		else if(get_uci_option(ctx, &e, p, "network", "wan_dev", "macaddr") == UCI_OK)
+		{
+			uci_wan_mac=get_option_value_string(uci_to_option(e));
+		}
+		if(get_uci_option(ctx, &e, p, "network", "wan", "ifname") == UCI_OK)
+		{
+			uci_wan_if = get_option_value_string(uci_to_option(e));
+		}
+		if(get_uci_option(ctx, &e, p, "network", "wan", "type") == UCI_OK)
+		{
+			uci_wan_type = get_option_value_string(uci_to_option(e));
+		}
+		if(get_uci_option(ctx, &e, p, "network", "lan", "ifname") == UCI_OK)
+		{
+			uci_lan_if = get_option_value_string(uci_to_option(e));
+		}
+	}
 
 
 
-        uci_add_delta_path(state_ctx, state_ctx->savedir);
-        uci_set_savedir(state_ctx, "/var/state");
-        if(uci_load(state_ctx, "network", &p) == UCI_OK)
-        {
-                if(get_uci_option(state_ctx, &e, p, "network", "wan", "device") == UCI_OK)
-                {
-                        uci_wan_dev=get_option_value_string(uci_to_option(e));
-                }
-                if(get_uci_option(state_ctx, &e, p, "network", "lan", "device") == UCI_OK)
-                {
-                        uci_lan_dev=get_option_value_string(uci_to_option(e));
-                }
-                if(get_uci_option(state_ctx, &e, p, "network", "lan", "ifname") == UCI_OK)
-                {
-                        uci_lan_bridge=get_option_value_string(uci_to_option(e));
-                }
-                if(get_uci_option(state_ctx, &e, p, "network", "wan", "ifname") == UCI_OK)
-                {
-                        uci_wan_bridge=get_option_value_string(uci_to_option(e));
-                }
-                if(get_uci_option(state_ctx, &e, p, "network", "wan", "gateway") == UCI_OK)
-                {
-                        uci_wan_gateway=get_option_value_string(uci_to_option(e));
-                }
+	uci_add_delta_path(state_ctx, state_ctx->savedir);
+	uci_set_savedir(state_ctx, "/var/state");
+	if(uci_load(state_ctx, "network", &p) == UCI_OK)
+	{
+		if(get_uci_option(state_ctx, &e, p, "network", "wan", "device") == UCI_OK)
+		{
+			uci_wan_dev=get_option_value_string(uci_to_option(e));
+		}
+		if(get_uci_option(state_ctx, &e, p, "network", "lan", "device") == UCI_OK)
+		{
+			uci_lan_dev=get_option_value_string(uci_to_option(e));
+		}
+		if(get_uci_option(state_ctx, &e, p, "network", "lan", "ifname") == UCI_OK)
+		{
+			uci_lan_bridge=get_option_value_string(uci_to_option(e));
+		}
+		if(get_uci_option(state_ctx, &e, p, "network", "wan", "ifname") == UCI_OK)
+		{
+			uci_wan_bridge=get_option_value_string(uci_to_option(e));
+		}
+		if(get_uci_option(state_ctx, &e, p, "network", "wan", "gateway") == UCI_OK)
+		{
+			uci_wan_gateway=get_option_value_string(uci_to_option(e));
+		}
 		if(get_uci_option(state_ctx, &e, p, "network", "wan", "ip6gw") == UCI_OK)
-                {
-                        uci_wan_gateway6=get_option_value_string(uci_to_option(e));
-                }
-                if(get_uci_option(state_ctx, &e, p, "network", "lan", "ipaddr") == UCI_OK)
-                {
-                        uci_lan_ip=get_option_value_string(uci_to_option(e));
-                }
-                if(get_uci_option(state_ctx, &e, p, "network", "lan", "netmask") == UCI_OK)
-                {
-                        uci_lan_mask=get_option_value_string(uci_to_option(e));
-                }
-                if(get_uci_option(state_ctx, &e, p, "network", "wan", "ipaddr") == UCI_OK)
-                {
-                        uci_wan_ip=get_option_value_string(uci_to_option(e));
-                }
-                if(get_uci_option(state_ctx, &e, p, "network", "wan", "netmask") == UCI_OK)
-                {
-                        uci_wan_mask=get_option_value_string(uci_to_option(e));
-                }
+		{
+			uci_wan_gateway6=get_option_value_string(uci_to_option(e));
+		}
+		if(get_uci_option(state_ctx, &e, p, "network", "lan", "ipaddr") == UCI_OK)
+		{
+			uci_lan_ip=get_option_value_string(uci_to_option(e));
+		}
+		if(get_uci_option(state_ctx, &e, p, "network", "lan", "netmask") == UCI_OK)
+		{
+			uci_lan_mask=get_option_value_string(uci_to_option(e));
+		}
+		if(get_uci_option(state_ctx, &e, p, "network", "wan", "ipaddr") == UCI_OK)
+		{
+			uci_wan_ip=get_option_value_string(uci_to_option(e));
+		}
+		if(get_uci_option(state_ctx, &e, p, "network", "wan", "netmask") == UCI_OK)
+		{
+			uci_wan_mask=get_option_value_string(uci_to_option(e));
+		}
 		if(get_uci_option(state_ctx, &e, p, "network", "globals", "ula_prefix") == UCI_OK)
 		{
 			char* tmpulaprefix=get_option_value_string(uci_to_option(e));
@@ -1043,115 +1043,115 @@ void print_interface_vars(char** ptr_lan_ip, char** ptr_wan_ip, list** ptr_lan_i
 			}
 		}
 
-        }
+	}
 
 
-        char* current_lan_bridge = uci_lan_bridge != NULL ? strdup(uci_lan_bridge) : strdup("br-lan");
-        char* current_lan_if = uci_lan_if != NULL ? strdup(uci_lan_if) : strdup(uci_lan_dev);
-        char* current_wan_if = uci_wan_if != NULL ? strdup(uci_wan_if) : strdup(uci_wan_dev);
-        if(safe_strcmp(uci_wan_type, "bridge") == 0 && (uci_wan_if == NULL || safe_strcmp(uci_wan_if, "") == 0))
-        {
-                current_wan_if = (uci_wan_bridge != NULL && strcmp(uci_wan_bridge, "") != 0) ? strdup(uci_wan_bridge) : strdup("br-wan");
-        }
-        char* current_wan_mac = get_interface_mac(current_wan_if);
-        char* current_lan_mac = get_interface_mac(current_lan_bridge);
+	char* current_lan_bridge = uci_lan_bridge != NULL ? strdup(uci_lan_bridge) : strdup("br-lan");
+	char* current_lan_if = uci_lan_if != NULL ? strdup(uci_lan_if) : strdup(uci_lan_dev);
+	char* current_wan_if = uci_wan_if != NULL ? strdup(uci_wan_if) : strdup(uci_wan_dev);
+	if(safe_strcmp(uci_wan_type, "bridge") == 0 && (uci_wan_if == NULL || safe_strcmp(uci_wan_if, "") == 0))
+	{
+		current_wan_if = (uci_wan_bridge != NULL && strcmp(uci_wan_bridge, "") != 0) ? strdup(uci_wan_bridge) : strdup("br-wan");
+	}
+	char* current_wan_mac = get_interface_mac(current_wan_if);
+	char* current_lan_mac = get_interface_mac(current_lan_bridge);
 
-        if(loaded_default_ifs == 0)
-        {
-                default_lan_if = current_lan_if != NULL ? strdup(current_lan_if) : NULL;
-                default_wan_if = current_wan_if != NULL ? strdup(current_wan_if) : NULL;
-                default_wan_mac = current_wan_mac != NULL ? strdup(current_wan_mac) : NULL;
+	if(loaded_default_ifs == 0)
+	{
+		default_lan_if = current_lan_if != NULL ? strdup(current_lan_if) : NULL;
+		default_wan_if = current_wan_if != NULL ? strdup(current_wan_if) : NULL;
+		default_wan_mac = current_wan_mac != NULL ? strdup(current_wan_mac) : NULL;
 
-                if(default_wan_if == NULL && current_lan_if != NULL)
-                {
-                        default_wan_if = strdup(current_lan_if);
-                }
-                if(default_wan_mac == NULL && uci_wan_mac != NULL)
-                {
-                        default_wan_mac = strdup(uci_wan_mac);
-                }
-                if(default_wan_mac == NULL && current_lan_mac != NULL)
-                {
-                        default_wan_mac = strdup(current_lan_mac);
-                }
-                if(default_wan_mac == NULL)
-                {
-                        default_wan_mac = strdup("00:11:22:33:44:55");
-                }
-                save_default_interfaces(default_lan_if, default_wan_if, default_wan_mac);
-        }
-
-
+		if(default_wan_if == NULL && current_lan_if != NULL)
+		{
+			default_wan_if = strdup(current_lan_if);
+		}
+		if(default_wan_mac == NULL && uci_wan_mac != NULL)
+		{
+			default_wan_mac = strdup(uci_wan_mac);
+		}
+		if(default_wan_mac == NULL && current_lan_mac != NULL)
+		{
+			default_wan_mac = strdup(current_lan_mac);
+		}
+		if(default_wan_mac == NULL)
+		{
+			default_wan_mac = strdup("00:11:22:33:44:55");
+		}
+		save_default_interfaces(default_lan_if, default_wan_if, default_wan_mac);
+	}
 
 
-        char* current_lan_ip      = uci_lan_ip != NULL   ? strdup(uci_lan_ip)   : (char*)get_interface_ip(current_lan_bridge, AF_INET);
-        char* current_lan_mask    = uci_lan_mask != NULL ? strdup(uci_lan_mask) : (char*)get_interface_netmask(current_lan_bridge, AF_INET);
+
+
+	char* current_lan_ip      = uci_lan_ip != NULL   ? strdup(uci_lan_ip)   : (char*)get_interface_ip(current_lan_bridge, AF_INET);
+	char* current_lan_mask    = uci_lan_mask != NULL ? strdup(uci_lan_mask) : (char*)get_interface_netmask(current_lan_bridge, AF_INET);
 	list* current_lan_ip6     = (list*)get_interface_ip(current_lan_bridge, AF_INET6);
 	list* current_lan_mask6   = (list*)get_interface_netmask(current_lan_bridge, AF_INET6);
 
-        char* current_wan_ip      = uci_wan_ip != NULL   ? strdup(uci_wan_ip)   : (char*)get_interface_ip(current_wan_if, AF_INET);
-        char* current_wan_mask    = uci_wan_mask != NULL ? strdup(uci_wan_mask) : (char*)get_interface_netmask(current_wan_if, AF_INET);
+	char* current_wan_ip      = uci_wan_ip != NULL   ? strdup(uci_wan_ip)   : (char*)get_interface_ip(current_wan_if, AF_INET);
+	char* current_wan_mask    = uci_wan_mask != NULL ? strdup(uci_wan_mask) : (char*)get_interface_netmask(current_wan_if, AF_INET);
 	list* current_wan_ip6     = (list*)get_interface_ip(current_wan_if, AF_INET6);
 	list* current_wan_mask6   = (list*)get_interface_netmask(current_wan_if, AF_INET6);
 
-        char* current_wan_gateway  = uci_wan_gateway != NULL ? strdup(uci_wan_gateway)   : get_interface_gateway(current_wan_if, AF_INET);
+	char* current_wan_gateway  = uci_wan_gateway != NULL ? strdup(uci_wan_gateway)   : get_interface_gateway(current_wan_if, AF_INET);
 	char* current_wan_gateway6 = uci_wan_gateway6 != NULL ? strdup(uci_wan_gateway6) : get_interface_gateway(current_wan_if, AF_INET6);
 
-        list* tmp_list = initialize_list();
-        list* wireless_macs = initialize_list();
-        int wireless_if_num = 1;
-        while(wireless_ifs->length > 0)
-        {
-                char* wireless_if = (char*)shift_list(wireless_ifs);
-                char* wireless_mac = get_interface_mac(wireless_if);
-                if(wireless_mac == NULL)
-                {
-                        wireless_mac = (char*)malloc(20);
-                        sprintf(wireless_mac, "00:11:22:33:44:%02x",
-                                wireless_if_num & 0xff);
-                }
-                push_list(wireless_macs, (void*)wireless_mac);
-                push_list(tmp_list, (void*)wireless_if);
-                wireless_if_num++;
-        }
-        unsigned long num_destroyed;
-        destroy_list(wireless_ifs, DESTROY_MODE_FREE_VALUES, &num_destroyed);
-        wireless_ifs = tmp_list;
+	list* tmp_list = initialize_list();
+	list* wireless_macs = initialize_list();
+	int wireless_if_num = 1;
+	while(wireless_ifs->length > 0)
+	{
+		char* wireless_if = (char*)shift_list(wireless_ifs);
+		char* wireless_mac = get_interface_mac(wireless_if);
+		if(wireless_mac == NULL)
+		{
+			wireless_mac = (char*)malloc(20);
+			sprintf(wireless_mac, "00:11:22:33:44:%02x",
+				wireless_if_num & 0xff);
+		}
+		push_list(wireless_macs, (void*)wireless_mac);
+		push_list(tmp_list, (void*)wireless_if);
+		wireless_if_num++;
+	}
+	unsigned long num_destroyed;
+	destroy_list(wireless_ifs, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+	wireless_ifs = tmp_list;
 
 
 
 
-        print_js_list_var("wirelessIfs", &wireless_ifs);
-        print_js_list_var("uciWirelessDevs", &wireless_uci);
-        print_js_list_var("currentWirelessMacs", &wireless_macs);
+	print_js_list_var("wirelessIfs", &wireless_ifs);
+	print_js_list_var("uciWirelessDevs", &wireless_uci);
+	print_js_list_var("currentWirelessMacs", &wireless_macs);
 
 
-        print_js_var("defaultLanIf", default_lan_if);
-        print_js_var("currentLanIf", uci_lan_if);
-        print_js_var("currentLanName", uci_lan_bridge);
-        print_js_var("currentLanMac", current_lan_mac);
-        print_js_var("currentLanIp", current_lan_ip);
-        print_js_var("currentLanMask", current_lan_mask);
+	print_js_var("defaultLanIf", default_lan_if);
+	print_js_var("currentLanIf", uci_lan_if);
+	print_js_var("currentLanName", uci_lan_bridge);
+	print_js_var("currentLanMac", current_lan_mac);
+	print_js_var("currentLanIp", current_lan_ip);
+	print_js_var("currentLanMask", current_lan_mask);
 	print_js_list_var("currentLanIp6", &current_lan_ip6);
 	print_js_list_var("currentLanMask6", &current_lan_mask6);
 	print_js_var("currentULAPrefix", uci_ula_prefix);
 	print_js_var("currentULAMask", uci_ula_mask);
 
 
-        print_js_var("defaultWanIf", default_wan_if);
-        print_js_var("defaultWanMac", default_wan_mac);
-        print_js_var("currentWanIf", current_wan_if);
-        print_js_var("currentWanName", uci_wan_bridge);
-        print_js_var("currentWanMac", current_wan_mac);
-        print_js_var("currentWanIp", current_wan_ip);
-        print_js_var("currentWanMask", current_wan_mask);
+	print_js_var("defaultWanIf", default_wan_if);
+	print_js_var("defaultWanMac", default_wan_mac);
+	print_js_var("currentWanIf", current_wan_if);
+	print_js_var("currentWanName", uci_wan_bridge);
+	print_js_var("currentWanMac", current_wan_mac);
+	print_js_var("currentWanIp", current_wan_ip);
+	print_js_var("currentWanMask", current_wan_mask);
 	print_js_list_var("currentWanIp6", &current_wan_ip6);
 	print_js_list_var("currentWanMask6", &current_wan_mask6);
-        print_js_var("currentWanGateway", current_wan_gateway);
+	print_js_var("currentWanGateway", current_wan_gateway);
 	print_js_var("currentWanGateway6", current_wan_gateway6);
 
-        uci_free_context(ctx);
-        uci_free_context(state_ctx);
+	uci_free_context(ctx);
+	uci_free_context(state_ctx);
 
 	*ptr_lan_ip = current_lan_ip;
 	*ptr_lan_ip6 = current_lan_ip6;
@@ -1159,107 +1159,107 @@ void print_interface_vars(char** ptr_lan_ip, char** ptr_wan_ip, list** ptr_lan_i
 	*ptr_wan_ip = current_wan_ip;
 	*ptr_wan_ip6 = current_wan_ip6;
 	*ptr_wan_mask6 = current_wan_mask6;
-        /* there are an assload of other variables to free... but, eh, fuck it, this thing doesn't run as a daemon
-         *
-         * variables are defined/copied with strdups, so we won't get any double-free errors if we do decide to implement
-         * code to free them at a later time
-         */
+	/* there are an assload of other variables to free... but, eh, fuck it, this thing doesn't run as a daemon
+	 *
+	 * variables are defined/copied with strdups, so we won't get any double-free errors if we do decide to implement
+	 * code to free them at a later time
+	 */
 }
 
 
 void print_hostname_map(char* ptr_lan_ip, char* ptr_wan_ip, list* ptr_lan_ip6, list* ptr_lan_mask6, list* ptr_wan_ip6, list* ptr_wan_mask6)
 {
-        string_map* ip_to_hostname = get_hostnames(ptr_lan_ip,ptr_wan_ip,ptr_lan_ip6,ptr_lan_mask6,ptr_wan_ip6,ptr_wan_mask6);
-        printf("\tvar ipToHostname = [];\n");
-        if(ip_to_hostname->num_elements == 0)
-        {
-                printf("\tvar ipsWithHostname = [];\n");
-        }
-        else
-        {
-                unsigned long num_ips;
-                char** ip_list = get_string_map_keys(ip_to_hostname, &num_ips);
-                char* ips_with_hostname_str = join_strs("\",\"", ip_list, -1, 0, 0);
-                int ip_index;
+	string_map* ip_to_hostname = get_hostnames(ptr_lan_ip,ptr_wan_ip,ptr_lan_ip6,ptr_lan_mask6,ptr_wan_ip6,ptr_wan_mask6);
+	printf("\tvar ipToHostname = [];\n");
+	if(ip_to_hostname->num_elements == 0)
+	{
+		printf("\tvar ipsWithHostname = [];\n");
+	}
+	else
+	{
+		unsigned long num_ips;
+		char** ip_list = get_string_map_keys(ip_to_hostname, &num_ips);
+		char* ips_with_hostname_str = join_strs("\",\"", ip_list, -1, 0, 0);
+		int ip_index;
 
-                printf("\tvar ipsWithHostname = [ \"%s\" ];\n", ips_with_hostname_str);
-                for(ip_index=0; ip_index < num_ips; ip_index++)
-                {
-                        char* ip = ip_list[ip_index];
-                        char* name = remove_string_map_element(ip_to_hostname, ip);
-                        printf("\tipToHostname[ \"%s\" ] = \"%s\";\n", ip, name);
-                        free(name);
-                }
-                free_null_terminated_string_array(ip_list);
-        }
-        unsigned long num_destroyed;
-        destroy_string_map(ip_to_hostname, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+		printf("\tvar ipsWithHostname = [ \"%s\" ];\n", ips_with_hostname_str);
+		for(ip_index=0; ip_index < num_ips; ip_index++)
+		{
+			char* ip = ip_list[ip_index];
+			char* name = remove_string_map_element(ip_to_hostname, ip);
+			printf("\tipToHostname[ \"%s\" ] = \"%s\";\n", ip, name);
+			free(name);
+		}
+		free_null_terminated_string_array(ip_list);
+	}
+	unsigned long num_destroyed;
+	destroy_string_map(ip_to_hostname, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 }
 
 
 void print_js_list_var(char* var, list** value)
 {
-        int first = 1;
-        printf("\tvar %s = [ ", var);
-        if(value != NULL)
-        {
-                if(*value != NULL)
-                {
-                        list* tmp = initialize_list();
-                        list* vals = *value;
-                        unsigned long num_destroyed;
-                        while(vals->length > 0)
-                        {
-                                char* val = (char*)shift_list(vals);
-                                printf("%s \"%s\"", first==0 ? "," : "", val);
-                                first = 0;
-                                push_list(tmp, val);
-                        }
-                        destroy_list(vals, DESTROY_MODE_FREE_VALUES, &num_destroyed);
-                        *value = tmp;
-                }
-        }
-        printf(" ];\n");
+	int first = 1;
+	printf("\tvar %s = [ ", var);
+	if(value != NULL)
+	{
+		if(*value != NULL)
+		{
+			list* tmp = initialize_list();
+			list* vals = *value;
+			unsigned long num_destroyed;
+			while(vals->length > 0)
+			{
+				char* val = (char*)shift_list(vals);
+				printf("%s \"%s\"", first==0 ? "," : "", val);
+				first = 0;
+				push_list(tmp, val);
+			}
+			destroy_list(vals, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+			*value = tmp;
+		}
+	}
+	printf(" ];\n");
 
 }
 
 void print_js_var(char* var, char* value)
 {
-        printf("\tvar %s = \"%s\";\n",
-               var,
-               (value != NULL) ? value : "");
+	printf("\tvar %s = \"%s\";\n",
+	       var,
+	       (value != NULL) ? value : "");
 }
 
 char* get_interface_mac(char* if_name)
 {
-        char* mac = NULL;
-        if(if_name != NULL)
-        {
-                struct ifreq buffer;
-                int s = socket(PF_INET, SOCK_DGRAM, 0);
-                memset(&buffer, 0x00, sizeof(buffer));
-                strcpy(buffer.ifr_name, if_name);
+	char* mac = NULL;
+	if(if_name != NULL)
+	{
+		struct ifreq buffer;
+		int s = socket(PF_INET, SOCK_DGRAM, 0);
+		memset(&buffer, 0x00, sizeof(buffer));
+		strcpy(buffer.ifr_name, if_name);
 
-                if(ioctl(s, SIOCGIFHWADDR, &buffer) != -1)
-                {
-                        mac = (char*)malloc(19*sizeof(char));
-                        int mac_index=0;
-                        for(mac_index = 0; mac_index < 6; mac_index++ )
-                        {
-                                sprintf(mac+(3*mac_index), "%.2X:", (unsigned char)buffer.ifr_hwaddr.sa_data[mac_index]);
-                        }
-                        mac[17] = '\0';
-                }
-                close(s);
-        }
-        return mac;
+		if(ioctl(s, SIOCGIFHWADDR, &buffer) != -1)
+		{
+			mac = (char*)malloc(19*sizeof(char));
+			int mac_index=0;
+			for(mac_index = 0; mac_index < 6; mac_index++ )
+			{
+				sprintf(mac+(3*mac_index), "%.2X:", (unsigned char)buffer.ifr_hwaddr.sa_data[mac_index]);
+			}
+			mac[17] = '\0';
+		}
+		close(s);
+	}
+	return mac;
 }
 
 char* get_interface_gateway(char* if_name, int family)
 {
-        char* gateway = NULL;
-        if(if_name != NULL)
-        {
+	char* gateway = NULL;
+	if(if_name != NULL)
+	{
 		FILE* route_file = NULL;
 		if(family == AF_INET)
 		{
@@ -1269,45 +1269,45 @@ char* get_interface_gateway(char* if_name, int family)
 		{
 			route_file = fopen("/proc/net/ipv6_route", "r");
 		}
-                
-                if(route_file != NULL)
-                {
-                        char newline_terminator[]= {'\n', '\r'};
-                        char spaces[] = {' ', '\t'};
-                        unsigned long read_length;
-                        unsigned long num_lines;
-                        int line_index;
+		
+		if(route_file != NULL)
+		{
+			char newline_terminator[]= {'\n', '\r'};
+			char spaces[] = {' ', '\t'};
+			unsigned long read_length;
+			unsigned long num_lines;
+			int line_index;
 
-                        char* route_data = read_entire_file(route_file, 100, &read_length);
-                        char** route_lines = split_on_separators(route_data, newline_terminator, 2, -1, 0, &num_lines);
-                        fclose(route_file);
-                        free(route_data);
+			char* route_data = read_entire_file(route_file, 100, &read_length);
+			char** route_lines = split_on_separators(route_data, newline_terminator, 2, -1, 0, &num_lines);
+			fclose(route_file);
+			free(route_data);
 
-                        for(line_index=0; line_index < num_lines && gateway == NULL; line_index++)
-                        {
-                                unsigned long line_pieces = 0;
-                                char** split_line;
-                                trim_flanking_whitespace(route_lines[line_index]);
-                                split_line = split_on_separators(route_lines[line_index], spaces, 2, -1, 0, &line_pieces);
+			for(line_index=0; line_index < num_lines && gateway == NULL; line_index++)
+			{
+				unsigned long line_pieces = 0;
+				char** split_line;
+				trim_flanking_whitespace(route_lines[line_index]);
+				split_line = split_on_separators(route_lines[line_index], spaces, 2, -1, 0, &line_pieces);
 				if(family == AF_INET)
 				{
-		                        if(line_pieces >=4)
-		                        {
-		                                if(strcmp(split_line[0], if_name) == 0)
-		                                {
-		                                        unsigned int flags = 0;
-		                                        if( sscanf(split_line[3], "%u", &flags) > 0)
-		                                        {
-		                                                if((flags | 2) != 0)
-		                                                {
-		                                                        unsigned int ip[4];
-		                                                        sscanf(split_line[2], "%2X%2X%2X%2X", ip, ip+1, ip+2, ip+3);
-		                                                        gateway = (char*)malloc(20);
-		                                                        sprintf(gateway, "%u.%u.%u.%u", ip[0], ip[1], ip[2], ip[3]);
-		                                                }
-		                                        }
-		                                }
-		                        }
+					if(line_pieces >=4)
+					{
+						if(strcmp(split_line[0], if_name) == 0)
+						{
+							unsigned int flags = 0;
+							if( sscanf(split_line[3], "%u", &flags) > 0)
+							{
+								if((flags | 2) != 0)
+								{
+									unsigned int ip[4];
+									sscanf(split_line[2], "%2X%2X%2X%2X", ip, ip+1, ip+2, ip+3);
+									gateway = (char*)malloc(20);
+									sprintf(gateway, "%u.%u.%u.%u", ip[0], ip[1], ip[2], ip[3]);
+								}
+							}
+						}
+					}
 				}
 				else if(family == AF_INET6)
 				{
@@ -1329,12 +1329,12 @@ char* get_interface_gateway(char* if_name, int family)
 						}
 					}
 				}
-                                free_null_terminated_string_array(split_line);
-                        }
-                        free_null_terminated_string_array(route_lines);
-                }
-        }
-        return gateway;
+				free_null_terminated_string_array(split_line);
+			}
+			free_null_terminated_string_array(route_lines);
+		}
+	}
+	return gateway;
 }
 
 void* get_interface_ip(char* if_name, int family)
@@ -1452,176 +1452,176 @@ void* get_interface_netmask(char* if_name, int family)
 
 void save_default_interfaces(char* default_lan_if, char* default_wan_if, char* default_wan_mac)
 {
-        FILE *interface_file = fopen(DEFAULT_IF_FILE, "w");
-        if(interface_file != NULL)
-        {
-                fprintf(interface_file, "default_lan_if\t%s\n", default_lan_if);
-                fprintf(interface_file, "default_wan_if\t%s\n", default_wan_if);
-                fprintf(interface_file, "default_wan_mac\t%s\n", default_wan_mac);
-                fclose(interface_file);
-        }
+	FILE *interface_file = fopen(DEFAULT_IF_FILE, "w");
+	if(interface_file != NULL)
+	{
+		fprintf(interface_file, "default_lan_if\t%s\n", default_lan_if);
+		fprintf(interface_file, "default_wan_if\t%s\n", default_wan_if);
+		fprintf(interface_file, "default_wan_mac\t%s\n", default_wan_mac);
+		fclose(interface_file);
+	}
 
 }
 
 int load_saved_default_interfaces( char** default_lan_if, char** default_wan_if, char** default_wan_mac)
 {
-        FILE *interface_file = fopen(DEFAULT_IF_FILE, "r");
-        char newline_terminator[]= {'\n', '\r'};
-        char spaces[] = {' ', '\t'};
+	FILE *interface_file = fopen(DEFAULT_IF_FILE, "r");
+	char newline_terminator[]= {'\n', '\r'};
+	char spaces[] = {' ', '\t'};
 
-        *default_lan_if = NULL;
-        *default_wan_if = NULL;
-
-
-        if(interface_file != NULL)
-        {
-                unsigned long read_length;
-                char* file_data = read_entire_file(interface_file, 100, &read_length);
-                unsigned long num_lines;
-                char** file_lines = split_on_separators(file_data, newline_terminator, 2, -1, 0, &num_lines);
-                fclose(interface_file);
-                free(file_data);
-
-                int line_index=0;
-                for(line_index=0; line_index < num_lines; line_index++)
-                {
-                        unsigned long line_pieces = 0;
-                        char** split_line;
-                        trim_flanking_whitespace(file_lines[line_index]);
-                        split_line = split_on_separators(file_lines[line_index], spaces, 2, -1, 0, &line_pieces);
-                        if(line_pieces >1)
-                        {
-                                if(safe_strcmp(split_line[0], "default_lan_if") == 0)
-                                {
-                                        *default_lan_if = join_strs(" ", split_line+1, -1, 0, 0);
-                                }
-                                if(safe_strcmp(split_line[0], "default_wan_if") == 0)
-                                {
-                                        *default_wan_if = join_strs(" ", split_line+1, -1, 0, 0);
-                                }
-                                if(safe_strcmp(split_line[0], "default_wan_mac") == 0)
-                                {
-                                        *default_wan_mac = join_strs(" ", split_line+1, -1, 0, 0);
-                                }
+	*default_lan_if = NULL;
+	*default_wan_if = NULL;
 
 
-                        }
-                        free_null_terminated_string_array(split_line);
-                }
-                free_null_terminated_string_array(file_lines);
+	if(interface_file != NULL)
+	{
+		unsigned long read_length;
+		char* file_data = read_entire_file(interface_file, 100, &read_length);
+		unsigned long num_lines;
+		char** file_lines = split_on_separators(file_data, newline_terminator, 2, -1, 0, &num_lines);
+		fclose(interface_file);
+		free(file_data);
 
-        }
+		int line_index=0;
+		for(line_index=0; line_index < num_lines; line_index++)
+		{
+			unsigned long line_pieces = 0;
+			char** split_line;
+			trim_flanking_whitespace(file_lines[line_index]);
+			split_line = split_on_separators(file_lines[line_index], spaces, 2, -1, 0, &line_pieces);
+			if(line_pieces >1)
+			{
+				if(safe_strcmp(split_line[0], "default_lan_if") == 0)
+				{
+					*default_lan_if = join_strs(" ", split_line+1, -1, 0, 0);
+				}
+				if(safe_strcmp(split_line[0], "default_wan_if") == 0)
+				{
+					*default_wan_if = join_strs(" ", split_line+1, -1, 0, 0);
+				}
+				if(safe_strcmp(split_line[0], "default_wan_mac") == 0)
+				{
+					*default_wan_mac = join_strs(" ", split_line+1, -1, 0, 0);
+				}
 
-        return *default_lan_if != NULL || *default_wan_if != NULL ? 1 : 0;
+
+			}
+			free_null_terminated_string_array(split_line);
+		}
+		free_null_terminated_string_array(file_lines);
+
+	}
+
+	return *default_lan_if != NULL || *default_wan_if != NULL ? 1 : 0;
 }
 
 char** load_interfaces_from_proc_file(char* filename)
 {
-        char** file_lines = NULL;
-        int num_interfaces = 0;
+	char** file_lines = NULL;
+	int num_interfaces = 0;
 
-        FILE *interface_file = fopen(filename, "r");
-        char newline_terminator[]= {'\n', '\r'};
-        if(interface_file != NULL)
-        {
-                unsigned long read_length;
-                char* file_data = read_entire_file(interface_file, 100, &read_length);
-                unsigned long num_pieces;
-                file_lines = split_on_separators(file_data, newline_terminator, 2, -1, 0, &num_pieces);
-                fclose(interface_file);
-                free(file_data);
+	FILE *interface_file = fopen(filename, "r");
+	char newline_terminator[]= {'\n', '\r'};
+	if(interface_file != NULL)
+	{
+		unsigned long read_length;
+		char* file_data = read_entire_file(interface_file, 100, &read_length);
+		unsigned long num_pieces;
+		file_lines = split_on_separators(file_data, newline_terminator, 2, -1, 0, &num_pieces);
+		fclose(interface_file);
+		free(file_data);
 
-                int line_index=0;
-                for(line_index=0; file_lines[line_index] != NULL; line_index++)
-                {
-                        num_interfaces = num_interfaces + (strstr(file_lines[line_index], ":") != NULL ? 1 : 0);
-                }
+		int line_index=0;
+		for(line_index=0; file_lines[line_index] != NULL; line_index++)
+		{
+			num_interfaces = num_interfaces + (strstr(file_lines[line_index], ":") != NULL ? 1 : 0);
+		}
 
-        }
+	}
 
 
-        char** interfaces = (char**)malloc((num_interfaces+1)*sizeof(char*));
-        interfaces[0] = NULL;
+	char** interfaces = (char**)malloc((num_interfaces+1)*sizeof(char*));
+	interfaces[0] = NULL;
 
-        if(file_lines != NULL)
-        {
-                int interface_index=0;
-                int line_index=0;
-                for(line_index=0; file_lines[line_index] != NULL; line_index++)
-                {
-                        char* interface_end = strstr(file_lines[line_index], ":");
-                        if(interface_end != NULL)
-                        {
-                                int new_length= (int)(interface_end - file_lines[line_index]);
-                                char* interface = (char*)malloc((1+new_length)*sizeof(char));
-                                memcpy(interface, file_lines[line_index], new_length);
-                                interface[new_length] = '\0';
-                                trim_flanking_whitespace(interface);
-                                interfaces[interface_index] = interface;
-                                interface_index++;
-                                interfaces[interface_index] = NULL;
-                        }
-                        free(file_lines[line_index]);
-                }
-                free(file_lines);
+	if(file_lines != NULL)
+	{
+		int interface_index=0;
+		int line_index=0;
+		for(line_index=0; file_lines[line_index] != NULL; line_index++)
+		{
+			char* interface_end = strstr(file_lines[line_index], ":");
+			if(interface_end != NULL)
+			{
+				int new_length= (int)(interface_end - file_lines[line_index]);
+				char* interface = (char*)malloc((1+new_length)*sizeof(char));
+				memcpy(interface, file_lines[line_index], new_length);
+				interface[new_length] = '\0';
+				trim_flanking_whitespace(interface);
+				interfaces[interface_index] = interface;
+				interface_index++;
+				interfaces[interface_index] = NULL;
+			}
+			free(file_lines[line_index]);
+		}
+		free(file_lines);
 
-        }
+	}
 
-        return interfaces;
+	return interfaces;
 }
 
 string_map* get_hostnames(char* ptr_lan_ip, char* ptr_wan_ip, list* ptr_lan_ip6, list* ptr_lan_mask6, list* ptr_wan_ip6, list* ptr_wan_mask6)
 {
-        string_map* ip_to_hostname = initialize_string_map(1);
+	string_map* ip_to_hostname = initialize_string_map(1);
 
-        char* hostname_files[] = { "/tmp/dhcp.leases", "/tmp/hosts/odhcpd", NULL };
-        int ip_indices[] = { 2, 0 };
-        int name_indices[] = { 3, 1 };
+	char* hostname_files[] = { "/tmp/dhcp.leases", "/tmp/hosts/odhcpd", NULL };
+	int ip_indices[] = { 2, 0 };
+	int name_indices[] = { 3, 1 };
 	char* subnet_sep = "/";
-        int file_index;
-        for(file_index = 0; hostname_files[file_index] != NULL; file_index++)
-        {
-                int ip_index = ip_indices[file_index];
-                int name_index = name_indices[file_index];
-                int min_line_pieces = ip_index > name_index ? ip_index+1 : name_index+1;
+	int file_index;
+	for(file_index = 0; hostname_files[file_index] != NULL; file_index++)
+	{
+		int ip_index = ip_indices[file_index];
+		int name_index = name_indices[file_index];
+		int min_line_pieces = ip_index > name_index ? ip_index+1 : name_index+1;
 
-                FILE* name_file = fopen(hostname_files[file_index], "r");
-                if(name_file != NULL)
-                {
-                        char *line = NULL;
-                        unsigned long read_len;
-                        int sep = '\n';
-                        do
-                        {
-                                sep = dyn_read_line(name_file, &line, &read_len);
-                                unsigned long num_line_pieces;
-                                char* whitespace_seps = "\t ";
-                                char** line_pieces = split_on_separators(line, whitespace_seps, 2, -1, 0, &num_line_pieces);
-                                free(line);
-                                if(num_line_pieces >= min_line_pieces && safe_strcmp(line_pieces[0], "#") != 0)
-                                {
-                                        char *name = strdup(line_pieces[ name_index ]);
-                                        trim_flanking_whitespace(name);
-                                        if(name[0] != '*' && name[0] != '\0')
-                                        {
-                                                char* ip  = line_pieces[ ip_index ];
+		FILE* name_file = fopen(hostname_files[file_index], "r");
+		if(name_file != NULL)
+		{
+			char *line = NULL;
+			unsigned long read_len;
+			int sep = '\n';
+			do
+			{
+				sep = dyn_read_line(name_file, &line, &read_len);
+				unsigned long num_line_pieces;
+				char* whitespace_seps = "\t ";
+				char** line_pieces = split_on_separators(line, whitespace_seps, 2, -1, 0, &num_line_pieces);
+				free(line);
+				if(num_line_pieces >= min_line_pieces && safe_strcmp(line_pieces[0], "#") != 0)
+				{
+					char *name = strdup(line_pieces[ name_index ]);
+					trim_flanking_whitespace(name);
+					if(name[0] != '*' && name[0] != '\0')
+					{
+						char* ip  = line_pieces[ ip_index ];
 						char* subnet = strstr(ip, subnet_sep);
 						if(subnet != NULL)
 						{
 							ip[subnet - ip] = '\0';
 						}
-                                                set_string_map_element(ip_to_hostname, ip, name);
-                                        }
-                                        else
-                                        {
-                                                free(name);
-                                        }
-                                }
-                                free_null_terminated_string_array(line_pieces);
-                        } while(sep != EOF);
-                        fclose(name_file);
-                }
-        }
+						set_string_map_element(ip_to_hostname, ip, name);
+					}
+					else
+					{
+						free(name);
+					}
+				}
+				free_null_terminated_string_array(line_pieces);
+			} while(sep != EOF);
+			fclose(name_file);
+		}
+	}
 
 	//create prefixes
 	list* ip6_prefixes = initialize_list();
@@ -1644,7 +1644,7 @@ string_map* get_hostnames(char* ptr_lan_ip, char* ptr_wan_ip, list* ptr_lan_ip6,
 		}
 	}
 	//source assignments from dhcp config file
-        struct uci_context *ctx = uci_alloc_context();
+	struct uci_context *ctx = uci_alloc_context();
 	struct uci_package *p = NULL;
 	struct uci_element *e;
 	if(uci_load(ctx, "dhcp", &p) == UCI_OK)
@@ -1733,18 +1733,18 @@ string_map* get_hostnames(char* ptr_lan_ip, char* ptr_wan_ip, list* ptr_lan_ip6,
 	}
 	uci_free_context(ctx);
 	unsigned long num_destroyed;
-        destroy_list(ip6_prefixes, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+	destroy_list(ip6_prefixes, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 
-        //make sure local ips get set to hostname
-        FILE* hostname_file = fopen("/proc/sys/kernel/hostname", "r");
-        if(hostname_file != NULL)
-        {
-                char *line = NULL;
-                unsigned long read_len;
-                dyn_read_line(hostname_file, &line, &read_len);
-                trim_flanking_whitespace(line);
-                if(strlen(line) > 0)
-                {
+	//make sure local ips get set to hostname
+	FILE* hostname_file = fopen("/proc/sys/kernel/hostname", "r");
+	if(hostname_file != NULL)
+	{
+		char *line = NULL;
+		unsigned long read_len;
+		dyn_read_line(hostname_file, &line, &read_len);
+		trim_flanking_whitespace(line);
+		if(strlen(line) > 0)
+		{
 			//Load LAN IPs
 			if(ptr_lan_ip != NULL)
 			{
@@ -1780,17 +1780,17 @@ string_map* get_hostnames(char* ptr_lan_ip, char* ptr_wan_ip, list* ptr_lan_ip6,
 				}
 			}
 
-                        //127.0.0.1 and ::1 are always local, so add it unconditionally
-                        set_string_map_element(ip_to_hostname, "127.0.0.1", strdup(line));
+			//127.0.0.1 and ::1 are always local, so add it unconditionally
+			set_string_map_element(ip_to_hostname, "127.0.0.1", strdup(line));
 			set_string_map_element(ip_to_hostname, "::1", strdup(line));
 
-                }
-                free(line);
-                fclose(hostname_file);
-        }
+		}
+		free(line);
+		fclose(hostname_file);
+	}
 
 
-        return ip_to_hostname;
+	return ip_to_hostname;
 
 
 
@@ -1889,21 +1889,21 @@ bool is_unusable_overlayfs(void)
 #ifdef UCI_OLD_VERSION //valid for uci version 0.3.3 for kamikaze 7.09
 char* get_option_value_string(struct uci_option* uopt)
 {
-        char* opt_str = strdup(uopt->value);
+	char* opt_str = strdup(uopt->value);
 
-        /* escape backslash characters & quote characters so javascript can parse variables properly */
-        char* tmp = opt_str;
-        opt_str = dynamic_replace(opt_str, "\\", "\\\\");
-        free(tmp);
-        tmp = opt_str;
-        opt_str = dynamic_replace(opt_str, "\"", "\\\"");
-        free(tmp);
+	/* escape backslash characters & quote characters so javascript can parse variables properly */
+	char* tmp = opt_str;
+	opt_str = dynamic_replace(opt_str, "\\", "\\\\");
+	free(tmp);
+	tmp = opt_str;
+	opt_str = dynamic_replace(opt_str, "\"", "\\\"");
+	free(tmp);
 
-        return opt_str;
+	return opt_str;
 }
 int get_uci_option(struct uci_context* ctx,  struct uci_element** e, struct uci_package *p, char* package_name, char* section_name, char* option_name)
 {
-        return uci_lookup(ctx, e, p, section_name, option_name);
+	return uci_lookup(ctx, e, p, section_name, option_name);
 }
 
 #else //valid for newer uci versions in trunk (tested with 0.6.2)
@@ -1917,128 +1917,128 @@ int get_uci_option(struct uci_context* ctx,  struct uci_element** e, struct uci_
 // do anything fancy.
 char* get_option_value_string(struct uci_option* uopt)
 {
-        char* opt_str = NULL;
-        if(uopt->type == UCI_TYPE_STRING)
-        {
-                opt_str = strdup(uopt->v.string);
-        }
-        if(uopt->type == UCI_TYPE_LIST)
-        {
-                struct uci_element* e;
-                uci_foreach_element(&uopt->v.list, e)
-                {
-                        if(opt_str == NULL)
-                        {
-                                opt_str = strdup(e->name);
-                        }
-                        else
-                        {
-                                char* tmp;
-                                tmp = dynamic_strcat(3, opt_str, " ", e->name);
-                                free(opt_str);
-                                opt_str = tmp;
-                        }
-                }
-        }
+	char* opt_str = NULL;
+	if(uopt->type == UCI_TYPE_STRING)
+	{
+		opt_str = strdup(uopt->v.string);
+	}
+	if(uopt->type == UCI_TYPE_LIST)
+	{
+		struct uci_element* e;
+		uci_foreach_element(&uopt->v.list, e)
+		{
+			if(opt_str == NULL)
+			{
+				opt_str = strdup(e->name);
+			}
+			else
+			{
+				char* tmp;
+				tmp = dynamic_strcat(3, opt_str, " ", e->name);
+				free(opt_str);
+				opt_str = tmp;
+			}
+		}
+	}
 
-        /* escape backslash characters & quote characters so javascript can parse variables properly */
-        char* tmp = opt_str;
-        opt_str = dynamic_replace(opt_str, "\\", "\\\\");
-        free(tmp);
-        tmp = opt_str;
-        opt_str = dynamic_replace(opt_str, "\"", "\\\"");
-        free(tmp);
+	/* escape backslash characters & quote characters so javascript can parse variables properly */
+	char* tmp = opt_str;
+	opt_str = dynamic_replace(opt_str, "\\", "\\\\");
+	free(tmp);
+	tmp = opt_str;
+	opt_str = dynamic_replace(opt_str, "\"", "\\\"");
+	free(tmp);
 
 
-        return opt_str;
+	return opt_str;
 }
 
 int get_uci_option(struct uci_context* ctx, struct uci_element** e, struct uci_package *p, char* package_name, char* section_name, char* option_name)
 {
-        struct uci_ptr ptr;
-        char* lookup_str = dynamic_strcat(5, package_name, ".", section_name, ".", option_name);
-        int ret_value = uci_lookup_ptr(ctx, &ptr, lookup_str, 1);
-        if(ret_value == UCI_OK)
-        {
-                if( !(ptr.flags & UCI_LOOKUP_COMPLETE))
-                {
-                        ret_value = UCI_ERR_NOTFOUND;
-                }
-                else
-                {
-                        *e = (struct uci_element*)ptr.o;
-                }
-        }
-        free(lookup_str);
+	struct uci_ptr ptr;
+	char* lookup_str = dynamic_strcat(5, package_name, ".", section_name, ".", option_name);
+	int ret_value = uci_lookup_ptr(ctx, &ptr, lookup_str, 1);
+	if(ret_value == UCI_OK)
+	{
+		if( !(ptr.flags & UCI_LOOKUP_COMPLETE))
+		{
+			ret_value = UCI_ERR_NOTFOUND;
+		}
+		else
+		{
+			*e = (struct uci_element*)ptr.o;
+		}
+	}
+	free(lookup_str);
 
-        return ret_value;
+	return ret_value;
 }
 
 char** ParseGHF_TranslationStrings(char* web_root, char* active_lang, char* fallback_lang)
 {
 #ifdef LOCALIZED_BUILD
-        return NULL;
+	return NULL;
 #else
-        unsigned char ghf_idx=0;
-        char** GHFstrings = (char**)calloc(6, sizeof(char*));         //5 strings + emptyval
-        //same order as in file:
-        //index=0: ghf.title="Gargoyle Router Management Utility";
-        //index=1: ghf.desc="Router<br/>Management<br/>Utility";
-        //index=2: ghf.devn="Device Name";
-        //index=3: ghf.waits="Please Wait While Settings Are Applied";
+	unsigned char ghf_idx=0;
+	char** GHFstrings = (char**)calloc(6, sizeof(char*));	 //5 strings + emptyval
+	//same order as in file:
+	//index=0: ghf.title="Gargoyle Router Management Utility";
+	//index=1: ghf.desc="Router<br/>Management<br/>Utility";
+	//index=2: ghf.devn="Device Name";
+	//index=3: ghf.waits="Please Wait While Settings Are Applied";
 	//index=4: ghf.badoverlay="Router storage full (read only) or is mounted in volatile storage (RAM). It will not function correctly, or will revert to a previous state after rebooting. Restore default configuration or flash new firmware (without preserving settings).";
-        char* ghfs_path = dynamic_strcat(4, web_root, "/i18n/", active_lang, "/ghf.js");
+	char* ghfs_path = dynamic_strcat(4, web_root, "/i18n/", active_lang, "/ghf.js");
 
-        if (path_exists(ghfs_path) == PATH_IS_REGULAR_FILE || path_exists(ghfs_path) == PATH_IS_SYMLINK )
-        {
-                unsigned long num_lines = 0;
-                char** ghf_js_lines = get_file_lines(ghfs_path, &num_lines);
+	if (path_exists(ghfs_path) == PATH_IS_REGULAR_FILE || path_exists(ghfs_path) == PATH_IS_SYMLINK )
+	{
+		unsigned long num_lines = 0;
+		char** ghf_js_lines = get_file_lines(ghfs_path, &num_lines);
 
-                if (memcmp(ghf_js_lines[0], "\xEF\xBB\xBF", 3) == 0)
-                {                 //Found a UTF8 BOM
-                        unsigned long ghf_line;
+		if (memcmp(ghf_js_lines[0], "\xEF\xBB\xBF", 3) == 0)
+		{		 //Found a UTF8 BOM
+			unsigned long ghf_line;
 
-                        for (ghf_line=0; ghf_line < num_lines; ghf_line++)
-                        {
-                                char* this_line = ghf_js_lines[ghf_line];
-                                unsigned short idx, start_str, end_str = 0;
+			for (ghf_line=0; ghf_line < num_lines; ghf_line++)
+			{
+				char* this_line = ghf_js_lines[ghf_line];
+				unsigned short idx, start_str, end_str = 0;
 
-                                for (idx=0; idx < strlen(this_line); idx++)
-                                {
-                                        //UTF8-BOM+ start of comment (/*) or just start of comment (/*)? skip the line
-                                        if (memcmp(this_line+idx, "\xEF\xBB\xBF/*", 5) == 0 || memcmp(this_line+idx, "/*", 2) == 0)
-                                        {
-                                                continue;
-                                        }
-                                        //skip lines shorter than 4 bytes (ghf. is 4 bytes, which is malformed) + skip empty lines
-                                        if (strlen(this_line) < 5 || this_line[idx] == '\n')
-                                        {
-                                                continue;
-                                        }
-                                        if (this_line[idx] == '"' && this_line[idx-1] == '=')
-                                        {
-                                                start_str=idx+1;
-                                        }
-                                        if (this_line[idx] == '"' && this_line[idx+1] == ';')
-                                        {
-                                                end_str=idx;
-                                        }
-                                }
-                                if (start_str > 0 && end_str > 0)
-                                {
-                                        char* val=(char*)calloc(end_str-start_str<8 ? 8 : (end_str-start_str)+1, sizeof(char));
-                                        memcpy(val, this_line+start_str, end_str-start_str);
-                                        GHFstrings[ghf_idx]=val;
-                                        ghf_idx++;
-                                }
-                        }
-                }
-                free_null_terminated_string_array(ghf_js_lines);
-        }
+				for (idx=0; idx < strlen(this_line); idx++)
+				{
+					//UTF8-BOM+ start of comment (/*) or just start of comment (/*)? skip the line
+					if (memcmp(this_line+idx, "\xEF\xBB\xBF/*", 5) == 0 || memcmp(this_line+idx, "/*", 2) == 0)
+					{
+						continue;
+					}
+					//skip lines shorter than 4 bytes (ghf. is 4 bytes, which is malformed) + skip empty lines
+					if (strlen(this_line) < 5 || this_line[idx] == '\n')
+					{
+						continue;
+					}
+					if (this_line[idx] == '"' && this_line[idx-1] == '=')
+					{
+						start_str=idx+1;
+					}
+					if (this_line[idx] == '"' && this_line[idx+1] == ';')
+					{
+						end_str=idx;
+					}
+				}
+				if (start_str > 0 && end_str > 0)
+				{
+					char* val=(char*)calloc(end_str-start_str<8 ? 8 : (end_str-start_str)+1, sizeof(char));
+					memcpy(val, this_line+start_str, end_str-start_str);
+					GHFstrings[ghf_idx]=val;
+					ghf_idx++;
+				}
+			}
+		}
+		free_null_terminated_string_array(ghf_js_lines);
+	}
 
-        free(ghfs_path);
-        return GHFstrings;
-        // don't forget to free_null_terminated_string_array(GHFstrings-or whatever);
+	free(ghfs_path);
+	return GHFstrings;
+	// don't forget to free_null_terminated_string_array(GHFstrings-or whatever);
 #endif
 }
 
