@@ -395,8 +395,8 @@ function setVisibility()
 {
 	setInvisibleIfIdMatches("applies_to_type", ["all","others_combined", "others_individual"], "quota_ip_container", "inline", document);
 	setInvisibleIfIdMatches("applies_to_type", ["all","others_combined", "others_individual"], "quota_ip6_container", "inline", document);
-	setInvisibleIfIdMatches("quota_reset", ["hour", "day"], "quota_day_container", "block", document);
-	setInvisibleIfIdMatches("quota_reset", ["hour"], "quota_hour_container", "block", document);
+	setInvisibleIfIdMatches("quota_reset", ["hour", "day", "never"], "quota_day_container", "block", document);
+	setInvisibleIfIdMatches("quota_reset", ["hour", "never"], "quota_hour_container", "block", document);
 	setInvisibleIfIdMatches("max_up_type", ["unlimited"], "max_up_container", "inline", document);
 	setInvisibleIfIdMatches("max_down_type", ["unlimited"], "max_down_container", "inline", document);
 	setInvisibleIfIdMatches("max_combined_type", ["unlimited"], "max_combined_container", "inline", document);
