@@ -175,7 +175,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 						</select>
 						<span id="bridge_dns_custom_container">
 							<div class="second_row_right_column">
-								<input type="text" id="add_bridge_dns" oninput="proofreadIp(this)" class="form-control" size="20" maxlength="17" />
+								<input type="text" id="add_bridge_dns" oninput="proofreadDnsIp(this)" class="form-control" size="20" />
 								<button class="btn btn-default btn-add" id="add_bridge_dns_button" onclick="addDns('bridge')"><%~ Add %></button>
 							</div>
 							<div id="bridge_dns_table_container" class="second_row_right_column form-group"></div>
@@ -714,10 +714,11 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 								<option value="google"><%~ GooSrvs %></option>
 								<option value="opendnsfs"><%~ OpnSrvsFS %></option>
 								<option value="quad9"><%~ Quad9 %></option>
+								<option value="cloudflare"><%~ Cloudflare %></option>
 								<option value="custom"><%~ CstDSrv %></option>
 							</select>
 							<div id="lan_dns_custom_container" class="second_row_right_column">
-								<input  type="text" id="add_lan_dns" class="form-control" oninput="proofreadIp(this)" size="20" maxlength="17" />
+								<input  type="text" id="add_lan_dns" class="form-control" oninput="proofreadDnsIp(this)" size="20" />
 								<button class="btn btn-default btn-add" id="add_lan_dns_button" onclick="addDns('lan')"><%~ Add %></button>
 								<div id="lan_dns_table_container" class="form-group second_row_right_column"></div>
 							</div>

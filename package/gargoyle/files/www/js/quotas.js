@@ -331,11 +331,11 @@ function setDocumentIp(ip)
 		ipGroups = ip.split(",");
 		for(var x = 0; x < ipGroups.length; x++)
 		{
-			if(getIPFamily(ipGroups[x].split("-")[0]) == "IPv4")
+			if(isIPv4(ipGroups[x].split("-")[0]))
 			{
 				ip4.push(ipGroups[x]);
 			}
-			else if(getIPFamily(ipGroups[x].split("-")[0]) == "IPv6")
+			else if(isIPv6(ipGroups[x].split("-")[0]))
 			{
 				ip6.push(ipGroups[x]);
 			}

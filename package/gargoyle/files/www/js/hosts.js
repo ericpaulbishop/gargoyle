@@ -385,7 +385,7 @@ function parseConntrack(arpHash, currentWanIp, lines)
 		var srcIpPart = splitLine[1];
 		var splitSrcIp = srcIpPart.split(/[\t ]+/);
 		var srcIp = splitSrcIp[0];
-		if(getIPFamily(srcIp) == "IPv6")
+		if(isIPv6(srcIp))
 		{
 			srcIp = ip6_canonical(srcIp);
 		}
@@ -394,7 +394,7 @@ function parseConntrack(arpHash, currentWanIp, lines)
 		var dstIpPart = splitLine[1];
 		var splitDstIp = dstIpPart.split(/[\t ]+/);
 		var dstIp = splitDstIp[0];
-		if(getIPFamily(dstIp) == "IPv6")
+		if(isIPv6(dstIp))
 		{
 			dstIp = ip6_canonical(dstIp);
 		}

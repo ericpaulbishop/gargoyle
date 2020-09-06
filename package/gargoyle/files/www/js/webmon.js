@@ -372,7 +372,7 @@ function updateMonitorTable()
 							lastVisit = systemDateFormat == "iso8601" ? m + "-" + d + h : lastVisit;
 
 							var ip = splitLine[2];
-							ip = getIPFamily(ip) == "IPv6" ? ip6_canonical(ip) : ip;
+							ip = isIPv6(ip) ? ip6_canonical(ip) : ip;
 							var host = getHostDisplay(ip, hostDisplayType);
 							var value = splitLine[3];
 

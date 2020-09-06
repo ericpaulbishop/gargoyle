@@ -2343,7 +2343,7 @@ function addAddressStringToTable(controlDocument, newAddrs, tableContainerId, ta
 			if(tmpaddr.indexOf("-") > -1)
 			{
 				var tmpaddrs = tmpaddr.split("-");
-				if(getIPFamily(tmpaddrs[0]) == "IPv6")
+				if(isIPv6(tmpaddrs[0]))
 				{
 					tmpaddrs[0] = ip6_canonical(tmpaddrs[0]);
 					tmpaddrs[1] = ip6_canonical(tmpaddrs[1]);
@@ -2352,7 +2352,7 @@ function addAddressStringToTable(controlDocument, newAddrs, tableContainerId, ta
 			}
 			else
 			{
-				if(getIPFamily(tmpaddr) == "IPv6")
+				if(isIPv6(tmpaddr))
 				{
 					tmpaddr = ip6_canonical(tmpaddr);
 				}
@@ -3625,6 +3625,16 @@ function getIPFamily(address)
 	}
 
 	return retVal;
+}
+
+function isIPv4(address)
+{
+	return getIPFamily(address) == "IPv4";
+}
+
+function isIPv6(address)
+{
+	return getIPFamily(address) == "IPv6";
 }
 
 function validateMultipleIp6s(ips)

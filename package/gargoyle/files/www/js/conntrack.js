@@ -126,7 +126,7 @@ function getHostDisplay(ip)
 		host = ipToHostname[ip] != null ? ipToHostname[ip] : ipToOVPNHostname[ip];
 		host = host.length < 25 ? host : host.substr(0,22)+"...";
 	}
-	if(host == ip && getIPFamily(host) == "IPv6")
+	if(host == ip && isIPv6(host))
 	{
 		host = "[" + host + "]";
 	}

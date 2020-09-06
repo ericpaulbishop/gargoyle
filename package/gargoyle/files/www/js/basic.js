@@ -12,10 +12,11 @@ var scannedSsids = [[],[],[],[],[]];
 var toggleReload = false;
 var currentLanIp;
 
-var googleDns = [["8.8.8.8", "8.8.4.4"],["2001:4860:4860::8888","2001:4860:4860:8844"]];
+var googleDns = [["8.8.8.8", "8.8.4.4"],["2001:4860:4860::8888","2001:4860:4860::8844"]];
 var openDns = [["208.67.222.222", "208.67.220.220"],["2620:119:35::35","2620:119:53::53"]];
 var openDnsFS = [["208.67.222.123", "208.67.220.123"],[]];
-var quad9DNS = [["9.9.9.9", "149.112.112.112"],[]];
+var quad9DNS = [["9.9.9.9", "149.112.112.112"],["2620:fe::fe","2620:fe::9"]];
+var cloudflareDns = [["1.1.1.1","1.0.0.1"],["2606:4700:4700::1111","2606:4700:4700::1001"]];
 
 var ncDns  = [["178.32.31.41", "176.58.118.172"],["2001:41d0:2:f391::401"]]
 var onDns  = [["66.244.95.20", "95.211.32.162", "95.142.171.235"],[]]
@@ -550,8 +551,8 @@ function saveChanges()
 			var svcat= setVariableFromConcatenation;
 			var svcond= setVariableConditionally;
 			setFunctions = [
-					sv,sv,sv,sv,svm,svcat,sv,sv,sv,sv,sv,svcond,svcond,
-					sv,sv,sv,sv,sv,sv,sv,
+					sv,sv,sv,sv,svm,svcat,sv,sv,sv,svm,svm,svcond,svcond,
+					sv,sv,sv,sv,sv,sv,svm,
 					sv,svcond,svcond,svcond,sv,sv,sv,sv,svcond,svcond,svcond,sv,sv,sv,sv,sv,sv,sv,
 					sv,sv,sv,sv,sv,sv,sv
 					];
@@ -576,10 +577,11 @@ function saveChanges()
 			var guestFtParams = [ifGuestFtChecked,f,'1'];
 			var guestHiddenParams = [ifGuestHiddenChecked,f,'1'];
 			var guestIsolateParams = [ifGuestIsolateChecked,f,'1'];
+			var ip6Params = [f,ip6_canonical];
 
 			additionalParams = [
-						f,f,f,f, demandParams,f,f,f,f,f,f,macParams,mtuParams,
-						f,f,f,f,f,f,f,
+						f,f,f,f, demandParams,f,f,f,f,ip6Params,ip6Params,macParams,mtuParams,
+						f,f,f,f,f,f,ip6Params,
 						f,ftParams,hiddenParams,isolateParams,f,f,f,f,guestFtParams,guestHiddenParams,guestIsolateParams,f,f,f,f,f,f,f,
 						f,f,f,f,f,f,f
 					];
@@ -997,48 +999,78 @@ inputIds = [
 		//we set from lan table, but we keep bridge & lan dns tables synchronized
 		//so they should be identical
 		uci.remove('network', 'wan', 'dns');
+		uci.remove('network', 'wan6', 'dns');
 		var lanGateway = uci.get("network", "lan", "gateway");
 		lanGateway = lanGateway == "" ? uci.get("network", "lan", "ipaddr") : lanGateway;
 		var dns = lanGateway;
+		var dns6 = "";
 		var dnsSource = getSelectedValue("lan_dns_source");
 		var notBridge = document.getElementById("global_gateway").checked
 		if(dnsSource != "isp")
 		{
 			var dnsList = [];
+			var dnsList6 = [];
 			if(dnsSource == "google" && notBridge )
 			{
 				dnsList = googleDns[0];
+				dnsList6 = googleDns[1];
 			}
 			else if(dnsSource == "opendns" && notBridge )
 			{
 				dnsList = openDns[0];
+				dnsList6 = openDns[1];
 			}
 			else if(dnsSource == "opendnsfs" && notBridge )
 			{
 				dnsList = openDnsFS[0];
+				dnsList6 = openDnsFS[1];
 			}
 			else if(dnsSource == "quad9" && notBridge )
 			{
 				dnsList = quad9DNS[0];
+				dnsList6 = quad9DNS[1];
+			}
+			else if(dnsSource == "cloudflare" && notBridge )
+			{
+				dnsList = cloudflareDns[0];
+				dnsList6 = cloudflareDns[1];
 			}
 			else //custom
 			{
 				var dnsData = getTableDataArray(document.getElementById("lan_dns_table_container").firstChild);
 				var dnsIndex=0;
-				for(dnsIndex=0; dnsIndex < dnsData.length; dnsIndex++) { dnsList.push(dnsData[dnsIndex][0]); }
+				for(dnsIndex=0; dnsIndex < dnsData.length; dnsIndex++)
+				{
+					if(isIPv4(dnsData[dnsIndex][0]))
+					{
+						dnsList.push(dnsData[dnsIndex][0]);
+					}
+					elseif(isIPv6(dnsData[dnsIndex][0]))
+					{
+						dnsList6.push(dnsData[dnsIndex][0]);
+					}
+				}
 			}
 			dns = dnsList.length > 0 ? dnsList.join(" ") : dns;
+			dns6 = dnsList6.length > 0 ? dnsList6.join(" ") : dns6;
 
 			//if a wan is active and we have custom DNS settings, propagate to the wan too
 			if( notBridge && uci.get("network", "wan", "") != "" && dns != lanGateway)
 			{
 				uci.set("network", "wan", "dns", dns);
-				uci.set("network", "wan", "peerdns", "0")
+				uci.set("network", "wan", "peerdns", "0");
+				if(dns6 != "")
+				{
+					uci.set("network", "wan6", "dns", dns6);
+					uci.set("network", "wan6", "peerdns", "0");
+				}
 			}
+			dns = [dns,dns6].join(" ");
 		}
 		else if( notBridge && uci.get("network", "wan", "") != "")
 		{
-			uci.remove("network", "wan", "peerdns")
+			uci.remove("network", "wan", "peerdns");
+			uci.remove("network", "wan6", "peerdns");
 		}
 		uci.set("network", "lan", "dns", dns)
 
@@ -1155,6 +1187,11 @@ function proofreadAll()
 	var vfk = validateFtKey;
 	var vtp = function(text){ return validateNumericRange(text, 0, getMaxTxPower("G")); };
 	var vtpa = function(text){ return validateNumericRange(text, 0, getMaxTxPower("A")); };
+	var vip6fr = validateIP6ForceRange;
+	var vip6 = validateIP6;
+	var vip6m = function(text) { return validateNumericRange(text, 1, 128); };
+	var vip6h = function(text) { return validateLengthRange(text,0,4) || (text.match(/[^0-9a-f]/) == null ? 0 : 1); };
+	var vip6if = function(text) { return validateIP6(text) || ((ip6_canonical(text) == ip6_mask(text,-32)) ? 0 : 1); };
 
 	var testWds = function(tableContainerId, selectId, wdsValue)
 	{
@@ -1170,9 +1207,19 @@ function proofreadAll()
 	var errors = [];
 	if(document.getElementById("global_gateway").checked)
 	{
-		var inputIds = ['wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle', 'wan_pppoe_reconnect_pings', 'wan_pppoe_interval', 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_mac', 'wan_mtu', 'lan_ip', 'lan_mask', 'lan_gateway', 'wifi_txpower', 'wifi_txpower_5ghz', 'wifi_ssid1', 'wifi_pass1', 'wifi_wep1', 'wifi_ft_key', 'wifi_guest_pass1', 'wifi_guest_wep1', 'wifi_server1', 'wifi_port1', 'wifi_ssid2', 'wifi_pass2', 'wifi_wep2', 'wan_3g_device', 'wan_3g_apn'];
+		var inputIds = [
+				'wan_pppoe_user', 'wan_pppoe_pass', 'wan_pppoe_max_idle', 'wan_pppoe_reconnect_pings', 'wan_pppoe_interval', 'wan_static_ip', 'wan_static_mask', 'wan_static_gateway', 'wan_mac', 'wan_mtu', 'wan_static_ip6', 'wan_static_gateway6',
+				'lan_ip', 'lan_mask', 'lan_gateway', 'lan_ip6assign', 'lan_ip6hint', 'lan_ip6ifaceid', 'lan_ip6gw',
+				'wifi_txpower', 'wifi_txpower_5ghz', 'wifi_ssid1', 'wifi_pass1', 'wifi_wep1', 'wifi_ft_key', 'wifi_guest_pass1', 'wifi_guest_wep1', 'wifi_server1', 'wifi_port1', 'wifi_ssid2', 'wifi_pass2', 'wifi_wep2', 
+				'wan_3g_device', 'wan_3g_apn'
+		];
 
-		var functions= [vlr1, vlr1, vn, vn, vn, vip, vnm, vip, vm, vn, vip, vnm, vip, vtp, vtpa, vid, vp, vw, vfk, vpg, vw, vip, vnp, vid, vp2, vw, vlr1, vlr1];
+		var functions= [
+				vlr1, vlr1, vn, vn, vn, vip, vnm, vip, vm, vn, vip6fr, vip6,
+				vip, vnm, vip, vip6m, vip6h, vip6if, vip6,
+				vtp, vtpa, vid, vp, vw, vfk, vpg, vw, vip, vnp, vid, vp2, vw,
+				vlr1, vlr1
+		];
 
 		var optInputIds = ['wifi_ssid1a', 'wifi_guest_ssid1', 'wifi_guest_ssid1a']
 		for(index in optInputIds)
@@ -2063,7 +2110,7 @@ function resetData()
 		var dip = origDns[dIndex]
 		var isRouterIp = !confIsBridge && dip == routerIp
 		var isBridgeGw =   confIsBridge && dip == routerGateway
-		if(  (!isRouterIp) && (!isBridgeGw) && validateIP(dip) == 0)
+		if(  (!isRouterIp) && (!isBridgeGw) && (validateIP(dip) == 0 || validateIP6(dip) == 0))
 		{
 			dnsTableData.push([dip]);
 		}
@@ -2089,6 +2136,10 @@ function resetData()
 	else if( dnsTableData.join(",") == quad9DNS.join(",") || dnsTableData.join(",") == quad9DNS.reverse().join(",") )
 	{
 		dnsType = "quad9";
+	}
+	else if( dnsTableData.join(",") == cloudflareDns.join(",") || dnsTableData.join(",") == cloudflareDns.reverse().join(",") )
+	{
+		dnsType = "cloudflare";
 	}
 	setSelectedValue("lan_dns_source", dnsType);
 	setDnsSource(document.getElementById("lan_dns_source"))
@@ -2662,11 +2713,11 @@ function addDns(section)
 {
 	var textId = "add_" + section + "_dns";
 	addIp = document.getElementById(textId).value;
-	addTextToSingleColumnTable(textId, "lan_dns_table_container", validateIP, function(str){ return str; }, 0, false, "IP");
+	addTextToSingleColumnTable(textId, "lan_dns_table_container", isIPv4(addIp) ? validateIP : validateIP6, function(str){ return str; }, 0, false, "IP");
 	if(addIp != "" && document.getElementById(textId).value == "")
 	{
 		document.getElementById(textId).value = addIp;
-		addTextToSingleColumnTable("add_" + section + "_dns", "bridge_dns_table_container", validateIP, function(str){ return str; }, 0, false, "IP");
+		addTextToSingleColumnTable("add_" + section + "_dns", "bridge_dns_table_container", isIPv4(addIp) ? validateIP : validateIP6, function(str){ return str; }, 0, false, "IP");
 	}
 }
 
@@ -4187,6 +4238,10 @@ function calculateMask6(mask)
 function addIp6(section)
 {
 	var textId = "add_" + section + "_ip6";
-	addIp = document.getElementById(textId).value;
-	addTextToSingleColumnTable(textId, "lan_ip6_table_container", validateIP6ForceRange, function(str){ return str; }, 0, false, "IP");
+	addTextToSingleColumnTable(textId, "lan_ip6_table_container", validateIP6ForceRange, function(str){ return ip6_canonical(str); }, 0, false, "IP");
+}
+
+function proofreadDnsIp(input)
+{
+	isIPv4(input.value) ? proofreadIp(input) : proofreadIp6(input);
 }
