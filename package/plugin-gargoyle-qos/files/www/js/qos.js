@@ -670,7 +670,7 @@ function addClassificationRule()
 			}
 			if(control.disabled == false)
 			{
-				controlValue = (addRuleMatchControls[controlIndex] == "source_ip" || addRuleMatchControls[controlIndex] == "dest_ip") && getIPFamily(controlValue) == "IPv6" ? ip6_canonical(controlValue) : controlValue;
+				controlValue = (addRuleMatchControls[controlIndex] == "source_ip" || addRuleMatchControls[controlIndex] == "dest_ip") && isIPv6(controlValue) ? ip6_canonical(controlValue) : controlValue;
 				substitution = displayList[controlIndex];
 				substitution = substitution.replace(/\$/, controlValue);
 				ruleText = ruleText == "" ? ruleText +substitution : ruleText + ", " + substitution;
@@ -923,7 +923,7 @@ function editRuleTableRow(editRuleWindowRow)
 			}
 			if(control.disabled == false)
 			{
-				controlValue = (addRuleMatchControls[controlIndex] == "source_ip" || addRuleMatchControls[controlIndex] == "dest_ip") && getIPFamily(controlValue) == "IPv6" ? ip6_canonical(controlValue) : controlValue;
+				controlValue = (addRuleMatchControls[controlIndex] == "source_ip" || addRuleMatchControls[controlIndex] == "dest_ip") && isIPv6(controlValue) ? ip6_canonical(controlValue) : controlValue;
 				substitution = displayList[controlIndex];
 				substitution = substitution.replace(/\$/, controlValue);
 				ruleText = ruleText == "" ? ruleText +substitution : ruleText + ", " + substitution;
@@ -1422,8 +1422,7 @@ function updateIPControls(triggerEl)
 
 function proofreadQOSIPRange(triggerEl)
 {
-	var ipfam = getIPFamily(triggerEl.value);
-	if(ipfam == "IPv6")
+	if(isIPv6(triggerEl.value))
 	{
 		proofreadIp6Range(triggerEl);
 	}
