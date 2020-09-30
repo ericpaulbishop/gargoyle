@@ -17,7 +17,7 @@
 	position: absolute;
 	z-index: 2000;
 	opacity: .75;
-	MozOpacity: .75;
+	-moz-opacity: .75;
 	filter: alpha(opacity=75)
 }
 #wait_icon
