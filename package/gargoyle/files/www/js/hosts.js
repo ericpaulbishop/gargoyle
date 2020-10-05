@@ -245,10 +245,13 @@ function parseArp(arpLines, leaseLines)
 	{
 		var nextLine = arpLines[lineIndex];
 		var splitLine = nextLine.split(/[\t ]+/);
-		var mac = splitLine[4].toUpperCase();
-		var ip = splitLine[0];
-		arpHash[ mac ] = ip;
-		arpHash[ ip  ] = mac;
+		if(splitLine.length >= 5)
+		{
+			var mac = splitLine[4].toUpperCase();
+			var ip = splitLine[0];
+			arpHash[ mac ] = ip;
+			arpHash[ ip  ] = mac;
+		}
 	}
 
 
