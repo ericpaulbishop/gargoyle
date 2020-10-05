@@ -494,6 +494,7 @@ initialize_qos()
 
 			#Add a filter to the root class to direct packets to this leaf class according to the conntrack mark
 			tc filter add dev $qos_interface parent 1:0 protocol ip handle $next_classid fw flowid 1:$next_class_index
+			tc filter add dev $qos_interface parent 1:0 protocol ipv6 handle $next_classid fw flowid 1:$next_class_index
 			#Add a filter to the leaf class to define flows as being the source IP address.
 			tc filter add dev $qos_interface parent $next_class_index: handle 1 flow divisor 256 map key nfct-src and 0xff
 			$echo_off
@@ -580,6 +581,8 @@ initialize_qos()
 		next_classid=$(printf "0x%X" $(($next_class_index << $download_shift)) )
 		def_download_idx=$next_class_index
 		def_download_class=$next_classid
+		#leave room for 2 high priority ping classes
+		next_class_prio=3
 
 		for dclass_name in $download_class_list ; do
 			$echo_on
@@ -638,7 +641,8 @@ initialize_qos()
 			tc class add dev imq0 parent 1:1 classid 1:$next_class_index hfsc $rt_str $ll_str $ul_str
 			#Assume average download packet size is 250 bytes.
 			tc qdisc add dev imq0 parent 1:$next_class_index handle $next_class_index:1 sfq headdrop limit $(($tbw/250)) $sfq_depth divisor 256  
-			tc filter add dev imq0 parent 1:0 prio $next_class_index protocol ip handle $next_classid fw flowid 1:$next_class_index
+			tc filter add dev imq0 parent 1:0 prio $next_class_prio protocol ip handle $next_classid fw flowid 1:$next_class_index
+			tc filter add dev imq0 parent 1:0 prio $(($next_class_prio+1)) protocol ipv6 handle $next_classid fw flowid 1:$next_class_index
 			tc filter add dev imq0 parent $next_class_index: handle 1 flow divisor 256 map key dst and 0xff
 			$echo_off
 
@@ -649,6 +653,7 @@ initialize_qos()
 
 			next_class_index=$(($next_class_index+1))
 			next_classid=$(printf "0x%X" $(($next_class_index << $download_shift)) )
+			next_class_prio=$(($next_class_prio+2))
 		done
 
 		$echo_on
@@ -734,6 +739,7 @@ initialize_qos()
 		tc class add dev $qos_interface parent 1:1 classid 1:127 hfsc rt umax 106 dmax 10ms rate 4kbit
 		tc qdisc add dev $qos_interface parent 1:127 pfifo
 		tc filter add dev $qos_interface parent 1:0 prio 1 protocol ip handle 127 fw flowid 1:127
+		tc filter add dev $qos_interface parent 1:0 prio 2 protocol ipv6 handle 127 fw flowid 1:127
 
 		#Mark all ping requests from the router to the ptarget to the above special class overriding any other mark.
 		if [ "$(ip_family $wan_ip)" == "ipv4" ] && [ "$(ip_family $ptarget_ip)" == "ipv4" ] ; then
@@ -899,4 +905,5 @@ boot()
 	#Do nothing during init.  Start is called by hotplug.
 	return
 }
+
 
