@@ -189,6 +189,27 @@ elif [ -n "$FORM_openvpn_client_conf_text" ] && [ -n "$FORM_openvpn_client_ca_te
 		ta_direction=$(  egrep "^[$tab ]*tls\-auth[$tab ]+" "${client_name}.conf" | egrep "^[$tab ]*tls\-auth[$tab ]+" | awk ' { print $3 } ' )
 		printf "$FORM_openvpn_client_ta_key_text"  | tr -d "\r" > "${client_name}_ta.key"
 	fi
+	if [ -n "$FORM_openvpn_client_auth_user_pass_text_user" ] && [ -n "$FORM_openvpn_client_auth_user_pass_text_pass" ] ; then
+		printf "$FORM_openvpn_client_auth_user_pass_text_user\n$FORM_openvpn_client_auth_user_pass_text_pass" | tr -d "\r" > "${client_name}.secret"
+		grep -q "auth-user-pass" "${client_name}.conf" && sed -i 's/^auth-user-pass.*$/auth-user-pass '"${client_name}"'.secret/i' "${client_name}.conf" || echo "auth-user-pass ${client_name}.secret" >> "${client_name}.conf"
+	fi
+
+elif [ -s "$FORM_openvpn_client_conf_file" ] ; then 
+	
+	cat "$FORM_openvpn_client_conf_file" | tr -d "\r" > "${client_name}.conf"
+	rm  "$FORM_openvpn_client_conf_file" 
+	if [ -n "$FORM_openvpn_client_auth_user_pass_user" ] && [ -n "$FORM_openvpn_client_auth_user_pass_pass" ] ; then
+		printf "$FORM_openvpn_client_auth_user_pass_user\n$FORM_openvpn_client_auth_user_pass_pass" | tr -d "\r" > "${client_name}.secret"
+		grep -q "auth-user-pass" "${client_name}.conf" && sed -i 's/^auth-user-pass.*$/auth-user-pass '"${client_name}"'.secret/i' "${client_name}.conf" || echo "auth-user-pass ${client_name}.secret" >> "${client_name}.conf"
+	fi
+
+elif [ -n "$FORM_openvpn_client_conf_text" ] ; then
+
+	printf "$FORM_openvpn_client_conf_text" | tr -d "\r" > "${client_name}.conf"
+	if [ -n "$FORM_openvpn_client_auth_user_pass_text_user" ] && [ -n "$FORM_openvpn_client_auth_user_pass_text_pass" ] ; then
+		printf "$FORM_openvpn_client_auth_user_pass_text_user\n$FORM_openvpn_client_auth_user_pass_text_pass" | tr -d "\r" > "${client_name}.secret"
+		grep -q "auth-user-pass" "${client_name}.conf" && sed -i 's/^auth-user-pass.*$/auth-user-pass '"${client_name}"'.secret/i' "${client_name}.conf" || echo "auth-user-pass ${client_name}.secret" >> "${client_name}.conf"
+	fi
 
 fi
 
@@ -221,9 +242,15 @@ if [ -z "$error" ] ; then
 	fi
 
 	if [ -z "$error" ] ; then
-		mv "${client_name}.conf" "${client_name}_ca.crt" "${client_name}.crt" "${client_name}.key"  /etc/openvpn/
+		mv "${client_name}.conf" /etc/openvpn/
+		if [ -e "${client_name}_ca.crt" ] && [ -e "${client_name}.crt" ] && [ -e "${client_name}.key" ] ; then
+			mv "${client_name}_ca.crt" "${client_name}.crt" "${client_name}.key"  /etc/openvpn/
+		fi
 		if [ -e "${client_name}_ta.key" ]  ; then
-			mv "${client_name}_ta.key"  /etc/openvpn/
+			mv "${client_name}_ta.key" /etc/openvpn/
+		fi
+		if [ -e "${client_name}.secret" ] ; then
+			mv "${client_name}.secret" /etc/openvpn/
 		fi
 
 		#run constant uci commands

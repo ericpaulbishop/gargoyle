@@ -19,14 +19,25 @@
 	fi
 
 	client_id=$(uci get openvpn_gargoyle.@client[0].id 2>/dev/null)
-	echo "var curClientConf =[]; var curClientCa = []; var curClientCert =[]; var curClientKey = []; var curClientTaKey = [];"
-	if [ -n "$client_id" ]  && [ -f "/etc/openvpn/${client_id}.conf" ] && [ -f "/etc/openvpn/${client_id}_ca.crt" ] && [ -f "/etc/openvpn/${client_id}.crt" ] && [ -f "/etc/openvpn/${client_id}.key" ] ; then
-		awk '{ gsub(/[\r\n]+$/, "") ; gsub(/\"/, "\\\"") ; print "curClientConf.push(\""$0"\")"}' "/etc/openvpn/${client_id}.conf"      2>/dev/null
-		awk '{ gsub(/[\r\n]+$/, "") ; gsub(/\"/, "\\\"") ; print "curClientCa.push(\""$0"\");"}'   "/etc/openvpn/${client_id}_ca.crt"   2>/dev/null
-		awk '{ gsub(/[\r\n]+$/, "") ; gsub(/\"/, "\\\"") ; print "curClientCert.push(\""$0"\");"}' "/etc/openvpn/${client_id}.crt"      2>/dev/null
-		awk '{ gsub(/[\r\n]+$/, "") ; gsub(/\"/, "\\\"") ; print "curClientKey.push(\""$0"\");"}'  "/etc/openvpn/${client_id}.key"      2>/dev/null
+	echo "var curClientConf =[]; var curClientCa = []; var curClientCert =[]; var curClientKey = []; var curClientTaKey = []; var curClientSecret = [];"
+	if [ -n "$client_id" ] ; then
+		if [ -f "/etc/openvpn/${client_id}.conf" ] ; then
+			awk '{ gsub(/[\r\n]+$/, "") ; gsub(/\"/, "\\\"") ; print "curClientConf.push(\""$0"\")"}' "/etc/openvpn/${client_id}.conf"      2>/dev/null
+		fi
+		if [ -f "/etc/openvpn/${client_id}_ca.crt" ] ; then
+			awk '{ gsub(/[\r\n]+$/, "") ; gsub(/\"/, "\\\"") ; print "curClientCa.push(\""$0"\");"}'   "/etc/openvpn/${client_id}_ca.crt"   2>/dev/null
+		fi
+		if [ -f "/etc/openvpn/${client_id}.crt" ] ; then
+			awk '{ gsub(/[\r\n]+$/, "") ; gsub(/\"/, "\\\"") ; print "curClientCert.push(\""$0"\");"}' "/etc/openvpn/${client_id}.crt"      2>/dev/null
+		fi
+		if [ -f "/etc/openvpn/${client_id}.key" ] ; then
+			awk '{ gsub(/[\r\n]+$/, "") ; gsub(/\"/, "\\\"") ; print "curClientKey.push(\""$0"\");"}'  "/etc/openvpn/${client_id}.key"      2>/dev/null
+		fi
 		if [ -f "/etc/openvpn/${client_id}_ta.key" ] ; then
 			awk '{ gsub(/[\r\n]+$/, "") }; {print "curClientTaKey.push(\""$0"\");"}'  "/etc/openvpn/${client_id}_ta.key"      2>/dev/null
+		fi
+		if [ -f "/etc/openvpn/${client_id}.secret" ] ; then
+			awk '{ gsub(/[\r\n]+$/, "") }; {print "curClientSecret.push(\""$0"\");"}'  "/etc/openvpn/${client_id}.secret"      2>/dev/null
 		fi
 	fi
 
@@ -220,13 +231,13 @@
 					</div>
 
 					<div id="openvpn_client_file_controls">
-
 						<div id="openvpn_client_file_type_container" class="row form-group">
 							<label class="col-xs-5" id="openvpn_client_file_type_label" for="openvpn_client_file_type"><%~ UpFmt %>:</label>
 							<span class="col-xs-7">
 								<select id="openvpn_client_file_type" class="form-control" onchange="setClientVisibility(document)">
 									<option value="zip"><%~ SZipF %></option>
-									<option value="multi" ><%~ CfgF %></option>
+									<option value="multi"><%~ CfgF %></option>
+									<option value="single"><%~ CfgFOvpn %></option>
 								</select>
 							</span>
 						</div>
@@ -239,6 +250,7 @@
 							<label class="col-xs-5" id="openvpn_client_conf_file_label" for="openvpn_client_conf_file"><%~ OCfgF %>:</label>
 							<span class="col-xs-7"><input type="file" id="openvpn_client_conf_file" name="openvpn_client_conf_file" /></span>
 						</div>
+
 						<div id="openvpn_client_ca_file_container" class="row form-group">
 							<label class="col-xs-5" id="openvpn_client_ca_file_label" for="openvpn_client_ca_file"><%~ CACF %>:</label>
 							<span class="col-xs-7"><input type="file" id="openvpn_client_ca_file" name="openvpn_client_ca_file" /></span>
@@ -261,6 +273,27 @@
 							<div class="row form-group">
 								<label class="col-xs-5" id="openvpn_client_ta_key_file_label" for="openvpn_client_use_ta_key_file"><%~ TAKeyF %>:</label>
 								<span class="col-xs-7"><input type="file" id="openvpn_client_ta_key_file" name="openvpn_client_ta_key_file" /></span>
+							</div>
+						</div>
+
+						<div id="openvpn_client_auth_user_pass_container">
+							<div class="row form-group">
+								<span class="col-xs-12">
+									<input type='checkbox' id='openvpn_client_use_auth_user_pass' name='use_auth_user_pass' onclick='enableAssociatedField(this, "openvpn_client_auth_user_pass_user", "");enableAssociatedField(this, "openvpn_client_auth_user_pass_pass","");' />
+									<label id='openvpn_client_use_auth_user_pass_label' for='openvpn_client_use_auth_user_pass'><%~ UseAUP %></label>
+								</span>
+							</div>
+							<div class="row form-group">
+								<label class="col-xs-5" id="openvpn_client_auth_user_pass_user_label" for="openvpn_client_auth_user_pass_user"><%~ AUPUser %>:</label>
+								<span class="col-xs-7"><input type="text" id="openvpn_client_auth_user_pass_user" name="openvpn_client_auth_user_pass_user" class="form-control" /></span>
+							</div>
+							<div class="row form-group">
+								<label class="col-xs-5" id="openvpn_client_auth_user_pass_pass_label" for="openvpn_client_auth_user_pass_pass"><%~ AUPPass %>:</label>
+								<span class="col-xs-7">
+									<input type="password" id="openvpn_client_auth_user_pass_pass" name="openvpn_client_auth_user_pass_pass" class="form-control" autocomplete="off" />
+									<input type="checkbox" id="show_pass" onclick="togglePass('openvpn_client_auth_user_pass_pass')" autocomplete="off">
+									<label for="show_pass" id="show_pass_label"><%~ rvel %></label>
+								</span>
 							</div>
 						</div>
 					</div>
@@ -361,6 +394,28 @@
 							</div>
 						</div>
 					</div>
+
+					<div id="openvpn_client_auth_user_pass_text_container">
+						<div class="row form-group">
+							<span class="col-xs-12">
+								<input type='checkbox' id='openvpn_client_use_auth_user_pass_text' name='use_auth_user_pass_text' onclick='enableAssociatedField(this, "openvpn_client_auth_user_pass_text_user", "");enableAssociatedField(this, "openvpn_client_auth_user_pass_text_pass","");' />
+								<label id='openvpn_client_use_auth_user_pass_text_label' for='openvpn_client_use_auth_user_pass_text'><%~ UseAUP %></label>
+							</span>
+						</div>
+						<div class="row form-group">
+							<label class="col-xs-5" id="openvpn_client_auth_user_pass_text_user_label" for="openvpn_client_auth_user_pass_text_user"><%~ AUPUser %>:</label>
+							<span class="col-xs-7"><input type="text" id="openvpn_client_auth_user_pass_text_user" name="openvpn_client_auth_user_pass_text_user" class="form-control" /></span>
+						</div>
+						<div class="row form-group">
+							<label class="col-xs-5" id="openvpn_client_auth_user_pass_text_pass_label" for="openvpn_client_auth_user_pass_text_pass"><%~ AUPPass %>:</label>
+							<span class="col-xs-7">
+								<input type="password" id="openvpn_client_auth_user_pass_text_pass" name="openvpn_client_auth_user_pass_text_pass" class="form-control" autocomplete="off" />
+								<input type="checkbox" id="show_text_pass" onclick="togglePass('openvpn_client_auth_user_pass_text_pass')" autocomplete="off">
+								<label for="show_text_pass" id="show_text_pass_label"><%~ rvel %></label>
+							</span>
+						</div>
+					</div>
+
 					<input style="display:none" type="hidden" id="net_mismatch_action" name="net_mismatch_action" value="query"></input>
 					<input style="display:none" type="hidden" id="openvpn_client_commands" name="commands"></input>
 					<input style="display:none" type="hidden" id="openvpn_client_hash" name="hash"></input>

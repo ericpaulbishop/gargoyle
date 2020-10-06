@@ -498,18 +498,28 @@ function resetData()
 	//client
 	var upCheckEl  = document.getElementById("openvpn_client_config_upload");
 	var manCheckEl = document.getElementById("openvpn_client_config_manual");
-	if(curClientConf.length >0 && curClientCa.length >0 && curClientCert.length >0 && curClientKey.length >0)
+	if(curClientConf.length >0)
 	{
 		manCheckEl.checked = true;
 		upCheckEl.checked  = false;
 		
 		document.getElementById("openvpn_client_conf_text").value    = curClientConf.join("\n");
-		document.getElementById("openvpn_client_ca_text").value      = curClientCa.join("\n");
-		document.getElementById("openvpn_client_cert_text").value    = curClientCert.join("\n");
-		document.getElementById("openvpn_client_key_text").value     = curClientKey.join("\n");
-		document.getElementById("openvpn_client_ta_key_text").value  = curClientTaKey.join("\n");
-		var textTaCheck = document.getElementById("openvpn_client_use_ta_key_text");	
-		textTaCheck.checked = curClientTaKey.length > 0 ? true : false;
+		if(curClientCa.length >0 && curClientCert.length >0 && curClientKey.length >0)
+		{
+			document.getElementById("openvpn_client_ca_text").value      = curClientCa.join("\n");
+			document.getElementById("openvpn_client_cert_text").value    = curClientCert.join("\n");
+			document.getElementById("openvpn_client_key_text").value     = curClientKey.join("\n");
+			document.getElementById("openvpn_client_ta_key_text").value  = curClientTaKey.join("\n");
+			var textTaCheck = document.getElementById("openvpn_client_use_ta_key_text");	
+			textTaCheck.checked = curClientTaKey.length > 0 ? true : false;
+		}
+		if(curClientSecret.length >0)
+		{
+			document.getElementById("openvpn_client_auth_user_pass_text_user").value = curClientSecret[0];
+			document.getElementById("openvpn_client_auth_user_pass_text_pass").value = curClientSecret[1];
+		}
+		var textAUPCheck = document.getElementById("openvpn_client_use_auth_user_pass_text");	
+		textAUPCheck.checked = curClientSecret.length > 0 ? true : false;
 
 		blockNonOpenVpn = uciOriginal.get("openvpn_gargoyle", "client", "block_non_openvpn")
 		setSelectedValue("openvpn_client_block_nonovpn", (blockNonOpenVpn == "true" || blockNonOpenVpn == "1") ? "block" : "allowed")
@@ -847,11 +857,18 @@ function setClientVisibility()
 	enableAssociatedField(fileTaCheck, "openvpn_client_ta_key_file", "")
 	enableAssociatedField(textTaCheck, "openvpn_client_ta_key_text", "")
 	enableAssociatedField(textTaCheck, "openvpn_client_ta_direction", "1")
+	var AUPUserCheck = document.getElementById("openvpn_client_use_auth_user_pass");
+	var AUPUserCheckText = document.getElementById("openvpn_client_use_auth_user_pass_text");
+	enableAssociatedField(AUPUserCheck, "openvpn_client_auth_user_pass_user", "")
+	enableAssociatedField(AUPUserCheck, "openvpn_client_auth_user_pass_pass", "")
+	enableAssociatedField(AUPUserCheckText, "openvpn_client_auth_user_pass_text_user", "")
+	enableAssociatedField(AUPUserCheckText, "openvpn_client_auth_user_pass_text_pass", "")
 
-	var single = getSelectedValue("openvpn_client_file_type", document) == "zip" ? 1 : 0;
-	var multi  = single == 1 ? 0 : 1;
+	var zip = getSelectedValue("openvpn_client_file_type", document) == "zip" ? 1 : 0;
+	var multi = getSelectedValue("openvpn_client_file_type", document) == "multi" ? 1 : 0;
+	var single = getSelectedValue("openvpn_client_file_type", document) == "single" ? 1 : 0;
 	document.getElementById("openvpn_client_cipher_other_container").style.display = getSelectedValue("openvpn_client_cipher", document) == "other" ? "block" : "none"
-	setVisibility( ["openvpn_client_zip_file_container", "openvpn_client_conf_file_container", "openvpn_client_ca_file_container", "openvpn_client_cert_file_container", "openvpn_client_key_file_container", "openvpn_client_ta_key_file_container"], [single, multi, multi, multi, multi, multi], ["block", "block", "block", "block", "block", "block"], document)
+	setVisibility( ["openvpn_client_zip_file_container", "openvpn_client_conf_file_container", "openvpn_client_ca_file_container", "openvpn_client_cert_file_container", "openvpn_client_key_file_container", "openvpn_client_ta_key_file_container","openvpn_client_auth_user_pass_container"], [zip, multi || single, multi, multi, multi, multi, single], ["block", "block", "block", "block", "block", "block", "block"], document)
 	setVisibility( ["openvpn_client_file_controls", "openvpn_client_manual_controls"], [ boolToInt(upCheckEl.checked), boolToInt(manCheckEl.checked) ], ["block","block"], document)
 	
 }
@@ -1358,4 +1375,17 @@ function editOvpnClientModal()
 
 	modalPrepare('openvpn_allowed_client_modal', ovpnS.EditOCS, modalElements, modalButtons);
 	openModalWindow('openvpn_allowed_client_modal');
+}
+
+function togglePass(name)
+{
+	password_field = document.getElementById(name);
+	if(password_field.type == 'password')
+	{
+		password_field.type = 'text';
+	}
+	else
+	{
+		password_field.type = 'password';
+	}
 }
