@@ -393,26 +393,26 @@
 								<span class="col-xs-7 col-xs-offset-5"><textarea class="form-control textarea-lg" id="openvpn_client_ta_key_text" name="openvpn_client_ta_key_text"></textarea></span>
 							</div>
 						</div>
-					</div>
-
-					<div id="openvpn_client_auth_user_pass_text_container">
-						<div class="row form-group">
-							<span class="col-xs-12">
-								<input type='checkbox' id='openvpn_client_use_auth_user_pass_text' name='use_auth_user_pass_text' onclick='enableAssociatedField(this, "openvpn_client_auth_user_pass_text_user", "");enableAssociatedField(this, "openvpn_client_auth_user_pass_text_pass","");' />
-								<label id='openvpn_client_use_auth_user_pass_text_label' for='openvpn_client_use_auth_user_pass_text'><%~ UseAUP %></label>
-							</span>
-						</div>
-						<div class="row form-group">
-							<label class="col-xs-5" id="openvpn_client_auth_user_pass_text_user_label" for="openvpn_client_auth_user_pass_text_user"><%~ AUPUser %>:</label>
-							<span class="col-xs-7"><input type="text" id="openvpn_client_auth_user_pass_text_user" name="openvpn_client_auth_user_pass_text_user" class="form-control" /></span>
-						</div>
-						<div class="row form-group">
-							<label class="col-xs-5" id="openvpn_client_auth_user_pass_text_pass_label" for="openvpn_client_auth_user_pass_text_pass"><%~ AUPPass %>:</label>
-							<span class="col-xs-7">
-								<input type="password" id="openvpn_client_auth_user_pass_text_pass" name="openvpn_client_auth_user_pass_text_pass" class="form-control" autocomplete="off" />
-								<input type="checkbox" id="show_text_pass" onclick="togglePass('openvpn_client_auth_user_pass_text_pass')" autocomplete="off">
-								<label for="show_text_pass" id="show_text_pass_label"><%~ rvel %></label>
-							</span>
+						
+						<div id="openvpn_client_auth_user_pass_text_container">
+							<div class="row form-group">
+								<span class="col-xs-12">
+									<input type='checkbox' id='openvpn_client_use_auth_user_pass_text' name='use_auth_user_pass_text' onclick='enableAssociatedField(this, "openvpn_client_auth_user_pass_text_user", "");enableAssociatedField(this, "openvpn_client_auth_user_pass_text_pass","");' />
+									<label id='openvpn_client_use_auth_user_pass_text_label' for='openvpn_client_use_auth_user_pass_text'><%~ UseAUP %></label>
+								</span>
+							</div>
+							<div class="row form-group">
+								<label class="col-xs-5" id="openvpn_client_auth_user_pass_text_user_label" for="openvpn_client_auth_user_pass_text_user"><%~ AUPUser %>:</label>
+								<span class="col-xs-7"><input type="text" id="openvpn_client_auth_user_pass_text_user" name="openvpn_client_auth_user_pass_text_user" class="form-control" /></span>
+							</div>
+							<div class="row form-group">
+								<label class="col-xs-5" id="openvpn_client_auth_user_pass_text_pass_label" for="openvpn_client_auth_user_pass_text_pass"><%~ AUPPass %>:</label>
+								<span class="col-xs-7">
+									<input type="password" id="openvpn_client_auth_user_pass_text_pass" name="openvpn_client_auth_user_pass_text_pass" class="form-control" autocomplete="off" />
+									<input type="checkbox" id="show_text_pass" onclick="togglePass('openvpn_client_auth_user_pass_text_pass')" autocomplete="off">
+									<label for="show_text_pass" id="show_text_pass_label"><%~ rvel %></label>
+								</span>
+							</div>
 						</div>
 					</div>
 
