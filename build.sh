@@ -140,61 +140,57 @@ EOF
 
 do_js_compress()
 {
-	echo "Compressing Javascript files..."
-	uglifyjs_arg1="$1"
-	uglifyjs_arg2="$2"
-
+	num_terser_threads=1
+	if [ "$num_build_threads" != "unspecified" ]; then
+		num_terser_threads=$num_build_threads
+	fi
+	echo "Compressing/Mangling JavaScript files ($num_terser_threads threads)..."
+	terser_arg1="$1"
+	terser_arg2="$2"
+	package_dir="$top_dir/package-prepare"
 	rm -rf "$compress_js_dir"
 	mkdir "$compress_js_dir"
-	escaped_package_dir=$(echo "$top_dir/package-prepare/" | sed 's/\//\\\//g' | sed 's/\-/\\-/g' ) ;
-	for jsdir in $(find "${top_dir}/package-prepare" -path "*/www/js") ; do
-		pkg_rel_path=$(echo $jsdir | sed "s/$escaped_package_dir//g");
-		mkdir -p "$compress_js_dir/$pkg_rel_path"
-		cp "$jsdir/"*.js "$compress_js_dir/$pkg_rel_path/"
-		cd "$compress_js_dir/$pkg_rel_path/"
-	 	
-		for jsf in *.js ; do
-	 		if [ -n "$uglifyjs_arg2" ] ; then
-				"$uglifyjs_arg1" "$uglifyjs_arg2" "$jsf" > "$jsf.cmp"
-			else
-				"$uglifyjs_arg1" "$jsf" > "$jsf.cmp"
-			fi
-	 		mv "$jsf.cmp" "$jsf"
-	 	done
-	done
-	cp -r "$compress_js_dir"/* "$top_dir/package-prepare/"
 
+	terser_batch=""
+	cd "$package_dir"
+	for jsf in $(find . -path '*.js' -a -not -path '*/www/i18n/*')
+	do
+		compress_jsf="$compress_js_dir/$jsf"
+		terser_batch="$terser_batch $package_dir/$jsf -o $compress_jsf -c -m"
+		mkdir -p "$(dirname "$compress_jsf")"
+	done
 	cd "$top_dir"
+
+	echo "$terser_batch" | xargs -n 5 -P $num_terser_threads $terser_arg1 $terser_arg2
+	cp -r "$compress_js_dir"/* "$package_dir"
 	echo "Done!"
 }
 
 do_css_compress()
 {
-	echo "Compressing CSS files..."
+	num_uglifycss_threads=1
+	if [ "$num_build_threads" != "unspecified" ]; then
+		num_uglifycss_threads=$num_build_threads
+	fi
+	echo "Compressing CSS files ($num_uglifycss_threads threads)..."
 	uglifycss_arg1="$1"
 	uglifycss_arg2="$2"
-
+	package_dir="$top_dir/package-prepare"
 	rm -rf "$compress_css_dir"
 	mkdir "$compress_css_dir"
-	escaped_package_dir=$(echo "$top_dir/package-prepare/" | sed 's/\//\\\//g' | sed 's/\-/\\-/g' ) ;
-	for cssdir in $(find "${top_dir}/package-prepare" -maxdepth 5 -path "*/www/themes/*") ; do
-		pkg_rel_path=$(echo $cssdir | sed "s/$escaped_package_dir//g");
-		mkdir -p "$compress_css_dir/$pkg_rel_path"
-		cp "$cssdir/"*.css "$compress_css_dir/$pkg_rel_path/"
-		cd "$compress_css_dir/$pkg_rel_path/"
 
-		for cssf in *.css ; do
-			if [ -n "$uglifycss_arg2" ] ; then
-				"$uglifycss_arg1" "$uglifycss_arg2" "$cssf" > "$cssf.cmp"
-			else
-				"$uglifycss_arg1" "$cssf" > "$cssf.cmp"
-			fi
-			mv "$cssf.cmp" "$cssf"
-		done
+	uglifycss_batch=""
+	cd "$package_dir"
+	for cssf in $(find . -path "*.css")
+	do
+		compress_cssf="$compress_css_dir/$cssf"
+		uglifycss_batch="$uglifycss_batch --output $compress_cssf $package_dir/$cssf"
+		mkdir -p "$(dirname "$compress_cssf")"
 	done
-	cp -r "$compress_css_dir"/* "$top_dir/package-prepare/"
-
 	cd "$top_dir"
+
+	echo "$uglifycss_batch" | xargs -n 3 -P $num_uglifycss_threads $uglifycss_arg1 $uglifycss_arg2
+	cp -r "$compress_css_dir"/* "$package_dir"
 	echo "Done!"
 }
 
@@ -400,31 +396,31 @@ if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress
 
 	else
 	
-		uglifyjs_bin="$top_dir/minifiers/node_modules/.bin/uglifyjs"
-		if [ ! -e "$uglifyjs_bin" ] ; then
+		terser_bin="$top_dir/minifiers/node_modules/.bin/terser"
+		if [ ! -e "$terser_bin" ] ; then
 			echo ""
 			echo "**************************************************************************"
-			echo "**  UglifyJS2 is not installed, attempting to install from npm          **"
+			echo "**  Terser is not installed, attempting to install from npm             **"
 			echo "**************************************************************************"
 			echo ""
 		
 			mkdir -p "$top_dir/minifiers/node_modules/.bin"
 
 			cd "$top_dir"
-			npm install uglify-js --prefix minifiers > /dev/null 2>&1
+			npm install terser --prefix minifiers > /dev/null 2>&1
 		else
-			echo "uglifyjs ok!"
+			echo "terser ok!"
 		fi
 		cd "$top_dir/minifiers/node_modules/.bin"
-		uglify_test=$( echo 'var abc = 1;' | ${nodeglobal:+$node_binary} "$uglifyjs_bin"  2>/dev/null )
+		uglify_test=$( echo 'var abc = 1;' | ${nodeglobal:+$node_binary} "$terser_bin"  2>/dev/null )
 		if [ "$uglify_test" = 'var abc=1' ] ||  [ "$uglify_test" = 'var abc=1;' ]  ; then
 			js_compress="true"
-			do_js_compress ${nodeglobal:+"$node_binary"} "$uglifyjs_bin"
+			do_js_compress ${nodeglobal:+"$node_binary"} "$terser_bin"
 		else
 			js_compress="false"
 			echo ""
 			echo "**************************************************************************"
-			echo "** WARNING: Cannot compress javascript, uglifyjs could not be installed **"
+			echo "** WARNING: Cannot compress JavaScript, terser could not be installed   **"
 			echo "**************************************************************************"
 			echo ""
 		fi
