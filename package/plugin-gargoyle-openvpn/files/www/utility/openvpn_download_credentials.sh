@@ -22,6 +22,7 @@ elif [ $GET_configtype == "single-ovpn" ] ; then
 	else
 		keystring="key-direction $keydirection"
 	fi
+	networkstring=$(sed 's/^ipaddr/gargoyle-network-ip/g; s/^netmask/gargoyle-network-subnet/g' /etc/openvpn/client_conf/$GET_id/network 2>/dev/null)
 
 	cat << EOF > /tmp/vpn.ac.tmp.ovpn
 $(cat /etc/openvpn/client_conf/$GET_id/$GET_id.conf)
@@ -32,14 +33,15 @@ $(cat /etc/openvpn/client_conf/$GET_id/$GET_id.crt)
 $(echo -e '</cert>\n<key>')
 $(cat /etc/openvpn/client_conf/$GET_id/$GET_id.key)
 $(echo -e '</key>\n')
-$(echo ' '$keystring)
+$(echo "$keystring")
 $(echo -e '<tls-auth>')
 $(cat /etc/openvpn/client_conf/$GET_id/ta.key)
-$(echo -e '</tls-auth>')
+$(echo -e '</tls-auth>\n')
+$(echo -e 'ignore-unknown-option gargoyle-network-ip\nignore-unknown-option gargoyle-network-subnet')
+$(echo "$networkstring")
 EOF
 	#few ugly hacks to fix heredoc
 	sed -i '/^ca\s\|^cert\s\|^key\s\|^tls-auth\s/d' /tmp/vpn.ac.tmp.ovpn
-	sed -i 's/^ key-direction/key-direction/g' /tmp/vpn.ac.tmp.ovpn
 	echo "Content-type: application/octet-stream"
 	echo "Content-Disposition: attachment; filename=openvpn-credentials-$GET_id.ovpn"
 	echo ""

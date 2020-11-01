@@ -203,12 +203,92 @@ elif [ -s "$FORM_openvpn_client_conf_file" ] ; then
 		grep -q "auth-user-pass" "${client_name}.conf" && sed -i 's/^auth-user-pass.*$/auth-user-pass '"${client_name}"'.secret/i' "${client_name}.conf" || echo "auth-user-pass ${client_name}.secret" >> "${client_name}.conf"
 	fi
 
+	expected_ip=$(awk ' $0 ~ /^gargoyle-network-ip/ { print $NF }' "${client_name}.conf")
+	expected_mask=$(awk ' $0 ~ /^gargoyle-network-subnet/ { print $NF }' "${client_name}.conf")
+
+	if [ -n "$expected_ip" ] && [ -n "$expected_mask" ] ; then
+		cur_ip=$(uci get network.lan.ipaddr)
+		cur_mask=$(uci get network.lan.netmask)
+		cur_ip_int=$(ip_to_int $cur_ip)
+		cur_mask_int=$(ip_to_int $cur_mask)
+		cur_sub_ip_int=$(($cur_ip_int & $cur_mask_int))
+		cur_sub_ip=$(int_to_ip $cur_sub_ip_int)
+
+		exp_ip_int=$(ip_to_int $expected_ip)
+		exp_mask_int=$(ip_to_int $expected_mask)
+		cur_test=$(( $cur_mask_int & $cur_ip_int ))
+		exp_test=$(( $exp_mask_int & $exp_ip_int ))
+		if [ "$cur_test" != "$exp_test" ] ; then
+			new_ip_int=$(($exp_ip_int+1))
+			new_ip=$(int_to_ip $new_ip_int)
+			if [ "$FORM_net_mismatch_action" = "query" ] ; then
+				echo "<script type=\"text/javascript\">top.clientNetMismatchQuery(\"$expected_ip/$expected_mask\",\"$cur_sub_ip/$cur_mask\", \"$new_ip\" );</script>"
+				echo "</body></html>"
+				cd /tmp
+				rm -rf "$tmp_dir"
+				exit
+			elif [ "$FORM_net_mismatch_action" = "change" ] ; then
+				old_dns=$(uci get network.lan.dns)
+				if [ "$old_dns" = "$cur_ip" ] ; then
+					uci set network.lan.dns="$new_ip"
+				fi
+				uci set network.lan.ipaddr="$new_ip"
+				uci set network.lan.netmask="$expected_mask"
+				uci commit
+				restart_network=1
+				old_replace_ip="$cur_ip"
+				new_replace_ip="$new_ip"
+			fi
+			#do nothing if net_mismatch_action is "keep"
+		fi
+	fi
+
 elif [ -n "$FORM_openvpn_client_conf_text" ] ; then
 
 	printf "$FORM_openvpn_client_conf_text" | tr -d "\r" > "${client_name}.conf"
 	if [ -n "$FORM_openvpn_client_auth_user_pass_text_user" ] && [ -n "$FORM_openvpn_client_auth_user_pass_text_pass" ] ; then
 		printf "$FORM_openvpn_client_auth_user_pass_text_user\n$FORM_openvpn_client_auth_user_pass_text_pass" | tr -d "\r" > "${client_name}.secret"
 		grep -q "auth-user-pass" "${client_name}.conf" && sed -i 's/^auth-user-pass.*$/auth-user-pass '"${client_name}"'.secret/i' "${client_name}.conf" || echo "auth-user-pass ${client_name}.secret" >> "${client_name}.conf"
+	fi
+
+	expected_ip=$(awk ' $0 ~ /^gargoyle-network-ip/ { print $NF }' "${client_name}.conf")
+	expected_mask=$(awk ' $0 ~ /^gargoyle-network-subnet/ { print $NF }' "${client_name}.conf")
+
+	if [ -n "$expected_ip" ] && [ -n "$expected_mask" ] ; then
+		cur_ip=$(uci get network.lan.ipaddr)
+		cur_mask=$(uci get network.lan.netmask)
+		cur_ip_int=$(ip_to_int $cur_ip)
+		cur_mask_int=$(ip_to_int $cur_mask)
+		cur_sub_ip_int=$(($cur_ip_int & $cur_mask_int))
+		cur_sub_ip=$(int_to_ip $cur_sub_ip_int)
+
+		exp_ip_int=$(ip_to_int $expected_ip)
+		exp_mask_int=$(ip_to_int $expected_mask)
+		cur_test=$(( $cur_mask_int & $cur_ip_int ))
+		exp_test=$(( $exp_mask_int & $exp_ip_int ))
+		if [ "$cur_test" != "$exp_test" ] ; then
+			new_ip_int=$(($exp_ip_int+1))
+			new_ip=$(int_to_ip $new_ip_int)
+			if [ "$FORM_net_mismatch_action" = "query" ] ; then
+				echo "<script type=\"text/javascript\">top.clientNetMismatchQuery(\"$expected_ip/$expected_mask\",\"$cur_sub_ip/$cur_mask\", \"$new_ip\" );</script>"
+				echo "</body></html>"
+				cd /tmp
+				rm -rf "$tmp_dir"
+				exit
+			elif [ "$FORM_net_mismatch_action" = "change" ] ; then
+				old_dns=$(uci get network.lan.dns)
+				if [ "$old_dns" = "$cur_ip" ] ; then
+					uci set network.lan.dns="$new_ip"
+				fi
+				uci set network.lan.ipaddr="$new_ip"
+				uci set network.lan.netmask="$expected_mask"
+				uci commit
+				restart_network=1
+				old_replace_ip="$cur_ip"
+				new_replace_ip="$new_ip"
+			fi
+			#do nothing if net_mismatch_action is "keep"
+		fi
 	fi
 
 fi
