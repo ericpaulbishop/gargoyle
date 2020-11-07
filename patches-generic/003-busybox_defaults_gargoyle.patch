@@ -22,7 +22,7 @@
  config BUSYBOX_DEFAULT_SHA256SUM
  	bool
  	default y
-@@ -2176,7 +2176,7 @@ config BUSYBOX_DEFAULT_ARP
+@@ -2177,7 +2177,7 @@ config BUSYBOX_DEFAULT_ARP
  	default n
  config BUSYBOX_DEFAULT_ARPING
  	bool

@@ -1,6 +1,6 @@
 --- a/target/linux/ar71xx/base-files/etc/board.d/01_leds
 +++ b/target/linux/ar71xx/base-files/etc/board.d/01_leds
-@@ -445,6 +445,10 @@
+@@ -447,6 +447,10 @@
  	ucidef_set_led_wlan "wlan" "WLAN" "$board:blue:wlan" "phy0tpt"
  	;;
 +dir-835-a1)

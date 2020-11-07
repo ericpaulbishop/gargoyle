@@ -171,7 +171,7 @@
    SUBMENU:=$(NF_MENU)
 --- a/package/network/utils/iptables/Makefile
 +++ b/package/network/utils/iptables/Makefile
-@@ -170,6 +170,21 @@
+@@ -169,6 +169,21 @@
  
  endef
  
@@ -193,7 +193,7 @@
  define Package/iptables-mod-ipopt
  $(call Package/iptables/Module, +kmod-ipt-ipopt)
    TITLE:=IP/Packet option extensions
-@@ -679,6 +694,7 @@
+@@ -678,6 +693,7 @@
  $(eval $(call BuildPlugin,iptables-mod-extra,$(IPT_EXTRA-m)))
  $(eval $(call BuildPlugin,iptables-mod-physdev,$(IPT_PHYSDEV-m)))
  $(eval $(call BuildPlugin,iptables-mod-filter,$(IPT_FILTER-m)))

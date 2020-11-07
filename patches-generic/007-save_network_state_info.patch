@@ -90,7 +90,7 @@
 +
 --- a/package/network/services/ppp/Makefile
 +++ b/package/network/services/ppp/Makefile
-@@ -223,9 +223,13 @@
+@@ -221,9 +221,13 @@
  	$(INSTALL_DIR) $(1)/usr/sbin
  	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/sbin/pppd $(1)/usr/sbin/
  	$(INSTALL_DIR) $(1)/etc/ppp

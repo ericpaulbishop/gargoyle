@@ -11,7 +11,7 @@
  		name="ja76pf"
 --- a/target/linux/ar71xx/base-files/lib/upgrade/platform.sh
 +++ b/target/linux/ar71xx/base-files/lib/upgrade/platform.sh
-@@ -274,7 +274,6 @@
+@@ -275,7 +275,6 @@
  	gl-mifi|\
  	gl-usb150|\
  	hiwifi-hc6361|\
@@ -29,7 +29,7 @@
  	zbt-we1526|\
 --- a/target/linux/ar71xx/base-files/etc/board.d/01_leds
 +++ b/target/linux/ar71xx/base-files/etc/board.d/01_leds
-@@ -453,7 +453,7 @@
+@@ -455,7 +455,7 @@
  	ucidef_set_led_wlan "wlan" "WLAN" "hiwifi:blue:wlan-2p4" "phy0tpt"
  	;;
  hornet-ub|\
@@ -40,7 +40,7 @@
  	ucidef_set_led_wlan "wlan" "WLAN" "alfa:blue:wlan" "phy0tpt"
 --- a/target/linux/ar71xx/base-files/etc/diag.sh
 +++ b/target/linux/ar71xx/base-files/etc/diag.sh
-@@ -259,7 +259,7 @@
+@@ -258,7 +258,7 @@
  		status_led="hiwifi:blue:system"
  		;;
  	hornet-ub|\
