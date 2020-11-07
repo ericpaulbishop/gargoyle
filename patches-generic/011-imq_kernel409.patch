@@ -2018,7 +2018,7 @@
 +  * required. Owning running seqcount bit guarantees that
 --- a/target/linux/generic/config-4.9
 +++ b/target/linux/generic/config-4.9
-@@ -5315,3 +5315,8 @@
+@@ -5323,3 +5323,8 @@
  # CONFIG_ZPOOL is not set
  # CONFIG_ZRAM is not set
  # CONFIG_ZSMALLOC is not set

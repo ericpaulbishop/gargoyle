@@ -144,7 +144,7 @@
 ++
 --- a/package/kernel/linux/modules/netfilter.mk	2015-07-21 12:50:21.295810884 -0400
 +++ b/package/kernel/linux/modules/netfilter.mk	2015-08-16 13:49:02.799039643 -0400
-@@ -323,6 +323,27 @@
+@@ -422,6 +422,27 @@
  
  $(eval $(call KernelPackage,ipt-nat-extra))
  
@@ -174,7 +174,7 @@
    SUBMENU:=$(NF_MENU)
 --- a/package/network/utils/iptables/Makefile	2015-07-21 12:50:21.271811285 -0400
 +++ b/package/network/utils/iptables/Makefile	2015-08-16 13:45:31.894409294 -0400
-@@ -128,6 +128,21 @@
+@@ -154,6 +154,21 @@
  
  endef
  
@@ -196,9 +196,9 @@
  define Package/iptables-mod-ipopt
  $(call Package/iptables/Module, +kmod-ipt-ipopt)
    TITLE:=IP/Packet option extensions
-@@ -525,6 +540,7 @@
- $(eval $(call BuildPlugin,iptables-mod-conntrack-extra,$(IPT_CONNTRACK_EXTRA-m)))
+@@ -621,6 +636,7 @@
  $(eval $(call BuildPlugin,iptables-mod-extra,$(IPT_EXTRA-m)))
+ $(eval $(call BuildPlugin,iptables-mod-physdev,$(IPT_PHYSDEV-m)))
  $(eval $(call BuildPlugin,iptables-mod-filter,$(IPT_FILTER-m)))
 +$(eval $(call BuildPlugin,iptables-mod-imq,$(IPT_IMQ-m)))
  $(eval $(call BuildPlugin,iptables-mod-ipopt,$(IPT_IPOPT-m)))
@@ -206,8 +206,8 @@
  $(eval $(call BuildPlugin,iptables-mod-nat-extra,$(IPT_NAT_EXTRA-m)))
 --- a/include/netfilter.mk	2015-07-21 12:50:21.307810682 -0400
 +++ b/include/netfilter.mk	2015-08-16 13:50:54.817249147 -0400
-@@ -103,6 +103,13 @@
- $(eval $(call nf_add,IPT_FILTER,CONFIG_NETFILTER_XT_MATCH_STRING, $(P_XT)xt_string))
+@@ -109,6 +109,13 @@
+ $(eval $(call nf_add,IPT_FILTER,CONFIG_NETFILTER_XT_MATCH_BPF, $(P_XT)xt_bpf))
  
  
 +# imq
