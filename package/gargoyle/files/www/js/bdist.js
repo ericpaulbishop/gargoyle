@@ -147,6 +147,13 @@ function doUpdate()
 					var nextDate = new Date();
 					nextDate.setTime(latestTime*1000);
 					nextDate.setUTCMinutes( nextDate.getUTCMinutes()+tzMinutes );
+					if((isNaN(parseInt(uploadName))) && (uploadName.match(/month/) || uploadName.match(/day/)))
+					{
+						// When interval is month or day, the transition is always at beginning of day/month, so adding just a few hours will never change the day or month
+						// However, when an hour gets subtracted for DST, there are problems.
+						// So, always add three hours, so when DST shifts an hour back in November date doesn't get pushed back to previous month and wrong month is displayed
+						nextDate = new Date( nextDate.getTime() + (3*60*60*1000))
+					}
 					var nextIntervalStart = nextDate.valueOf()/1000;
 
 					timeFrameIntervalData = [];
