@@ -38,15 +38,16 @@ set_version_variables()
 
 	#openwrt branch
 	branch_name="Attitude Adjustment"
-	branch_id="attitude_adjustment"
+	branch_id="12.09"
 	branch_is_trunk="0"
-	branch_packages_path="branches/packages_12.09"
+	branch_packages_path="packages"
 
 
-	# set svn revision number to use 
-	# you can set this to an alternate revision 
-	# or empty to checkout latest 
-	rnum=42171
+	# set precise commit in repo to use 
+	# you can set this to an alternate commit 
+ 	# or empty to checkout latest 
+	openwrt_commit="80c728365438d670bca4ed30251bfd00d773bae8"
+	openwrt_abbrev_commit=$( echo "$openwrt_commit" | cut -b 1-7 )
 
 	#set date here, so it's guaranteed the same for all images
 	#even though build can take several hours
@@ -99,7 +100,7 @@ create_gargoyle_banner()
 	local gargoyle_version="$4"
 	local gargoyle_commit="$5"
 	local openwrt_branch="$6"
-	local openwrt_revision="$7"
+	local openwrt_cmt="$7"
 	local banner_file_path="$8"
 	local revision_save_dir="$9"
 
@@ -109,7 +110,7 @@ create_gargoyle_banner()
 	fi
 
 	local top_line=$(printf "| %-26s| %-35s|" "Gargoyle version $gargoyle_version" "$openwrt_branch_str")
-	local middle_line=$(printf "| %-26s| %-35s|" "Gargoyle revision $gargoyle_commit" "OpenWrt revision r$openwrt_revision")
+	local middle_line=$(printf "| %-26s| %-35s|" "Gargoyle revision $gargoyle_commit" "OpenWrt revision r$openwrt_cmt")
 	local bottom_line=$(printf "| %-26s| %-35s|" "Built $date" "Target  $target/$profile")
 
 	cat << 'EOF' >"$banner_file_path"
@@ -133,7 +134,7 @@ EOF
 	echo '------------------------------------------------------------------' >> "$banner_file_path"
 
 	#save openwrt variables for rebuild
-	echo "$openwrt_revision" > "$revision_save_dir/OPENWRT_REVISION"
+	echo "$openwrt_cmt" > "$revision_save_dir/OPENWRT_REVISION"
 	echo "$openwrt_branch"  > "$revision_save_dir/OPENWRT_BRANCH"
 
 }
@@ -215,7 +216,6 @@ distrib_init ()
 	fi
 	#git log --since=5/16/2013 $(git log -1 --pretty=format:%h) --pretty=format:"%h%x09%ad%x09%s" --date=short > "$top_dir/Distribution/changelog.txt"
 	git log $(git describe --abbrev=0 --tags)..$(git log -1 --pretty=format:%h) --no-merges --pretty=format:"%h%x09%ad%x09%s" --date=short > "$top_dir/Distribution/Gargoyle changelog.txt"
-	svn log -r "$rnum":36425 svn://svn.openwrt.org/openwrt/branches/attitude_adjustment/ > "$top_dir/Distribution/OpenWrt changelog.txt"
 	cp -fR "$top_dir/LICENSES" "$top_dir/Distribution/"
 }
 
@@ -333,9 +333,9 @@ fi
 
 openwrt_src_dir="$top_dir/downloaded/$branch_id"
 openwrt_package_dir="$top_dir/downloaded/$branch_id-packages"
-if [ -n "$rnum" ] ; then
-	openwrt_src_dir="$top_dir/downloaded/$branch_id-$rnum"
-	openwrt_package_dir="$top_dir/downloaded/$branch_id-packages-$rnum"
+if [ -n "$openwrt_commit" ] ; then
+	openwrt_src_dir="$top_dir/downloaded/$branch_id-${openwrt_abbrev_commit}"
+	openwrt_package_dir="$top_dir/downloaded/$branch_id-packages-${openwrt_abbrev_commit}"
 else
 	rm -rf "$openwrt_src_dir"
 	rm -rf "$openwrt_package_dir"
@@ -344,25 +344,22 @@ fi
 
 #download openwrt source if we haven't already
 if [ ! -d "$openwrt_src_dir" ] ; then
-	revision=""
-	if [ -n "$rnum" ] ; then
-		revision=" -r $rnum "
-	fi
 	echo "fetching openwrt source"
 	rm -rf "$branch_name" "$branch_id"
 	if [ "$branch_is_trunk" = "1" ] ; then 
-		svn checkout $revision svn://svn.openwrt.org/openwrt/trunk "$branch_id"
+		git clone  git://git.openwrt.org/openwrt.git "$openwrt_src_dir"
 	else
-		svn checkout $revision svn://svn.openwrt.org/openwrt/branches/$branch_id/
+		git clone  git://git.archive.openwrt.org/$branch_id/openwrt.git "$openwrt_src_dir"
 	fi
-	if [ ! -d "$branch_id" ] ; then
+	if [ ! -d "$openwrt_src_dir" ] ; then
 		echo "ERROR: could not download source, exiting"
 		exit
 	fi
-	cd "$branch_id"
-	find . -name ".svn" | xargs -r rm -rf
+	if [ -n "$openwrt_commit" ] ; then
+		cd "$openwrt_src_dir"
+		git checkout "$openwrt_commit"
+	fi
 	cd "$top_dir" 
-	mv "$branch_id" "$openwrt_src_dir"
 fi
 
 rm -rf "$openwrt_src_dir/dl" 
@@ -467,13 +464,12 @@ for target in $targets ; do
 		if [ ! -d "$openwrt_package_dir" ] ; then
 			
 			if [ "$branch_is_trunk" = "1" ] ; then 
-				svn checkout $revision svn://svn.openwrt.org/openwrt/packages "$openwrt_package_dir" 
+				git clone git://git.openwrt.org/feed/packages.git "$openwrt_package_dir" 
 			else
-				svn checkout $revision "svn://svn.openwrt.org/openwrt/$branch_packages_path" "$openwrt_package_dir" 
+				git clone "git://git.archive.openwrt.org/$branch_id/packages.git" "$openwrt_package_dir" 
 			fi
 			
 			cd "$openwrt_package_dir"
-			find . -name ".svn" | xargs rm -rf
 			for gp in $gargoyle_packages ; do
 				find . -name "$gp" | xargs rm -rf
 			done
@@ -489,10 +485,9 @@ for target in $targets ; do
 
 
 
-	#enter build directory and make sure we get rid of all those pesky .svn files, 
-	#and any crap left over from editing
+	#enter build directory and make sure we get rid of
+	#any crap left over from editing
 	cd "$top_dir/$target-src"
-	find . -name ".svn"  | xargs rm -rf
 	find . -name "*~"    | xargs rm -rf
 	find . -name ".*sw*" | xargs rm -rf
 	
@@ -516,7 +511,7 @@ for target in $targets ; do
 
 	
 		openwrt_target=$(get_target_from_config "./.config")
-		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."
+		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$openwrt_abbrev_commit" "package/base-files/files/etc/banner" "."
 
 		make -j $num_build_threads GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$default_profile"
 
@@ -533,7 +528,7 @@ for target in $targets ; do
 
 
 		openwrt_target=$(get_target_from_config "./.config")
-		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."
+		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$openwrt_abbrev_commit" "package/base-files/files/etc/banner" "."
 
 		make -j $num_build_threads V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$default_profile"
 
@@ -547,8 +542,9 @@ for target in $targets ; do
 
 	#copy packages to built/target directory
 	mkdir -p "$top_dir/built/$target/$default_profile"
-	package_files=$(find bin -name "*.ipk")
-	index_files=$(find bin -name "Packa*")
+	package_base_dir=$(find bin -name "base")
+	package_files=$(find "$package_base_dir" -name "*.ipk")
+	index_files=$(find "$package_base_dir" -name "Packa*")
 	if [ -n "$package_files" ] && [ -n "$index_files" ] ; then
 
 		for pf in $package_files ; do
@@ -625,7 +621,7 @@ for target in $targets ; do
 		
 		
 		openwrt_target=$(get_target_from_config "./.config")
-		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$rnum" "package/base-files/files/etc/banner" "."
+		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$openwrt_abbrev_commit" "package/base-files/files/etc/banner" "."
 
 		
 		echo ""
@@ -655,8 +651,9 @@ for target in $targets ; do
 		#copy packages to build/target directory
 		mkdir -p "$top_dir/built/$target/$profile_name"
 		arch=$(ls bin)
-		package_files=$(find bin -name "*.ipk")
-		index_files=$(find bin -name "Packa*")
+		package_base_dir=$(find bin -name "base")
+		package_files=$(find "$package_base_dir" -name "*.ipk")
+		index_files=$(find "$package_base_dir" -name "Packa*")
 		if [ -n "$package_files" ] && [ -n "$index_files" ] ; then
 			for pf in $package_files ; do
 				cp "$pf" "$top_dir/built/$target/$profile_name/"

@@ -10,7 +10,7 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/obfsproxy-legacy
 PKG_FIXUP:=autoreconf
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
-PKG_SOURCE_URL:=git://gitweb.torproject.org/pluggable-transports/obfsproxy-legacy.git
+PKG_SOURCE_URL:=https://git.torproject.org/pluggable-transports/obfsproxy-legacy.git
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_VERSION:=obfsproxy-0.1.4
 PKG_SOURCE_SUBDIR:=obfsproxy-legacy

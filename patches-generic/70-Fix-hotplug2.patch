@@ -1,0 +1,11 @@
+--- a/package/hotplug2/Makefile
++++ b/package/hotplug2/Makefile
+@@ -12,7 +12,7 @@
+ 
+ PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
+ PKG_SOURCE_URL:=http://downloads.openwrt.org/sources/
+-PKG_MD5SUM:=7bab8ba67555a8400424f3c92ec67579
++PKG_MD5SUM:=9a8e64f89558998bb824525105cdbe6b
+ 
+ include $(INCLUDE_DIR)/package.mk
+ 

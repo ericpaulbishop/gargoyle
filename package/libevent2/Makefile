@@ -13,8 +13,7 @@ PKG_RELEASE:=1
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/libevent-$(PKG_VERSION)-stable
 PKG_SOURCE:=libevent-$(PKG_VERSION)-stable.tar.gz
-PKG_SOURCE_URL:=http://www.monkey.org/~provos/ \
-	@SF/levent
+PKG_SOURCE_URL:=https://github.com/downloads/libevent/libevent/
 PKG_MD5SUM:=91111579769f46055b0a438f5cc59572
 
 PKG_FIXUP:=autoreconf

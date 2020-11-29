@@ -1,0 +1,11 @@
+--- a/package/dnsmasq/Makefile
++++ b/package/dnsmasq/Makefile
+@@ -12,7 +12,7 @@
+ PKG_RELEASE:=2
+ 
+ PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
+-PKG_SOURCE_URL:=http://thekelleys.org.uk/dnsmasq
++PKG_SOURCE_URL:=http://thekelleys.org.uk/dnsmasq/archive
+ PKG_MD5SUM:=c5eb8fb88847a5e9bf18db67c74efd47
+ 
+ PKG_LICENSE:=GPLv2

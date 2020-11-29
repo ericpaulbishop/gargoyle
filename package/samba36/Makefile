@@ -11,8 +11,8 @@ PKG_NAME:=samba
 PKG_VERSION:=3.6.5
 PKG_RELEASE:=3
 
-PKG_SOURCE_URL:=http://ftp.samba.org/pub/samba \
-	http://ftp.samba.org/pub/samba/old-versions
+PKG_SOURCE_URL:=https://download.samba.org/pub/samba \
+	https://download.samba.org/pub/samba/stable
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_MD5SUM:=2f0c14547333c1b48fd4728b031e7040
 
