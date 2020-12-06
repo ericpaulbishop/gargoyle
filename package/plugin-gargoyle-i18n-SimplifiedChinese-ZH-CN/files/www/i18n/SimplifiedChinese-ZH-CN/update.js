@@ -8,6 +8,18 @@ upS.Warn="默认情况下升级你的固件将彻底删除当前设置。所以<
 upS.CGV="当前石像鬼（Gargoyle）版本";
 upS.SelF="选择固件文件";
 upS.Prsv="尝试保留设置";
+upS.UploadFrm="上传固件";
+upS.ConfirmNext="直到在下页确定前，固件升级不会开始。";
+upS.EHash="输入hash";
+upS.ValidFw="有效固件";
+upS.DevMatch="固件匹配设备";
+upS.SuppDevs="支持的设备";
+upS.FwFitFlash="固件适合闪存";
+upS.ChksumMatch="校验和匹配";
+upS.NoPrsv="此固件不允许保留设置";
+upS.ForceWarn="已检测到固件与此设备不兼容（设备不对，固件太大或格式不对）。 如果使用不当，强制升级固件可能会导致设备变砖。 请确保此固件适合您的设备！</ p> <p>如果您想强制升级，请在下面勾选<em>强制升级。";
+upS.ForceUpg="强制升级";
+upS.optional="可选";
 
 //javascript
 upS.SelErr="错误：你必须选择固件文件。";
@@ -16,6 +28,7 @@ upS.Uping="正在上传固件";
 upS.UWait="正在升级，请稍候。";
 upS.Rbtg="升级完成，正在重启...";
 upS.UErr="发生错误：你的路由器不能升级。";
+upS.UpConfirm="确认升级";
 upS.UErrBB="固件包含引导程序。你的路由器不能升级。";
 upS.brcmT="固件应该是一个.bin或.trx文件";
 upS.ar71xxT="固件应该是sysupgrade.bin的文件";
