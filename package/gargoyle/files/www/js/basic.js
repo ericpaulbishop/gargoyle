@@ -4156,7 +4156,7 @@ function checkWifiCountryVisibility()
 	else if(uciOriginal.get("wireless",uciWirelessDevs[0], "country") == "")
 	{
 		var selOpt = countryName[geo_countrycode];
-		if(selOpt == "")
+		if(selOpt == "" || selOpt === undefined)
 		{
 			return false;
 		}
