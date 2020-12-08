@@ -115,6 +115,12 @@ basicS.HexCh="个十六进制数字";
 basicS.BcsID="SSID广播";
 basicS.WlIso="无线客户端隔离";
 basicS.DPing="忽略来自WAN端Ping";
+basicS.WifiCountry="国家";
+basicS.WifiCountryWarning="Gargoyle已尝试确定您的地理区域。如该结果不正确，强烈建议将此设置保留为<i> World（默认）</i>。<br>该值设置错误可能会导致您违反所在地区的法规标准。如有疑问，请选择在所有地区都合法的<i> World（默认）</i>。<br>通过正确设置国家/地区，或会允许您使用其他频道，更高的发射功率或更宽的频道宽。<br> <br>注意：您只能更改一次此设置。";
+basicS.DFSWarning="所选频道是<i> DFS（动态频率选择）</i>频道。 在发射信号前，Gargoyle须先扫描60秒以寻找占用该频率的雷达设备信号。 如有检测到，Gargoyle可能会选择在与您所选<u>不同</u>的频道上发送，或者<u>完全不传输</u>信号，具体取决于您的设备。 Gargoyle将继续监视雷达脉冲，并可能随时切换频道或停止发射信号。";
+basicS.Ip6AMsk="前缀分配掩码";
+basicS.Ip6SubPrfx="子前缀Sub-prefix";
+basicS.Ip6Ifaceid="路由器主机ID";
 
 //javascript
 basicS.WaitRb="请等待设置被应用及设备重启";

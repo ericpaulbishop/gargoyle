@@ -9,6 +9,7 @@ fbS.Stz="选择你的时区";
 fbS.Sla="选择语言";
 fbS.SSet="保存设置";
 fbS.ULngF="上传语言文件";
+fbS.Upld="上传";
 
 //javascript
 fbS.nopsErr="错误：你必须设置一个密码";
