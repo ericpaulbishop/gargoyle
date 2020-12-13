@@ -431,6 +431,13 @@ static int get_bandwidth_data(char* id, unsigned char get_history, char* ip, uns
 		}
 	}
 	*request_index = 0;
+	uint32_t testblk[4];
+	memset(testblk, 0, sizeof(uint32_t)*4);
+	if(memcmp(testblk, request_ip, sizeof(uint32_t)*4) == 0 && strcmp(ip, "ALL") != 0)
+	{
+		// User has requested 0.0.0.0 or :: (or some other non-canonical variant of it anyway). Hint to the kernel space that we want to return only the combined data
+		*request_index = __UINT32_MAX__;
+	}
 	*request_history = get_history;
 	sprintf(request_id, "%s", id);
 

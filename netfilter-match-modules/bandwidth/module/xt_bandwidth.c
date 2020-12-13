@@ -2056,17 +2056,20 @@ static int xt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 	/* allocate ip list if this is first query */
 	uint32_t testblk[4];
 	memset(testblk, 0, sizeof(uint32_t)*4);
-	if(query.next_ip_index == 0 && memcmp(testblk, query.ip, sizeof(uint32_t)*4) == 0)
+	if((query.next_ip_index == 0 || query.next_ip_index == __UINT32_MAX__) && memcmp(testblk, query.ip, sizeof(uint32_t)*4) == 0)
 	{
 		if(output_ip_list != NULL)
 		{
 			free_null_terminated_string_array(output_ip_list);
 		}
-		if(iam->info->type == BANDWIDTH_COMBINED)
+		if(iam->info->type == BANDWIDTH_COMBINED || query.next_ip_index == __UINT32_MAX__)
 		{
 			output_ip_list_length = 1;
 			output_ip_list = (char**)kmalloc(sizeof(char*)*2, GFP_ATOMIC);
 			if(output_ip_list != NULL) { output_ip_list[0] = strdup("0.0.0.0"); output_ip_list[1] = NULL; }
+			// We set next_ip_index to a very large number to indicate that we only want the COMBINED (0.0.0.0) use case only.
+			// Reset the variable here to a sensible value.
+			query.next_ip_index = 0;
 		}
 		else
 		{
