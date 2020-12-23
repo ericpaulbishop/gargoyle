@@ -8,6 +8,7 @@
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
 	gargoyle_header_footer -h -s "system" -p "webcam" -j "webcam.js" -z "webcam.js" mjpg-streamer firewall dropbear uhttpd
 %>
+<%in templates/client_server_template %>
 <script>
 var webcams = [];
 <!--
@@ -19,16 +20,6 @@ var webcams = [];
 		echo "webcams['/dev/$d']['res'] = [];"
 		webcaminfo -d "/dev/$d"
 	done
-
-	lan_ip=$(uci -p /tmp/state get network.lan.ipaddr 2>/dev/null)
-	echo "currentLanIp=\"$lan_ip\";"
-
-	echo "const REMOTE_ADDR = \"$REMOTE_ADDR\";";
-	echo "const SERVER_ADDR = \"$SERVER_ADDR\";";
-
-	echo "const HTTPS = \"$HTTPS\";";
-	echo "const HTTP_HOST = \"$HTTP_HOST\";";
-	echo "const SERVER_PORT = \"$SERVER_PORT\";";
 %>
 //-->
 </script>

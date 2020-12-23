@@ -8,7 +8,7 @@
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
 	gargoyle_header_footer -h -s "system" -p "access" -j "table.js access.js" -z "access.js" -i uhttpd dropbear gargoyle firewall network wireless
 %>
-
+<%in templates/client_server_template %>
 <script>
 <!--
 <%
@@ -31,13 +31,6 @@
 		if [ -e /etc/dropbear/authorized_keys ] ; then
 			cat /etc/dropbear/authorized_keys | awk -F' ' ' $0 ~ /./ {print "authorizedKeyMap[\""$NF"\"]=\""$0"\";"}'
 		fi
-
-		echo "const REMOTE_ADDR = \"$REMOTE_ADDR\";";
-		echo "const SERVER_ADDR = \"$SERVER_ADDR\";";
-
-		echo "const HTTPS = \"$HTTPS\";";
-		echo "const HTTP_HOST = \"$HTTP_HOST\";";
-		echo "const SERVER_PORT = \"$SERVER_PORT\";";
 %>
 //-->
 </script>

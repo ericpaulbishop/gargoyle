@@ -204,7 +204,7 @@ function saveChanges()
 		if(directView)
 		{
 			// Either local or remote protocol.
-			var accessProt = document.getElementById(accessArea + "_web_protocol").value;
+			var accessProt = document.getElementById(accessSide + "_web_protocol").value;
 			// When there is either HTTP or HTTPS, use the available one.
 			if(accessProt != "redirect" && accessProt != "both")
 			{
@@ -213,7 +213,7 @@ function saveChanges()
 			// Avoid CORS error the next time we save changes.
 			var anticipateRedirect = accessProt == "redirect" && clientProt == "http";
 			// Port of either local or remote target protocol.
-			targetPort = document.getElementById(accessArea + "_" + targetProt + "_port").value;
+			targetPort = document.getElementById(accessSide + "_" + targetProt + "_port").value;
 			// Redirect on demand.
 			needRedirect = clientProt != targetProt || clientPort != targetPort || anticipateRedirect;
 		}
@@ -333,21 +333,6 @@ function proofreadAll()
 function resetData()
 {
 	// Global variables are used in saveChanges().
-
-	// What client (browser) sees.
-	clientProt = window.location.protocol.slice(0, -1);
-	clientHost = window.location.hostname;
-	clientPort = window.location.port == "" ? (clientProt == "http" ? 80 : 443) : window.location.port;
-	// What server (uhttpd) sees.
-	serverProt = HTTPS == "on" ? "https" : "http";
-	serverHost = HTTP_HOST == "" ? SERVER_ADDR : HTTP_HOST;
-	serverPort = SERVER_PORT;
-
-	// Whether client sees what server sees.
-	directView = clientProt == serverProt && clientHost == serverHost && clientPort == serverPort;
-
-	// Whether web interface is accessed locally or remotely.
-	accessArea = SERVER_ADDR == currentWanIp ? "remote" : "local";
 
 	controlIds = ['local_https_port', 'local_http_port', 'local_ssh_port', 'remote_https_port', 'remote_http_port', 'remote_ssh_port'];
 	resetProofreadFields(controlIds);
@@ -591,20 +576,21 @@ function updateVisibility()
 		remoteHttpsElement.value = "";
 		remoteHttpElement.value = "";
 	}
-	document.getElementById("noip6redi").style.display = remoteWebProtocol != "disabled" ? "block" : "none";
+	document.getElementById("noip6redi").style.display = remoteWebProtocol == "disabled" || (remoteWebProtocol == "https" && localWebProtocol == "redirect") ? "none" : "";
 
 	// RFC 1918 filter checkbox.
 	var disableRfc1918Filter = document.getElementById("disable_rfc1918_filter").checked;
 	// Either local or remote web protocol.
-	var accessWebProtocol = getSelectedValue(accessArea + "_web_protocol");
+	var accessWebProtocol = getSelectedValue(accessSide + "_web_protocol");
 	// Warn when about to lock out by disabling remote web access.
-	var protocolLockout = accessArea == "remote" && remoteWebProtocol == "disabled";
+	var protocolLockout = remoteView && remoteWebProtocol == "disabled";
 	// Warn when about to lock out by enabling RFC 1918 filter again.
-	var rfc1918FilterLockout = accessArea == "remote" && remoteWebProtocol != "disabled" && !disableRfc1918Filter && ipInPrivate(REMOTE_ADDR) && !ipInPrivate(SERVER_ADDR);
+	var rfc1918FilterLockout = remoteView && remoteWebProtocol != "disabled" && !disableRfc1918Filter &&
+		isIPv4(REMOTE_ADDR) && ipInPrivate(REMOTE_ADDR) && isIPv4(SERVER_ADDR) && !ipInPrivate(SERVER_ADDR);
 	// Warn when about to lock out on unfit protocol change if uhttpd is used as a reverse proxy's backend.
 	var reverseProxyLockout = !directView && accessWebProtocol != "disabled" && accessWebProtocol != "both" && accessWebProtocol.replace("redirect", "https") != serverProt;
 	// Reset warning container for either local or remote web protocol.
-	var accessWebProtocolLockoutContainer = document.getElementById(accessArea + "_web_protocol_lockout_container");
+	var accessWebProtocolLockoutContainer = document.getElementById(accessSide + "_web_protocol_lockout_container");
 	accessWebProtocolLockoutContainer.style.display = "none";
 	accessWebProtocolLockoutContainer.innerHTML = "";
 	// Reset warning container for RFC 1918 filter checkbox.
@@ -612,19 +598,21 @@ function updateVisibility()
 	rfc1918FilterLockoutContainer.style.display = "none";
 	rfc1918FilterLockoutContainer.innerHTML = "";
 	var lockoutTemplate =
-	'<span class="alert alert-danger col-xs-12" role="alert" id="lockout">' +
-		'<p>' +  accessStr.LockoutWarning + '</p>' +
-		'<span id="reverse_proxy_smooth" style="display: none">' +
-			'<p>' + accessStr.ReverseProxySmooth + ':</p>' +
-			'<ol>' +
-				'<li>' + accessStr.ReverseProxySelect + ' <i>HTTP & HTTPS</i> ' + accessStr.ReverseProxySaveCh + '.</li>' +
-				'<li>' + accessStr.ReverseProxySwitch + ' <i><span id="reverse_proxy_switch"></span></i>.</li>' +
-				'<li>' + accessStr.ReverseProxySelect + ' <i><span id="reverse_proxy_select"></span></i> ' + accessStr.ReverseProxySaveCh + '.</li>' +
-			'</ol>' +
-		'</span>' +
-		'<p>' + accessStr.AccessChain + ':</p>' +
-		'<p><span id="access_chain"></span></p>' +
-	'</span>';
+	`<span id="lockout" class="col-xs-12">
+		<div class="alert alert-danger" role="alert">
+			${accessStr.LockoutWarning}
+			<span id="reverse_proxy_smooth" style="display: none">
+				<p>${accessStr.ReverseProxySmooth}:</p>
+				<ol>
+					<li>${accessStr.ReverseProxySelect} <i>HTTP & HTTPS</i> ${accessStr.ReverseProxySaveCh}.</li>
+					<li>${accessStr.ReverseProxySwitch} <i><span id="reverse_proxy_switch"></span></i>.</li>
+					<li>${accessStr.ReverseProxySelect} <i><span id="reverse_proxy_select"></span></i> ${accessStr.ReverseProxySaveCh}.</li>
+				</ol>
+			</span>
+			<p>${accessStr.AccessChain}:</p>
+			<p><span id="access_chain"></span></p>
+		</div>
+	</span>`;
 	if(protocolLockout || reverseProxyLockout || rfc1918FilterLockout)
 	{
 		var lockoutContainer = rfc1918FilterLockout ? rfc1918FilterLockoutContainer : accessWebProtocolLockoutContainer;
@@ -636,8 +624,9 @@ function updateVisibility()
 		document.getElementById("reverse_proxy_select").innerText = allOptionValueHash[accessWebProtocol];
 
 		// Web access trace of domains and/or IP addresses from client, possibly over reverse proxy, to server.
+		var ipHost = function(ip) { return ip.includes(":") ? `[${ip}]` : ip; };
 		var lastOccurrence = function(value, index, self) { return value && self.lastIndexOf(value) === index; };
-		var webAccessChain = [window.location.hostname, REMOTE_ADDR, HTTP_HOST, SERVER_ADDR].filter(lastOccurrence);
+		var webAccessChain = [clientHost, ipHost(REMOTE_ADDR), HTTP_HOST, ipHost(SERVER_ADDR)].filter(lastOccurrence);
 		document.getElementById("access_chain").innerText = webAccessChain.join(" ➔ ");
 
 		lockoutContainer.style.display = "block";
