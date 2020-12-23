@@ -27,19 +27,31 @@
 
 	web_root=$(uci get gargoyle.global.web_root 2>/dev/null)
 
+	css=""
 	js="login.js"
+	i18n="$js"
+	pkg="gargoyle"
+	i=0
+	hook="uci -q get gargoyle.@login_hook"
+	while [ -n "$($hook[$i])" ]; do
+		css="$css $($hook[$i].css)"
+		js="$js $($hook[$i].js)"
+		i18n="$i18n $($hook[$i].i18n)"
+		[ "$($hook[$i].mac)" = "1" ] && mac="-i"
+		[ "$($hook[$i].host)" = "1" ] && host="-n"
+		pkg="$pkg $($hook[$i].pkg)"
+		i=$((i+1))
+	done
 	if [ -d "$web_root/hooks/login" ] ; then
 		sh_hooks=$(ls "$web_root/hooks/login/"*.sh | sort )
 		js_hooks=$(ls "$web_root/hooks/login" | sort | awk " \$1 ~ /js\$/ { print \"../hooks/login/\"\$1  }")
 		js_hooks=$(echo $js_hooks)
 		js="$js $js_hooks"
-		ljs=$(echo "$js" | awk -F '[ /]' '{ for(i = 1; i <= NF; i++) {  print $i; } }' | awk '/.js/')
-		lang_js=$(echo $ljs)
-		[ -n "$ljs" ] && ljs="$js"
+		i18n_hooks=$(echo "$js" | awk -F '[ /]' '{ for(i = 1; i <= NF; i++) {  print $i; } }' | awk '/.js/')
+		i18n="$i18n $(echo $i18n_hooks)"
 	fi
 
-
-	gargoyle_header_footer -h  -j "$js" -z "$js $lang_js" gargoyle
+	gargoyle_header_footer -h -c "$css" -j "$js" -z "$i18n" "$mac" "$host" -- $pkg
 %>
 
 
