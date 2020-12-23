@@ -647,7 +647,7 @@ inputIds = [
 			{
 				uci.createListOption("network","lan","ip6addr",true);
 				ip6addrdata = getTableDataArray(document.getElementById("lan_ip6_table"), true, false);
-				uci.set("network","lan","ip6addr",ip6addrdata);
+				uci.set("network","lan","ip6addr",ip6addrdata.map(function(row) { return row[0]; }));
 			}
 			else
 			{
