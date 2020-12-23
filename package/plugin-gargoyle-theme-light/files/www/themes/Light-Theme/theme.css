@@ -228,7 +228,7 @@ li.sidebar-item>a:hover
 }
 .sidebar-item.active .sidebar-item.minor-sidebar-item.sidebar-bottom-subelement a
 {
-	padding-bottom:8px;
+	margin-bottom:8px;
 	display:block;
 }
 ul.sidebar .sidebar-header a, ul.sidebar .sidebar-list a:hover 
