@@ -1,0 +1,8 @@
+#!/bin/sh
+
+uci set gargoyle.display.system_qr_code='QR Code'
+uci set gargoyle.scripts.system_qr_code='qr_code.sh'
+uci set gargoyle.system.qr_code='380'
+uci set gargoyle.help='help'
+uci set gargoyle.help.qr_code_help='1'
+uci commit

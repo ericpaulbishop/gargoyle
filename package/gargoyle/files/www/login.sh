@@ -27,10 +27,12 @@
 
 	web_root=$(uci get gargoyle.global.web_root 2>/dev/null)
 
+	# Append shared login hook resources as whitespace separated strings to default resources.
 	css=""
 	js="login.js"
 	i18n="$js"
 	pkg="gargoyle"
+	# Iterate over section array where [$i].option is simply appended to the $hook string.
 	i=0
 	hook="uci -q get gargoyle.@login_hook"
 	while [ -n "$($hook[$i])" ]; do

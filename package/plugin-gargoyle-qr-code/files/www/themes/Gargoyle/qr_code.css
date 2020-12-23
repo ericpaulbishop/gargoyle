@@ -1,0 +1,157 @@
+/*
+ * This program is copyright © 2020 Rouven Spreckels and is distributed under the terms of the GNU GPL
+ * version 2.0 with a special clarification/exception that permits adapting the program to
+ * configure proprietary "back end" software provided that all modifications to the web interface
+ * itself remain covered by the GPL.
+ * See http://gargoyle-router.com/faq.html#qfoss for more information
+ */
+
+/* Markdown editor area. */
+textarea.markdown
+{
+	/* Fix themes missing `.textarea-lg`. */
+	width: 100%;
+	/* Minimum height preventing collapse when empty. */
+	min-height: 8em;
+	/* Disable manual resizing as it is done via `autoHeight()`. */
+	resize: none;
+	/* Avoid trivial scrollbars with `autoHeight()`. */
+	overflow: hidden;
+	/* Ease writing whitespace-sensitive markdown. */
+	font-family: monospace;
+}
+
+/* Frame width input of type number. */
+#qr_code_width
+{
+	/* Display number inline with its appended `%` unit. */
+	display: inline;
+	/* Up/Down arrows require extra space. */
+	width: 8ch;
+}
+
+/* Contains elements to be printed. */
+#qr_code_document
+{
+	/* Use full panel. */
+	width: 100%;
+	/* Break long subject/secrets. Inherited by children. */
+	overflow-wrap: break-word;
+	/* Use larger of the two common document font sizes (11 or 12 pt). */
+	font-size: 12pt;
+}
+/* Elements to be printed. */
+#qr_code_document *
+{
+	/* Required for break-word to work. Not inherited by children. */
+	max-width: 100%;
+}
+
+/* Contains SVG as child and SVG blob as its `href`. */
+#qr_code_frame
+{
+	/* Adhere to both `.text-center` and `width`. */
+	display: inline-block;
+}
+
+/* Subject/Secrets as description list (term names/definition pairs). */
+#qr_code_items
+{
+	margin-bottom: 0;
+}
+#qr_code_items dt
+{
+	/* Treat as heading. */
+	margin-top: 1em;
+}
+#qr_code_items dd
+{
+	/* Distinguish subject/secrets characters as in `il` or `0O`. */
+	font-family: monospace;
+}
+
+/* Markdown rendered guide. */
+#qr_code_guide
+{
+	/* Adhere to both `.text-center` and `margin-top`. */
+	display: inline-block;
+	/* Keep distance from frame or description list. */
+	margin-top: 3em;
+	/* Restore default text alignment. */
+	text-align: left;
+	/* Use smaller of the two common document font sizes (11 or 12 pt). */
+	font-size: 11pt;
+}
+/* Markdown rendered images. */
+#qr_code_guide img
+{
+	/* Adhere to `max-width`. */
+	display: block;
+	/* Center images. */
+	margin: 0 auto;
+}
+/* Markdown rendered headings. */
+#qr_code_guide h1
+{
+	font-size: 16pt;
+}
+#qr_code_guide h2
+{
+	font-size: 15pt;
+}
+#qr_code_guide h3
+{
+	font-size: 14pt;
+}
+#qr_code_guide h4
+{
+	font-size: 13pt;
+}
+#qr_code_guide h5
+{
+	font-size: 12pt;
+}
+#qr_code_guide h6
+{
+	font-size: 11pt;
+}
+
+/* Applies only when printing. */
+@media print
+{
+	/* Stay within page avoiding follow-up blank pages. */
+	html, body
+	{
+		overflow: hidden !important;
+		margin: 0 !important;
+		padding: 0 !important;
+		width: 100% !important;
+		height: 100% !important;
+	}
+	/* Hide page content. */
+	body *
+	{
+		visibility: hidden;
+	}
+
+	/* Cover page with document. */
+	#qr_code_document
+	{
+		position: fixed;
+		top: 5%;
+		left: 0;
+		margin: 0;
+		width: 100% !important;
+		color: #ccc;
+	}
+	/* Show only document. */
+	#qr_code_document *
+	{
+		visibility: visible;
+	}
+	/* Avoid printing SVG blob filename. */
+	#qr_code_document a
+	{
+		visibility: hidden;
+	}
+}
