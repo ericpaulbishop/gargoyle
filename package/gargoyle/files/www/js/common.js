@@ -12,6 +12,12 @@ var TSort_Classes = new Array ('odd', 'even'); // table sorting zebra row suppor
 var menuState = []; //nav Menu State variable
 var navTimer; //timeout for restoring menu
 
+// Abbreviation.
+function byId(id)
+{
+	return document.getElementById(id);
+}
+
 // Escape HTML using DOM API.
 function escapeHTML(html)
 {
