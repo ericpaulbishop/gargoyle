@@ -9,18 +9,18 @@
 // ECMAScript 6 (ES6) Strict Mode Code
 "use strict";
 
-const pkg = "qr_code_gargoyle";
+let pkg = "qr_code_gargoyle";
 
 let uci = {};
 
 function updateEditor()
 {
 	// QR code editor selection.
-	const editor = byId("application");
+	let editor = byId("application");
 	// Print/Embed checkbox IDs.
-	const ids = ["print_subject", "print_secrets", "print_comment", "embed_via_lan", "embed_via_wan"];
+	let ids = ["print_subject", "print_secrets", "print_comment", "embed_via_lan", "embed_via_wan"];
 	// Comment text area.
-	const comment = byId("comment");
+	let comment = byId("comment");
 
 	// Deselected (previously selected) application to save.
 	let application = editor.getAttribute("data-application");
@@ -66,14 +66,14 @@ function updateEditor()
 	byId("print_secrets_label").innerHTML = secrets;
 
 	// Update editor visibility.
-	byId("print_secrets_container").style.display = secrets ? "" : "none";
+	byId("print_secrets_container").style.display = secrets ? "block" : "none";
 	["print_container", "embed_container", "qr_code_help"]
-		.forEach(id => byId(id).style.display = application ? "": "none");
+		.forEach(id => byId(id).style.display = application ? "block": "none");
 	["wifi", "web_access", "webcam"]
-		.forEach(id => byId(id + "_help").style.display = application.includes(id) ? "": "none");
+		.forEach(id => byId(id + "_help").style.display = application.includes(id) ? "block": "none");
 
 	// QR code viewer selection.
-	const viewer = byId("qr_code");
+	let viewer = byId("qr_code");
 	// Reset QR code viewer selection.
 	viewer.innerHTML = "";
 	addPlaceholderOption(viewer, QrCode.SelectQrCode);
@@ -82,51 +82,51 @@ function updateEditor()
 	if(application.endsWith("wifi"))
 	{
 		// Wether to add guest wireless network group and options.
-		const guest = application.includes("guest");
+		let guest = application.includes("guest");
 		// Add home/guest wireless network group.
-		const wifi = addWifiQrCodeApplication(viewer, guest ? QrCode.GuestWifi : QrCode.HomeWifi, application);
+		let wifi = addWifiQrCodeApplication(viewer, guest ? QrCode.GuestWifi : QrCode.HomeWifi, application);
 		// Add home/guest wireless network options to their corresponding group.
-		const wireless = "wireless";
-		const wirelessSections = uciOriginal.getAllSectionsOfType(wireless, "wifi-iface");
-		for(const section of wirelessSections)
+		let wireless = "wireless";
+		let wirelessSections = uciOriginal.getAllSectionsOfType(wireless, "wifi-iface");
+		for(let section of wirelessSections)
 		{
-			const ssid = uciOriginal.get(wireless, section, "ssid");
-			const hidden = uciOriginal.get(wireless, section, "hidden") == "1";
-			const encryption = uciOriginal.get(wireless, section, "encryption");
-			const key = uciOriginal.get(wireless, section, "key");
+			let ssid = uciOriginal.get(wireless, section, "ssid");
+			let hidden = uciOriginal.get(wireless, section, "hidden") == "1";
+			let encryption = uciOriginal.get(wireless, section, "encryption");
+			let key = uciOriginal.get(wireless, section, "key");
 			addWifiQrCode(wifi, section, ssid, hidden, encryption, key, guest);
 		}
 	}
 
 	// Filter and map global IPv6 addresses as hosts for IP URLs.
-	const globalIp6 = ip => ip6_scope(ip)[0] == "Global";
-	const ip6Host = ip => `[${ip}]`;
-	const currentLanIps = [currentLanIp].concat(currentLanIp6.filter(globalIp6).map(ip6Host));
-	const currentWanIps = [currentWanIp].concat(currentWanIp6.filter(globalIp6).map(ip6Host));
+	let globalIp6 = ip => ip6_scope(ip)[0] == "Global";
+	let ip6Host = ip => "[" + ip + "]";
+	let currentLanIps = [currentLanIp].concat(currentLanIp6.filter(globalIp6).map(ip6Host));
+	let currentWanIps = [currentWanIp].concat(currentWanIp6.filter(globalIp6).map(ip6Host));
 
 	// Load host for host URLs.
-	const systemSections = uciOriginal.getAllSectionsOfType("system", "system");
-	const dnsmasqSections = uciOriginal.getAllSectionsOfType("dhcp", "dnsmasq");
-	const hostname = uciOriginal.get("system", systemSections[0], "hostname");
-	const domain = uciOriginal.get("dhcp", dnsmasqSections[0], "domain");
-	const host = hostname + "." + domain;
+	let systemSections = uciOriginal.getAllSectionsOfType("system", "system");
+	let dnsmasqSections = uciOriginal.getAllSectionsOfType("dhcp", "dnsmasq");
+	let hostname = uciOriginal.get("system", systemSections[0], "hostname");
+	let domain = uciOriginal.get("dhcp", dnsmasqSections[0], "domain");
+	let host = hostname + "." + domain;
 
 	// Add local/remote/indirect router access groups and IP/host/client URL options.
 	if(application == "web_access")
 	{
 		// Load local/remote http/https ports.
-		const localHttpPort = getHttpPort(uciOriginal);
-		const localHttpsPort = getHttpsPort(uciOriginal);
+		let localHttpPort = getHttpPort(uciOriginal);
+		let localHttpsPort = getHttpsPort(uciOriginal);
 		let remoteHttpPort = "";
 		let remoteHttpsPort = "";
-		const remoteAcceptSections = uciOriginal.getAllSectionsOfType("firewall", "remote_accept")
-		for(const section of remoteAcceptSections)
+		let remoteAcceptSections = uciOriginal.getAllSectionsOfType("firewall", "remote_accept")
+		for(let section of remoteAcceptSections)
 		{
-			const localPort = uciOriginal.get("firewall", section, "local_port");
+			let localPort = uciOriginal.get("firewall", section, "local_port");
 			let remotePort = uciOriginal.get("firewall", section, "remote_port");
 			remotePort = remotePort ? remotePort : localPort;
-			const proto = uciOriginal.get("firewall", section, "proto").toLowerCase();
-			const zone = uciOriginal.get("firewall", section, "zone").toLowerCase();
+			let proto = uciOriginal.get("firewall", section, "proto").toLowerCase();
+			let zone = uciOriginal.get("firewall", section, "zone").toLowerCase();
 			if((zone == "wan" || !zone) && (proto == "tcp" || !proto))
 			{
 				if(localPort == localHttpsPort)
@@ -141,9 +141,9 @@ function updateEditor()
 		}
 
 		// Add local URL group.
-		const local = addUrlQrCodeApplication(viewer, QrCode.LocalWebAccess, application, false);
+		let local = addUrlQrCodeApplication(viewer, QrCode.LocalWebAccess, application, false);
 		// Add local IP URLs.
-		for(const ip of currentLanIps)
+		for(let ip of currentLanIps)
 		{
 			addUrlQrCode(local, "http", ip, localHttpPort);
 			addUrlQrCode(local, "https", ip, localHttpsPort);
@@ -158,9 +158,9 @@ function updateEditor()
 		}
 
 		// Add remote URL group.
-		const remote = addUrlQrCodeApplication(viewer, QrCode.RemoteWebAccess, application, true);
+		let remote = addUrlQrCodeApplication(viewer, QrCode.RemoteWebAccess, application, true);
 		// Add remote IP URLs.
-		for(const ip of currentWanIps)
+		for(let ip of currentWanIps)
 		{
 			addUrlQrCode(remote, "http", ip, remoteHttpPort);
 			addUrlQrCode(remote, "https", ip, remoteHttpsPort);
@@ -172,7 +172,7 @@ function updateEditor()
 		}
 
 		// Add indirect URL group.
-		const indirect = addUrlQrCodeApplication(viewer, QrCode.IndirectWebAccess, application, remoteView);
+		let indirect = addUrlQrCodeApplication(viewer, QrCode.IndirectWebAccess, application, remoteView);
 		// Add indirect client URL.
 		if(!directView)
 		{
@@ -183,26 +183,26 @@ function updateEditor()
 	// Add local/remote/indirect webcam snapshot/stream groups and IP/host/client URL options.
 	if(application.startsWith("webcam"))
 	{
-		const mjpgStreamer = "mjpg-streamer", core = "core";
+		let mjpgStreamer = "mjpg-streamer", core = "core";
 		// Wether to add snapshot group and options.
-		const snapshot = application.endsWith("snapshot");
+		let snapshot = application.endsWith("snapshot");
 		// Load local port.
-		const localWebcamPort = uciOriginal.get(mjpgStreamer, core, "port");
+		let localWebcamPort = uciOriginal.get(mjpgStreamer, core, "port");
 		// Offer remote access even when disabled by using local port since
 		// remote port either equals local port or is empty when disabled.
-		const remoteWebcamPort = localWebcamPort;
+		let remoteWebcamPort = localWebcamPort;
 		// Load login credentials.
-		const user = uciOriginal.get(mjpgStreamer, core, "username");
-		const pass = uciOriginal.get(mjpgStreamer, core, "password");
+		let user = uciOriginal.get(mjpgStreamer, core, "username");
+		let pass = uciOriginal.get(mjpgStreamer, core, "password");
 
 		// URL parameters.
-		const path = "/";
-		const parm = "?action=" + (snapshot ? "snapshot" : "stream");
+		let path = "/";
+		let parm = "?action=" + (snapshot ? "snapshot" : "stream");
 
 		// Add local URL group.
-		const local = addUrlQrCodeApplication(viewer, snapshot ? QrCode.LocalWebcamSnapshot : QrCode.LocalWebcamStream, application, false);
+		let local = addUrlQrCodeApplication(viewer, snapshot ? QrCode.LocalWebcamSnapshot : QrCode.LocalWebcamStream, application, false);
 		// Add local IP URL.
-		for(const ip of currentLanIps)
+		for(let ip of currentLanIps)
 		{
 			addUrlQrCode(local, "http", ip, localWebcamPort, user, pass, path, parm);
 		}
@@ -215,9 +215,9 @@ function updateEditor()
 		}
 
 		// Add remote URL group.
-		const remote = addUrlQrCodeApplication(viewer, snapshot ? QrCode.RemoteWebcamSnapshot : QrCode.RemoteWebcamStream, application, true);
+		let remote = addUrlQrCodeApplication(viewer, snapshot ? QrCode.RemoteWebcamSnapshot : QrCode.RemoteWebcamStream, application, true);
 		// Add remote IP URL.
-		for(const ip of currentWanIps)
+		for(let ip of currentWanIps)
 		{
 			addUrlQrCode(remote, "http", ip, localWebcamPort, user, pass, path, parm);
 		}
@@ -228,7 +228,7 @@ function updateEditor()
 		}
 
 		// Add indirect URL group.
-		const indirect = addUrlQrCodeApplication(viewer, snapshot ? QrCode.IndirectWebcamSnapshot : QrCode.IndirectWebcamStream, application, remoteView);
+		let indirect = addUrlQrCodeApplication(viewer, snapshot ? QrCode.IndirectWebcamSnapshot : QrCode.IndirectWebcamStream, application, remoteView);
 		// Add indirect client URL.
 		if(!directView)
 		{
@@ -244,15 +244,15 @@ function updateViewer() {
 	setQrCodeTitle();
 	setQrCodeAlert();
 	// Set QR code alert info.
-	const optgroup = getOption(byId("qr_code")).parentNode;
-	const application = optgroup.getAttribute("data-application");
+	let optgroup = getOption(byId("qr_code")).parentNode;
+	let application = optgroup.getAttribute("data-application");
 	if(application && application.startsWith("webcam"))
 	{
 		if(uci.get("mjpg-streamer", "core", "enabled") == "1")
 		{
 			// Set alert info if webcam is enabled and a remote URL is selected but remote access is disabled.
-			const remote = optgroup.getAttribute("data-remote") == "true";
-			const remotePort = uci.get("firewall", "webcam_wan_access", "remote_port");
+			let remote = optgroup.getAttribute("data-remote") == "true";
+			let remotePort = uci.get("firewall", "webcam_wan_access", "remote_port");
 			setQrCodeAlert(remote && !remotePort ? QrCode.RemoteWebcamDisabled : "");
 		}
 		else
@@ -268,17 +268,17 @@ function updateViewer() {
 }
 
 function updatePrint() {
-	const print = (application, id) => byId(id).checked;
-	const guide = (application, id) => byId(id).value;
+	let print = (application, id) => byId(id).checked;
+	let guide = (application, id) => byId(id).value;
 	setQrCodePrint(print, guide);
 }
 
 function updateGuide() {
 	// Comment print checkbox value and text area.
-	const print = byId("print_comment").checked;
-	const comment = byId("comment");
+	let print = byId("print_comment").checked;
+	let comment = byId("comment");
 	// Update comment text area visibility.
-	byId("comment_container").style.display = print && byId("application").value ? "" : "none";
+	byId("comment_container").style.display = print && byId("application").value ? "block" : "none";
 	// Update comment text area height after updating its visibility.
 	autoHeight(comment);
 	// Render Markdown comment if checked and viewed.
@@ -308,20 +308,20 @@ function resetData()
 	uci = uciOriginal.clone();
 
 	// Reset editor selection.
-	const editor = byId("application");
+	let editor = byId("application");
 	editor.innerHTML = "";
 	editor.removeAttribute("data-application");
 	addPlaceholderOption(editor, QrCode.SelectApplication);
 
 	// Add wireless network group and options.
-	const wifi = addOptGroup(editor, QrCode.Wifi);
+	let wifi = addOptGroup(editor, QrCode.Wifi);
 	addOption(wifi, QrCode.HomeWifi, "home_wifi");
 	addOption(wifi, QrCode.GuestWifi, "guest_wifi");
 	// Add router access group and options.
-	const access = addOptGroup(editor, QrCode.RouterAccess);
+	let access = addOptGroup(editor, QrCode.RouterAccess);
 	addOption(access, QrCode.WebAccess, "web_access");
 	// Add webcam group and options.
-	const webcam = addOptGroup(editor, QrCode.Webcam);
+	let webcam = addOptGroup(editor, QrCode.Webcam);
 	addOption(webcam, QrCode.WebcamSnapshot, "webcam_snapshot");
 	addOption(webcam, QrCode.WebcamStream, "webcam_stream");
 	// Hide webcam group when webcam plugin is not installed, that is with no mandatory local port.
@@ -332,7 +332,7 @@ function resetData()
 	updateEditor();
 
 	// Load QR code width with 50 as default.
-	const width = +uci.get(pkg, "viewer", "width");
+	let width = +uci.get(pkg, "viewer", "width");
 	setQrCodeWidth(width ? width : 50);
 	// Update viewer visibility.
 	updateViewer();
@@ -347,30 +347,30 @@ function saveChanges()
 	updateEditor();
 
 	// Save shared login hook resources.
-	const global = "gargoyle", plugin = "qr_code";
+	let global = "gargoyle", plugin = "qr_code";
 	uci.removeSection(global, plugin);
-	const embed = (embed, application) => embed
+	let embed = (embed, application) => embed
 		|| uci.get(pkg, application, "embed_via_lan") == "1"
 		|| uci.get(pkg, application, "embed_via_wan") == "1";
 	if(["home_wifi", "guest_wifi", "web_access", "webcam_snapshot", "webcam_stream"].reduce(embed, false))
 	{
 		uci.set(global, plugin, "", "login_hook");
 		uci.set(global, plugin, "css", "qr_code.css");
-		uci.set(global, plugin, "js", "drawdown.js qrcodegen.js qr_code_common.js");
+		uci.set(global, plugin, "js", "drawdown.js qrcodegen.js optgroup.js qr_code_common.js");
 		uci.set(global, plugin, "i18n", "qr_code.js");
 		uci.set(global, plugin, "pkg", pkg);
 	}
 
 	// Save QR code width.
-	const viewer = "viewer";
+	let viewer = "viewer";
 	uci.set(pkg, viewer, "", viewer);
 	uci.set(pkg, viewer, "width", byId("qr_code_width").value);
 
 	// Save changes.
-	const commands = uci.getScriptCommands(uciOriginal) + "\n";
-	const hash = document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, "");
-	const param = getParameterDefinition("commands", commands)  + "&" + getParameterDefinition("hash", hash);
-	const stateChangeFunction = req =>
+	let commands = uci.getScriptCommands(uciOriginal) + "\n";
+	let hash = document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, "");
+	let param = getParameterDefinition("commands", commands)  + "&" + getParameterDefinition("hash", hash);
+	let stateChangeFunction = req =>
 	{
 		if(req.readyState == 4)
 		{

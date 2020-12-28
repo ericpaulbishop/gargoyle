@@ -6,8 +6,9 @@
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time" )
-	gargoyle_header_footer -h -s "system" -p "qr_code" -c "qr_code.css" -j "drawdown.js qrcodegen.js qr_code_common.js qr_code.js" -z "qr_code.js" -i gargoyle system dhcp uhttpd firewall network wireless mjpg-streamer qr_code_gargoyle
+	gargoyle_header_footer -h -s "system" -p "qr_code" -c "qr_code.css" -j "drawdown.js qrcodegen.js optgroup.js qr_code_common.js qr_code.js" -z "qr_code.js" -i gargoyle system dhcp uhttpd firewall network wireless mjpg-streamer qr_code_gargoyle
 %>
+
 <%in templates/client_server_template %>
 <h1 class="page-header"><%~ qr_code.QrCode %></h1>
 <div class="row">
@@ -83,6 +84,7 @@
 		</div>
 	</div>
 	<div class="col-lg-6">
+
 <%in templates/qr_code_viewer_template %>
 	</div>
 </div>

@@ -1,6 +1,4 @@
-
 <script>
-
 <%
 	# Browser or reverse proxy IP.
 	echo 'const REMOTE_ADDR = "'$REMOTE_ADDR'";'
@@ -21,7 +19,7 @@
 
 	# What server (uhttpd) sees.
 	echo 'const serverProt = HTTPS == "on" ? "https" : "http";'
-	echo 'const serverHost = HTTP_HOST ? HTTP_HOST : SERVER_ADDR.includes(":") ? `[${SERVER_ADDR}]` : SERVER_ADDR;'
+	echo 'const serverHost = HTTP_HOST ? HTTP_HOST : SERVER_ADDR.includes(":") ? "[" + SERVER_ADDR + "]" : SERVER_ADDR;'
 	echo 'const serverPort = SERVER_PORT;'
 
 	# Whether client sees what server sees.

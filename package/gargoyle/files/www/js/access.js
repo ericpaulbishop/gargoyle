@@ -598,21 +598,21 @@ function updateVisibility()
 	rfc1918FilterLockoutContainer.style.display = "none";
 	rfc1918FilterLockoutContainer.innerHTML = "";
 	var lockoutTemplate =
-	`<span id="lockout" class="col-xs-12">
-		<div class="alert alert-danger" role="alert">
-			${accessStr.LockoutWarning}
-			<span id="reverse_proxy_smooth" style="display: none">
-				<p>${accessStr.ReverseProxySmooth}:</p>
-				<ol>
-					<li>${accessStr.ReverseProxySelect} <i>HTTP & HTTPS</i> ${accessStr.ReverseProxySaveCh}.</li>
-					<li>${accessStr.ReverseProxySwitch} <i><span id="reverse_proxy_switch"></span></i>.</li>
-					<li>${accessStr.ReverseProxySelect} <i><span id="reverse_proxy_select"></span></i> ${accessStr.ReverseProxySaveCh}.</li>
-				</ol>
-			</span>
-			<p>${accessStr.AccessChain}:</p>
-			<p><span id="access_chain"></span></p>
-		</div>
-	</span>`;
+	'<span id="lockout" class="col-xs-12">' +
+		'<div class="alert alert-danger" role="alert">' +
+			accessStr.LockoutWarning +
+			'<span id="reverse_proxy_smooth" style="display: none">' +
+				'<p>' + accessStr.ReverseProxySmooth + ':</p>' +
+				'<ol>' +
+					'<li>' + accessStr.ReverseProxySelect + ' <i>HTTP & HTTPS</i> ' + accessStr.ReverseProxySaveCh + '.</li>' +
+					'<li>' + accessStr.ReverseProxySwitch + ' <i><span id="reverse_proxy_switch"></span></i>.</li>' +
+					'<li>' + accessStr.ReverseProxySelect + ' <i><span id="reverse_proxy_select"></span></i> ' + accessStr.ReverseProxySaveCh + '.</li>' +
+				'</ol>' +
+			'</span>' +
+			'<p>' + accessStr.AccessChain + ':</p>' +
+			'<p><span id="access_chain"></span></p>' +
+		'</div>' +
+	'</span>';
 	if(protocolLockout || reverseProxyLockout || rfc1918FilterLockout)
 	{
 		var lockoutContainer = rfc1918FilterLockout ? rfc1918FilterLockoutContainer : accessWebProtocolLockoutContainer;
@@ -624,7 +624,7 @@ function updateVisibility()
 		document.getElementById("reverse_proxy_select").innerText = allOptionValueHash[accessWebProtocol];
 
 		// Web access trace of domains and/or IP addresses from client, possibly over reverse proxy, to server.
-		var ipHost = function(ip) { return ip.includes(":") ? `[${ip}]` : ip; };
+		var ipHost = function(ip) { return ip.includes(":") ? "[" + ip + "]" : ip; };
 		var lastOccurrence = function(value, index, self) { return value && self.lastIndexOf(value) === index; };
 		var webAccessChain = [clientHost, ipHost(REMOTE_ADDR), HTTP_HOST, ipHost(SERVER_ADDR)].filter(lastOccurrence);
 		document.getElementById("access_chain").innerText = webAccessChain.join(" ➔ ");

@@ -1,4 +1,5 @@
 #!/usr/bin/haserl
+
 <%in templates/client_server_template %>
 <script>
 
@@ -67,6 +68,7 @@
 </script>
 <div id="qr_code_fields" style="display:none" class="row">
 	<div class="col-lg-6">
+
 <%in templates/qr_code_viewer_template %>
 	</div>
 </div>

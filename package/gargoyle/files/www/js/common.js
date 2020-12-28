@@ -13,15 +13,16 @@ var menuState = []; //nav Menu State variable
 var navTimer; //timeout for restoring menu
 
 // Abbreviation.
-function byId(id)
+function byId(id, controlDocument)
 {
-	return document.getElementById(id);
+	controlDocument = controlDocument == null ? document : controlDocument;
+	return controlDocument.getElementById(id);
 }
 
 // Escape HTML using DOM API.
 function escapeHTML(html)
 {
-	const container = document.createElement("div");
+	let container = document.createElement("div");
 	container.textContent = html;
 	return container.innerHTML;
 }
@@ -30,8 +31,8 @@ function escapeHTML(html)
 function autoHeight(element)
 {
 	element.style.height = "";
-	const computed = window.getComputedStyle(element);
-	const height = element.scrollHeight
+	let computed = window.getComputedStyle(element);
+	let height = element.scrollHeight
 		+ parseInt(computed.getPropertyValue("border-top-width"))
 		+ parseInt(computed.getPropertyValue("padding-top"))
 		+ parseInt(computed.getPropertyValue("padding-bottom"))
@@ -1326,68 +1327,6 @@ function setAllowableSelections(selectId, allowableValues, allowableNames, contr
 			setSelectedValue(selectId, currentSelection, controlDocument); //restore original settings if still valid
 		}
 	}
-}
-
-// Add hidden option group. Adding an option to this group will unhide it.
-function addOptGroup(select, label, hidden = true, disabled = false)
-{
-	const optgroup = document.createElement("optgroup");
-	optgroup.label = label;
-	optgroup.hidden = hidden;
-	optgroup.disabled = disabled;
-	select.appendChild(optgroup);
-	return optgroup;
-}
-
-// Add option and unhide its group if present.
-function addOption(selectOrOptgroup, text, value = "", selected = false, hidden = false, disabled = false)
-{
-	const option = document.createElement("option");
-	option.text = text;
-	option.value = value;
-	option.selected = selected;
-	option.hidden = hidden;
-	option.disabled = disabled;
-	selectOrOptgroup.appendChild(option);
-	if(!hidden)
-	{
-		selectOrOptgroup.hidden = false;
-	}
-	return option;
-}
-
-// Add preselected hidden placeholder option.
-function addPlaceholderOption(select, text)
-{
-	return addOption(select, text, "", true, true);
-}
-
-// Get selected option group.
-function getOptGroup(select)
-{
-	const option = getOption(select);
-	return option ? option.parentNode : null;
-}
-
-// Get selected option.
-function getOption(select)
-{
-	const index = select.selectedIndex;
-	return index == -1 ? null : select.options[index];
-}
-
-// Get first option by its text.
-function getOptionByText(selectOrOptgroup, text)
-{
-	return Array.from(selectOrOptgroup.getElementsByTagName("option"))
-		.find(option => option.text == text);
-}
-
-// Whether there are any selectable options.
-function hasOptions(selectOrOptgroup)
-{
-	return Array.from(selectOrOptgroup.getElementsByTagName("option"))
-		.some(option => !option.hidden && !option.disabled);
 }
 
 function setSingleChild(container, child)

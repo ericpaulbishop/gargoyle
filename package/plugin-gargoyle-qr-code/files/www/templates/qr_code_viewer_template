@@ -1,4 +1,3 @@
-
 		<div id="qr_code_viewer" class="panel panel-default">
 			<div class="panel-heading">
 				<h3 id="qr_code_title" class="panel-title"><%~ qr_code.QrCodeViewer %></h3>

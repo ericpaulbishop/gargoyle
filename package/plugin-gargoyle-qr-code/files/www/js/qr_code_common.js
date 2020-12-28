@@ -15,7 +15,7 @@ let QrCode = {};
 // Set title of QR code viewer panel.
 function setQrCodeTitle()
 {
-	const qrCode = getOption(byId("qr_code"));
+	let qrCode = getOption(byId("qr_code"));
 	byId("qr_code_title").innerHTML = qrCode && qrCode.value ? qrCode.parentNode.label : QrCode.QrCodeViewer;
 }
 
@@ -23,7 +23,7 @@ function setQrCodeTitle()
 function setQrCodeAlert(info = "")
 {
 	byId("qr_code_alert").innerHTML = info ? info : "";
-	byId("qr_code_alert_container").style.display = info ? "" : "none";
+	byId("qr_code_alert_container").style.display = info ? "block" : "none";
 }
 
 // Set QR code width from 20 to 80 % and synchronize range and number inputs.
@@ -39,7 +39,7 @@ function setQrCodeWidth(percent, current)
 function setQrCodeFrame()
 {
 	// QR code frame is an anchor enclosing an SVG.
-	const frame = byId("qr_code_frame");
+	let frame = byId("qr_code_frame");
 	// Reset frame.
 	if(frame.href)
 	{
@@ -50,18 +50,18 @@ function setQrCodeFrame()
 		frame.innerHTML = "";
 	}
 	// Selected option or null.
-	const qrCode = getOption(byId("qr_code"));
+	let qrCode = getOption(byId("qr_code"));
 	// Skip hidden placeholder option (empty value).
 	if(qrCode && qrCode.value)
 	{
 		// Generate QR code in a version range from 2 to 40, skipping version 1 which lacks the
 		// bottom right alignment pattern. Boost ECC level (true) within same version starting
 		// from LOW. Automatically choose the mask pattern (-1).
-		const segs = qrcodegen.QrSegment.makeSegments(qrCode.value);
-		const qr = qrcodegen.QrCode.encodeSegments(segs, qrcodegen.QrCode.Ecc.LOW, 2, 40, -1, true);
+		let segs = qrcodegen.QrSegment.makeSegments(qrCode.value);
+		let qr = qrcodegen.QrCode.encodeSegments(segs, qrcodegen.QrCode.Ecc.LOW, 2, 40, -1, true);
 		// Generate an SVG with a quiet zone of 4 modules, parse it, and get its document element.
-		const doc = new DOMParser().parseFromString(qr.toSvgString(4), "image/svg+xml");
-		const svg = doc.documentElement;
+		let doc = new DOMParser().parseFromString(qr.toSvgString(4), "image/svg+xml");
+		let svg = doc.documentElement;
 		// Disallow distortion when resizing.
 		svg.setAttribute("preserveAspectRatio", "xMidYMid slice");
 		// Emphasize contrast between clean edges over rendering speed and geometric precision.
@@ -72,36 +72,36 @@ function setQrCodeFrame()
 		// Scale SVG of a quite small default size by an integral multiple of 6. An integral
 		// multiple helps renderers to keep the edges crispy without inserting white padding
 		// lines between the modules.
-		const viewBox = svg.getAttribute("viewBox").split(" ");
+		let viewBox = svg.getAttribute("viewBox").split(" ");
 		svg.setAttribute("width", viewBox[2] * 6);
 		svg.setAttribute("height", viewBox[3] * 6);
 		// Serialize SVG document into a blob and offer it to be downloaded as a named SVG file
 		// when the anchor is clicked.
-		const xml = new XMLSerializer().serializeToString(doc);
+		let xml = new XMLSerializer().serializeToString(doc);
 		frame.href = window.URL.createObjectURL(new Blob([xml], { type: "image/svg+xml" }));
 		frame.title = qrCode.parentNode.label + ".svg";
 		frame.download = frame.title;
 	}
 	// Update viewer visibility.
-	byId("qr_code_container").style.display = qrCode && qrCode.value ? "" : "none";
+	byId("qr_code_container").style.display = qrCode && qrCode.value ? "block" : "none";
 }
 
 // Set description list items and guide comprising Markdown comment below QR code frame.
 function setQrCodePrint(print, guide)
 {
 	// Description list items.
-	const items = byId('qr_code_items');
+	let items = byId('qr_code_items');
 	// Reset or append description list items.
-	const setQrCodeItems = (title = "", value = "") =>
+	let setQrCodeItems = (title = "", value = "") =>
 	{
-		items.innerHTML = title ? items.innerHTML + `<dt>${title}</dt><dd>${value}</dd>` : "";
+		items.innerHTML = title ? items.innerHTML + "<dt>" + title + "</dt><dd>" + value + "</dd>" : "";
 	};
 	// Reset description list items.
 	setQrCodeItems();
 	// Reset guide comprising Markdown comment.
 	setQrCodeGuide();
 	// Selected option or null.
-	const qrCode = getOption(byId("qr_code"));
+	let qrCode = getOption(byId("qr_code"));
 	// Skip hidden placeholder option (empty value).
 	if(qrCode && qrCode.value)
 	{
@@ -109,8 +109,8 @@ function setQrCodePrint(print, guide)
 		// * home_wifi, guest_wifi,
 		// * web_access,
 		// * webcam_stream, webcam_snapshot.
-		const application = qrCode.parentNode.getAttribute("data-application");
-		const wifi = application.endsWith("wifi");
+		let application = qrCode.parentNode.getAttribute("data-application");
+		let wifi = application.endsWith("wifi");
 		// Append subject if checked.
 		if(print(application, "print_subject"))
 		{
@@ -127,8 +127,8 @@ function setQrCodePrint(print, guide)
 			else
 			{
 				// Append URL login credentials.
-				const user = qrCode.getAttribute("data-username");
-				const pass = qrCode.getAttribute("data-password");
+				let user = qrCode.getAttribute("data-username");
+				let pass = qrCode.getAttribute("data-password");
 				if(user && pass)
 				{
 					setQrCodeItems(QrCode.Username, user);
@@ -147,15 +147,15 @@ function setQrCodePrint(print, guide)
 // Render Markdown comment below description list.
 function setQrCodeGuide(text = "")
 {
-	const guide = byId("qr_code_guide");
+	let guide = byId("qr_code_guide");
 	guide.innerHTML = markdown(escapeHTML(text));
-	guide.style.display = text ? "" : "none";
+	guide.style.display = text ? "inline-block" : "none";
 }
 
 // Add option group and set QR code application.
 function addWifiQrCodeApplication(select, label, application)
 {
-	const optgroup = addOptGroup(select, label);
+	let optgroup = addOptGroup(select, label);
 	optgroup.setAttribute("data-application", application);
 	return optgroup;
 }
@@ -169,13 +169,13 @@ function addWifiQrCode(optgroup, section, ssid, hidden, encryption, key, guest)
 	// * Skip duplicates when both bands (2.4 and 5 GHz) share the same SSID.
 	// * Skip RADIUS encryption types, though its encoding is defined, due to lack
 	//   of user credentials as Gargoyle cannot (yet) be a RADIUS server on its own.
-	const applicable = guest == undefined || guest == section.includes("_gn_");
+	let applicable = guest == undefined || guest == section.includes("_gn_");
 	if(applicable && section.startsWith("ap_") && !getOptionByText(optgroup, ssid) && !encryption.includes("wpa"))
 	{
 		// Encode Wi-Fi configuration.
-		const data = encWifiQrCode(ssid, hidden, encryption, key);
+		let data = encWifiQrCode(ssid, hidden, encryption, key);
 		// Add option per SSID with SSID as text and QR code data as value.
-		const option = addOption(optgroup, ssid, data);
+		let option = addOption(optgroup, ssid, data);
 		// Add key as data attribute to append to description list.
 		option.setAttribute("data-key", key);
 	}
@@ -187,7 +187,7 @@ function addWifiQrCode(optgroup, section, ssid, hidden, encryption, key, guest)
 //   https://github.com/evgeni/qifi/issues/4#issuecomment-365815774
 function encWifiQrCode(ssid, hidden, encryption, key)
 {
-	const field = (name, data) => data ? name + ":" + data.replace(/([";,:\\])/g, "\\$1") + ";" : "";
+	let field = (name, data) => data ? name + ":" + data.replace(/([";,:\\])/g, "\\$1") + ";" : "";
 	let data = "WIFI:";
 	data += field("S", ssid);
 	data += field("H", hidden ? "true" : "");
@@ -200,7 +200,7 @@ function encWifiQrCode(ssid, hidden, encryption, key)
 // Add option group and set QR code application and whether URL is remote.
 function addUrlQrCodeApplication(select, label, application, remote)
 {
-	const optgroup = addOptGroup(select, label);
+	let optgroup = addOptGroup(select, label);
 	optgroup.setAttribute("data-application", application);
 	optgroup.setAttribute("data-remote", remote);
 	return optgroup;
@@ -213,12 +213,12 @@ function addUrlQrCode(optgroup, prot, host, port, user = "", pass = "", path = "
 	if(host && port)
 	{
 		port = (prot == "http" && port != "80") || (prot == "https" && port != "443") ? ":" + port : "";
-		const auth = user && pass ? encodeURIComponent(user) + ":" + encodeURIComponent(pass) + "@" : "";
-		const url = prot + "://" + auth + host + port + path + parm;
+		let auth = user && pass ? encodeURIComponent(user) + ":" + encodeURIComponent(pass) + "@" : "";
+		let url = prot + "://" + auth + host + port + path + parm;
 		// Add option per URL with URL as text and QR code data as value.
 		if(!getOptionByText(optgroup, url))
 		{
-			const option = addOption(optgroup, url, encUrlQrCode(url));
+			let option = addOption(optgroup, url, encUrlQrCode(url));
 			// Add login credentials as data attributes to append to description list.
 			option.setAttribute("data-username", user);
 			option.setAttribute("data-password", pass);
@@ -235,7 +235,7 @@ function encUrlQrCode(url)
 }
 
 // Add event listeners of QR code viewer.
-addLoadFunction(() =>
+addLoadFunction(function()
 {
 	// Event listeners to print, download, and hide QR code.
 	byId("qr_code_print_button").addEventListener("click", () => window.print());
