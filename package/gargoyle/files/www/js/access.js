@@ -576,7 +576,7 @@ function updateVisibility()
 		remoteHttpsElement.value = "";
 		remoteHttpElement.value = "";
 	}
-	document.getElementById("noip6redi").style.display = remoteWebProtocol == "disabled" || (remoteWebProtocol == "https" && localWebProtocol == "redirect") ? "none" : "";
+	document.getElementById("noip6redi").style.display = remoteWebProtocol == "disabled" || (remoteWebProtocol == "https" && localWebProtocol == "redirect") ? "none" : "block";
 
 	// RFC 1918 filter checkbox.
 	var disableRfc1918Filter = document.getElementById("disable_rfc1918_filter").checked;
