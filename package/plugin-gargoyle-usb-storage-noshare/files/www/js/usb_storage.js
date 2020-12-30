@@ -527,7 +527,7 @@ function resetData()
 				userPass.value = ""
 				userTableData.push( [ userNames[userIndex], userPass, userEditButton ] )
 			}
-			var tableObject = createTable(["", "", ""], userTableData, "share_user_table", true, false, removeUserCallback);
+			var tableObject = createTable([usbSStr.User, ""], userTableData, "share_user_table", true, false, removeUserCallback);
 		}
 		else
 		{
@@ -1400,7 +1400,7 @@ function addUserModal()
 	userpassconfirm = "";
 
 	modalElements = [
-		{"id" : "new_user", "value" : newuser},
+		{"id" : "new_user", "value" : newuser, "disable" : false},
 		{"id" : "user_pass", "value" : userpass},
 		{"id" : "user_pass_confirm", "value" : userpassconfirm}
 	];
