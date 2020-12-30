@@ -46,6 +46,45 @@
 		fi
 	done
 
+	# Only load allowed WireGuard clients revealing keys when the configured
+	# conditions are met, as whether this page is accessed via LAN or WAN and
+	# the WireGuard server is enabled.
+	enabled=$(uci_get wireguard_gargoyle server enabled)
+	embedClient=$(uci_get qr_code_gargoyle wireguard embed_via_$accessArea)
+	if [ "$enabled" = 1 -a "$embedClient" = 1 ]; then
+		if [ "$(uci_get wireguard_gargoyle server all_client_traffic)" = false ]; then
+			ip=$(uci_get network lan ipaddr)
+			mask=$(uci_get network lan netmask)
+			echo 'const wgAllowedIPs = ipToStr(parseIp("'$ip'") & parseIp("'$mask'")) + "/" + parseCidr("'$mask'");'
+		else
+			echo 'const wgAllowedIPs = "0.0.0.0/0";'
+		fi
+		uci_set wireguard_gargoyle server enabled "$enabled"
+		uci_set wireguard_gargoyle server public_key
+		uci_set wireguard_gargoyle server port
+		i=0
+		client="uci -q get wireguard_gargoyle.@allowed_client"
+		while [ -n "$($client[$i])" ]; do
+			id="$($client[$i].id)"
+			private_key=$(uci_get wireguard_gargoyle "$id" private_key)
+			remote=$(uci_get wireguard_gargoyle "$id" remote)
+			enabled=$(uci_get wireguard_gargoyle "$id" enabled)
+			# Only load allowed WireGuard clients when enabled and keys are
+			# managed by Gargoyle and with non-empty WAN IP or custom endpoint.
+			if [ -n "$private_key" -a -n "$remote" -a "$enabled" = 1 ]; then
+				uci_set wireguard_gargoyle "$id"
+				uci_set wireguard_gargoyle "$id" name
+				uci_set wireguard_gargoyle "$id" ip
+				uci_set wireguard_gargoyle "$id" public_key
+				uci_set wireguard_gargoyle "$id" private_key "$private_key"
+				uci_set wireguard_gargoyle "$id" remote "$remote"
+				uci_set wireguard_gargoyle "$id" enabled "$enabled"
+			fi
+			i=$(($i+1))
+		done
+		unset private_key
+	fi
+
 	# Only load webcam data revealing login credentials when the configured
 	# conditions are met, as whether this page is accessed via LAN or WAN.
 	embedSnapshot=$(uci_get qr_code_gargoyle webcam_snapshot embed_via_$accessArea)

@@ -952,6 +952,20 @@ function parseIp(ip)
 	var ip = ip.split(".");
 	return ((((((+ip[0])*256)+(+ip[1]))*256)+(+ip[2]))*256)+(+ip[3]);
 }
+function ipToStr(ip)
+{
+	return ((ip>>>24)+'.'+(ip>>16 & 255)+'.'+(ip>>8 & 255)+'.'+(ip & 255));
+}
+function parseCidr(ip)
+{
+	var ip = ip.match(/(\d+)/g);
+	var cidr = 0;
+	for(var i in ip)
+	{
+		cidr += (((ip[i] >>> 0).toString(2)).match(/1/g) || []).length;
+	}
+	return cidr;
+}
 function ipInRange(ip, start, end)
 {
 	var ip = parseIp(ip);

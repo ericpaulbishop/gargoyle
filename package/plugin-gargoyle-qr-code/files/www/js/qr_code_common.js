@@ -79,7 +79,8 @@ function setQrCodeFrame()
 		// when the anchor is clicked.
 		let xml = new XMLSerializer().serializeToString(doc);
 		frame.href = window.URL.createObjectURL(new Blob([xml], { type: "image/svg+xml" }));
-		frame.title = qrCode.parentNode.label + ".svg";
+		let web = qrCode.parentNode.getAttribute("data-application").startsWith("web");
+		frame.title = qrCode.parentNode.label + (web ? "" : " - " + qrCode.text) + ".svg";
 		frame.download = frame.title;
 	}
 	// Update viewer visibility.
@@ -107,14 +108,16 @@ function setQrCodePrint(print, guide)
 	{
 		// QR code application:
 		// * home_wifi, guest_wifi,
+		// * wireguard,
 		// * web_access,
-		// * webcam_stream, webcam_snapshot.
+		// * webcam_snapshot, webcam_stream.
 		let application = qrCode.parentNode.getAttribute("data-application");
 		let wifi = application.endsWith("wifi");
+		let wireGuard = application == "wireguard";
 		// Append subject if checked.
 		if(print(application, "print_subject"))
 		{
-			setQrCodeItems(wifi ? QrCode.Ssid : QrCode.Url, qrCode.text);
+			setQrCodeItems(wifi ? QrCode.Ssid : wireGuard ? QrCode.Name : QrCode.Url, qrCode.text);
 		}
 		// Append secrets if checked.
 		if(print(application, "print_secrets"))
@@ -126,13 +129,22 @@ function setQrCodePrint(print, guide)
 			}
 			else
 			{
-				// Append URL login credentials.
-				let user = qrCode.getAttribute("data-username");
-				let pass = qrCode.getAttribute("data-password");
-				if(user && pass)
+				if(wireGuard)
 				{
-					setQrCodeItems(QrCode.Username, user);
-					setQrCodeItems(QrCode.Password, pass);
+					// Append allowed WireGuard client key pair.
+					setQrCodeItems(QrCode.PublicKey, qrCode.getAttribute("data-public-key"));
+					setQrCodeItems(QrCode.PrivateKey, qrCode.getAttribute("data-private-key"));
+				}
+				else
+				{
+					// Append URL login credentials.
+					let user = qrCode.getAttribute("data-username");
+					let pass = qrCode.getAttribute("data-password");
+					if(user && pass)
+					{
+						setQrCodeItems(QrCode.Username, user);
+						setQrCodeItems(QrCode.Password, pass);
+					}
 				}
 			}
 		}
@@ -195,6 +207,47 @@ function encWifiQrCode(ssid, hidden, encryption, key)
 	data += field("P", key);
 	data += ";";
 	return data;
+}
+
+// Add option group and set QR code application.
+function addWireGuardQrCodeApplication(select, label, application)
+{
+	let optgroup = addOptGroup(select, label);
+	optgroup.setAttribute("data-application", application);
+	return optgroup;
+}
+
+// Add option holding QR code data of allowed WireGuard client with keys managed by Gargoyle.
+function addWireGuardQrCode(optgroup, name, iface, peer, enabled)
+{
+	if(iface.privateKey && !peer.endpoint.startsWith(":"))
+	{
+		// Encode allowed WireGuard client.
+		let data = encWireGuardQrCode(iface, peer);
+		// Add option per client name with client name as text and QR code data as value.
+		let option = addOption(optgroup, name, data);
+		// Add client key pair as data attributes to append to description list.
+		option.setAttribute("data-public-key", iface.publicKey);
+		option.setAttribute("data-private-key", iface.privateKey);
+		// Add data attribute of whether client is enabled to set alert info otherwise.
+		option.setAttribute("data-enabled", enabled);
+	}
+}
+
+// Encode WireGuard client configuration.
+function encWireGuardQrCode(iface, peer)
+{
+	return [
+		"[Interface]",
+		"Address = " + iface.address,
+		"PrivateKey = " + iface.privateKey,
+		"",
+		"[Peer]",
+		"AllowedIPs = " + peer.allowedIPs,
+		"Endpoint = " + peer.endpoint,
+		"PersistentKeepalive = 25",
+		"PublicKey = " + peer.publicKey,
+	].join("\n");
 }
 
 // Add option group and set QR code application and whether URL is remote.

@@ -12,11 +12,11 @@
 addLoadFunction(function()
 {
 	// Whether shared login hook resources of plugin are loaded.
-	let pkg = uciOriginal.get("gargoyle", "qr_code", "pkg");
-	if(!pkg)
+	if(!uciOriginal.get("gargoyle", "qr_code", "pkg"))
 	{
 		return;
 	}
+	let pkg = "qr_code_gargoyle";
 
 	// QR code viewer selection.
 	let viewer = byId("qr_code");
@@ -44,6 +44,35 @@ addLoadFunction(function()
 		let encryption = uciOriginal.get(wireless, section, "encryption");
 		let key = uciOriginal.get(wireless, section, "key");
 		addWifiQrCode(section.includes("_gn_") ? guest : home, section, ssid, hidden, encryption, key);
+	}
+
+	// Add allowed WireGuard client group and options.
+	let wireGuard = "wireguard_gargoyle";
+	if(uciOriginal.get(wireGuard, "server", "enabled") == "1")
+	{
+		// Add allowed WireGuard client group.
+		let client = addWireGuardQrCodeApplication(viewer, QrCode.WireGuardClient, "wireguard");
+		// Add allowed WireGuard client group options.
+		let wireGuardSections = uciOriginal.getAllSectionsOfType(wireGuard, "allowed_client");
+		for(let id of wireGuardSections)
+		{
+			let name = uciOriginal.get(wireGuard, id, "name");
+			let iface = {
+				address: uciOriginal.get(wireGuard, id, "ip") + "/32",
+				publicKey: uciOriginal.get(wireGuard, id, "public_key"),
+				privateKey: uciOriginal.get(wireGuard, id, "private_key"),
+			};
+			let peer = {
+				allowedIPs: wgAllowedIPs,
+				endpoint: uciOriginal.get(wireGuard, id, "remote") + ":" + uciOriginal.get(wireGuard, "server", "port"),
+				publicKey: uciOriginal.get(wireGuard, "server", "public_key"),
+			};
+			let enabled = uciOriginal.get(wireGuard, id, "enabled") == "1";
+			if(enabled)
+			{
+				addWireGuardQrCode(client, name, iface, peer, enabled);
+			}
+		}
 	}
 
 	// Add local/remote/indirect router access group and client URL options.

@@ -62,6 +62,11 @@ function updateEditor()
 		subject = QrCode.Url;
 		secrets = application.includes("cam") ? QrCode.LoginCredentials : "";
 	}
+	else if(!application.includes("wifi"))
+	{
+		subject = QrCode.Name;
+		secrets = QrCode.KeyPair;
+	}
 	byId("print_subject_label").innerHTML = subject;
 	byId("print_secrets_label").innerHTML = secrets;
 
@@ -69,7 +74,7 @@ function updateEditor()
 	byId("print_secrets_container").style.display = secrets ? "block" : "none";
 	["print_container", "embed_container", "qr_code_help"]
 		.forEach(id => byId(id).style.display = application ? "block": "none");
-	["wifi", "web_access", "webcam"]
+	["wifi", "wireguard", "web_access", "webcam"]
 		.forEach(id => byId(id + "_help").style.display = application.includes(id) ? "block": "none");
 
 	// QR code viewer selection.
@@ -95,6 +100,33 @@ function updateEditor()
 			let encryption = uciOriginal.get(wireless, section, "encryption");
 			let key = uciOriginal.get(wireless, section, "key");
 			addWifiQrCode(wifi, section, ssid, hidden, encryption, key, guest);
+		}
+	}
+
+	// Add allowed WireGuard client group and options.
+	if(application == "wireguard")
+	{
+		// Add allowed WireGuard client group.
+		let client = addWireGuardQrCodeApplication(viewer, QrCode.WireGuardClient, application);
+		// Add allowed WireGuard client group options.
+		let wireGuard = "wireguard_gargoyle";
+		let wireGuardSections = uciOriginal.getAllSectionsOfType(wireGuard, "allowed_client");
+		for(let id of wireGuardSections)
+		{
+			let name = uciOriginal.get(wireGuard, id, "name");
+			let iface = {
+				address: uciOriginal.get(wireGuard, id, "ip") + "/32",
+				publicKey: uciOriginal.get(wireGuard, id, "public_key"),
+				privateKey: uciOriginal.get(wireGuard, id, "private_key"),
+			};
+			let peer = {
+				allowedIPs: uci.get(wireGuard, "server", "all_client_traffic") == "false"
+					? ipToStr(parseIp(currentLanIp) & parseIp(currentLanMask)) + "/" + parseCidr(currentLanMask) : "0.0.0.0/0",
+				endpoint: uci.get(wireGuard, id, "remote") + ":" + uci.get(wireGuard, "server", "port"),
+				publicKey: uciOriginal.get(wireGuard, "server", "public_key"),
+			};
+			let enabled = uciOriginal.get(wireGuard, id, "enabled") == "1";
+			addWireGuardQrCode(client, name, iface, peer, enabled);
 		}
 	}
 
@@ -244,21 +276,41 @@ function updateViewer() {
 	setQrCodeTitle();
 	setQrCodeAlert();
 	// Set QR code alert info.
-	let optgroup = getOption(byId("qr_code")).parentNode;
+	let option = getOption(byId("qr_code"));
+	let optgroup = option.parentNode;
 	let application = optgroup.getAttribute("data-application");
-	if(application && application.startsWith("webcam"))
+	if(application)
 	{
-		if(uci.get("mjpg-streamer", "core", "enabled") == "1")
+		if(application == "wireguard")
 		{
-			// Set alert info if webcam is enabled and a remote URL is selected but remote access is disabled.
-			let remote = optgroup.getAttribute("data-remote") == "true";
-			let remotePort = uci.get("firewall", "webcam_wan_access", "remote_port");
-			setQrCodeAlert(remote && !remotePort ? QrCode.RemoteWebcamDisabled : "");
+			if(uci.get("wireguard_gargoyle", "server", "enabled") == "1")
+			{
+				// Set alert info if WireGuard server is enabled but the selected WireGuard client is disabled.
+				if(option.getAttribute("data-enabled") == "false")
+				{
+					setQrCodeAlert(QrCode.WireGuardClientDisabled);
+				}
+			}
+			else
+			{
+				// Set alert info if WireGuard server is disabled.
+				setQrCodeAlert(QrCode.WireGuardServerDisabled);
+			}
 		}
-		else
+		else if(application.startsWith("webcam"))
 		{
-			// Set alert info if webcam is disabled.
-			setQrCodeAlert(QrCode.WebcamDisabled);
+			if(uci.get("mjpg-streamer", "core", "enabled") == "1")
+			{
+				// Set alert info if webcam is enabled and a remote URL is selected but remote access is disabled.
+				let remote = optgroup.getAttribute("data-remote") == "true";
+				let remotePort = uci.get("firewall", "webcam_wan_access", "remote_port");
+				setQrCodeAlert(remote && !remotePort ? QrCode.RemoteWebcamDisabled : "");
+			}
+			else
+			{
+				// Set alert info if webcam is disabled.
+				setQrCodeAlert(QrCode.WebcamDisabled);
+			}
 		}
 	}
 	setQrCodeFrame();
@@ -317,6 +369,11 @@ function resetData()
 	let wifi = addOptGroup(editor, QrCode.Wifi);
 	addOption(wifi, QrCode.HomeWifi, "home_wifi");
 	addOption(wifi, QrCode.GuestWifi, "guest_wifi");
+	// Add virtual private network group and options.
+	let vpn = addOptGroup(editor, QrCode.Vpn);
+	addOption(vpn, QrCode.WireGuard, "wireguard");
+	// Hide virtual private network group when WireGuard plugin is not installed.
+	vpn.hidden = !uci.get("gargoyle", "connection", "wireguard");
 	// Add router access group and options.
 	let access = addOptGroup(editor, QrCode.RouterAccess);
 	addOption(access, QrCode.WebAccess, "web_access");
@@ -324,8 +381,8 @@ function resetData()
 	let webcam = addOptGroup(editor, QrCode.Webcam);
 	addOption(webcam, QrCode.WebcamSnapshot, "webcam_snapshot");
 	addOption(webcam, QrCode.WebcamStream, "webcam_stream");
-	// Hide webcam group when webcam plugin is not installed, that is with no mandatory local port.
-	webcam.hidden = uci.get("mjpg-streamer", "core", "port") == "";
+	// Hide webcam group when webcam plugin is not installed.
+	webcam.hidden = !uci.get("gargoyle", "system", "webcam");
 	editor.disabled = !hasOptions(editor);
 
 	// Update editor visibility.
@@ -352,7 +409,7 @@ function saveChanges()
 	let embed = (embed, application) => embed
 		|| uci.get(pkg, application, "embed_via_lan") == "1"
 		|| uci.get(pkg, application, "embed_via_wan") == "1";
-	if(["home_wifi", "guest_wifi", "web_access", "webcam_snapshot", "webcam_stream"].reduce(embed, false))
+	if(["home_wifi", "guest_wifi", "wireguard", "web_access", "webcam_snapshot", "webcam_stream"].reduce(embed, false))
 	{
 		uci.set(global, plugin, "", "login_hook");
 		uci.set(global, plugin, "css", "qr_code.css");
