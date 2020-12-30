@@ -220,7 +220,7 @@ function addWireGuardQrCodeApplication(select, label, application)
 // Add option holding QR code data of allowed WireGuard client with keys managed by Gargoyle.
 function addWireGuardQrCode(optgroup, name, iface, peer, enabled)
 {
-	if(iface.privateKey && !peer.endpoint.startsWith(":"))
+	if(iface.privateKey)
 	{
 		// Encode allowed WireGuard client.
 		let data = encWireGuardQrCode(iface, peer);

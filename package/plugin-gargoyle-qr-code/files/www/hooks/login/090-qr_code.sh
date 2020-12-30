@@ -69,9 +69,8 @@
 			private_key=$(uci_get wireguard_gargoyle "$id" private_key)
 			remote=$(uci_get wireguard_gargoyle "$id" remote)
 			enabled=$(uci_get wireguard_gargoyle "$id" enabled)
-			# Only load allowed WireGuard clients when enabled and keys are
-			# managed by Gargoyle and with non-empty WAN IP or custom endpoint.
-			if [ -n "$private_key" -a -n "$remote" -a "$enabled" = 1 ]; then
+			# Only load allowed WireGuard clients when enabled and keys are managed by Gargoyle.
+			if [ "$enabled" = 1 -a -n "$private_key" ]; then
 				uci_set wireguard_gargoyle "$id"
 				uci_set wireguard_gargoyle "$id" name
 				uci_set wireguard_gargoyle "$id" ip

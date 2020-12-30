@@ -753,8 +753,13 @@ function setRemoteNames(selectedRemote)
 		}
 	}
 	selectedFound = (selectedRemote == currentWanIp) || selectedFound
-	names.push("WAN IP: " + currentWanIp, wgStr.OthIPD)
-	values.push(currentWanIp, "custom")
+	if(currentWanIp)
+	{
+		names.push("WAN IP: " + currentWanIp)
+		values.push(currentWanIp)
+	}
+	names.push(wgStr.OthIPD)
+	values.push("custom")
 	
 	setAllowableSelections(selectId, values, names, document)
 	var chosen = selectedRemote == "" ? values[0] : selectedRemote
