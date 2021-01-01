@@ -26,18 +26,18 @@
 	echo 'const directView = clientProt == serverProt && clientHost == serverHost && clientPort == serverPort;'
 
 	# Whether client connected via LAN or WAN.
-	remoteView=false
-	accessSide=local
-	accessArea=lan
-	for remoteAddr in $(uci -q get network.wan.ipaddr; uci -q get network.wan.ip6addr); do
-		if [ "$SERVER_ADDR" = "$(echo "$remoteAddr" | cut -d / -f 1)" ]; then
-			remoteView=true
-			accessSide=remote
-			accessArea=wan
+	remoteView=true
+	accessSide=remote
+	accessArea=wan
+	for localAddr in $(uci -q get network.lan.ipaddr; uci -q get network.lan.ip6addr); do
+		if [ "$SERVER_ADDR" = "$(echo "$localAddr" | cut -d / -f 1)" ]; then
+			remoteView=false
+			accessSide=local
+			accessArea=lan
 			break
 		fi
 	done
-	unset remoteAddr
+	unset localAddr
 	echo 'const remoteView = '$remoteView';'
 	echo 'const accessSide = "'$accessSide'";'
 	echo 'const accessArea = "'$accessArea'";'
