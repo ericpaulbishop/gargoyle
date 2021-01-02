@@ -1431,3 +1431,15 @@ function proofreadQOSIPRange(triggerEl)
 		proofreadIpRange(triggerEl);
 	}
 }
+
+function proofreadQOSIP(triggerEl)
+{
+	if(isIPv6(triggerEl.value))
+	{
+		proofreadIp6(triggerEl);
+	}
+	else
+	{
+		proofreadIp(triggerEl);
+	}
+}

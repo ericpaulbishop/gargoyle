@@ -146,7 +146,7 @@
 						<label for="use_ptarget_ip" id="ptarget_ip_label"><%~ ACC_Pt %>:</label>
 					</span>
 					<span class="col-xs-6">
-						<input type="text" name="ptarget_ip" id="ptarget_ip" class="form-control" oninput="proofreadIpRange(this)" size="17" maxlength="31" aria-labelledby="ptarget_ip_label"/>
+						<input type="text" name="ptarget_ip" id="ptarget_ip" class="form-control" oninput="proofreadQOSIP(this)" aria-labelledby="ptarget_ip_label"/>
 					</span>
 				</div>
 
