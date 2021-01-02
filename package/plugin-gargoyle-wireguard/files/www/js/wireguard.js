@@ -255,7 +255,7 @@ function saveChanges()
 			var ip = document.getElementById(prefix + "ip").value;
 			uci.set("wireguard_gargoyle", "server", "ip", ip)
 			var submask = document.getElementById(prefix + "mask").value;
-			var subcidr = mask2cidr(submask);
+			var subcidr = parseCidr(submask);
 			uci.set("wireguard_gargoyle", "server", "submask", submask)
 			uci.set("wireguard_gargoyle", "server", "port", wgPort)
 			uci.set("wireguard_gargoyle", "server", "c2c", getSelectedValue(prefix + "client_to_client"))
@@ -280,7 +280,7 @@ function saveChanges()
 					var subnetmask = uci.get("wireguard_gargoyle",wgACs[wgACIdx],"subnet_mask");
 					if(subnetip != "" && subnetmask != "")
 					{
-						subnetmask = mask2cidr(subnetmask);
+						subnetmask = parseCidr(subnetmask);
 						ipArr.push(subnetip + "/" + subnetmask);
 					}
 					configureAC(clientId,pubkey,ipArr,null,null);
@@ -465,7 +465,7 @@ function downloadAc()
 	var prroutedips = "0.0.0.0/0";
 	if(uci.get("wireguard_gargoyle","server","all_client_traffic") == "false")
 	{
-		prroutedips = numericIpToStr(getNumericIp(currentLanIp) & getNumericIp(currentLanMask)) + "/" + mask2cidr(currentLanMask);
+		prroutedips = ipToStr(parseIp(currentLanIp) & parseIp(currentLanMask)) + "/" + parseCidr(currentLanMask);
 	}
 	var prendpoint = uci.get("wireguard_gargoyle",downloadId,"remote") + ":" + uci.get("wireguard_gargoyle","server","port");
 	var prpubkey = uci.get("wireguard_gargoyle","server","public_key");
@@ -753,8 +753,13 @@ function setRemoteNames(selectedRemote)
 		}
 	}
 	selectedFound = (selectedRemote == currentWanIp) || selectedFound
-	names.push("WAN IP: " + currentWanIp, wgStr.OthIPD)
-	values.push(currentWanIp, "custom")
+	if(currentWanIp)
+	{
+		names.push("WAN IP: " + currentWanIp)
+		values.push(currentWanIp)
+	}
+	names.push(wgStr.OthIPD)
+	values.push("custom")
 	
 	setAllowableSelections(selectId, values, names, document)
 	var chosen = selectedRemote == "" ? values[0] : selectedRemote
@@ -802,9 +807,9 @@ function validateAc(internalServerIp, internalServerMask)
 	var errors = proofreadFields(inputIds, labelIds, functions, validReturnCodes, visibilityIds, document );
 	if(errors.length == 0 && document.getElementById(prefix + "ip_container").style.display != "none")
 	{
-		var testIp  = getNumericIp(document.getElementById(prefix + "ip").value)
-		var wgIp   = getNumericIp(internalServerIp)
-		var wgMask = getNumericMask(internalServerMask)
+		var testIp  = parseIp(document.getElementById(prefix + "ip").value)
+		var wgIp   = parseIp(internalServerIp)
+		var wgMask = parseMask(internalServerMask)
 		if( ( testIp & wgMask ) != ( wgIp & wgMask ) )
 		{
 			errors.push(wgStr.ClntIntIP+" " + document.getElementById(prefix + "ip").value + " "+wgStr.OSubErr)
@@ -823,41 +828,27 @@ function validateAc(internalServerIp, internalServerMask)
 	{
 		var subnetIpEl   = document.getElementById(prefix + "subnet_ip")
 		var subnetMaskEl = document.getElementById(prefix + "subnet_mask")
-		subnetIpEl.value = adjustSubnetIp(subnetIpEl.value, subnetMaskEl.value)
+		subnetIpEl.value = applyMask(subnetIpEl.value, subnetMaskEl.value)
 	}
 
 	return errors;
 }
 
-function getNumericIp(ip)
-{
-	var i = ip.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/)
-	if(i)
-	{
-        	return (+i[1]<<24) + (+i[2]<<16) + (+i[3]<<8) + (+i[4])
-	}
-	return null
-}
-
-function getNumericMask(mask)
+function parseMask(mask)
 {
 	if(mask.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/))
 	{
-		return getNumericIp(mask)
+		return parseIp(mask)
 	}
 	else
 	{
 		return -1<<(32-mask)
 	}
 }
-function numericIpToStr(numIp)
-{
-	return ( (numIp>>>24) +'.' + (numIp>>16 & 255) + '.' + (numIp>>8 & 255) + '.' + (numIp & 255) );
-}
 
-function adjustSubnetIp(ip, mask)
+function applyMask(ip, mask)
 {
-	return numericIpToStr( getNumericIp(ip) & getNumericMask(mask) )
+	return ipToStr( parseIp(ip) & parseMask(mask) )
 }
 
 function setAcUciFromDocument(id)
@@ -964,17 +955,6 @@ function editAc(editRow,editId,serverInternalIp,serverInternalMask)
 		editRow.childNodes[2].appendChild(document.createTextNode(pubkey))
 		closeModalWindow('wireguard_allowed_client_modal');
 	}
-}
-
-function mask2cidr(mask)
-{
-	var maskNodes = mask.match(/(\d+)/g);
-	var cidr = 0;
-	for(var i in maskNodes)
-	{
-  	cidr += (((maskNodes[i] >>> 0).toString(2)).match(/1/g) || []).length;
-	}
-	return cidr;
 }
 
 function setClientVisibility()

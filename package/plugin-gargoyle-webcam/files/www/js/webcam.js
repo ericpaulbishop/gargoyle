@@ -187,16 +187,6 @@ function showPreview(enabled, port, username, password)
 	{
 		auth="";
 	}
-	// What client (browser) sees.
-	var clientProt = window.location.protocol.slice(0, -1);
-	var clientHost = window.location.hostname;
-	var clientPort = window.location.port ? window.location.port : clientProt == "http" ? 80 : 443;
-	// What server (uhttpd) sees.
-	var serverProt = HTTPS == "on" ? "https" : "http";
-	var serverHost = HTTP_HOST ? HTTP_HOST : SERVER_ADDR;
-	var serverPort = SERVER_PORT;
-	// Whether client sees what server sees.
-	var directView = clientProt == serverProt && clientHost == serverHost && clientPort == serverPort;
 	// Use saved port except when there is a reverse proxy. In that case use clientPort and simply
 	// assume that reverse proxy passes the queries `?action=snapshot` and `?action=stream` to the
 	// saved port. There is no reason for a reverse proxy to use a separate port on its own and we

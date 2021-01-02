@@ -12,6 +12,34 @@ var TSort_Classes = new Array ('odd', 'even'); // table sorting zebra row suppor
 var menuState = []; //nav Menu State variable
 var navTimer; //timeout for restoring menu
 
+// Abbreviation.
+function byId(id, controlDocument)
+{
+	controlDocument = controlDocument == null ? document : controlDocument;
+	return controlDocument.getElementById(id);
+}
+
+// Escape HTML using DOM API.
+function escapeHTML(html)
+{
+	let container = document.createElement("div");
+	container.textContent = html;
+	return container.innerHTML;
+}
+
+// Automatically adjust height of element to fit its content without scrollbars.
+function autoHeight(element)
+{
+	element.style.height = "";
+	let computed = window.getComputedStyle(element);
+	let height = element.scrollHeight
+		+ parseInt(computed.getPropertyValue("border-top-width"))
+		+ parseInt(computed.getPropertyValue("padding-top"))
+		+ parseInt(computed.getPropertyValue("padding-bottom"))
+		+ parseInt(computed.getPropertyValue("border-bottom-width"));
+	element.style.height = height + "px";
+}
+
 window.onresize = function onresize()
 {
 	//in case this gets called while initializing page, you may get error if element isnt defined,
@@ -358,6 +386,24 @@ function UCIContainer()
 		var value = this.values[next_key];
 		return value != null ? value : '';
 	}
+
+	this.setLines = function(pkg, section, option, value)
+	{
+		this.createListOption(pkg, section, option, true);
+		var lines = value.split(/\r\n|\r|\n/);
+		this.set(pkg, section, option, lines.splice(0, 1), false)
+		for(var lineIndex in lines)
+		{
+			this.set(pkg, section, option, lines[lineIndex], true)
+		}
+	}
+
+	this.getLines = function(pkg, section, option)
+	{
+		var lines = this.get(pkg, section, option);
+		return (lines instanceof Array ? lines : []).join("\n");
+	}
+
 	this.removeAllSectionsOfType = function(pkg, type)
 	{
 		var removeSections = this.getAllSectionsOfType(pkg, type);
@@ -905,6 +951,20 @@ function parseIp(ip)
 {
 	var ip = ip.split(".");
 	return ((((((+ip[0])*256)+(+ip[1]))*256)+(+ip[2]))*256)+(+ip[3]);
+}
+function ipToStr(ip)
+{
+	return ((ip>>>24)+'.'+(ip>>16 & 255)+'.'+(ip>>8 & 255)+'.'+(ip & 255));
+}
+function parseCidr(ip)
+{
+	var ip = ip.match(/(\d+)/g);
+	var cidr = 0;
+	for(var i in ip)
+	{
+		cidr += (((ip[i] >>> 0).toString(2)).match(/1/g) || []).length;
+	}
+	return cidr;
 }
 function ipInRange(ip, start, end)
 {

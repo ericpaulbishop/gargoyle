@@ -1,0 +1,15 @@
+#fallback is the string the web UI will use when the target language is not present
+
+fallback=QR Code
+AR=رمز الاستجابة السريعة
+CS=QR kód
+EN=QR Code
+FR=QR Code
+DE=QR-Code
+NO=QR kode
+PL=Kod QR
+BR=Código QR
+RU=QR код
+ZH=二维码
+SK=QR kód
+ES=Código QR

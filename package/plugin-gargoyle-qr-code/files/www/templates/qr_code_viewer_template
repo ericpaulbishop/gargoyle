@@ -1,0 +1,54 @@
+		<div id="qr_code_viewer" class="panel panel-default">
+			<div class="panel-heading">
+				<h3 id="qr_code_title" class="panel-title"><%~ qr_code.QrCodeViewer %></h3>
+			</div>
+			<div id="qr_code_body" class="panel-body">
+				<div id="qr_code_selection" class="row form-group">
+					<span class="col-xs-3">
+						<label for="qr_code"><%~ qr_code.QrCode %>:</label>
+					</span>
+					<span class="col-xs-9">
+						<select id="qr_code" class="form-control" disabled="disabled">
+							<option value="" hidden="hidden"><%~ SelectQrCode %></option>
+						</select>
+					</span>
+				</div>
+				<div id="qr_code_container" style="display: none">
+					<div id="qr_code_alert_container" class="row form-group" style="display: none">
+						<span class="col-xs-3"></span>
+						<span class="col-xs-9">
+							<div id="qr_code_alert" class="alert alert-info" role="alert"></div>
+						</span>
+					</div>
+					<div class="row form-group">
+						<span class="col-xs-3">
+							<label id="qr_code_width_label" for="qr_code_width"><%~ qr_code.Width %>:</label>
+						</span>
+						<span class="col-xs-6">
+							<input id="qr_code_width_range" class="form-control" type="range" min="20" max="80" step="1"/>
+						</span>
+						<span class="col-xs-3 text-right">
+							<input id="qr_code_width" class="form-control" type="number" min="20" max="80" maxlength="2" step="1"/> %
+						</span>
+					</div>
+					<div class="internal_divider"></div>
+					<div class="row text-center">
+						<span id="qr_code_document" class="col-xs-12">
+							<a id="qr_code_frame"></a>
+							<dl id="qr_code_items"></dl>
+							<div id="qr_code_guide"></div>
+						</span>
+					</div>
+					<div class="internal_divider"></div>
+					<div class="row form-group">
+						<span class="col-xs-9">
+							<button id="qr_code_print_button" class="btn btn-primary"><%~ qr_code.PrintDocument %></button>
+							<button id="qr_code_download_button" class="btn btn-default"><%~ qr_code.DownloadQrCode %></button>
+						</span>
+						<span class="col-xs-3 text-right">
+							<button id="qr_code_hide_button" class="btn btn-default"><%~ qr_code.Hide %></button>
+						</span>
+					</div>
+				</div>
+			</div>
+		</div>

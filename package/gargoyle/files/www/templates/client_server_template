@@ -1,0 +1,45 @@
+<script>
+<%
+	# Browser or reverse proxy IP.
+	echo 'const REMOTE_ADDR = "'$REMOTE_ADDR'";'
+	# Either LAN or WAN uhttpd IP.
+	echo 'const SERVER_ADDR = "'$SERVER_ADDR'";'
+
+	# HTTPS when "on".
+	echo 'const HTTPS = "'$HTTPS'";'
+	# Browser or reverse proxy host or IP, or empty with omitted HTTP header.
+	echo 'const HTTP_HOST = "'$HTTP_HOST'";'
+	# Either LAN or WAN uhttpd port.
+	echo 'const SERVER_PORT = "'$SERVER_PORT'";'
+
+	# What client (browser) sees.
+	echo 'const clientProt = window.location.protocol.slice(0, -1);'
+	echo 'const clientHost = window.location.hostname;'
+	echo 'const clientPort = window.location.port ? window.location.port : clientProt == "http" ? "80" : "443";'
+
+	# What server (uhttpd) sees.
+	echo 'const serverProt = HTTPS == "on" ? "https" : "http";'
+	echo 'const serverHost = HTTP_HOST ? HTTP_HOST : SERVER_ADDR.includes(":") ? "[" + SERVER_ADDR + "]" : SERVER_ADDR;'
+	echo 'const serverPort = SERVER_PORT;'
+
+	# Whether client sees what server sees.
+	echo 'const directView = clientProt == serverProt && clientHost == serverHost && clientPort == serverPort;'
+
+	# Whether client connected via LAN or WAN.
+	remoteView=false
+	accessSide=local
+	accessArea=lan
+	for remoteAddr in $(uci -q get network.wan.ipaddr; uci -q get network.wan.ip6addr); do
+		if [ "$SERVER_ADDR" = "$(echo "$remoteAddr" | cut -d / -f 1)" ]; then
+			remoteView=true
+			accessSide=remote
+			accessArea=wan
+			break
+		fi
+	done
+	unset remoteAddr
+	echo 'const remoteView = '$remoteView';'
+	echo 'const accessSide = "'$accessSide'";'
+	echo 'const accessArea = "'$accessArea'";'
+%>
+</script>

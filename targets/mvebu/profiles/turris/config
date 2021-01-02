@@ -2379,6 +2379,7 @@ CONFIG_PACKAGE_plugin-gargoyle-openvpn=y
 CONFIG_PACKAGE_plugin-gargoyle-ping-watchdog=m
 CONFIG_PACKAGE_plugin-gargoyle-pptp=m
 CONFIG_PACKAGE_plugin-gargoyle-qos=y
+CONFIG_PACKAGE_plugin-gargoyle-qr-code=m
 CONFIG_PACKAGE_plugin-gargoyle-spectrum-analyser=m
 CONFIG_PACKAGE_plugin-gargoyle-spectrum-analyser-minimal=m
 CONFIG_PACKAGE_plugin-gargoyle-stamgr=y
