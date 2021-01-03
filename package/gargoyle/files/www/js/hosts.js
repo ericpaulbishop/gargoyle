@@ -239,7 +239,6 @@ function parseArp(arpLines, leaseLines)
 {
 	var arpHash = [];
 
-	arpLines.shift(); //skip header
 	var lineIndex = 0;
 	for(lineIndex=0; lineIndex < arpLines.length; lineIndex++)
 	{

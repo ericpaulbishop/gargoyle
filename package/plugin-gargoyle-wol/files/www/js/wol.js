@@ -18,7 +18,6 @@ function initWolTable()
 	initializeDescriptionVisibility(uciOriginal, "wol_help"); // set description visibility
 	uciOriginal.removeSection("gargoyle", "help"); // necessary, or we overwrite the help settings when we save
 
-	arpLines.shift(); // skip header
 	var lineIndex = 0;
 	for(lineIndex=0; lineIndex < arpLines.length; lineIndex++)
 	{
