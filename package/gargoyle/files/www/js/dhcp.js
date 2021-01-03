@@ -89,7 +89,13 @@ function saveChanges()
 			staticHostCommands.push("uci set dhcp." + cfgid + "=host");
 		}
 
+		// We don't use /etc/ethers anymore
 		createEtherCommands = [ "touch /etc/ethers", "rm /etc/ethers" ];
+		var dnsmasqsec = uci.getAllSectionsOfType("dhcp","dnsmasq");
+		if(dnsmasqsec.length > 0)
+		{
+			uci.set("dhcp",dnsmasqsec[0],"readethers","0");
+		}
 
 		createHostCommands = [ "touch /etc/hosts", "rm /etc/hosts" ];
 		createHostCommands.push("echo \"127.0.0.1\tlocalhost localhost4\" >> /etc/hosts");
