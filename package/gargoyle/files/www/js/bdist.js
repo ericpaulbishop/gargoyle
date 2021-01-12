@@ -50,14 +50,25 @@ function getEmbeddedSvgPlotFunction(embeddedId)
 	return null;
 }
 
-function getHostDisplay(ip)
+function getHostDisplay(ip,keepLongHost)
 {
+	// If keepLongHost is true, we return an array both the shortened host (if > 25char) and original
+	// Otherwise, just a string with the result
+	keepLongHost = keepLongHost === undefined ? false : keepLongHost;
 	var hostDisplay = getSelectedValue("host_display");
-	var host = ip;
+	var host = keepLongHost ? [ip,ip] : ip;
 	if(hostDisplay == "hostname" && ipToHostname[ip] != null)
 	{
-		host = ipToHostname[ip];
-		host = host.length < 25 ? host : host.substr(0,22)+"...";
+		if(keepLongHost)
+		{
+			host[1] = ipToHostname[ip];
+			host[0] = host[1].length < 25 ? host[1] : host[1].substr(0,22)+"...";
+		}
+		else
+		{
+			host = ipToHostname[ip];
+			host = host.length < 25 ? host : host.substr(0,22)+"...";
+		}
 	}
 	return host;
 }
@@ -65,15 +76,17 @@ function getHostDisplay(ip)
 
 function getHostList(ipList)
 {
-	var hostList = [[],[]];
+	// [[host (shortened)],[ip],[host]]
+	var hostList = [[],[],[]];
 	var ipIndex =0;
 	for(ipIndex=0; ipIndex < ipList.length; ipIndex++)
 	{
-		host = getHostDisplay(ipList[ipIndex]);
-		if(hostList[0].indexOf(host) < 0)
+		host = getHostDisplay(ipList[ipIndex],true);
+		if(hostList[2].indexOf(host[1]) < 0)
 		{
-			hostList[0].push(host);
+			hostList[0].push(host[0]);
 			hostList[1].push(ipList[ipIndex]);
+			hostList[2].push(host[1]);
 		}
 	}
 	return hostList;
@@ -311,7 +324,8 @@ function resetDisplayInterval()
 			{
 				var host = hostLists[0][x];
 				var hip = hostLists[1][x];
-				var ipList = getAllIPForHostname(host);
+				var longhost = hostLists[2][x];
+				var ipList = getAllIPForHostname(longhost);
 				var ipData = [];
 				for(ip in ipList)
 				{
