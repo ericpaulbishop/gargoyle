@@ -320,7 +320,8 @@ if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress
 
 	cd "$top_dir/minifiers/node_modules/.bin" 2>/dev/null
 
-	npm_test=$( npm -v 2>/dev/null )
+	npm_binary="npm"
+	npm_test=$( "$npm_binary" -v 2>/dev/null )
 	nodeglobal=$npm_test
 	node_binary="node"
 	node_version=$( "$node_binary" -v 2>/dev/null)
@@ -365,7 +366,7 @@ if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress
 			git clone git://github.com/npm/cli.git "$top_dir/npm"
 			cd npm
 			git checkout "$npm_version_tag"
-			node bin/npm-cli.js install -gf
+			npm_binary="$node_binary $top_dir/npm/bin/npm-cli.js"
 		fi
 
 		npm_test=$( npm -v 2>/dev/null )
@@ -395,7 +396,7 @@ if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress
 			mkdir -p "$top_dir/minifiers/node_modules/.bin"
 	
 			cd "$top_dir"
-			npm install terser --prefix minifiers > /dev/null 2>&1
+			${npm_binary} install terser --prefix minifiers > /dev/null 2>&1
 		else
 			echo "terser ok!"
 		fi
@@ -422,7 +423,7 @@ if [ "$js_compress" = "true" ] || [ "$js_compress" = "TRUE" ] || [ "$js_compress
 				echo ""
 	
 				cd "$top_dir"
-				npm install uglifycss -q --prefix minifiers > /dev/null 2>&1
+				${npm_binary} install uglifycss -q --prefix minifiers > /dev/null 2>&1
 			else
 				echo "uglifycss ok!"
 			fi
