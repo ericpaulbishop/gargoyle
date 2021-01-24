@@ -1,5 +1,7 @@
 #/bin/sh
 
+. /lib/functions/network.sh
+
 tz="$1"
 
 timezone_lines=$(wc -l /www/data/timezones.txt | awk ' { print $1 ; } ' )
@@ -8,7 +10,7 @@ opp_tz_line_num=$(( 1+ (($tz_line_num+($timezone_lines/2)) % $timezone_lines) ))
 opp_tz=$( head -n $opp_tz_line_num /www/data/timezones.txt | tail -n 1 | sed 's/^[^\t]*\t*\"//g' | sed 's/\".*$//g' )
 
 
-wan_gateway=$(uci -P /var/state get network.wan.gateway)
+network_get_gateway wan_gateway wan
 echo "$opp_tz" >/etc/TZ
 set_kernel_timezone
 ping -c 2 $wan_gateway >/dev/null 2>/dev/null 

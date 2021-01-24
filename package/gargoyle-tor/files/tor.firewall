@@ -1,5 +1,7 @@
 #!/bin/sh
 
+. /lib/functions/network.sh
+
 if [ -f /tmp/tor.firewall.running ] ; then
 	exit
 fi
@@ -143,8 +145,8 @@ initialize()
 		if [ -z "$zone" ] ; then 
 			zone="lan"
 		fi
-		zone_ip=$(uci -P /var/state get network.$zone.ipaddr 2>/dev/null )
-		zone_mask=$(uci -P /var/state get network.$zone.netmask 2>/dev/null )
+		network_get_ipaddr zone_ip "$zone"
+		network_get_subnet zone_mask "$zone"
 		
 		hidden_service_subnet=$( uci get tor.client.hidden_service_subnet 2>/dev/null )
 		hidden_service_mask_bits=$( uci get tor.client.hidden_service_mask_bits 2>/dev/null )
@@ -168,7 +170,7 @@ initialize()
 			
 			uci del_list dhcp.@dnsmasq[0].rebind_domain='.onion'			
 			cur_onion_server=$( uci get dhcp.@dnsmasq[0].server | grep -o "\/.onion\/[0-9\.#]*" )
-			client_listen_ip=$(uci -P /var/state get network.$zone.ipaddr 2>/dev/null)
+			network_get_ipaddr client_listen_ip "$zone"
 			if [ -n "$cur_onion_server" ] ; then
 				uci del_list dhcp.@dnsmasq[0].server="$cur_onion_server"
 			fi
@@ -205,9 +207,9 @@ initialize()
 			iptables -t nat -A tor_client -p tcp   --dport 53 -j REDIRECT --to-ports $dns_port
 		
 			# don't redirect local addresses
-			if [ -n "$zone_ip" ] && [ -n "$zone_mask" ] ; then
-				iptables -t nat    -A tor_client -d $zone_ip/$zone_mask -j RETURN
-				iptables -t filter -A tor_client -d $zone_ip/$zone_mask -j RETURN
+			if [ -n "$zone_mask" ] ; then
+				iptables -t nat    -A tor_client -d $zone_mask -j RETURN
+				iptables -t filter -A tor_client -d $zone_mask -j RETURN
 			elif [ -n "$zone_ip" ] ; then
 				iptables -t nat    -A tor_client -d $zone_ip -j RETURN
 				iptables -t filter -A tor_client -d $zone_ip -j RETURN
@@ -245,9 +247,9 @@ initialize()
 	
 	if [ "$enabled" != "0" ]  && [ "$relay_mode$client_mode" != "00" ] ; then
 
-		wan_if=$(uci -P /var/state get network.wan.ifname 2>/dev/null)
+		network_get_device wan_if wan
 		if [ -z "$wan_if" ] ; then
-			wan_if=$(uci -P /var/state get network.wan.device 2>/dev/null)
+			network_get_physdev wan_if wan
 		fi
 		if [ -n "$wan_if" ] ; then
 			

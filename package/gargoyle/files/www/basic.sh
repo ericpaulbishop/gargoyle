@@ -22,8 +22,8 @@
 
 	cur_date_seconds=$(date +%s)
 	uptime=$(cat /proc/uptime | sed 's/\..*$//g' | sed 's/ .*$//g')
-	lease_start=$(uci -P /var/state get network.wan.lease_acquired 2>/dev/null)
-	lease_lifetime=$(uci -P /var/state get network.wan.lease_lifetime 2>/dev/null)
+	lease_start=$(ifstatus wan | jsonfilter -e '@.data.leaseacquired' 2>/dev/null)
+	lease_lifetime=$(ifstatus wan | jsonfilter -e '@.data.leasetime' 2>/dev/null)
 	echo "var currentDateSeconds = \"$cur_date_seconds\";"
 	echo "var uptime = \"$uptime\";"
 	echo "var leaseStart = \"$lease_start\";"

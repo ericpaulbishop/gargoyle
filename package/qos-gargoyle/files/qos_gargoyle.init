@@ -776,18 +776,18 @@ define_interface()
 	$echo_on
 	#Wait for up to 15 seconds for the wan interface to indicate it is up.
 	wait_sec=15
-	while [ -z $(uci -P /var/state get network.wan.up 2>/dev/null) ] && [ $wait_sec -gt 0 ] ; do
+	while ! network_is_up wan && [ $wait_sec -gt 0 ] ; do
 		sleep 1
 		wait_sec=$(($wait_sec - 1))
 	done
 
 	#The wan interface name will depend on if pppoe is used or not.  If pppoe is used then
-	#the name we are looking for is in network.wan.ifname.  If there is nothing there
+	#the name we are looking for is in network.wan.l3_device.  If there is nothing there
 	#use the device named by network.wan.device
 
-	qos_interface=$(uci -P /var/state get network.wan.ifname 2>/dev/null)
+	network_get_device qos_interface wan
 	if [ -z $qos_interface ] ; then
-		qos_interface=$(uci -P /var/state get network.wan.device 2>/dev/null)
+		network_get_physdev qos_interface wan
 	fi
 
 	#Determine our wan ip from the wan interface we detected.
@@ -799,7 +799,7 @@ define_interface()
 	[ -n "$local_ip6" ] && wan_ip6="$local_ip6"
 
 	#Determine the VPN interface if there is one.
-	vpn_interface=$(uci -P /var/state get firewall.vpn_zone.device 2>/dev/null)
+	vpn_interface=$(uci -q get firewall.vpn_zone.device)
 	$echo_off
 }
 

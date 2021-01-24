@@ -1,5 +1,7 @@
 #!/bin/sh
 
+. /lib/functions/network.sh
+
 if [ -f /tmp/openvpn.firewall.running ] ; then
 	exit
 fi
@@ -138,8 +140,9 @@ initialize()
 		
 		local_openvpn_port=$(netstat -u -t -p -a -e -n 2>/dev/null | awk ' $0 ~/openvpn/ { gsub(/^.*:/, "", $4) ; print $4 ; } ')
 		openvpn_proto=$(netstat -u -t -p -a -e -n 2>/dev/null | awk ' $0 ~/openvpn/ { print $1 ; } ')
-		wan_if=$(uci -P /var/state get network.wan.ifname 2>/dev/null)
-		vpn_if=$(uci -P /var/state get firewall.vpn_zone.device 2>/dev/null)
+		network_get_device wan_if lan || \
+			wan_if=$(uci -q get network.wan.ifname)
+		vpn_if=$(uci -q get firewall.vpn_zone.device)
 		if [ -n "$local_openvpn_port" ] &&  [ -n "$openvpn_proto" ] && [ -n "$wan_if" ] && [ -n "$vpn_if" ]  ; then
 
 			# create openvpn bandwidth monitor chains
@@ -209,7 +212,8 @@ set_block_nonovpn()
 		
 		
 		if [ "$do_block" = "1" ] || [ "$do_block" = "true" ] ; then
-			wan_if=$(uci -P /var/state get network.wan.ifname 2>/dev/null)
+			network_get_device wan_if lan || \
+				wan_if=$(uci -q get network.wan.ifname)
 			iptables -t filter -N block_non_openvpn
 			iptables -t filter -A block_non_openvpn -d 10.0.0.0/8     -j ACCEPT
 			iptables -t filter -A block_non_openvpn -d 172.16.0.0/12  -j ACCEPT

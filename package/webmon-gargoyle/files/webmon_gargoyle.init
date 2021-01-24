@@ -1,6 +1,7 @@
 #!/bin/sh /etc/rc.common
 START=85
 
+. /lib/functions/network.sh
 include /lib/network
 
 
@@ -40,7 +41,8 @@ start()
 	config_get_bool enabled webmon 'enabled' '0'
 	[ "$enabled" -gt 0 ] || return
 
-	wan_if=$(uci -P "/var/state" get network.wan.ifname)
+	network_get_device wan_if wan || \
+		wan_if=$(uci -q get network.wan.ifname)
 	if [ -n "$wan_if" ] ; then
 		
 		#load save path, creating directory if necessary

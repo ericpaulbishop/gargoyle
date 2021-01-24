@@ -1,12 +1,14 @@
 #!/bin/sh
 
+. /lib/functions/network.sh
+
 if [ "$INTERFACE" = "lan" ] && [ "$ACTION" = "ifup" ] ; then
 	inc=0;
-	if_ip=$(uci -P /var/state get network.$INTERFACE.ipaddr)
+	network_get_ipaddr if_ip "$INTERFACE"
 	while [ -z "$if_ip" ] && [ $inc -lt 20 ] ; do
 		sleep 2
 		inc=$(($inc+2))
-		if_ip=$(uci -P /var/state get network.$INTERFACE.ipaddr)
+		network_get_ipaddr if_ip "$INTERFACE"
 	done
 	hostname=$(uci get system.@system[0].hostname)
 	if [ -n "$if_ip" ] && [ -n "$hostname" ] ; then

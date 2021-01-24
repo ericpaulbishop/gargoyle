@@ -13,8 +13,11 @@
 <script>
 <!--
 <%
-	lan_iface=$(uci -P /var/state get network.lan.ifname)
-	wan_iface=$(uci -q -P /var/state get network.wan.ifname)
+	. /lib/functions/network.sh
+	network_get_device lan_iface lan || \
+		lan_iface=$(uci -q get network.lan.ifname)
+	network_get_device wan_iface wan || \
+		wan_iface=$(uci -q get network.wan.ifname)
 	echo "var lanIface=\"$lan_iface\";"
 	echo "var wanIface=\"$wan_iface\";"
 	echo "var routingData = new Array();"

@@ -69,8 +69,8 @@ service_start_if_enabled dnsmasq
 service_start_if_enabled odhcpd
 service_start_if_enabled webmon_gargoyle
 
-lan_gateway=$(uci -P /var/state get network.lan.gateway)
-wan_gateway=$(uci -P /var/state get network.wan.gateway)
+network_get_gateway lan_gateway lan
+network_get_gateway wan_gateway wan
 if [ -n "$lan_gateway" ] ; then
 	arping -c 2 -I br-lan $lan_gateway
 	ping -c 2 $lan_gateway
