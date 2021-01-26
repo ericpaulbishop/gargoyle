@@ -39,8 +39,9 @@ for PORT in $PORTS; do
 	json_select $PORT
 	json_get_var PHYSICAL index
 	json_get_var LOGICAL num
+	json_get_var ROLE role
 	json_select ..
-	if [ -n "$PHYSICAL" ] && [ -n "$LOGICAL" ] ; then
+	if [ "$ROLE" = "lan" ] && [ -n "$LOGICAL" ] ; then
 		[ "$P" = "-1" ] && continue
 		[ -n "$VLAN" ] && {
 			PVID=$(swconfig dev $SWITCHID port $LOGICAL get pvid)
