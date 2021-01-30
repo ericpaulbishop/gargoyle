@@ -1,4 +1,4 @@
-GHF_LIBS:= -luci -lericstools
+GHF_LIBS:= -luci -ljson-c -lericstools
 GSV_LIBS:= -lcrypt -lericstools
 
 all: gargoyle_header_footer gargoyle_session_validator 
