@@ -625,9 +625,7 @@ for target in $targets ; do
 		fi
 		other_packages=$(ls "$openwrt_package_dir" )
 		for other in $other_packages ; do
-			if [ ! -d "$target-src/package/$other" ] ; then
-				cp -r "$openwrt_package_dir/$other" $target-src/package
-			fi
+			cp -r "$openwrt_package_dir/$other" $target-src/package
 		done
 	fi
 
