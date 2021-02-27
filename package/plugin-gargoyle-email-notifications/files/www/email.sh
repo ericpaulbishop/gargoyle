@@ -22,7 +22,7 @@ gargoyle_header_footer -h -s "system" -p "email_notifications" -j "email.js" -z 
 	fi
 	echo 'var msmtprc='"'$(cat /etc/msmtprc | tr '\n' ' ')'"';';
 	echo "var weekly_time=\"`date \"+%w-%H-%M\"`\";"
-	echo 'var TLSsupport='"'$(msmtp --version | grep OpenSSL)'"';';
+	echo 'var TLSsupport='"'$(msmtp --version | grep "TLS/SSL library: none")'"';';
 	webmon_enabled=$(ls /etc/rc.d/*webmon_gargoyle* 2>/dev/null)
 	if [ -n "$webmon_enabled" ] ; then
 		echo "var webmonEnabled=true;"
