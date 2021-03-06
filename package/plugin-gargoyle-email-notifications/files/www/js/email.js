@@ -860,13 +860,13 @@ function testMail() {
 		}else{
 			command = command + 'echo -e "account default\\nhost '+data['serverIP']+"\\nport "+data['serverPort']+"\\ndomain " + data['domain'] + "\\ntls on"+"\\nauth plain\\nuser " + data['username'] + "\\npassword " + data['password'] + "\\nauto_from off\\nfrom "+data['sender']+'" > /etc/msmtprc && ';
 		}
-		command = command + body + 'sendmail '+data['receiver']+' --syslog --tls-trust-file '+data['certpath']+' --timeout 30 && rm /etc/msmtprc && mv /tmp/msmtprc.tmp /etc/msmtprc';
+		command = command + body + 'msmtp '+data['receiver']+' --syslog --tls-trust-file '+data['certpath']+' --timeout 30 && rm /etc/msmtprc && mv /tmp/msmtprc.tmp /etc/msmtprc';
     } else {
 		if(!data['encryption']){
 			//Authentication and encryption disabled
-			command = body + 'sendmail --host='+data['serverIP']+' --port='+data['serverPort']+' --domain='+data['domain']+' --from '+data['sender']+' '+data['receiver']+' --timeout 30 --syslog';		
+			command = body + 'msmtp --host='+data['serverIP']+' --port='+data['serverPort']+' --domain='+data['domain']+' --from '+data['sender']+' '+data['receiver']+' --timeout 30 --syslog';
 		}else{
-			command = body + 'sendmail --host='+data['serverIP']+' --port='+data['serverPort']+' --domain='+data['domain']+' --tls=on --tls-trust-file='+data['certpath']+' --from '+data['sender']+' '+data['receiver']+' --timeout 30 --syslog';		
+			command = body + 'msmtp --host='+data['serverIP']+' --port='+data['serverPort']+' --domain='+data['domain']+' --tls=on --tls-trust-file='+data['certpath']+' --from '+data['sender']+' '+data['receiver']+' --timeout 30 --syslog';
 		}
     }
 	
@@ -901,7 +901,7 @@ function LoadData() {
 	
 	var config = readSendmailConfig();
 	
-	if(TLSsupport==''){
+	if(TLSsupport!=''){
 		document.getElementById("plain").checked = true;
 		document.getElementById("TLS").disabled = true;
 	}

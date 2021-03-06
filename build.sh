@@ -33,7 +33,7 @@ set_version_variables()
 	# set precise commit in repo to use 
 	# you can set this to an alternate commit 
 	# or empty to checkout latest
-	openwrt_commit="78c4c04dd7979a7f6d3cadeb1783b6c38d63b575"
+	openwrt_commit="11f4918ebb32f658e419225ef218f82d66b482cc"
 	openwrt_abbrev_commit=$( echo "$openwrt_commit" | cut -b 1-7 )
 	
 
@@ -625,9 +625,7 @@ for target in $targets ; do
 		fi
 		other_packages=$(ls "$openwrt_package_dir" )
 		for other in $other_packages ; do
-			if [ ! -d "$target-src/package/$other" ] ; then
-				cp -r "$openwrt_package_dir/$other" $target-src/package
-			fi
+			cp -r "$openwrt_package_dir/$other" $target-src/package
 		done
 	fi
 

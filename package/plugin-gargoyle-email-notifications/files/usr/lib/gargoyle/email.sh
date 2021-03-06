@@ -190,9 +190,9 @@ echo "</body></html>" >> /tmp/email-log.txt
 
 if printf '%s' "$tls" | egrep -q "0"
 then
-	cat /tmp/email-log.txt | sendmail $receiver 
+	cat /tmp/email-log.txt | msmtp $receiver
 else
-	cat /tmp/email-log.txt | sendmail --tls-trust-file $tlscert $receiver 
+	cat /tmp/email-log.txt | msmtp --tls-trust-file $tlscert $receiver
 fi
 
 rm /tmp/email-log.txt
