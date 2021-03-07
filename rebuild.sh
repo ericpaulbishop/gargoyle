@@ -611,10 +611,10 @@ for target in $targets ; do
 		index_files=$(find "$package_base_dir" -name "Packa*")
 		if [ -n "$package_files" ] && [ -n "$index_files" ] ; then
 			for pf in $package_files ; do
-				cp "$pf" "$top_dir/built/$target/$default_profile"_kernelspecific/
+				cp "$pf" "$top_dir/built/$target/$profile_name"_kernelspecific/
 			done
 			for inf in $index_files ; do
-				cp "$inf" "$top_dir/built/$target/$default_profile"_kernelspecific/
+				cp "$inf" "$top_dir/built/$target/$profile_name"_kernelspecific/
 			done
 		fi
 	
