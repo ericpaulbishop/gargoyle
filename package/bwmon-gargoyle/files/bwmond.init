@@ -64,9 +64,10 @@ start()
 	wan_ip=""
 	bw_if="$wan_if"
 	if [ -z "$bw_if" ] ; then
-		bw_if=$(uci -P "/var/state" get network.lan.ifname)	
+		network_get_device bw_if lan || \
+			bw_if=$(uci -q get network.lan.ifname)
 	else
-		wan_ip=$(uci -P "/var/state" get network.wan.ipaddr)
+		network_get_ipaddr wan_ip wan
 	fi
 	
 
@@ -98,23 +99,20 @@ start()
 	ip6tables -t $upload_table -A POSTROUTING -o $bw_if -j $upload_chain
 	
 
-	lan_mask=$(uci -p /tmp/state get network.lan.netmask 2>/dev/null)
-	lan_ip=$(uci -p /tmp/state get network.lan.ipaddr 2>/dev/null)
-	lan_subnet="$lan_ip/$lan_mask"
-	lan_bits=$( mask_to_cidr $lan_mask )
+	network_get_subnet lan_ip lan
 
 	# code to help filter out bogons on distribution monitors, 
 	# which make up really small amount of bandwidth, but screw up monitoring
 
 	iptables -t $upload_table -A $upload_chain                                    -j CONNMARK --set-mark 0x0/0xFF000000
-	iptables -t $upload_table -A $upload_chain -s $lan_ip/$lan_bits               -j CONNMARK --set-mark 0x0F000000/0xFF000000
+	iptables -t $upload_table -A $upload_chain -s $lan_ip                         -j CONNMARK --set-mark 0x0F000000/0xFF000000
 	iptables -t $upload_table -A $upload_chain -s $wan_ip                         -j CONNMARK --set-mark 0x0F000000/0xFF000000
 	iptables -t $upload_table -A $upload_chain -m connmark --mark 0x0/0x0F000000  -j RETURN
 	iptables -t $upload_table -A $upload_chain                                    -j CONNMARK --set-mark 0x0/0xFF000000
 	
 
 	iptables -t $download_table -A $download_chain                                    -j CONNMARK --set-mark 0x0/0xFF000000
-	iptables -t $download_table -A $download_chain -d $lan_ip/$lan_bits               -j CONNMARK --set-mark 0x0F000000/0xFF000000
+	iptables -t $download_table -A $download_chain -d $lan_ip                         -j CONNMARK --set-mark 0x0F000000/0xFF000000
 	iptables -t $download_table -A $download_chain -d $wan_ip                         -j CONNMARK --set-mark 0x0F000000/0xFF000000
 	iptables -t $download_table -A $download_chain -m connmark --mark 0x0/0x0F000000  -j RETURN
 	iptables -t $download_table -A $download_chain                                    -j CONNMARK --set-mark 0x0/0xFF000000
@@ -181,7 +179,7 @@ start()
 		bdist_num_intervals=$(eval "echo \$bdist"$n"_num_intervals")
 		bdist_reset_time=$(eval "echo \$bdist"$n"_reset_time")
 		if [ -n "$bdist_reset_time" ] ; then bdist_reset_time="--reset_time $bdist_reset_time" ; fi
-		if [ -n "$lan_mask" ] && [ -n "$lan_ip" ] ; then
+		if [ -n "$lan_ip" ] ; then
 			iptables -t $download_table -A $download_chain -m bandwidth --id "bdist"$n"-download-$bdist_interval-$bdist_num_intervals" --type "individual_dst" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
 			ip6tables -t $download_table -A $download_chain -m bandwidth --id "bdist"$n"-download-$bdist_interval-$bdist_num_intervals" --type "individual_dst" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
 			iptables -t $upload_table   -A $upload_chain   -m bandwidth --id "bdist"$n"-upload-$bdist_interval-$bdist_num_intervals"   --type "individual_src" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
@@ -223,7 +221,7 @@ start()
 			fi
 		fi
 
-		if [ -n "$lan_mask" ] && [ -n "$lan_ip" ] ; then
+		if [ -n "$lan_ip" ] ; then
 			iptables -t $download_table -A $download_chain -m bandwidth --id "bdist"$n"-download-$bdist_interval-$bdist_num_intervals" --type "individual_dst" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
 			ip6tables -t $download_table -A $download_chain -m bandwidth --id "bdist"$n"-download-$bdist_interval-$bdist_num_intervals" --type "individual_dst" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
 			iptables -t $upload_table   -A $upload_chain   -m bandwidth --id "bdist"$n"-upload-$bdist_interval-$bdist_num_intervals"   --type "individual_src" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time

@@ -11,7 +11,8 @@
 <script>
 <!--
 <%
-	lan_ip=$(uci -p /tmp/state get network.lan.ipaddr 2>/dev/null)
+	. /lib/functions/network.sh
+	network_get_ipaddr lan_ip lan
 	echo "currentLanIp=\"$lan_ip\";"
 	echo "var storageDrives = [];"
 	awk '{ print "storageDrives.push([\""$1"\",\""$2"\",\""$3"\",\""$4"\", \""$5"\", \""$6"\"]);" }' /tmp/mounted_usb_storage.tab 2>/dev/null

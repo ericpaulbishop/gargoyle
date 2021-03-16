@@ -1,5 +1,7 @@
 #!/bin/sh
 
+. /lib/functions/network.sh
+
 if [ -f /tmp/wireguard.firewall.running ] ; then
 	exit
 fi
@@ -138,8 +140,9 @@ initialize()
 		[ "$server_enabled" == "1" ] && wireguard_port=$( uci get wireguard_gargoyle.server.port 2>/dev/null )
 		[ "$client_enabled" == "1" ] && wireguard_port=$( uci get wireguard_gargoyle.client.server_port 2>/dev/null )
 
-		wan_if=$(uci -P /var/state get network.wan.ifname 2>/dev/null)
-		wg_if=$(uci -P /var/state get firewall.wg_zone.device 2>/dev/null)
+		network_get_device wan_if wan || \
+			wan_if=$(uci -q get network.wan.ifname)
+		wg_if=$(uci -q get firewall.wg_zone.device)
 		if [ -n "$wireguard_port" ] && [ -n "$wan_if" ] && [ -n "$wg_if" ]  ; then
 			# create wireguard bandwidth monitor chains
 			iptables -t mangle -N wireguard_down_bw
@@ -207,7 +210,8 @@ set_block_nonwg()
 		do_block=$(uci get wireguard_gargoyle.client.block_non_wireguard 2>/dev/null)
 
 		if [ "$do_block" = "1" ] || [ "$do_block" = "true" ] ; then
-			wan_if=$(uci -P /var/state get network.wan.ifname 2>/dev/null)
+			network_get_device wan_if wan || \
+				wan_if=$(uci -q get network.wan.ifname)
 			iptables -t filter -N block_non_wireguard
 			iptables -t filter -A block_non_wireguard -d 10.0.0.0/8     -j ACCEPT
 			iptables -t filter -A block_non_wireguard -d 172.16.0.0/12  -j ACCEPT

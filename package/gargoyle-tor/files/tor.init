@@ -12,6 +12,8 @@ RUN_GROUP=tor
 BOOT="0"
 OPTIONS=" --User $RUN_USER  --PidFile '$PID_F' --RunAsDaemon 1  --SocksPort 0 --AvoidDiskWrites 1 "
 
+. /lib/functions/network.sh
+
 init_group()
 {
 	group="$1"
@@ -115,8 +117,7 @@ start()
 			dns_port=9053
 		fi
 
-		
-		client_listen_ip=$(uci -P /var/state get network.$client_zone.ipaddr 2>/dev/null)
+		network_get_ipaddr client_listen_ip "${client_zone}"
 		if [ -n "$client_listen_ip" ] ; then
 			OPTIONS="$OPTIONS  --TransPort '$client_listen_ip:$trans_port' --DNSPort '$client_listen_ip:$dns_port' "
 		else

@@ -19,9 +19,10 @@ var arpLines;
 var currentTime;
 var wlanLines;
 <%
+	. /lib/functions/network.sh
 	sh /usr/lib/gargoyle/define_host_vars.sh
-	wan_ip=$(uci -p /tmp/state get network.wan.ipaddr 2>/dev/null)
-	lan_ip=$(uci -p /tmp/state get network.lan.ipaddr 2>/dev/null)
+	network_get_ipaddr wan_ip wan
+	network_get_ipaddr lan_ip lan
 	echo "currentWanIp=\"$wan_ip\";"
 	echo "currentLanIp=\"$lan_ip\";"
 %>

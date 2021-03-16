@@ -34,6 +34,7 @@
 
 #include <erics_tools.h>
 #include <uci.h>
+#include <json-c/json.h>
 #define malloc safe_malloc
 #define strdup safe_strdup
 
@@ -62,8 +63,9 @@ char** ParseGHF_TranslationStrings(char* web_root, char* active_lang, char* fall
 bool is_unusable_overlayfs(void);
 char* ip6_mask(char* addr, long mask);
 char* ip6_combine_prefix_hostid(char* ip6, char* hostid);
-
-
+json_object* getInterfaceDump(void);
+void get_ifstatus_ip6addrs(json_object* iface, list* ifstatus_ip6, list* ifstatus_mask6);
+void get_ifstatus_gateway(json_object* iface, char* ifstatus_gateway);
 
 
 int main(int argc, char **argv)
@@ -879,59 +881,143 @@ void define_package_vars(char** package_vars_to_load)
 	}
 }
 
+json_object* getInterfaceDump(void)
+{
+	FILE *fp;	
+	unsigned long read_length;
+	struct json_object* jobj;
+
+	fp = popen("ubus -S call network.interface dump", "r");
+	if (fp == NULL)
+	{
+		//printf("network interface dump failed\n");
+		return NULL;
+	}
+
+	char* ifstatus = read_entire_file(fp, 100, &read_length);
+	jobj = json_tokener_parse(ifstatus);
+	free(ifstatus);
+	
+	//printf("<!--\ninterface dump:\n%s\n-->\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
+	
+	return jobj;
+}
+
+void get_ifstatus_ip6addrs(json_object* iface, list* ifstatus_ip6, list* ifstatus_mask6)
+{
+	struct json_object* tmpobj = NULL;
+	struct json_object* ip6arr = NULL;
+	struct json_object* localaddrobj = NULL;
+	struct json_object* addressobj = NULL;
+	struct json_object* maskobj = NULL;
+	const char* address = NULL;
+	const char* mask = NULL;
+	json_object_object_get_ex(iface, "ipv6-address", &ip6arr);
+	int ip6arrlen = json_object_array_length(ip6arr);
+	
+	for(int idx = 0; idx < ip6arrlen; idx++)
+	{
+		tmpobj = json_object_array_get_idx(ip6arr, idx);
+		json_object_object_get_ex(tmpobj, "address", &addressobj);
+		address = json_object_get_string(addressobj);
+		json_object_object_get_ex(tmpobj, "mask", &maskobj);
+		mask = json_object_get_string(maskobj);
+		
+		push_list(ifstatus_ip6, (void*)strdup(address));
+		push_list(ifstatus_mask6, (void*)strdup(mask));
+	}
+	
+	json_object_object_get_ex(iface, "ipv6-prefix-assignment", &ip6arr);
+	ip6arrlen = json_object_array_length(ip6arr);
+	
+	for(int idx = 0; idx < ip6arrlen; idx++)
+	{
+		tmpobj = json_object_array_get_idx(ip6arr, idx);
+		json_object_object_get_ex(tmpobj, "local-address", &localaddrobj);
+		json_object_object_get_ex(localaddrobj, "address", &addressobj);
+		address = json_object_get_string(addressobj);
+		json_object_object_get_ex(localaddrobj, "mask", &maskobj);
+		mask = json_object_get_string(maskobj);
+		
+		push_list(ifstatus_ip6, (void*)strdup(address));
+		push_list(ifstatus_mask6, (void*)strdup(mask));
+	}
+}
+
+void get_ifstatus_gateway(json_object* iface, char* ifstatus_gateway)
+{
+	struct json_object* tmpobj = NULL;
+	struct json_object* routesarr = NULL;
+	struct json_object* targetobj = NULL;
+	struct json_object* nexthopobj = NULL;
+	const char* target = NULL;
+	int routearrlen = 0;
+	json_object_object_get_ex(iface, "route", &routesarr);
+	routearrlen = json_object_array_length(routesarr);
+	
+	for(int idx = 0; idx < routearrlen; idx++)
+	{
+		tmpobj = json_object_array_get_idx(routesarr, idx);
+		json_object_object_get_ex(tmpobj, "target", &targetobj);
+		target = json_object_get_string(targetobj);
+		
+		if(safe_strcmp(target, "::") == 0)
+		{
+			json_object_object_get_ex(tmpobj, "nexthop", &nexthopobj);
+			ifstatus_gateway = json_object_get_string(nexthopobj);
+		}
+	}
+}
+
 void print_interface_vars(char** ptr_lan_ip, char** ptr_wan_ip, list** ptr_lan_ip6, list** ptr_lan_mask6, list** ptr_wan_ip6, list** ptr_wan_mask6)
 {
-	list* wireless_ifs  = initialize_list();
-	list* wireless_uci = initialize_list();
-
+	struct json_object* ifdump = getInterfaceDump();
+	struct json_object* if_lan = NULL;
+	struct json_object* if_wan = NULL;
+	struct json_object* if_wan6 = NULL;
+	
+	struct json_object* interfaces_arr;
+	int ifacearrlen = 0;
+	json_object_object_get_ex(ifdump, "interface", &interfaces_arr);
+	ifacearrlen = json_object_array_length(interfaces_arr);
+	
+	for(int idx = 0; idx < ifacearrlen; idx++)
+	{
+		struct json_object* tmpobj = NULL;
+		struct json_object* nameobj = NULL;
+		const char* name = NULL;
+		
+		tmpobj = json_object_array_get_idx(interfaces_arr, idx);
+		json_object_object_get_ex(tmpobj, "interface", &nameobj);
+		name = json_object_get_string(nameobj);
+		
+		if(safe_strcmp(name, "lan") == 0)
+		{
+			if_lan = json_object_get(tmpobj);
+		}
+		else if(safe_strcmp(name, "wan") == 0)
+		{
+			if_wan = json_object_get(tmpobj);
+		}
+		else if(safe_strcmp(name, "wan6") == 0)
+		{
+			if_wan6 = json_object_get(tmpobj);
+		}
+	}
+	
+	// Free bits that haven't been grabbed separately
+	json_object_put(ifdump);
+	
+	// GENERIC
 	char* default_lan_if  = NULL;
 	char* default_wan_if  = NULL;
 	char* default_wan_mac = NULL;
 	int loaded_default_ifs = load_saved_default_interfaces( &default_lan_if, &default_wan_if, &default_wan_mac);
-
-	/*
-	 * A few notes on "if" vs "dev" vs "bridge" variable names:
-	 * When doing load "if" is the ifname variable loaded from the /etc/config/network file,
-	 * while "dev" is the "device" loaded from /var/state/network, and "bridge" is the
-	 * "ifname" from /var/state/network.
-	 *
-	 * "Bridge" is labeled that way because if the interface
-	 * is a bridge, this will be the only place the name of the bridge interface shows up, the
-	 * other variables will just have the names of the interfaces within the bridge.
-	 *
-	 * Note also that "bridge" interface variables will contain the pppoe device name if we're using pppoe.
-	 * Therefore we print these out in addition to the interface list as javascript variables labeled
-	 * currentLanName and currentWanName
-	 */
-
-	char* uci_wan_mac     = NULL;
-	char* uci_wan_if      = NULL;
-	char* uci_wan_dev     = NULL;
-	char* uci_lan_if      = NULL;
-	char* uci_lan_dev     = NULL;
-	char* uci_lan_bridge  = NULL;
-	char* uci_wan_bridge  = NULL;
-	char* uci_wan_type    = NULL;
-
-	char* uci_wan_gateway  = NULL;
-	char* uci_wan_gateway6 = NULL;
-	char* uci_lan_ip       = NULL;
-	char* uci_lan_mask     = NULL;
-	char* uci_wan_ip       = NULL;
-	char* uci_wan_mask     = NULL;
-
-	char* uci_ula_prefix  = NULL;
-	char* uci_ula_mask    = NULL;
-
-
-
-
-	struct uci_context *ctx = uci_alloc_context();
-	struct uci_context *state_ctx = uci_alloc_context();
-	struct uci_package *p = NULL;
-	struct uci_element *e = NULL;
-
-
+	
+	// WIRELESS
+	list* wireless_ifs  = initialize_list();
+	list* wireless_uci = initialize_list();
+	
 	char** wireless_if_arr = load_interfaces_from_proc_file("/proc/net/wireless");
 	int wif_index;
 	for(wif_index = 0; wireless_if_arr[wif_index] != NULL; wif_index++)
@@ -940,6 +1026,10 @@ void print_interface_vars(char** ptr_lan_ip, char** ptr_wan_ip, list** ptr_lan_i
 	}
 	free_null_terminated_string_array(wireless_if_arr);
 
+	struct uci_context *ctx = uci_alloc_context();
+	struct uci_context *state_ctx = uci_alloc_context();
+	struct uci_package *p = NULL;
+	struct uci_element *e = NULL;
 
 	if(uci_load(ctx, "wireless", &p) == UCI_OK)
 	{
@@ -952,14 +1042,67 @@ void print_interface_vars(char** ptr_lan_ip, char** ptr_wan_ip, list** ptr_lan_i
 			}
 		}
 	}
-
+	
+	list* tmp_list = initialize_list();
+	list* wireless_macs = initialize_list();
+	int wireless_if_num = 1;
+	while(wireless_ifs->length > 0)
+	{
+		char* wireless_if = (char*)shift_list(wireless_ifs);
+		char* wireless_mac = get_interface_mac(wireless_if);
+		if(wireless_mac == NULL)
+		{
+			wireless_mac = (char*)malloc(20);
+			sprintf(wireless_mac, "00:11:22:33:44:%02x",
+				wireless_if_num & 0xff);
+		}
+		push_list(wireless_macs, (void*)wireless_mac);
+		push_list(tmp_list, (void*)wireless_if);
+		wireless_if_num++;
+	}
+	unsigned long num_destroyed;
+	destroy_list(wireless_ifs, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+	wireless_ifs = tmp_list;
+	
+	/*
+	 * A few notes on "if" vs "dev" vs "l3dev" variable names:
+	 * When doing load "if" is the ifname variable loaded from the /etc/config/network file (e.g. eth1.1),
+	 * while "dev" is the "device" loaded from ifstatus (e.g. eth1.1, br-lan), and "l3dev" is the
+	 * "l3_device" from ifstatus (e.g. br-lan, pppoe-wan).
+	 *
+	 * "dev" and "l3dev" can be equal, and either one can be missing as well
+	 *
+	 * Note also that "l3dev" interface variables will contain the pppoe device name if we're using pppoe.
+	 * Therefore we print these out in addition to the interface list as javascript variables labeled
+	 * currentLanName and currentWanName
+	 */
+	 
+	// NETWORK UCI
+	char* uci_wan_mac = NULL;
+	char* uci_wan_if = NULL;
+	char* uci_wan_type = NULL;
+	char* uci_wan_ip = NULL;
+	char* uci_wan_mask = NULL;
+	char* uci_wan_gateway = NULL;
+	char* uci_wan_gateway6 = NULL;
+	
+	char* uci_lan_if = NULL;
+	char* uci_lan_ip = NULL;
+	char* uci_lan_mask = NULL;
+	char* uci_ula_prefix = NULL;
+	char* uci_ula_mask = NULL;
+	
 	if(uci_load(ctx, "network", &p) == UCI_OK)
 	{
-		if(get_uci_option(ctx, &e, p, "network", "wan", "macaddr") == UCI_OK)
+		char* wan_dev = dynamic_strcat(3,"wan_",default_wan_if,"_dev");
+		char* tmp_dev = dynamic_replace(wan_dev, ".", "_");
+		free(wan_dev);
+		wan_dev = tmp_dev;
+		if(get_uci_option(ctx, &e, p, "network", wan_dev, "macaddr") == UCI_OK)
 		{
 			uci_wan_mac=get_option_value_string(uci_to_option(e));
 		}
-		else if(get_uci_option(ctx, &e, p, "network", "wan_dev", "macaddr") == UCI_OK)
+		else if(get_uci_option(ctx, &e, p, "network", "wan", "macaddr") == UCI_OK)
 		{
 			uci_wan_mac=get_option_value_string(uci_to_option(e));
 		}
@@ -971,33 +1114,13 @@ void print_interface_vars(char** ptr_lan_ip, char** ptr_wan_ip, list** ptr_lan_i
 		{
 			uci_wan_type = get_option_value_string(uci_to_option(e));
 		}
-		if(get_uci_option(ctx, &e, p, "network", "lan", "ifname") == UCI_OK)
+		if(get_uci_option(state_ctx, &e, p, "network", "wan", "ipaddr") == UCI_OK)
 		{
-			uci_lan_if = get_option_value_string(uci_to_option(e));
+			uci_wan_ip=get_option_value_string(uci_to_option(e));
 		}
-	}
-
-
-
-	uci_add_delta_path(state_ctx, state_ctx->savedir);
-	uci_set_savedir(state_ctx, "/var/state");
-	if(uci_load(state_ctx, "network", &p) == UCI_OK)
-	{
-		if(get_uci_option(state_ctx, &e, p, "network", "wan", "device") == UCI_OK)
+		if(get_uci_option(state_ctx, &e, p, "network", "wan", "netmask") == UCI_OK)
 		{
-			uci_wan_dev=get_option_value_string(uci_to_option(e));
-		}
-		if(get_uci_option(state_ctx, &e, p, "network", "lan", "device") == UCI_OK)
-		{
-			uci_lan_dev=get_option_value_string(uci_to_option(e));
-		}
-		if(get_uci_option(state_ctx, &e, p, "network", "lan", "ifname") == UCI_OK)
-		{
-			uci_lan_bridge=get_option_value_string(uci_to_option(e));
-		}
-		if(get_uci_option(state_ctx, &e, p, "network", "wan", "ifname") == UCI_OK)
-		{
-			uci_wan_bridge=get_option_value_string(uci_to_option(e));
+			uci_wan_mask=get_option_value_string(uci_to_option(e));
 		}
 		if(get_uci_option(state_ctx, &e, p, "network", "wan", "gateway") == UCI_OK)
 		{
@@ -1007,6 +1130,11 @@ void print_interface_vars(char** ptr_lan_ip, char** ptr_wan_ip, list** ptr_lan_i
 		{
 			uci_wan_gateway6=get_option_value_string(uci_to_option(e));
 		}
+
+		if(get_uci_option(ctx, &e, p, "network", "lan", "ifname") == UCI_OK)
+		{
+			uci_lan_if = get_option_value_string(uci_to_option(e));
+		}		
 		if(get_uci_option(state_ctx, &e, p, "network", "lan", "ipaddr") == UCI_OK)
 		{
 			uci_lan_ip=get_option_value_string(uci_to_option(e));
@@ -1014,14 +1142,6 @@ void print_interface_vars(char** ptr_lan_ip, char** ptr_wan_ip, list** ptr_lan_i
 		if(get_uci_option(state_ctx, &e, p, "network", "lan", "netmask") == UCI_OK)
 		{
 			uci_lan_mask=get_option_value_string(uci_to_option(e));
-		}
-		if(get_uci_option(state_ctx, &e, p, "network", "wan", "ipaddr") == UCI_OK)
-		{
-			uci_wan_ip=get_option_value_string(uci_to_option(e));
-		}
-		if(get_uci_option(state_ctx, &e, p, "network", "wan", "netmask") == UCI_OK)
-		{
-			uci_wan_mask=get_option_value_string(uci_to_option(e));
 		}
 		if(get_uci_option(state_ctx, &e, p, "network", "globals", "ula_prefix") == UCI_OK)
 		{
@@ -1044,17 +1164,117 @@ void print_interface_vars(char** ptr_lan_ip, char** ptr_wan_ip, list** ptr_lan_i
 		}
 
 	}
-
-
-	char* current_lan_bridge = uci_lan_bridge != NULL ? strdup(uci_lan_bridge) : strdup("br-lan");
-	char* current_lan_if = uci_lan_if != NULL ? strdup(uci_lan_if) : strdup(uci_lan_dev);
-	char* current_wan_if = uci_wan_if != NULL ? strdup(uci_wan_if) : strdup(uci_wan_dev);
-	if(safe_strcmp(uci_wan_type, "bridge") == 0 && (uci_wan_if == NULL || safe_strcmp(uci_wan_if, "") == 0))
+	
+	// NETWORK IFSTATUS
+	const char* ifstatus_lan_dev = NULL;
+	const char* ifstatus_lan_l3dev = NULL;
+	const char* ifstatus_lan_ip = NULL;
+	char ifstatus_lan_mask[16] = "";
+	list* ifstatus_lan_ip6 = initialize_list();
+	list* ifstatus_lan_mask6 = initialize_list();
+	
+	const char* ifstatus_wan_dev = NULL;
+	const char* ifstatus_wan_l3dev = NULL;
+	const char* ifstatus_wan_ip = NULL;
+	char ifstatus_wan_mask[16] = "";
+	const char* ifstatus_wan_gateway = NULL;
+	
+	list* ifstatus_wan_ip6 = initialize_list();
+	list* ifstatus_wan_mask6 = initialize_list();
+	const char* ifstatus_wan_gateway6 = NULL;
+	
+	if(if_lan != NULL)
 	{
-		current_wan_if = (uci_wan_bridge != NULL && strcmp(uci_wan_bridge, "") != 0) ? strdup(uci_wan_bridge) : strdup("br-wan");
+		struct json_object* tmpobj = NULL;
+		struct json_object* tmpobj2 = NULL;
+		uint32_t maskbits = 0;
+		
+		json_object_object_get_ex(if_lan, "device", &tmpobj);
+		ifstatus_lan_dev = json_object_get_string(tmpobj);
+		
+		json_object_object_get_ex(if_lan, "l3_device", &tmpobj);
+		ifstatus_lan_l3dev = json_object_get_string(tmpobj);
+		
+		json_object_object_get_ex(if_lan, "ipv4-address", &tmpobj);
+		tmpobj = json_object_array_get_idx(tmpobj, 0);
+		json_object_object_get_ex(tmpobj, "address", &tmpobj2);
+		ifstatus_lan_ip = json_object_get_string(tmpobj2);
+		json_object_object_get_ex(tmpobj, "mask", &tmpobj2);
+		//ifstatus_lan_mask = json_object_get_string(tmpobj2);
+		maskbits = json_object_get_int(tmpobj2);
+		maskbits = (0xFFFFFFFF << (32 - maskbits)) & 0xFFFFFFFF;
+		sprintf(ifstatus_lan_mask, "%u.%u.%u.%u", maskbits >> 24, (maskbits >> 16) & 0xFF, (maskbits >> 8) & 0xFF, maskbits & 0xFF);
+		
+		get_ifstatus_ip6addrs(if_lan, ifstatus_lan_ip6, ifstatus_lan_mask6);
 	}
-	char* current_wan_mac = get_interface_mac(current_wan_if);
-	char* current_lan_mac = get_interface_mac(current_lan_bridge);
+	if(if_wan != NULL)
+	{
+		struct json_object* tmpobj = NULL;
+		struct json_object* tmpobj2 = NULL;
+		uint32_t maskbits = 0;
+		
+		json_object_object_get_ex(if_wan, "device", &tmpobj);
+		ifstatus_wan_dev = json_object_get_string(tmpobj);
+		
+		json_object_object_get_ex(if_wan, "l3_device", &tmpobj);
+		ifstatus_wan_l3dev = json_object_get_string(tmpobj);
+		
+		json_object_object_get_ex(if_wan, "ipv4-address", &tmpobj);
+		tmpobj = json_object_array_get_idx(tmpobj, 0);
+		json_object_object_get_ex(tmpobj, "address", &tmpobj2);
+		ifstatus_wan_ip = json_object_get_string(tmpobj2);
+		json_object_object_get_ex(tmpobj, "mask", &tmpobj2);
+		//ifstatus_wan_mask = json_object_get_string(tmpobj2);
+		maskbits = json_object_get_int(tmpobj2);
+		maskbits = (0xFFFFFFFF << (32 - maskbits)) & 0xFFFFFFFF;
+		sprintf(ifstatus_wan_mask, "%u.%u.%u.%u", maskbits >> 24, (maskbits >> 16) & 0xFF, (maskbits >> 8) & 0xFF, maskbits & 0xFF);
+		
+		get_ifstatus_gateway(if_wan, ifstatus_wan_gateway);
+	}
+	if(if_wan6 != NULL)
+	{
+		get_ifstatus_ip6addrs(if_wan6, ifstatus_wan_ip6, ifstatus_wan_mask6);
+		get_ifstatus_gateway(if_wan6, ifstatus_wan_gateway6);
+	}
+	
+	char* current_lan_l3dev = NULL;
+	if(ifstatus_lan_l3dev != NULL)
+	{
+		current_lan_l3dev = strdup(ifstatus_lan_l3dev);
+	}
+	else if(ifstatus_lan_dev != NULL)
+	{
+		current_lan_l3dev = strdup(ifstatus_lan_dev);
+	}
+	else if(uci_lan_if != NULL)
+	{
+		current_lan_l3dev = strdup(uci_lan_if);
+	}
+	else
+	{
+		current_lan_l3dev = strdup("br-lan");
+	}
+	char* current_lan_if = uci_lan_if != NULL ? strdup(uci_lan_if) : strdup(ifstatus_lan_dev);
+	char* current_wan_if = uci_wan_if != NULL ? strdup(uci_wan_if) : strdup(ifstatus_wan_dev);
+	char* current_wan_l3dev = NULL;
+	if(ifstatus_wan_l3dev != NULL)
+	{
+		current_wan_l3dev = strdup(ifstatus_wan_l3dev);
+	}
+	else if(ifstatus_wan_dev != NULL)
+	{
+		current_wan_l3dev = strdup(ifstatus_wan_dev);
+	}
+	else if(uci_wan_if != NULL)
+	{
+		current_wan_l3dev = strdup(uci_wan_if);
+	}
+	else if(safe_strcmp(uci_wan_type, "bridge") == 0)
+	{
+		current_wan_l3dev = strdup("br-wan");
+	}
+	char* current_wan_mac = get_interface_mac(current_wan_l3dev);
+	char* current_lan_mac = get_interface_mac(current_lan_l3dev);
 
 	if(loaded_default_ifs == 0)
 	{
@@ -1080,55 +1300,137 @@ void print_interface_vars(char** ptr_lan_ip, char** ptr_wan_ip, list** ptr_lan_i
 		}
 		save_default_interfaces(default_lan_if, default_wan_if, default_wan_mac);
 	}
-
-
-
-
-	char* current_lan_ip      = uci_lan_ip != NULL   ? strdup(uci_lan_ip)   : (char*)get_interface_ip(current_lan_bridge, AF_INET);
-	char* current_lan_mask    = uci_lan_mask != NULL ? strdup(uci_lan_mask) : (char*)get_interface_netmask(current_lan_bridge, AF_INET);
-	list* current_lan_ip6     = (list*)get_interface_ip(current_lan_bridge, AF_INET6);
-	list* current_lan_mask6   = (list*)get_interface_netmask(current_lan_bridge, AF_INET6);
-
-	char* current_wan_ip      = uci_wan_ip != NULL   ? strdup(uci_wan_ip)   : (char*)get_interface_ip(current_wan_if, AF_INET);
-	char* current_wan_mask    = uci_wan_mask != NULL ? strdup(uci_wan_mask) : (char*)get_interface_netmask(current_wan_if, AF_INET);
-	list* current_wan_ip6     = (list*)get_interface_ip(current_wan_if, AF_INET6);
-	list* current_wan_mask6   = (list*)get_interface_netmask(current_wan_if, AF_INET6);
-
-	char* current_wan_gateway  = uci_wan_gateway != NULL ? strdup(uci_wan_gateway)   : get_interface_gateway(current_wan_if, AF_INET);
-	char* current_wan_gateway6 = uci_wan_gateway6 != NULL ? strdup(uci_wan_gateway6) : get_interface_gateway(current_wan_if, AF_INET6);
-
-	list* tmp_list = initialize_list();
-	list* wireless_macs = initialize_list();
-	int wireless_if_num = 1;
-	while(wireless_ifs->length > 0)
+	
+	// Get canonical answers
+	char* current_lan_ip = NULL;
+	if(ifstatus_lan_ip != NULL)
 	{
-		char* wireless_if = (char*)shift_list(wireless_ifs);
-		char* wireless_mac = get_interface_mac(wireless_if);
-		if(wireless_mac == NULL)
-		{
-			wireless_mac = (char*)malloc(20);
-			sprintf(wireless_mac, "00:11:22:33:44:%02x",
-				wireless_if_num & 0xff);
-		}
-		push_list(wireless_macs, (void*)wireless_mac);
-		push_list(tmp_list, (void*)wireless_if);
-		wireless_if_num++;
+		current_lan_ip = strdup(ifstatus_lan_ip);
 	}
-	unsigned long num_destroyed;
-	destroy_list(wireless_ifs, DESTROY_MODE_FREE_VALUES, &num_destroyed);
-	wireless_ifs = tmp_list;
+	else if(ifstatus_lan_ip != NULL)
+	{
+		current_lan_ip = strdup(uci_lan_ip);
+	}
+	else
+	{
+		current_lan_ip = (char*)get_interface_ip(current_lan_l3dev, AF_INET);
+	}
+	char* current_lan_mask = NULL;
+	if(ifstatus_lan_mask != NULL)
+	{
+		current_lan_mask = strdup(ifstatus_lan_mask);
+	}
+	else if(uci_lan_mask != NULL)
+	{
+		current_lan_mask = strdup(uci_lan_mask);
+	}
+	else
+	{
+		current_lan_mask = (char*)get_interface_netmask(current_lan_l3dev, AF_INET);
+	}
+	list* current_lan_ip6 = NULL;
+	if(ifstatus_lan_ip6->length > 0)
+	{
+		current_lan_ip6 = ifstatus_lan_ip6;
+	}
+	else
+	{
+		current_lan_ip6 = (list*)get_interface_ip(current_lan_l3dev, AF_INET6);
+	}
+	list* current_lan_mask6 = NULL;
+	if(ifstatus_lan_mask6->length > 0)
+	{
+		current_lan_mask6 = ifstatus_lan_mask6;
+	}
+	else
+	{
+		current_lan_mask6 = (list*)get_interface_netmask(current_lan_l3dev, AF_INET6);
+	}
 
+	char* current_wan_ip = NULL;
+	if(ifstatus_wan_ip != NULL)
+	{
+		current_wan_ip = strdup(ifstatus_wan_ip);
+	}
+	else if(uci_wan_ip != NULL)
+	{
+		current_wan_ip = strdup(uci_wan_ip);
+	}
+	else
+	{
+		current_wan_ip = (char*)get_interface_ip(current_wan_l3dev, AF_INET);
+	}
+	char* current_wan_mask = NULL;
+	if(ifstatus_wan_mask != NULL)
+	{
+		current_wan_mask = strdup(ifstatus_wan_mask);
+	}
+	else if(uci_wan_mask != NULL)
+	{
+		current_wan_mask = strdup(uci_wan_mask);
+	}
+	else
+	{
+		current_wan_mask = (char*)get_interface_netmask(current_wan_l3dev, AF_INET);
+	}
+	char* current_wan_gateway = NULL;
+	if(ifstatus_wan_gateway != NULL)
+	{
+		current_wan_gateway = strdup(ifstatus_wan_gateway);
+	}
+	else if(uci_wan_gateway != NULL)
+	{
+		current_wan_gateway = strdup(uci_wan_gateway);
+	}
+	else
+	{
+		current_wan_gateway = (char*)get_interface_gateway(current_wan_l3dev, AF_INET);
+	}
+	list* current_wan_ip6 = NULL;
+	if(ifstatus_wan_ip6->length > 0)
+	{
+		current_wan_ip6 = ifstatus_wan_ip6;
+	}
+	else
+	{
+		current_wan_ip6 = (list*)get_interface_ip(current_wan_l3dev, AF_INET6);
+	}
+	list* current_wan_mask6 = NULL;
+	if(ifstatus_wan_mask6->length > 0)
+	{
+		current_wan_mask6 = ifstatus_wan_mask6;
+	}
+	else
+	{
+		current_wan_mask6 = (list*)get_interface_netmask(current_wan_l3dev, AF_INET6);
+	}
+	char* current_wan_gateway6 = NULL;
+	if(ifstatus_wan_gateway6 != NULL)
+	{
+		current_wan_gateway6 = strdup(ifstatus_wan_gateway6);
+	}
+	else if(uci_wan_gateway6 != NULL)
+	{
+		current_wan_gateway6 = strdup(uci_wan_gateway6);
+	}
+	else
+	{
+		current_wan_gateway6 = (char*)get_interface_gateway(current_wan_l3dev, AF_INET6);
+	}
+	
+	// Free ifstatus vars, we should be done with these now
+	json_object_put(if_lan);
+	json_object_put(if_wan);
+	json_object_put(if_wan6);
 
-
-
+	// Print variables
 	print_js_list_var("wirelessIfs", &wireless_ifs);
 	print_js_list_var("uciWirelessDevs", &wireless_uci);
 	print_js_list_var("currentWirelessMacs", &wireless_macs);
 
-
 	print_js_var("defaultLanIf", default_lan_if);
-	print_js_var("currentLanIf", uci_lan_if);
-	print_js_var("currentLanName", uci_lan_bridge);
+	print_js_var("currentLanIf", current_lan_if);
+	print_js_var("currentLanName", current_lan_l3dev);
 	print_js_var("currentLanMac", current_lan_mac);
 	print_js_var("currentLanIp", current_lan_ip);
 	print_js_var("currentLanMask", current_lan_mask);
@@ -1137,17 +1439,16 @@ void print_interface_vars(char** ptr_lan_ip, char** ptr_wan_ip, list** ptr_lan_i
 	print_js_var("currentULAPrefix", uci_ula_prefix);
 	print_js_var("currentULAMask", uci_ula_mask);
 
-
 	print_js_var("defaultWanIf", default_wan_if);
 	print_js_var("defaultWanMac", default_wan_mac);
 	print_js_var("currentWanIf", current_wan_if);
-	print_js_var("currentWanName", uci_wan_bridge);
+	print_js_var("currentWanName", current_wan_l3dev);
 	print_js_var("currentWanMac", current_wan_mac);
 	print_js_var("currentWanIp", current_wan_ip);
 	print_js_var("currentWanMask", current_wan_mask);
+	print_js_var("currentWanGateway", current_wan_gateway);
 	print_js_list_var("currentWanIp6", &current_wan_ip6);
 	print_js_list_var("currentWanMask6", &current_wan_mask6);
-	print_js_var("currentWanGateway", current_wan_gateway);
 	print_js_var("currentWanGateway6", current_wan_gateway6);
 
 	uci_free_context(ctx);
@@ -1301,7 +1602,7 @@ char* get_interface_gateway(char* if_name, int family)
 								if((flags | 2) != 0)
 								{
 									unsigned int ip[4];
-									sscanf(split_line[2], "%2X%2X%2X%2X", ip, ip+1, ip+2, ip+3);
+									sscanf(split_line[2], "%2X%2X%2X%2X", ip+3, ip+2, ip+1, ip);
 									gateway = (char*)malloc(20);
 									sprintf(gateway, "%u.%u.%u.%u", ip[0], ip[1], ip[2], ip[3]);
 								}

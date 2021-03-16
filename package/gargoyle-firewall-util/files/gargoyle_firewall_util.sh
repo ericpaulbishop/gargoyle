@@ -68,18 +68,18 @@ define_wan_if()
 	if  [ -z "$wan_if" ] ;  then
 		#Wait for up to 15 seconds for the wan interface to indicate it is up.
 		wait_sec=15
-		while [ -z "$(uci -P /var/state get network.wan.up 2>/dev/null)" ] && [ "$wait_sec" -gt 0 ] ; do
+		while ! network_is_up wan && [ "$wait_sec" -gt 0 ] ; do
 			sleep 1
 			wait_sec=$(($wait_sec - 1))
 		done
 
 		#The interface name will depend on if pppoe is used or not.  If pppoe is used then
-		#the name we are looking for is in network.wan.ifname.  If there is nothing there
+		#the name we are looking for is in network.wan.l3_device.  If there is nothing there
 		#use the device named by network.wan.device
 
-		wan_if=$(uci -P /var/state get network.wan.ifname 2>/dev/null)
+		network_get_device wan_if wan
 		if [ -z "$wan_if" ] ; then
-			wan_if=$(uci -P /var/state get network.wan.device 2>/dev/null)
+			network_get_physdev wan_if wan
 		fi
 	fi
 }
@@ -225,8 +225,8 @@ insert_pf_loopback_rules()
 
 	define_wan_if
 	if [ -z "$wan_if" ]  ; then return ; fi
-	wan_ip=$(uci -p /tmp/state get network.wan.ipaddr)
-	lan_mask=$(uci -p /tmp/state get network.lan.netmask)
+	network_get_ipaddr wan_ip wan
+	network_get_subnet lan_mask lan
 
 	if [ -n "$wan_ip" ] && [ -n "$lan_mask" ] ; then
 
@@ -263,7 +263,7 @@ insert_pf_loopback_rules()
 			if [ "$all_defined" = "1" ] && [ "$src" = "wan" ] && [ "$dest" = "lan" ]  ; then
 				iptables -t nat    -A pf_loopback_A -p $proto --dport $sdp_colon -j DNAT --to-destination $dest_ip:$dp_dash
 				iptables -t filter -A pf_loopback_B -p $proto --dport $dp_colon -d $dest_ip -j ACCEPT
-				iptables -t nat    -A pf_loopback_C -p $proto --dport $dp_colon -d $dest_ip -s $dest_ip/$lan_mask -j MASQUERADE
+				iptables -t nat    -A pf_loopback_C -p $proto --dport $dp_colon -d $dest_ip -s $lan_mask -j MASQUERADE
 			fi
 		}
 
@@ -285,7 +285,8 @@ insert_dmz_rule()
 			config_get $var $1 $var
 		done
 		if [ -n "$from" ] ; then
-			from_if=$(uci -q -p /tmp/state get network.$from.ifname)
+			network_get_device from_if "$from" || \
+				from_if=$(uci -q get network.$from.ifname)
 		fi
 		# echo "from_if = $from_if"
 		if [ -n "$to_ip" ] && [ -n "$from"  ] && [ -n "$from_if" ] ; then
@@ -401,13 +402,12 @@ insert_restriction_rules()
 initialize_quotas()
 {
 	define_wan_if
-	if [ -z "$wan_if" ]  ; then return ; fi
+	if [ -z "$wan_if" ] ; then return ; fi
 
 	if [  -e /tmp/quota_init.lock ] ; then return ; fi
 	touch /tmp/quota_init.lock
 
-	lan_mask=$(uci -p /tmp/state get network.lan.netmask)
-	lan_ip=$(uci -p /tmp/state get network.lan.ipaddr)
+	network_get_subnet lan_mask lan
 	network_get_subnet6 lan_ipmask6 lan
 	[ -z "$lan_ipmask6" ] && lan_ipmask6="2001:db8::/32"
 	full_qos_enabled=$(ls /etc/rc.d/*qos_gargoyle 2>/dev/null)
@@ -427,10 +427,10 @@ initialize_quotas()
 	# have up and down speeds defined for when quota is exceeded
 	# and full qos is not enabled
 	if [ -z "$full_qos_enabled" ] ; then
-		restore_quotas    -w $wan_if -d $death_mark -m $death_mask -s "$lan_ip/$lan_mask" -t $lan_ipmask6 -c "0 0,4,8,12,16,20 * * * /usr/bin/backup_quotas >/dev/null 2>&1"
+		restore_quotas    -w $wan_if -d $death_mark -m $death_mask -s "$lan_mask" -t $lan_ipmask6 -c "0 0,4,8,12,16,20 * * * /usr/bin/backup_quotas >/dev/null 2>&1"
 		initialize_quota_qos
 	else
-		restore_quotas -q -w $wan_if -d $death_mark -m $death_mask -s "$lan_ip/$lan_mask" -t $lan_ipmask6 -c "0 0,4,8,12,16,20 * * * /usr/bin/backup_quotas >/dev/null 2>&1"
+		restore_quotas -q -w $wan_if -d $death_mark -m $death_mask -s "$lan_mask" -t $lan_ipmask6 -c "0 0,4,8,12,16,20 * * * /usr/bin/backup_quotas >/dev/null 2>&1"
 		cleanup_old_quota_qos
 	fi
 
@@ -668,7 +668,8 @@ isolate_guest_networks()
 		local lanifs=`brctl show br-lan 2>/dev/null | awk ' $NF !~ /interfaces/ { print $NF } '`
 		local lif
 
-		local lan_ip=$(uci -p /tmp/state get network.lan.ipaddr)
+		local lan_ip
+		network_get_ipaddr lan_ip lan
 
 		for lif in $lanifs ; do
 			for gmac in $guest_macs ; do

@@ -3827,8 +3827,10 @@ function renewDhcpLease()
 	commands.push("killall -SIGUSR1 udhcpc");
 	commands.push("sleep 1");
 	commands.push("wait_sec=10");
-	commands.push("while [ $(uci -p /tmp/state get network.wan.ipaddr 2>/dev/null) == NULL ] && [ $wait_sec -gt 0 ] ; do");
+	commands.push(". /lib/functions/network.sh");
+	commands.push("while ! network_get_ipaddr wan_ip wan && [ $wait_sec -gt 0 ] ; do");
 	commands.push("sleep 1");
+	commands.push("wait_sec=$(($wait_sec - 1))");
 	commands.push("done");
 
 	var param = getParameterDefinition("commands", commands.join("\n")) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
@@ -3847,17 +3849,10 @@ function renewDhcpLease()
 function releaseDhcpLease()
 {
 	//To release a DHCP lease we send the SIGUSR2 signal to udhcpc & will go inactive or wait for a SIGUSR1 renew signal.
-	//Leave the WAN interface semi-configured to bring back up, just delete the IP for checks & set variables to ""
+	//Leave the WAN interface semi-configured to bring back up
 	//Then just spin for 2 seconds & update page data.
 	var commands = [];
 	commands.push("killall -SIGUSR2 udhcpc");
-	commands.push("uci -P /var/state set network.wan.ipaddr=\'\'");
-	commands.push("uci -P /var/state set network.wan.lease_lifetime=\'\'");
-	commands.push("uci -P /var/state set network.wan.lease_acquired=\'\'");
-	commands.push("uci -P /var/state set network.wan.gateway=\'\'");
-	commands.push("uci -P /var/state set network.wan.lease_server=\'\'");
-	commands.push("uci -P /var/state set network.wan.up=0");
-	commands.push("uci commit");
 
 	var param = getParameterDefinition("commands", commands.join("\n")) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 	setControlsEnabled(false, true, basicS.RlsL);
