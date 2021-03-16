@@ -5,7 +5,7 @@
 
 case $(uci -q get network.wan.proto) in
 	qmi|ncm|mbim)
-	uci -P /var/state set network.wan.device=$DEVICE
+	uci set network.wan.device=$DEVICE
 	;;
 esac
 exit 0
