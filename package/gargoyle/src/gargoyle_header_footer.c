@@ -66,6 +66,7 @@ char* ip6_combine_prefix_hostid(char* ip6, char* hostid);
 json_object* getInterfaceDump(void);
 void get_ifstatus_ip6addrs(json_object* iface, list* ifstatus_ip6, list* ifstatus_mask6);
 void get_ifstatus_gateway(json_object* iface, char* ifstatus_gateway);
+void get_ifstatus_ipaddrs(json_object* iface, char* ifstatus_ip, char* ifstatus_mask);
 
 
 int main(int argc, char **argv)
@@ -912,35 +913,42 @@ void get_ifstatus_ip6addrs(json_object* iface, list* ifstatus_ip6, list* ifstatu
 	struct json_object* maskobj = NULL;
 	const char* address = NULL;
 	const char* mask = NULL;
+	int ip6arrlen = 0;
 	json_object_object_get_ex(iface, "ipv6-address", &ip6arr);
-	int ip6arrlen = json_object_array_length(ip6arr);
-	
-	for(int idx = 0; idx < ip6arrlen; idx++)
+	if(ip6arr != NULL)
 	{
-		tmpobj = json_object_array_get_idx(ip6arr, idx);
-		json_object_object_get_ex(tmpobj, "address", &addressobj);
-		address = json_object_get_string(addressobj);
-		json_object_object_get_ex(tmpobj, "mask", &maskobj);
-		mask = json_object_get_string(maskobj);
+		ip6arrlen = json_object_array_length(ip6arr);
 		
-		push_list(ifstatus_ip6, (void*)strdup(address));
-		push_list(ifstatus_mask6, (void*)strdup(mask));
+		for(int idx = 0; idx < ip6arrlen; idx++)
+		{
+			tmpobj = json_object_array_get_idx(ip6arr, idx);
+			json_object_object_get_ex(tmpobj, "address", &addressobj);
+			address = json_object_get_string(addressobj);
+			json_object_object_get_ex(tmpobj, "mask", &maskobj);
+			mask = json_object_get_string(maskobj);
+			
+			push_list(ifstatus_ip6, (void*)strdup(address));
+			push_list(ifstatus_mask6, (void*)strdup(mask));
+		}
 	}
 	
 	json_object_object_get_ex(iface, "ipv6-prefix-assignment", &ip6arr);
-	ip6arrlen = json_object_array_length(ip6arr);
-	
-	for(int idx = 0; idx < ip6arrlen; idx++)
+	if(ip6arr != NULL)
 	{
-		tmpobj = json_object_array_get_idx(ip6arr, idx);
-		json_object_object_get_ex(tmpobj, "local-address", &localaddrobj);
-		json_object_object_get_ex(localaddrobj, "address", &addressobj);
-		address = json_object_get_string(addressobj);
-		json_object_object_get_ex(localaddrobj, "mask", &maskobj);
-		mask = json_object_get_string(maskobj);
+		ip6arrlen = json_object_array_length(ip6arr);
 		
-		push_list(ifstatus_ip6, (void*)strdup(address));
-		push_list(ifstatus_mask6, (void*)strdup(mask));
+		for(int idx = 0; idx < ip6arrlen; idx++)
+		{
+			tmpobj = json_object_array_get_idx(ip6arr, idx);
+			json_object_object_get_ex(tmpobj, "local-address", &localaddrobj);
+			json_object_object_get_ex(localaddrobj, "address", &addressobj);
+			address = json_object_get_string(addressobj);
+			json_object_object_get_ex(localaddrobj, "mask", &maskobj);
+			mask = json_object_get_string(maskobj);
+			
+			push_list(ifstatus_ip6, (void*)strdup(address));
+			push_list(ifstatus_mask6, (void*)strdup(mask));
+		}
 	}
 }
 
@@ -953,19 +961,43 @@ void get_ifstatus_gateway(json_object* iface, char* ifstatus_gateway)
 	const char* target = NULL;
 	int routearrlen = 0;
 	json_object_object_get_ex(iface, "route", &routesarr);
-	routearrlen = json_object_array_length(routesarr);
 	
-	for(int idx = 0; idx < routearrlen; idx++)
+	if(routesarr != NULL)
 	{
-		tmpobj = json_object_array_get_idx(routesarr, idx);
-		json_object_object_get_ex(tmpobj, "target", &targetobj);
-		target = json_object_get_string(targetobj);
-		
-		if(safe_strcmp(target, "::") == 0)
+		routearrlen = json_object_array_length(routesarr);
+
+		for(int idx = 0; idx < routearrlen; idx++)
 		{
-			json_object_object_get_ex(tmpobj, "nexthop", &nexthopobj);
-			ifstatus_gateway = json_object_get_string(nexthopobj);
+			tmpobj = json_object_array_get_idx(routesarr, idx);
+			json_object_object_get_ex(tmpobj, "target", &targetobj);
+			target = json_object_get_string(targetobj);
+			
+			if(safe_strcmp(target, "::") == 0)
+			{
+				json_object_object_get_ex(tmpobj, "nexthop", &nexthopobj);
+				ifstatus_gateway = json_object_get_string(nexthopobj);
+			}
 		}
+	}
+}
+
+void get_ifstatus_ipaddrs(json_object* iface, char* ifstatus_ip, char* ifstatus_mask)
+{
+	struct json_object* tmpobj = NULL;
+	struct json_object* tmpobj2 = NULL;
+	uint32_t maskbits = 0;
+
+	json_object_object_get_ex(iface, "ipv4-address", &tmpobj);
+	if(tmpobj != NULL)
+	{
+		tmpobj = json_object_array_get_idx(tmpobj, 0);
+		json_object_object_get_ex(tmpobj, "address", &tmpobj2);
+		ifstatus_ip = json_object_get_string(tmpobj2);
+		json_object_object_get_ex(tmpobj, "mask", &tmpobj2);
+		//ifstatus_wan_mask = json_object_get_string(tmpobj2);
+		maskbits = json_object_get_int(tmpobj2);
+		maskbits = (0xFFFFFFFF << (32 - maskbits)) & 0xFFFFFFFF;
+		sprintf(ifstatus_mask, "%u.%u.%u.%u", maskbits >> 24, (maskbits >> 16) & 0xFF, (maskbits >> 8) & 0xFF, maskbits & 0xFF);
 	}
 }
 
@@ -979,29 +1011,32 @@ void print_interface_vars(char** ptr_lan_ip, char** ptr_wan_ip, list** ptr_lan_i
 	struct json_object* interfaces_arr;
 	int ifacearrlen = 0;
 	json_object_object_get_ex(ifdump, "interface", &interfaces_arr);
-	ifacearrlen = json_object_array_length(interfaces_arr);
-	
-	for(int idx = 0; idx < ifacearrlen; idx++)
+	if(interfaces_arr != NULL)
 	{
-		struct json_object* tmpobj = NULL;
-		struct json_object* nameobj = NULL;
-		const char* name = NULL;
+		ifacearrlen = json_object_array_length(interfaces_arr);
 		
-		tmpobj = json_object_array_get_idx(interfaces_arr, idx);
-		json_object_object_get_ex(tmpobj, "interface", &nameobj);
-		name = json_object_get_string(nameobj);
-		
-		if(safe_strcmp(name, "lan") == 0)
+		for(int idx = 0; idx < ifacearrlen; idx++)
 		{
-			if_lan = json_object_get(tmpobj);
-		}
-		else if(safe_strcmp(name, "wan") == 0)
-		{
-			if_wan = json_object_get(tmpobj);
-		}
-		else if(safe_strcmp(name, "wan6") == 0)
-		{
-			if_wan6 = json_object_get(tmpobj);
+			struct json_object* tmpobj = NULL;
+			struct json_object* nameobj = NULL;
+			const char* name = NULL;
+			
+			tmpobj = json_object_array_get_idx(interfaces_arr, idx);
+			json_object_object_get_ex(tmpobj, "interface", &nameobj);
+			name = json_object_get_string(nameobj);
+			
+			if(safe_strcmp(name, "lan") == 0)
+			{
+				if_lan = json_object_get(tmpobj);
+			}
+			else if(safe_strcmp(name, "wan") == 0)
+			{
+				if_wan = json_object_get(tmpobj);
+			}
+			else if(safe_strcmp(name, "wan6") == 0)
+			{
+				if_wan6 = json_object_get(tmpobj);
+			}
 		}
 	}
 	
@@ -1195,16 +1230,7 @@ void print_interface_vars(char** ptr_lan_ip, char** ptr_wan_ip, list** ptr_lan_i
 		json_object_object_get_ex(if_lan, "l3_device", &tmpobj);
 		ifstatus_lan_l3dev = json_object_get_string(tmpobj);
 		
-		json_object_object_get_ex(if_lan, "ipv4-address", &tmpobj);
-		tmpobj = json_object_array_get_idx(tmpobj, 0);
-		json_object_object_get_ex(tmpobj, "address", &tmpobj2);
-		ifstatus_lan_ip = json_object_get_string(tmpobj2);
-		json_object_object_get_ex(tmpobj, "mask", &tmpobj2);
-		//ifstatus_lan_mask = json_object_get_string(tmpobj2);
-		maskbits = json_object_get_int(tmpobj2);
-		maskbits = (0xFFFFFFFF << (32 - maskbits)) & 0xFFFFFFFF;
-		sprintf(ifstatus_lan_mask, "%u.%u.%u.%u", maskbits >> 24, (maskbits >> 16) & 0xFF, (maskbits >> 8) & 0xFF, maskbits & 0xFF);
-		
+		get_ifstatus_ipaddrs(if_lan, ifstatus_lan_ip, ifstatus_lan_mask);
 		get_ifstatus_ip6addrs(if_lan, ifstatus_lan_ip6, ifstatus_lan_mask6);
 	}
 	if(if_wan != NULL)
@@ -1219,16 +1245,7 @@ void print_interface_vars(char** ptr_lan_ip, char** ptr_wan_ip, list** ptr_lan_i
 		json_object_object_get_ex(if_wan, "l3_device", &tmpobj);
 		ifstatus_wan_l3dev = json_object_get_string(tmpobj);
 		
-		json_object_object_get_ex(if_wan, "ipv4-address", &tmpobj);
-		tmpobj = json_object_array_get_idx(tmpobj, 0);
-		json_object_object_get_ex(tmpobj, "address", &tmpobj2);
-		ifstatus_wan_ip = json_object_get_string(tmpobj2);
-		json_object_object_get_ex(tmpobj, "mask", &tmpobj2);
-		//ifstatus_wan_mask = json_object_get_string(tmpobj2);
-		maskbits = json_object_get_int(tmpobj2);
-		maskbits = (0xFFFFFFFF << (32 - maskbits)) & 0xFFFFFFFF;
-		sprintf(ifstatus_wan_mask, "%u.%u.%u.%u", maskbits >> 24, (maskbits >> 16) & 0xFF, (maskbits >> 8) & 0xFF, maskbits & 0xFF);
-		
+		get_ifstatus_ipaddrs(if_wan, ifstatus_wan_ip, ifstatus_wan_mask);
 		get_ifstatus_gateway(if_wan, ifstatus_wan_gateway);
 	}
 	if(if_wan6 != NULL)
