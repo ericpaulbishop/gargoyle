@@ -15,6 +15,7 @@
 # However, if vlan is active it can be problematic to take
 # the switch interface down, so just take down the sub-interfaces
 
+. /lib/functions/network.sh
 . /usr/lib/gargoyle/libgargoylehelper.sh
 
 backup_quotas >/dev/null 2>&1
