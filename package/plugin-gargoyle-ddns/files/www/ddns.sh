@@ -23,7 +23,7 @@
 	done
 
 	echo "extScripts = new Array();"
-	external_scripts=$(ls /usr/lib/ddns-gargoyle 2&>1)
+	external_scripts=$(ls /usr/lib/ddns-gargoyle 2>/dev/null)
 	for script in $external_scripts ; do
 		echo "extScripts.push(\""$script"\");"
 	done
