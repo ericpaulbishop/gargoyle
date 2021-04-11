@@ -28,6 +28,13 @@
 		echo "extScripts.push(\""$script"\");"
 	done
 
+	. /lib/functions/network.sh
+	network_get_device lan_iface lan || \
+		lan_iface=$(uci -q get network.lan.ifname)
+	network_get_device wan_iface wan || \
+		wan_iface=$(uci -q get network.wan.ifname)
+	echo "var lanIface=\"$lan_iface\";"
+	echo "var wanIface=\"$wan_iface\";"
 %>
 //-->
 </script>

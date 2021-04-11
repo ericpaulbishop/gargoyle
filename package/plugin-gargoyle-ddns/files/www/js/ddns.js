@@ -237,6 +237,8 @@ function resetData()
 		ddnsTableData[deIndex][2].checked = ddnsEnabledData[deIndex];
 	}
 
+	addOptionToSelectElement("ip_from", wanIface + " (WAN)", wanIface);
+	addOptionToSelectElement("ip_from", lanIface + " (LAN)", lanIface);
 }
 
 function addDdnsService()
@@ -424,7 +426,17 @@ function setUciFromDocument(dstUci, pkg, section)
 	dstUci.set("ddns_gargoyle", section, "", "service");
 	dstUci.set("ddns_gargoyle", section, "enabled", "1");
 	dstUci.set("ddns_gargoyle", section, "service_provider", providerName);
-	dstUci.set("ddns_gargoyle", section, "ip_source", "internet");
+	var ip_from = getSelectedValue("ip_from", document);
+	if(ip_from != "internet")
+	{
+		dstUci.set("ddns_gargoyle", section, "ip_source", "interface");
+		dstUci.set("ddns_gargoyle", section, "ip_interface", ip_from);
+	}
+	else
+	{
+		dstUci.set("ddns_gargoyle", section, "ip_source", "internet");
+		dstUci.remove("ddns_gargoyle", section, "ip_interface");
+	}
 	dstUci.set("ddns_gargoyle", section, "force_interval", document.getElementById("ddns_force").value  );
 	dstUci.set("ddns_gargoyle", section, "force_unit", "days");
 	dstUci.set("ddns_gargoyle", section, "check_interval", document.getElementById("ddns_check").value );
@@ -535,6 +547,9 @@ function setDocumentFromUci(srcUci, pkg, section)
 	var forceDays = (getMultipleFromUnit( srcUci.get("ddns_gargoyle", section, "force_unit") ) * srcUci.get("ddns_gargoyle", section, "force_interval"))/(24*60*60);
 	forceDays = (forceDays > 0) ? forceDays : 3;
 	document.getElementById( "ddns_force" ).value = forceDays;
+
+	var ip_from = srcUci.get("ddns_gargoyle", section, "ip_interface");
+	setSelectedValue("ip_from", ip_from ? ip_from : "internet");
 }
 
 function setProvider()

@@ -22,6 +22,15 @@
 					</span>
 				</div>
 
+				<div class="row form-group">
+					<label class="col-xs-5" for="ip_from" id="ip_from_label"><%~ IPSrc %>:</label>
+					<span class="col-xs-7">
+						<select id="ip_from" class="form-control">
+							<option value="internet">Internet</option>
+						</select>
+					</span>
+				</div>
+
 				<div class="row form-group" id="ddns_1">
 					<span class="col-xs-12"><a id="ddns_1_ref" href="javascript:setDescriptionVisibility('ddns_1')"><%~ Hide %></a></span>
 					<span class="col-xs-12" id="ddns_1_txt">

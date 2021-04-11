@@ -22,6 +22,7 @@ DyDNS.UpFErr="Update failed.  Ensure your configuration is valid and that you ar
 DyDNS.UpOK="Update successful.";
 DyDNS.UpSrvErr="Could not update service class.";
 DyDNS.NoScriptErr="You need to install an additional package to use this provider!";
+DyDNS.IPSrc="IP Source";
 
 //ddns_edit.sh
 DyDNS.EDSect="Edit Dynamic DNS Service";
