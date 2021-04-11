@@ -237,8 +237,7 @@ function resetData()
 		ddnsTableData[deIndex][2].checked = ddnsEnabledData[deIndex];
 	}
 
-	addOptionToSelectElement("ip_from", wanIface + " (WAN)", wanIface);
-	addOptionToSelectElement("ip_from", lanIface + " (LAN)", lanIface);
+	setAllowableSelections("ip_from", ["internet", wanIface, lanIface], ["Internet", wanIface + " (WAN)", lanIface + " (LAN)"]);
 }
 
 function addDdnsService()
