@@ -138,8 +138,8 @@ initialize()
 	if [ "$enabled" == "1" ] ; then
 		
 		
-		local_openvpn_port=$(netstat -u -t -p -a -e -n 2>/dev/null | awk ' $0 ~/openvpn/ { gsub(/^.*:/, "", $4) ; print $4 ; } ')
-		openvpn_proto=$(netstat -u -t -p -a -e -n 2>/dev/null | awk ' $0 ~/openvpn/ { print $1 ; } ')
+		local_openvpn_port=$(netstat -u -t -p -a -e -n 2>/dev/null | awk ' $0 ~/openvpn/ { gsub(/^.*:/, "", $4) ; print $4 ; exit; } ')
+		openvpn_proto=$(netstat -u -t -p -a -e -n 2>/dev/null | awk ' $0 ~/openvpn/ { print $1 ; exit; } ')
 		network_get_device wan_if lan || \
 			wan_if=$(uci -q get network.wan.ifname)
 		vpn_if=$(uci -q get firewall.vpn_zone.device)
