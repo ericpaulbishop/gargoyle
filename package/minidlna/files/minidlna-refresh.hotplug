@@ -4,7 +4,7 @@ minidlna_enabled=$(uci get minidlna.config.enabled 2>/dev/null)
 if [ "$minidlna_enabled" = "1" ]; then
 	[ "$INTERFACE" = "lan" ] && [ "$ACTION" = "ifup" ] && {
 		/etc/init.d/minidlna stop
-		kill -9 $(pidof minidlna)
+		kill -9 $(pidof minidlnad) 2>/dev/null
 		/etc/init.d/minidlna start
 	}
 fi
