@@ -578,6 +578,7 @@ CONFIG_PER_FEED_REPO=y
 # CONFIG_FEED_luci is not set
 # CONFIG_FEED_routing is not set
 # CONFIG_FEED_telephony is not set
+# CONFIG_FEED_freifunk is not set
 
 #
 # Base system
@@ -2625,11 +2626,6 @@ CONFIG_PACKAGE_plugin-gargoyle-wol=y
 # CONFIG_PACKAGE_valgrind is not set
 
 #
-# Extra packages
-#
-CONFIG_PACKAGE_wireguard-tools=y
-
-#
 # Firmware
 #
 
@@ -3923,6 +3919,7 @@ CONFIG_OPENVPN_gargoyle_openssl_ENABLE_PF=y
 # CONFIG_OPENVPN_gargoyle_openssl_ENABLE_IPROUTE2 is not set
 CONFIG_OPENVPN_gargoyle_openssl_ENABLE_SMALL=y
 CONFIG_PACKAGE_wireguard=y
+CONFIG_PACKAGE_wireguard-tools=y
 
 #
 # WWAN
