@@ -1,10 +1,7 @@
 #!/bin/sh /etc/rc.common
 START=85
 
-. /lib/functions/network.sh
 include /lib/network
-
-
 
 backup_script="/tmp/do_webmon_backup.sh"
 tmp_cron="/tmp/tmp.cron"
@@ -28,6 +25,8 @@ update_cron()
 
 start()
 {
+	. /lib/functions/network.sh
+	
 	config_load webmon_gargoyle
 	config_get max_domains webmon max_domains
 	config_get max_searches webmon max_searches

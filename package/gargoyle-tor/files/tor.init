@@ -12,8 +12,6 @@ RUN_GROUP=tor
 BOOT="0"
 OPTIONS=" --User $RUN_USER  --PidFile '$PID_F' --RunAsDaemon 1  --SocksPort 0 --AvoidDiskWrites 1 "
 
-. /lib/functions/network.sh
-
 init_group()
 {
 	group="$1"
@@ -64,6 +62,8 @@ boot()
 
 start()
 {
+	. /lib/functions/network.sh
+	
 	enabled=$(uci get tor.global.enabled             2>/dev/null)
 	loglevel=$( uci get tor.global.loglevel          2>/dev/null)
 	control_port=$( uci get tor.global.control_port  2>/dev/null)
