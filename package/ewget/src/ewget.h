@@ -35,7 +35,7 @@
 #include <netdb.h>
 
 
-#include <sys/errno.h>
+#include <errno.h>
 #include <sys/select.h>
 #include <fcntl.h>
 #include <signal.h>

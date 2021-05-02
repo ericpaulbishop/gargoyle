@@ -127,6 +127,7 @@ static void alarm_triggered(int sig);
 
 	#ifdef USE_OPENSSL
 		#include <openssl/ssl.h>
+		static int ssl_servername_cb(SSL *s, int *ad, void *arg);
 	#endif
 	
 	#ifdef USE_CYASSL
@@ -1543,7 +1544,26 @@ static int ewget_urandom(void *ctx, unsigned char *out, size_t len)
 }
 #endif
 
+#ifdef USE_OPENSSL
+/* This is a context that we pass to callbacks */
+typedef struct tlsextctx_st {
+    BIO *biodebug;
+    int ack;
+} tlsextctx;
 
+static int ssl_servername_cb(SSL *s, int *ad, void *arg)
+{
+    // We would check and acknowledge the servername here if we were doing it
+	/*tlsextctx *p = (tlsextctx *) arg;
+    const char *hn = SSL_get_servername(s, TLSEXT_NAMETYPE_host_name);
+    if (SSL_get_servername_type(s) != -1)
+        p->ack = !SSL_session_reused(s) && hn != NULL;
+    else
+        BIO_printf(bio_err, "Can't use SSL_get_servername\n");*/
+
+    return SSL_TLSEXT_ERR_OK;
+}
+#endif
 
 static void* initialize_connection_https(char* host, int port, int family)
 {
@@ -1564,12 +1584,16 @@ static void* initialize_connection_https(char* host, int port, int family)
 		SSL_CTX* ctx = NULL;
 		#ifdef USE_OPENSSL
 			const SSL_METHOD* meth;
+			tlsextctx tlsextcbp = { NULL, 0 };
 			SSL_library_init();
 			SSL_load_error_strings();
 			
 			meth = TLS_method();
 			ctx = SSL_CTX_new(meth);
-    			ssl = SSL_new(ctx);
+			SSL_CTX_set_tlsext_servername_callback(ctx, ssl_servername_cb);
+			SSL_CTX_set_tlsext_servername_arg(ctx, &tlsextcbp);
+			ssl = SSL_new(ctx);
+			SSL_set_tlsext_host_name(ssl, host);
 			SSL_set_fd(ssl, socket);
 			initialized = SSL_connect(ssl);
 			/* would check cert here if we were doing it */
