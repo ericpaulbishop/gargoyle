@@ -21,7 +21,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 #include "erics_tools.h"
 #include "ewget.h"
 #define malloc safe_malloc
@@ -41,12 +40,13 @@
 #include <sys/socket.h>
 #include <net/if.h>
 #include <netdb.h>
+#include <ifaddrs.h>
 
 #include <regex.h>
 
 #include <dirent.h>
 #include <sys/param.h>
-#include <sys/errno.h>
+#include <errno.h>
 
 #include <signal.h>
 #include <limits.h>
@@ -79,7 +79,6 @@
 #define MAX_EXTERN_SCRIPT_PARAM_LENGTH	50
 #define EXTERN_SCRIPT_MANDATORY_PARAM_NUM	6
 
-
 #define MAX_LOOKUP_URL_LENGTH	65
 
 int daemon_pid_file;
@@ -105,6 +104,18 @@ char default_ip_lookup_url_data[][MAX_LOOKUP_URL_LENGTH] = {
 							"\0"
 							};
 
+char default_ip6_lookup_url_data[][MAX_LOOKUP_URL_LENGTH] = {
+							"https://api6.ipify.org",
+							"https://api.myip.com",
+							"http://bot.whatismyipaddress.com",
+							"https://api.my-ip.io/ip",
+							"https://ip.seeip.org",
+							"https://ifconfig.co/ip",
+							"https://ipapi.co/ip",
+							"https://api.ip.sb/ip",
+							"\0"
+							};
+
 #define MAX_USER_AGENT_LENGTH	125
 char user_agents[][MAX_USER_AGENT_LENGTH] = {
 						"Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0)",        //IE 8, Windows
@@ -115,18 +126,15 @@ char user_agents[][MAX_USER_AGENT_LENGTH] = {
 						"\0"
 						};
 
-
-
-
-
 char** default_ip_lookup_urls = NULL;
-
+char** default_ip6_lookup_urls = NULL;
 
 typedef struct
 {
 	char* name;
 	char* url_template;	  	// contains vars that should be replaced, eg http://[USER]:[PASS]@dynservice.com
 	char* external_script;	// path (without /usr/lib/ddns-gargoyle/ start) to external script to process update
+	int ipv6;	// is the service provider for IPv6 or not
 	char** required_variables;	 	
 	char** optional_variables;
 	char** optional_variable_defaults;
@@ -146,6 +154,7 @@ typedef struct
 {
 	char* name;
 	char* service_provider;			//name of service from ddns_service_provider
+	int ipv6;	// is the config for IPv6 or not
 	int check_interval; 			// seconds
 	int force_interval; 			// seconds
 	int ip_source; 			// INTERFACE or CHECK_URL
@@ -157,7 +166,6 @@ typedef struct
 
 } ddns_service_config;
 
-
 typedef struct
 {
 	char* service_name;
@@ -165,29 +173,33 @@ typedef struct
 	time_t last_full_update;
 } update_node;
 
-
 typedef struct
 {
 	long int msg_type;
 	char msg_line[MAX_MSG_LINE];
 } message_t;
 
+#ifndef IN6_IS_ADDR_GLOBAL
+#define IN6_IS_ADDR_GLOBAL(a) \
+        ((((__const uint32_t *) (a))[0] & htonl(0x70000000)) \
+        == htonl (0x20000000))
+#endif /* IS ADDR GLOBAL */
+
 //global variables for daemon (used in signal handler) 
 int terminated; 
 int output_requested; 
-
 
 string_map* load_service_providers(char* filename);
 string_map* load_service_configurations(char* filename, string_map* service_providers);
 char** parse_variable_definition_line(char* line);
 int get_multiple_for_unit(char* unit);
 
-char* get_local_ip(int ip_source, void* check_parameter);
+char* get_local_ip(int ip_source, void* check_parameter, int ipv6);
 char* get_next_url_and_rotate(char **urls);
 void  initialize_default_ip_lookup_urls(void);
 void  free_default_ip_lookup_urls(void);
-char* get_ip_from_url(char* url);
-char* get_interface_ip(char* if_name);
+char* get_ip_from_url(char* url, int ipv6);
+char* get_interface_ip(char* if_name, int ipv6);
 
 char* do_url_substitution(ddns_service_provider* def, ddns_service_config* config, char* current_ip);
 char* do_line_substitution(char* line, string_map* variables, string_map* escaped_variables);
@@ -197,7 +209,7 @@ char *replace_str(char *s, char *old, char *new);
 char** get_args_from_config(ddns_service_provider* provider, ddns_service_config* config, char* ext_file, char* update_ip, char* current_ip, int force, int verbose);
 
 int do_single_update(ddns_service_config *service_config, string_map *service_providers, char* remote_ip, char* local_ip, int force_update, int verbose);
-char* lookup_domain_ip(char* url_str);
+char* lookup_domain_ip(char* url_str, int ipv6);
 
 void run_request(string_map *service_configs, string_map *service_providers, char **service_names, int force_update, char display_format, int verbose);
 void run_request_through_daemon(char **service_names, int force_update, char display_format);
@@ -213,14 +225,11 @@ void free_service_config(ddns_service_config* config);
 void free_service_provider(ddns_service_provider* provider);
 void free_update_nodes(update_node** update_nodes, unsigned long num_nodes);
 
-
 int srand_called = 0;
 char* get_random_user_agent(void);
 
-
 int main(int argc, char** argv)
 {
-
 	// -C [SERVICE_CONFIG_FILE]
 	// -P [SERVICE_PROVIDER_FILE]
 	// -d (start daemon mode)
@@ -320,8 +329,6 @@ int main(int argc, char** argv)
 		service_names[name_length] = NULL;
 	}
 
-
-
 	//test if a daemon is already running by trying to open the message queue (which daemon creates)
 	int testq = msgget(ftok(PID_PATH, MSG_ID), 0777);
 	int daemon_running = testq < 0 ? 0 : 1;
@@ -344,7 +351,6 @@ int main(int argc, char** argv)
 		}
 		else
 		{
-
 			if(is_daemon)
 			{
 				//start update daemon
@@ -456,12 +462,6 @@ void free_update_nodes(update_node** update_nodes, unsigned long num_nodes)
 	free(update_nodes);
 }
 
-
-
-
-
-
-
 void run_request(string_map *service_configs, string_map* service_providers, char **service_names, int force_update, char display_format, int verbose)
 {
 	int name_index = 0;
@@ -476,7 +476,6 @@ void run_request(string_map *service_configs, string_map* service_providers, cha
 		service_names = get_map_keys(service_configs, &num_keys);
 	}
 	
-	
 	for(name_index = 0; service_names[name_index] != NULL ; name_index++)
 	{
 		ddns_service_config* service_config = get_map_element(service_configs, service_names[name_index]);
@@ -484,13 +483,13 @@ void run_request(string_map *service_configs, string_map* service_providers, cha
 		if(service_config != NULL)
 		{
 			
-			char *local_ip = get_local_ip(service_config->ip_source, service_config->ip_source == INTERFACE ? (void*)service_config->ip_interface : (void*)service_config->ip_url);
+			char *local_ip = get_local_ip(service_config->ip_source, service_config->ip_source == INTERFACE ? (void*)service_config->ip_interface : (void*)service_config->ip_url, service_config->ipv6);
 
 			char* test_domain = get_map_element(service_config->variable_definitions, "domain");
 			char* remote_ip = NULL;
 			if(test_domain != NULL)
 			{
-				remote_ip = lookup_domain_ip(test_domain);
+				remote_ip = lookup_domain_ip(test_domain, service_config->ipv6);
 			}
 			int update_status = do_single_update(service_config, service_providers, remote_ip, local_ip, force_update, verbose);
 		
@@ -508,7 +507,6 @@ void run_request(string_map *service_configs, string_map* service_providers, cha
 					fclose(update_file);
 				}
 			}
-
 
 			if(test_domain == NULL)
 			{
@@ -555,7 +553,6 @@ void run_request(string_map *service_configs, string_map* service_providers, cha
 		free_null_terminated_string_array(service_names);
 	}
 }
-
 
 void run_request_through_daemon(char** service_names, int force_update, char display_format)
 {
@@ -618,11 +615,8 @@ void run_request_through_daemon(char** service_names, int force_update, char dis
 		messages_expected = name_index;
 	}
 
-
-
 	// signal daemon that we've sent requests
 	kill((pid_t)daemon_pid, SIGUSR1);
-
 
 	string_map* result_map = initialize_map(1);
 
@@ -710,13 +704,10 @@ void run_request_through_daemon(char** service_names, int force_update, char dis
 
 void run_daemon(string_map *service_configs, string_map* service_providers, int force_update, char run_in_background)
 {
-
-
 	daemonize(run_in_background); //call with 0 for forground of 1 for background
 
 	//enable logging to syslog
 	openlog("ddns_gargoyle", LOG_NDELAY|LOG_PID, LOG_DAEMON );
-
 
 	//open message queue 
 	int mq = msgget(ftok(PID_PATH, MSG_ID), 0777 | IPC_CREAT );
@@ -726,12 +717,9 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 		exit(0);
 	}
 
-
 	//we store times of last updates in a special directory
 	//if it doesn't exist, create it now
 	create_path(UPDATE_INFO_DIR, 0700);
-
-
 
 	//printf("initial scheduling...\n");
 
@@ -752,8 +740,7 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 
 		// since we're working off list we obtained from map, don't need to check for NULL
 		ddns_service_config *service_config = get_map_element(service_configs, name); 	
-	
-	
+
 		char* filename = dynamic_strcat(2, UPDATE_INFO_DIR, name);
 		FILE* update_file = fopen(filename, "r");
 		free(filename);
@@ -877,7 +864,7 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 				{
 					if(test_domain != NULL)
 					{
-						remote_ip = lookup_domain_ip(test_domain);
+						remote_ip = lookup_domain_ip(test_domain, service_config->ipv6);
 						if(remote_ip != NULL)
 						{
 							set_map_element(remote_ips, test_domain, remote_ip);
@@ -903,7 +890,7 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 				}
 				if(using_predefined_local_ip == 0)
 				{
-					local_ip = get_local_ip(service_config->ip_source, service_config->ip_source == INTERFACE ? (void*)service_config->ip_interface : (void*)service_config->ip_url);
+					local_ip = get_local_ip(service_config->ip_source, service_config->ip_source == INTERFACE ? (void*)service_config->ip_interface : (void*)service_config->ip_url, service_config->ipv6);
 					if(local_ip != NULL)
 					{
 						time_t *update_time = (time_t*)get_map_element(local_ip_updates, interface_name);
@@ -1013,8 +1000,6 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 				check_uq = peek_priority_queue_node(update_queue);
 			}
 		}
-
-		
 
 		//sleep for 400 milliseconds, or until signal is caught
 		usleep(400*1000); 
@@ -1137,7 +1122,6 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 	}
 	unlink(PID_PATH);
 
-
 	//cleanup used memory (makes finding TRUE memory leaks with valgrind a lot easier)
 	unsigned long num_destroyed;
 	free_null_terminated_string_array(service_names);
@@ -1152,8 +1136,6 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 	update_node** uvalues = (update_node**)destroy_priority_queue(update_queue, DESTROY_MODE_RETURN_VALUES, &num_u);
 	free_update_nodes(rvalues, num_r);
 	free_update_nodes(uvalues, num_u);	
-
-
 }
 
 void daemonize(char run_in_background) //background variable is useful for debugging, causes program to run in foreground if 0
@@ -1196,7 +1178,6 @@ void daemonize(char run_in_background) //background variable is useful for debug
 		if(reopened){ i++; } //dummy, prevents compilation warnings
 	}
 
-
 	// record pid to lockfile
 	daemon_pid_file = open(PID_PATH,O_RDWR|O_CREAT,0644);
 	if(daemon_pid_file<0) // exit if we can't open file
@@ -1213,7 +1194,6 @@ void daemonize(char run_in_background) //background variable is useful for debug
 	{
 		exit(1);
 	}
-
 
 	//set signal handlers
 	signal(SIGTERM,signal_handler);
@@ -1342,7 +1322,7 @@ int do_single_update(ddns_service_config *service_config, string_map *service_pr
 				{
 					char* url_str = do_url_substitution(def, service_config, local_ip);
 					if(verbose > 0) { printf("fetching: \"%s\"\n", url_str); }
-					http_response* page = get_url(url_str, NULL, EW_INET);
+					http_response* page = get_url(url_str, NULL, service_config->ipv6 ? EW_INET6 : EW_INET);
 
 					if(page != NULL)
 					{
@@ -1423,7 +1403,6 @@ char** get_args_from_config(ddns_service_provider* provider, ddns_service_config
 
 char* do_url_substitution(ddns_service_provider* provider, ddns_service_config* config, char* current_ip)
 {
-	
 	string_map*  all_variables = initialize_string_map(1);
 	string_map*  escaped_variables = initialize_string_map(0);
 
@@ -1529,7 +1508,6 @@ char* do_url_substitution(ddns_service_provider* provider, ddns_service_config* 
 			}
 		}
 	}
-
 	
 	//do substitution for url
 	char* url = do_line_substitution(provider->url_template, all_variables, escaped_variables);
@@ -1588,8 +1566,6 @@ char* do_line_substitution(char* line, string_map* variables, string_map* escape
 	return replaced;
 }
 
-
-
 char *http_req_escape(char *unescaped)
 {
 	//be sure to do '%' first, to avoid much craziness
@@ -1612,32 +1588,69 @@ char *http_req_escape(char *unescaped)
 	return escaped;
 }
 
-
-
-char* lookup_domain_ip(char* url_str)
+// TODO
+char* lookup_domain_ip(char* url_str, int ipv6)
 {
 	char* ip = NULL;
 
-	url_request* url = parse_url(url_str, NULL, EW_INET);
+	url_request* url = parse_url(url_str, NULL, ipv6 ? EW_INET6 : EW_INET);
 	if(url !=  NULL)
 	{
-		struct hostent* host;
-		host = gethostbyname(url->hostname);
-		if(host != NULL)
+		struct addrinfo hints;
+		struct addrinfo* gaip;
+		struct addrinfo* gai;
+		char portstr[6];
+		int gairet;
+		struct sockaddr_in* in;
+		struct sockaddr_in6* in6;
+	
+		snprintf(portstr, 6, "%d", url->port);
+		memset(&hints, 0, sizeof(struct addrinfo));
+		hints.ai_family = ipv6 ? EW_INET6 : EW_INET;
+		hints.ai_socktype = SOCK_STREAM;
+
+		gairet = getaddrinfo(url->hostname, portstr, &hints, &gaip);
+		if(gairet != 0)
 		{
-			ip = strdup((char*)inet_ntoa(*((struct in_addr *)host->h_addr)));
+			return ip;
 		}
+		
+		gai = gaip;
+		do
+		{
+			if(gai->ai_addr && gai->ai_addr->sa_family==AF_INET && !ipv6)
+			{
+				in = (struct sockaddr_in*)gai->ai_addr;
+				ip = (char*)malloc(INET_ADDRSTRLEN);
+				inet_ntop(AF_INET, &in->sin_addr, ip, INET_ADDRSTRLEN);
+				break;
+			}
+			else if(gai->ai_addr && gai->ai_addr->sa_family==AF_INET6 && ipv6)
+			{
+				in6 = (struct sockaddr_in6*)gai->ai_addr;
+				if(IN6_IS_ADDR_GLOBAL(&in6->sin6_addr))
+				{
+					ip = (char*)malloc(INET6_ADDRSTRLEN);
+					inet_ntop(AF_INET6, &in6->sin6_addr, ip, INET6_ADDRSTRLEN);
+					break;
+				}
+			}
+		} while((gai = gai->ai_next) != NULL);
+
+		freeaddrinfo(gaip);
 		free_url_request(url);
 	}
+
 	return ip;
 }
 
-char* get_local_ip(int ip_source, void* check_parameter)
+char* get_local_ip(int ip_source, void* check_parameter, int ipv6)
 {
+	char** default_ip_lookup_urls_ptr = NULL;
 	char* ip = NULL;
 	if(ip_source == INTERFACE)
 	{
-		ip = get_interface_ip((char*)check_parameter);
+		ip = get_interface_ip((char*)check_parameter, ipv6);
 	}
 	else
 	{
@@ -1656,7 +1669,7 @@ char* get_local_ip(int ip_source, void* check_parameter)
 			strcpy(first_url, next_url);
 			while(ip == NULL && (strcmp(first_url, next_url) != 0 || is_first_lookup == 1))
 			{
-				ip = get_ip_from_url(next_url);
+				ip = get_ip_from_url(next_url, ipv6);
 				syslog(LOG_INFO, "\t\t%s local ip from url: %s\n",  (ip == NULL ? "Could not determine" : "Successfully retrieved"),  next_url);
 				if(ip == NULL) { next_url = get_next_url_and_rotate(urls); }
 				is_first_lookup = 0;
@@ -1665,13 +1678,18 @@ char* get_local_ip(int ip_source, void* check_parameter)
 		if(ip == NULL)
 		{
 			is_first_lookup=1;
-			next_url = get_next_url_and_rotate(default_ip_lookup_urls);
+			default_ip_lookup_urls_ptr = default_ip_lookup_urls;
+			if(ipv6)
+			{
+				default_ip_lookup_urls_ptr = default_ip6_lookup_urls;
+			}
+			next_url = get_next_url_and_rotate(default_ip_lookup_urls_ptr);
 			strcpy(first_url, next_url);
 			while(ip == NULL && (strcmp(first_url, next_url) != 0 || is_first_lookup == 1))
 			{
-				ip = get_ip_from_url(next_url);
+				ip = get_ip_from_url(next_url, ipv6);
 				syslog(LOG_INFO, "\t\t%s local ip from url: %s\n",  (ip == NULL ? "Could not determine" : "Successfully retrieved"),  next_url);
-				if(ip == NULL) { next_url = get_next_url_and_rotate(default_ip_lookup_urls); }
+				if(ip == NULL) { next_url = get_next_url_and_rotate(default_ip_lookup_urls_ptr); }
 				is_first_lookup = 0;
 			}
 		}
@@ -1681,7 +1699,7 @@ char* get_local_ip(int ip_source, void* check_parameter)
 	return ip;
 }
 
-void  initialize_default_ip_lookup_urls(void)
+void initialize_default_ip_lookup_urls(void)
 {
 	if(default_ip_lookup_urls == NULL)
 	{
@@ -1696,6 +1714,19 @@ void  initialize_default_ip_lookup_urls(void)
 		}
 		default_ip_lookup_urls[url_index] = NULL;
 	}
+	if(default_ip6_lookup_urls == NULL)
+	{
+		int num_urls;
+		int url_index;
+		for(num_urls=0; default_ip6_lookup_url_data[num_urls][0] != '\0'; num_urls++){}
+		default_ip6_lookup_urls = (char**)malloc( (num_urls+2)*sizeof(char*) );
+		for(url_index=0; url_index < num_urls+1; url_index++)
+		{
+			default_ip6_lookup_urls[url_index] = (char*)malloc( MAX_LOOKUP_URL_LENGTH );
+			strcpy(default_ip6_lookup_urls[url_index], default_ip6_lookup_url_data[url_index]);
+		}
+		default_ip6_lookup_urls[url_index] = NULL;
+	}
 }
 
 void free_default_ip_lookup_urls(void)
@@ -1704,15 +1735,16 @@ void free_default_ip_lookup_urls(void)
 	{
 		free_null_terminated_string_array(default_ip_lookup_urls);
 	}
+	if(default_ip6_lookup_urls != NULL)
+	{
+		free_null_terminated_string_array(default_ip6_lookup_urls);
+	}
 }
-
-
 
 char* get_next_url_and_rotate(char **urls)
 {
 	char next[MAX_LOOKUP_URL_LENGTH];
 	int url_index;
-
 
 	strcpy(next, urls[0]);
 	for(url_index=0; urls[url_index+1][0] != '\0' ; url_index++)
@@ -1721,7 +1753,6 @@ char* get_next_url_and_rotate(char **urls)
 	}
 	strcpy(urls[url_index], next);
 	
-
 	return urls[url_index];
 }
 
@@ -1738,18 +1769,20 @@ char* get_random_user_agent(void)
 	return user_agents[ua_num];
 }
 
-
-char* get_ip_from_url(char* url)
+char* get_ip_from_url(char* url, int ipv6)
 {
 	char* ip = NULL;
-	http_response* page = get_url(url, get_random_user_agent(), EW_INET );
+	char ipv4regex[] = "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)";
+	char ipv6regex[] = "(([0-9A-Fa-f]{1,4}:){1,})(([0-9A-Fa-f]{1,4}){0,1})((:[0-9A-Fa-f]{1,4}){1,})";
+	
+	http_response* page = get_url(url, get_random_user_agent(), ipv6 ? EW_INET6 : EW_INET );
 	if(page != NULL)
 	{
 		if(page->data != NULL)
 		{
 			int status;
 			regex_t re;
-			if (regcomp(&re, "(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)", REG_EXTENDED) == 0)
+			if (regcomp(&re, ipv6 ? ipv6regex : ipv4regex, REG_EXTENDED) == 0)
 			{
 				regmatch_t m[5];
 				status = regexec(&re, page->data, (size_t) 5, m, 0);
@@ -1765,36 +1798,49 @@ char* get_ip_from_url(char* url)
 		}
 		free_http_response(page);
 	}
+
 	return ip;
 }
 
-
-char* get_interface_ip(char* if_name)
+char* get_interface_ip(char* if_name, int ipv6)
 {
-	struct ifreq buffer;
-	int s = socket(PF_INET, SOCK_DGRAM, 0);
-	memset(&buffer, 0x00, sizeof(buffer));
-	strcpy(buffer.ifr_name, if_name);
-	ioctl(s, SIOCGIFADDR, &buffer);
-	close(s);
+	struct ifaddrs* ifap;
+	struct ifaddrs* ifa;
+	struct sockaddr_in* in;
+	struct sockaddr_in6* in6;
+	char* ip = NULL;
 
-	struct sockaddr_in *addr = (struct sockaddr_in*)(&buffer.ifr_addr);	
-	struct in_addr sin= (struct in_addr)addr->sin_addr;
-	char *ip =  strdup((char*)inet_ntoa(sin));
+	getifaddrs(&ifap);
+	for(ifa = ifap; ifa; ifa = ifa->ifa_next)
+	{
+		if(ifa->ifa_addr && ifa->ifa_addr->sa_family==AF_INET && (strcmp(ifa->ifa_name,if_name) == 0) && !ipv6)
+		{
+			in = (struct sockaddr_in*)ifa->ifa_addr;
+			ip = (char*)malloc(INET_ADDRSTRLEN);
+			inet_ntop(AF_INET, &in->sin_addr, ip, INET_ADDRSTRLEN);
+			break;
+		}
+		else if(ifa->ifa_addr && ifa->ifa_addr->sa_family==AF_INET6 && (strcmp(ifa->ifa_name,if_name) == 0) && ipv6)
+		{
+			in6 = (struct sockaddr_in6*)ifa->ifa_addr;
+			if(IN6_IS_ADDR_GLOBAL(&in6->sin6_addr))
+			{
+				ip = (char*)malloc(INET6_ADDRSTRLEN);
+				inet_ntop(AF_INET6, &in6->sin6_addr, ip, INET6_ADDRSTRLEN);
+				break;
+			}
+		}
+	}
 
+	freeifaddrs(ifap);
 	return ip;
 }
-
-
-
 
 string_map* load_service_configurations(char* filename, string_map* service_providers)
 {
 	char newline_terminator[3];
 	newline_terminator[0] = '\n';
 	newline_terminator[1] = '\r';
-
-
 	
 	//intialize service_confs to an empty string_map
 	string_map* service_confs = initialize_map(1);
@@ -1835,6 +1881,7 @@ string_map* load_service_configurations(char* filename, string_map* service_prov
 				service_conf->ip_source = -1;
 				service_conf->ip_url = NULL;
 				service_conf->ip_interface = NULL;
+				service_conf->ipv6 = 0;
 				service_conf->variable_definitions = initialize_map(1); 	
 				service_conf->cached_meta_variables = initialize_string_map(0);
 				int service_enabled = 0;
@@ -1900,6 +1947,14 @@ string_map* load_service_configurations(char* filename, string_map* service_prov
 						{
 							service_conf->ip_interface = variable[1];
 						}
+						else if(safe_strcmp(variable[0], "ipv6") == 0 && variable[1] != NULL)
+						{
+							if(sscanf(variable[1], "%d", &read) > 0)
+							{
+								service_conf->ipv6 = read;
+							}
+							free(variable[1]);
+						}
 						else
 						{
 							if(variable[1] == NULL)
@@ -1944,7 +1999,8 @@ string_map* load_service_configurations(char* filename, string_map* service_prov
 					service_provider != NULL &&
 					service_conf->check_interval > 0 &&
 					service_conf->force_interval > 0 &&
-					( service_conf->ip_source == INTERNET || (service_conf->ip_source == INTERFACE && service_conf->ip_interface != NULL))
+					( service_conf->ip_source == INTERNET || (service_conf->ip_source == INTERFACE && service_conf->ip_interface != NULL)) &&
+					((ddns_service_provider*)service_provider)->ipv6 == service_conf->ipv6
 				  )
 				{
 					set_map_element(service_confs, service_conf->name, (void*)service_conf);
@@ -1991,7 +2047,6 @@ int get_multiple_for_unit(char* unit)
 	return 1;
 }
 
-
 string_map* load_service_providers(char* filename)
 {
 	string_map* service_providers = initialize_map(1);
@@ -2031,6 +2086,7 @@ string_map* load_service_providers(char* filename)
 				//initialize values of service_provider to null values
 				service_provider->url_template = NULL;
 				service_provider->external_script = NULL;
+				service_provider->ipv6 = 0;
 				service_provider->success_regexp = NULL;
 				service_provider->failure_regexp = NULL;
 				service_provider->required_variables = NULL;
@@ -2050,6 +2106,7 @@ string_map* load_service_providers(char* filename)
 				{
 					if(variable[0] != NULL)
 					{
+						int read = -1;
 						if(safe_strcmp(variable[0], "url_template") == 0 && variable[1] != NULL)
 						{
 							service_provider->url_template = variable[1];
@@ -2057,6 +2114,14 @@ string_map* load_service_providers(char* filename)
 						else if(safe_strcmp(variable[0], "external_script") == 0 && variable[1] != NULL)
 						{
 							service_provider->external_script = variable[1];
+						}
+						else if(safe_strcmp(variable[0], "ipv6") == 0 && variable[1] != NULL)
+						{
+							if(sscanf(variable[1], "%d", &read) > 0)
+							{
+								service_provider->ipv6 = read;
+							}
+							free(variable[1]);
 						}
 						else if(safe_strcmp(variable[0], "required_variables") == 0 && variable[1] != NULL)
 						{
@@ -2200,7 +2265,6 @@ string_map* load_service_providers(char* filename)
 	}
 	return service_providers;
 }
-
 
 //variable name is first non-whitespace, definition is part of string after first whitespace up until first newline
 //line is freed at end of function, but variable definition, if defined, must be freed

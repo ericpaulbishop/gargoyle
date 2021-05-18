@@ -144,14 +144,19 @@ function resetData()
 	// setup providers in add section
 	// also, make sure freedns.afraid.org is at top of list [ DO NOT CHANGE THIS! ]
 	var providerNames = [];
+	var providerValues = [];
 	var providerIndex;
 	var foundAfraid = false;
 	for(providerIndex=0; providerIndex < serviceProviders.length; providerIndex++)
 	{
 		var p = serviceProviders[providerIndex]["name"]
-		if(p != "freedns.afraid.org")
+		if(p != "freedns.afraid.org" && p != "freedns.afraid.org_v6")
 		{
-			providerNames.push( serviceProviders[providerIndex]["name"] );
+			var nameMatch = serviceProviders[providerIndex]["name"].match(/(.*)_v6$/);
+			var name = serviceProviders[providerIndex]["name"];
+			name = nameMatch != null ? nameMatch[1] + " (IPv6)" : name; 
+			providerNames.push( name );
+			providerValues.push( serviceProviders[providerIndex]["name"] );
 		}
 		else
 		{
@@ -164,11 +169,19 @@ function resetData()
 		b = b.toLowerCase();
 		return a < b ? -1 : a > b ? 1 : 0
 	});
+	providerValues.sort(function(a, b) {
+		a = a.toLowerCase();
+		b = b.toLowerCase();
+		return a < b ? -1 : a > b ? 1 : 0
+	});
 	if(foundAfraid)
 	{
+		providerNames.unshift("freedns.afraid.org (IPv6)")
+		providerValues.unshift("freedns.afraid.org_v6")
 		providerNames.unshift("freedns.afraid.org")
+		providerValues.unshift("freedns.afraid.org")
 	}
-	setAllowableSelections("ddns_provider", providerNames, providerNames, document);
+	setAllowableSelections("ddns_provider", providerValues, providerNames, document);
 	setSelectedValue("ddns_provider", 'freedns.afraid.org', document);
 
 
@@ -391,13 +404,16 @@ function proofreadServiceProvider()
 		{
 			domain = providerName;
 		}
+		var ipv6 = providerName.match(/(.*)_v6$/) != null ? "1" : "0";
 		var allServices = uci.getAllSectionsOfType("ddns_gargoyle", "service");
 		var domainMatches = false;
 		for(serviceIndex = 0; serviceIndex < allServices.length && domainMatches == false; serviceIndex++)
 		{
 			var testDomain = uci.get("ddns_gargoyle", allServices[serviceIndex], "domain");
 			testDomain = testDomain == "" ? uci.get("ddns_gargoyle", allServices[serviceIndex], "service_provider") : testDomain;
-			domainMatches = testDomain == domain ? true : false;
+			var testIpv6 = uci.get("ddns_gargoyle", allServices[serviceIndex], "ipv6");
+			testIpv6 = testIpv6 == "" ? "0" : testIpv6;
+			domainMatches = (testDomain == domain) && (ipv6 == testIpv6) ? true : false;
 		}
 		if(domainMatches)
 		{
@@ -425,6 +441,14 @@ function setUciFromDocument(dstUci, pkg, section)
 	dstUci.set("ddns_gargoyle", section, "", "service");
 	dstUci.set("ddns_gargoyle", section, "enabled", "1");
 	dstUci.set("ddns_gargoyle", section, "service_provider", providerName);
+	if(providerName.match(/.*_v6$/) != null)
+	{
+		dstUci.set("ddns_gargoyle", section, "ipv6", "1");
+	}
+	else
+	{
+		dstUci.remove("ddns_gargoyle", section, "ipv6");
+	}
 	var ip_from = getSelectedValue("ip_from", document);
 	if(ip_from != "internet")
 	{

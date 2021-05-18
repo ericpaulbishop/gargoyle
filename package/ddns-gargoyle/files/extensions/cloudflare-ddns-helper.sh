@@ -23,8 +23,10 @@ DATAFILE="/var/run/cloudflare-ddns-helper.dat"
 ERRFILE="/var/run/cloudflare-ddns-helper.err"
 # IPv4       0-9   1-3x "." 0-9  1-3x "." 0-9  1-3x "." 0-9  1-3x
 IPV4_REGEX="[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}"
+# IPv6       ( ( 0-9a-f  1-4char ":") min 1x) ( ( 0-9a-f  1-4char   )optional) ( (":" 0-9a-f 1-4char  ) min 1x)
+IPV6_REGEX="\(\([0-9A-Fa-f]\{1,4\}:\)\{1,\}\)\(\([0-9A-Fa-f]\{1,4\}\)\{0,1\}\)\(\(:[0-9A-Fa-f]\{1,4\}\)\{1,\}\)"
 
-if [ $# != 6 ] ; then
+if [ $# != 7 ] ; then
 	logger -t cloudflare-ddns-helper "Incorrect number of arguments supplied. Exiting"
 	echo "cloudflare-ddns-helper usage:"
 	echo -e "\tusername\tyour cloudflare email"
@@ -33,6 +35,7 @@ if [ $# != 6 ] ; then
 	echo -e "\tlocal_ip\tIP address to be sent to cloudflare"
 	echo -e "\tforce_update\t1 to force update of IP, 0 to exit if already matched"
 	echo -e "\tverbose\t\t0 for low output or 1 for verbose logging"
+	echo -e "\tipv6\t\t0 for IPv4 output or 1 for IPv6"
 	exit 3
 fi
 
@@ -42,6 +45,7 @@ API_KEY=$3
 LOCAL_IP=$4
 FORCE_UPDATE=$5
 VERBOSE=$6
+IPV6=$7
 
 [ -z "$USERNAME" ] && {
 	logger -t cloudflare-ddns-helper "Invalid username"
@@ -105,6 +109,9 @@ command_runner()
 # base command
 CMDBASE="curl -RsS -o $DATAFILE --stderr $ERRFILE"
 
+# force IP version
+[ $IPV6 -eq 0 ] && CMDBASE="$CMDBASE -4 " || CMDBASE="$CMDBASE -6 "
+
 # add headers
 CMDBASE="$CMDBASE --header 'X-Auth-Email: $USERNAME' "
 CMDBASE="$CMDBASE --header 'X-Auth-Key: $API_KEY' "
@@ -121,8 +128,9 @@ if [ -z "$ZONEID" ] ; then
 fi
 [ $VERBOSE -eq  1 ] && logger -t cloudflare-ddns-helper "Zone ID for $DOMAIN: $ZONEID"
 
-# get A record
-RUNCMD="$CMDBASE --request GET '$URLBASE/zones/$ZONEID/dns_records?name=$HOST&type=A'"
+# get A or AAAA record
+[ $IPV6 -eq 0 ] && TYPE="A" || TYPE="AAAA"
+RUNCMD="$CMDBASE --request GET '$URLBASE/zones/$ZONEID/dns_records?name=$HOST&type=$TYPE'"
 command_runner || exit 3
 
 RECORDID=$(grep -o '"id": \?"[^"]*' $DATAFILE | grep -o '[^"]*$' | head -1)
@@ -134,7 +142,9 @@ fi
 
 # if we got this far, we can check the data for the current IP address
 DATA=$(grep -o '"content": \?"[^"]*' $DATAFILE | grep -o '[^"]*$' | head -1)
-DATA=$(printf "%s" "$DATA" | grep -m 1 -o "$IPV4_REGEX")
+[ $IPV6 -eq 0 ] \
+	&& DATA=$(printf "%s" "$DATA" | grep -m 1 -o "$IPV4_REGEX") \
+	|| DATA=$(printf "%s" "$DATA" | grep -m 1 -o "$IPV6_REGEX")
 [ $VERBOSE -eq  1 ] && logger -t cloudflare-ddns-helper "Remote IP for $HOST: $DATA"
 
 if [ -n "$DATA" ]; then
@@ -149,7 +159,7 @@ fi
 
 # if we got this far, we need to update IP with cloudflare
 cat > $DATAFILE << EOF
-{"id":"$ZONEID","type":"A","name":"$HOST","content":"$LOCAL_IP"}
+{"id":"$ZONEID","type":"$TYPE","name":"$HOST","content":"$LOCAL_IP"}
 EOF
 
 RUNCMD="$CMDBASE --request PUT --data @$DATAFILE '$URLBASE/zones/$ZONEID/dns_records/$RECORDID'"
@@ -157,3 +167,4 @@ command_runner || exit 3
 
 [ $VERBOSE -eq  1 ] && logger -t cloudflare-ddns-helper "Remote IP updated to $LOCAL_IP"
 exit 5
+

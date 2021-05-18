@@ -74,6 +74,8 @@ endef
 define Package/plugin-gargoyle-ddns-cloudflare/install
 	$(INSTALL_DIR) $(1)/usr/lib/ddns-gargoyle
 	$(CP) ./files/extensions/cloudflare-ddns-helper.sh $(1)/usr/lib/ddns-gargoyle
+	$(CP) ./files/extensions/cloudflare-ddns-helper-ipv4.sh $(1)/usr/lib/ddns-gargoyle
+	$(CP) ./files/extensions/cloudflare-ddns-helper-ipv6.sh $(1)/usr/lib/ddns-gargoyle
 endef
 
 define Package/plugin-gargoyle-ddns-cloudflare/prerm
