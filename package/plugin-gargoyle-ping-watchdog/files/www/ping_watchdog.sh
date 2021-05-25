@@ -27,7 +27,7 @@
 				<div class="row form-group">
 					<label class="col-xs-5" for='address_to_ping' id='address_to_ping_label'><%~ PgIP %>:</label>
 					<span class="col-xs-7">
-						<input type='text' id='address_to_ping' class="form-control" size='20' oninput='proofreadIp(this)'/>
+						<input type='text' id='address_to_ping' class="form-control" oninput='proofreadPWIP(this)'/>
 						<em class="help-block"><%~ IPAd %></em>
 					</span>
 				</div>

@@ -19,10 +19,11 @@ function saveChanges()
 	var test59 = function(text){ return validateNumericRange(text,1,59); }
 	var test999 = function(text){ return validateNumericRange(text,1,999); }
 	var test10 = function(text){ return validateNumericRange(text,1,10); }
+	var testIPBoth = function(text){ return isIPv6(text) ? validateIP6(text) : validateIP(text); }
 
 	var addIds=["address_to_ping","ping_interval","startup_delay","failure_count"];
 	var labelIds=["address_to_ping_label","ping_interval_label","startup_delay_label","failure_count_label"];
-	var functions = [validateIP, test59, test999, test10];
+	var functions = [testIPBoth, test59, test999, test10];
 	var errors = proofreadFields(addIds, labelIds, functions, [0,0,0,0], addIds, document);
 
 	if(failure_action == "custom")
@@ -127,4 +128,16 @@ function showScript(action)
 {
 	var show=action == "wan" || action == "reboot";
 	setVisibility(["custom_script"],[!show]);
+}
+
+function proofreadPWIP(triggerEl)
+{
+	if(isIPv6(triggerEl.value))
+	{
+		proofreadIp6(triggerEl);
+	}
+	else
+	{
+		proofreadIp(triggerEl);
+	}
 }

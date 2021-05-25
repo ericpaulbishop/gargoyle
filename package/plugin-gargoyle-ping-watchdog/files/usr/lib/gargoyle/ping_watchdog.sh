@@ -20,7 +20,7 @@ if [ "$PR" = "0" ]; then
 			;;
 		"wan")
 			logger -t $0 "WAN Restart"
-			(ifdown wan; sleep 5; ifup wan) &
+			(ifdown wan6; ifdown wan; sleep 5; ifup wan; ifup wan6) &
 			;;
 		*)
 			logger -t $0 "Run custom script"
