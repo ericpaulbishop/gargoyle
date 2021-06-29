@@ -1290,6 +1290,10 @@ void print_interface_vars(char** ptr_lan_ip, char** ptr_wan_ip, list** ptr_lan_i
 		current_wan_l3dev = strdup("br-wan");
 	}
 	char* current_wan_mac = get_interface_mac(current_wan_l3dev);
+	if(safe_strcmp(current_wan_mac, "00:00:00:00:00:00") == 0 || current_wan_mac == NULL)
+	{
+		current_wan_mac = get_interface_mac(ifstatus_wan_dev);
+	}
 	char* current_lan_mac = get_interface_mac(current_lan_l3dev);
 
 	if(loaded_default_ifs == 0)
