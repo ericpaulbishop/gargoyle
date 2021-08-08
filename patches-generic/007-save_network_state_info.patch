@@ -1,6 +1,6 @@
 --- a/package/network/config/netifd/files/lib/netifd/dhcp.script
 +++ b/package/network/config/netifd/files/lib/netifd/dhcp.script
-@@ -54,6 +54,8 @@
+@@ -60,6 +60,8 @@
  	[ -n "$message" ]  && json_add_string message "$message"
  	[ -n "$timezone" ] && json_add_int timezone "$timezone"
  	[ -n "$lease" ]    && json_add_int leasetime "$lease"

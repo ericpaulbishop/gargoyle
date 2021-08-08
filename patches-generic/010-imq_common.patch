@@ -141,7 +141,7 @@
 ++
 --- a/package/kernel/linux/modules/netfilter.mk
 +++ b/package/kernel/linux/modules/netfilter.mk
-@@ -515,6 +515,27 @@
+@@ -517,6 +517,27 @@
  
  $(eval $(call KernelPackage,ipt-nat-extra))
  
@@ -193,7 +193,7 @@
  define Package/iptables-mod-ipopt
  $(call Package/iptables/Module, +kmod-ipt-ipopt)
    TITLE:=IP/Packet option extensions
-@@ -678,6 +693,7 @@
+@@ -668,6 +683,7 @@
  $(eval $(call BuildPlugin,iptables-mod-extra,$(IPT_EXTRA-m)))
  $(eval $(call BuildPlugin,iptables-mod-physdev,$(IPT_PHYSDEV-m)))
  $(eval $(call BuildPlugin,iptables-mod-filter,$(IPT_FILTER-m)))
@@ -203,7 +203,7 @@
  $(eval $(call BuildPlugin,iptables-mod-nat-extra,$(IPT_NAT_EXTRA-m)))
 --- a/include/netfilter.mk
 +++ b/include/netfilter.mk
-@@ -110,6 +110,13 @@
+@@ -107,6 +107,13 @@
  $(eval $(call nf_add,IPT_FILTER,CONFIG_NETFILTER_XT_MATCH_BPF, $(P_XT)xt_bpf))
  
  

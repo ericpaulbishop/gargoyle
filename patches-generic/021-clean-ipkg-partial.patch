@@ -17,7 +17,7 @@
  		$(call file_copy,$(2)/.,$(1)); \
 --- a/config/Config-build.in
 +++ b/config/Config-build.in
-@@ -89,6 +89,14 @@ menu "Global build settings"
+@@ -101,6 +101,14 @@ menu "Global build settings"
  		  This removes all ipkg/opkg status data files from the target directory
  		  before building the root filesystem.
  

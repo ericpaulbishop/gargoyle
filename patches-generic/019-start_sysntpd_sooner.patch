@@ -11,7 +11,7 @@
  PROG=/usr/sbin/ntpd
 --- a/package/base-files/files/bin/config_generate
 +++ b/package/base-files/files/bin/config_generate
-@@ -250,11 +250,11 @@
+@@ -310,11 +310,11 @@
  		delete system.ntp
  		set system.ntp='timeserver'
  		set system.ntp.enabled='1'

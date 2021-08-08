@@ -1,6 +1,6 @@
 --- a/package/base-files/files/lib/functions.sh
 +++ b/package/base-files/files/lib/functions.sh
-@@ -154,14 +154,17 @@ default_prerm() {
+@@ -181,14 +181,17 @@ default_prerm() {
  	local root="${IPKG_INSTROOT}"
  	local pkgname="$(basename ${1%.*})"
  	local ret=0
@@ -15,13 +15,13 @@
  		ret=$?
  	fi
  
- 	local shell="$(which bash)"
+ 	local shell="$(command -v bash)"
 -	for i in $(grep -s "^/etc/init.d/" "$root/usr/lib/opkg/info/${pkgname}.list"); do
 +	for i in $(grep -s "/etc/init.d/" "${pkg_list}"); do
  		if [ -n "$root" ]; then
  			${shell:-/bin/sh} "$root/etc/rc.common" "$root$i" disable
  		else
-@@ -176,8 +179,8 @@ default_prerm() {
+@@ -203,8 +206,8 @@ default_prerm() {
  }
  
  add_group_and_user() {
@@ -32,7 +32,7 @@
  
  	if [ -n "$rusers" ]; then
  		local tuple oIFS="$IFS"
-@@ -216,10 +219,19 @@ default_postinst() {
+@@ -243,10 +246,19 @@ default_postinst() {
  	local filelist="/usr/lib/opkg/info/${pkgname}.list"
  	local ret=0
  
@@ -55,7 +55,7 @@
  		ret=$?
  	fi
  
-@@ -229,18 +241,18 @@ default_postinst() {
+@@ -256,17 +268,17 @@ default_postinst() {
  	fi
  
  	if [ -z "$root" ]; then
@@ -71,17 +71,16 @@
  
 -		if grep -m1 -q -s "^/etc/uci-defaults/" "$filelist"; then
 +		if grep -m1 -q -s "/etc/uci-defaults/" "${pkg_list}"; then
- 			. /lib/functions/system.sh
  			[ -d /tmp/.uci ] || mkdir -p /tmp/.uci
 -			for i in $(grep -s "^/etc/uci-defaults/" "$filelist"); do
 +			for i in $(grep -s "/etc/uci-defaults/" "${pkg_list}"); do
  				( [ -f "$i" ] && cd "$(dirname $i)" && . "$i" ) && rm -f "$i"
  			done
  			uci commit
-@@ -250,7 +262,7 @@ default_postinst() {
+@@ -276,7 +288,7 @@ default_postinst() {
  	fi
  
- 	local shell="$(which bash)"
+ 	local shell="$(command -v bash)"
 -	for i in $(grep -s "^/etc/init.d/" "$root$filelist"); do
 +	for i in $(grep -s "/etc/init.d/" "${pkg_list}"); do
  		if [ -n "$root" ]; then

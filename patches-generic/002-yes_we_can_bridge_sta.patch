@@ -48,7 +48,7 @@
 + 
 --- a/package/network/services/hostapd/files/hostapd.sh
 +++ b/package/network/services/hostapd/files/hostapd.sh
-@@ -690,9 +690,6 @@ wpa_supplicant_prepare_interface() {
+@@ -1032,9 +1032,6 @@ wpa_supplicant_prepare_interface() {
  			adhoc)
  				fail=1
  			;;
