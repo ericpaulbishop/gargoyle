@@ -155,7 +155,7 @@
 +diff -Naupr linux-5.4.10_orig/drivers/net/imq.c linux-5.4.10/drivers/net/imq.c
 +--- linux-5.4.10_orig/drivers/net/imq.c	1970-01-01 02:00:00.000000000 +0200
 ++++ linux-5.4.10/drivers/net/imq.c	2020-01-10 15:21:17.815149199 +0200
-+@@ -0,0 +1,963 @@
++@@ -0,0 +1,1265 @@
 ++/*
 ++ *             Pseudo-driver for the intermediate queue device.
 ++ *
