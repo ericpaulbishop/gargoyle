@@ -78,7 +78,7 @@ typedef struct qn
   int family;
 	ipany src_ip;
 	char* value;
-	struct timeval time;
+	struct timespec64 time;
 	struct qn* next;
 	struct qn* previous;	
 } queue_node;
@@ -105,8 +105,8 @@ static spinlock_t webmon_lock = __SPIN_LOCK_UNLOCKED(webmon_lock);;
 
 static void update_queue_node_time(queue_node* update_node, queue* full_queue)
 {
-	struct timeval t;
-	do_gettimeofday(&t);
+	struct timespec64 t;
+	ktime_get_real_ts64(&t);
 	update_node->time = t;
 	
 	/* move to front of queue if not already at front of queue */
@@ -135,7 +135,7 @@ void add_queue_node(int family, ipany src_ip, char* value, queue* full_queue, st
 
 	queue_node *new_node = (queue_node*)kmalloc(sizeof(queue_node), GFP_ATOMIC);
 	char* dyn_value = kernel_strdup(value);
-	struct timeval t;
+	struct timespec64 t;
 
 
 	if(new_node == NULL || dyn_value == NULL)
@@ -148,7 +148,7 @@ void add_queue_node(int family, ipany src_ip, char* value, queue* full_queue, st
 	set_map_element(queue_index, queue_index_key, (void*)new_node);
 
 
-	do_gettimeofday(&t);
+	ktime_get_real_ts64(&t);
 	new_node->time = t;
   new_node->family = family;
 	new_node->src_ip = src_ip;
@@ -799,7 +799,7 @@ static int xt_webmon_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t len
   						{
   							valid_ip = parsed_ip[0] <= 255 && parsed_ip[1] <= 255 && parsed_ip[2] <= 255 && parsed_ip[3] <= 255 ? valid_ip : 0;
   						}
-              if(sscanf(split[0], "%ld", &time) > 0 && valid_ip == 4)
+              if(sscanf(split[0], "%lld", &time) > 0 && valid_ip == 4)
   						{
   							char* value = split[3];
   							char value_key[700];
@@ -827,7 +827,7 @@ static int xt_webmon_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t len
   						{
   							valid_ip = parsed_ip[0] <= 65535 && parsed_ip[1] <= 65535 && parsed_ip[2] <= 65535 && parsed_ip[3] <= 65535 && parsed_ip[4] <= 65535 && parsed_ip[5] <= 65535 && parsed_ip[6] <= 65535 && parsed_ip[7] <= 65535 ? valid_ip : 0;
   						}
-              if(sscanf(split[0], "%ld", &time) > 0 && valid_ip == 8)
+              if(sscanf(split[0], "%lld", &time) > 0 && valid_ip == 8)
   						{
   							char* value = split[3];
   							char value_key[700];
@@ -1144,8 +1144,8 @@ static bool webmon_mt4(const struct sk_buff *skb, struct xt_action_param *par)
 							{
 								if(recent_node->src_ip.ip4.s_addr == iph->saddr)
 								{
-									struct timeval t;
-									do_gettimeofday(&t);
+									struct timespec64 t;
+									ktime_get_real_ts64(&t);
 									if( (recent_node->time).tv_sec + 1 >= t.tv_sec || ((recent_node->time).tv_sec + 5 >= t.tv_sec && within_edit_distance(search, recent_node->value, 2)))
 									{
 										char recent_key[700];
@@ -1522,8 +1522,8 @@ static bool webmon_mt6(const struct sk_buff *skb, struct xt_action_param *par)
   							{
   								if(recent_node->src_ip.ip6.s6_addr == iph->saddr.s6_addr)
   								{
-  									struct timeval t;
-  									do_gettimeofday(&t);
+  									struct timespec64 t;
+  									ktime_get_real_ts64(&t);
   									if( (recent_node->time).tv_sec + 1 >= t.tv_sec || ((recent_node->time).tv_sec + 5 >= t.tv_sec && within_edit_distance(search, recent_node->value, 2)))
   									{
   										char recent_key[700];

@@ -62,9 +62,9 @@ static bool timerange_mt(const struct sk_buff *skb, struct xt_action_param *par)
 	int test_index;
 	int match_found;
 
-	struct timeval test_time;
+	struct timespec64 test_time;
 	
-	do_gettimeofday(&test_time);
+	ktime_get_real_ts64(&test_time);
 	stamp_time = test_time.tv_sec;
 	stamp_time = stamp_time -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
 	seconds_since_midnight = stamp_time % 86400; /* 86400 seconds per day */

@@ -24,7 +24,7 @@ define Package/plugin-gargoyle-wireguard
 	CATEGORY:=Administration
 	SUBMENU:=Gargoyle Web Interface
 	TITLE:=Wireguard Support for Gargoyle
-	DEPENDS:=+gargoyle +wireguard
+	DEPENDS:=+gargoyle +wireguard-tools
 	MAINTAINER:=Eric Bishop
 	PKGARCH:=all
 endef

@@ -1,12 +1,12 @@
---- a/genconfig.sh
-+++ b/genconfig.sh
-@@ -238,7 +238,8 @@
- 		FW=netfilter
+--- a/configure
++++ b/configure
+@@ -381,7 +381,8 @@
+ 		V6SOCKETS_ARE_V6ONLY=`$(find /sbin /bin /usr/sbin /usr/bin -name sysctl) -n net.ipv6.bindv6only`
  		;;
  	OpenWRT)
 -		OS_URL=http://www.openwrt.org/
 +		OS_NAME=Gargoyle
-+		OS_URL=http://gargoyle-router.com/
++		OS_URL=https://www.gargoyle-router.com/
  		echo "#define USE_IFACEWATCHER 1" >> ${CONFIGFILE}
- 		FW=netfilter
+ 		FW=iptables
  		;;
