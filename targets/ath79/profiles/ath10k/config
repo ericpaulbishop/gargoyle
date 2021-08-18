@@ -250,7 +250,8 @@ CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c60-v1=y
 CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c60-v1="kmod-ath10k-ct-smallbuffers ath10k-firmware-qca9888-ct"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c60-v2=y
 CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c60-v2="kmod-ath10k-ct-smallbuffers ath10k-firmware-qca9888-ct"
-# CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c60-v3 is not set
+CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c60-v3=y
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c60-v3="kmod-ath10k-ct-smallbuffers ath10k-firmware-qca9888-ct"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c7-v1=y
 CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c7-v1=""
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c7-v2 is not set
