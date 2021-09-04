@@ -741,15 +741,14 @@ function addKey()
 	}
 	else
 	{
+		splitKey[1] = splitKey[1].replace(/[\r\n\t ]+$/, "");
 		var key = splitKey[0] + " " + splitKey[1] + " " + keyName
 		authorizedKeyMap[keyName]=key;
 		resetAuthorizedKeysTable()
 		document.getElementById('public_key_file').value = '';
 		document.getElementById('public_key_name').value = '';
 		document.getElementById('file_contents').value = '';
-
 	}
-
 }
 
 
