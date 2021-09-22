@@ -3220,8 +3220,8 @@ CONFIG_PACKAGE_kmod-gpio-button-hotplug=y
 CONFIG_PACKAGE_kmod-phy-ath79-usb=y
 CONFIG_PACKAGE_kmod-usb-acm=y
 # CONFIG_PACKAGE_kmod-usb-atm is not set
-# CONFIG_PACKAGE_kmod-usb-chipidea is not set
-# CONFIG_PACKAGE_kmod-usb-chipidea2 is not set
+CONFIG_PACKAGE_kmod-usb-chipidea=y
+CONFIG_PACKAGE_kmod-usb-chipidea2=y
 # CONFIG_PACKAGE_kmod-usb-cm109 is not set
 CONFIG_PACKAGE_kmod-usb-core=y
 # CONFIG_PACKAGE_kmod-usb-dwc2 is not set
@@ -3255,6 +3255,7 @@ CONFIG_PACKAGE_kmod-usb-net-sierrawireless=y
 # CONFIG_PACKAGE_kmod-usb-net-sr9700 is not set
 # CONFIG_PACKAGE_kmod-usb-ohci is not set
 # CONFIG_PACKAGE_kmod-usb-ohci-pci is not set
+CONFIG_PACKAGE_kmod-usb-phy-nop=y
 CONFIG_PACKAGE_kmod-usb-printer=y
 CONFIG_PACKAGE_kmod-usb-serial=y
 # CONFIG_PACKAGE_kmod-usb-serial-ark3116 is not set
