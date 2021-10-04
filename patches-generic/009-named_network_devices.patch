@@ -1,0 +1,40 @@
+--- a/package/base-files/files/bin/config_generate
++++ b/package/base-files/files/bin/config_generate
+@@ -111,17 +111,17 @@ generate_network() {
+ 
+ 	[ -n "$ports" -a -z "$bridge" ] && {
+ 		uci -q batch <<-EOF
+-			add network device
+-			set network.@device[-1].name='br-$1'
+-			set network.@device[-1].type='bridge'
++			set network.br$1_dev='device'
++			set network.br$1_dev.name='br-$1'
++			set network.br$1_dev.type='bridge'
+ 		EOF
+-		for port in $ports; do uci add_list network.@device[-1].ports="$port"; done
++		for port in $ports; do uci add_list network.br$1_dev.ports="$port"; done
+ 		[ -n "$macaddr" ] && {
+ 			for port in $ports; do
+ 				uci -q batch <<-EOF
+-					add network device
+-					set network.@device[-1].name='$port'
+-					set network.@device[-1].macaddr='$macaddr'
++					set network.$1_${port/./_}_dev='device'
++					set network.$1_${port/./_}_dev.name='$port'
++					set network.$1_${port/./_}_dev.macaddr='$macaddr'
+ 				EOF
+ 			done
+ 		}
+@@ -143,9 +143,9 @@ generate_network() {
+ 
+ 	if [ -n "$macaddr" ]; then
+ 		uci -q batch <<-EOF
+-			add network device
+-			set network.@device[-1].name='$device'
+-			set network.@device[-1].macaddr='$macaddr'
++			set network.$1_${device/./_}_dev='device'
++			set network.$1_${device/./_}_dev.name='$device'
++			set network.$1_${device/./_}_dev.macaddr='$macaddr'
+ 		EOF
+ 	fi
+ 

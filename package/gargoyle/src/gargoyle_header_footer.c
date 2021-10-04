@@ -1129,18 +1129,26 @@ void print_interface_vars(char** ptr_lan_ip, char** ptr_wan_ip, list** ptr_lan_i
 	if(uci_load(ctx, "network", &p) == UCI_OK)
 	{
 		char* wan_dev = dynamic_strcat(3,"wan_",default_wan_if,"_dev");
+		char* lan_dev = dynamic_strcat(3,"lan_",default_lan_if,"_dev");
 		char* tmp_dev = dynamic_replace(wan_dev, ".", "_");
 		free(wan_dev);
 		wan_dev = tmp_dev;
+		tmp_dev = dynamic_replace(lan_dev, ".", "_");
+		free(lan_dev);
+		lan_dev = tmp_dev;
 		if(get_uci_option(ctx, &e, p, "network", wan_dev, "macaddr") == UCI_OK)
 		{
 			uci_wan_mac=get_option_value_string(uci_to_option(e));
 		}
-		else if(get_uci_option(ctx, &e, p, "network", "wan", "macaddr") == UCI_OK)
+		else if(get_uci_option(ctx, &e, p, "network", "wan", "macaddr") == UCI_OK)	//LEGACY TO BE REMOVED
 		{
 			uci_wan_mac=get_option_value_string(uci_to_option(e));
 		}
-		if(get_uci_option(ctx, &e, p, "network", "wan", "ifname") == UCI_OK)
+		if(get_uci_option(ctx, &e, p, "network", wan_dev, "device") == UCI_OK)
+		{
+			uci_wan_if=get_option_value_string(uci_to_option(e));
+		}
+		else if(get_uci_option(ctx, &e, p, "network", "wan", "device") == UCI_OK)
 		{
 			uci_wan_if = get_option_value_string(uci_to_option(e));
 		}
@@ -1165,10 +1173,23 @@ void print_interface_vars(char** ptr_lan_ip, char** ptr_wan_ip, list** ptr_lan_i
 			uci_wan_gateway6=get_option_value_string(uci_to_option(e));
 		}
 
-		if(get_uci_option(ctx, &e, p, "network", "lan", "ifname") == UCI_OK)
+		if(get_uci_option(ctx, &e, p, "network", lan_dev, "device") == UCI_OK)
+		{
+			uci_lan_if=get_option_value_string(uci_to_option(e));
+		}
+		else if(get_uci_option(ctx, &e, p, "network", "lan", "device") == UCI_OK)
 		{
 			uci_lan_if = get_option_value_string(uci_to_option(e));
-		}		
+		}
+		// If uci_lan_if is br-lan, we might be able to dig down to the next level
+		char* br_dev = dynamic_strcat(2,uci_lan_if,"_dev");
+		tmp_dev = dynamic_replace(br_dev, "-","");
+		free(br_dev);
+		br_dev = tmp_dev;
+		if(get_uci_option(ctx, &e, p, "network", br_dev, "ports") == UCI_OK)
+		{
+			uci_lan_if=get_option_value_string(uci_to_option(e));
+		}	
 		if(get_uci_option(state_ctx, &e, p, "network", "lan", "ipaddr") == UCI_OK)
 		{
 			uci_lan_ip=get_option_value_string(uci_to_option(e));
