@@ -23,7 +23,7 @@ var onDns  = [["66.244.95.20", "95.211.32.162", "95.142.171.235"],[]]
 var ncTlds = [ ".bit" ];
 var onTlds = [ ".glue", ".parody", ".dyn", ".bbs", ".free", ".fur", ".geek", ".gopher", ".indy", ".ing", ".null", ".oss", ".micro" ];
 
-var wanMacLoc = "wan";
+var wanMacLoc = "wan_dev";
 
 function saveChanges()
 {
@@ -144,6 +144,16 @@ function saveChanges()
 			}
 		}
 
+		// Create br-lan
+		preCommands = preCommands + "\nuci set network.brlan_dev=device\n";
+		uci.set('network', 'brlan_dev', 'name', 'br-lan');
+		uci.set('network', 'brlan_dev', 'type', 'bridge');
+		uci.remove('network', 'brlan_dev', 'ports');
+		uci.set('network', 'brlan_dev', 'ports', [defaultLanIf]);//TODO
+		// Create wan_dev
+		preCommands = preCommands + "\nuci set network.wan_" + defaultWanIf + "_dev=device\n";
+		uci.set('network', 'wan_' + defaultWanIf + '_dev', 'name', defaultWanIf);
+		uci.set('network', 'wan_' + defaultWanIf + '_dev', 'macaddr', defaultWanMac.toLowerCase());
 		if( document.getElementById("global_gateway").checked )
 		{
 			//If we were previously bridged, and are now going to a gateway, we re-enable DHCP for the user
@@ -173,55 +183,57 @@ function saveChanges()
 			else
 			{
 				preCommands = preCommands + "\nuci set network.wan=interface\n";
-				uci.remove('network', 'wan', 'type');
+				uci.removeSection("network", "brwan_dev");
 				if(getSelectedValue("wan_protocol").match(/wireless/))
 				{
-					uci.remove('network', 'wan', 'ifname');
-					uci.set('network', 'wan', 'type', 'bridge');
+					uci.set('network', 'wan', 'device','brwan_dev');
+					preCommands = preCommands + "\nuci set network.brwan_dev=device\n";
+					uci.set('network', 'brwan_dev', 'name', 'br-wan');
+					uci.set('network', 'brwan_dev', 'type', 'bridge');
+					uci.set('network', 'brwan_dev', 'ports', [defaultWanIf]);//TODO
 				}
 				else if( singleEthernetIsWan() )
 				{
-					uci.set('network', 'wan', 'ifname', defaultLanIf);
+					uci.removeSection("network", "brlan_dev");
+					uci.set('network', 'wan', 'device', defaultLanIf); //TODO
 				}
 				else if(getSelectedValue("wan_protocol").match(/3g/))
 				{
-					uci.remove('network', 'wan', 'ifname');
+					uci.remove('network', 'wan', 'device');
 				}
 				else if(getSelectedValue("wan_protocol").match(/qmi/))
 				{
-					uci.remove('network', 'wan', 'ifname');
+					uci.remove('network', 'wan', 'device');
 				}
 				else if(getSelectedValue("wan_protocol").match(/ncm/))
 				{
-					uci.remove('network', 'wan', 'ifname');
+					uci.remove('network', 'wan', 'device');
 				}
 				else if(getSelectedValue("wan_protocol").match(/mbim/))
 				{
-					uci.remove('network', 'wan', 'ifname');
+					uci.remove('network', 'wan', 'device');
 				}
 				else if(getSelectedValue("wan_protocol").match(/cdc/))
 				{
-					uci.set('network', 'wan', 'ifname', cdcif);
+					uci.set('network', 'wan', 'device', cdcif);
 				}
 				else
 				{
-					uci.set('network', 'wan', 'ifname', defaultWanIf);
+					uci.set('network', 'wan', 'device', defaultWanIf);
 				}
 			}
 
+			uci.set('network','lan','device','br-lan');
 			if( document.getElementById("wan_port_to_lan_container").style.display != "none" && getSelectedValue('wan_port_to_lan') == "bridge" )
 			{
-				uci.set('network', 'lan', 'ifname', defaultLanIf + " " + defaultWanIf);
+				uci.remove('network', 'brlan_dev', 'ports');
+				uci.set('network', 'brlan_dev', 'ports', [defaultLanIf, defaultWanIf] ); //TODO
 			}
 			else if( singleEthernetIsWan() )
 			{
 				//just in case wirelessIf does not exist, remove variable first
-				uci.remove('network', 'lan', 'ifname');
-				uci.set('network', 'lan', 'ifname', wirelessIfs.length > 0 ? wirelessIfs[0] : "");
-			}
-			else
-			{
-				uci.set('network', 'lan', 'ifname', defaultLanIf);
+				uci.remove('network', 'brlan_dev', 'ports');
+				uci.set('network', 'brlan_dev', 'ports', wirelessIfs.length > 0 ? [wirelessIfs[0]] : "");
 			}
 
 			//define new sections, now that we have cleared old ones
@@ -551,7 +563,7 @@ function saveChanges()
 			var svcat= setVariableFromConcatenation;
 			var svcond= setVariableConditionally;
 			setFunctions = [
-					sv,sv,sv,sv,svm,svcat,sv,sv,sv,svm,svm,svcond,svcond,
+					sv,sv,sv,sv,svm,svcat,sv,sv,sv,svm,svm,/*svcond*/svm,svcond,
 					sv,sv,sv,sv,sv,sv,svm,
 					sv,svcond,svcond,svcond,sv,sv,sv,sv,svcond,svcond,svcond,sv,sv,sv,sv,sv,sv,sv,
 					sv,sv,sv,sv,sv,sv,sv
@@ -560,7 +572,8 @@ function saveChanges()
 			var t=true;
 			var minutesToSeconds = function(value){return value*60;};
 			var lowerCase = function(value) { return value.toLowerCase(); }
-			var ifCustomMac = function(value){ return (document.getElementById('wan_use_mac').checked == true) || (defaultWanMac != currentWanMac); };
+			var ifCustomMac = function(value){ return (document.getElementById('wan_use_mac').checked == true) || (defaultWanMac != currentWanMac); };//TODO
+			var setMac = function(value){ return value == "" ? defaultWanMac : value.toLowerCase()};
 			var ifCustomMtu = function(value){ return (document.getElementById('wan_use_mtu').checked == true &&  document.getElementById('wan_mtu').value != 1500);};
 			var ifFtChecked =  function(value) { return getSelectedValue('wifi_ft') == "enabled" && document.getElementById('wifi_encryption1_container').style.display != "none"; };
 			var ifHiddenChecked =  function(value) { return getSelectedValue('wifi_hidden') == "disabled" ? 1 : 0;}; //the label is for "broadcast", so disabled means it is hidden
@@ -569,7 +582,7 @@ function saveChanges()
 			var ifGuestHiddenChecked =  function(value) { return getSelectedValue('wifi_guest_hidden') == "disabled" ? 1 : 0;}; //the label is for "broadcast", so disabled means it is hidden
 			var ifGuestIsolateChecked = function(value) { return getSelectedValue('wifi_guest_isolate') == "enabled" ? 1 : 0;};
 			var demandParams = [f,minutesToSeconds];
-			var macParams = [ifCustomMac,f,  document.getElementById('wan_mac').value.toLowerCase()];
+			var macParams = [t,setMac];//TODO
 			var mtuParams = [ifCustomMtu,t,''];
 			var ftParams = [ifFtChecked,f,'1'];
 			var hiddenParams = [ifHiddenChecked,f,'1'];
@@ -580,7 +593,7 @@ function saveChanges()
 			var ip6Params = [f,ip6_canonical];
 
 			additionalParams = [
-						f,f,f,f, demandParams,f,f,f,f,ip6Params,ip6Params,macParams,mtuParams,
+						f,f,f,f, demandParams,f,f,f,f,ip6Params,ip6Params,macParams/*TODO*/,mtuParams,
 						f,f,f,f,f,f,ip6Params,
 						f,ftParams,hiddenParams,isolateParams,f,f,f,f,guestFtParams,guestHiddenParams,guestIsolateParams,f,f,f,f,f,f,f,
 						f,f,f,f,f,f,f
@@ -620,7 +633,7 @@ inputIds = [
 				{
 					pkgs.push('network');
 					sections.push(wanMacLoc);
-					uci.remove('network', wanMacLoc, options[idIndex]);
+					//uci.remove('network', wanMacLoc, options[idIndex]);
 				}
 				else if(idIndex < 13 || idIndex > 37)
 				{
@@ -812,11 +825,12 @@ inputIds = [
 
 			if( document.getElementById("bridge_wan_port_to_lan_container").style.display != "none" && getSelectedValue('bridge_wan_port_to_lan') == "bridge" )
 			{
-				uci.set('network', 'lan', 'ifname', defaultLanIf + " " + defaultWanIf);
+				uci.remove('network', 'brlan_dev', 'ports');
+				uci.set('network', 'brlan_dev', 'ports', [defaultLanIf, defaultWanIf] ); //TODO
 			}
 			else
 			{
-				uci.set('network', 'lan', 'ifname', defaultLanIf);
+				uci.set('network', 'lan', 'device', 'br-lan');
 			}
 
 			currentLanIp = document.getElementById("bridge_ip").value;
@@ -1790,8 +1804,7 @@ function localdate(ldate)
 
 function resetData()
 {
-	wanMacAltLoc = defaultWanIf != "" ? ("wan_" + defaultWanIf.replace(".","_") + "_dev"): "wan_dev";
-	wanMacLoc = uciOriginal.get("network",wanMacAltLoc) != "" ? wanMacAltLoc : wanMacLoc;
+	wanMacLoc = defaultWanIf != "" ? ("wan_" + defaultWanIf.replace(".","_") + "_dev"): wanMacLoc;
 	var removeChannels = [];
 	var hwAmode = "disabled";
 	var hwGmode = "disabled";
@@ -1929,7 +1942,7 @@ function resetData()
 	var wifIndex=0;
 	for(wifIndex=0; wifIndex < wirelessIfs.length; wifIndex++)
 	{
-		wanIsWireless = uciOriginal.get("network", "wan", "ifname") == wirelessIfs[wifIndex];
+		wanIsWireless = uciOriginal.get("network", "wan", "device") == wirelessIfs[wifIndex];
 	}
 
 	if(isBcm94704 && (!wanIsWireless) && uciOriginal.get("network", wanMacLoc, "macaddr") != "")
@@ -1952,9 +1965,9 @@ function resetData()
 
 	//set wan proto && wan/wifi/bridge variables
 	var wp = uciOriginal.get("network", "wan", "proto");
-	var wanUciIf= uciOriginal.get('network', 'wan', 'ifname');
+	var wanUciIf= uciOriginal.get('network', 'wan', 'device');
 	var wanType = uciOriginal.get('network', 'wan', 'type');
-	var lanUciIf= uciOriginal.get('network', 'lan', 'ifname');
+	var lanUciIf= uciOriginal.get('network', 'lan', 'device');
 	var wanIsWifi = (wanUciIf == '' && wanType == 'bridge' ) && ( getWirelessMode(uciOriginal) == "sta" || getWirelessMode(uciOriginal) == "ap+sta");
 	wp = wp == "" ? "none" : wp;
 	if(wp != "none" && wp != "3g" && wp != "qmi" && wp != "ncm" && wp != "mbim" ) { wp = wanIsWifi ? wp + "_wireless" : wp + "_wired"; }
@@ -1969,7 +1982,7 @@ function resetData()
 	}
 	setSelectedValue("wan6_protocol", wp6);
 
-	var wanToLanStatus = lanUciIf.indexOf(defaultWanIf) < 0 ? 'disable' : 'bridge' ;
+	var wanToLanStatus = lanUciIf.indexOf(defaultWanIf) < 0 ? 'disable' : 'bridge' ; //TODO
 	setSelectedValue('bridge_wan_port_to_lan', wanToLanStatus);
 	setSelectedValue('wan_port_to_lan', wanToLanStatus);
 
