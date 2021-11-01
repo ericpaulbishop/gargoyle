@@ -2425,7 +2425,7 @@ CONFIG_PACKAGE_resolveip=y
 # CONFIG_PACKAGE_rpcd is not set
 # CONFIG_PACKAGE_selinux-policy is not set
 # CONFIG_PACKAGE_snapshot-tool is not set
-CONFIG_PACKAGE_swconfig=y
+# CONFIG_PACKAGE_swconfig is not set
 CONFIG_PACKAGE_ubox=y
 CONFIG_PACKAGE_ubus=y
 CONFIG_PACKAGE_ubusd=y
