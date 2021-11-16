@@ -3266,6 +3266,14 @@ function setupModalKeys(name)
 	document.onkeydown = handleModalKeys;
 }
 
+function openPopupWindow(url, name, width, height)
+{
+	var xCoor = (window.outerWidth - width)/2;
+	var yCoor = (window.outerHeight - height)/2;
+
+	return window.open(url, name, "width=" + width + ",height=" + height + ",left=" + xCoor + ",top=" + yCoor);
+}
+
 function openModalWindow(name)
 {
 	var modal = document.getElementById(name);
