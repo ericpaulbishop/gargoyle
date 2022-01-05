@@ -610,26 +610,14 @@ static void extract_url_https(const unsigned char* packet_data, int packet_lengt
 
 #ifdef CONFIG_PROC_FS
 
-static void *webmon_proc_start(struct seq_file *seq, loff_t *loff_pos)
+static void *webmon_proc_start(struct seq_file *seq, loff_t *pos)
 {
-	static unsigned long counter = 0;
-
-	/* beginning a new sequence ? */	
-	if ( *loff_pos == 0 )
-	{	
-		/* yes => return a non null value to begin the sequence */
-		return &counter;
-	}
-	else
-	{
-		/* no => it's the end of the sequence, return end to stop reading */
-		*loff_pos = 0;
-		return NULL;
-	}
+	return NULL + (*pos == 0);
 }
 
 static void *webmon_proc_next(struct seq_file *seq, void *v, loff_t *pos)
 {
+	++*pos;
 	return NULL;
 }
 
