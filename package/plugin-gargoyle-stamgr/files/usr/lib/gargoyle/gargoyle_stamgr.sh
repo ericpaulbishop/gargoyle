@@ -81,10 +81,10 @@ identify_wlan_bands()
 {
 	local radios="radio0 radio1"
 	for radio in $radios ; do
-		hwmode="$(uci_get "wireless" "$radio" "hwmode")"
-		if [ "$hwmode" = "11g" ] ; then
+		hwmode="$(uci_get "wireless" "$radio" "band")"
+		if [ "$hwmode" = "2g" ] ; then
 			band24="$radio"
-		elif [ "$hwmode" = "11a" ] ; then
+		elif [ "$hwmode" = "5g" ] ; then
 			band5="$radio"
 		fi
 	done

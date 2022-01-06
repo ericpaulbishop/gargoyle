@@ -13,16 +13,16 @@
 <!--
 <%
 		echo "var radioList = [];"
-		radio0=$(uci -q get wireless.radio0.hwmode)
-		if [ "$radio0" = "11g" ] ; then
+		radio0=$(uci -q get wireless.radio0.band)
+		if [ "$radio0" = "2g" ] ; then
 			echo "radioList['radio0'] = '2.4GHz';"
-		elif [ "$radio0" = "11a" ] ; then
+		elif [ "$radio0" = "5g" ] ; then
 			echo "radioList['radio0'] = '5GHz';"
 		fi
-		radio1=$(uci -q get wireless.radio1.hwmode)
-		if [ "$radio1" = "11g" ] ; then
+		radio1=$(uci -q get wireless.radio1.band)
+		if [ "$radio1" = "2g" ] ; then
 			echo "radioList['radio1'] = '2.4GHz';"
-		elif [ "$radio1" = "11a" ] ; then
+		elif [ "$radio1" = "5g" ] ; then
 			echo "radioList['radio1'] = '5GHz';"
 		fi
 		
