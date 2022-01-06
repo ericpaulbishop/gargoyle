@@ -10,7 +10,7 @@ print_mac80211_channels_for_wifi_dev()
 	echo "nextCh     = [];" >> "$out"
 	echo "nextChFreq = [];" >> "$out"
 	echo "nextChPwr  = [];" >> "$out"
-	mode=$(uci get wireless.$wifi_dev.hwmode)
+	mode=$(uci get wireless.$wifi_dev.band)
 
 	wifiN=$(iwinfo $wifi_dev h | sed 's/\bVHT[0-9]\{2,3\}\(+[0-9]\{2\}\)\?//g' | sed 's/^[ ]*//')
 	wifiAC=$(iwinfo $wifi_dev h | sed 's/\bHT[0-9]\{2,3\}//g' | sed 's/^[ ]*//')
@@ -24,7 +24,7 @@ print_mac80211_channels_for_wifi_dev()
 
 	#802.11ac should only be able to operate on the "A" device
 	
-	if [ "$mode" = "11a" ] ; then
+	if [ "$mode" = "5g" ] ; then
 		chId="A"
 		echo "wifiDevA=\"$wifi_dev\";" >> "$out"
 		if [ "$wifiN" ] ; then
@@ -131,7 +131,7 @@ elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" ] ; then
 	echo "var nextCh=[];" >> "$out_file"
 	
 	#test for dual band
-	if [ `uci show wireless | grep wifi-device | wc -l`"" = "2" ] && [ -e "/sys/class/ieee80211/phy1" ] && [ ! `uci get wireless.@wifi-device[0].hwmode`"" = `uci get wireless.@wifi-device[1].hwmode`""  ] ; then
+	if [ `uci show wireless | grep wifi-device | wc -l`"" = "2" ] && [ -e "/sys/class/ieee80211/phy1" ] && [ ! `uci get wireless.@wifi-device[0].band`"" = `uci get wireless.@wifi-device[1].band`""  ] ; then
 		echo "var dualBandWireless=true;" >> "$out_file"
 		dualband='true'
 	else
@@ -139,7 +139,6 @@ elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" ] ; then
 		dualband='false'
 	fi
 	
-	radios=$(uci show wireless | grep wifi-device | sed 's/^.*\.//g' | sed 's/=.*$//g')
 	radios="$(uci show wireless | sed -e '/wifi-device/!d; s/^.*\.//g; s/=.*$//g')"
 	rnum=0;
 	for r in $radios ; do

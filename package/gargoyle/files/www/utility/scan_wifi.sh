@@ -53,7 +53,7 @@
 			test_ifs="phy0"
 		fi
 
-		if [ `uci show wireless | grep wifi-device | wc -l`"" = "2" ] && [ -e "/sys/class/ieee80211/phy1" ] && [ ! `uci get wireless.@wifi-device[0].hwmode`"" = `uci get wireless.@wifi-device[1].hwmode`""  ] ; then
+		if [ `uci show wireless | grep wifi-device | wc -l`"" = "2" ] && [ -e "/sys/class/ieee80211/phy1" ] && [ ! `uci get wireless.@wifi-device[0].band`"" = `uci get wireless.@wifi-device[1].band`""  ] ; then
 			phy0_is_g=$(iw phy0 info | grep "2[0-9]\{3\} MHz \[[0-9]\{1,3\}\]")
 			g_phy="phy0"
 			a_phy="phy1"

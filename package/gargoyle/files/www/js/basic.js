@@ -62,7 +62,7 @@ function saveChanges()
 			uci.set("wireless", wifiDevG, "type", wirelessDriver);
 			if(wirelessDriver == "mac80211")
 			{
-				uci.set("wireless", wifiDevG, "hwmode", "11g");
+				uci.set("wireless", wifiDevG, "band", "2g");
 			}
 		}
 
@@ -167,7 +167,7 @@ function saveChanges()
 			var dualBandSelected = false;
 			if(document.getElementById("wifi_hwmode_container").style.display == "block")
 			{
-				uci.set("wireless",  wifiDevG, "hwmode", "11g");
+				uci.set("wireless",  wifiDevG, "band", "2g");
 				wifiASelected = (getSelectedValue("wifi_hwmode_5ghz") == "disabled") ? false : true;
 				wifiGSelected = (getSelectedValue("wifi_hwmode") == "disabled") ? false : true;
 				dualBandSelected = ((wifiGSelected == true) && (wifiASelected == true));
@@ -818,11 +818,11 @@ function saveChanges()
 				bridgeDev = hwMatchMode == true ? wifiDevA : wifiDevG
 				if(wifiDevG == bridgeDev)
 				{
-					uci.set("wireless",  wifiDevG, "hwmode", "11g");
+					uci.set("wireless",  wifiDevG, "band", "2g");
 				}
 				else if(wifiDevA == bridgeDev)
 				{
-					uci.set("wireless",  wifiDevA, "hwmode", "11a");
+					uci.set("wireless",  wifiDevA, "band", "5g");
 				}
 			}
 
@@ -1508,7 +1508,7 @@ function setWifiVisibility()
 		setAllowableSelections('wifi_hwmode', ['disabled', '11gn', '11g'], [UI.Disabled, 'B+G+N', 'B+G']);
 	}
 
-	if((AwifiN == false) && ((uciOriginal.get("wireless", wifiDevA, "hwmode"))==""))
+	if((AwifiN == false) && ((uciOriginal.get("wireless", wifiDevA, "band"))==""))
 	{
 		setAllowableSelections('wifi_hwmode_5ghz', ['disabled'], [UI.Disabled]);
 	}
@@ -2227,8 +2227,8 @@ function resetData()
 	//wireless N + AC variables
 	if( GwifiN || AwifiN || AwifiAC )
 	{
-		var hwGmode = uciOriginal.get("wireless", wifiDevG, "hwmode");
-		hwGmode = hwGmode == "" ? "11g" : hwGmode;
+		var hwGmode = uciOriginal.get("wireless", wifiDevG, "band");
+		hwGmode = hwGmode == "" || hwGmode == "2g" ? "11g" : hwGmode;
 		setAllowableSelections( "wifi_hwmode", [ 'disabled', '11gn', '11g' ], [UI.Disabled, 'B+G+N', 'B+G' ] );
 		setSelectedValue("wifi_hwmode", hwGmode);
 		if(dualBandWireless)
@@ -2245,7 +2245,8 @@ function resetData()
 			{
 				setAllowableSelections( "wifi_hwmode_5ghz", [ 'disabled', '11a' ], [UI.Disabled, 'A' ] );
 			}
-			hwAmode = uciOriginal.get("wireless", wifiDevA, "hwmode");
+			hwAmode = uciOriginal.get("wireless", wifiDevA, "band");
+			hwAmode = hwAmode == "" || hwAmode == "5g" ? "11a" : hwAmode;
 			setSelectedValue("wifi_hwmode_5ghz", hwAmode);
 		}
 
@@ -2335,8 +2336,10 @@ function resetData()
 	else
 	{
 		document.getElementById("bridge_channel_width_container").style.display="none";
-		hwGmode = uciOriginal.get("wireless", wifiDevG, "hwmode");
-		hwAmode = uciOriginal.get("wireless", wifiDevA, "hwmode");
+		hwGmode = uciOriginal.get("wireless", wifiDevG, "band");
+		hwAmode = uciOriginal.get("wireless", wifiDevA, "band");
+		hwGmode = hwGmode == "" || hwGmode == "2g" ? "11g" : hwGmode;
+		hwAmode = hwAmode == "" || hwAmode == "5g" ? "11a" : hwAmode;
 		setSelectedValue("wifi_hwmode", hwGmode);
 		setSelectedValue("wifi_hwmode_5ghz", hwAmode);
 	}
@@ -3422,7 +3425,7 @@ function setHwMode(selectCtl)
 
 				if(secmode == "sta")
 				{
-					HWMODE = uciOriginal.get("wireless", secdev, "hwmode");
+					HWMODE = uciOriginal.get("wireless", secdev, "band");
 					if(HWMODE == "11g")
 					{
 						hwGmode = uciOriginal.get("wireless", secdev, "htmode").match(/HT/) ? "11gn" : "11g";
