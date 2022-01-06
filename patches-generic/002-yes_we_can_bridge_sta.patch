@@ -26,13 +26,13 @@
 + 
 +--- a/net/wireless/util.c
 ++++ b/net/wireless/util.c
-+@@ -1035,7 +1035,6 @@ int cfg80211_change_iface(struct cfg8021
-+ 	/* if it's part of a bridge, reject changing type to station/ibss */
-+ 	if (netif_is_bridge_port(dev) &&
-+ 	    (ntype == NL80211_IFTYPE_ADHOC ||
-+-	     ntype == NL80211_IFTYPE_STATION ||
-+ 	     ntype == NL80211_IFTYPE_P2P_CLIENT))
-+ 		return -EBUSY;
++@@ -1037,7 +1035,6 @@ int cfg80211_change_iface(struct cfg8021
++ 		/* if it's part of a bridge, reject changing type to station/ibss */
++ 		if (netif_is_bridge_port(dev) &&
++ 		    (ntype == NL80211_IFTYPE_ADHOC ||
++-		     ntype == NL80211_IFTYPE_STATION ||
++ 		     ntype == NL80211_IFTYPE_P2P_CLIENT))
++ 			return -EBUSY;
 + 
 +@@ -1081,11 +1080,6 @@ int cfg80211_change_iface(struct cfg8021
 + 	if (!err) {
@@ -49,7 +49,7 @@
 +
 --- a/package/network/services/hostapd/files/hostapd.sh
 +++ b/package/network/services/hostapd/files/hostapd.sh
-@@ -1032,9 +1032,6 @@ wpa_supplicant_prepare_interface() {
+@@ -1111,9 +1111,6 @@ wpa_supplicant_prepare_interface() {
  			adhoc)
  				fail=1
  			;;

@@ -1,6 +1,6 @@
 --- a/target/linux/generic/config-5.4
 +++ b/target/linux/generic/config-5.4
-@@ -6553,3 +6553,8 @@
+@@ -6556,3 +6556,8 @@
  # CONFIG_ZRAM_MEMORY_TRACKING is not set
  # CONFIG_ZSMALLOC is not set
  # CONFIG_ZX_TDM is not set

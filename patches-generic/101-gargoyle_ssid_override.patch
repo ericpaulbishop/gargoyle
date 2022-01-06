@@ -1,6 +1,6 @@
 --- a/package/kernel/mac80211/files/lib/wifi/mac80211.sh
 +++ b/package/kernel/mac80211/files/lib/wifi/mac80211.sh
-@@ -116,7 +116,7 @@ detect_mac80211() {
+@@ -181,7 +181,7 @@ detect_mac80211() {
  			set wireless.default_radio${devidx}.device=radio${devidx}
  			set wireless.default_radio${devidx}.network=lan
  			set wireless.default_radio${devidx}.mode=ap
