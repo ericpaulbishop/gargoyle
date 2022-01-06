@@ -19,6 +19,10 @@
 					<span class="col-xs-7" id='supported_devs'></span>
 				</div>
 				<div class="row form-group">
+					<label class="col-xs-5" id='firmware_compat_match_label' for='firmware_compat_match'><%~ CompatMatch %>:</label>
+					<span class="col-xs-7" id='firmware_compat_match'></span>
+				</div>
+				<div class="row form-group">
 					<label class="col-xs-5" id='size_ok_label' for='size_ok'><%~ FwFitFlash %>:</label>
 					<span class="col-xs-7" id='size_ok'></span>
 				</div>
