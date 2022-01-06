@@ -11,6 +11,7 @@ var reloadTarget = "http://192.168.1.1/"
 var fwtoolJson = JSON.parse("{}");
 var validateFwJson = JSON.parse("{}");
 var firmware_hash = "";
+var devcompatversion = "1.0";
 var storage_size = 0;
 var toggleReload = false;
 var reloadTarget = "";
@@ -111,6 +112,8 @@ function failureByBootloader()
 function resetData()
 {
 	setUpgradeFormat();
+	var systemSecs = uciOriginal.getAllSectionsOfType("system","system");
+	devcompatversion = uciOriginal.get("system",systemSecs[0],"compat_version");
 	fwtoolJson = JSON.parse(fwtoolStr == "" ? "{}" : fwtoolStr);
 	validateFwJson = JSON.parse(validateFwStr == "" ? "{}" : validateFwStr);
 
@@ -253,13 +256,15 @@ function confirmUpgradeModal()
 	{
 		firmware_dev_match = validateFwJson.tests.fwtool_device_match == true ? UI.YES : UI.NO;
 	}
+	var imgcompatversion = fwtoolJson.compat_version !== undefined ? fwtoolJson.compat_version : "1.0";
+	var firmware_compat_match = imgcompatversion == devcompatversion ? UI.YES : UI.NO + (fwtoolJson.compat_message !== undefined ? ". " + fwtoolJson.compat_message : "");
+	var supported_devsarr = [];
+	supported_devsarr = fwtoolJson.supported_devices !== undefined ? fwtoolJson.supported_devices : supported_devsarr;
+	supported_devsarr = fwtoolJson.new_supported_devices !== undefined && imgcompatversion != "1.0" ? fwtoolJson.new_supported_devices : supported_devsarr;
 	var supported_devs = "";
-	if (fwtoolJson.supported_devices !== undefined)
-	{
-		fwtoolJson.supported_devices.forEach(function(item) {
-			supported_devs = supported_devs == "" ? item : supported_devs + "\n" + item;
-		});
-	}
+	supported_devsarr.forEach(function(item) {
+		supported_devs = supported_devs == "" ? item : supported_devs + "\n" + item;
+	});
 	var size_ok = "";
 	if(firmware_size > 0 && storage_size > 0)
 	{
@@ -317,6 +322,7 @@ function confirmUpgradeModal()
 		{"id" : "firmware_valid", "innertext" : firmware_valid},
 		{"id" : "firmware_dev_match", "innertext" : firmware_dev_match},
 		{"id" : "supported_devs", "innertext" : supported_devs},
+		{"id" : "firmware_compat_match", "innertext" : firmware_compat_match},
 		{"id" : "size_ok", "innertext" : size_ok},
 		{"id" : "checksum_match", "innertext" : checksum_match},
 		{"id" : "md5sum", "innertext" : md5hash},

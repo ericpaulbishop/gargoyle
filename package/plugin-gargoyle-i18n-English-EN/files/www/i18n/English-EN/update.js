@@ -14,6 +14,7 @@ upS.EHash="Enter hash";
 upS.ValidFw="Valid firmware";
 upS.DevMatch="Firmware matches device";
 upS.SuppDevs="Supported devices";
+upS.CompatMatch="Firmware/Device Compatibile";
 upS.FwFitFlash="Firmware fits in flash memory";
 upS.ChksumMatch="Checksum matches";
 upS.NoPrsv="Preserve settings is not allowed with this firmware";
