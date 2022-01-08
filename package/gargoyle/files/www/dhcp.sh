@@ -159,13 +159,12 @@ ipHostHash["::1"] = "localhost6";
 					</span>
 				</div>
 
-				<div id="ra_management_container" class="row form-group">
-					<label class="col-xs-5" for="ra_management" id="ra_management_label"><%~ RtrAdvMgm %>:</label>
+				<div id="ra_slaac_container" class="row form-group">
+					<label class="col-xs-5" for="ra_slaac" id="ra_slaac_label">SLAAC:</label>
 					<span class="col-xs-7">
-						<select class="form-control" id="ra_management">
-							<option value="2"><%~ Sttfl %></option>
-							<option value="1"><%~ Sttfl %>+<%~ Sttlss %></option>
-							<option value="0"><%~ Sttlss %></option>
+						<select class="form-control" id="ra_slaac">
+							<option value="1"><%~ Enabled %></option>
+							<option value="0"><%~ Disabled %></option>
 						</select>
 					</span>
 				</div>

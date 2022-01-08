@@ -51,14 +51,14 @@ function saveChanges()
 			uci.remove("dhcp", "lan", "ignore");
 			uci.set("dhcp","lan","dhcpv6",document.getElementById("dhcpv6").value);
 			uci.set("dhcp","lan","ra",document.getElementById("ra").value);
-			uci.set("dhcp","lan","ra_management",document.getElementById("ra_management").value);
+			uci.set("dhcp","lan","ra_slaac",document.getElementById("ra_slaac").value);
 		}
 		else
 		{
 			uci.set("dhcp", "lan", "ignore", "1");
 			uci.set("dhcp","lan","dhcpv6","disabled");
 			uci.set("dhcp","lan","ra","disabled");
-			uci.remove("dhcp","lan","ra_management");
+			uci.set("dhcp","lan","ra_slaac","0");
 			dhcpWillBeEnabled = false;
 		}
 
@@ -229,8 +229,8 @@ function resetData()
 	ra = uciOriginal.get("dhcp", "lan", "ra");
 	document.getElementById("ra").value = ra == "" ? "disabled" : ra;
 
-	ra_management = uciOriginal.get("dhcp", "lan", "ra_management");
-	document.getElementById("ra_management").value = ra_management == "" ? "2" : ra_management;
+	ra_slaac = uciOriginal.get("dhcp", "lan", "ra_slaac");
+	document.getElementById("ra_slaac").value = ra_slaac == "" ? "0" : ra_slaac;
 
 	var ip6txt = "";
 	for(var x = 0; x < currentLanIp6.length; x++)
