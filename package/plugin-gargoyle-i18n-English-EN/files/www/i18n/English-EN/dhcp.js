@@ -31,5 +31,4 @@ dhcpS.AErr="Could not add row.";
 dhcpS.RtrAdv="Router Advertisements";
 dhcpS.RtrAdvMgm="Router Advertisements Management";
 dhcpS.Relayed="Relayed";
-dhcpS.Sttfl="Stateful";
-dhcpS.Sttlss="Stateless";
+
