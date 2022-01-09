@@ -1357,41 +1357,65 @@ int do_single_update(ddns_service_config *service_config, string_map *service_pr
 char** get_args_from_config(ddns_service_provider* provider, ddns_service_config* config, char* ext_file, char* update_ip, char* current_ip, int force, int verbose)
 {
 	/*
-	* Number of args is length of required variables + 6
+	* Number of args is length of required variables + optional variables + 6
 	* Always start with the "sh + script"
 	* We always end with LOCAL_IP, FORCE_UPDATE, VERBOSE (and NULL termination)
+	* Optional variables will always be passed to the external script even if they aren't provided
 	* External scripts should be written with this in mind
 	*/
-	int var_count = 0, tot_var_count = 0, var_index = 0, x = 0;
-	for(var_index=0; (provider->required_variables)[var_index] != NULL; var_index++)
+	int req_var_count = 0, opt_var_count = 0, tot_var_count = 0, var_index = 0, x = 0;
+	for(x=0; (provider->required_variables)[x] != NULL; x++)
 	{
-		var_count += 1;
+		req_var_count += 1;
 	}
-	if(verbose > 0 ){ printf("Variable count (from config): %d\n", var_count); }
-	tot_var_count = var_count + EXTERN_SCRIPT_MANDATORY_PARAM_NUM;
+	if(verbose > 0 ){ printf("Required variable count (from config): %d\n", req_var_count); }
+	if(provider->optional_variables != NULL)
+	{
+		for(x=0; (provider->optional_variables)[x] != NULL; x++)
+		{
+			opt_var_count += 1;
+		}
+	}
+	if(verbose > 0 ){ printf("Optional variable count (from config): %d\n", opt_var_count); }
+	tot_var_count = req_var_count + opt_var_count + EXTERN_SCRIPT_MANDATORY_PARAM_NUM;
 	if(verbose > 0 ){ printf("Total Variable count: %d\n", tot_var_count); }
 
 	char** args = NULL;
 	args = (char**)malloc(tot_var_count*sizeof(char*));
 	args[0] = strdup("/bin/sh");
 	args[1] = strdup(ext_file);
+	var_index = 2;
 
-	for(var_index=0; var_index < var_count; var_index++)
+	for(x=0; x < req_var_count; x++, var_index++)
 	{
-		char* var_name = (provider->required_variables)[var_index];
+		char* var_name = (provider->required_variables)[x];
 		if(verbose > 0 ){ printf("Var name: %s; ",var_name); }
 		char* var_def = (char*)get_map_element(config->variable_definitions, var_name);
 		if(verbose > 0 ){ printf("Var def: %s\n",var_def); }
-		args[var_index+2] = strdup(var_def);
+		args[var_index] = strdup(var_def);
+	}
+	
+	for(x=0; x < opt_var_count; x++, var_index++)
+	{
+		char* var_name = (provider->optional_variables)[x];
+		if(verbose > 0 ){ printf("Var name: %s; ",var_name); }
+		char* var_def = (char*)get_map_element(config->variable_definitions, var_name);
+		if(!var_def)
+		{
+			if(verbose > 0 ){ printf("Replacing NULL Var def with empty string; "); }
+			var_def = strdup("");
+		}
+		if(verbose > 0 ){ printf("Var def: %s\n",var_def); }
+		args[var_index] = strdup(var_def);
 	}
 
 	printf("Including mandatory variables (localip, force, verbose, arg terminator)\n");
-	args[var_index+2] = strdup(update_ip);
-	args[var_index+3] = (char*)malloc(2*sizeof(char));
-	sprintf(args[var_index+3], "%d", force);
-	args[var_index+4] = (char*)malloc(2*sizeof(char));
-	sprintf(args[var_index+4], "%d", verbose);
-	args[var_index+5] = NULL;
+	args[var_index] = strdup(update_ip);
+	args[var_index+1] = (char*)malloc(2*sizeof(char));
+	sprintf(args[var_index+1], "%d", force);
+	args[var_index+2] = (char*)malloc(2*sizeof(char));
+	sprintf(args[var_index+2], "%d", verbose);
+	args[var_index+3] = NULL;
 
 	for(x=0; x < tot_var_count; x++)
 	{

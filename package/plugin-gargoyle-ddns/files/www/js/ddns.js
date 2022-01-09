@@ -648,16 +648,16 @@ function setProvider()
 		for(variableIndex = 0; variableIndex < optionalVariables.length; variableIndex++)
 		{
 			var div= document.createElement("div");
-
+			div.className="row form-group";
 			var label = document.createElement("label");
-			label.className="leftcolumn";
+			label.className="col-xs-5";
 			label.id=optionalVariables[variableIndex] + "_label";
-			label.appendChild( document.createTextNode(optionalVariableNames[variableIndex] + ":" ));
+			label.appendChild( document.createTextNode( (ObjLen(DyDNS)==0 ? optionalVariableNames[variableIndex] : eval(optionalVariableNames[variableIndex])) + ":" ));
 			div.appendChild(label);
 			if(allBooleanVariables[ optionalVariables[variableIndex] ] != 1)
 			{
 				var span = document.createElement("span");
-				span.className = "rightcolumn";
+				span.className = "col-xs-7";
 
 				var check = createInput("checkbox", document);
 				var text  = createInput("text", document);
