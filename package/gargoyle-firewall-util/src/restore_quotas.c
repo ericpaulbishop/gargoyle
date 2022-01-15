@@ -659,11 +659,15 @@ int main(int argc, char** argv)
 							foundip4 = 1;
 							foundip6 = 1;
 						}
+						else if(strcmp(ip, "ALL") == 0)
+						{
+							foundip4 = 1;
+							foundip6 = 1;
+						}
 						if(ip6_test == NULL)
 						{
 							ip6_test=strdup(ip_test);
 						}
-
 
 						if(up_qos_mark != NULL && down_qos_mark != NULL)
 						{
