@@ -36,8 +36,8 @@ endef
 CONFIGURE_ARGS += --disable-gssapi
 HOST_CONFIGURE_ARGS += --disable-gssapi
 
-TARGET_CFLAGS += -DGQ
-HOST_CFLAGS += -DGQ
+TARGET_CFLAGS += -DGQ -fno-common 
+HOST_CFLAGS += -DGQ -fno-common 
 
 define Package/libtirpc/install
 	$(INSTALL_DIR) $(1)/usr/lib
