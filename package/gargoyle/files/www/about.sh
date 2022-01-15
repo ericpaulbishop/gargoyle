@@ -36,6 +36,8 @@
 				<p><span class="contributer">Benjamin Coy (<a href="http://tenorposaune.net">tenorposaune.net</a>):</span> <%~ BCoy %></p>
 
 				<p><span class="contributer">FRiC (<a href="http://ivoidwarranties.blogspot.com">ivoidwarranties.blogspot.com</a>):</span> <%~ FRiC %></p>
+				
+				<p><span class="contributer">Michael Gray:</span> <%~ MGray %></p>
 
 				<p><%~ logo %> (<a href="http://manfred-klein.ina-mar.com">manfred-klein.ina-mar.com</a>).</p>
 
