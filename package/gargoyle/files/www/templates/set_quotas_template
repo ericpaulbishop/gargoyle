@@ -1,0 +1,41 @@
+<div class="row form-group">
+	<span class="col-xs-5">
+		<input type="checkbox" id="use_set_up" onclick="enableAssociatedField(this,'set_up','')">
+		<label id="use_set_up_label" for='use_set_up'><%~ Up %>:</label>
+	</span>
+	<span class="col-xs-7">
+		<span id="set_up_container">
+			<input type='text' id='set_up' oninput='proofreadDecimal(this)' size='7' maxlength='15' class='form-control' />
+			<select id="set_up_unit" class='form-control'></select>
+		</span>
+	</span>
+	<span class="col-xs-offset-5 col-xs-7"><em>Limit: <span id="set_up_limit"></span></em></span>
+</div>
+
+<div class="row form-group">
+	<span class="col-xs-5">
+		<input type="checkbox" id="use_set_down" onclick="enableAssociatedField(this,'set_down','')">
+		<label id="use_set_down_label" for='use_set_down'><%~ Down %>:</label>
+	</span>
+	<span class="col-xs-7">
+		<span id="set_down_container">
+			<input type='text' id='set_down' oninput='proofreadDecimal(this)' size='7' maxlength='15' class='form-control' />
+			<select id="set_down_unit" class='form-control'></select>
+		</span>
+	</span>
+	<span class="col-xs-offset-5 col-xs-7"><em>Limit: <span id="set_down_limit"></span></em></span>
+</div>
+
+<div class="row form-group">
+	<span class="col-xs-5">
+		<input type="checkbox" id="use_set_combined">
+		<label id="use_set_combined_label" for='use_set_combined'><%~ Total %>:</label>
+	</span>
+	<span class="col-xs-7">
+		<span id="set_combined_container">
+			<input type='text' id='set_combined' oninput='proofreadDecimal(this)' size='7' maxlength='15' class='form-control' />
+			<select id="set_combined_unit" class='form-control'></select>
+		</span>
+	</span>
+	<span class="col-xs-offset-5 col-xs-7"><em>Limit: <span id="set_combined_limit"></span></em></span>
+</div>

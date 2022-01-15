@@ -1057,6 +1057,28 @@ function parseBytes(bytes, units, abbr, dDgt)
 	return parsed;
 }
 
+function toBytes(val, unit)
+{
+	var byteVal = val;
+	if(unit == "KB")
+	{
+		byteVal = byteVal * 1024;
+	}
+	else if(unit == "MB")
+	{
+		byteVal = byteVal * 1024 * 1024;
+	}
+	else if(unit == "GB")
+	{
+		byteVal = byteVal * 1024 * 1024 * 1024;
+	}
+	else if(unit == "TB")
+	{
+		byteVal = byteVal * 1024 * 1024 * 1024 * 1024;
+	}
+	return byteVal;
+}
+
 function parseKbytesPerSecond(kbytes, units)
 {
 	var parsed;
@@ -2965,8 +2987,6 @@ function checkForPortConflict(port, proto, ignorePorts)
 	return portConflict;
 }
 
-
-
 function query(queryHeader, queryText, buttonNameList, continueFunction )
 {
 	document.getElementById("wait_icon").style.display="none"
@@ -3012,6 +3032,10 @@ function query(queryHeader, queryText, buttonNameList, continueFunction )
 		document.getElementById("query_button_container").appendChild(b);
 		document.getElementById("query_button_container").appendChild( document.createElement("br") )
 	}
+}
+
+function getKeyByValue(object, value) {
+	return Object.keys(object).find(key => object[key] === value);
 }
 
 //apparently these var fbS=new Object(); //part of i18n  -> objects do not have a length (it is undefined)
@@ -3350,6 +3374,10 @@ function modalPrepare(modalID, title, elements, buttons)
 			if(element.innertext !== undefined)
 			{
 				inputEl.innerText = element.innertext;
+			}
+			if(element.checked !== undefined)
+			{
+				inputEl.checked = element.checked;
 			}
 			if(element.disable !== undefined)
 			{

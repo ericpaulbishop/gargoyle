@@ -16,11 +16,11 @@ var allQuotaUsed;
 var allQuotaLimits;
 var allQuotaPercents;
 
-
 var idToSection = [];
 var idToIpStr = [];
 var idToTimeParams = [];
 
+var refreshInterval;
 
 function resetData()
 {
@@ -48,7 +48,7 @@ function resetData()
 	}
 
 	refreshTableData(document.getElementById("data_display").value);
-	setInterval("updateTableData()", 1500);
+	refreshInterval = setInterval("updateTableData()", 1500);
 }
 function getIpFromUci(srcUci, quotaSection)
 {
@@ -229,7 +229,7 @@ function refreshTableData(scheme)
 			hostList = getHostList(ipList);
 			if (!hide)
 			{
-				quotaTableData.push( [ textListToSpanElement(hostList, true, document), timeParamsToTableSpan(timeParameters), total, down, up ] );
+				quotaTableData.push( [ textListToSpanElement(hostList, true, document), timeParamsToTableSpan(timeParameters), total, down, up, createSetButton(id,ipList) ] );
 			}
 		}
 	}
@@ -338,4 +338,156 @@ function weekly_i18n(weekly_schd, direction) { //this is part of i18n; TODO: bes
 		}
 	}
 	return joiner.join(" ");
+}
+
+function createSetButton(id,iplist)
+{
+	setButton = createInput("button");
+	setButton.textContent = quotasStr.SetQuota;
+	setButton.className = "btn btn-default btn-edit";
+	setButton.onclick = function(){setQuotaModal(id,iplist);};
+
+	setElementEnabled(setButton, true);
+
+	return setButton;
+}
+
+function doSetQuota(id,iplist)
+{
+	var createCmdStr = function(id,quotaId,ipList,quotaVal) {
+		// Beware escaping things properly here
+		var cmdLines = [];
+		cmdLines.push("bw_get -i " + quotaId + " -f /tmp/" + quotaId + ".quota");
+		cmdLines.push("sed -i 's/\\(.*\t" + (id == "ALL_OTHERS_INDIVIDUAL" ? ipList : "0.0.0.0") + "\\)[\t ].*/\\1\t" + quotaVal + "/' /tmp/" + quotaId + ".quota");
+		cmdLines.push("bw_set -i " + quotaId + " -f /tmp/" + quotaId + ".quota");
+		cmdLines.push("rm /tmp/" + quotaId + ".quota");
+		
+		return cmdLines.join("\n");
+	};
+	var setUpCheck = byId("use_set_up").checked;
+	var setDownCheck = byId("use_set_down").checked;
+	var setCombinedCheck = byId("use_set_combined").checked;
+	
+	var cmd = [];
+	if(setUpCheck)
+	{
+		var quotaID = id + "_egress";
+		var setVal = byId("set_up").value;
+		var setUnit = getSelectedValue("set_up_unit");
+		var quotaVal = toBytes(setVal,setUnit);
+		cmd.push(createCmdStr(id,quotaID,iplist,quotaVal));
+	}
+	if(setDownCheck)
+	{
+		var quotaID = id + "_ingress";
+		var setVal = byId("set_down").value;
+		var setUnit = getSelectedValue("set_down_unit");
+		var quotaVal = toBytes(setVal,setUnit);
+		cmd.push(createCmdStr(id,quotaID,iplist,quotaVal));
+	}
+	if(setCombinedCheck)
+	{
+		var quotaID = id + "_combined";
+		var setVal = byId("set_combined").value;
+		var setUnit = getSelectedValue("set_combined_unit");
+		var quotaVal = toBytes(setVal,setUnit);
+		cmd.push(createCmdStr(id,quotaID,iplist,quotaVal));
+	}
+
+	if(cmd.length > 0)
+	{
+		var command = cmd.join("\n");
+		var param = getParameterDefinition("commands", command) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+
+		var stateChangeFunction = function(req)
+		{
+			if(req.readyState == 4)
+			{
+				var text = req.responseText.split(/[\r\n]+/);
+			}
+		}
+		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
+	}
+
+	closeQuotaModal();
+}
+
+function closeQuotaModal()
+{
+	refreshInterval = setInterval("updateTableData()", 1500); // restart GUI updates
+	closeModalWindow('quotas_modal');
+}
+
+function setQuotaModal(id,iplist)
+{
+	var unitOpts = {};
+	unitOpts['KB'] = UI.KBy;
+	unitOpts['MB'] = UI.MBy;
+	unitOpts['GB'] = UI.GBy;
+	unitOpts['TB'] = UI.TBy;
+	joinIpList = iplist.join(",");
+
+	upCurrent = allQuotaUsed[id][joinIpList][2];
+	downCurrent = allQuotaUsed[id][joinIpList][1];
+	combinedCurrent = allQuotaUsed[id][joinIpList][0];
+	upCurrent = (upCurrent == -1 ? " " : parseBytes(upCurrent)).split(" ");
+	downCurrent = (downCurrent == -1 ? " " : parseBytes(downCurrent)).split(" ");
+	combinedCurrent = (combinedCurrent == -1 ? " " : parseBytes(combinedCurrent)).split(" ");
+	upCurrentUnit = getKeyByValue(unitOpts,upCurrent[1]);
+	upCurrent = upCurrent[0];
+	downCurrentUnit = getKeyByValue(unitOpts,downCurrent[1]);
+	downCurrent = downCurrent[0];
+	combinedCurrentUnit = getKeyByValue(unitOpts,combinedCurrent[1]);
+	combinedCurrent = combinedCurrent[0];
+
+	upLimit = allQuotaLimits[id][joinIpList][2];
+	downLimit = allQuotaLimits[id][joinIpList][1];
+	combinedLimit = allQuotaLimits[id][joinIpList][0];
+	upLimit = upLimit == -1 ? "N/A" : parseBytes(upLimit);
+	downLimit = downLimit == -1 ? "N/A" : parseBytes(downLimit);
+	combinedLimit = combinedLimit == -1 ? "N/A" : parseBytes(combinedLimit);
+
+	upDisabled = (upCurrent == "");
+	downDisabled = (downCurrent == "");
+	combinedDisabled = (combinedCurrent == "");
+
+	enableBothQuotaFields = function(triggerEl,fieldName,data,unit) {
+		enableAssociatedField(triggerEl,fieldName,data);
+		enableAssociatedField(triggerEl,fieldName+'_unit',unit);
+	};
+
+	byId("use_set_up").onclick = function() {
+		enableBothQuotaFields(this,'set_up',upCurrent,upCurrentUnit);
+	};
+	byId("use_set_down").onclick = function() {
+		enableBothQuotaFields(this,'set_down',downCurrent,downCurrentUnit);
+	};
+	byId("use_set_combined").onclick = function() {
+		enableBothQuotaFields(this,'set_combined',combinedCurrent,combinedCurrentUnit);
+	};
+
+	clearInterval(refreshInterval); // pause GUI updates
+
+	modalButtons = [
+		{"title" : UI.CApplyChanges, "classes" : "btn btn-primary", "function" : function(){doSetQuota(id,joinIpList);}},
+		{"title" : UI.CDiscardChanges, "classes" : "btn btn-warning", "function" : function(){closeQuotaModal();}}
+	];
+
+	modalElements = [
+		{"id" : "set_up", "value" : upCurrent, "disable" : true},
+		{"id" : "set_down", "value" : downCurrent, "disable" : true},
+		{"id" : "set_combined", "value" : combinedCurrent, "disable" : true},
+		{"id" : "use_set_up", "checked" : false, "disable" : upDisabled},
+		{"id" : "use_set_down", "checked" : false, "disable" : downDisabled},
+		{"id" : "use_set_combined", "checked" : false, "disable" : combinedDisabled},
+		{"id" : "set_up_unit", "options" : unitOpts, "value" : upCurrentUnit, "disable" : true},
+		{"id" : "set_down_unit", "options" : unitOpts, "value" : downCurrentUnit, "disable" : true},
+		{"id" : "set_combined_unit", "options" : unitOpts, "value" : combinedCurrentUnit, "disable" : true},
+		{"id" : "set_up_limit", "innertext" : upLimit},
+		{"id" : "set_down_limit", "innertext" : downLimit},
+		{"id" : "set_combined_limit", "innertext" : combinedLimit}
+	];
+
+	modalPrepare('quotas_modal', quotasStr.SetQuota, modalElements, modalButtons);
+	openModalWindow('quotas_modal');
 }
