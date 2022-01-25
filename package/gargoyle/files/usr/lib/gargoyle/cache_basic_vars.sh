@@ -157,6 +157,7 @@ echo "var wpad_eap = $(hostapd -veap && echo 'true' || echo 'false');" >> "$out_
 echo "var wpad_sae = $(hostapd -vsae && echo 'true' || echo 'false');" >> "$out_file"
 echo "var wpad_owe = $(hostapd -vowe && echo 'true' || echo 'false');" >> "$out_file"
 echo "var wpad_sb192 = $(hostapd -vsuiteb192 && echo 'true' || echo 'false');" >> "$out_file"
+echo "var wpad_wep = $(hostapd -vwep && echo 'true' || echo 'false');" >> "$out_file"
 
 awk -F= '/DISTRIB_TARGET/{printf "var distribTarget=%s;\n", $2}' /etc/openwrt_release >> "$out_file"
 

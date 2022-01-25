@@ -1433,8 +1433,13 @@ function setWifiVisibility()
 	var wifiMode=getSelectedValue("wifi_mode");
 	if(wifiMode == "ap+wds")
 	{
-		var values = ['none', 'psk2', 'psk', 'wep'];
-		var names = [basicS.None, 'WPA2 PSK', 'WPA PSK', 'WEP'];
+		var values = ['none', 'psk2', 'psk'];
+		var names = [basicS.None, 'WPA2 PSK', 'WPA PSK'];
+		if(wpad_wep)
+		{
+			values.push('wep');
+			names.push('WEP');
+		}
 		if(wpad_sae)
 		{
 			values.splice(values.indexOf('psk2'),0,'sae-mixed','sae');
@@ -1449,8 +1454,13 @@ function setWifiVisibility()
 	}
 	else
 	{
-		var values = ['none', 'psk2', 'psk', 'wep'];
-		var names = [basicS.None, 'WPA2 PSK', 'WPA PSK', 'WEP'];
+		var values = ['none', 'psk2', 'psk'];
+		var names = [basicS.None, 'WPA2 PSK', 'WPA PSK'];
+		if(wpad_wep)
+		{
+			values.push('wep');
+			names.push('WEP');
+		}
 		if(wpad_sae)
 		{
 			values.splice(values.indexOf('psk2'),0,'sae-mixed','sae');
@@ -1478,14 +1488,26 @@ function setWifiVisibility()
 
 	if(wifiMode == 'adhoc')
 	{
-		setAllowableSelections('wifi_encryption2', ['none', 'wep'], [basicS.None, 'WEP']);
+		var values = ['none'];
+		var names = [basicS.None];
+		if(wpad_wep)
+		{
+			values.push('wep');
+			names.push('WEP');
+		}
+		setAllowableSelections('wifi_encryption2', values, names);
 		document.getElementById("wifi_ssid2_label").firstChild.data = "SSID:";
 	}
 	else
 	{
 		document.getElementById("wifi_ssid2_label").firstChild.data = basicS.Join+":";
-		var values = ['none', 'psk2', 'psk', 'wep'];
-		var names = [basicS.None, 'WPA2 PSK', 'WPA PSK', 'WEP'];
+		var values = ['none', 'psk2', 'psk'];
+		var names = [basicS.None, 'WPA2 PSK', 'WPA PSK'];
+		if(wpad_wep)
+		{
+			values.push('wep');
+			names.push('WEP');
+		}
 		if(wpad_sae)
 		{
 			values.splice(values.indexOf('psk2'),0,'sae-mixed','sae');
@@ -1662,8 +1684,13 @@ function setBridgeVisibility()
 
 	if(document.getElementById("global_bridge").checked)
 	{
-		var values = ['none', 'psk2', 'psk', 'wep'];
-		var names = [basicS.None, 'WPA2 PSK', 'WPA PSK', 'WEP'];
+		var values = ['none', 'psk2', 'psk'];
+		var names = [basicS.None, 'WPA2 PSK', 'WPA PSK'];
+		if(wpad_wep)
+		{
+			values.push('wep');
+			names.push('WEP');
+		}
 		if(wpad_sae)
 		{
 			values.splice(values.indexOf('psk2'),0,'sae-mixed','sae');
@@ -3105,7 +3132,7 @@ function parseWifiScan(rawScanOutput)
 			{
 				enc = "sae"
 			}
-			else if(encStr.match(/WPA2 PSK/))
+			else if(encStr.match(/WPA2 PSK/) || encStr.match(/WPA2\/WPA3 PSK\/SAE/))
 			{
 				enc = "psk2"
 			}
