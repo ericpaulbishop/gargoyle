@@ -1,0 +1,10 @@
+#fallback is the string the web UI will use when the target language is not present
+
+fallback=Diagnostics
+EN=Diagnostics
+PL=Diagnostics
+RU=Diagnostics
+NO=Diagnostics
+ZH-CN=Diagnostics
+BR=Diagnostics
+CS=Diagnostics

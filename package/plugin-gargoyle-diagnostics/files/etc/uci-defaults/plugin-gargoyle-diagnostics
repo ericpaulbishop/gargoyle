@@ -1,0 +1,6 @@
+#!/bin/sh
+
+uci set gargoyle.display.system_diagnostics='Diagnostics'
+uci set gargoyle.scripts.system_diagnostics='diagnostics.sh'
+uci set gargoyle.system.diagnostics='370'
+uci commit
