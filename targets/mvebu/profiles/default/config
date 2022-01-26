@@ -2451,6 +2451,7 @@ CONFIG_PACKAGE_gargoyle-i18n=y
 CONFIG_PACKAGE_plugin-gargoyle-adblock=m
 CONFIG_PACKAGE_plugin-gargoyle-cron=m
 CONFIG_PACKAGE_plugin-gargoyle-ddns=y
+CONFIG_PACKAGE_plugin-gargoyle-diagnostics=y
 CONFIG_PACKAGE_plugin-gargoyle-email-notifications=m
 CONFIG_PACKAGE_plugin-gargoyle-email-notifications-nossl=m
 CONFIG_PACKAGE_plugin-gargoyle-i18n-Arabic-AR=m
