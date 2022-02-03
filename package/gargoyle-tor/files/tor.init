@@ -89,7 +89,7 @@ start()
 	init_dir "$tor_data_dir" "0700"
 	init_dir "$KEY_D"        "0700"
 	init_dir "$RUN_D"        "0755"
-	[ -h "$tor_data_dir/keys" ] || ( rm -rf "$tor_data_dir/keys" && ln -s "$KEY_D" "$tor_data_dir/keys" && chown -R $RON_USER:$RUN_GROUP "$tor_data_dir/keys" )
+	[ -h "$tor_data_dir/keys" ] || ( rm -rf "$tor_data_dir/keys" && ln -s "$KEY_D" "$tor_data_dir/keys" && chown -R $RUN_USER:$RUN_GROUP "$tor_data_dir/keys" )
 	[ -f "$PID_F" ] || ( touch "$PID_F" && chown $RUN_USER:$RUN_GROUP "$PID_F" )
 
 	OPTIONS="$OPTIONS  --Log '$loglevel syslog' --ControlPort $control_port --DataDirectory '$tor_data_dir' "
