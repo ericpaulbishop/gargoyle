@@ -134,4 +134,5 @@ basicS.Mo3gQMI="Modem 3G USB (QMI)";
 basicS.Mo3gNCM="Modem 3G USB (NCM)";
 basicS.Mo3gMBIM="Modem 3G USB (MBIM)";
 basicS.Mo3gHiLink="Modem 3G USB (HiLink, RNDIS)";
+basicS.Mo3gIPH="USB Modem (iPhone)";
 basicS.Dfult="Padrão";

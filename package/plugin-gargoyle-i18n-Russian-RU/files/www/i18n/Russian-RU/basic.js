@@ -144,4 +144,5 @@ basicS.Mo3gQMI="USB-модем (QMI)";
 basicS.Mo3gNCM="USB-модем (NCM)";
 basicS.Mo3gMBIM="USB-модем (MBIM)";
 basicS.Mo3gHiLink="USB-модем (HiLink, RNDIS)";
+basicS.Mo3gIPH="USB-модем (iPhone)";
 basicS.Dfult="По умолчанию";

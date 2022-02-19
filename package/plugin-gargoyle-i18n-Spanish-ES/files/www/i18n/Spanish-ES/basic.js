@@ -56,6 +56,7 @@ basicS.Cnct="Conectar mediante";
 basicS.Wird="Cableado";
 basicS.Wrlss="Inalámbrico";
 basicS.Mo3g="3G (GSM)";
+basicS.Mo3gIPH="USB Modem (iPhone)";
 basicS.CLsExp="Asignación Actual Finaliza";
 basicS.Renew="Renovar DHCP";
 basicS.Rleas="Liberar DHCP";

@@ -56,6 +56,7 @@ basicS.Cnct="Verbunden via";
 basicS.Wird="Ethernet";
 basicS.Wrlss="Wlan";
 basicS.Mo3g="3G (GSM)";
+basicS.Mo3gIPH="USB Modem (iPhone)";
 basicS.CLsExp="Aktuelle IP-Adresse läuft ab";
 basicS.Renew="IP-Adresse erneuen (DHCP)";
 basicS.Rleas="DHCP Release";

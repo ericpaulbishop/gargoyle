@@ -203,6 +203,10 @@ function saveChanges()
 				{
 					uci.set('network', 'wan', 'ifname', cdcif);
 				}
+				else if(getSelectedValue("wan_protocol").match(/iph/))
+				{
+					uci.set('network', 'wan', 'ifname', iphif);
+				}
 				else
 				{
 					uci.set('network', 'wan', 'ifname', defaultWanIf);
@@ -1363,11 +1367,17 @@ function setGlobalVisibility()
 		proto2.push(basicS.Mo3gHiLink);
 	}
 
+	if(iphif != "")
+	{
+		proto1.push('dhcp_iph');
+		proto2.push(basicS.Mo3gIPH);
+	}
+
 	proto1.push('none');
 	proto2.push(UI.Disabled);
 	setAllowableSelections('wan_protocol', proto1, proto2);
 
-	setVisibility( [ 'wan_port_to_lan_container' ], ((getSelectedValue("wan_protocol") == 'none' || getSelectedValue("wan_protocol").match(/wireless/) || getSelectedValue("wan_protocol").match(/3g/) || getSelectedValue("wan_protocol").match(/ncm/) || getSelectedValue("wan_protocol").match(/qmi/) || getSelectedValue("wan_protocol").match(/mbim/))  && (!singleEthernetPort())) ? [1] : [0] )
+	setVisibility( [ 'wan_port_to_lan_container' ], ((getSelectedValue("wan_protocol") == 'none' || getSelectedValue("wan_protocol").match(/wireless/) || getSelectedValue("wan_protocol").match(/3g/) || getSelectedValue("wan_protocol").match(/ncm/) || getSelectedValue("wan_protocol").match(/qmi/) || getSelectedValue("wan_protocol").match(/mbim/) || getSelectedValue("wan_protocol").match(/iph/))  && (!singleEthernetPort())) ? [1] : [0] )
 
 	setWanVisibility();
 	setWifiVisibility();
@@ -1400,6 +1410,7 @@ function setWanVisibility()
 	wanVisibilities['qmi'] = qmiVisability;
 	wanVisibilities['ncm'] = qmiVisability;
 	wanVisibilities['mbim'] = qmiVisability;
+	wanVisibilities['iph'] = qmiVisability;
 
 	var selectedVisibility= wanVisibilities[ getSelectedValue("wan_protocol").replace(/_.*$/g, "") ];
 
@@ -1957,8 +1968,18 @@ function resetData()
 	var lanUciIf= uciOriginal.get('network', 'lan', 'ifname');
 	var wanIsWifi = (wanUciIf == '' && wanType == 'bridge' ) && ( getWirelessMode(uciOriginal) == "sta" || getWirelessMode(uciOriginal) == "ap+sta");
 	wp = wp == "" ? "none" : wp;
-	if(wp != "none" && wp != "3g" && wp != "qmi" && wp != "ncm" && wp != "mbim" ) { wp = wanIsWifi ? wp + "_wireless" : wp + "_wired"; }
-	if(wp == "dhcp_wired" && wanUciIf != defaultWanIf) { wp = "dhcp_cdc"; }
+	if(wp != "none" && wp != "3g" && wp != "qmi" && wp != "ncm" && wp != "mbim" && wp != "iph") { wp = wanIsWifi ? wp + "_wireless" : wp + "_wired"; }
+	if(wp == "dhcp_wired")
+	{
+		if(wanUciIf == cdcif)
+		{
+			wp = "dhcp_cdc";
+		}
+		else if(wanUciIf == iphif)
+		{
+			wp = "dhcp_iph";
+		}
+	}
 	setSelectedValue("wan_protocol", wp);
 
 	var wp6 = uciOriginal.get("network", "wan6", "proto");

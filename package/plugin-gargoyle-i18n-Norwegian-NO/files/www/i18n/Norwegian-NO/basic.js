@@ -56,6 +56,7 @@ basicS.Cnct="Koble til Via";
 basicS.Wird="Kablet";
 basicS.Wrlss="Trådløs";
 basicS.Mo3g="3G(GSM)";
+basicS.Mo3gIPH="USB Modem (iPhone)";
 basicS.CLsExp="Gjeldende Leieavtale Utløper";
 basicS.Renew="DHCP Fornyelse";
 basicS.Rleas="DHCP Frigivelse";
