@@ -12,7 +12,7 @@
 <script>
 <%
 
-	if [ -e /etc/openvpn/dh1024.pem ] ; then
+	if [ -e /etc/openvpn/dh.pem ] ; then
 		echo "var haveDh = true;"
 	else
 		echo "var haveDh = false;"
