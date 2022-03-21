@@ -2392,6 +2392,7 @@ CONFIG_PACKAGE_plugin-gargoyle-i18n-SimplifiedChinese-ZH-CN=m
 CONFIG_PACKAGE_plugin-gargoyle-i18n-Slovak-SK=m
 CONFIG_PACKAGE_plugin-gargoyle-i18n-Spanish-ES=m
 CONFIG_PACKAGE_plugin-gargoyle-initd=m
+# CONFIG_PACKAGE_plugin-gargoyle-ipheth-tether is not set
 CONFIG_PACKAGE_plugin-gargoyle-logread=m
 # CONFIG_PACKAGE_plugin-gargoyle-minidlna is not set
 # CONFIG_PACKAGE_plugin-gargoyle-openvpn is not set
@@ -3291,6 +3292,14 @@ CONFIG_OPENSSL_ENGINE=y
 # database
 #
 # CONFIG_PACKAGE_libsqlite3 is not set
+
+#
+# libimobiledevice
+#
+# CONFIG_PACKAGE_libimobiledevice is not set
+# CONFIG_PACKAGE_libplist is not set
+# CONFIG_PACKAGE_libplistcxx is not set
+# CONFIG_PACKAGE_libusbmuxd is not set
 # CONFIG_PACKAGE_alsa-lib is not set
 # CONFIG_PACKAGE_argp-standalone is not set
 # CONFIG_PACKAGE_libaio is not set
@@ -3430,6 +3439,7 @@ CONFIG_PACKAGE_libuuid=m
 # CONFIG_PACKAGE_libv4l is not set
 # CONFIG_PACKAGE_libvorbis is not set
 # CONFIG_PACKAGE_libwrap is not set
+# CONFIG_PACKAGE_libxml2 is not set
 # CONFIG_PACKAGE_linux-atm is not set
 # CONFIG_PACKAGE_p11-kit is not set
 # CONFIG_PACKAGE_terminfo is not set
@@ -3869,6 +3879,14 @@ CONFIG_PACKAGE_wpad-basic=y
 # database
 #
 # CONFIG_PACKAGE_sqlite3-cli is not set
+
+#
+# libimobiledevice
+#
+# CONFIG_PACKAGE_libimobiledevice-utils is not set
+# CONFIG_PACKAGE_libusbmuxd-utils is not set
+# CONFIG_PACKAGE_plistutil is not set
+# CONFIG_PACKAGE_usbmuxd is not set
 # CONFIG_PACKAGE_adb is not set
 # CONFIG_PACKAGE_bsdiff is not set
 # CONFIG_PACKAGE_bspatch is not set
