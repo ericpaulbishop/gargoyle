@@ -172,14 +172,14 @@ function saveChanges()
 
 
 	//update shares
-	uci.removeAllSectionsOfType("samba",  "samba")
-	uci.removeAllSectionsOfType("samba",  "sambashare")
+	uci.removeAllSectionsOfType(sambapkg,  "samba")
+	uci.removeAllSectionsOfType(sambapkg,  "sambashare")
 	uci.removeAllSectionsOfType("vsftpd", "vsftpd")
 	uci.removeAllSectionsOfType("vsftpd", "share")
 	uci.removeAllSectionsOfType("nfsd",   "nfsshare")
 
-	uci.set("samba", "global", "", "samba")
-	uci.set("samba", "global", "workgroup", sambaGroup);
+	uci.set(sambapkg, "global", "", "samba")
+	uci.set(sambapkg, "global", "workgroup", sambaGroup);
 
 	var haveAnonymousFtp = false;
 	var makeDirCmds = [];
@@ -210,7 +210,7 @@ function saveChanges()
 
 		if(isCifs)
 		{
-			var pkg = "samba"
+			var pkg = sambapkg
 			uci.set(pkg, shareId, "", "sambashare")
 			uci.set(pkg, shareId, "name", shareName);
 			uci.set(pkg, shareId, "path", fullMountPath);
@@ -292,7 +292,7 @@ function saveChanges()
 		postCommands.push("/etc/init.d/firewall restart");
 	}
 	postCommands.push("/etc/init.d/share_users restart");
-	postCommands.push("/etc/init.d/samba restart");
+	postCommands.push("/etc/init.d/" + sambapkg + " restart");
 	postCommands.push("/etc/init.d/vsftpd restart");
 	postCommands.push("/etc/init.d/nfsd restart");
 
@@ -497,8 +497,8 @@ function resetData()
 	{
 
 		//workgroup
-		var s =  uciOriginal.getAllSectionsOfType("samba", "samba");
-		document.getElementById("cifs_workgroup").value = s.length > 0 ? uciOriginal.get("samba", s.shift(), "workgroup") : "Workgroup";
+		var s =  uciOriginal.getAllSectionsOfType(sambapkg, "samba");
+		document.getElementById("cifs_workgroup").value = s.length > 0 ? uciOriginal.get(sambapkg, s.shift(), "workgroup") : "Workgroup";
 
 		// wan access to FTP
 		var wanFtp = uciOriginal.get("firewall", ftpFirewallRule, "local_port") == "21"
@@ -573,7 +573,7 @@ function resetData()
 		nameToSharePath = [];      //global
 
 		var mountedDrives = [];
-		var sambaShares = uciOriginal.getAllSectionsOfType("samba", "sambashare");
+		var sambaShares = uciOriginal.getAllSectionsOfType(sambapkg, "sambashare");
 		var nfsShares = uciOriginal.getAllSectionsOfType("nfsd", "nfsshare");
 		var ftpShares = uciOriginal.getAllSectionsOfType("vsftpd", "share");
 		var getMounted = function(shareList, config)
@@ -608,7 +608,7 @@ function resetData()
 					var shareData = sharePathToShareData[fullSharePath] == null ? ["", "", "", "", "", false, false, false, "none", [], [], "ro", "*" ] :  sharePathToShareData[fullSharePath] ;
 
 					//name
-					if( shareData[0] == "" || config == "samba")
+					if( shareData[0] == "" || config == sambapkg)
 					{
 						shareData[0] = uciOriginal.get(config, shareId, "name");
 						shareData[0] == "" ? shareId : shareData[0];
@@ -617,7 +617,7 @@ function resetData()
 					shareData[2] = shareMountPoint                           //share drive mount
 					shareData[3] = shareDirectory                            //directory
 					shareData[4] = fullSharePath				 //full path
-					shareData[5] = config == "samba"  ? true : shareData[5]  //isCIFS
+					shareData[5] = config == sambapkg  ? true : shareData[5]  //isCIFS
 					shareData[6] = config == "vsftpd" ? true : shareData[6]  //isFTP
 					shareData[7] = config == "nfsd"   ? true : shareData[7]  //isNFS
 
@@ -625,7 +625,7 @@ function resetData()
 					//both samba and vsftpd have ro_users and rw_users list options
 					//however, they handle anonymous access a bit differently
 					//samba has guest_ok option, while vsftpd includes "anonymous" (or "ftp") user in lists
-					if(config == "vsftpd" || config == "samba")
+					if(config == "vsftpd" || config == sambapkg)
 					{
 						var readTypes = ["rw", "ro"]
 						var readTypeShareDataIndices = [9,10]
@@ -656,7 +656,7 @@ function resetData()
 							}
 							shareData[  readTypeShareDataIndices[rtIndex] ] = shareDataUserList;
 						}
-						if(config == "samba")
+						if(config == sambapkg)
 						{
 							//handle anonymous for samba
 							if( uciOriginal.get(config, shareId, "guest_ok").toLowerCase() == "yes" || uciOriginal.get(config, shareId, "public").toLowerCase() == "yes" )
@@ -702,7 +702,7 @@ function resetData()
 			}
 		}
 
-		getMounted(sambaShares, "samba");
+		getMounted(sambaShares, sambapkg);
 		getMounted(ftpShares, "vsftpd");
 		getMounted(nfsShares, "nfsd");
 

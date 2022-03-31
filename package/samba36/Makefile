@@ -41,6 +41,8 @@ define Package/samba36-server
   $(call Package/samba/Default)
   TITLE+= server
   DEPENDS:=+USE_GLIBC:librt $(ICONV_DEPENDS)
+  PROVIDES:=gargoyle-sambapkg
+  CONFLICTS:=ksmbd-server
 endef
 
 define Package/samba36-hotplug

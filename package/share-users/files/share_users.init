@@ -27,7 +27,7 @@ clear_old_users()
 	for u in $cur_users ; do
 		utest=$(/sbin/uci get share_users.$u)
 		if [ "$utest" != "user" ] ; then
-			for f in "/etc/passwd" "/etc/group" "/etc/shadow" "/etc/samba/smbpasswd" ; do
+			for f in "/etc/passwd" "/etc/group" "/etc/shadow" "/etc/samba/smbpasswd" "/etc/ksmbd/ksmbdpwd.db" ; do
 				if [ -e "$f" ] ; then
 					sed -i "/^$u:*/d" "$f"
 				fi
@@ -119,6 +119,10 @@ update_user()
 			if [ -e /usr/sbin/smbpasswd ] ; then
 				touch /etc/samba/smbpasswd
 				printf "$password\n$password\n" | /usr/sbin/smbpasswd -a -s "$username"
+			fi
+			if [ -e /usr/sbin/ksmbd.adduser ] ; then
+				touch /etc/ksmbd/ksmbdpwd.db
+				ksmbd.adduser -a "$username" -p "$password"
 			fi
 		fi
 		uci_remove "share_users" "$username" password

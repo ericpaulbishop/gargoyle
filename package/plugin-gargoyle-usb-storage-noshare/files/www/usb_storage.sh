@@ -6,7 +6,7 @@
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "system" -p "usb_storage" -j "gs_sortable.js table.js usb_storage.js" -z "usb_storage.js" gargoyle network firewall nfsd samba vsftpd share_users
+	gargoyle_header_footer -h -s "system" -p "usb_storage" -j "gs_sortable.js table.js usb_storage.js" -z "usb_storage.js" gargoyle network firewall nfsd samba ksmbd vsftpd share_users
 
 %>
 
@@ -46,6 +46,9 @@
 	echo "var extroot_drive=\""$(mount | awk '/\/dev\/[sm][dm].*on \/overlay/ {print $1}')"\";"
 
 	echo "var fullVariant=\""$(opkg list-installed 2>&1 | grep plugin-gargoyle-usb-storage-full)"\";"
+
+	whichksmbd="$(which ksmbd.mountd)"
+	[ -n "$whichksmbd" ] && echo "var sambapkg=\"ksmbd\";" || echo "var sambapkg=\"samba\";"
 %>
 //-->
 </script>

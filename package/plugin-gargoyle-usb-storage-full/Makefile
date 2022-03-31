@@ -25,7 +25,7 @@ define Package/plugin-gargoyle-usb-storage-full
 	CATEGORY:=Administration
 	SUBMENU:=Gargoyle Web Interface
 	TITLE:=USB Storage Support for Gargoyle (Full)
-	DEPENDS:=+plugin-gargoyle-usb-storage-noshare +share-users +samba36-server +nfs-kernel-server +nfs-kernel-server-utils +nfs-utils +vsftpd
+	DEPENDS:=+plugin-gargoyle-usb-storage-noshare +share-users +nfs-kernel-server +nfs-kernel-server-utils +nfs-utils +vsftpd +gargoyle-sambapkg
 	MAINTAINER:=Eric Bishop
 	PKGARCH:=all
 endef
