@@ -2707,10 +2707,10 @@ CONFIG_PACKAGE_kmod-crypto-aead=y
 CONFIG_PACKAGE_kmod-crypto-arc4=y
 # CONFIG_PACKAGE_kmod-crypto-authenc is not set
 CONFIG_PACKAGE_kmod-crypto-cbc=y
-# CONFIG_PACKAGE_kmod-crypto-ccm is not set
-# CONFIG_PACKAGE_kmod-crypto-cmac is not set
+CONFIG_PACKAGE_kmod-crypto-ccm=y
+CONFIG_PACKAGE_kmod-crypto-cmac=y
 CONFIG_PACKAGE_kmod-crypto-crc32c=y
-# CONFIG_PACKAGE_kmod-crypto-ctr is not set
+CONFIG_PACKAGE_kmod-crypto-ctr=y
 CONFIG_PACKAGE_kmod-crypto-cts=y
 # CONFIG_PACKAGE_kmod-crypto-deflate is not set
 CONFIG_PACKAGE_kmod-crypto-des=y
@@ -2718,9 +2718,9 @@ CONFIG_PACKAGE_kmod-crypto-ecb=y
 # CONFIG_PACKAGE_kmod-crypto-ecdh is not set
 # CONFIG_PACKAGE_kmod-crypto-echainiv is not set
 # CONFIG_PACKAGE_kmod-crypto-fcrypt is not set
-# CONFIG_PACKAGE_kmod-crypto-gcm is not set
-# CONFIG_PACKAGE_kmod-crypto-gf128 is not set
-# CONFIG_PACKAGE_kmod-crypto-ghash is not set
+CONFIG_PACKAGE_kmod-crypto-gcm=y
+CONFIG_PACKAGE_kmod-crypto-gf128=y
+CONFIG_PACKAGE_kmod-crypto-ghash=y
 CONFIG_PACKAGE_kmod-crypto-hash=y
 CONFIG_PACKAGE_kmod-crypto-hmac=y
 # CONFIG_PACKAGE_kmod-crypto-hw-ccp is not set
@@ -2735,7 +2735,7 @@ CONFIG_PACKAGE_kmod-crypto-lib-chacha20poly1305=y
 CONFIG_PACKAGE_kmod-crypto-lib-curve25519=y
 CONFIG_PACKAGE_kmod-crypto-lib-poly1305=y
 CONFIG_PACKAGE_kmod-crypto-manager=y
-# CONFIG_PACKAGE_kmod-crypto-md4 is not set
+CONFIG_PACKAGE_kmod-crypto-md4=y
 CONFIG_PACKAGE_kmod-crypto-md5=y
 # CONFIG_PACKAGE_kmod-crypto-michael-mic is not set
 # CONFIG_PACKAGE_kmod-crypto-misc is not set
@@ -2743,11 +2743,11 @@ CONFIG_PACKAGE_kmod-crypto-null=y
 # CONFIG_PACKAGE_kmod-crypto-pcbc is not set
 CONFIG_PACKAGE_kmod-crypto-pcompress=y
 # CONFIG_PACKAGE_kmod-crypto-rmd160 is not set
-# CONFIG_PACKAGE_kmod-crypto-rng is not set
-# CONFIG_PACKAGE_kmod-crypto-seqiv is not set
+CONFIG_PACKAGE_kmod-crypto-rng=y
+CONFIG_PACKAGE_kmod-crypto-seqiv=y
 CONFIG_PACKAGE_kmod-crypto-sha1=y
-# CONFIG_PACKAGE_kmod-crypto-sha256 is not set
-# CONFIG_PACKAGE_kmod-crypto-sha512 is not set
+CONFIG_PACKAGE_kmod-crypto-sha256=y
+CONFIG_PACKAGE_kmod-crypto-sha512=y
 # CONFIG_PACKAGE_kmod-crypto-test is not set
 # CONFIG_PACKAGE_kmod-crypto-user is not set
 # CONFIG_PACKAGE_kmod-crypto-wq is not set
@@ -2774,6 +2774,8 @@ CONFIG_PACKAGE_kmod-fs-ext4=y
 CONFIG_PACKAGE_kmod-fs-hfsplus=y
 # CONFIG_PACKAGE_kmod-fs-isofs is not set
 # CONFIG_PACKAGE_kmod-fs-jfs is not set
+CONFIG_PACKAGE_kmod-fs-ksmbd=y
+CONFIG_KSMBD_SMB_INSECURE_SERVER=y
 # CONFIG_PACKAGE_kmod-fs-minix is not set
 CONFIG_PACKAGE_kmod-fs-msdos=y
 CONFIG_PACKAGE_kmod-fs-nfs=y
@@ -2914,9 +2916,11 @@ CONFIG_PACKAGE_kmod-input-core=y
 #
 # CONFIG_PACKAGE_kmod-leds-gpio is not set
 # CONFIG_PACKAGE_kmod-leds-pca963x is not set
+# CONFIG_PACKAGE_kmod-leds-uleds is not set
 # CONFIG_PACKAGE_kmod-ledtrig-activity is not set
 # CONFIG_PACKAGE_kmod-ledtrig-gpio is not set
 # CONFIG_PACKAGE_kmod-ledtrig-oneshot is not set
+# CONFIG_PACKAGE_kmod-ledtrig-pattern is not set
 # CONFIG_PACKAGE_kmod-ledtrig-transient is not set
 # end of LED modules
 
@@ -3557,6 +3561,7 @@ CONFIG_PACKAGE_libbz2=y
 #
 # Filesystem
 #
+# CONFIG_PACKAGE_libattr is not set
 # CONFIG_PACKAGE_libsysfs is not set
 # end of Filesystem
 
@@ -3638,6 +3643,7 @@ CONFIG_WOLFSSL_HAS_SESSION_TICKET=y
 CONFIG_WOLFSSL_HAS_OCSP=y
 CONFIG_WOLFSSL_HAS_WPAS=y
 # CONFIG_WOLFSSL_HAS_ECC25519 is not set
+CONFIG_WOLFSSL_ALT_NAMES=y
 CONFIG_WOLFSSL_HAS_NO_HW=y
 # CONFIG_WOLFSSL_HAS_AFALG is not set
 # CONFIG_WOLFSSL_HAS_DEVCRYPTO_CBC is not set
@@ -3665,6 +3671,7 @@ CONFIG_SQLITE3_RTREE=y
 
 # CONFIG_PACKAGE_alsa-lib is not set
 # CONFIG_PACKAGE_argp-standalone is not set
+# CONFIG_PACKAGE_glib2 is not set
 # CONFIG_PACKAGE_jansson is not set
 # CONFIG_PACKAGE_libaio is not set
 # CONFIG_PACKAGE_libasm is not set
@@ -3727,6 +3734,7 @@ CONFIG_LIBCURL_PROXY=y
 # CONFIG_LIBCURL_LIBCURL_OPTION is not set
 # CONFIG_LIBCURL_VERBOSE is not set
 CONFIG_PACKAGE_libdevmapper=y
+# CONFIG_PACKAGE_libdevmapper-selinux is not set
 # CONFIG_PACKAGE_libdw is not set
 CONFIG_PACKAGE_libelf=y
 CONFIG_PACKAGE_libericstools=y
@@ -3741,6 +3749,7 @@ CONFIG_PACKAGE_libf2fs=y
 # CONFIG_PACKAGE_libf2fs-selinux is not set
 CONFIG_PACKAGE_libfdisk=y
 # CONFIG_PACKAGE_libfdt is not set
+# CONFIG_PACKAGE_libffi is not set
 CONFIG_PACKAGE_libffmpeg-audio-dec=y
 # CONFIG_PACKAGE_libffmpeg-custom is not set
 # CONFIG_PACKAGE_libffmpeg-full is not set
@@ -3774,8 +3783,8 @@ CONFIG_PACKAGE_libncurses=y
 # CONFIG_PACKAGE_libnftnl is not set
 CONFIG_PACKAGE_libnghttp2=m
 # CONFIG_PACKAGE_libnl is not set
-# CONFIG_PACKAGE_libnl-core is not set
-# CONFIG_PACKAGE_libnl-genl is not set
+CONFIG_PACKAGE_libnl-core=y
+CONFIG_PACKAGE_libnl-genl=y
 # CONFIG_PACKAGE_libnl-nf is not set
 # CONFIG_PACKAGE_libnl-route is not set
 CONFIG_PACKAGE_libnl-tiny=y
@@ -3869,6 +3878,10 @@ CONFIG_PACKAGE_vsftpd=y
 #
 # Filesystem
 #
+# CONFIG_PACKAGE_ksmbd-avahi-service is not set
+CONFIG_PACKAGE_ksmbd-server=y
+CONFIG_PACKAGE_ksmbd-utils=y
+# CONFIG_KSMBD_UTILS_SHAREADD is not set
 CONFIG_PACKAGE_nfs-kernel-server=y
 
 #
@@ -4187,8 +4200,7 @@ CONFIG_RPCBIND_RMTCALLS=y
 # CONFIG_PACKAGE_samba36-client is not set
 # CONFIG_PACKAGE_samba36-hotplug is not set
 # CONFIG_PACKAGE_samba36-net is not set
-CONFIG_PACKAGE_samba36-server=y
-CONFIG_PACKAGE_SAMBA_MAX_DEBUG_LEVEL=-1
+# CONFIG_PACKAGE_samba36-server is not set
 # CONFIG_PACKAGE_soloscli is not set
 # CONFIG_PACKAGE_tcpdump is not set
 # CONFIG_PACKAGE_tcpdump-mini is not set
@@ -4240,6 +4252,7 @@ CONFIG_PACKAGE_fdisk=y
 # CONFIG_PACKAGE_findfs is not set
 # CONFIG_PACKAGE_lsblk is not set
 # CONFIG_PACKAGE_lvm2 is not set
+# CONFIG_PACKAGE_lvm2-selinux is not set
 # CONFIG_PACKAGE_mdadm is not set
 CONFIG_PACKAGE_partx-utils=y
 # CONFIG_PACKAGE_sfdisk is not set
@@ -4258,6 +4271,7 @@ CONFIG_PACKAGE_partx-utils=y
 #
 # Filesystem
 #
+# CONFIG_PACKAGE_attr is not set
 CONFIG_PACKAGE_badblocks=y
 # CONFIG_PACKAGE_chattr is not set
 # CONFIG_PACKAGE_debugfs is not set
