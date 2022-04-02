@@ -45,7 +45,7 @@
 	echo "var extroot_enabled=\""$(mount | grep "/dev/[sm][dm].*on /overlay" | wc -l)"\";"
 	echo "var extroot_drive=\""$(mount | awk '/\/dev\/[sm][dm].*on \/overlay/ {print $1}')"\";"
 
-	echo "var fullVariant=\""$(opkg list-installed 2>&1 | grep plugin-gargoyle-usb-storage-full)"\";"
+	echo "var fullVariant=\""$(gpkg list-installed plugin-gargoyle-usb-storage-fulls 2>&1)"\";"
 
 	whichksmbd="$(which ksmbd.mountd)"
 	[ -n "$whichksmbd" ] && echo "var sambapkg=\"ksmbd\";" || echo "var sambapkg=\"samba\";"
