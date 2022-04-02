@@ -488,7 +488,8 @@ function resetData()
 	document.getElementById("no_disks").style.display =  storageDrives.length == 0 ?   "block" : "none";
 	document.getElementById("shared_disks").style.display = storageDrives.length > 0 ? "block" : "none";
 	document.getElementById("disk_unmount").style.display = storageDrives.length > 0 ? "block" : "none";
-	document.getElementById("disk_format").style.display  = storageDrives.length > 0 || drivesWithNoMounts.length > 0 ? "block" : "none"
+	document.getElementById("disk_format").style.display  = storageDrives.length > 0 || drivesWithNoMounts.length > 0 ? "block" : "none";
+	document.getElementById("disk_mount").style.display  = drivesWithNoMounts.length > 0 ? "block" : "none";
 	document.getElementById("save_button").disabled = fullVariant == "" ? true : false;
 	document.getElementById("usb_no_share").style.display = fullVariant == "" ? "block" : "none";
 
@@ -1239,6 +1240,27 @@ function unmountAllUsb()
 
 
 	var commands = "/etc/init.d/samba stop ; /etc/init.d/vsftpd stop ; /etc/init.d/nfsd stop ; /etc/init.d/usb_storage stop ; "
+
+	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+	var stateChangeFunction = function(req)
+	{
+		if(req.readyState == 4)
+		{
+			//reload page
+			window.location=window.location
+			setControlsEnabled(true);
+		}
+	}
+
+	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
+}
+
+function mountAllUsb()
+{
+	setControlsEnabled(false, true, usbSStr.MDisk);
+
+
+	var commands = "/etc/init.d/usb_storage restart; /etc/init.d/samba restart; /etc/init.d/vsftpd restart; /etc/init.d/nfsd restart;";
 
 	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 	var stateChangeFunction = function(req)

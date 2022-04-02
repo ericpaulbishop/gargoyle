@@ -159,6 +159,26 @@
 			</div>
 		</div>
 	</div>
+
+	<div id="disk_mount" class="col-lg-6">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ Mnt %></h3>
+			</div>
+
+			<div class="panel-body">
+				<div class="row form-group">
+					<span class="col-xs-12">
+						<div class="alert alert-warning"><em><%~ MntWarn %></em></div>
+					</span>
+					<span class="col-xs-12">
+						<button id="mount_usb_button" class="btn btn-warning btn-lg" onclick="mountAllUsb()"><%~ MntB %></button>
+					</span>
+				</div>
+			</div>
+		</div>
+	</div>
+
 </div>
 
 <div class="row">
