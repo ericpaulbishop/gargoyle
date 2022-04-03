@@ -186,11 +186,10 @@ function saveChanges()
 				uci.removeSection("network", "brwan_dev");
 				if(getSelectedValue("wan_protocol").match(/wireless/))
 				{
-					uci.set('network', 'wan', 'device','brwan_dev');
+					uci.set('network', 'wan', 'device','br-wan');
 					preCommands = preCommands + "\nuci set network.brwan_dev=device\n";
 					uci.set('network', 'brwan_dev', 'name', 'br-wan');
 					uci.set('network', 'brwan_dev', 'type', 'bridge');
-					uci.set('network', 'brwan_dev', 'ports', defaultWanIf.split(" "));
 				}
 				else if( singleEthernetIsWan() )
 				{
@@ -1996,12 +1995,12 @@ function resetData()
 	//set wan proto && wan/wifi/bridge variables
 	var wp = uciOriginal.get("network", "wan", "proto");
 	var wanUciIf= uciOriginal.get('network', 'wan', 'device');
-	var wanType = uciOriginal.get('network', 'wan', 'type');
+	var wanType = wanUciIf == 'br-wan' ? 'bridge' : '';
 	var lanUciIf= uciOriginal.get('network', 'brlan_dev', 'ports');
-	var wanIsWifi = (wanUciIf == '' && wanType == 'bridge' ) && ( getWirelessMode(uciOriginal) == "sta" || getWirelessMode(uciOriginal) == "ap+sta");
+	var wanIsWifi = (wanUciIf == 'br-wan' && wanType == 'bridge' ) && ( getWirelessMode(uciOriginal) == "sta" || getWirelessMode(uciOriginal) == "ap+sta");
 	wp = wp == "" ? "none" : wp;
 	if(wp != "none" && wp != "3g" && wp != "qmi" && wp != "ncm" && wp != "mbim" ) { wp = wanIsWifi ? wp + "_wireless" : wp + "_wired"; }
-	if(wp == "dhcp_wired" && wanUciIf != defaultWanIf) { wp = "dhcp_cdc"; }
+	if(wp == "dhcp_wired" && wanUciIf != defaultWanIf && wanUciIf != 'br-wan') { wp = "dhcp_cdc"; }
 	setSelectedValue("wan_protocol", wp);
 
 	var wp6 = uciOriginal.get("network", "wan6", "proto");
