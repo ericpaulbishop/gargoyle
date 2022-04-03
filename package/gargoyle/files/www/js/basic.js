@@ -2592,7 +2592,9 @@ function resetData()
 
 	// should they be enabled?
 	var originalGmode = uciOriginal.get("wireless","ap_g");
+	originalGmode = uciOriginal.get("wireless","stacfg","device") == wifiDevG ? "sta" : originalGmode;
 	var originalAmode = uciOriginal.get("wireless","ap_a");
+	originalAmode = uciOriginal.get("wireless","stacfg","device") == wifiDevA ? "sta" : originalAmode;
 	if(originalGmode == "")
 	{
 		//hwGmode=originalGmode;
