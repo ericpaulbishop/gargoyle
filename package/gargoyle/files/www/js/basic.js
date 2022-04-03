@@ -187,7 +187,7 @@ function saveChanges()
 				if(getSelectedValue("wan_protocol").match(/wireless/))
 				{
 					uci.set('network', 'wan', 'device','br-wan');
-					preCommands = preCommands + "\nuci set network.brwan_dev=device\n";
+					uci.set('network', 'brwan_dev', '', 'device');
 					uci.set('network', 'brwan_dev', 'name', 'br-wan');
 					uci.set('network', 'brwan_dev', 'type', 'bridge');
 				}
@@ -770,6 +770,9 @@ function saveChanges()
 				}
 				uci.set("network", "wan", "ipv6", ip6en);
 				uci.set("network", "wan6", "proto", w6prot);
+				var wandev = uci.get('network','wan','device');
+				wandev = wandev == "" ? defaultWanIf : wandev;
+				uci.set('network', 'wan6', 'device',wandev);
 			}
 			if(uci.get('network', 'lan', 'proto') === '')
 			{
