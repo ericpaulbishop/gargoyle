@@ -47,3 +47,6 @@ ip neigh | grep -v "FAILED" | awk '{print "arpLines.push(\""$0"\");"}'
 
 current_time=$(date +%s)
 echo "currentTime=$current_time;"
+
+echo "usteerRemotes = '"$(ubus -S call usteer remote_info)"';"
+echo "usteerClients = '"$(ubus -S call usteer get_clients)"';"

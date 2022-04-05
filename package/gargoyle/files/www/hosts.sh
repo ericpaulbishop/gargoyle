@@ -87,6 +87,8 @@ var wlanLines;
 				<div id="wifi_data" class="form-group form-inline">
 					<div id="wifi_table_container" class="table-responsive"></div>
 				</div>
+
+				<div id="wifi_remote_data" class="form-group form-inline"></div>
 			</div>
 		</div>
 	</div>
