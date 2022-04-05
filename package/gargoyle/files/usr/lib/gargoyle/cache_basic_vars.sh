@@ -11,6 +11,8 @@ print_mac80211_channels_for_wifi_dev()
 	echo "nextChFreq = [];" >> "$out"
 	echo "nextChPwr  = [];" >> "$out"
 	mode=$(uci get wireless.$wifi_dev.band)
+	phyname=$(iwinfo nl80211 phyname $wifi_dev)
+	[ "$phyname" = "Phy not found" ] && phyname="phy$dev_num"
 
 	wifiN=$(iwinfo $wifi_dev h | sed 's/\bVHT[0-9]\{2,3\}\(+[0-9]\{2\}\)\?//g' | sed 's/^[ ]*//')
 	wifiAC=$(iwinfo $wifi_dev h | sed 's/\bHT[0-9]\{2,3\}//g' | sed 's/^[ ]*//')
@@ -64,7 +66,7 @@ print_mac80211_channels_for_wifi_dev()
 	# however, as far as I can tell there is no other way to get max txpower for each channel
 	# so... here it goes.
 	# If stuff gets FUBAR, take a look at iw output, and see if this god-awful expression still works
-	iw "phy${dev_num}" info 2>&1 | sed -e '/MHz/!d; /GI/d; /disabled/d; /radar detect /d; /Supported Channel Width/d; s/[:blank:]*\*[:blank:]*//g; s:[]()[]::g; s/\..*$//g' | awk ' { print "nextCh.push("$3"); nextChFreq["$3"] = \""$1"MHz\"; nextChPwr["$3"] = "$4";"   ; } ' >> "$out"
+	iw "$phyname" info 2>&1 | sed -e '/MHz/!d; /GI/d; /disabled/d; /radar detect /d; /Supported Channel Width/d; s/[:blank:]*\*[:blank:]*//g; s:[]()[]::g; s/\..*$//g' | awk ' { print "nextCh.push("$3"); nextChFreq["$3"] = \""$1"MHz\"; nextChPwr["$3"] = "$4";"   ; } ' >> "$out"
 
 	echo "mac80211Channels[\"$chId\"] = nextCh ;"     >> "$out"
 	echo "mac80211ChFreqs[\"$chId\"]  = nextChFreq ;" >> "$out"

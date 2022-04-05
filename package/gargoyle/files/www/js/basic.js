@@ -3457,7 +3457,7 @@ function setHwMode(selectCtl)
 				if(secmode == "sta")
 				{
 					HWMODE = uciOriginal.get("wireless", secdev, "band");
-					if(HWMODE == "11g")
+					if(HWMODE == "2g")
 					{
 						hwGmode = uciOriginal.get("wireless", secdev, "htmode").match(/HT/) ? "11gn" : "11g";
 						for(x = 0; x<document.getElementById("wifi_hwmode").length;x++)
@@ -3529,10 +3529,6 @@ function setHwMode(selectCtl)
 		hwGmode = "disabled";
 		hwAmode = bridgehwmode;
 	}
-
-
-
-
 
 	document.getElementById("wifi_txpower_container").style.marginBottom    = "20px";
 	document.getElementById("wifi_txpower_5ghz_container").style.marginBottom    = "20px";
