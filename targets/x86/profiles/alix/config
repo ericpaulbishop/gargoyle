@@ -4189,6 +4189,7 @@ CONFIG_RPCBIND_RMTCALLS=y
 # CONFIG_PACKAGE_tcpdump-mini is not set
 CONFIG_PACKAGE_uclient-fetch=y
 # CONFIG_PACKAGE_umdns is not set
+CONFIG_PACKAGE_usteer=y
 # CONFIG_PACKAGE_vti is not set
 # CONFIG_PACKAGE_vxlan is not set
 # CONFIG_PACKAGE_wpan-tools is not set
