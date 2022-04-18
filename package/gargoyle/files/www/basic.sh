@@ -73,13 +73,6 @@
 	else
 		echo "cdcif = \"$cdcif\";"
 	fi
-
-	echo "var countryLines = new Array();"
-	if [ -e ./data/countrylist.txt ] ; then
-		awk '{gsub(/"/, "\\\""); print "countryLines.push(\""$0"\");"}' ./data/countrylist.txt	
-	fi
-	echo "var countryData = parseCountry(countryLines);"
-
 %>
 var timezoneOffset = (parseInt(timezoneOffStr.substr(0,3),10)*60+parseInt(timezoneOffStr.substr(3,2),10))*60;
 
@@ -396,16 +389,6 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 						<button class="btn btn-default btn-add" id="add_bridge_wds_mac_button" onclick="addMacToWds('bridge')"><%~ Add %></button>
 						<div id="bridge_wds_mac_table_container" class="second_row_right_column form-group"></div>
 					</span>
-				</div>
-
-				<div id="bridge_wireless_country_container" class="row form-group">
-					<span class="alert alert-warning col-xs-12" role="alert"><%~ WifiCountryWarning %></span>
-					<label class="col-xs-5" for="bridge_wireless_country"><%~ WifiCountry %>:</label>
-					<div class="col-xs-7">
-						<select class="form-control" id="bridge_wireless_country" onchange="syncWifiCountrySelection(this)">
-							<option value="00">World (Default)</option>
-						</select>
-					</div>
 				</div>
 			</div>
 		</div>
@@ -869,16 +852,6 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 						</div>
 						<div id="mac_table_container" class="form-group second_row_right_column"></div>
 
-					</div>
-				</div>
-
-				<div id="wireless_country_container" class="row form-group">
-					<span class="alert alert-warning col-xs-12" role="alert"><%~ WifiCountryWarning %></span>
-					<label class="col-xs-5" for="wireless_country"><%~ WifiCountry %>:</label>
-					<div class="col-xs-7">
-						<select class="form-control" id="wireless_country" onchange="syncWifiCountrySelection(this)">
-							<option value="00">World (Default)</option>
-						</select>
 					</div>
 				</div>
 

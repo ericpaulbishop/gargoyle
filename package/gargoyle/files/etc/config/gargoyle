@@ -27,6 +27,7 @@ config display display
 	option connection		'Connection'
 	option connection_dhcp		'DHCP'
 	option connection_basic		'Basic'
+	option connection_advanced	'Advanced'
 	option connection_routing	'Routing'
 	option system			'System'
 	option system_access		'Router Access'
@@ -52,6 +53,7 @@ config scripts scripts
 	option status_hosts		'hosts.sh'
 	option status_connections	'conntrack.sh'
 	option connection_basic		'basic.sh'
+	option connection_advanced	'advanced.sh'
 	option connection_dhcp		'dhcp.sh'
 	option connection_routing	'routing.sh'
 	option system_access		'access.sh'
@@ -80,6 +82,7 @@ config 100 status
 
 config 200 connection
 	option basic	'100'
+	option advanced '110'
 	option dhcp	'200'
 	option routing	'400'
 
