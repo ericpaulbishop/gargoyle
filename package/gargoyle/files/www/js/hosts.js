@@ -231,6 +231,10 @@ function parseusteerClient(client,usteerClientsJSON,arpHash)
 
 function signalToSpan(sig)
 {
+	// Some drivers pass through quality rather than signal level. Convert this back. Also make sure it fits within the standard max/min range
+	sig = sig > 0 ? sig - 110 : sig;
+	sig = sig > -40 ? -40 : sig;
+	sig = sig < -110 ? -110 : sig;
 	var toHexTwo = function(num) { var ret = parseInt(num).toString(16).toUpperCase(); ret= ret.length < 2 ? "0" + ret : ret.substr(0,2); return ret; }
 	var color = sig < -80  ? "#AA0000" : "";
 	color = sig >= -80 && sig < -70 ? "#AA" + toHexTwo(170*((sig+80)/10.0)) + "00" : color;
@@ -408,8 +412,6 @@ function parseWifi(arpHash, wirelessDriver, lines, apsta)
 		var mbs = wirelessDriver == "broadcom" ? macBitSig[0] : macBitSig[1];
 		mbs[0] = (mbs[0]).toUpperCase();
 		mbs[1] = mbs[1] + " Mbps";
-
-		var toHexTwo = function(num) { var ret = parseInt(num).toString(16).toUpperCase(); ret= ret.length < 2 ? "0" + ret : ret.substr(0,2); return ret; }
 
 		var sig = parseInt(mbs[2]);
 		var sigSpan = signalToSpan(sig);

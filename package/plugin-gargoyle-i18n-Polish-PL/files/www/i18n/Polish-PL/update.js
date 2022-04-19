@@ -14,6 +14,7 @@ upS.EHash="Wprowadź hash";
 upS.ValidFw="Prawidłowy plik firmware";
 upS.DevMatch="Firmware pasuje do urządzenia";
 upS.SuppDevs="Wspierane urządzenia";
+upS.CompatMatch="Kompatybilność z firmware/urządzeniem";
 upS.FwFitFlash="Firmware mieści się w pamięci flash";
 upS.ChksumMatch="Dopasowanie sumy kontrolnej";
 upS.NoPrsv="Zachowanie ustawień w tym firmware nie jest dozwolone";

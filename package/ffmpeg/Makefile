@@ -9,16 +9,16 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=ffmpeg
-PKG_VERSION:=3.4.6
-PKG_RELEASE:=2
+PKG_VERSION:=3.4.9
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
 PKG_SOURCE_URL:=https://ffmpeg.org/releases/
-PKG_HASH:=3572279cb139d9e39dcfbc23edf438ff5311ec3fc5d0dcb3558e49591e5cb83e
+PKG_HASH:=496fb4a9c396406e24841f3f3f108a7ae6397d6d1106ac1f953317c4529b1635
 PKG_MAINTAINER:=Ted Hess <thess@kitschensync.net>, \
 		Ian Leonard <antonlacon@gmail.com>
 
-PKG_LICENSE:=LGPL-2.1+ GPL-2+ LGPL-3
+PKG_LICENSE:=LGPL-2.1-or-later GPL-2.0-or-later LGPL-3.0-or-later
 PKG_LICENSE_FILES:=COPYING.GPLv2 COPYING.GPLv3 COPYING.LGPLv2.1 COPYING.LGPLv3
 PKG_CPE_ID:=cpe:/a:ffmpeg:ffmpeg
 
@@ -216,8 +216,6 @@ FFMPEG_PATENTED_PARSERS:= \
 	h264 \
 	hevc \
 	vc1 \
-
-PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(BUILD_VARIANT)/$(PKG_NAME)-$(PKG_VERSION)
 
 PKG_CONFIG_DEPENDS:= \
 	$(patsubst %,CONFIG_FFMPEG_CUSTOM_ENCODER_%,$(FFMPEG_CUSTOM_ENCODERS)) \
@@ -446,7 +444,7 @@ FFMPEG_CONFIGURE+= \
 	--disable-fast-unaligned \
 	--disable-runtime-cpudetect
 
-else ifneq ($(findstring arm,$(CONFIG_ARCH)),)
+else ifneq ($(findstring arm,$(CONFIG_ARCH))$(findstring aarch64,$(CONFIG_ARCH)),)
 FFMPEG_CONFIGURE+= \
 	--disable-runtime-cpudetect
 # XXX: GitHub issue 3320 ppc cpu with fpu but no altivec (WNDR4700)
@@ -466,12 +464,12 @@ endif
 ifneq ($(findstring arm,$(CONFIG_ARCH)),)
 	FFMPEG_CONFIGURE+= --enable-lto
 
-	ifneq ($(findstring vfp,$(CONFIG_TARGET_OPTIMIZATION)),)
+	ifneq ($(findstring vfp,$(CONFIG_CPU_TYPE)),)
 		FFMPEG_CONFIGURE+= --enable-vfp
 	else
 		FFMPEG_CONFIGURE+= --disable-vfp
 	endif
-	ifneq ($(findstring neon,$(CONFIG_TARGET_OPTIMIZATION)),)
+	ifneq ($(findstring neon,$(CONFIG_CPU_TYPE)),)
 		FFMPEG_CONFIGURE+= \
 			--enable-neon \
 			--enable-vfp
@@ -480,16 +478,21 @@ ifneq ($(findstring arm,$(CONFIG_ARCH)),)
 	endif
 endif
 
+ifneq ($(findstring aarch64,$(CONFIG_ARCH)),)
+	FFMPEG_CONFIGURE+= \
+		--enable-lto \
+		--enable-neon \
+		--enable-vfp
+endif
+
 ifeq ($(ARCH),x86_64)
 	FFMPEG_CONFIGURE+= --enable-lto
 endif
 
-ifneq ($(CONFIG_TARGET_x86),)
-ifeq ($(CONFIG_NASM),y)
+ifeq ($(CONFIG_FFMPEG_X86ASM),y)
   FFMPEG_CONFIGURE += --enable-x86asm
 else
   FFMPEG_CONFIGURE += --disable-x86asm
-endif
 endif
 
 ifeq ($(BUILD_VARIANT),full)
