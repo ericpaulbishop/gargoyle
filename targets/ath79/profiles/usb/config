@@ -221,6 +221,8 @@ CONFIG_TARGET_MULTI_PROFILE=y
 # CONFIG_TARGET_ath79_generic_DEVICE_xiaomi_mi-router-4q is not set
 # CONFIG_TARGET_ath79_generic_DEVICE_yuncore_a770 is not set
 # CONFIG_TARGET_ath79_generic_DEVICE_yuncore_a782 is not set
+# CONFIG_TARGET_ath79_generic_DEVICE_yuncore_a930 is not set
+# CONFIG_TARGET_ath79_generic_DEVICE_yuncore_xd3200 is not set
 # CONFIG_TARGET_ath79_generic_DEVICE_yuncore_xd4200 is not set
 # CONFIG_TARGET_ath79_generic_DEVICE_zbtlink_zbt-wd323 is not set
 # CONFIG_TARGET_ath79_generic_DEVICE_zyxel_nbg6616 is not set
@@ -272,9 +274,6 @@ CONFIG_TARGET_MULTI_PROFILE=y
 # CONFIG_TARGET_ath79_generic_DEVICE_tplink_tl-wdr4900-v2 is not set
 # CONFIG_TARGET_ath79_generic_DEVICE_tplink_tl-wdr7500-v3 is not set
 # CONFIG_TARGET_ath79_generic_DEVICE_tplink_tl-wpa8630-v1 is not set
-# CONFIG_TARGET_ath79_generic_DEVICE_tplink_tl-wpa8630p-v2-int is not set
-# CONFIG_TARGET_ath79_generic_DEVICE_tplink_tl-wpa8630p-v2.0-eu is not set
-# CONFIG_TARGET_ath79_generic_DEVICE_tplink_tl-wpa8630p-v2.1-eu is not set
 # CONFIG_TARGET_ath79_generic_DEVICE_tplink_tl-wr1043nd-v1 is not set
 # CONFIG_TARGET_ath79_generic_DEVICE_tplink_tl-wr1043nd-v2 is not set
 # CONFIG_TARGET_ath79_generic_DEVICE_tplink_tl-wr1043nd-v3 is not set
@@ -549,9 +548,6 @@ CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wdr4300-v1=y
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wdr4900-v2 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wdr7500-v3 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wpa8630-v1 is not set
-# CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wpa8630p-v2-int is not set
-# CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wpa8630p-v2.0-eu is not set
-# CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wpa8630p-v2.1-eu is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr1043n-v5 is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr1043nd-v1=y
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr1043nd-v2=y
@@ -615,6 +611,8 @@ CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_unifi=y
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_xiaomi_mi-router-4q is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_yuncore_a770 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_yuncore_a782 is not set
+# CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_yuncore_a930 is not set
+# CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_yuncore_xd3200 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_yuncore_xd4200 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_zbtlink_zbt-wd323 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_zyxel_nbg6616 is not set
@@ -947,7 +945,6 @@ CONFIG_PER_FEED_REPO=y
 CONFIG_PACKAGE_base-files=y
 CONFIG_PACKAGE_block-mount=y
 # CONFIG_PACKAGE_blockd is not set
-# CONFIG_PACKAGE_bridge is not set
 CONFIG_PACKAGE_busybox=y
 CONFIG_BUSYBOX_CUSTOM=y
 CONFIG_BUSYBOX_DEFAULT_HAVE_DOT_CONFIG=y
@@ -3130,12 +3127,9 @@ CONFIG_PACKAGE_libiwinfo-data=y
 # CONFIG_PACKAGE_cypress-firmware-4356-pcie is not set
 # CONFIG_PACKAGE_cypress-firmware-4356-sdio is not set
 # CONFIG_PACKAGE_cypress-firmware-43570-pcie is not set
-# CONFIG_PACKAGE_cypress-firmware-4359-pcie is not set
-# CONFIG_PACKAGE_cypress-firmware-4359-sdio is not set
 # CONFIG_PACKAGE_cypress-firmware-4373-sdio is not set
 # CONFIG_PACKAGE_cypress-firmware-4373-usb is not set
 # CONFIG_PACKAGE_cypress-firmware-54591-pcie is not set
-# CONFIG_PACKAGE_cypress-firmware-89459-pcie is not set
 # CONFIG_PACKAGE_e100-firmware is not set
 # CONFIG_PACKAGE_edgeport-firmware is not set
 # CONFIG_PACKAGE_eip197-mini-firmware is not set
@@ -3305,6 +3299,7 @@ CONFIG_PACKAGE_kmod-crypto-sha512=m
 # CONFIG_PACKAGE_kmod-fs-cifs is not set
 # CONFIG_PACKAGE_kmod-fs-configfs is not set
 # CONFIG_PACKAGE_kmod-fs-cramfs is not set
+# CONFIG_PACKAGE_kmod-fs-exfat is not set
 CONFIG_PACKAGE_kmod-fs-exportfs=m
 CONFIG_PACKAGE_kmod-fs-ext4=y
 # CONFIG_PACKAGE_kmod-fs-f2fs is not set
@@ -4085,6 +4080,24 @@ CONFIG_PACKAGE_libbz2=m
 # end of Compression
 
 #
+# Database
+#
+CONFIG_PACKAGE_libsqlite3=m
+
+#
+# Configuration
+#
+CONFIG_SQLITE3_DYNAMIC_EXTENSIONS=y
+CONFIG_SQLITE3_FTS3=y
+CONFIG_SQLITE3_FTS4=y
+CONFIG_SQLITE3_FTS5=y
+CONFIG_SQLITE3_JSON1=y
+CONFIG_SQLITE3_RTREE=y
+# CONFIG_SQLITE3_SESSION is not set
+# end of Configuration
+# end of Database
+
+#
 # Filesystem
 #
 # CONFIG_PACKAGE_libattr is not set
@@ -4174,24 +4187,6 @@ CONFIG_WOLFSSL_HAS_NO_HW=y
 # CONFIG_WOLFSSL_HAS_DEVCRYPTO_AES is not set
 # CONFIG_WOLFSSL_HAS_DEVCRYPTO_FULL is not set
 # end of SSL
-
-#
-# database
-#
-CONFIG_PACKAGE_libsqlite3=m
-
-#
-# Configuration
-#
-CONFIG_SQLITE3_DYNAMIC_EXTENSIONS=y
-CONFIG_SQLITE3_FTS3=y
-CONFIG_SQLITE3_FTS4=y
-CONFIG_SQLITE3_FTS5=y
-CONFIG_SQLITE3_JSON1=y
-CONFIG_SQLITE3_RTREE=y
-# CONFIG_SQLITE3_SESSION is not set
-# end of Configuration
-# end of database
 
 # CONFIG_PACKAGE_alsa-lib is not set
 # CONFIG_PACKAGE_argp-standalone is not set
@@ -4290,7 +4285,7 @@ CONFIG_PACKAGE_libid3tag=m
 # CONFIG_PACKAGE_libintl-full is not set
 # CONFIG_PACKAGE_libiw is not set
 CONFIG_PACKAGE_libiwinfo=y
-CONFIG_PACKAGE_libjpeg=m
+CONFIG_PACKAGE_libjpeg-turbo=m
 CONFIG_PACKAGE_libjson-c=y
 CONFIG_PACKAGE_libkeyutils=m
 # CONFIG_PACKAGE_libltdl is not set
@@ -4374,7 +4369,6 @@ CONFIG_PACKAGE_msmtp-nossl=m
 #
 # CONFIG_PACKAGE_ffmpeg is not set
 # CONFIG_PACKAGE_ffprobe is not set
-# CONFIG_PACKAGE_ffserver is not set
 CONFIG_PACKAGE_gargoyle-mjpg-streamer=m
 # CONFIG_MJPG_STREAMER_V4L2 is not set
 # CONFIG_MJPG_STREAMER_INPUT_FILE is not set
@@ -4749,6 +4743,8 @@ CONFIG_PACKAGE_wwan=y
 #
 # Sound
 #
+# CONFIG_PACKAGE_aserver is not set
+# CONFIG_PACKAGE_fdk-aac is not set
 # CONFIG_PACKAGE_lame is not set
 # CONFIG_PACKAGE_lame-lib is not set
 # CONFIG_PACKAGE_shine is not set
@@ -4773,6 +4769,12 @@ CONFIG_PACKAGE_zip=m
 # end of Compression
 
 #
+# Database
+#
+# CONFIG_PACKAGE_sqlite3-cli is not set
+# end of Database
+
+#
 # Disc
 #
 # CONFIG_PACKAGE_blkdiscard is not set
@@ -4795,6 +4797,7 @@ CONFIG_PACKAGE_fdisk=y
 # Encryption
 #
 # CONFIG_PACKAGE_keyctl is not set
+# CONFIG_PACKAGE_keyutils is not set
 # CONFIG_PACKAGE_px5g-mbedtls is not set
 # CONFIG_PACKAGE_px5g-standalone is not set
 # CONFIG_PACKAGE_px5g-wolfssl is not set
@@ -4813,7 +4816,8 @@ CONFIG_PACKAGE_disktype=y
 # CONFIG_PACKAGE_e2freefrag is not set
 CONFIG_PACKAGE_e2fsprogs=y
 # CONFIG_PACKAGE_e4crypt is not set
-# CONFIG_PACKAGE_exfat is not set
+# CONFIG_PACKAGE_exfat-fsck is not set
+# CONFIG_PACKAGE_exfat-mkfs is not set
 # CONFIG_PACKAGE_f2fs-tools is not set
 # CONFIG_PACKAGE_f2fs-tools-selinux is not set
 # CONFIG_PACKAGE_f2fsck is not set
@@ -4839,7 +4843,7 @@ CONFIG_PACKAGE_swap-utils=y
 #
 # Image Manipulation
 #
-# CONFIG_PACKAGE_jpeg-tools is not set
+# CONFIG_PACKAGE_libjpeg-turbo-utils is not set
 # end of Image Manipulation
 
 #
@@ -4856,12 +4860,6 @@ CONFIG_PACKAGE_swap-utils=y
 # CONFIG_PACKAGE_setterm is not set
 # CONFIG_PACKAGE_wall is not set
 # end of Terminal
-
-#
-# database
-#
-# CONFIG_PACKAGE_sqlite3-cli is not set
-# end of database
 
 #
 # libselinux tools

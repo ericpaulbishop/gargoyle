@@ -13,4 +13,3 @@ Bug-Debian: http://bugs.debian.org/779042
  #  define COMPILE_DATE " on " __DATE__
  #else
  #  define COMPILE_DATE ""
-

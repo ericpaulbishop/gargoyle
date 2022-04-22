@@ -8,24 +8,21 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=alsa-lib
-PKG_VERSION:=1.1.8
+PKG_VERSION:=1.2.4
 PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
 PKG_SOURCE_URL:=ftp://ftp.alsa-project.org/pub/lib/ \
 		http://distfiles.gentoo.org/distfiles/
+PKG_HASH:=f7554be1a56cdff468b58fc1c29b95b64864c590038dd309c7a978c7116908f7
 
-PKG_HASH:=3cdc3a93a6427a26d8efab4ada2152e64dd89140d981f6ffa003e85be707aedf
 PKG_MAINTAINER:=Ted Hess <thess@kitschensync.net>, \
 		Peter Wagner <tripolar@gmx.at>
 
-PKG_LICENSE:=LGPLv2.1 GPLv2
-PKG_LICENSE_FILES:=COPYING aserver/COPYING
-
 PKG_FIXUP:=autoreconf
 PKG_INSTALL:=1
+PKG_BUILD_PARALLEL:=1
 PKG_USE_MIPS16:=0
-PKG_CHECK_FORMAT_SECURITY:=0
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -35,11 +32,27 @@ define Package/alsa-lib
   TITLE:=ALSA (Advanced Linux Sound Architecture) library
   URL:=http://www.alsa-project.org/
   DEPENDS:=@AUDIO_SUPPORT +kmod-sound-core +libpthread +librt
+  LICENSE:=LGPL-2.1-or-later
+  LICENSE_FILES:=COPYING
 endef
 
 define Package/alsa-lib/description
  This is the library package for alsa, needed by some userspace programs.
  You must have enabled the ALSA support in the kernel.
+endef
+
+define Package/aserver
+  SECTION:=sound
+  CATEGORY:=Sound
+  TITLE:=ALSA (Advanced Linux Sound Architecture) server
+  URL:=http://www.alsa-project.org/
+  DEPENDS:=+alsa-lib
+  LICENSE:=GPL-2.0-or-later
+  LICENSE_FILES:=aserver/COPYING
+endef
+
+define Package/aserver/description
+ This is the aserver application for ALSA.
 endef
 
 define Package/alsa-lib/conffiles
@@ -52,8 +65,8 @@ CONFIGURE_ARGS+= \
 		--disable-python \
 		--disable-debug \
 		--without-debug \
-		$(SOFT_FLOAT_CONFIG_OPTION) \
-		--with-versioned=no
+		--without-versioned \
+		$(SOFT_FLOAT_CONFIG_OPTION)
 
 define Build/InstallDev
 	$(INSTALL_DIR) $(1)/usr/include/
@@ -64,6 +77,9 @@ define Build/InstallDev
 	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
 	$(CP) \
 		$(PKG_INSTALL_DIR)/usr/lib/libasound.{la,so*} \
+		$(1)/usr/lib/
+	$(CP) \
+		$(PKG_INSTALL_DIR)/usr/lib/libatopology.{la,so*} \
 		$(1)/usr/lib/
 	$(INSTALL_DATA) \
 		$(PKG_INSTALL_DIR)/usr/lib/pkgconfig/alsa.pc \
@@ -80,6 +96,9 @@ define Package/alsa-lib/install
 	$(CP) \
 		$(PKG_INSTALL_DIR)/usr/lib/libasound.so.* \
 		$(1)/usr/lib/
+	$(CP) \
+		$(PKG_INSTALL_DIR)/usr/lib/libatopology.so.* \
+		$(1)/usr/lib/
 
 	$(INSTALL_DIR) $(1)/usr/share/alsa/{cards,pcm}
 	$(INSTALL_DATA) \
@@ -93,4 +112,10 @@ define Package/alsa-lib/install
 		$(1)/usr/share/alsa/cards/
 endef
 
+define Package/aserver/install
+	$(INSTALL_DIR) $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/aserver $(1)/usr/bin
+endef
+
 $(eval $(call BuildPackage,alsa-lib))
+$(eval $(call BuildPackage,aserver))

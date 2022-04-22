@@ -8,15 +8,17 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=sqlite
-PKG_VERSION:=3270200
-PKG_RELEASE:=2
+PKG_VERSION:=3330000
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-autoconf-$(PKG_VERSION).tar.gz
-PKG_HASH:=50c39e85ea28b5ecfdb3f9e860afe9ba606381e21836b2849efca6a0bfe6ef6e
-PKG_SOURCE_URL:=https://www.sqlite.org/2019/
+PKG_HASH:=106a2c48c7f75a298a7557bcc0d5f4f454e5b43811cc738b7ca294d6956bbb15
+PKG_SOURCE_URL:=https://www.sqlite.org/2020/
 
 PKG_LICENSE:=PUBLICDOMAIN
 PKG_LICENSE_FILES:=
+
+PKG_MAINTAINER:=
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-autoconf-$(PKG_VERSION)
 
@@ -42,10 +44,9 @@ PKG_CONFIG_DEPENDS := \
 include $(INCLUDE_DIR)/package.mk
 
 define Package/sqlite3/Default
-  SUBMENU:=database
+  SUBMENU:=Database
   TITLE:=SQLite (v3.x) database engine
   URL:=http://www.sqlite.org/
-  MAINTAINER:=Sebastian Kemper <sebastian_ml@gmx.net>
 endef
 
 define Package/sqlite3/Default/description
@@ -59,6 +60,7 @@ define Package/libsqlite3
   CATEGORY:=Libraries
   DEPENDS:=+libpthread +zlib
   TITLE+= (library)
+  ABI_VERSION:=0
 endef
 
 define Package/libsqlite3/description
@@ -124,19 +126,19 @@ endif
 define Build/InstallDev
 	$(INSTALL_DIR) $(1)/usr/include
 	$(INSTALL_DIR) $(1)/usr/lib/pkgconfig
-	$(CP) $(PKG_INSTALL_DIR)/usr/include/sqlite3{,ext}.h $(1)/usr/include/
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libsqlite3.{a,so*} $(1)/usr/lib/
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/pkgconfig/sqlite3.pc $(1)/usr/lib/pkgconfig/
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libsqlite3.{a,so*} $(1)/usr/lib
+	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/usr/include/sqlite3{,ext}.h $(1)/usr/include
+	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/usr/lib/pkgconfig/sqlite3.pc $(1)/usr/lib/pkgconfig
 endef
 
 define Package/libsqlite3/install
 	$(INSTALL_DIR) $(1)/usr/lib
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libsqlite3.so.* $(1)/usr/lib/
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libsqlite3.so.$(ABI_VERSION)* $(1)/usr/lib
 endef
 
 define Package/sqlite3-cli/install
 	$(INSTALL_DIR) $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/sqlite3 $(1)/usr/bin/
+	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/sqlite3 $(1)/usr/bin
 endef
 
 $(eval $(call BuildPackage,libsqlite3))

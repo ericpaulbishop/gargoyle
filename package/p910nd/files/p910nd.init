@@ -28,8 +28,8 @@ start_service() {
 
 
 start_p910nd() {
-	local section="$1"
-	config_get_bool "enabled" "$section" "enabled" '1'
+	local section="$1" runas_root
+	config_get_bool "enabled" "$section" "enabled" '0'
 	if [ "$enabled" -gt 0 ]; then
 		args="-d "
 		config_get port "$section" port
@@ -42,6 +42,9 @@ start_p910nd() {
 		procd_set_param command /usr/sbin/p910nd $args
 		procd_set_param respawn
 
+		config_get_bool runas_root "$section" runas_root 0
+		[ "$runas_root" -ne 1 ] && procd_set_param user p910nd
+
 		config_get_bool "mdns" "$section" "mdns" '0'
 		config_get mdns_note "$section" mdns_note
 		config_get mdns_ty "$section" mdns_ty
@@ -53,4 +56,11 @@ start_p910nd() {
 
 		procd_close_instance
 	fi
+}
+
+service_triggers()
+{
+	procd_open_trigger
+	procd_add_config_trigger "config.change" "p910nd" /etc/init.d/p910nd reload
+	procd_close_trigger
 }

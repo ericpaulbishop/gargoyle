@@ -1,3 +1,11 @@
+config FFMPEG_X86ASM
+	bool "Compile x86 ASM"
+	depends on (x86_64 || (i386 && !(TARGET_x86_geode || TARGET_x86_legacy)))
+	help
+		This compiles ffmpeg with x86 assembly optimizations. This option is needed as NASM is
+		totally broken with CPU_TYPE=pentium.
+	default y
+
 if PACKAGE_libffmpeg-custom
 
 comment "Build Licensing"
@@ -33,13 +41,6 @@ config FFMPEG_CUSTOM_LARGE
 	default n
 
 comment "Profiles"
-
-config FFMPEG_CUSTOM_FFSERVER_SUPPORT
-	bool "Include support for ffserver (FFmpeg streaming server)"
-	select FFMPEG_CUSTOM_MUXER_ffm
-	select FFMPEG_CUSTOM_DEMUXER_ffm
-	select FFMPEG_CUSTOM_DEMUXER_rtsp
-	select FFMPEG_CUSTOM_PROTOCOL_rtp
 
 config FFMPEG_CUSTOM_MINIDLNA_SUPPORT
 	bool "Include support for minidlna"
@@ -128,7 +129,6 @@ config FFMPEG_CUSTOM_AUDIO_DEC_SUPPORT
 config FFMPEG_CUSTOM_PROGRAMS
 	bool "Include ffmpeg command-line utilities"
 	select PACKAGE_ffmpeg-custom
-	select PACKAGE_ffserver-custom
 	select PACKAGE_ffprobe-custom
 
 comment "External Libraries"
@@ -136,7 +136,6 @@ comment "External Libraries"
 config FFMPEG_CUSTOM_SELECT_libfdk-aac
 	bool "Fraunhofer FDK AAC encoding library (libfdk-aac)"
 	depends on FFMPEG_CUSTOM_NONFREE
-	depends on FFMPEG_CUSTOM_PATENTED
 	depends on PACKAGE_fdk-aac
 
 config FFMPEG_CUSTOM_SELECT_libmp3lame
@@ -304,9 +303,6 @@ comment "Muxers"
 config FFMPEG_CUSTOM_MUXER_ac3
 	bool "AC3"
 
-config FFMPEG_CUSTOM_MUXER_ffm
-	bool "FFM (ffserver live feed)"
-
 config FFMPEG_CUSTOM_MUXER_h264
 	bool "H.264 Raw Video"
 	depends on FFMPEG_CUSTOM_PATENTED
@@ -355,9 +351,6 @@ config FFMPEG_CUSTOM_DEMUXER_ape
 
 config FFMPEG_CUSTOM_DEMUXER_flac
 	bool "FLAC"
-
-config FFMPEG_CUSTOM_DEMUXER_ffm
-	bool "FFM (ffserver live feed)"
 
 config FFMPEG_CUSTOM_DEMUXER_h264
 	bool "H.264 Raw Video"

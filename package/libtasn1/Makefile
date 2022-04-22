@@ -8,21 +8,24 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libtasn1
-PKG_VERSION:=4.13
-PKG_RELEASE:=2
+PKG_VERSION:=4.16.0
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=@GNU/$(PKG_NAME)
-PKG_HASH:=7e528e8c317ddd156230c4e31d082cd13e7ddeb7a54824be82632209550c8cca
+PKG_HASH:=0e0fb0903839117cb6e3b56e68222771bebf22ad7fc2295a0ed7d576e8d4329d
 
 PKG_MAINTAINER:=Nikos Mavrogiannopoulos <n.mavrogiannopoulos@gmail.com>
-PKG_LICENSE:=LGPLv2.1+
+PKG_LICENSE:=LGPL-2.1-or-later
 PKG_LICENSE_FILES:=COPYING.LIB
+PKG_CPE_ID:=cpe:/a:gnu:libtasn1
 
 #PKG_FIXUP:=autoreconf
 PKG_INSTALL:=1
+PKG_BUILD_PARALLEL:=1
 
 include $(INCLUDE_DIR)/package.mk
+include $(INCLUDE_DIR)/host-build.mk
 
 define Package/libtasn1
   SECTION:=libs
@@ -36,6 +39,8 @@ define Package/libtasn1/description
  Distinguish Encoding Rules (DER) manipulation.
 endef
 
+HOST_CFLAGS += -std=gnu99
+TARGET_CFLAGS += -ffunction-sections -fdata-sections
 TARGET_LDFLAGS += -Wl,--gc-sections
 
 CONFIGURE_ARGS += \
@@ -45,7 +50,8 @@ CONFIGURE_ARGS += \
 	--disable-valgrind-tests
 
 define Build/InstallDev
-	$(INSTALL_DIR) $(1)/usr/bin
+	# $(INSTALL_DIR) $(1)/usr/bin
+	# $(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/bin/* $(1)/usr/bin/
 	$(INSTALL_DIR) $(1)/usr/include
 	$(CP) $(PKG_INSTALL_DIR)/usr/include/libtasn1.h $(1)/usr/include/
 	$(INSTALL_DIR) $(1)/usr/lib
@@ -59,4 +65,5 @@ define Package/libtasn1/install
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libtasn1.so.* $(1)/usr/lib/
 endef
 
+$(eval $(call HostBuild))
 $(eval $(call BuildPackage,libtasn1))
