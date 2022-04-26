@@ -1,11 +1,25 @@
 # Process this file with autoconf to produce a configure script.
-AC_INIT([haserl],[0.9.26],[Nathan Angelacos <nangel@users.sourceforge.net>],[haserl])
-AM_INIT_AUTOMAKE([haserl],[$PACKAGE_VERSION])
+AC_INIT([haserl],[0.9.36],[Nathan Angelacos - nangel@users.sourceforge.net],[haserl])
+AM_INIT_AUTOMAKE
 
 # Checks for programs.
 AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_LN_S
+
+# allow different compiler for build tools in case cross compiling
+if test -z "$CC_FOR_BUILD"; then
+	CC_FOR_BUILD="$CC"
+fi
+
+# allow different compiler switches
+if test -z "$CFLAGS_FOR_BUILD"; then
+	CFLAGS_FOR_BUILD="$CFLAGS"
+fi
+
+
+AC_SUBST(CC_FOR_BUILD)
+AC_SUBST(CFLAGS_FOR_BUILD)
 
 # Checks for libraries.
 
@@ -26,13 +40,6 @@ AC_DEFINE([_GNU_SOURCE], [], [Enable GNU Extensions])
 
 
 dnl **************************************************************
-AC_ARG_WITH(lua-headers,
-   [  --with-lua-headers=DIR  lua include files location],
-   [LUA_HDR_DIR="$withval"]
-   [CFLAGS="$CFLAGS -I$withval"] 
-)
-
-
 dnl Checks for lua
 
 luashell=false
@@ -40,43 +47,25 @@ luacshell=false
 ac_report_have_lua=disabled
 ac_report_bash_extensions=disabled
 
+AC_ARG_WITH([lua],
+  AS_HELP_STRING([--with-lua], [Specify lua pkg-config name (default is 'lua')]))
 
-AC_ARG_WITH(lua, 
-	AC_HELP_STRING([--with-lua[[=DIR]]], [use lua in DIR]),
-[ case "$withval" in
-  no)	ac_report_have_lua=disabled
-	;;	
-  *)	AC_SEARCH_LIBS(dlopen, dl)
-	# ubuntu has lua5.1 rather than just lua
-	if pkg-config --exists lua5.1; then
-		LUALIB=lua5.1
-	else
-		LUALIB=lua
-	fi
-	if test -z "$LUA_HDR_DIR"; then
-		CFLAGS="$CFLAGS `pkg-config $LUALIB --cflags`"
-	fi
-	LIBS="$LIBS -lm"
-	LDFLAGS="$LDFLAGS -Wl,-E -L$withval"
-	AC_DEFINE(USE_LUA, , [Enable Lua])
-
-	AC_CHECK_LIB($LUALIB, luaL_newstate, , [
-        	AC_MSG_ERROR([The Lua runtime library cannot be found!])
-	], $LIBS)
-	luashell=true
-	luacshell=true
-	ac_report_have_lua=enabled
-	;;
-  esac ], [
-  	ac_report_have_lua=disabled
+AS_IF([test "x$with_lua" = "xyes"], [with_lua=lua])
+AS_IF([test "x$with_lua" != "xno" -a "x$with_lua" != "x"], [
+  luashell=true
+  luacshell=true
+  ac_report_have_lua=enabled
+  AC_DEFINE(USE_LUA, , [Lua enabled])
+  PKG_CHECK_MODULES([LUA], [$with_lua])
 ])
+
 AM_CONDITIONAL(USE_LUA, test x$ac_report_have_lua = xenabled)
 
 # If Lua is enabled, the user can choose between two different shells
 
 # shell: ordinary Haserl code with embedded Lua
 AC_ARG_ENABLE(luashell,
-	AC_HELP_STRING([--enable-luashell], [Includes the standard Lua shell - Haserl with embedded Lua (default is yes if Lua's enabled)]),
+	AS_HELP_STRING([--enable-luashell],[Includes the standard Lua shell - Haserl with embedded Lua (default is yes if Lua's enabled)]),
 [case "${enableval}" in
   yes) luashell=true ;;
   no)  luashell=false ;;
@@ -89,7 +78,7 @@ fi
 
 # shell: precompiled Haserl code - compiled Lua code
 AC_ARG_ENABLE(luacshell,
-	AC_HELP_STRING([--enable-luacshell], [Includes the compiled Lua shell - precompiled Haserl/Lua (default is yes if Lua's enabled)]),
+	AS_HELP_STRING([--enable-luacshell],[Includes the compiled Lua shell - precompiled Haserl/Lua (default is yes if Lua's enabled)]),
 [case "${enableval}" in
   yes) luacshell=true ;;
   no)  luacshell=false ;;
@@ -107,7 +96,7 @@ fi
 # the Linux shell is always available
 
 AC_ARG_ENABLE(bashshell,
-	AC_HELP_STRING([--enable-bashshell], [Includes the Bash or another Linux shell (default is yes)]),
+	AS_HELP_STRING([--enable-bashshell],[Includes the Bash or another Linux shell (default is yes)]),
 [case "${enableval}" in
   yes) bashshell=true ;;
   no)  bashshell=false ;;
@@ -135,7 +124,7 @@ fi
 
 # Do we include scott's bash extensions
 AC_ARG_ENABLE(bash-extensions,
-	AC_HELP_STRING([--enable-bash-extensions], [Includes bash extensions to the haserl script language (default is no)]),
+	AS_HELP_STRING([--enable-bash-extensions],[Includes bash extensions to the haserl script language (default is no)]),
 [case "${enableval}" in
   yes) bashextensions=true 
 	ac_report_bash_extensions=enabled 
@@ -171,7 +160,6 @@ CFLAGS="$CFLAGS -Wall"
 AC_CONFIG_FILES([Makefile
 		src/Makefile
 		doc/Makefile
-		tests/Makefile
 		])
 
 

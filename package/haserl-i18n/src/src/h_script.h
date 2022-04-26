@@ -1,6 +1,23 @@
-/*
- * $Id: haserl.h,v 1.14 2005/11/18 14:43:10 nangel Exp $
- */
+/* --------------------------------------------------------------------------
+ * Copyright 2003-2021 (inclusive) Nathan Angelacos 
+ *                   (nangel@users.sourceforge.net)
+ * 
+ *   This file is part of haserl.
+ *
+ *   Haserl is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License version 2,
+ *   as published by the Free Software Foundation.
+ *
+ *   Haserl is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with haserl.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * ------------------------------------------------------------------------ */
+
 #ifndef H_SCRIPT_H
 #define H_SCRIPT_H	1
 
@@ -11,8 +28,10 @@ typedef struct {
 	int	size;		/* size of script in bytes 	*/	
  	uid_t	uid;		/* user owner			*/
 	gid_t	gid;		/* group owner			*/
-	char 	*buf;	 /* pointer to malloc'ed buffer	*/
-	size_t	curpos;		/* current position in buffer	*/	
+	char 	*buf;		/* pointer to malloc'ed buffer	*/
+	size_t	curpos;		/* current position in buffer	*/
+	int	bang_script;	/* true if script starts with #!*/
+	int	tokens;		/* number of tokens in script	*/
 	void    *next;		/* next script in our chain     */
 	} script_t;
 

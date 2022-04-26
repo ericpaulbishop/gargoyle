@@ -1,22 +1,22 @@
-/*--------------------------------------------------------------------------
- * functions related to opening, tokenizing and parsing a haserl script
- * Copyright (c) 2006-2007   Nathan Angelacos (nangel@users.sourceforge.net)
+/* --------------------------------------------------------------------------
+ * Copyright 2003-2011 (inclusive) Nathan Angelacos 
+ *                   (nangel@users.sourceforge.net)
+ * 
+ *   This file is part of haserl.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License, version 2,
- * as published by the Free Software Foundation.
+ *   Haserl is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License version 2,
+ *   as published by the Free Software Foundation.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
+ *   Haserl is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *   You should have received a copy of the GNU General Public License
+ *   along with haserl.  If not, see <http://www.gnu.org/licenses/>.
  *
- *
- ------------------------------------------------------------------------- */
+ * ------------------------------------------------------------------------ */
 
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -26,7 +26,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <sys/fcntl.h>
+#include <fcntl.h>
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -53,7 +53,7 @@ const char *g_tag[] = {
   "in",
   "=",
   "#",
-  "~"
+  "~",
 #ifdef BASHEXTENSIONS
   "if",
   "elif",
@@ -94,7 +94,7 @@ load_script (char *filename, script_t * scriptlist)
   scriptfp = open (filename, O_NONBLOCK + O_RDONLY);
   if (scriptfp == -1)
     {				/* open failed */
-        die_with_message (NULL, NULL, g_err_msg[E_FILE_OPEN_FAIL], filename);
+      die_with_message (NULL, NULL, g_err_msg[E_FILE_OPEN_FAIL], filename);
     }
 
   fstat (scriptfp, &filestat);
@@ -107,6 +107,7 @@ load_script (char *filename, script_t * scriptlist)
   memset (scriptbuf->buf, 0, filestat.st_size + 1);
   read (scriptfp, scriptbuf->buf, filestat.st_size);
 
+  scriptbuf->bang_script = 0;
   scriptbuf->size = filestat.st_size;
   scriptbuf->uid = filestat.st_uid;
   scriptbuf->gid = filestat.st_gid;
@@ -133,6 +134,10 @@ load_script (char *filename, script_t * scriptlist)
 	  (scriptbuf->curpos)++;
 	}
       (scriptbuf->curpos)++;
+   	/* check to make sure the string following the #! matches argc[0] */
+  	if (memcmp (scriptbuf->buf+2, global.exec_name, strlen(global.exec_name)) == 0) {
+		scriptbuf->bang_script=1;
+	}
     }
 
   /* If this is the first script, switch to <? ?> mode only
@@ -267,6 +272,7 @@ build_token_list (script_t * scriptbuf, token_t * tokenlist)
 
   char *start, *end, *curpos, *endpos;
   token_t *curtoken, *firsttoken;
+  int tokens = 0;
 
   curtoken = tokenlist;
   firsttoken = tokenlist;
@@ -318,6 +324,7 @@ build_token_list (script_t * scriptbuf, token_t * tokenlist)
 	  /* push start of token to end of token  */
 	  curtoken =
 	    push_token_on_list (curtoken, scriptbuf, start, end - start);
+	    tokens = tokens + 1;
 	  if (firsttoken == NULL)
 	    firsttoken = curtoken;
 	  curpos = end + 2;
@@ -327,12 +334,14 @@ build_token_list (script_t * scriptbuf, token_t * tokenlist)
 	  /* push curpos to end of script */
 	  curtoken =
 	    push_token_on_list (curtoken, scriptbuf, curpos, endpos - curpos);
+	  tokens = tokens + 1;
 	  if (firsttoken == NULL)
 	    firsttoken = curtoken;
 	  curpos = endpos;
 	}
     }
 
+  scriptbuf->tokens = tokens;
   return (firsttoken);
 }
 

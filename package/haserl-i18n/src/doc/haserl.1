@@ -1,9 +1,9 @@
 .\" Process with  groff -man -Tascii haserl.1
-.TH haserl 1 "July 2007"
+.TH haserl 1 "October 2010"
 .SH NAME
 haserl \- A cgi scripting program for embedded environments
 .SH SYNOPSIS
-.BI "#!/usr/bin/haserl [--shell=" pathspec "] [--upload-dir=" dirspec "] [--upload-handler=" handler "] [--upload-limit=" limit "] [--accept-all] [--accept-none] [--silent] [--debug]"
+.BI "#!/usr/bin/haserl [\-\-shell=" pathspec "] [\-\-upload\-dir=" dirspec "] [\-\-upload\-handler=" handler "] [\-\-upload\-limit=" limit "] [\-\-accept\-all] [\-\-accept\-none] [\-\-silent] [\-\-debug]"
 
 [ text ] [ <% shell script %> ] [ text ] ... 
 
@@ -37,27 +37,27 @@ This is a summary of the command-line options.  Please see the
 .B OPTIONS
 section under the long option name for a complete description.
 
--a  --accept-all
+\-a  \-\-accept\-all
 .br
--n  --accept-none
+\-n  \-\-accept\-none
 .br
--d  --debug 
+\-d  \-\-debug 
 .br
--s, --shell
+\-s, \-\-shell
 .br
--S, --silent
+\-S, \-\-silent
 .br
--U, --upload-dir
+\-U, \-\-upload\-dir
 .br
--u, --upload-limit
+\-u, \-\-upload\-limit
 .br
--H, --upload-handler
+\-H, \-\-upload\-handler
 .br
 
 .SH OPTIONS
 
 .TP
-.BI --accept-all
+.BI \-\-accept\-all
 The program normally accepts POST data only when the REQUEST_METHOD is POST and only accepts
 data on the URL  data when the REQUEST_METHOD is GET.   This option allows both POST and
 URL data to be accepted regardless of the REQUEST_METHOD.  When this option is set, 
@@ -67,23 +67,23 @@ are taken from COOKIE data, POST data, and GET data.)  The default is not to acc
 input methods - just the COOKIE data and the REQUEST_METHOD.
 
 .TP
-.BI --accept-none
+.BI \-\-accept\-none
 If given, haserl will not parse standard input as http content before 
 processing the script.  This is useful if calling a haserl script from 
 another haserl script.
 
 .TP
-.BI --debug
+.BI \-\-debug
 Instead of executing the script, print out the script that would be executed.  If the environment variable 'REQUEST_METHOD' is set, the data is sent with the plain/text content type.  Otherwise, the shell script is printed verbatim.  
 
 .TP
-.BI --shell= "pathspec " 
+.BI \-\-shell= "pathspec " 
 Specify an alternative bash-like shell to use. Defaults to "/bin/sh"
 
-To include shell parameters do not use the --shell=/bin/sh format. Instead, use the alternative format without the "=", as in --shell "/bin/bash --norc". Be sure to quote the option string to protect any special characters.
+To include shell parameters do not use the \-\-shell=/bin/sh format. Instead, use the alternative format without the "=", as in \-\-shell "/bin/bash \-\-norc". Be sure to quote the option string to protect any special characters.
 
 If compiled with Lua libraries, then the string "lua" is used to use an integrated Lua vm.  This string is case sensitive.  Example:
-.BI --shell= lua
+.BI \-\-shell= lua
 
 An alternative is "luac".  This causes the haserl and lua parsers to be disabled, and the 
 script is assumed to be a precompiled lua chunk.  See 
@@ -91,19 +91,19 @@ script is assumed to be a precompiled lua chunk.  See
 below for more information.
 
 .TP
-.BI --silent
+.BI \-\-silent
 Haserl normally prints an informational message on error conditions.  This 
 suppresses the error message, so that the use of haserl is not advertised.
 
 .TP
-.BI --upload-dir= "dirspec "
+.BI \-\-upload\-dir= "dirspec "
 Defaults to "/tmp". All uploaded files are created with temporary filename in this
 directory  
-.BR FORM_xxx " contains the name of the temporary file."  FORM_xxx_name 
+.BR HASERL_xxx_path " contains the name of the temporary file. " FORM_xxx_name 
 contains the original name of the file, as specified by the client.
 
 .TP
-.BI --upload-handler= "pathspec "
+.BI \-\-upload\-handler= "pathspec "
 When specified, file uploads are handled by this handler, rather than written
 to temporary files.  The full pathspec must be given (the PATH is not 
 searched), and the upload-handler is given one command-line parameter:  
@@ -116,7 +116,7 @@ of the upload file to the specified FIFO.  Haserl will then block until
 the handler terminates.  This method is for experts only.
 
 .TP
-.BI --upload-limit= "limit  "
+.BI \-\-upload\-limit= "limit  "
 Allow a mime-encoded file up to 
 .I limit KB
 to be uploaded.  The default is 
@@ -193,28 +193,43 @@ added.  For example, if the post stream includes "foo=bar", the environment vari
 .BR POST_foo  = bar .
 
 Also, for the POST method, if the data is sent using 
-.I "multipart/form-data" 
+.I "multipart/form\-data" 
 encoding, the data is automatically decoded.   This is typically used when 
 files are uploaded from a web client using <input type=file>.
 
 .TP
 .B NOTE
 When a file is uploaded to the web server, it is stored in the 
-.I upload-target
+.I upload-dir
 directory. 
-.RI The FORM_variable=  "variable contains the name of the file uploaded"
-(as specified by the client.) The
-.I FORM_variable_name=
-variable contains the name of the file in 
-.I upload-target
-that contains the uploaded content.   To prevent malicious clients from 
+.BR FORM_variable_name=  " contains the name of the file uploaded"
+(as specified by the client.) 
+.BR HASERL_variable_path= " contains the name of the file in "
+.I upload-dir
+that holds the uploaded content.   To prevent malicious clients from 
 filling up 
-.I upload-target
+.I upload-dir
 on your web server, file uploads are only allowed when the
-.I --upload-limit 
+.I \-\-upload\-limit 
 option is used to specify how large a file can be uploaded.   Haserl automatically
 deletes the temporary file when the script is finished.  To keep the file, move it
 or rename it somewhere in the script.
+
+.TP
+.B " "
+Note that the filename is stored in 
+.BI HASERL_ variable_path
+This is because the FORM_, GET_, and POST_ variables are modifiable by the client, 
+and a malicious client can set a second variable with the name 
+.IR variable_path=/etc/passwd .
+Earlier versions did not store the pathspec in 
+.B HASERL
+namespace.  
+.I To maintain backward compailibility, the name of the temporary file
+.I is also stored in 
+.BI FORM_variable= " and  "
+.BI POST_variable=. " This is considered unsafe and should not be used."
+
 
 .P
 If the client sends data 
@@ -325,7 +340,7 @@ Content-type: text/html
 <body>
 <table border=1><tr>
 <% for a in Red Blue Yellow Cyan; do %>                                                                       
-	<td bgcolor="<% echo -n "$a" %>"><% echo -n "$a" %></td>                                              
+	<td bgcolor="<% echo \-n "$a" %>"><% echo \-n "$a" %></td>                                              
 	<% done %>
 </tr></table>
 </body>
@@ -367,13 +382,13 @@ content-type: text/html
 .sp
 <html><body>
 <h1>Sample Form</h1>
-<form action="<% echo -n $SCRIPT_NAME %>" method="GET">
+<form action="<% echo \-n $SCRIPT_NAME %>" method="GET">
 <% # Do some basic validation of FORM_textfield
    # To prevent common web attacks
-   FORM_textfield=$( echo "$FORM_textfield" | sed "s/[^A-Za-z0-9 ]//g" )
+   FORM_textfield=$( echo "$FORM_textfield" | sed "s/[^A\-Za\-z0\-9 ]//g" )
    %>
 <input type=text name=textfield 
-	Value="<% echo -n "$FORM_textfield" | tr a-z A-Z %>" cols=20>
+	Value="<% echo \-n "$FORM_textfield" | tr a\-z A\-Z %>" cols=20>
 <input type=submit value=GO>
 </form></html>
 </body>
@@ -386,20 +401,20 @@ and the textfield is sanitized to prevent web attacks, then the form is redispla
 .TP
 .B Uploading a File 
 .nf
-#!/usr/local/bin/haserl --upload-limit=4096 --upload-target=/tmp 
-content-type: text/html
+#!/usr/local/bin/haserl \-\-upload\-limit=4096 \-\-upload\-dir=/tmp 
+content\-type: text/html
 .sp
 <html><body>
-<form action="<% echo -n $SCRIPT_NAME %>" method=POST enctype="multipart/form-data" >
+<form action="<% echo \-n $SCRIPT_NAME %>" method=POST enctype="multipart/form\-data" >
 <input type=file name=uploadfile>
 <input type=submit value=GO>
 <br>
-<% if test -n "$FORM_uploadfile"; then %>
+<% if test \-n "$HASERL_uploadfile_path"; then %>
         <p>
-        You uploaded a file named <b><% echo -n $FORM_uploadfile_name %></b>, and it was
-        temporarily stored on the server as <i><% echo $FORM_uploadfile %></i>.  The
-        file was <% cat $FORM_uploadfile | wc -c %> bytes long.</p>
-        <% rm -f $FORM_uploadfile %><p>Don't worry, the file has just been deleted
+        You uploaded a file named <b><% echo \-n $FORM_uploadfile_name %></b>, and it was
+        temporarily stored on the server as <i><% echo $HASERL_uploadfile_path %></i>.  The
+        file was <% cat $HASERL_uploadfile_path | wc \-c %> bytes long.</p>
+        <% rm \-f $HASERL_uploadfile_path %><p>Don't worry, the file has just been deleted
         from the web server.</p>
 <% else %>
         You haven't uploaded a file yet.
@@ -409,13 +424,25 @@ content-type: text/html
 .fi
 
 Displays a form that allows for file uploading.  This is accomplished by using the 
-.B --upload-limit
+.B \-\-upload\-limit
 and by setting the form 
 .I enctype
-.RI "to " multipart/form-data.
+.RI "to " multipart/form\-data.
 If the client sends a file, then some information regarding the file is printed, and then deleted.  Otherwise, the form states that the client has not uploaded a file.
 
+.TP
+.B RFC-2616 Conformance
+.nf
+#!/usr/local/bin/haserl
+<% echo \-en "content\-type: text/html\\r\\n\\r\\n" %>
+<html><body>
+  ...
+</body></html>
+.fi
 
+To fully comply with the HTTP specification, headers should be terminated
+using CR+LF, rather than the normal unix LF line termination only.  The
+above syntax can be used to produce RFC 2616 compliant headers.
 
 .SH ENVIRONMENT
 In addition to the environment variables inherited from the web server, the following environment variables are always defined at startup:
@@ -470,7 +497,8 @@ binary is not installed suid, then the CGI scripts will run with the uid/gid of 
 .B Reject command line parameters given on the URL
 If the URL does not contain an unencoded "=", then the CGI spec states the options are to be
 used as command-line parameters to the program.  For instance, according to the CGI spec:
-.I http://192.168.0.1/test.cgi?--upload-limit%3d2000&foo%3dbar
+.I http://192.168.0.1/test.cgi?\-\-upload\-limit%3d2000&foo%3dbar
+.RS
 Should set the upload-limit to 2000KB in addition to setting "Foo=bar". 
 To protect against clients enabling their own uploads,
 .I haserl
@@ -481,15 +509,15 @@ combined into argv[1], and the script name is argv[2].
 .SH LUA
 
 If compiled with lua support, 
-.B --shell=lua
+.B \-\-shell=lua
 will enable lua as the script language instead of bash shell.  The environment variables 
 (SCRIPT_NAME, SERVER_NAME, etc) are placed in the ENV table, and the form variables are 
 placed in the FORM table.  For example, the self-referencing form above can be written like this:
 
 .RS
 .nf
-#!/usr/local/bin/haserl --shell=lua
-content-type: text/html
+#!/usr/local/bin/haserl \-\-shell=lua
+content\-type: text/html
 .sp
 <html><body>
 <h1>Sample Form</h1>
@@ -531,7 +559,7 @@ Your message is <%= gvar %>
 foo.haserl
 .RS
 .nf
-#!/usr/local/bin/haserl --shell=lua
+#!/usr/local/bin/haserl \-\-shell=lua
 <% m = haserl.loadfile("bar.lsp")
    gvar = "Run as m()"
    m()
@@ -575,32 +603,32 @@ Here is an example of a trivial script, converted into a luac cgi script:
 Given the file test.lua:
 .RS
 .nf
-print ("Content-Type: text/plain\n\n")
+print ("Content\-Type: text/plain\n\n")
 print ("Your UUID for this run is: " .. ENV.SESSIONID)
 .fi
 .RE
 
 It can be compiled with luac:
 .RS
-luac -o test.luac -s test.lua
+luac \-o test.luac \-s test.lua
 .RE
 
 And then the haserl header added to it:
 .RS
-echo '#!/usr/bin/haserl --shell=luac' | cat - test.luac  >luac.cgi
+echo '#!/usr/bin/haserl \-\-shell=luac' | cat \- test.luac  >luac.cgi
 .RE
 
 Alternatively, it is possible to develop an entire website using the standard lua shell,
 and then have haserl itself preprocess the scripts for the luac compiler as part of a build
-process.  To do this, use --shell=lua, and develop the website.  When ready to build
-the runtime environment, add the --debug line to your lua scripts, and run them outputting
+process.  To do this, use \-\-shell=lua, and develop the website.  When ready to build
+the runtime environment, add the \-\-debug line to your lua scripts, and run them outputting
 the results to .lua source files.  For example:
 
 Given the haserl script test.cgi:
 .RS
 .nf
-#!/usr/bin/haserl --shell=lua --debug
-Content-Type: text/plain
+#!/usr/bin/haserl \-\-shell=lua \-\-debug
+Content\-Type: text/plain
 
 Your UUID for this run is <%= ENV.SESSIONID %>
 .fi
@@ -609,9 +637,9 @@ Your UUID for this run is <%= ENV.SESSIONID %>
 Precompile, compile, and add the haserl luac header:
 .RS
 .nf
-./test.cgi > test.lua
-luac -s -o test.luac test.lua
-echo '#!/usr/bin/haserl --shell=luac' | cat - test.luac >luac.cgi
+\&./test.cgi > test.lua
+luac \-s \-o test.luac test.lua
+echo '#!/usr/bin/haserl \-\-shell=luac' | cat \- test.luac >luac.cgi
 .fi
 .RS
 
@@ -619,6 +647,11 @@ echo '#!/usr/bin/haserl --shell=luac' | cat - test.luac >luac.cgi
 Old versions of haserl used <? ?> as token markers, instead of <% %>.  Haserl
 will fall back to using <? ?> 
 .I if <% does not appear anywhere in the script.
+
+When files are uploaded using RFC-2388, a temporary file is created.  The name of the file
+is stored in 
+.BR FORM_variable_name ", " POST_variable_name ", and " HASERL_variable_name ". Only " HASERL_variable_name
+should be used - the others can be overwritten by a malicious client.
 
 .SH NAME
 The name "haserl" comes from the Bavarian word for "bunny." At first glance it

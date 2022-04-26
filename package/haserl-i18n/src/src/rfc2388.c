@@ -1,21 +1,23 @@
 /* --------------------------------------------------------------------------
- * multipart/form-data handler functions (obviously, see rfc2388 for info)
- * Copyright (c) 2007   Nathan Angelacos (nangel@users.sourceforge.net)
+ * Copyright 2003-2014 (inclusive) Nathan Angelacos 
+ *                   (nangel@users.sourceforge.net)
+ * 
+ *   This file is part of haserl.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2, as published by the Free
- * Software Foundation.
+ *   Haserl is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License version 2,
+ *   as published by the Free Software Foundation.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
+ *   Haserl is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *   You should have received a copy of the GNU General Public License
+ *   along with haserl.  If not, see <http://www.gnu.org/licenses/>.
  *
- ------------------------------------------------------------------------- */
+ * ------------------------------------------------------------------------ */
+
 
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -28,7 +30,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
-#include <sys/fcntl.h>
+#include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -71,6 +73,7 @@ void
 mime_var_destroy (mime_var_t * obj)
 {
   int status;
+  struct sigaction new_action;
 
   if (obj->name)
     {
@@ -95,10 +98,14 @@ mime_var_destroy (mime_var_t * obj)
   buffer_destroy (&(obj->value));
   if (obj->fh)
     {
-      close (obj->fh);
+      close (abs (obj->fh));
       if (global.uploadhandler)
 	{
 	  wait (&status);
+	  new_action.sa_handler = SIG_DFL;
+	  sigemptyset (&new_action.sa_mask);
+	  new_action.sa_flags = 0;
+	  sigaction (SIGPIPE, &new_action, NULL);
 	}
       obj->fh = 0;
     }
@@ -131,7 +138,7 @@ mime_tag_add (mime_var_t * obj, char *str)
     {
       a += strlen (tag[0]);
       b = strchr (a, '"');
-      if (!obj->name)
+      if ( (!obj->name) && ( b ) )
 	obj->name = mime_substr (a, b - a);
     }
 
@@ -140,7 +147,7 @@ mime_tag_add (mime_var_t * obj, char *str)
     {
       a += strlen (tag[1]);
       b = strchr (a, '"');
-      if (!obj->filename)
+      if ( (!obj->filename) && ( b ) )
 	obj->filename = mime_substr (a, b - a);
     }
 
@@ -161,6 +168,10 @@ mime_var_putenv (list_t * env, mime_var_t * obj)
   haserl_buffer_init (&buf);
   if (obj->name)
     {
+      /* For file uploads, this creates FORM_foo=tempfile_pathspec.
+         That name can be overwritten by a subsequent foo=/etc/passwd, 
+         for instance.  This code block is depricated for FILE uploads
+         only. (it is still valid for non-form uploads */
       buffer_add (&(obj->value), "", 1);
       buffer_add (&buf, obj->name, strlen (obj->name));
       buffer_add (&buf, "=", 1);
@@ -172,6 +183,17 @@ mime_var_putenv (list_t * env, mime_var_t * obj)
     }
   if (obj->filename)
     {
+      /* This creates HASERL_foo_path=tempfile_pathspec.  */
+      buffer_add (&buf, obj->name, strlen (obj->name));
+      buffer_add (&buf, "_path=", 6);
+      buffer_add (&buf, (char *) obj->value.data,
+		  strlen ((char *) obj->value.data) + 1);
+      myputenv (env, (char *) buf.data, global.haserl_prefix);
+      myputenv (env, (char *) buf.data, global.var_prefix);
+      myputenv (env, (char *) buf.data, global.post_prefix);
+      buffer_reset (&buf);
+
+      /* this saves the name of the file the client supplied */
       buffer_add (&buf, obj->name, strlen (obj->name));
       buffer_add (&buf, "_name=", 6);
       buffer_add (&buf, obj->filename, strlen (obj->filename) + 1);
@@ -191,6 +213,9 @@ mime_exec (mime_var_t * obj, char *fifo)
   char *type, *filename, *name;
   char *c;
   int fh;
+  struct sigaction new_action;
+
+
 
   pid = fork ();
   if (pid == -1)
@@ -240,7 +265,11 @@ mime_exec (mime_var_t * obj, char *fifo)
     }
   else
     {
-      /* I'm parent */
+      /* I'm parent - ignore SIGPIPE from the child */
+      new_action.sa_handler = SIG_IGN;
+      sigemptyset (&new_action.sa_mask);
+      new_action.sa_flags = 0;
+      sigaction (SIGPIPE, &new_action, NULL);
     }
 
   /* control should get to this point only in the parent.
@@ -284,7 +313,9 @@ mime_var_open_target (mime_var_t * obj)
       close (obj->fh);
       unlink (tmpname);
       if (mkfifo (tmpname, 0600))
-	ok = 0;
+	{
+	  ok = 0;
+	}
       /* you must open the fifo for reading before writing
        * on non linux systems
        */
@@ -322,6 +353,8 @@ mime_var_open_target (mime_var_t * obj)
 void
 mime_var_writer (mime_var_t * obj, char *str, int len)
 {
+  int err;
+
   /* if not a file upload, then just a normal variable */
   if (!obj->filename)
     {
@@ -333,9 +366,15 @@ mime_var_writer (mime_var_t * obj, char *str, int len)
     mime_var_open_target (obj);
 
   /* if we have an open file, write the chunk */
-  if (obj->fh)
+  if (obj->fh > 0)
     {
-      write (obj->fh, str, len);
+      err = write (obj->fh, str, len);
+      /* if there was an error, invert the filehandle; we need the
+         handle for later when we close it */
+      if (err == -1)
+	{
+	  obj->fh = abs (obj->fh) * -1;
+	}
     }
 }
 
@@ -360,6 +399,11 @@ rfc2388_handler (list_t * env)
   char *str;
   buffer_t buf;
   mime_var_t var;
+
+  int header_continuation;
+
+  /* prevent a potential unitialized free() - ISE-TPS-2014-008 */
+  var.name = NULL;
 
   /* get the boundary info */
   str = getenv ("CONTENT_TYPE");
@@ -408,6 +452,9 @@ rfc2388_handler (list_t * env)
 
   state = DISCARD;
   str = boundary + 2;		/* skip the leading crlf */
+
+  header_continuation = 0;
+
   do
     {
       /* x is true if this token ends with a matchstr or is at the end of stream */
@@ -460,6 +507,7 @@ rfc2388_handler (list_t * env)
 		  buffer_reset (&buf);
 		  mime_var_init (&var);
 		  state = HEADER;
+                  header_continuation = 0;
 		  str = crlf;
 		}
 	    }
@@ -469,7 +517,7 @@ rfc2388_handler (list_t * env)
 	  buffer_add (&buf, sbuf.segment, sbuf.len);
 	  if (x)
 	    {
-	      if (sbuf.len == 0)
+	      if (sbuf.len == 0 && header_continuation == 0)
 		{		/* blank line */
 		  buffer_reset (&buf);
 		  state = CONTENT;
@@ -481,7 +529,13 @@ rfc2388_handler (list_t * env)
 		  mime_tag_add (&var, (char *) buf.data);
 		  buffer_reset (&buf);
 		}
+              header_continuation = 0;
 	    }
+          else
+            {
+              // expect more data
+              header_continuation = 1;
+            }
 	  break;
 
 	case CONTENT:

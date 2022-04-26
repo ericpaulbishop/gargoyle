@@ -90,7 +90,7 @@
 /* the subshell to start up */
 #undef SUBSHELL_CMD
 
-/* Enable Lua */
+/* Lua enabled */
 #undef USE_LUA
 
 /* Version number of package */

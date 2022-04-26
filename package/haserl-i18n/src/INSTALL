@@ -22,11 +22,16 @@ If lua 5.1.x dev libraries are already installed, then
 make
 make install
 
-If you don't have the lua 5.1.x dev libraries, or you have 
-a different version than 5.1.x, then:
+If lua 5.2.x dev libraries are already installed, then
+./configure --with-lua=lua5.2
+make
+make install
 
-tar zxvf lua-5.1.1.tar.gz
-cd lua-5.1.1
+If you don't have the lua dev libraries, or you have 
+a different version then:
+
+tar zxvf lua-5.x.x.tar.gz
+cd lua-5.x.x
 make generic | make posix | make linux | ...
 mkdir /tmp/lua
 cp src/* /tmp/lua

@@ -1,21 +1,22 @@
-/*-----------------------------------------------------------------
- * haserl functions specific to a bash/ash/dash shell
- * Copyright (c) 2003-2007    Nathan Angelacos (nangel@users.sourceforge.net)
+/* --------------------------------------------------------------------------
+ * Copyright 2003-2011 (inclusive) Nathan Angelacos 
+ *                   (nangel@users.sourceforge.net)
+ * 
+ *   This file is part of haserl.
  *
- * This program is free software; you can redistribute it and/or modify it under
- * the terms of the GNU General Public License, version 2, as published by the Free
- * Software Foundation.
+ *   Haserl is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License version 2,
+ *   as published by the Free Software Foundation.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
+ *   Haserl is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *   You should have received a copy of the GNU General Public License
+ *   along with haserl.  If not, see <http://www.gnu.org/licenses/>.
  *
- ------------------------------------------------------------------------- */
+ * ------------------------------------------------------------------------ */
 
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -29,7 +30,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
-#include <sys/fcntl.h>
+#include <fcntl.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -138,7 +139,7 @@ bash_echo (buffer_t * buf, char *str, size_t len)
  * we will take the (ancient) POSIX1 standard of 4K, subtract 1K from it and use that
  * as the maxmimum.    The Linux limit appears to be 128K, so 3K will fit. */
 
-  static char echo_start[] = "echo -n '";
+  static char echo_start[] = "printf '%s' '";
   static char echo_quote[] = "'\\''";
   static char echo_end[] = "'\n";
   const size_t maxlen = 3096;
