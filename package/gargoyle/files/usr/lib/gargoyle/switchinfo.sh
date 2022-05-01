@@ -20,6 +20,9 @@ convert_link_speed()
 		"link:up speed:1000baseT") STATUS="1Gbps";;
 		"link:up speed:100baseT") STATUS="100Mbps";;
 		"link:up speed:10baseT") STATUS="10Mbps";;
+		"10000") STATUS="10Gbps";;
+		"5000") STATUS="5Gbps";;
+		"2500") STATUS="2.5Gbps";;
 		"1000") STATUS="1Gbps";;
 		"100") STATUS="100Mbps";;
 		"10") STATUS="10Mbps";;
@@ -43,6 +46,7 @@ json_select network
 		done
 	json_select ..
 json_select ..
+LANTEST=$(uci get network.brlan_dev.ports)
 
 if [ -n "$PORTSTEST" ]; then
 	# DSA
@@ -99,6 +103,15 @@ elif [ -n "$SWITCHTEST" ]; then
 			json_select ..
 		json_select ..
 	json_select ..
+elif [ -n "$LANTEST" ]; then
+	# Try just using ethX
+	lan_eths=$(uci get network.brlan_dev.ports)
+	for PORTNAME in $lan_eths; do
+		LINK=$(cat /sys/class/net/$PORTNAME/carrier 2>/dev/null)
+		[ "$LINK" = "1" ] && LINK=$(cat /sys/class/net/$PORTNAME/speed 2>/dev/null)
+		STATUS=$(convert_link_speed "$LINK")
+		echo "ports.push([\"LAN${PORTNAME:3}\",\"$STATUS\"]);"
+	done
 fi
 
 exit 0
