@@ -23,6 +23,8 @@ define Package/haserl-i18n
   URL:=http://haserl.sourceforge.net/
 endef
 
+TARGET_LDFLAGS += -lericstools -luci
+
 define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)
 	$(CP) ./src/* $(PKG_BUILD_DIR)/
