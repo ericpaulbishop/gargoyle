@@ -5,11 +5,18 @@ use warnings;
 # helper to dump image list, from image directory:
 # arch=$(pwd | sed 's/^.*\///g') ; echo $arch ;  ls | sed 's/gargoyle.*'${arch}'\-//g' |  sort | awk ' { print "\t\t\""$1"\"," ; } ' 
 ############################################################################################################################################
+#
+# dirs="ar71xx  ath79  atheros  brcm47xx ipq806x  mvebu  ramips x86" ; for d in $dirs ; do cd "$d" ;  arch=$(pwd | sed 's/^.*\///g') ; echo $arch ;  ls | sed 's/gargoyle.*'${arch}'\-//g' | sed 's/gargoyle[^\-]*\-//g' |  sort | uniq | awk ' { print "\t\t\""$1"\"," ; } ' ; cd ..  ; done
+#
+
+
+my $useDummyMd5 = "FALSE";
 
 
 
 my $downloadPageDir = shift @ARGV;
 my $downloadRootDir = shift @ARGV;
+
 if(defined($downloadPageDir))
 {
 	chdir $downloadPageDir;
@@ -23,8 +30,9 @@ my $typeOrder = [ "images", "fon-flash", "src" ];
 my $typeNames = {"src"=>"Source Code", "images"=>"Firmware Images", "fon-flash"=>"FonFlash"};
 my $typeMatches={"src"=>"src", "fon-flash"=>"fon" };
 
-my $archOrder = [ "ar71xx", "mvebu", "ramips", "x86", "brcm47xx", "atheros",  ];
-my $archNames = {"brcm47xx"=>"Broadcom", "atheros"=>"Atheros 231X/5312", "ar71xx"=>"Atheros AR71XX", "mvebu"=>"Marvell Armada XP/370", "ramips" => "MediaTek/Ralink ramips", "x86"=>"x86/x86_64" };
+my $archOrder = [ "ar71xx", "ipq806x", "mvebu", "ramips", "x86", "brcm47xx", "atheros",  ];
+my $archNames = {"brcm47xx"=>"Broadcom", "atheros"=>"Atheros 231X/5312", "ar71xx"=>"Atheros ATH79/AR71XX", "mvebu"=>"Marvell Armada XP/370", "ramips" => "MediaTek/Ralink ramips", "x86"=>"x86/x86_64", "ipq806x" =>"Qualcomm Atheros IPQ806X" };
+
 my $targetOrder = 
 { 
 	"atheros"=>
@@ -68,6 +76,106 @@ my $targetOrder =
 		"wnr834b_v2-squashfs.chk",
 		"e3000-v1-squashfs.bin"
 		],
+
+
+	"ath79"=>
+		[
+		"generic-buffalo_wzr-hp-ag300h-squashfs-factory.bin",
+		"generic-buffalo_wzr-hp-ag300h-squashfs-sysupgrade.bin",
+		"generic-buffalo_wzr-hp-ag300h-squashfs-tftp.bin",
+		"generic-buffalo_wzr-hp-g450h-squashfs-factory.bin",
+		"generic-buffalo_wzr-hp-g450h-squashfs-sysupgrade.bin",
+		"generic-buffalo_wzr-hp-g450h-squashfs-tftp.bin",
+		"generic-dlink_dir-825-b1-squashfs-sysupgrade.bin",
+		"generic-dlink_dir-825-c1-squashfs-factory.bin",
+		"generic-dlink_dir-825-c1-squashfs-sysupgrade.bin",
+		"generic-dlink_dir-835-a1-squashfs-factory.bin",
+		"generic-dlink_dir-835-a1-squashfs-sysupgrade.bin",
+		"generic-glinet_gl-ar150-squashfs-sysupgrade.bin",
+		"generic-jjplus_ja76pf2-squashfs-sysupgrade.bin",
+		"generic-netgear_wndr3700-squashfs-factory.img",
+		"generic-netgear_wndr3700-squashfs-factory-NA.img",
+		"generic-netgear_wndr3700-squashfs-sysupgrade.bin",
+		"generic-netgear_wndr3700v2-squashfs-factory.img",
+		"generic-netgear_wndr3700v2-squashfs-sysupgrade.bin",
+		"generic-netgear_wndr3800-squashfs-factory.img",
+		"generic-netgear_wndr3800-squashfs-sysupgrade.bin",
+		"generic-tplink_archer-a7-v5-squashfs-factory.bin",
+		"generic-tplink_archer-a7-v5-squashfs-sysupgrade.bin",
+		"generic-tplink_archer-c25-v1-squashfs-factory.bin",
+		"generic-tplink_archer-c25-v1-squashfs-sysupgrade.bin",
+		"generic-tplink_archer-c2-v3-squashfs-factory.bin",
+		"generic-tplink_archer-c2-v3-squashfs-sysupgrade.bin",
+		"generic-tplink_archer-c58-v1-squashfs-factory.bin",
+		"generic-tplink_archer-c58-v1-squashfs-sysupgrade.bin",
+		"generic-tplink_archer-c59-v1-squashfs-factory.bin",
+		"generic-tplink_archer-c59-v1-squashfs-sysupgrade.bin",
+		"generic-tplink_archer-c5-v1-squashfs-factory.bin",
+		"generic-tplink_archer-c5-v1-squashfs-sysupgrade.bin",
+		"generic-tplink_archer-c60-v1-squashfs-factory.bin",
+		"generic-tplink_archer-c60-v1-squashfs-sysupgrade.bin",
+		"generic-tplink_archer-c60-v2-squashfs-factory.bin",
+		"generic-tplink_archer-c60-v2-squashfs-sysupgrade.bin",
+		"generic-tplink_archer-c60-v3-squashfs-factory.bin",
+		"generic-tplink_archer-c60-v3-squashfs-sysupgrade.bin",
+		"generic-tplink_archer-c6-v2-squashfs-factory.bin",
+		"generic-tplink_archer-c6-v2-squashfs-sysupgrade.bin",
+		"generic-tplink_archer-c7-v1-squashfs-factory.bin",
+		"generic-tplink_archer-c7-v1-squashfs-sysupgrade.bin",
+		"generic-tplink_archer-c7-v2-squashfs-factory.bin",
+		"generic-tplink_archer-c7-v2-squashfs-factory-eu.bin",
+		"generic-tplink_archer-c7-v2-squashfs-factory-us.bin",
+		"generic-tplink_archer-c7-v2-squashfs-sysupgrade.bin",
+		"generic-tplink_archer-c7-v4-squashfs-factory.bin",
+		"generic-tplink_archer-c7-v4-squashfs-sysupgrade.bin",
+		"generic-tplink_archer-c7-v5-squashfs-factory.bin",
+		"generic-tplink_archer-c7-v5-squashfs-sysupgrade.bin",
+		"generic-tplink_tl-wdr3600-v1-squashfs-factory.bin",
+		"generic-tplink_tl-wdr3600-v1-squashfs-sysupgrade.bin",
+		"generic-tplink_tl-wdr4300-v1-squashfs-factory.bin",
+		"generic-tplink_tl-wdr4300-v1-squashfs-sysupgrade.bin",
+		"generic-tplink_tl-wr1043nd-v1-squashfs-factory.bin",
+		"generic-tplink_tl-wr1043nd-v1-squashfs-sysupgrade.bin",
+		"generic-tplink_tl-wr1043nd-v2-squashfs-factory.bin",
+		"generic-tplink_tl-wr1043nd-v2-squashfs-sysupgrade.bin",
+		"generic-tplink_tl-wr1043nd-v3-squashfs-factory.bin",
+		"generic-tplink_tl-wr1043nd-v3-squashfs-sysupgrade.bin",
+		"generic-tplink_tl-wr1043nd-v4-squashfs-factory.bin",
+		"generic-tplink_tl-wr1043nd-v4-squashfs-sysupgrade.bin",
+		"generic-tplink_tl-wr1043n-v5-squashfs-factory.bin",
+		"generic-tplink_tl-wr1043n-v5-squashfs-sysupgrade.bin",
+		"generic-tplink_tl-wr2543-v1-squashfs-factory.bin",
+		"generic-tplink_tl-wr2543-v1-squashfs-sysupgrade.bin",
+		"generic-tplink_tl-wr842n-v1-squashfs-factory.bin",
+		"generic-tplink_tl-wr842n-v1-squashfs-sysupgrade.bin",
+		"generic-tplink_tl-wr842n-v2-squashfs-factory.bin",
+		"generic-tplink_tl-wr842n-v2-squashfs-sysupgrade.bin",
+		"generic-tplink_tl-wr842n-v3-squashfs-factory.bin",
+		"generic-tplink_tl-wr842n-v3-squashfs-sysupgrade.bin",
+		"generic-ubnt_airrouter-squashfs-factory.bin",
+		"generic-ubnt_airrouter-squashfs-sysupgrade.bin",
+		"generic-ubnt_bullet-m-squashfs-factory.bin",
+		"generic-ubnt_bullet-m-squashfs-sysupgrade.bin",
+		"generic-ubnt_rocket-m-squashfs-factory.bin",
+		"generic-ubnt_rocket-m-squashfs-sysupgrade.bin",
+		"generic-ubnt_routerstation-pro-squashfs-factory.bin",
+		"generic-ubnt_routerstation-pro-squashfs-sysupgrade.bin",
+		"generic-ubnt_routerstation-squashfs-factory.bin",
+		"generic-ubnt_routerstation-squashfs-sysupgrade.bin",
+		"generic-ubnt_unifi-squashfs-factory.bin",
+		"generic-ubnt_unifi-squashfs-sysupgrade.bin",
+		"generic-wd_mynet-n750-initramfs-kernel.bin",
+		"generic-wd_mynet-n750-squashfs-factory.bin",
+		"generic-wd_mynet-n750-squashfs-sysupgrade.bin",
+
+		"generic-vmlinux.bin",
+		"generic-vmlinux.elf",
+		"generic-vmlinux.lzma",
+		"generic-vmlinux-lzma.elf",
+		"root.squashfs-64k"
+
+		],
+
 	"ar71xx"=>
 		[
 		"alfa-ap96-squashfs-sysupgrade.bin",
@@ -405,25 +513,63 @@ my $targetOrder =
 		"generic-vmlinux-lzma.elf",
 		"root.squashfs-64k"
 		
+
 		],
+
+
+        "ipq806x"=>
+                [
+		"generic-linksys_ea8500-squashfs-factory.bin",
+		"generic-linksys_ea8500-squashfs-sysupgrade.bin",
+		"generic-netgear_d7800-squashfs-factory.img",
+		"generic-netgear_d7800-squashfs-sysupgrade.bin",
+		"generic-netgear_r7500v2-squashfs-factory.img",
+		"generic-netgear_r7500v2-squashfs-sysupgrade.bin",
+		"generic-netgear_r7800-squashfs-factory.img",
+		"generic-netgear_r7800-squashfs-sysupgrade.bin",
+		"generic-tplink_c2600-squashfs-factory.bin",
+		"generic-tplink_c2600-squashfs-sysupgrade.bin",
+		"generic-zyxel_nbg6817-squashfs-factory.bin",
+		"generic-zyxel_nbg6817-squashfs-sysupgrade.bin"
+                ],
 	"mvebu"=>
 		[ 
+
+
 		"cortexa9-linksys-wrt1200ac-squashfs-factory.img",
+		"cortexa9-linksys_wrt1200ac-squashfs-factory.img",
 		"cortexa9-linksys-wrt1200ac-squashfs-sysupgrade.bin",
+		"cortexa9-linksys_wrt1200ac-squashfs-sysupgrade.bin",
 		"cortexa9-linksys-wrt1900ac-squashfs-factory.img",
+		"cortexa9-linksys_wrt1900ac-squashfs-factory.img",
 		"cortexa9-linksys-wrt1900ac-squashfs-sysupgrade.bin",
+		"cortexa9-linksys_wrt1900ac-squashfs-sysupgrade.bin",
 		"cortexa9-linksys-wrt1900acs-squashfs-factory.img",
+		"cortexa9-linksys_wrt1900acs-squashfs-factory.img",
 		"cortexa9-linksys-wrt1900acs-squashfs-sysupgrade.bin",
+		"cortexa9-linksys_wrt1900acs-squashfs-sysupgrade.bin",
 		"cortexa9-linksys-wrt1900acv2-squashfs-factory.img",
+		"cortexa9-linksys_wrt1900acv2-squashfs-factory.img",
 		"cortexa9-linksys-wrt1900acv2-squashfs-sysupgrade.bin",
+		"cortexa9-linksys_wrt1900acv2-squashfs-sysupgrade.bin",
 		"cortexa9-linksys-wrt3200acm-squashfs-factory.img",
+		"cortexa9-linksys_wrt3200acm-squashfs-factory.img",
 		"cortexa9-linksys-wrt3200acm-squashfs-sysupgrade.bin",
+		"cortexa9-linksys_wrt3200acm-squashfs-sysupgrade.bin",
 		"cortexa9-linksys-wrt32x-squashfs-factory.img",
+		"cortexa9-linksys_wrt32x-squashfs-factory.img",
 		"cortexa9-linksys-wrt32x-squashfs-sysupgrade.bin",
-		"cortexa9-turris-omnia-sysupgrade.img.gz",
-		"cortexa9-turris-omnia-initramfs.tar.gz",
-		"cortexa9-turris-omnia-kernel.bin",
+		"cortexa9-linksys_wrt32x-squashfs-sysupgrade.bin",
 		"cortexa9-turris-omnia-initramfs-kernel.bin",
+		"cortexa9-turris-omnia-kernel.bin",
+		"cortexa9-turris-omnia-sysupgrade.img.gz",
+
+
+		"cortexa9-cznic_turris-omnia-initramfs-kernel.bin",
+		"cortexa9-cznic_turris-omnia-kernel.bin",
+		"cortexa9-cznic_turris-omnia-sysupgrade.img.gz",
+		"omnia-medkit-cortexa9-cznic_turris-omnia-initramfs.tar.gz",
+		"omnia-medkit-cortexa9-turris-omnia-initramfs.tar.gz",
 
 		"linksys-caiman-squashfs-factory.img",
 		"linksys-caiman-squashfs-sysupgrade.tar",
@@ -440,19 +586,28 @@ my $targetOrder =
 		],
 	"ramips"=>
 		[ 
+		"mt7620-ai-br100-initramfs-kernel.bin",
 		"mt7620-ai-br100-squashfs-sysupgrade.bin",
+		"mt7620-alfa-network_ac1200rm-initramfs-kernel.bin",
 		"mt7620-alfa-network_ac1200rm-squashfs-sysupgrade.bin",
 		"mt7620-ArcherC20i-squashfs-factory.bin",
 		"mt7620-ArcherC20i-squashfs-sysupgrade.bin",
 		"mt7620-ArcherC50v1-squashfs-factory-eu.bin",
 		"mt7620-ArcherC50v1-squashfs-factory-us.bin",
 		"mt7620-ArcherC50v1-squashfs-sysupgrade.bin",
+		"mt7620-ArcherMR200-initramfs-kernel.bin",
 		"mt7620-ArcherMR200-squashfs-sysupgrade.bin",
+		"mt7620-bocco-initramfs-kernel.bin",
 		"mt7620-bocco-squashfs-sysupgrade.bin",
+		"mt7620-c108-initramfs-kernel.bin",
 		"mt7620-c108-squashfs-sysupgrade.bin",
+		"mt7620-cf-wr800n-initramfs-kernel.bin",
 		"mt7620-cf-wr800n-squashfs-sysupgrade.bin",
+		"mt7620-cs-qr10-initramfs-kernel.bin",
 		"mt7620-cs-qr10-squashfs-sysupgrade.bin",
+		"mt7620-d240-initramfs-kernel.bin",
 		"mt7620-d240-squashfs-sysupgrade.bin",
+		"mt7620-db-wrt01-initramfs-kernel.bin",
 		"mt7620-db-wrt01-squashfs-sysupgrade.bin",
 		"mt7620-dch-m225-squashfs-factory.bin",
 		"mt7620-dch-m225-squashfs-sysupgrade.bin",
@@ -465,13 +620,20 @@ my $targetOrder =
 		"mt7620-dlink_dwr-921-c3-squashfs-sysupgrade.bin",
 		"mt7620-e1700-squashfs-factory.bin",
 		"mt7620-e1700-squashfs-sysupgrade.bin",
+		"mt7620-ex3700-ex3800-initramfs-kernel.bin",
 		"mt7620-ex3700-ex3800-squashfs-factory.chk",
 		"mt7620-ex3700-ex3800-squashfs-sysupgrade.bin",
+		"mt7620-gl-mt300a-initramfs-kernel.bin",
 		"mt7620-gl-mt300a-squashfs-sysupgrade.bin",
+		"mt7620-gl-mt300n-initramfs-kernel.bin",
 		"mt7620-gl-mt300n-squashfs-sysupgrade.bin",
+		"mt7620-gl-mt750-initramfs-kernel.bin",
 		"mt7620-gl-mt750-squashfs-sysupgrade.bin",
+		"mt7620-hc5661-initramfs-kernel.bin",
 		"mt7620-hc5661-squashfs-sysupgrade.bin",
+		"mt7620-hc5761-initramfs-kernel.bin",
 		"mt7620-hc5761-squashfs-sysupgrade.bin",
+		"mt7620-hc5861-initramfs-kernel.bin",
 		"mt7620-hc5861-squashfs-sysupgrade.bin",
 		"mt7620-kng_rc-squashfs-factory.bin",
 		"mt7620-kng_rc-squashfs-sysupgrade.bin",
@@ -479,84 +641,123 @@ my $targetOrder =
 		"mt7620-kn_rc-squashfs-sysupgrade.bin",
 		"mt7620-kn_rf-squashfs-factory.bin",
 		"mt7620-kn_rf-squashfs-sysupgrade.bin",
+		"mt7620-microwrt-initramfs-kernel.bin",
 		"mt7620-microwrt-squashfs-sysupgrade.bin",
+		"mt7620-miwifi-mini-initramfs-kernel.bin",
 		"mt7620-miwifi-mini-squashfs-sysupgrade.bin",
+		"mt7620-mlw221-initramfs-kernel.bin",
 		"mt7620-mlw221-squashfs-sysupgrade.bin",
+		"mt7620-mlwg2-initramfs-kernel.bin",
 		"mt7620-mlwg2-squashfs-sysupgrade.bin",
 		"mt7620-mt7620a_mt7530-squashfs-sysupgrade.bin",
 		"mt7620-mt7620a_mt7610e-squashfs-sysupgrade.bin",
 		"mt7620-mt7620a-squashfs-sysupgrade.bin",
 		"mt7620-mt7620a_v22sg-squashfs-sysupgrade.bin",
+		"mt7620-mzk-750dhp-initramfs-kernel.bin",
 		"mt7620-mzk-750dhp-squashfs-sysupgrade.bin",
+		"mt7620-mzk-ex300np-initramfs-kernel.bin",
 		"mt7620-mzk-ex300np-squashfs-sysupgrade.bin",
+		"mt7620-mzk-ex750np-initramfs-kernel.bin",
 		"mt7620-mzk-ex750np-squashfs-sysupgrade.bin",
+		"mt7620-na930-initramfs-kernel.bin",
 		"mt7620-na930-squashfs-sysupgrade.bin",
+		"mt7620-oy-0001-initramfs-kernel.bin",
 		"mt7620-oy-0001-squashfs-sysupgrade.bin",
+		"mt7620-phicomm_k2g-initramfs-kernel.bin",
 		"mt7620-phicomm_k2g-squashfs-sysupgrade.bin",
+		"mt7620-psg1208-initramfs-kernel.bin",
 		"mt7620-psg1208-squashfs-sysupgrade.bin",
+		"mt7620-psg1218a-initramfs-kernel.bin",
 		"mt7620-psg1218a-squashfs-sysupgrade.bin",
+		"mt7620-psg1218b-initramfs-kernel.bin",
 		"mt7620-psg1218b-squashfs-sysupgrade.bin",
+		"mt7620-ravpower_wd03-initramfs-kernel.bin",
 		"mt7620-ravpower_wd03-squashfs-sysupgrade.bin",
+		"mt7620-rp-n53-initramfs-kernel.bin",
 		"mt7620-rp-n53-squashfs-sysupgrade.bin",
+		"mt7620-rt-ac51u-initramfs-kernel.bin",
 		"mt7620-rt-ac51u-squashfs-sysupgrade.bin",
+		"mt7620-rt-n12p-initramfs-kernel.bin",
 		"mt7620-rt-n12p-squashfs-sysupgrade.bin",
+		"mt7620-rt-n14u-initramfs-kernel.bin",
 		"mt7620-rt-n14u-squashfs-sysupgrade.bin",
+		"mt7620-tiny-ac-initramfs-kernel.bin",
 		"mt7620-tiny-ac-squashfs-sysupgrade.bin",
 		"mt7620-tplink_c20-v1-squashfs-factory.bin",
 		"mt7620-tplink_c20-v1-squashfs-sysupgrade.bin",
+		"mt7620-u25awf-h1-initramfs-kernel.bin",
 		"mt7620-u25awf-h1-squashfs-sysupgrade.bin",
+		"mt7620-we1026-5g-16m-initramfs-kernel.bin",
 		"mt7620-we1026-5g-16m-squashfs-sysupgrade.bin",
+		"mt7620-whr-1166d-initramfs-kernel.bin",
 		"mt7620-whr-1166d-squashfs-sysupgrade.bin",
+		"mt7620-whr-300hp2-initramfs-kernel.bin",
 		"mt7620-whr-300hp2-squashfs-sysupgrade.bin",
+		"mt7620-whr-600d-initramfs-kernel.bin",
 		"mt7620-whr-600d-squashfs-sysupgrade.bin",
+		"mt7620-wmr-300-initramfs-kernel.bin",
 		"mt7620-wmr-300-squashfs-sysupgrade.bin",
 		"mt7620-wn3000rpv3-squashfs-factory.bin",
 		"mt7620-wn3000rpv3-squashfs-sysupgrade.bin",
 		"mt7620-wrh-300cr-squashfs-factory.bin",
 		"mt7620-wrh-300cr-squashfs-sysupgrade.bin",
+		"mt7620-wrtnode-initramfs-kernel.bin",
 		"mt7620-wrtnode-squashfs-sysupgrade.bin",
 		"mt7620-wt3020-8M-squashfs-factory.bin",
 		"mt7620-wt3020-8M-squashfs-sysupgrade.bin",
+		"mt7620-xiaomi-miwifi-mini-squashfs-sysupgrade.bin",
+		"mt7620-y1-initramfs-kernel.bin",
+		"mt7620-y1s-initramfs-kernel.bin",
 		"mt7620-y1-squashfs-sysupgrade.bin",
 		"mt7620-y1s-squashfs-sysupgrade.bin",
+		"mt7620-youku-yk1-initramfs-kernel.bin",
 		"mt7620-youku-yk1-squashfs-sysupgrade.bin",
+		"mt7620-zbt-ape522ii-initramfs-kernel.bin",
 		"mt7620-zbt-ape522ii-squashfs-sysupgrade.bin",
+		"mt7620-zbt-cpe102-initramfs-kernel.bin",
 		"mt7620-zbt-cpe102-squashfs-sysupgrade.bin",
+		"mt7620-zbt-wa05-initramfs-kernel.bin",
 		"mt7620-zbt-wa05-squashfs-sysupgrade.bin",
+		"mt7620-zbt-we2026-initramfs-kernel.bin",
 		"mt7620-zbt-we2026-squashfs-sysupgrade.bin",
 		"mt7620-zbt-we826-16M-squashfs-sysupgrade.bin",
 		"mt7620-zbt-we826-32M-squashfs-sysupgrade.bin",
+		"mt7620-zbt-wr8305rt-initramfs-kernel.bin",
 		"mt7620-zbt-wr8305rt-squashfs-sysupgrade.bin",
+		"mt7620-zte-q7-initramfs-kernel.bin",
 		"mt7620-zte-q7-squashfs-sysupgrade.bin",
 		"mt7621-mir3g-initramfs-kernel.bin",
 		"mt7621-mir3g-squashfs-kernel1.bin",
 		"mt7621-mir3g-squashfs-rootfs0.bin",
 		"mt7621-mir3g-squashfs-sysupgrade.tar",
+		"mt7621-r6220-initramfs-kernel.bin",
+		"mt7621-r6220-squashfs-factory.img",
+		"mt7621-r6220-squashfs-kernel.bin",
+		"mt7621-r6220-squashfs-rootfs.bin",
+		"mt7621-r6220-squashfs-sysupgrade.bin",
 		"mt7621-ubnt-erx-initramfs-kernel.bin",
 		"mt7621-ubnt-erx-sfp-initramfs-kernel.bin",
+		"mt7621-ubnt-erx-sfp-squashfs-sysupgrade.bin",
 		"mt7621-ubnt-erx-sfp-squashfs-sysupgrade.tar",
+		"mt7621-ubnt-erx-squashfs-sysupgrade.bin",
 		"mt7621-ubnt-erx-squashfs-sysupgrade.tar",
+		"mt7621-wndr3700v5-initramfs-kernel.bin",
+		"mt7621-wndr3700v5-squashfs-factory.img",
+		"mt7621-wndr3700v5-squashfs-sysupgrade.bin",
+		"mt7621-xiaomi_mir3g-initramfs-kernel.bin",
+		"mt7621-xiaomi_mir3g-squashfs-kernel1.bin",
+		"mt7621-xiaomi_mir3g-squashfs-rootfs0.bin",
+		"mt7621-xiaomi_mir3g-squashfs-sysupgrade.bin",
 		"rt305x-fonera20n-squashfs-factory.bin",
 		"rt305x-fonera20n-squashfs-sysupgrade.bin",
 		"rt305x-mpr-a2-squashfs-sysupgrade.bin",
 		"rt305x-px-4885-8M-squashfs-sysupgrade.bin",
+		"rt305x-px4885-8M-squashfs-sysupgrade.bin",
 		"rt305x-vocore-16M-squashfs-sysupgrade.bin",
 		"rt305x-vocore-8M-squashfs-sysupgrade.bin",
+		"rt305x-vocore-squashfs-sysupgrade.bin",
 		"rt305x-wt1520-8M-squashfs-factory.bin",
-		"rt305x-wt1520-8M-squashfs-sysupgrade.bin",
-
-		"wt3020-8M-squashfs-factory.bin",
-		"wt3020-8M-squashfs-sysupgrade.bin",
-		"xiaomi-miwifi-mini-squashfs-sysupgrade.bin",
-		"fonera20n-squashfs-factory.bin",
-		"fonera20n-squashfs-sysupgrade.bin",
-		"mpr-a2-squashfs-sysupgrade.bin",
-		"px4885-8M-squashfs-sysupgrade.bin",
-		"vocore-squashfs-sysupgrade.bin",
-		"wt1520-8M-squashfs-factory.bin",
-		"wt1520-8M-squashfs-sysupgrade.bin"
-
-
+		"rt305x-wt1520-8M-squashfs-sysupgrade.bin"
 
 		],
 	"x86"=> 
@@ -600,7 +801,35 @@ foreach my $type (@$typeOrder)
 					print "var $archVarName = new Array();\n";
 
 					my @fileNames = glob("$downloadRootDir/$type/$arch/*");
+					if($arch eq "ar71xx")
+					{
+						my @moreFileNames = glob("$downloadRootDir/$type/ath79/*");
+						foreach my $fn (@moreFileNames)
+						{
+							push(@fileNames, $fn)
+						}
+					}
 					my $sortedTypeFiles = sortFiles(\@fileNames);
+
+					if($arch eq "ar71xx")
+					{
+						#ath79 first
+						my $ath79Files = [];
+						my $nonAth79Files = [];
+						foreach my $stf (@$sortedTypeFiles)
+						{
+							if($stf->[3] eq "ath79") 
+							{
+								push(@$ath79Files, $stf);
+							}
+							else
+							{
+								push(@$nonAth79Files, $stf);
+							}
+						}
+						$sortedTypeFiles = [ @$ath79Files, @$nonAth79Files ];
+					}
+
 					
 					my $definedBranches = {};
 					my $sortedBranches = [];
@@ -652,8 +881,14 @@ foreach my $type (@$typeOrder)
 									$name =~ s/^.*\///g;
 									
 									my $path = $f->[0];
-									my $md5 = `md5 $path 2>/dev/null | awk '{ print \$4 }' ; md5sum $path 2>/dev/null | awk ' { print \$1 } '`;
-									chomp $md5;
+
+									my $md5 = "12345678901234567890123456789012";
+									if($useDummyMd5 ne "TRUE")
+									{
+										$md5 = `md5 $path 2>/dev/null | awk '{ print \$4 }' ; md5sum $path 2>/dev/null | awk ' { print \$1 } '`;
+										chomp $md5;
+									}
+
 									print $versionVarName ."[\"$name\"] = [\"$path\", \"$md5\" ];\n";
 									push(@$fileOrder, "\"$name\"");
 								}
@@ -683,8 +918,12 @@ foreach my $type (@$typeOrder)
 				my $name = $f->[0];
 				$name =~ s/^.*\///g;
 				my $path = $f->[0];
-				my $md5 = `md5 $path 2>/dev/null | awk '{ print \$4 }' ; md5sum $path 2>/dev/null | awk ' { print \$1 } '`;
-				chomp $md5;
+				my $md5 = "12345678901234567890123456789012";
+				if($useDummyMd5 ne "TRUE")
+				{
+					$md5 = `md5 $path 2>/dev/null | awk '{ print \$4 }' ; md5sum $path 2>/dev/null | awk ' { print \$1 } '`;
+					chomp $md5;
+				}
 				print $typeVarName ."[\"$name\"] = [\"$path\", \"$md5\" ];\n";
 				push(@$fileOrder, "\"$name\""); 
 			}

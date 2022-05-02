@@ -73,6 +73,13 @@
 	else
 		echo "cdcif = \"$cdcif\";"
 	fi
+
+	iphif=$(ls -l /sys/class/net/*/device/driver | grep ipheth | sed 's!.*/sys/class/net/\(.*\)/device/.*!\1!')
+	if [ -z "$iphif" ]; then
+		echo "iphif = \"\";"
+	else
+		echo "iphif = \"$iphif\";"
+	fi
 %>
 var timezoneOffset = (parseInt(timezoneOffStr.substr(0,3),10)*60+parseInt(timezoneOffStr.substr(3,2),10))*60;
 
@@ -417,6 +424,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 								<option value="ncm"><%~ Mo3gNCM %></option>
 								<option value="mbim"><%~ Mo3gMBIM %></option>
 								<option value="dhcp_cdc"><%~ Mo3gHiLink %></option>
+								<option value="dhcp_iph"><%~ Mo3gIPH %></option>
 								<option value="none"><%~ Disabled %></option>
 							</select>
 						</span>

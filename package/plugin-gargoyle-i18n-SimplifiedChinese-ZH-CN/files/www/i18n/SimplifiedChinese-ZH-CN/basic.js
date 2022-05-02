@@ -142,5 +142,6 @@ basicS.WANIntr="WAN接口";
 basicS.Mo3gQMI="USB Modem (QMI)";
 basicS.Mo3gNCM="USB Modem (NCM)";
 basicS.Mo3gHiLink="USB Modem (HiLink, RNDIS)";
+basicS.Mo3gIPH="USB Modem (iPhone)";
 basicS.Dfult="默认";
 
