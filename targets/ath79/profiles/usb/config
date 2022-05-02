@@ -555,8 +555,8 @@ CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr1043nd-v3=y
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr1043nd-v4 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr1045nd-v2 is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr2543-v1=y
-# CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr710n-v1 is not set
-# CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr710n-v2.1 is not set
+CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr710n-v1=y
+CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr710n-v2.1=y
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr810n-v1 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr810n-v2 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr842n-v3 is not set
