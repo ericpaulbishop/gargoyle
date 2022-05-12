@@ -520,27 +520,29 @@ initialize_quota_qos()
 		insmod sch_prio  >/dev/null 2>&1
 		insmod sch_tbf   >/dev/null 2>&1
 		insmod cls_fw    >/dev/null 2>&1
+		insmod act_connmark >/dev/null 2>&1
 
-		ifconfig imq0 down  >/dev/null 2>&1
-		ifconfig imq1 down  >/dev/null 2>&1
-		rmmod  imq          >/dev/null 2>&1
-		# Allow IMQ to fail to load 3 times (15 seconds) before we bail out
+		ifconfig ifb0 down 2>/dev/null
+		rmmod ifb 2>/dev/null
+		# Allow IFB to fail to load 3 times (15 seconds) before we bail out
 		# No particularly graceful way to get out of this one. Quotas will be active but speed limits won't be enforced.
-		insmod imq numdevs=1 hook_chains="INPUT,FORWARD" hook_tables="mangle,mangle" >/dev/null 2>&1
+		insmod ifb >&- 2>&-
+		ip link add ifb0 type ifb 2>/dev/null
 		cnt=0
-		while [ "$(ls -d /proc/sys/net/ipv4/conf/imq* 2>&- | wc -l)" -eq "0" ]
+		while [ "$(ls -d /proc/sys/net/ipv4/conf/ifb* 2>&- | wc -l)" -eq "0" ]
 			do
-				logger -t "gargoyle_firewall_util" "insmod imq failed. Waiting and trying again..."
-				sleep 5
+				logger -t "gargoyle_firewall_util" "insmod ifb failed. Waiting and trying again..."
 				cnt=`expr $cnt + 1`
 				if [ $cnt -ge 3 ] ; then
-					logger -t "gargoyle_firewall_util" "Could not insmod imq, too many retries. Stopping."
+					logger -t "gargoyle_firewall_util" "Could not insmod ifb, too many retries. Stopping."
 					cleanup_old_quota_qos
 					return
 				fi
-				insmod imq numdevs=1 hook_chains="INPUT,FORWARD" hook_tables="mangle,mangle" >/dev/null 2>&1
+				sleep 5
+				insmod ifb >&- 2>&-
+				ip link add ifb0 type ifb 2>/dev/null
 			done
-		ip link set imq0 up
+		ip link set ifb0 up
 
 		#egress/upload
 		tc qdisc del dev $wan_if root >/dev/null 2>&1
@@ -556,22 +558,23 @@ initialize_quota_qos()
 		done
 
 		#ingress/download
-		tc qdisc del dev imq0 root >/dev/null 2>&1
-		tc qdisc add dev imq0 handle 1:0 root prio bands $num_down_bands priomap 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+		tc qdisc del dev ifb0 root >/dev/null 2>&1
+		tc qdisc add dev ifb0 handle 1:0 root prio bands $num_down_bands priomap 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 		cur_band=2
 		download_shift=8
 		for rate_kb in $unique_down ; do
 			kbit=$(echo $((rate_kb*8))kbit)
 			mark=$(($cur_band << $download_shift))
-			tc filter add dev imq0 parent 1:0 prio $cur_band protocol ip  handle $mark fw flowid 1:$cur_band
-			tc qdisc  add dev imq0 parent 1:$cur_band handle $cur_band: tbf rate $kbit burst $kbit limit $kbit
+			tc filter add dev ifb0 parent 1:0 prio $cur_band protocol ip  handle $mark fw flowid 1:$cur_band
+			tc qdisc  add dev ifb0 parent 1:$cur_band handle $cur_band: tbf rate $kbit burst $kbit limit $kbit
 			cur_band=$(($cur_band+1))
 		done
 
-		iptables -t mangle -I ingress_quotas -i $wan_if -j IMQ --todev 0
+		tc qdisc add dev $wan_if handle ffff: ingress
+		tc filter add dev $wan_if parent ffff: protocol ip u32 match u8 0 0 action connmark action mirred egress redirect dev ifb0 flowid ffff:1
 
 		#tc -s qdisc show dev $wan_if
-		#tc -s qdisc show dev imq0
+		#tc -s qdisc show dev ifb0
 	fi
 }
 
@@ -699,3 +702,4 @@ ifup_firewall()
 	initialize_quotas
 	insert_pf_loopback_rules
 }
+

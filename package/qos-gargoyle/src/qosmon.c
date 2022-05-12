@@ -171,7 +171,7 @@ int sel_err=0;           //Last error code returned by select
 #define DAEMON_NAME "qosmon"
 
 #ifndef DEVICE
-#define DEVICE "imq0"
+#define DEVICE "ifb0"
 #endif
 
 #define EXIT_SUCCESS 0
