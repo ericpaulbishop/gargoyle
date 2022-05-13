@@ -29,7 +29,10 @@ case "$tmodel" in
 	TEMPCPU="-";
 	TEMPMEM="-";
 	TEMPWIFI="-";
-	show_temp=0;;
+	show_temp=0;
+	# Try to load whatever info we can find from hwmon or thermal_zone
+	[ -e /sys/class/thermal/thermal_zone0/temp ] && { TEMPCPU=$(cut -c1-2 /sys/class/thermal/thermal_zone0/temp); show_temp=1; };
+	[ -e /sys/class/hwmon/hwmon0/temp1_input ] && { TEMPCPU=$(cut -c1-2 /sys/class/hwmon/hwmon0/temp1_input); show_temp=1; };;
 esac
 
 echo "temps.push(\"$show_temp\",\"$TEMPCPU\",\"$TEMPMEM\",\"$TEMPWIFI\");"
