@@ -23,12 +23,15 @@ function initWolTable()
 	{
 		var nextLine = arpLines[lineIndex];
 		var splitLine = nextLine.split(/[\t ]+/);
-		var mac = splitLine[4].toUpperCase();
-		var ip = splitLine[0];
-		if(mac != "00:00:00:00:00:00" && ip6_scope(ip)[1] != "Link-local Address")
+		if(splitLine.length > 4)
 		{
-			dataList.push( [ getHostname(ip), ip, mac, createWakeUpButton() ] );
-			ipToHostAndMac[ip] = 1;
+			var mac = splitLine[4].toUpperCase();
+			var ip = splitLine[0];
+			if(mac != "00:00:00:00:00:00" && ip6_scope(ip)[1] != "Link-local Address")
+			{
+				dataList.push( [ getHostname(ip), ip, mac, createWakeUpButton() ] );
+				ipToHostAndMac[ip] = 1;
+			}
 		}
 	}
 
@@ -56,6 +59,17 @@ function initWolTable()
 			ipToHostAndMac[ip] = 1;
 		}
 	}
+
+	var staticLeases = uciOriginal.getAllSectionsOfType('dhcp','host');
+	staticLeases.forEach(function(lease) {
+		var ether = uciOriginal.get('dhcp',lease,'mac');
+		var ip = uciOriginal.get('dhcp',lease,'ip');
+		if(ipToHostAndMac[ip] == null && ether != '')
+		{
+			dataList.push( [ getHostname(ip), ip, mac, createWakeUpButton() ] );
+			ipToHostAndMac[ip] = 1;
+		}
+	});
 
 	sort2dStrArr(dataList, 1);
 	var columnNames = [UI.HsNm, "IP", "MAC", "" ]
