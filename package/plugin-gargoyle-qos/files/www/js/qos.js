@@ -1102,7 +1102,7 @@ function updatetc()
 
 		if (direction == "download")
 		{
-			commands = commands + "imq0";
+			commands = commands + "ifb0";
 		}
 		else
 		{
