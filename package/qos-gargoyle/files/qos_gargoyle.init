@@ -790,11 +790,11 @@ define_interface()
 	fi
 
 	#Determine our wan ip from the wan interface we detected.
-	wan_ip=$(ifconfig $qos_interface | sed -n 's/.*inet addr:\([0-9/.]*\).*/\1/p')
-	local_ip=$(ifconfig br-lan | sed -n 's/.*inet addr:\([0-9/.]*\).*/\1/p')
+	network_get_ipaddr wan_ip wan
+	network_get_ipaddr local_ip lan
 	#Determine wan6 ip from wan interface. Note that the pppoe case is untested and likely incorrect! Also attempt to only grab global addresses
-	wan_ip6=$(ifconfig $qos_interface | sed -n 's/.*inet6 addr: \(200[0-9/.]*\)\/[0-9]*.*/\1/p')
-	local_ip6=$(ifconfig br-lan | sed -n 's/.*inet6 addr: \(200[0-9a-f/:]*\)\/[0-9]*.*/\1/p')
+	network_get_ipaddr6 wan_ip6 wan6
+	network_get_ipaddr6 local_ip6 lan
 	[ -n "$local_ip6" ] && wan_ip6="$local_ip6"
 
 	#Determine the VPN interface if there is one.
