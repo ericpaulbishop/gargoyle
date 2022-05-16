@@ -66,7 +66,7 @@ function initWolTable()
 		var ip = uciOriginal.get('dhcp',lease,'ip');
 		if(ipToHostAndMac[ip] == null && ether != '')
 		{
-			dataList.push( [ getHostname(ip), ip, mac, createWakeUpButton() ] );
+			dataList.push( [ getHostname(ip), ip, ether, createWakeUpButton() ] );
 			ipToHostAndMac[ip] = 1;
 		}
 	});
