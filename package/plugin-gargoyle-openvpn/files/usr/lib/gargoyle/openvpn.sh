@@ -193,7 +193,7 @@ $openvpn_client_to_client
 $openvpn_duplicate_cn
 $openvpn_pool
 
-cipher                $openvpn_cipher
+data-ciphers          $openvpn_cipher
 
 dev                   tun
 keepalive             25 180
@@ -209,12 +209,10 @@ tls-auth              $OPENVPN_DIR/ta.key 0
 
 persist-key
 persist-tun
-comp-lzo
 
 push "topology subnet"
 push "route-gateway $openvpn_server_internal_ip"
 $openvpn_redirect_gateway
-
 EOF
 	
 	if [ -n "$openvpn_redirect_gateway" ] ; then
@@ -364,7 +362,7 @@ remote-cert-tls server
 topology        subnet
 verb            3
 
-cipher          $openvpn_cipher
+data-ciphers    $openvpn_cipher
 
 ca              ca.crt
 cert            $openvpn_client_id.crt
@@ -374,7 +372,8 @@ tls-auth        ta.key 1
 nobind
 persist-key
 persist-tun
-comp-lzo
+
+push-peer-info
 EOF
 
 	#update info about assigned ip/subnet

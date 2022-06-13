@@ -7,7 +7,6 @@ if [ -f /tmp/openvpn.firewall.running ] ; then
 fi
 touch /tmp/openvpn.firewall.running
 
-
 # constants for openvpn bandwidth moniotoring rules
 
 backup_script_dir="/tmp/bw_backup"
@@ -136,15 +135,12 @@ initialize()
 {
 	enabled=$( uci get openvpn.custom_config.enabled 2>/dev/null )
 	if [ "$enabled" == "1" ] ; then
-		
-		
 		local_openvpn_port=$(netstat -u -t -p -a -e -n 2>/dev/null | awk ' $0 ~/openvpn/ { gsub(/^.*:/, "", $4) ; print $4 ; exit; } ')
 		openvpn_proto=$(netstat -u -t -p -a -e -n 2>/dev/null | awk ' $0 ~/openvpn/ { print $1 ; exit; } ')
-		network_get_device wan_if lan || \
+		network_get_device wan_if wan || \
 			wan_if=$(uci -q get network.wan.ifname)
 		vpn_if=$(uci -q get firewall.vpn_zone.device)
-		if [ -n "$local_openvpn_port" ] &&  [ -n "$openvpn_proto" ] && [ -n "$wan_if" ] && [ -n "$vpn_if" ]  ; then
-
+		if [ -n "$local_openvpn_port" ] && [ -n "$openvpn_proto" ] && [ -n "$wan_if" ] && [ -n "$vpn_if" ] ; then
 			# create openvpn bandwidth monitor chains
 			iptables -t mangle -N openvpn_down_bw
 			iptables -t mangle -N openvpn_up_bw
@@ -246,7 +242,6 @@ set_openvpn_cron_watchdog()
 
 
 RUN_MODE="$1"
-
 
 if [ "$RUN_MODE" != "start" ] && [ "$RUN_MODE" != "stop" ] && [ "$RUN_MODE" != "restart" ] && [ "$RUN_MODE" != "update_enabled" ] ; then
 	RUN_MODE="restart"

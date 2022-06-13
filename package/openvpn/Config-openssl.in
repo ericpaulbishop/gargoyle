@@ -12,10 +12,6 @@ config OPENVPN_gargoyle_openssl_ENABLE_X509_ALT_USERNAME
 	bool "Enable the --x509-username-field feature"
 	default n
 
-config OPENVPN_gargoyle_openssl_ENABLE_SERVER
-	bool "Enable server support (otherwise only client mode is support)"
-	default y
-
 #config OPENVPN_gargoyle_openssl_ENABLE_EUREPHIA
 #	bool "Enable support for the eurephia plug-in"
 #	default n
@@ -27,14 +23,6 @@ config OPENVPN_gargoyle_openssl_ENABLE_MANAGEMENT
 #config OPENVPN_gargoyle_openssl_ENABLE_PKCS11
 #	bool "Enable pkcs11 support"
 #	default n
-
-config OPENVPN_gargoyle_openssl_ENABLE_HTTP
-	bool "Enable HTTP proxy support"
-	default y
-
-config OPENVPN_gargoyle_openssl_ENABLE_SOCKS
-	bool "Enable SOCKS proxy support"
-	default y
 
 config OPENVPN_gargoyle_openssl_ENABLE_FRAGMENT
 	bool "Enable internal fragmentation support (--fragment)"

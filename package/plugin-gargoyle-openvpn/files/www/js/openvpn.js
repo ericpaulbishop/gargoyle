@@ -164,8 +164,7 @@ function saveChanges()
 			
 
 			
-			var cipher = getSelectedValue(prefix + "cipher")
-			uci.remove("openvpn_gargoyle", "server", "keysize")	//Leave in to ensure option is removed. Deprecated in Openvpn 2.4
+			var cipher = getSelectedCiphers('server');
 			uci.set("openvpn_gargoyle", "server", "cipher", cipher);
 		}
 		if(openvpnConfig == "client")
@@ -375,7 +374,35 @@ function clientManualCheckCaCertKey()
 	}
 }
 
+function setSelectedCiphers(cipherStr,prefix)
+{
+	var ciphers = cipherStr.split(':');
+	var cipherIdx = 1;
+	var cipherSelEl = byId('openvpn_' + prefix + '_cipher_' + cipherIdx);
+	while(cipherSelEl)
+	{
+		cipherSelEl.checked = ciphers.indexOf(cipherSelEl.value) > -1;
+		cipherIdx += 1;
+		cipherSelEl = byId('openvpn_' + prefix + '_cipher_' + cipherIdx);
+	}
+}
 
+function getSelectedCiphers(prefix)
+{
+	var ciphers = [];
+	var cipherIdx = 1;
+	var cipherSelEl = byId('openvpn_' + prefix + '_cipher_' + cipherIdx);
+	while(cipherSelEl)
+	{
+		if(cipherSelEl.checked)
+		{
+			ciphers.push(cipherSelEl.value);
+		}
+		cipherIdx += 1;
+		cipherSelEl = byId('openvpn_' + prefix + '_cipher_' + cipherIdx);
+	}
+	return ciphers.length == 0 ? 'AES-256-GCM' : ciphers.join(':');
+}
 
 function resetData()
 {
@@ -421,11 +448,11 @@ function resetData()
 	var serverCipher  = uciOriginal.get("openvpn_gargoyle", "server", "cipher")
 	if(serverCipher == "")
 	{
-		serverCipher = "AES-256-CBC"
+		serverCipher = "AES-256-GCM"
 	}
 
 	setSelectedValue("openvpn_server_protocol", getServerVarWithDefault("proto", "udp"))
-	setSelectedValue("openvpn_server_cipher", serverCipher)
+	setSelectedCiphers(serverCipher,'server');
 	setSelectedValue("openvpn_server_client_to_client", getServerVarWithDefault("client_to_client", "false"))
 	setSelectedValue("openvpn_server_subnet_access", getServerVarWithDefault("subnet_access", "false"))
 	setSelectedValue("openvpn_server_duplicate_cn", getServerVarWithDefault("duplicate_cn", "false"))
@@ -574,7 +601,7 @@ function updateClientControlsFromConfigText()
 				proto = lineParts[1] == "udp" ? "udp" : "tcp"
 			}
 		}
-		else if(lineParts[0].toLowerCase() == "cipher")
+		else if(lineParts[0].toLowerCase() == "data-ciphers")
 		{
 			cipher = lineParts[1] != null ? lineParts[1] : cipher;
 		}
@@ -598,15 +625,7 @@ function updateClientControlsFromConfigText()
 	}
 	if(cipher != null)
 	{
-		if(cipher == "AES-128-CBC" || cipher == "AES-256-CBC" || cipher == "AES-128-GCM" || cipher == "AES-256-GCM")
-		{
-			setSelectedValue("openvpn_client_cipher", cipher)
-		}
-		else
-		{
-			setSelectedValue("openvpn_client_cipher", "other")
-			document.getElementById("openvpn_client_cipher_other").value = cipher
-		}
+		setSelectedCiphers(cipher,'client');
 	}
 	if(taDirection != null)
 	{
@@ -625,18 +644,13 @@ function updateClientConfigTextFromControls()
 	var remote      = document.getElementById("openvpn_client_remote").value;
 	var port        = document.getElementById("openvpn_client_port").value;
 	var proto       = getSelectedValue("openvpn_client_protocol");
-	var cipher      = getSelectedValue("openvpn_client_cipher");
+	var cipher      = getSelectedCiphers('client');
 	var taDirection = getSelectedValue("openvpn_client_ta_direction") == "1" ? " 1" : ""
-	
-	if(cipher == "other")
-	{
-		cipher  = document.getElementById("openvpn_client_cipher_other").value;
-	}
 
 	var configLines = document.getElementById("openvpn_client_conf_text").value.split(/[\r\n]+/);
 	var newLines = [];
 	var foundVars = [];
-	var defaultCipher = cipher == "AES-256-CBC" ? true : false;
+	var defaultCipher = cipher == "AES-256-GCM" ? true : false;
 	while(configLines.length >0)
 	{
 		var line = configLines.shift();
@@ -651,9 +665,9 @@ function updateClientConfigTextFromControls()
 			line = "proto " + (proto == "tcp" ? "tcp-client" : "udp" )
 			foundVars["proto"] = 1
 		}
-		else if(lineParts[0].toLowerCase() == "cipher")
+		else if(lineParts[0].toLowerCase() == "data-ciphers")
 		{
-			line = "cipher " + cipher
+			line = "data-ciphers " + cipher
 			foundVars["cipher"] = 1
 		}
 		else if(lineParts[0].toLowerCase() == "rport" || lineParts[0].toLowerCase() == "port" )
@@ -679,7 +693,7 @@ function updateClientConfigTextFromControls()
 
 	if(foundVars["cipher"] == null && (!defaultCipher) )
 	{
-		newLines.unshift("cipher " + cipher);
+		newLines.unshift("data-ciphers " + cipher);
 	}
 	if(foundVars["proto"] == null)
 	{
@@ -867,7 +881,6 @@ function setClientVisibility()
 	var zip = getSelectedValue("openvpn_client_file_type", document) == "zip" ? 1 : 0;
 	var multi = getSelectedValue("openvpn_client_file_type", document) == "multi" ? 1 : 0;
 	var single = getSelectedValue("openvpn_client_file_type", document) == "single" ? 1 : 0;
-	document.getElementById("openvpn_client_cipher_other_container").style.display = getSelectedValue("openvpn_client_cipher", document) == "other" ? "block" : "none"
 	setVisibility( ["openvpn_client_zip_file_container", "openvpn_client_conf_file_container", "openvpn_client_ca_file_container", "openvpn_client_cert_file_container", "openvpn_client_key_file_container", "openvpn_client_ta_key_file_container","openvpn_client_auth_user_pass_container"], [zip, multi || single, multi, multi, multi, multi, single], ["block", "block", "block", "block", "block", "block", "block"], document)
 	setVisibility( ["openvpn_client_file_controls", "openvpn_client_manual_controls"], [ boolToInt(upCheckEl.checked), boolToInt(manCheckEl.checked) ], ["block","block"], document)
 	

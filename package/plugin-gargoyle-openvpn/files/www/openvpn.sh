@@ -129,12 +129,28 @@
 				<div id="openvpn_server_cipher_container" class="row form-group">
 					<label class="col-xs-5" for='openvpn_server_cipher' id='openvpn_server_cipher_label'><%~ OCiph %>:</label>
 					<span class="col-xs-7">
-						<select class="form-control" id='openvpn_server_cipher'>
-							<option value='AES-128-CBC'>AES-CBC 128bit</option>
-							<option value='AES-256-CBC'>AES-CBC 256bit</option>
-							<option value='AES-128-GCM'>AES-GCM 128bit</option>
-							<option value='AES-256-GCM'>AES-GCM 256bit</option>
-						</select>
+						<input type="checkbox" id="openvpn_server_cipher_1" value="CHACHA20-POLY1305">
+						<label for="openvpn_server_cipher_1" id="openvpn_server_cipher_1_label">Chacha20-Poly1305</label>
+					</span>
+					<span class="col-xs-7 col-xs-offset-5">
+						<input type="checkbox" id="openvpn_server_cipher_2" value="AES-256-GCM">
+						<label for="openvpn_server_cipher_2" id="openvpn_server_cipher_2_label">AES-GCM 256bit</label>
+					</span>
+					<span class="col-xs-7 col-xs-offset-5">
+						<input type="checkbox" id="openvpn_server_cipher_3" value="AES-128-GCM">
+						<label for="openvpn_server_cipher_3" id="openvpn_server_cipher_3_label">AES-GCM 128bit</label>
+					</span>
+					<span class="col-xs-7 col-xs-offset-5">
+						<input type="checkbox" id="openvpn_server_cipher_4" value="AES-256-CBC">
+						<label for="openvpn_server_cipher_4" id="openvpn_server_cipher_4_label">AES-CBC 256bit</label>
+					</span>
+					<span class="col-xs-7 col-xs-offset-5">
+						<input type="checkbox" id="openvpn_server_cipher_5" value="AES-128-CBC">
+						<label for="openvpn_server_cipher_5" id="openvpn_server_cipher_5_label">AES-CBC 128bit</label>
+					</span>
+					<span class="col-xs-7 col-xs-offset-5">
+						<input type="checkbox" id="openvpn_server_cipher_6" value="BF-CBC">
+						<label for="openvpn_server_cipher_6" id="openvpn_server_cipher_6_label">BF-CBC</label>
 					</span>
 				</div>
 
@@ -319,21 +335,32 @@
 							</span>
 						</div>
 
-						<div id='openvpn_client_cipher_container' class="row form-group">
+						<div id='openvpn_client_cipher_container' class='row form-group'>
 							<label class="col-xs-5" for='openvpn_client_cipher' id='openvpn_client_cipher_label'><%~ OCiph %>:</label>
 							<span class="col-xs-7">
-								<select class="form-control" id='openvpn_client_cipher' onchange="setClientVisibility(document);updateClientConfigTextFromControls();" >
-									<option value='AES-128-CBC'>AES-CBC 128bit</option>
-									<option value='AES-256-CBC'>AES-CBC 256bit</option>
-									<option value='AES-128-GCM'>AES-GCM 128bit</option>
-									<option value='AES-256-GCM'>AES-GCM 256bit</option>
-									<option value='other'><%~ Othr %></option>
-								</select>
+								<input type="checkbox" id="openvpn_client_cipher_1" value="CHACHA20-POLY1305" onchange="setClientVisibility(document);updateClientConfigTextFromControls();">
+								<label for="openvpn_client_cipher_1" id="openvpn_client_cipher_1_label">Chacha20-Poly1305</label>
 							</span>
-						</div>
-
-						<div id='openvpn_client_cipher_other_container' class="row form-group">
-							<span class="col-xs-7 col-xs-offset-5"><input type='text' class="form-control" oninput="updateClientConfigTextFromControls()" id="openvpn_client_cipher_other" />&nbsp;<em><%~ Cphr %></em></span>
+							<span class="col-xs-7 col-xs-offset-5">
+								<input type="checkbox" id="openvpn_client_cipher_2" value="AES-256-GCM" onchange="setClientVisibility(document);updateClientConfigTextFromControls();">
+								<label for="openvpn_client_cipher_2" id="openvpn_client_cipher_2_label">AES-GCM 256bit</label>
+							</span>
+							<span class="col-xs-7 col-xs-offset-5">
+								<input type="checkbox" id="openvpn_client_cipher_3" value="AES-128-GCM" onchange="setClientVisibility(document);updateClientConfigTextFromControls();">
+								<label for="openvpn_client_cipher_3" id="openvpn_client_cipher_3_label">AES-GCM 128bit</label>
+							</span>
+							<span class="col-xs-7 col-xs-offset-5">
+								<input type="checkbox" id="openvpn_client_cipher_4" value="AES-256-CBC" onchange="setClientVisibility(document);updateClientConfigTextFromControls();">
+								<label for="openvpn_client_cipher_4" id="openvpn_client_cipher_4_label">AES-CBC 256bit</label>
+							</span>
+							<span class="col-xs-7 col-xs-offset-5">
+								<input type="checkbox" id="openvpn_client_cipher_5" value="AES-128-CBC" onchange="setClientVisibility(document);updateClientConfigTextFromControls();">
+								<label for="openvpn_client_cipher_5" id="openvpn_client_cipher_5_label">AES-CBC 128bit</label>
+							</span>
+							<span class="col-xs-7 col-xs-offset-5">
+								<input type="checkbox" id="openvpn_client_cipher_6" value="BF-CBC" onchange="setClientVisibility(document);updateClientConfigTextFromControls();">
+								<label for="openvpn_client_cipher_6" id="openvpn_client_cipher_6_label">BF-CBC</label>
+							</span>
 						</div>
 
 						<div id='openvpn_client_block_nonovpn_container' class="row form-group">
