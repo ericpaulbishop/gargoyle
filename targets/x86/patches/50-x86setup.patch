@@ -7,7 +7,7 @@
 +
 +boot()
 +{
-+	eths=$(cat /proc/net/dev | grep eth | sed 's/^.*eth/eth/g' | sed 's/:.*$//g')
++	eths=$(cat /proc/net/dev | grep eth | sed 's/^.*eth/eth/g' | sed 's/:.*$//g' | sort -r)
 +	num_eths=$(echo $eths | wc -w)
 +
 +	wan_if_num=$(($num_eths-1))
