@@ -38,7 +38,7 @@ char default_ip_lookup_url[][MAX_LOOKUP_URL_LENGTH] = {
 							"http://www.tracemyip.org",
 							"http://checkip.dyndns.org",
 							"http://checkip.org",
-							"https://aruljohn.com/ip/",
+							"https://api.aruljohn.com/ip",
 							"http://www.lawrencegoetz.com/programs/ipinfo/",
 							"http://myipinfo.net",
 							"http://www.myipnumber.com",
