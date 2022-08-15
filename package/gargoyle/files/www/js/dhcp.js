@@ -78,7 +78,12 @@ function saveChanges()
 			hostid = tableData[hostIdx][3];
 			if(hostid != "-")
 			{
-				uci.set("dhcp",cfgid,"hostid",hostid.replace(/:/g,""));
+				var splitHostId = hostid.split(':');
+				if(splitHostId.length == 4)
+				{
+					splitHostId[3] = ('0000' + splitHostId[3]).slice(-4);
+				}
+				uci.set("dhcp",cfgid,"hostid",splitHostId.join(''));
 			}
 			duid = tableData[hostIdx][4];
 			if(duid != "-")
