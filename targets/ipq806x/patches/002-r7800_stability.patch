@@ -1,0 +1,22 @@
+--- /dev/null
++++ b/package/base-files/files/etc/init.d/r7800stability
+@@ -0,0 +1,9 @@
++#!/bin/sh /etc/rc.common
++
++START=99
++
++boot()
++{
++	dev=$(cat /tmp/sysinfo/board_name | grep "netgear,r7800")
++	[ -n "$dev" ] && {echo "performance" > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor; echo "performance" > /sys/devices/system/cpu/cpufreq/policy1/scaling_governor;}
++}
+--- a/package/base-files/Makefile
++++ b/package/base-files/Makefile
+@@ -180,6 +180,7 @@ define Package/base-files/install
+ 
+ 	chmod 0600 $(1)/etc/shadow
+ 	chmod 1777 $(1)/tmp
++	chmod 0775 $(1)/etc/init.d/r7800stability
+ 
+ 	$(call ImageConfigOptions,$(1))
+ 	$(call Package/base-files/install-target,$(1))
