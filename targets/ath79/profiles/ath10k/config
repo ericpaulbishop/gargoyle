@@ -3125,16 +3125,16 @@ CONFIG_PACKAGE_ath10k-board-qca988x=m
 # CONFIG_PACKAGE_ath10k-firmware-qca4019-ct-htt is not set
 # CONFIG_PACKAGE_ath10k-firmware-qca6174 is not set
 # CONFIG_PACKAGE_ath10k-firmware-qca9377 is not set
-# CONFIG_PACKAGE_ath10k-firmware-qca9887 is not set
+CONFIG_PACKAGE_ath10k-firmware-qca9887=m
 CONFIG_PACKAGE_ath10k-firmware-qca9887-ct=m
-# CONFIG_PACKAGE_ath10k-firmware-qca9887-ct-full-htt is not set
-# CONFIG_PACKAGE_ath10k-firmware-qca9888 is not set
+CONFIG_PACKAGE_ath10k-firmware-qca9887-ct-full-htt=m
+CONFIG_PACKAGE_ath10k-firmware-qca9888=m
 CONFIG_PACKAGE_ath10k-firmware-qca9888-ct=m
-# CONFIG_PACKAGE_ath10k-firmware-qca9888-ct-full-htt is not set
-# CONFIG_PACKAGE_ath10k-firmware-qca9888-ct-htt is not set
-# CONFIG_PACKAGE_ath10k-firmware-qca988x is not set
+CONFIG_PACKAGE_ath10k-firmware-qca9888-ct-full-htt=m
+CONFIG_PACKAGE_ath10k-firmware-qca9888-ct-htt=m
+CONFIG_PACKAGE_ath10k-firmware-qca988x=m
 CONFIG_PACKAGE_ath10k-firmware-qca988x-ct=m
-# CONFIG_PACKAGE_ath10k-firmware-qca988x-ct-full-htt is not set
+CONFIG_PACKAGE_ath10k-firmware-qca988x-ct-full-htt=m
 # CONFIG_PACKAGE_ath10k-firmware-qca9984 is not set
 # CONFIG_PACKAGE_ath10k-firmware-qca9984-ct is not set
 # CONFIG_PACKAGE_ath10k-firmware-qca9984-ct-full-htt is not set
@@ -4003,11 +4003,11 @@ CONFIG_ATH_USER_REGD=y
 # CONFIG_PACKAGE_ATH_DEBUG is not set
 CONFIG_PACKAGE_ATH_DFS=y
 # CONFIG_PACKAGE_ATH_DYNACK is not set
-# CONFIG_PACKAGE_kmod-ath10k is not set
+CONFIG_PACKAGE_kmod-ath10k=m
 CONFIG_PACKAGE_kmod-ath10k-ct=m
 CONFIG_ATH10K-CT_LEDS=y
 CONFIG_PACKAGE_kmod-ath10k-ct-smallbuffers=m
-# CONFIG_PACKAGE_kmod-ath10k-smallbuffers is not set
+CONFIG_PACKAGE_kmod-ath10k-smallbuffers=m
 # CONFIG_PACKAGE_kmod-ath5k is not set
 # CONFIG_PACKAGE_kmod-ath6kl-sdio is not set
 # CONFIG_PACKAGE_kmod-ath6kl-usb is not set
