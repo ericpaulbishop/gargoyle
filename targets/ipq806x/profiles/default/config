@@ -75,7 +75,8 @@ CONFIG_TARGET_PER_DEVICE_ROOTFS=y
 # CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_buffalo_wxr-2533dhp is not set
 # CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_compex_wpq864 is not set
 # CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_edgecore_ecw5410 is not set
-# CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_linksys_ea7500-v1 is not set
+CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_linksys_ea7500-v1=y
+CONFIG_TARGET_DEVICE_PACKAGES_ipq806x_generic_DEVICE_linksys_ea7500-v1="kmod-ath10k-ct ath10k-firmware-qca99x0-ct"
 CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_linksys_ea8500=y
 CONFIG_TARGET_DEVICE_PACKAGES_ipq806x_generic_DEVICE_linksys_ea8500="kmod-ath10k-ct ath10k-firmware-qca99x0-ct"
 # CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_nec_wg2600hp is not set
