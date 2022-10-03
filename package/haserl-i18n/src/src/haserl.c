@@ -1,20 +1,19 @@
 /* --------------------------------------------------------------------------
- * Copyright 2003-2021 (inclusive) Nathan Angelacos 
- *                   (nangel@users.sourceforge.net)
- * 
- *   This file is part of haserl.
+ * core of haserl.cgi - a poor-man's php for embedded/lightweight environments
+ * Copyright (c) 2003-2007   Nathan Angelacos (nangel@users.sourceforge.net)
  *
- *   Haserl is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License version 2,
- *   as published by the Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License, version 2, as published by the Free
+ * Software Foundation.
  *
- *   Haserl is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * General Public License for more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with haserl.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  * -----
  * The x2c() and unescape_url() routines were taken from
@@ -42,7 +41,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
-#include <fcntl.h>
+#include <sys/fcntl.h>
 #include <stdlib.h>
 #include <string.h>
 #include <grp.h>
@@ -272,7 +271,7 @@ myputenv (list_t * cur, char *str, char *prefix)
 	      /* if an array, create a new string with this
 	       * value added to the end of the old value(s) 
 	       */
-	      temp = xmalloc (strlen (cur->buf) + strlen (entry) - len + 2);
+	      temp = xmalloc (strlen (cur->buf) + strlen(entry) - len + 1);
 	      memmove (temp, cur->buf, strlen (cur->buf) + 1);
 	      strcat (temp, "\n");
 	      strcat (temp, str + keylen + 3);
@@ -400,17 +399,17 @@ haserlflags (list_t * env)
 {
   char buf[200];
 
-  snprintf (buf, 200, "UPLOAD_DIR=%s", global.uploaddir);
-  myputenv (env, buf, global.haserl_prefix);
+  snprintf (buf, 200, "HASERL_UPLOAD_DIR=%s", global.uploaddir);
+  myputenv (env, buf, global.nul_prefix);
 
-  snprintf (buf, 200, "UPLOAD_LIMIT=%lu", global.uploadkb);
-  myputenv (env, buf, global.haserl_prefix);
+  snprintf (buf, 200, "HASERL_UPLOAD_LIMIT=%lu", global.uploadkb);
+  myputenv (env, buf, global.nul_prefix);
 
-  snprintf (buf, 200, "ACCEPT_ALL=%d", global.acceptall);
-  myputenv (env, buf, global.haserl_prefix);
+  snprintf (buf, 200, "HASERL_ACCEPT_ALL=%d", global.acceptall);
+  myputenv (env, buf, global.nul_prefix);
 
-  snprintf (buf, 200, "SHELL=%s", global.shell);
-  myputenv (env, buf, global.haserl_prefix);
+  snprintf (buf, 200, "HASERL_SHELL=%s", global.shell);
+  myputenv (env, buf, global.nul_prefix);
 
 }
 
@@ -463,125 +462,92 @@ ReadCGIQueryString (list_t * env)
  */
 
 int
-ReadCGIPOSTValues (list_t * env )
+ReadCGIPOSTValues (list_t * env)
 {
-  char prefix[64];
-
   size_t content_length = 0;
   size_t max_len;
-  int	urldecoding = 0;
-  char *matchstr = "";
   size_t i, j, x;
   sliding_buffer_t sbuf;
   buffer_t token;
   unsigned char *data;
   const char *CONTENT_LENGTH = "CONTENT_LENGTH";
-  const char *CONTENT_TYPE = "CONTENT_TYPE";
-  char *content_type = NULL;
 
   if ((getenv (CONTENT_LENGTH) == NULL) ||
       (strtoul (getenv (CONTENT_LENGTH), NULL, 10) == 0))
     return (0);
 
-  content_type = getenv(CONTENT_TYPE);
-
-  if ( content_type != NULL )
+  if (getenv ("CONTENT_TYPE"))
+    {
+      if (strncasecmp (getenv ("CONTENT_TYPE"), "multipart/form-data", 19)
+	  == 0)
 	{
-	 if ( strncasecmp ( content_type , "multipart/form-data", 19) == 0 )
-     		{
-	  		/* This is a mime request, we need to go to the mime handler */
-	  		i = rfc2388_handler (env);
-	  		return (i);
-		}
-	 if ( strncasecmp (getenv (CONTENT_TYPE), "application/x-www-form-urlencoded", 33) == 0 ) 
-		{
-			/* url encoded data in the payload */
-  			urldecoding = 1;
-			matchstr = "&";
-		}
+	  /* This is a mime request, we need to go to the mime handler */
+	  i = rfc2388_handler (env);
+	  return (i);
 	}
+    }
 
-  /* otherwise, assume just a binary octet stream */
-  	// These were set in the variable definition - just leave them alone
-	// matchstr = "";
-	// urldecoding = 0;
+  s_buffer_init (&sbuf, 32768);
+  sbuf.fh = STDIN;
+  if (getenv (CONTENT_LENGTH))
+    {
+      sbuf.maxread = strtoul (getenv (CONTENT_LENGTH), NULL, 10);
+    }
+  haserl_buffer_init (&token);
+
 
   /* Allow 2MB content, unless they have a global upload set */
   max_len = ((global.uploadkb == 0) ? 2048 : global.uploadkb) *1024;
 
+  do
+    {
+      /* x is true if this token ends with a matchstr or is at the end of stream */
+      x = s_buffer_read (&sbuf, "&");
+      content_length += sbuf.len;
+      if (content_length > max_len)
+	{
+	  die_with_message (NULL, NULL,
+			    "Attempted to send content larger than allowed limits.");
+	}
 
-  	 s_buffer_init (&sbuf, 32768);
-	 sbuf.fh = STDIN;
+      if ((x == 0) || (token.data))
+	{
+	  buffer_add (&token, (char *) sbuf.segment, sbuf.len);
+	}
 
-	  if (getenv (CONTENT_LENGTH))
+      if (x)
+	{
+	  data = sbuf.segment;
+	  sbuf.segment[sbuf.len] = '\0';
+	  if (token.data)
 	    {
-	      sbuf.maxread = strtoul (getenv (CONTENT_LENGTH), NULL, 10);
+	      /* add the ASCIIZ */
+	      buffer_add (&token, sbuf.segment + sbuf.len, 1);
+	      data = token.data;
 	    }
-	  haserl_buffer_init (&token);
-	
-	if ( urldecoding == 0 ) {
-		buffer_add( &token, "body=", 5 );
-		}
 
-	/* Set the prefix to the request method */  
-  	if (getenv ("REQUEST_METHOD") != NULL)
-    		{
-  			snprintf (prefix, 64, "%s_", getenv("REQUEST_METHOD"));
-		} else {
-  			snprintf (prefix, 64, "REQUEST_");
-		}
-
-	do
+	  /* change plusses into spaces */
+	  j = strlen ((char *) data);
+	  for (i = 0; i <= j; i++)
 	    {
-	      /* x is true if this token ends with a matchstr or is at the end of stream */
-	      x = s_buffer_read (&sbuf, matchstr);
-	      content_length += sbuf.len;
-	      if (content_length > max_len)
+	      if (data[i] == '+')
 		{
-		  die_with_message (NULL, NULL,
-				    "Attempted to send content larger than allowed limits.");
-		}
-	
-	      if ((x == 0) || (token.data))
-		{
-		  buffer_add (&token, (char *) sbuf.segment, sbuf.len);
-		}
-	
-	      if (x)
-		{
-		  data = sbuf.segment;
-		  sbuf.segment[sbuf.len] = '\0';
-		  if (token.data)
-		    {
-		      /* add the ASCIIZ */
-		      buffer_add (&token, sbuf.segment + sbuf.len, 1);
-		      data = token.data;
-		    }
-
-		if (urldecoding) {
-		  /* change plusses into spaces */
-		  j = strlen ((char *) data);
-		  for (i = 0; i <= j; i++)
-		    {
-		      if (data[i] == '+')
-			{
-			  data[i] = ' ';
-			}
-		    }
-		  unescape_url ((char *) data);
-		}
-		myputenv (env, (char *) data, global.var_prefix);
-		myputenv (env, (char *) data, prefix);
-		if (token.data)
-		    {
-		      buffer_reset (&token);
-		    }
+		  data[i] = ' ';
 		}
 	    }
-	  while (!sbuf.eof);
-	  s_buffer_destroy (&sbuf);
-	  buffer_destroy (&token);
-	  return (0);
+	  unescape_url ((char *) data);
+	  myputenv (env, (char *) data, global.var_prefix);
+	  myputenv (env, (char *) data, global.post_prefix);
+	  if (token.data)
+	    {
+	      buffer_reset (&token);
+	    }
+	}
+    }
+  while (!sbuf.eof);
+  s_buffer_destroy (&sbuf);
+  buffer_destroy (&token);
+  return (0);
 }
 
 
@@ -645,29 +611,19 @@ parseCommandLine (int argc, char *argv[])
 }
 
 int
-BecomeUser (script_t *scriptbuf)
+BecomeUser (uid_t uid, gid_t gid)
 {
   /* This silently fails if it doesn't work */
+  /* Following is from Timo Teras */
+  if (getuid () == 0)
+    setgroups (1, &gid);
 
-  /* if we are not root, trying to run a root script,
-   * verify it looks like a script (pass 1)
-   */
-  if ( scriptbuf->uid == 0 ) { 
-	if ( scriptbuf->bang_script > 0 ) {
-		/* Then we change permissions */
-		setgid (scriptbuf->gid);
-		setgid (getgid ());
+  setgid (gid);
+  setgid (getgid ());
 
-		setuid (scriptbuf->uid);
-		setuid (getuid ());
+  setuid (uid);
+  setuid (getuid ());
 
-		/* Following is from Timo Teras */
-		setgroups (1, &(scriptbuf->gid));
-	} else {
-		die_with_message ( NULL, NULL, "Exception.");
-	}
-
-  }
   return (0);
 }
 
@@ -690,9 +646,7 @@ assignGlobalStartupValues ()
   global.get_prefix = "GET_";
   global.post_prefix = "POST_";
   global.cookie_prefix = "COOKIE_";
-  global.haserl_prefix = "HASERL_";
   global.nul_prefix = "";
-  global.exec_name = "";
   // translationKV_map gets filled only if a <%~ translation %> tag is found; and unknowable until preprocessing
 
   uci_init();
@@ -726,16 +680,7 @@ unlink_uploadlist ()
 
 }
 
-void
-cleanup (void)
-{
-  if (global.uploadlist)
-    {
-      unlink_uploadlist ();
-      free_token_list (global.uploadlist);
-      global.uploadlist = NULL;
-    }
-}
+
 
 /*-------------------------------------------------------------------------
  *
@@ -752,6 +697,7 @@ main (int argc, char *argv[])
 #endif
   script_t *scriptchain;
 
+  int retval = 0;
   char *filename = NULL;
 
   argv_t *av = NULL;
@@ -763,18 +709,10 @@ main (int argc, char *argv[])
 
   list_t *env = NULL;
 
-  if (atexit (cleanup) != 0)
-    {
-      die_with_message (NULL, NULL, "atexit() failed");
-    }
-
   assignGlobalStartupValues ();
 #ifndef JUST_LUACSHELL
   haserl_buffer_init (&script_text);
 #endif
-
-  // assign exec_name to be the name of the interpreter 
-  global.exec_name = argv[0];
 
   /* if more than argv[1] and argv[1] is not a file */
   switch (argc)
@@ -854,7 +792,7 @@ main (int argc, char *argv[])
 
   scriptchain = load_script (filename, NULL);
 /* drop permissions */
-  BecomeUser (scriptchain);
+  BecomeUser (scriptchain->uid, scriptchain->gid);
 
   /* populate the function pointers based on the shell selected */
   if (strcmp (global.shell, "lua") && strcmp (global.shell, "luac"))
@@ -900,10 +838,7 @@ main (int argc, char *argv[])
       shell_destroy = &lua_common_destroy;
       global.var_prefix = "FORM.";
       global.nul_prefix = "ENV.";
-      global.get_prefix = "GET.";
-      global.post_prefix = "POST.";
-      global.cookie_prefix = "COOKIE.";
-      global.haserl_prefix = "HASERL.";
+
       if (global.shell[3] == 'c')	/* luac only */
 #ifdef INCLUDE_LUACSHELL
 	shell_doscript = &luac_doscript;
@@ -936,15 +871,6 @@ main (int argc, char *argv[])
   if (strcmp (global.shell, "luac"))
     {
       tokenchain = build_token_list (scriptchain, NULL);
-      /* This is a second pass to make sure haserl running as root 
-       * is actually running a haserl script.  If the first script
-       * doesn't have any haserl tokens, assume it is not valid
-       */
-      if (getuid () == 0) {
-	      if ( scriptchain->tokens < 2 ) {
-		      die_with_message ( NULL, NULL, "Exception.");
-		}
-	}
       preprocess_token_list (tokenchain);
     }
 #endif
@@ -956,20 +882,18 @@ main (int argc, char *argv[])
       CookieVars (env);
       if (getenv ("REQUEST_METHOD"))
 	{
-	  if ( (strcasecmp (getenv ("REQUEST_METHOD"), "GET") == 0) ||
-	     (strcasecmp (getenv ("REQUEST_METHOD"), "DELETE") == 0) )
+	  if (strcasecmp (getenv ("REQUEST_METHOD"), "GET") == 0)
 	    {
 	      if (global.acceptall == TRUE)
 		ReadCGIPOSTValues (env);
 	      ReadCGIQueryString (env);
 	    }
 
-	  if ( (strcasecmp (getenv ("REQUEST_METHOD"), "POST") == 0) ||
-	     (strcasecmp (getenv ("REQUEST_METHOD"), "PUT") == 0) )
+	  if (strcasecmp (getenv ("REQUEST_METHOD"), "POST") == 0)
 	    {
 	      if (global.acceptall == TRUE)
-		ReadCGIQueryString (env);
-	      ReadCGIPOSTValues (env);
+		retval = ReadCGIQueryString (env);
+	      retval = ReadCGIPOSTValues (env);
 	    }
 	}
     }
@@ -1010,6 +934,12 @@ main (int argc, char *argv[])
     //printf("%s\n", global.fallback_lang);
     //printf("%s\n", global.active_lang);
 
+  if (global.uploadlist)
+    {
+      unlink_uploadlist ();
+      free_token_list (global.uploadlist);
+    }
+
 #ifndef JUST_LUACSHELL
   /* destroy the script */
   buffer_destroy (&script_text);
@@ -1018,7 +948,7 @@ main (int argc, char *argv[])
 
   free_list_chain (env);
   free_script_list (scriptchain);
-
+    
   unsigned long num_destroyed;
   destroy_string_map(global.translationKV_map, DESTROY_MODE_IGNORE_VALUES, &num_destroyed);
 

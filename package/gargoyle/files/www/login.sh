@@ -148,7 +148,7 @@ var passInvalid = false;
 </div>
 <%
 	for h in $sh_hooks ; do
-		run_haserl $h
+		haserl $h
 	done
 %>
 

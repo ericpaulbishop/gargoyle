@@ -1,22 +1,17 @@
-/* --------------------------------------------------------------------------
- * Copyright 2003-2014 (inclusive) Nathan Angelacos 
- *                   (nangel@users.sourceforge.net)
- * 
- *   This file is part of haserl.
- *
- *   Haserl is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License version 2,
- *   as published by the Free Software Foundation.
- *
- *   Haserl is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
- *
- *   You should have received a copy of the GNU General Public License
- *   along with haserl.  If not, see <http://www.gnu.org/licenses/>.
- *
- * ------------------------------------------------------------------------ */
+/*
+ * --------------------------------------------------------------------------
+ * Sliding Buffer functions for haserl Copyright (c) 2007 Nathan Angelacos
+ * (nangel@users.sourceforge.net) This program is free software; you can
+ * redistribute it and/or modify it under the terms of the GNU General Public
+ * License, version 2, as published by the Free Software Foundation. This
+ * program is distributed in the hope that it will be useful, but WITHOUT ANY
+ * WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details. You should have received a copy of the GNU General Public License 
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ * ------------------------------------------------------------------------- 
+ */
 
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -31,7 +26,6 @@
 #include <fcntl.h>
 
 #include "sliding_buffer.h"
-#include "h_error.h"
 
 /*
  * initialize a sliding buffer structure 
@@ -106,7 +100,7 @@ s_buffer_read (sliding_buffer_t * sbuf, char *matchstr)
       else
 	{
 	  size_t n = sbuf->maxsize - len;
-	  if (sbuf->maxread && sbuf->maxread < sbuf->nrread + n)
+	  if ( sbuf->maxread && sbuf->maxread < sbuf->nrread + n)
 	    n = sbuf->maxread - sbuf->nrread;
 	  r = read (sbuf->fh, sbuf->buf + len, n);
 	}
@@ -129,37 +123,27 @@ s_buffer_read (sliding_buffer_t * sbuf, char *matchstr)
    */
   pos = 0;
   len = sbuf->bufsize - (int) (sbuf->ptr - sbuf->buf) - strlen (matchstr);
-  /* a malicious client can send a matchstr longer than the actual content body 
-     do not allow reads beyond the buffer limits
-  */
-  len = ( len < 0 ) ? 0 : len;
+  while (memcmp (matchstr, sbuf->ptr + pos, strlen (matchstr)) && (pos < len))
+    {
+      pos++;
+    }
 
-  /* if have a matchstr, look for it, otherwise return the chunk */
-  if ( strlen(matchstr) > 0 )  {
+  /*
+   * if we found it 
+   */
+  if (pos < len)
+    {
+      sbuf->len = pos;
+      sbuf->segment = sbuf->ptr;
+      sbuf->ptr = sbuf->segment + pos + strlen (matchstr);
+      return -1;
+    }
 
-	  while (memcmp (matchstr, sbuf->ptr + pos, strlen (matchstr)) && (pos < len))
-	    {
-	      pos++;
-	    }
+  if (sbuf->eof)
+    {
+      len += strlen (matchstr);
+    }
 
-	  /*
-	   * if we found it 
-	   */
-	  if (pos < len)
-	    {
-	      sbuf->len = pos;
-	      sbuf->segment = sbuf->ptr;
-	      sbuf->ptr = sbuf->segment + pos + strlen (matchstr);
-	      return -1;
-	    }
-	
-
-	  if (sbuf->eof)
-	    {
-	      len += strlen (matchstr);
-	    }
-
-  } 
   /*
    * ran off the end, didn't find the matchstr
    */

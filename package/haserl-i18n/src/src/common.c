@@ -1,22 +1,24 @@
-/* --------------------------------------------------------------------------
- * Copyright 2003-2014 (inclusive) Nathan Angelacos 
- *                   (nangel@users.sourceforge.net)
- * 
- *   This file is part of haserl.
+/*
+ * --------------------------------------------------------------------------
+ * Common library functions for the haserl suite
+ * Copyright (c) 2005-2007 Nathan Angelacos (nangel@users.sourceforge.net)
  *
- *   Haserl is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License version 2,
- *   as published by the Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License, version 2, as published by the 
+ * Free Software Foundation.
  *
- *   Haserl is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with haserl.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc., 59
+ * Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * ------------------------------------------------------------------------ */
+ * -------------------------------------------------------------------------
+ */
+
 #if HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -78,14 +80,13 @@ argc_argv (char *instr, argv_t ** argv, char *commentstr)
 
   len = strlen (instr);
   pos = 0;
-  char quoted = 0;
 
   while (pos < len)
     {
-
       // printf ("%3d of %3d: %s\n", pos, len, instr);
- 
+
       /* Comments are really, really special */
+
       if ((state == WHITESPACE) && (strchr (commentstr, *instr)))
 	{
 	  while ((*instr != '\n') && (*instr != '\0'))
@@ -106,10 +107,11 @@ argc_argv (char *instr, argv_t ** argv, char *commentstr)
 	    {
 	      quote = *instr;
 	      state = TOKENSTART;
-	      quoted = -1;
 	      if (*(instr + 1) == quote)
 		{		/* special case for NULL quote */
+		  quote = '\0';
 		  *instr = '\0';
+		  argv_array[arg_count].quoted = -1;
 		}
 	      else
 		{
@@ -119,9 +121,11 @@ argc_argv (char *instr, argv_t ** argv, char *commentstr)
 	    }
 	  else
 	    {			/* WORDSPACE, so quotes end or quotes within quotes */
+
 	      /* Is it the same kind of quote? */
-	      if ( (*instr == quote) && quoted )
+	      if (*instr == quote)
 		{
+		  argv_array[arg_count - 1].quoted = -1;
 		  quote = '\0';
 		  *instr = '\0';
 		  state = WHITESPACE;
@@ -182,21 +186,18 @@ argc_argv (char *instr, argv_t ** argv, char *commentstr)
 							ALLOC_CHUNK));
 	    }
 
-	  if (argv_array == NULL)
+	  if (argv_array ==  NULL)
 	    {
 	      return (-1);
 	    }
 	  argv_array[arg_count - 1].string = instr;
-	  argv_array[arg_count - 1].quoted = quoted;
+	  argv_array[arg_count].quoted = 0;
 	  state = WORDSPACE;
-	  quoted = 0;
 	}
 
       instr++;
       pos++;
     }
-
-  if ( arg_count == 0 ) return (0);
 
   argv_array[arg_count].string = NULL;
   *argv = argv_array;
@@ -256,10 +257,6 @@ buffer_add (buffer_t * buf, const void *data, unsigned long size)
 	}
       index = buf->ptr - buf->data;
       buf->data = realloc (buf->data, newsize);
-	if ( buf->data == NULL ) 
-          {
-	   die_with_message ( NULL, NULL, "Memory allocation error");
-          }
       buf->limit = buf->data + newsize;
       buf->ptr = buf->data + index;
     }
@@ -342,15 +339,14 @@ main ()
 
 
   strcpy (string,
-	  "\\This\\ string will be  '' \"separated into\"  \"'\\\"'\" ' 16 ' elements.\n"
+	  "\\This\\ string will be  '' \"separated into\"  \"'\\\"'\" ' 15 ' elements.\n"
 	  "' including a multi-line\n"
 	  "element' with a comment.  # This should not be parsed\n"
 	  ";Nor should this\n" "The End.");
 
-
-  argc = argc_argv (string, &argv, "#;");
   printf ("%s\n", string);
 
+  argc = argc_argv (string, &argv, "#;");
   for (count = 0; count < argc; count++)
     {
       printf ("%03d: [%s] ", count, argv[count].string, "");
