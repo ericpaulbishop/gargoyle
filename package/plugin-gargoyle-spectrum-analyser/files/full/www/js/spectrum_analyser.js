@@ -209,7 +209,7 @@ function parseWifiData(rawScanOutput)
 		}
 		
 		var stringSplit = "BSS";
-		var exceptions = ["I","Q"]
+		var exceptions = ["I","i","Q"]
 		var cells = splitStringWithException(rawScanOutput, stringSplit, exceptions);
 		////////////////////////////////////////
 		
