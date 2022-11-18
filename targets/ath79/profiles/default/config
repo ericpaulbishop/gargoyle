@@ -359,16 +359,16 @@ CONFIG_TARGET_PER_DEVICE_ROOTFS=y
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_buffalo_bhr-4grv is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_buffalo_bhr-4grv2 is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_buffalo_wzr-600dhp=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_buffalo_wzr-600dhp=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_buffalo_wzr-600dhp="gargoyle-basic"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_buffalo_wzr-hp-ag300h=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_buffalo_wzr-hp-ag300h="plugin-gargoyle-ddns plugin-gargoyle-ipheth-tether plugin-gargoyle-minidlna plugin-gargoyle-openvpn plugin-gargoyle-qr-code plugin-gargoyle-stamgr plugin-gargoyle-tor plugin-gargoyle-upnp plugin-gargoyle-usb-printer plugin-gargoyle-usb-storage-full plugin-gargoyle-webcam plugin-gargoyle-wireguard"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_buffalo_wzr-hp-ag300h="gargoyle-large"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_buffalo_wzr-hp-g300nh-rb=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_buffalo_wzr-hp-g300nh-rb=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_buffalo_wzr-hp-g300nh-rb="gargoyle-basic"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_buffalo_wzr-hp-g300nh-s=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_buffalo_wzr-hp-g300nh-s=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_buffalo_wzr-hp-g300nh-s="gargoyle-basic"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_buffalo_wzr-hp-g302h-a1a0 is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_buffalo_wzr-hp-g450h=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_buffalo_wzr-hp-g450h="plugin-gargoyle-ddns plugin-gargoyle-ipheth-tether plugin-gargoyle-minidlna plugin-gargoyle-openvpn plugin-gargoyle-qr-code plugin-gargoyle-stamgr plugin-gargoyle-tor plugin-gargoyle-upnp plugin-gargoyle-usb-printer plugin-gargoyle-usb-storage-full plugin-gargoyle-webcam plugin-gargoyle-wireguard"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_buffalo_wzr-hp-g450h="gargoyle-large"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_comfast_cf-e110n-v2 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_comfast_cf-e120a-v3 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_comfast_cf-e130n-v2 is not set
@@ -393,21 +393,21 @@ CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_buffalo_wzr-hp-g450h="plugin-
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_dlink_dap-3662-a1 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_dlink_dch-g020-a1 is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_dlink_dir-505=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_dlink_dir-505=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_dlink_dir-505="gargoyle-basic"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_dlink_dir-825-b1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_dlink_dir-825-b1=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_dlink_dir-825-b1="gargoyle-basic"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_dlink_dir-825-c1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_dlink_dir-825-c1="plugin-gargoyle-ddns plugin-gargoyle-ipheth-tether plugin-gargoyle-minidlna plugin-gargoyle-openvpn plugin-gargoyle-qr-code plugin-gargoyle-stamgr plugin-gargoyle-tor plugin-gargoyle-upnp plugin-gargoyle-usb-printer plugin-gargoyle-usb-storage-full plugin-gargoyle-webcam plugin-gargoyle-wireguard"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_dlink_dir-825-c1="gargoyle-large"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_dlink_dir-835-a1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_dlink_dir-835-a1="plugin-gargoyle-ddns plugin-gargoyle-ipheth-tether plugin-gargoyle-minidlna plugin-gargoyle-openvpn plugin-gargoyle-qr-code plugin-gargoyle-stamgr plugin-gargoyle-tor plugin-gargoyle-upnp plugin-gargoyle-usb-printer plugin-gargoyle-usb-storage-full plugin-gargoyle-webcam plugin-gargoyle-wireguard"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_dlink_dir-835-a1="gargoyle-large"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_dlink_dir-842-c1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_dlink_dir-842-c1=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_dlink_dir-842-c1="gargoyle-basic"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_dlink_dir-842-c2=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_dlink_dir-842-c2=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_dlink_dir-842-c2="gargoyle-basic"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_dlink_dir-842-c3=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_dlink_dir-842-c3=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_dlink_dir-842-c3="gargoyle-basic"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_dlink_dir-859-a1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_dlink_dir-859-a1=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_dlink_dir-859-a1="gargoyle-basic"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_devolo_magic-2-wifi is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_devolo_dvl1200e is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_devolo_dvl1200i is not set
@@ -420,7 +420,7 @@ CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_dlink_dir-859-a1=""
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_embeddedwireless_dorin is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_engenius_eap1200h is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_engenius_eap300-v2=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_engenius_eap300-v2=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_engenius_eap300-v2="gargoyle-basic"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_engenius_eap600 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_engenius_ecb1200 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_engenius_ecb1750 is not set
@@ -434,12 +434,12 @@ CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_engenius_eap300-v2=""
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_glinet_6408 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_glinet_6416 is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_glinet_gl-ar150=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_glinet_gl-ar150="plugin-gargoyle-ddns plugin-gargoyle-ipheth-tether plugin-gargoyle-minidlna plugin-gargoyle-openvpn plugin-gargoyle-qr-code plugin-gargoyle-stamgr plugin-gargoyle-tor plugin-gargoyle-upnp plugin-gargoyle-usb-printer plugin-gargoyle-usb-storage-full plugin-gargoyle-webcam plugin-gargoyle-wireguard"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_glinet_gl-ar150="gargoyle-large"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_glinet_gl-ar300m-lite is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_glinet_gl-ar300m16=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_glinet_gl-ar300m16="plugin-gargoyle-ddns plugin-gargoyle-ipheth-tether plugin-gargoyle-minidlna plugin-gargoyle-openvpn plugin-gargoyle-qr-code plugin-gargoyle-stamgr plugin-gargoyle-tor plugin-gargoyle-upnp plugin-gargoyle-usb-printer plugin-gargoyle-usb-storage-full plugin-gargoyle-webcam plugin-gargoyle-wireguard"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_glinet_gl-ar300m16="gargoyle-large"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_glinet_gl-ar750=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_glinet_gl-ar750="plugin-gargoyle-ddns plugin-gargoyle-ipheth-tether plugin-gargoyle-minidlna plugin-gargoyle-openvpn plugin-gargoyle-qr-code plugin-gargoyle-stamgr plugin-gargoyle-tor plugin-gargoyle-upnp plugin-gargoyle-usb-printer plugin-gargoyle-usb-storage-full plugin-gargoyle-webcam plugin-gargoyle-wireguard"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_glinet_gl-ar750="gargoyle-large"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_glinet_gl-mifi is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_glinet_gl-usb150 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_glinet_gl-x750 is not set
@@ -452,7 +452,7 @@ CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_glinet_gl-ar750="plugin-gargo
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_iodata_wn-ac1600dgr2 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_iodata_wn-ag300dgr is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_jjplus_ja76pf2=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_jjplus_ja76pf2="plugin-gargoyle-ddns plugin-gargoyle-ipheth-tether plugin-gargoyle-minidlna plugin-gargoyle-openvpn plugin-gargoyle-qr-code plugin-gargoyle-stamgr plugin-gargoyle-tor plugin-gargoyle-upnp plugin-gargoyle-usb-printer plugin-gargoyle-usb-storage-full plugin-gargoyle-webcam plugin-gargoyle-wireguard"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_jjplus_ja76pf2="gargoyle-large"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_joyit_jt-or750i is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_librerouter_librerouter-v1 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_meraki_mr12 is not set
@@ -463,48 +463,48 @@ CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_jjplus_ja76pf2="plugin-gargoy
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_netgear_ex6400 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_netgear_ex7300 is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_netgear_wndr3700=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_netgear_wndr3700=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_netgear_wndr3700="gargoyle-usb"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_netgear_wndr3700-v2=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_netgear_wndr3700-v2="plugin-gargoyle-ddns plugin-gargoyle-ipheth-tether plugin-gargoyle-minidlna plugin-gargoyle-openvpn plugin-gargoyle-qr-code plugin-gargoyle-stamgr plugin-gargoyle-tor plugin-gargoyle-upnp plugin-gargoyle-usb-printer plugin-gargoyle-usb-storage-full plugin-gargoyle-webcam plugin-gargoyle-wireguard"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_netgear_wndr3700-v2="gargoyle-large"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_netgear_wndr3800=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_netgear_wndr3800="plugin-gargoyle-ddns plugin-gargoyle-ipheth-tether plugin-gargoyle-minidlna plugin-gargoyle-openvpn plugin-gargoyle-qr-code plugin-gargoyle-stamgr plugin-gargoyle-tor plugin-gargoyle-upnp plugin-gargoyle-usb-printer plugin-gargoyle-usb-storage-full plugin-gargoyle-webcam plugin-gargoyle-wireguard"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_netgear_wndr3800="gargoyle-large"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_netgear_wndr3800ch=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_netgear_wndr3800ch=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_netgear_wndr3800ch="gargoyle-basic"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_netgear_wndrmac-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_netgear_wndrmac-v1=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_netgear_wndrmac-v1="gargoyle-basic"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_netgear_wndrmac-v2=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_netgear_wndrmac-v2=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_netgear_wndrmac-v2="gargoyle-basic"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_netgear_wnr2200-16m=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_netgear_wnr2200-16m="plugin-gargoyle-ddns plugin-gargoyle-ipheth-tether plugin-gargoyle-minidlna plugin-gargoyle-openvpn plugin-gargoyle-qr-code plugin-gargoyle-stamgr plugin-gargoyle-tor plugin-gargoyle-upnp plugin-gargoyle-usb-printer plugin-gargoyle-usb-storage-full plugin-gargoyle-webcam plugin-gargoyle-wireguard"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_netgear_wnr2200-16m="gargoyle-large"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_netgear_wnr2200-8m=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_netgear_wnr2200-8m=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_netgear_wnr2200-8m="gargoyle-basic"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ocedo_koala is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ocedo_raccoon is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ocedo_ursus is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_onion_omega is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_mr1750-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_mr1750-v1=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_mr1750-v1="gargoyle-basic"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_mr1750-v2=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_mr1750-v2=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_mr1750-v2="gargoyle-basic"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_mr600-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_mr600-v1=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_mr600-v1="gargoyle-basic"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_mr600-v2=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_mr600-v2=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_mr600-v2="gargoyle-basic"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_mr900-v1 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_mr900-v2 is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_om2p-v2=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_om2p-v2=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_om2p-v2="gargoyle-basic"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_om2p-v4=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_om2p-v4=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_om2p-v4="gargoyle-basic"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_om2p-hs-v1 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_om2p-hs-v2 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_om2p-hs-v3 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_om2p-hs-v4 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_om2p-lc is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_om5p=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_om5p=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_om5p="gargoyle-basic"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_om5p-ac-v2=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_om5p-ac-v2=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_om5p-ac-v2="gargoyle-basic"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_phicomm_k2t is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_pisen_wmm003n is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_pisen_ts-d084 is not set
@@ -516,17 +516,17 @@ CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_om5p-ac-v2=""
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_pcs_cr5000 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_qihoo_c301 is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_qxwlan_e1700ac-v2-16m=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_qxwlan_e1700ac-v2-16m=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_qxwlan_e1700ac-v2-16m="gargoyle-basic"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_qxwlan_e1700ac-v2-8m=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_qxwlan_e1700ac-v2-8m=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_qxwlan_e1700ac-v2-8m="gargoyle-basic"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_qxwlan_e558-v2-16m is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_qxwlan_e558-v2-8m is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_qxwlan_e600g-v2-16m is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_qxwlan_e600g-v2-8m is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_qxwlan_e600gac-v2-16m=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_qxwlan_e600gac-v2-16m=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_qxwlan_e600gac-v2-16m="gargoyle-basic"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_qxwlan_e600gac-v2-8m=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_qxwlan_e600gac-v2-8m=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_qxwlan_e600gac-v2-8m="gargoyle-basic"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_qxwlan_e750a-v4-16m is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_qxwlan_e750a-v4-8m is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_qxwlan_e750g-v8-16m is not set
@@ -540,37 +540,37 @@ CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_qxwlan_e600gac-v2-8m=""
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_teltonika_rut955 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_teltonika_rut955-h7v3c0 is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c6-v2-us=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c6-v2-us="plugin-gargoyle-ddns plugin-gargoyle-ipheth-tether plugin-gargoyle-minidlna plugin-gargoyle-openvpn plugin-gargoyle-qr-code plugin-gargoyle-stamgr plugin-gargoyle-tor plugin-gargoyle-upnp plugin-gargoyle-usb-printer plugin-gargoyle-usb-storage-full plugin-gargoyle-webcam plugin-gargoyle-wireguard"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c6-v2-us="gargoyle-large"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-a7-v5=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-a7-v5="plugin-gargoyle-ddns plugin-gargoyle-ipheth-tether plugin-gargoyle-minidlna plugin-gargoyle-openvpn plugin-gargoyle-qr-code plugin-gargoyle-stamgr plugin-gargoyle-tor plugin-gargoyle-upnp plugin-gargoyle-usb-printer plugin-gargoyle-usb-storage-full plugin-gargoyle-webcam plugin-gargoyle-wireguard"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-a7-v5="gargoyle-large"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c2-v3=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c2-v3=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c2-v3="gargoyle-usb"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c25-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c25-v1=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c25-v1="gargoyle-usb"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c5-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c5-v1="plugin-gargoyle-ddns plugin-gargoyle-ipheth-tether plugin-gargoyle-minidlna plugin-gargoyle-openvpn plugin-gargoyle-qr-code plugin-gargoyle-stamgr plugin-gargoyle-tor plugin-gargoyle-upnp plugin-gargoyle-usb-printer plugin-gargoyle-usb-storage-full plugin-gargoyle-webcam plugin-gargoyle-wireguard"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c5-v1="gargoyle-large"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c58-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c58-v1=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c58-v1="gargoyle-usb"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c59-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c59-v1="plugin-gargoyle-ddns plugin-gargoyle-ipheth-tether plugin-gargoyle-minidlna plugin-gargoyle-openvpn plugin-gargoyle-qr-code plugin-gargoyle-stamgr plugin-gargoyle-tor plugin-gargoyle-upnp plugin-gargoyle-usb-printer plugin-gargoyle-usb-storage-full plugin-gargoyle-webcam plugin-gargoyle-wireguard"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c59-v1="gargoyle-large"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c59-v2=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c59-v2="plugin-gargoyle-ddns plugin-gargoyle-ipheth-tether plugin-gargoyle-minidlna plugin-gargoyle-openvpn plugin-gargoyle-qr-code plugin-gargoyle-stamgr plugin-gargoyle-tor plugin-gargoyle-upnp plugin-gargoyle-usb-printer plugin-gargoyle-usb-storage-full plugin-gargoyle-webcam plugin-gargoyle-wireguard"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c59-v2="gargoyle-large"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c6-v2=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c6-v2=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c6-v2="gargoyle-usb"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c60-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c60-v1=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c60-v1="gargoyle-usb"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c60-v2=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c60-v2=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c60-v2="gargoyle-usb"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c60-v3=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c60-v3=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c60-v3="gargoyle-usb"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c7-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c7-v1=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c7-v1="gargoyle-usb"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c7-v2=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c7-v2="plugin-gargoyle-ddns plugin-gargoyle-ipheth-tether plugin-gargoyle-minidlna plugin-gargoyle-openvpn plugin-gargoyle-qr-code plugin-gargoyle-stamgr plugin-gargoyle-tor plugin-gargoyle-upnp plugin-gargoyle-usb-printer plugin-gargoyle-usb-storage-full plugin-gargoyle-webcam plugin-gargoyle-wireguard"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c7-v2="gargoyle-large"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c7-v4=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c7-v4="plugin-gargoyle-ddns plugin-gargoyle-ipheth-tether plugin-gargoyle-minidlna plugin-gargoyle-openvpn plugin-gargoyle-qr-code plugin-gargoyle-stamgr plugin-gargoyle-tor plugin-gargoyle-upnp plugin-gargoyle-usb-printer plugin-gargoyle-usb-storage-full plugin-gargoyle-webcam plugin-gargoyle-wireguard"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c7-v4="gargoyle-large"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c7-v5=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c7-v5="plugin-gargoyle-ddns plugin-gargoyle-ipheth-tether plugin-gargoyle-minidlna plugin-gargoyle-openvpn plugin-gargoyle-qr-code plugin-gargoyle-stamgr plugin-gargoyle-tor plugin-gargoyle-upnp plugin-gargoyle-usb-printer plugin-gargoyle-usb-storage-full plugin-gargoyle-webcam plugin-gargoyle-wireguard"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c7-v5="gargoyle-large"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-d50-v1 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-d7-v1 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-d7b-v1 is not set
@@ -597,61 +597,61 @@ CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c7-v5="plugin-g
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-mr6400-v1 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wdr3500-v1 is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wdr3600-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wdr3600-v1=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wdr3600-v1="gargoyle-usb"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wdr4300-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wdr4300-v1=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wdr4300-v1="gargoyle-usb"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wdr4300-v1-il is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wdr4310-v1 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wdr4900-v2 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wdr7500-v3 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wpa8630-v1 is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr1043n-v5=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr1043n-v5="plugin-gargoyle-ddns plugin-gargoyle-ipheth-tether plugin-gargoyle-minidlna plugin-gargoyle-openvpn plugin-gargoyle-qr-code plugin-gargoyle-stamgr plugin-gargoyle-tor plugin-gargoyle-upnp plugin-gargoyle-usb-printer plugin-gargoyle-usb-storage-full plugin-gargoyle-webcam plugin-gargoyle-wireguard"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr1043n-v5="gargoyle-large"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr1043nd-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr1043nd-v1=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr1043nd-v1="gargoyle-usb"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr1043nd-v2=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr1043nd-v2=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr1043nd-v2="gargoyle-usb"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr1043nd-v3=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr1043nd-v3=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr1043nd-v3="gargoyle-usb"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr1043nd-v4=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr1043nd-v4="plugin-gargoyle-ddns plugin-gargoyle-ipheth-tether plugin-gargoyle-minidlna plugin-gargoyle-openvpn plugin-gargoyle-qr-code plugin-gargoyle-stamgr plugin-gargoyle-tor plugin-gargoyle-upnp plugin-gargoyle-usb-printer plugin-gargoyle-usb-storage-full plugin-gargoyle-webcam plugin-gargoyle-wireguard"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr1043nd-v4="gargoyle-large"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr1045nd-v2 is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr2543-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr2543-v1=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr2543-v1="gargoyle-usb"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr710n-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr710n-v1=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr710n-v1="gargoyle-usb"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr710n-v2.1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr710n-v2.1=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr710n-v2.1="gargoyle-usb"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr810n-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr810n-v1=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr810n-v1="gargoyle-usb"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr810n-v2=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr810n-v2=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr810n-v2="gargoyle-basic"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr842n-v3=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr842n-v3="plugin-gargoyle-ddns plugin-gargoyle-ipheth-tether plugin-gargoyle-minidlna plugin-gargoyle-openvpn plugin-gargoyle-qr-code plugin-gargoyle-stamgr plugin-gargoyle-tor plugin-gargoyle-upnp plugin-gargoyle-usb-printer plugin-gargoyle-usb-storage-full plugin-gargoyle-webcam plugin-gargoyle-wireguard"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr842n-v3="gargoyle-large"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr842n-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr842n-v1=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr842n-v1="gargoyle-usb"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr842n-v2=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr842n-v2=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr842n-v2="gargoyle-usb"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr902ac-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr902ac-v1=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr902ac-v1="gargoyle-usb"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_wbs210-v1 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_wbs210-v2 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_wbs510-v1 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_wbs510-v2 is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_trendnet_tew-823dru=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_trendnet_tew-823dru=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_trendnet_tew-823dru="gargoyle-basic"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_aircube-ac is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_aircube-isp is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_airrouter=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_airrouter=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_airrouter="gargoyle-basic"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_bullet-ac=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_bullet-ac=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_bullet-ac="gargoyle-basic"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_bullet-m-ar7240=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_bullet-m-ar7240=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_bullet-m-ar7240="gargoyle-basic"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_bullet-m-ar7241=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_bullet-m-ar7241=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_bullet-m-ar7241="gargoyle-basic"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_bullet-m-xw=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_bullet-m-xw=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_bullet-m-xw="gargoyle-basic"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_edgeswitch-5xp is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_edgeswitch-8xp is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_lap-120 is not set
@@ -664,33 +664,33 @@ CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_bullet-m-xw=""
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_nanostation-loco-m is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_nanostation-loco-m-xw is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_nanostation-m=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_nanostation-m=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_nanostation-m="gargoyle-basic"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_nanostation-m-xw=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_nanostation-m-xw=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_nanostation-m-xw="gargoyle-basic"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_picostation-m is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_powerbeam-5ac-500 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_powerbeam-5ac-gen2 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_powerbridge-m is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_rocket-m=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_rocket-m=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_rocket-m="gargoyle-basic"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_routerstation is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_routerstation-pro is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_unifi=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_unifi=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_unifi="gargoyle-basic"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_unifiac-lite is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_unifiac-lr is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_unifiac-mesh is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_unifiac-mesh-pro is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_unifiac-pro is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_unifi-ap-outdoor-plus=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_unifi-ap-outdoor-plus=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_unifi-ap-outdoor-plus="gargoyle-basic"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_unifi-ap-pro=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_unifi-ap-pro=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_unifi-ap-pro="gargoyle-basic"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_wallys_dr531 is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_wd_mynet-n750=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_wd_mynet-n750="plugin-gargoyle-ddns plugin-gargoyle-ipheth-tether plugin-gargoyle-minidlna plugin-gargoyle-openvpn plugin-gargoyle-qr-code plugin-gargoyle-stamgr plugin-gargoyle-tor plugin-gargoyle-upnp plugin-gargoyle-usb-printer plugin-gargoyle-usb-storage-full plugin-gargoyle-webcam plugin-gargoyle-wireguard"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_wd_mynet-n750="gargoyle-large"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_wd_mynet-wifi-rangeextender=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_wd_mynet-wifi-rangeextender=""
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_wd_mynet-wifi-rangeextender="gargoyle-basic"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_winchannel_wb2000 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_xiaomi_aiot-ac2350 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_xiaomi_mi-router-4q is not set
@@ -3106,6 +3106,9 @@ CONFIG_PACKAGE_usign=y
 # Gargoyle Web Interface
 #
 CONFIG_PACKAGE_gargoyle=y
+CONFIG_PACKAGE_gargoyle-basic=m
+CONFIG_PACKAGE_gargoyle-usb=m
+CONFIG_PACKAGE_gargoyle-large=m
 CONFIG_PACKAGE_gargoyle-i18n=y
 CONFIG_PACKAGE_plugin-gargoyle-adblock=m
 CONFIG_PACKAGE_plugin-gargoyle-cron=m
