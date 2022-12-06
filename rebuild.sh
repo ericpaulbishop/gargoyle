@@ -8,6 +8,7 @@ set_constant_variables()
 
 	targets_dir="$top_dir/targets"
 	patches_dir="$top_dir/patches-generic"
+	files_dir="$top_dir/files-generic"
 	compress_js_dir="$top_dir/compressed_javascript"
 	compress_css_dir="$top_dir/compressed_css"
 	
