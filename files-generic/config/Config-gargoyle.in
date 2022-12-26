@@ -4,25 +4,32 @@
 # See /LICENSE for more information.
 #
 
-menu "Gargoyle packages choice shortcut"
+menuconfig USE_GARGOYLE_PROFILE_PKGS
+	bool "Gargoyle packages choice shortcut"
+        default y
+        select PACKAGE_gargoyle
+        select PACKAGE_plugin-gargoyle-i18n-English-EN
+        if USE_GARGOYLE_PROFILE_PKGS
 
-	menu "Select Gargoyle package inclusion level"
 		config GARGOYLE_BASIC
-			bool "Basic Packages"
+			tristate "Basic Packages"
+			default m
 			select PACKAGE_gargoyle-basic
 			help
 			  Choose basic packages, the minimum required for Gargoyle.
 
 		config GARGOYLE_USB
-			bool "Basic & USB Functionality"
+			tristate "Basic & USB Functionality" if USE_GARGOYLE_PROFILE_PKGS
+			default m
 			select PACKAGE_gargoyle-usb
 			help
 			  Choose basic packages and those required to support USB functionality (but no network sharing).
 
 		config GARGOYLE_large
-			bool "Full Functionality"
+			tristate "Full Functionality"
+			default m
 			select PACKAGE_gargoyle-large
 			help
 			  Choose packages that only fit on larger devices (USB, VPN, ToR, Mobile Tethering, Network Sharing etc).
-	endmenu
-endmenu
+
+	endif
