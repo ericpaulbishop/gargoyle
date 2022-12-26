@@ -6,30 +6,93 @@
 
 menuconfig USE_GARGOYLE_PROFILE_PKGS
 	bool "Gargoyle packages choice shortcut"
-        default y
-        select PACKAGE_gargoyle
-        select PACKAGE_plugin-gargoyle-i18n-English-EN
-        if USE_GARGOYLE_PROFILE_PKGS
+	default y
+	select BUSYBOX_CUSTOM
+	select BUSYBOX_CONFIG_ARPING
+	select BUSYBOX_CONFIG_SHA1SUM
+	select PACKAGE_gargoyle
+	select PACKAGE_plugin-gargoyle-i18n-English-EN
+	if USE_GARGOYLE_PROFILE_PKGS
 
-		config GARGOYLE_BASIC
-			tristate "Basic Packages"
-			default m
-			select PACKAGE_gargoyle-basic
-			help
-			  Choose basic packages, the minimum required for Gargoyle.
+		menu "Standard Gargoyle package sets"
+			config GARGOYLE_BASIC
+				tristate "Basic Packages"
+				default m
+				select PACKAGE_gargoyle-basic
+				help
+				  Choose basic packages, the minimum required for Gargoyle.
 
-		config GARGOYLE_USB
-			tristate "Basic & USB Functionality" if USE_GARGOYLE_PROFILE_PKGS
-			default m
-			select PACKAGE_gargoyle-usb
-			help
-			  Choose basic packages and those required to support USB functionality (but no network sharing).
+			config GARGOYLE_USB
+				tristate "Basic & USB Functionality"
+				default m
+				select PACKAGE_gargoyle-usb
+				help
+				  Choose basic packages and those required to support USB functionality (but no network sharing).
 
-		config GARGOYLE_large
-			tristate "Full Functionality"
+			config GARGOYLE_large
+				tristate "Full Functionality"
+				default m
+				select PACKAGE_gargoyle-large
+				help
+				  Choose packages that only fit on larger devices (USB, VPN, ToR, Mobile Tethering, Network Sharing etc).
+		endmenu
+
+		config GARGOYLE_LANGUAGE_PKGS
+			tristate "Language translation packages"
 			default m
-			select PACKAGE_gargoyle-large
+			select PACKAGE_plugin-gargoyle-i18n-Arabic-AR
+			select PACKAGE_plugin-gargoyle-i18n-Czech-CS
+			select PACKAGE_plugin-gargoyle-i18n-French-FR
+			select PACKAGE_plugin-gargoyle-i18n-German-DE
+			select PACKAGE_plugin-gargoyle-i18n-Norwegian-NO
+			select PACKAGE_plugin-gargoyle-i18n-Polish-PL
+			select PACKAGE_plugin-gargoyle-i18n-Portuguese-BR
+			select PACKAGE_plugin-gargoyle-i18n-Russian-RU
+			select PACKAGE_plugin-gargoyle-i18n-SimplifiedChinese-ZH-CN
+			select PACKAGE_plugin-gargoyle-i18n-Slovak-SK
+			select PACKAGE_plugin-gargoyle-i18n-Spanish-ES
 			help
-			  Choose packages that only fit on larger devices (USB, VPN, ToR, Mobile Tethering, Network Sharing etc).
+				Plugins for languages other than English
+
+		config GARGOYLE_THEME_PKGS
+			tristate "Display theme packages"
+			default m
+			select PACKAGE_plugin-gargoyle-theme-Gargoyle-Modern
+			select PACKAGE_plugin-gargoyle-theme-by-matei
+			select PACKAGE_plugin-gargoyle-theme-dark-one
+			select PACKAGE_plugin-gargoyle-theme-demantoid
+			select PACKAGE_plugin-gargoyle-theme-flat-blue
+			select PACKAGE_plugin-gargoyle-theme-green
+			select PACKAGE_plugin-gargoyle-theme-horchata
+			select PACKAGE_plugin-gargoyle-theme-light
+			select PACKAGE_plugin-gargoyle-theme-xeye
+			help
+				Plugins for alternative display themes
+
+		config GARGOYLE_OTHER_PKGS
+			tristate "Other Gargoyle plugins"
+			default m
+			select PACKAGE_msmtp
+			select PACKAGE_msmtp-nossl
+			select PACKAGE_plugin-gargoyle-adblock
+			select PACKAGE_plugin-gargoyle-cron
+			select PACKAGE_plugin-gargoyle-ddns-cloudflare
+			select PACKAGE_plugin-gargoyle-diagnostics
+			select PACKAGE_plugin-gargoyle-email-notifications
+			select PACKAGE_plugin-gargoyle-email-notifications-nossl
+			select PACKAGE_plugin-gargoyle-initd
+			select PACKAGE_plugin-gargoyle-logread
+			select PACKAGE_plugin-gargoyle-ping-watchdog
+			select PACKAGE_plugin-gargoyle-pptp
+			select PACKAGE_plugin-gargoyle-qr-code
+			select PACKAGE_plugin-gargoyle-spectrum-analyser
+			select PACKAGE_plugin-gargoyle-spectrum-analyser-minimal
+			select PACKAGE_plugin-gargoyle-stamgr
+			select PACKAGE_plugin-gargoyle-upnp
+			select PACKAGE_plugin-gargoyle-webshell
+			select PACKAGE_plugin-gargoyle-wifi-schedule
+			select PACKAGE_resolveip
+			help
+				Other plugin packages
 
 	endif
