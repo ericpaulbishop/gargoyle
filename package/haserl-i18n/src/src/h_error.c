@@ -1,22 +1,23 @@
-/* --------------------------------------------------------------------------
- * Copyright 2003-2011 (inclusive) Nathan Angelacos 
- *                   (nangel@users.sourceforge.net)
- * 
- *   This file is part of haserl.
+/*
+ * --------------------------------------------------------------------------
+ * Error functions for haserl
+ * Copyright (c) 2003-2006 Nathan Angelacos (nangel@users.sourceforge.net)
  *
- *   Haserl is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License version 2,
- *   as published by the Free Software Foundation.
+ * This program is free software; you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License, version 2, as published by the Free
+ * Software Foundation.
  *
- *   Haserl is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ * FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+ * more details.
  *
- *   You should have received a copy of the GNU General Public License
- *   along with haserl.  If not, see <http://www.gnu.org/licenses/>.
+ * You should have received a copy of the GNU General Public License along with
+ * this program; if not, write to the Free Software Foundation, Inc., 59
+ * Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
- * ------------------------------------------------------------------------ */
+ * -------------------------------------------------------------------------
+ */
 
 #if HAVE_CONFIG_H
 #include <config.h>
@@ -66,9 +67,9 @@ die_with_error (char *msg)
 void
 die_with_message (void *sp, char *where, const char *s, ...)
 {
-#ifndef JUST_LUACSHELL
+  #ifndef JUST_LUACSHELL
   script_t *script = sp;
-#endif
+  #endif
   va_list p;
   FILE *fo = stderr;
 
@@ -85,14 +86,14 @@ die_with_message (void *sp, char *where, const char *s, ...)
       va_start (p, s);
       vfprintf (fo, s, p);
       va_end (p);
-#ifndef JUST_LUACSHELL
+      #ifndef JUST_LUACSHELL
       if (where && sp)
-	{
+        {
 	  fprintf (fo, " near line %d of %s\n",
 		   count_lines (script->buf, script->size, where),
 		   script->name);
 	}
-#endif
+      #endif
       printf ("\n");
 
       if (getenv ("REQUEST_METHOD"))

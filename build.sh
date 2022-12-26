@@ -8,6 +8,7 @@ set_constant_variables()
 	top_dir="${scriptpath%/${0##*/}}"
 	targets_dir="$top_dir/targets"
 	patches_dir="$top_dir/patches-generic"
+	files_dir="$top_dir/files-generic"
 	compress_js_dir="$top_dir/compressed_javascript"
 	compress_css_dir="$top_dir/compressed_css"
 	
@@ -33,7 +34,7 @@ set_version_variables()
 	# set precise commit in repo to use 
 	# you can set this to an alternate commit 
 	# or empty to checkout latest
-	openwrt_commit="8d24ea3f31b4e60a342e579e3218e1adc282dba3"
+	openwrt_commit="be3b061d7bbf425c95ef9108a37c51747c0025e9"
 	openwrt_abbrev_commit=$( echo "$openwrt_commit" | cut -b 1-7 )
 	
 
@@ -654,6 +655,8 @@ for target in $targets ; do
 
 	#build, if verbosity is 0 dump most output to /dev/null, otherwise dump everything
 	if [ "$verbosity" = "0" ] ; then
+		cp -r "$files_dir/." .
+		cp -r "$targets_dir/$target/files/." .
 		scripts/patch-kernel.sh . "$patches_dir/" >/dev/null 2>&1
 		scripts/patch-kernel.sh . "$targets_dir/$target/patches/" >/dev/null 2>&1
 		if [ "$target" = "custom" ] ; then
@@ -671,6 +674,8 @@ for target in $targets ; do
 		make $num_build_thread_str GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$default_profile"
 
 	else
+		cp -r "$files_dir/." .
+		cp -r "$targets_dir/$target/files/." .
 		scripts/patch-kernel.sh . "$patches_dir/" 
 		scripts/patch-kernel.sh . "$targets_dir/$target/patches/" 
 		if [ "$target" = "custom" ] ; then

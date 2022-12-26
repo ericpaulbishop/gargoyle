@@ -1,28 +1,5 @@
-/* --------------------------------------------------------------------------
- * Copyright 2003-2021 (inclusive) Nathan Angelacos 
- *                   (nangel@users.sourceforge.net)
- * 
- *   This file is part of haserl.
- *
- *   Haserl is free software: you can redistribute it and/or modify
- *   it under the terms of the GNU General Public License version 2,
- *   as published by the Free Software Foundation.
- *
- *   Haserl is distributed in the hope that it will be useful,
- *   but WITHOUT ANY WARRANTY; without even the implied warranty of
- *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *   GNU General Public License for more details.
- *
- *   You should have received a copy of the GNU General Public License
- *   along with haserl.  If not, see <http://www.gnu.org/licenses/>.
- *
- * ------------------------------------------------------------------------ */
-
 #ifndef _HASERL_H
 #define _HASERL_H	1
-
-// should already be included - but BecomeUser needs this
-#include "h_script.h"
 
 
 /* Just a silly construct to contain global variables    */
@@ -37,13 +14,12 @@ typedef struct
   char *post_prefix;		/* what name we give to POST variables       */
   char *cookie_prefix;		/* what name we give to COOKIE variables     */
   char *nul_prefix;		/* what name we give to environment variables*/
-  char *haserl_prefix;		/* what name we give to HASERL variables     */
   token_t *uploadlist;		/* a linked list of pathspecs	             */
   int debug;                    /* true if in "debug" mode                   */
   int acceptall;                /* true if we'll accept POST data on 
   					GETs and vice versa 		     */
   int silent;                   /* true if we never print errors             */
-  char *exec_name;		/* pointer to argv[0]			     */
+    
   char *webroot;                /* return value for uci get gargoyle.global.web_root */
   char *fallback_lang;          /* return value for uci get gargoyle.global.fallback_lang */
   char *active_lang;            /* return value for uci get gargoyle.global.language */
@@ -69,7 +45,7 @@ int LineToStr(char *string, size_t max);
 int ReadMimeEncodedInput(list_t *env);
 void PrintParseError(char *error, int linenum);
 int parseCommandLine(int argc, char *argv[]);
-int BecomeUser(script_t *scriptbuf);
+int BecomeUser(uid_t uid, gid_t gid);
 void assignGlobalStartupValues(void);
 void unlink_uploadlist (void);
 int main(int argc, char *argv[]);

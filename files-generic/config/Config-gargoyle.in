@@ -1,0 +1,28 @@
+# Copyright (C) 2022 Gargoyle-Router.com
+#
+# This is free software, licensed under the GNU General Public License v2.
+# See /LICENSE for more information.
+#
+
+menu "Gargoyle packages choice shortcut"
+
+	menu "Select Gargoyle package inclusion level"
+		config GARGOYLE_BASIC
+			bool "Basic Packages"
+			select PACKAGE_gargoyle-basic
+			help
+			  Choose basic packages, the minimum required for Gargoyle.
+
+		config GARGOYLE_USB
+			bool "Basic & USB Functionality"
+			select PACKAGE_gargoyle-usb
+			help
+			  Choose basic packages and those required to support USB functionality (but no network sharing).
+
+		config GARGOYLE_large
+			bool "Full Functionality"
+			select PACKAGE_gargoyle-large
+			help
+			  Choose packages that only fit on larger devices (USB, VPN, ToR, Mobile Tethering, Network Sharing etc).
+	endmenu
+endmenu

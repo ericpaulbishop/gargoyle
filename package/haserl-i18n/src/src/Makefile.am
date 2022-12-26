@@ -1,16 +1,11 @@
 PACKAGE=@PACKAGE_TARNAME@
 
-EXTRA_DIST = haserl_lualib.lua lua2c.c
+EXTRA_DIST = haserl_lualib.lua haserl_lualib.inc lua2c.c
 
 datarootdir=@datarootdir@
 
-# Not strictly required, but we explicitly do not distribute the generated inc file
-nodist_haserl_SOURCES = haserl_lualib.inc
-
-
 if USE_LUA
-noinst_PROGRAMS = lua2c
-LUASOURCE = h_lua_common.c h_lua_common.h
+LUASOURCE = haserl_lualib.inc h_lua_common.c h_lua_common.h
 if INCLUDE_LUASHELL
 LUASOURCE += h_lua.c h_lua.h
 endif
@@ -24,17 +19,24 @@ BASHSOURCE = h_bash.c h_bash.h
 endif
 
 if USE_LUA
-# lua2c_LIBS ?= -llua -ldl -lm
-lua2c_LDFLAGS ?= -Wl,-E
-lua2c:	lua2c.c
-	$(CC_FOR_BUILD) $(CFLAGS) $(LUA_CFLAGS) $(LDFLAGS) $(lua2c_LDFLAGS) \
-		-o $@ $^ $(LIBS) $(LUA_LIBS)
 
-haserl_lualib.inc : haserl_lualib.lua lua2c
-	if ! ./lua2c haserl_lualib haserl_lualib.lua >$@; then \
-		rm $@; \
-		exit 1 ;\
-	fi
+haserl_lualib.inc : haserl_lualib.lua 
+	@echo '-----------------------------------------------------'
+	@echo 'Whoops.   haserl_lualib.inc is old.  You will need'
+	@echo 'to compile lua2c by hand, or help the maintainer'
+	@echo 'get automake to do it for you.'
+	@echo ''
+	@echo 'For now, to compile lua2c:'
+	@echo ''
+	@echo 'gcc -I<luaheaderdir> -Wl,-E -L<lualibdir> -o lua2c lua2c.c -llua -ldl -lm'
+	@echo ''
+	@echo ''
+	@echo 'Then follow the instructions in lua2c.c to create a'
+	@echo 'new haserl_lualib.inc'
+	@echo ''
+	@echo 'Sorry.'
+	@echo '-----------------------------------------------------'
+	@exit 1
 
 h_lua_common.c : haserl_lualib.inc
 
@@ -45,12 +47,20 @@ bin_PROGRAMS = haserl
 haserl_SOURCES = common.c common.h sliding_buffer.c sliding_buffer.h \
 		 h_error.c h_error.h h_script.c h_script.h rfc2388.c rfc2388.h \
 		 $(BASHSOURCE) $(LUASOURCE) h_translate.c h_translate.h haserl.c haserl.h
-haserl_CFLAGS = $(LUA_CFLAGS)
-haserl_LDADD = $(LUA_LIBS)
 
 install-strip:
 	$(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
-	  install_sh_PROGRAM="$(INSTALL_STRIP_PROGRAM)" INSTALL_STRIP_FLAG=-s \
-	  `test -z '$(STRIP)' || \
-	    echo "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'"` install
+          install_sh_PROGRAM="$(INSTALL_STRIP_PROGRAM)" INSTALL_STRIP_FLAG=-s \
+          `test -z '$(STRIP)' || \
+            echo "INSTALL_PROGRAM_ENV=STRIPPROG='$(STRIP)'"` install
+
+
+#---------  Unit Tests ----------------------
+#TESTS = utest_common
+
+#check_PROGRAMS = utest_common
+
+#utest_common: utest_common.c
+
+#--------- End Unit Tests -------------------
 

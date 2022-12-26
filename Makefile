@@ -1,8 +1,8 @@
 GARGOYLE_VERSION:=1.15.X (Built $(shell echo "`date -u +%Y%m%d-%H%M` git@`git log -1 --pretty=format:%h`"))
 V=99
 FULL_BUILD=false
-CUSTOM_TEMPLATE=ar71xx
-CUSTOM_TARGET=ar71xx
+CUSTOM_TEMPLATE=ath79
+CUSTOM_TARGET=ath79
 JS_COMPRESS=true
 CSS_COMPRESS=true
 TRANSLATION=internationalize
