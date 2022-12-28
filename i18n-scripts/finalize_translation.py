@@ -17,8 +17,8 @@ elif len(sys.argv) == 4 and sys.argv[1] == 'internationalize':
 	target_platform=sys.argv[3]
 else:
 	sys.stderr.write('Usage: {} [localize|internationalize] $target_language $target_platform\n'.format(sys.argv[0]))
-	sys.stderr.write('  example: {} internationalize English-EN ar71xx\n'.format(sys.argv[0]))
-	sys.stderr.write('  example: {} localize ar71xx\n'.format(sys.argv[0]))
+	sys.stderr.write('  example: {} internationalize English-EN ath79\n'.format(sys.argv[0]))
+	sys.stderr.write('  example: {} localize ath79\n'.format(sys.argv[0]))
 	sys.exit(1)
 	
 #if localize, ensure hidden .config file is devoid of i18n
@@ -40,6 +40,7 @@ if os.path.exists(config_file):
 	found_lang=False
 	found_gi18n=False
 	found_haserl=False
+	found_haserli18n=False
 	i18n_section=0
 	for cline in cfg_doc:
 		anewline=''
@@ -52,6 +53,9 @@ if os.path.exists(config_file):
 			found_gi18n=True
 		if cline.startswith('# CONFIG_PACKAGE_gargoyle-i18n is not set') and tran_type=='internationalize' :
 			anewline=cline[2:-12]+"=y\n"
+			found_gi18n=True
+		if cline.startswith('CONFIG_PACKAGE_gargoyle-i18n=m') and tran_type=='internationalize' :
+			anewline=cline[:-2]+"y\n"
 			found_gi18n=True
 		if cline.startswith('CONFIG_PACKAGE_gargoyle-i18n=y') and tran_type=='localize' :
 			anewline="# "+cline[:-3]+" is not set\n"
@@ -67,6 +71,7 @@ if os.path.exists(config_file):
 		
 		if cline.startswith('# CONFIG_PACKAGE_haserl-i18n is not set') and tran_type=='internationalize' :
 			anewline=cline[2:-12]+"=y\n"
+			found_haserli18n=True
 		if cline.startswith('CONFIG_PACKAGE_haserl=y') and tran_type=='internationalize' :
 			anewline='# '+cline[:-3]+" is not set\n"
 		if cline.startswith('CONFIG_PACKAGE_haserl=y') and tran_type=='localize' :
@@ -84,15 +89,26 @@ if os.path.exists(config_file):
 			
 	if tran_type=='internationalize' and found_gi18n == False :
 		print('Warning: injecting gargoyle-i18n package into config file\n')
-		garg_package=newcfg_doc.index("CONFIG_PACKAGE_gargoyle=y\n")
-		newcfg_doc.insert(garg_package+1, 'CONFIG_PACKAGE_gargoyle-i18n=y\n')
+		garg_section=0
+		if "CONFIG_PACKAGE_gargoyle=y\n" in newcfg_doc:
+			garg_section=newcfg_doc.index("CONFIG_PACKAGE_gargoyle=y\n")
+		newcfg_doc.insert(garg_section+1, 'CONFIG_PACKAGE_gargoyle-i18n=y\n')
 
+	if tran_type=='internationalize' and found_haserli18n == False :
+		print('Warning: injecting haserl-i18n package into config file\n')
+		garg_section=0
+		if "# CONFIG_PACKAGE_haserl is not set\n" in newcfg_doc:
+			garg_section=newcfg_doc.index("# CONFIG_PACKAGE_haserl is not set\n")
+		newcfg_doc.insert(garg_section+1, 'CONFIG_PACKAGE_haserl-i18n=y\n')
 			
 	if tran_type=='internationalize' and found_lang == False :
 		print('Warning: target language not present in config file\n')
 		if os.path.exists(g_base+'/package/plugin-gargoyle-i18n-'+target_lang+'/Makefile'):
 			if i18n_section < 15:
-				i18n_section=newcfg_doc.index("CONFIG_PACKAGE_gargoyle=y\n")+1
+				if "CONFIG_PACKAGE_gargoyle=y\n" in newcfg_doc:
+					i18n_section=newcfg_doc.index("CONFIG_PACKAGE_gargoyle=y\n")+1
+				elif "CONFIG_PACKAGE_gargoyle-i18n=y\n" in newcfg_doc:
+					i18n_section=newcfg_doc.index("CONFIG_PACKAGE_gargoyle-i18n=y\n")+1
 			print(' Injecting target language {} into config file\n'.format(target_lang))
 			newcfg_doc.insert(i18n_section+1, 'CONFIG_PACKAGE_plugin-gargoyle-i18n-'+target_lang+'=y\n')
 		else:
@@ -101,8 +117,10 @@ if os.path.exists(config_file):
 			
 	if tran_type=='localize' and found_haserl == False :
 		print('Warning: adding stock haserl into config file\n')
-		haserl_package=newcfg_doc.index("# CONFIG_PACKAGE_haserl-i18n is not set\n")
-		newcfg_doc.insert(haserl_package+1, 'CONFIG_PACKAGE_haserl=y\n')
+		haserl_section=0
+		if "# CONFIG_PACKAGE_haserl-i18n is not set\n" in newcfg_doc:
+			haserl_section=newcfg_doc.index("# CONFIG_PACKAGE_haserl-i18n is not set\n")
+		newcfg_doc.insert(haserl_section+1, 'CONFIG_PACKAGE_haserl=y\n')
 			
 		
 	cfg_fileFO = open(config_file, 'w')

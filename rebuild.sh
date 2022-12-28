@@ -236,6 +236,35 @@ distrib_init ()
 	cp -fR "$top_dir/LICENSES" "$top_dir/Distribution/"
 }
 
+loc_or_i18n ()
+{
+	local tgt="$1"
+	local actlang="$2"
+
+	[ ! -z $(which python 2>&1) ] && {
+		#finish internationalization by setting the target language & adding the i18n plugin to the config file
+		#finish localization just deletes the (now unnecessary) language packages from the config file
+		[ "$translation_type" = "localize" ] 	&& "$top_dir/i18n-scripts/finalize_translation.py" 'localize' "$tgt" \
+												|| "$top_dir/i18n-scripts/finalize_translation.py" 'internationalize' "$actlang" "$tgt"
+	} || {
+		#NOTE: localize is not supported because it requires python
+		"$top_dir/i18n-scripts/finalize_tran_ltd.sh" "$tgt-src" "$actlang"
+	}
+}
+
+copy_buildinfo ()
+{
+	local owrt_tgt="$1"
+	local subtgt_arch="$2"
+	local tgt="$3"
+	local dprof="$4"
+	
+	#copy build config info
+	if [ -e "bin/targets/$owrt_tgt/$subtgt_arch/config.buildinfo" ] ; then
+		cp "bin/targets/$owrt_tgt/$subtgt_arch/config.buildinfo" "$top_dir/images/$tgt/$tgt-$dprof.buildinfo"
+	fi
+}
+
 
 ######################################################################################################
 ## Begin Main Body of Build Script                                                                  ##
@@ -542,17 +571,8 @@ for target in $targets ; do
 			done
 		done
 		
-		
-		[ ! -z $(which python 2>&1) ] && {
-			#finish internationalization by setting the target language & adding the i18n plugin to the config file
-			#finish localization just deletes the (now unnecessary) language packages from the config file
-			[ "$translation_type" = "localize" ] 	&& "$top_dir/i18n-scripts/finalize_translation.py" 'localize' "$target" \
-													|| "$top_dir/i18n-scripts/finalize_translation.py" 'internationalize' "$active_lang" "$target"
-		} || {
-			#NOTE: localize is not supported because it requires python
-			"$top_dir/i18n-scripts/finalize_tran_ltd.sh" "$target-src" "$active_lang"
-		}
-
+		make defconfig
+		loc_or_i18n "$target" "$active_lang"
 
 		#enter build directory and make sure we get rid of all those pesky .svn files, 
 		#and any crap left over from editing
@@ -577,7 +597,6 @@ for target in $targets ; do
 		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "${openwrt_abbrev_commit}" "package/base-files/files/etc/banner" "."
 		if [ "$verbosity" = "0" ] ; then
 			make $num_build_thread_str GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$default_profile"
-
 		else
 			make $num_build_thread_str V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$default_profile"
 		fi
@@ -651,10 +670,7 @@ for target in $targets ; do
 			done
 		fi
 
-		#copy build config info
-		if [ -e "bin/targets/$openwrt_target/$subtarget_arch/config.buildinfo" ] ; then
-			cp "bin/targets/$openwrt_target/$subtarget_arch/config.buildinfo" "$top_dir/images/$target/$target-$default_profile.buildinfo"
-		fi
+		copy_buildinfo "$openwrt_target" "$subtarget_arch" "$target" "$default_profile"
 
 		#if we didn't build anything, die horribly
 		if [ -z "$image_files" ] ; then
@@ -690,17 +706,8 @@ for target in $targets ; do
 				done
 			done
 			
-			
-			[ ! -z $(which python 2>&1) ] && {
-				#finish internationalization by setting the target language & adding the i18n plugin to the config file
-				#finish localization just deletes the (now unnecessary) language packages from the config file
-				[ "$translation_type" = "localize" ] 	&& "$top_dir/i18n-scripts/finalize_translation.py" 'localize' "$target" \
-														|| "$top_dir/i18n-scripts/finalize_translation.py" 'internationalize' "$active_lang" "$target"
-			} || {
-				#NOTE: localize is not supported because it requires python
-				"$top_dir/i18n-scripts/finalize_tran_ltd.sh" "$target-src" "$active_lang"
-			}
-			
+			make defconfig
+			loc_or_i18n "$target" "$active_lang"
 
 			openwrt_target=$(get_target_from_config "./.config")
 			create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$openwrt_abbrev_commit" "package/base-files/files/etc/banner" "."
@@ -782,10 +789,7 @@ for target in $targets ; do
 
 			done
 
-			#copy build config info
-			if [ -e "bin/targets/$openwrt_target/$subtarget_arch/config.buildinfo" ] ; then
-				cp "bin/targets/$openwrt_target/$subtarget_arch/config.buildinfo" "$top_dir/images/$target/$target-$profile_name.buildinfo"
-			fi
+			copy_buildinfo "$openwrt_target" "$subtarget_arch" "$target" "$profile_name"
 
 			if [ "$distribution" = "true" ] ; then
 				#Generate licenses file for each profile
