@@ -502,20 +502,19 @@ CONFIG_EXTERNAL_KERNEL_TREE=""
 CONFIG_KERNEL_GIT_CLONE_URI=""
 CONFIG_BUILD_LOG_DIR=""
 CONFIG_EXTRA_OPTIMIZATION="-fno-caller-saves -fno-plt"
+CONFIG_USE_GARGOYLE_PROFILE_PKGS=y
 
 #
-# Gargoyle packages choice shortcut
-#
-
-#
-# Select Gargoyle package inclusion level
+# Standard Gargoyle package sets
 #
 # CONFIG_GARGOYLE_BASIC is not set
 # CONFIG_GARGOYLE_USB is not set
-# CONFIG_GARGOYLE_large is not set
-# end of Select Gargoyle package inclusion level
-# end of Gargoyle packages choice shortcut
+# CONFIG_GARGOYLE_LARGE is not set
+# end of Standard Gargoyle package sets
 
+CONFIG_GARGOYLE_LANGUAGE_PKGS=m
+CONFIG_GARGOYLE_THEME_PKGS=m
+CONFIG_GARGOYLE_OTHER_PKGS=m
 CONFIG_TARGET_OPTIMIZATION="-Os -pipe -mno-branch-likely -mips32r2 -mtune=24kc"
 CONFIG_SOFT_FLOAT=y
 CONFIG_USE_MIPS16=y
@@ -3701,7 +3700,50 @@ CONFIG_PACKAGE_libcap-ng=y
 # CONFIG_PACKAGE_libcharset is not set
 CONFIG_PACKAGE_libcomerr=m
 # CONFIG_PACKAGE_libctf is not set
-# CONFIG_PACKAGE_libcurl is not set
+CONFIG_PACKAGE_libcurl=m
+
+#
+# SSL support
+#
+# CONFIG_LIBCURL_MBEDTLS is not set
+# CONFIG_LIBCURL_WOLFSSL is not set
+CONFIG_LIBCURL_OPENSSL=y
+# CONFIG_LIBCURL_GNUTLS is not set
+# CONFIG_LIBCURL_NOSSL is not set
+
+#
+# Supported protocols
+#
+# CONFIG_LIBCURL_DICT is not set
+CONFIG_LIBCURL_FILE=y
+CONFIG_LIBCURL_FTP=y
+# CONFIG_LIBCURL_GOPHER is not set
+CONFIG_LIBCURL_HTTP=y
+CONFIG_LIBCURL_COOKIES=y
+# CONFIG_LIBCURL_IMAP is not set
+# CONFIG_LIBCURL_LDAP is not set
+# CONFIG_LIBCURL_POP3 is not set
+# CONFIG_LIBCURL_RTSP is not set
+# CONFIG_LIBCURL_SSH2 is not set
+CONFIG_LIBCURL_NO_SMB="!"
+# CONFIG_LIBCURL_SMTP is not set
+# CONFIG_LIBCURL_TELNET is not set
+# CONFIG_LIBCURL_TFTP is not set
+CONFIG_LIBCURL_NGHTTP2=y
+
+#
+# Miscellaneous
+#
+CONFIG_LIBCURL_PROXY=y
+# CONFIG_LIBCURL_CRYPTO_AUTH is not set
+# CONFIG_LIBCURL_TLS_SRP is not set
+# CONFIG_LIBCURL_LIBIDN2 is not set
+# CONFIG_LIBCURL_THREADED_RESOLVER is not set
+# CONFIG_LIBCURL_ZLIB is not set
+# CONFIG_LIBCURL_ZSTD is not set
+# CONFIG_LIBCURL_UNIX_SOCKETS is not set
+# CONFIG_LIBCURL_LIBCURL_OPTION is not set
+# CONFIG_LIBCURL_VERBOSE is not set
 CONFIG_PACKAGE_libdevmapper=m
 # CONFIG_PACKAGE_libdevmapper-selinux is not set
 # CONFIG_PACKAGE_libdw is not set
@@ -3750,7 +3792,7 @@ CONFIG_PACKAGE_libncurses=m
 # CONFIG_PACKAGE_libnettle is not set
 # CONFIG_PACKAGE_libnfnetlink is not set
 # CONFIG_PACKAGE_libnftnl is not set
-# CONFIG_PACKAGE_libnghttp2 is not set
+CONFIG_PACKAGE_libnghttp2=m
 # CONFIG_PACKAGE_libnl is not set
 CONFIG_PACKAGE_libnl-core=m
 CONFIG_PACKAGE_libnl-genl=m
@@ -3841,7 +3883,7 @@ CONFIG_PACKAGE_minidlna=m
 #
 # File Transfer
 #
-# CONFIG_PACKAGE_curl is not set
+CONFIG_PACKAGE_curl=m
 CONFIG_PACKAGE_vsftpd=m
 # end of File Transfer
 
@@ -4153,7 +4195,7 @@ CONFIG_PACKAGE_odhcpd_ipv6only_ext_cer_id=0
 # end of Configuration
 
 # CONFIG_PACKAGE_omcproxy is not set
-# CONFIG_PACKAGE_plugin-gargoyle-ddns-cloudflare is not set
+CONFIG_PACKAGE_plugin-gargoyle-ddns-cloudflare=m
 CONFIG_PACKAGE_ppp=y
 # CONFIG_PACKAGE_ppp-mod-passwordfd is not set
 # CONFIG_PACKAGE_ppp-mod-pppoa is not set

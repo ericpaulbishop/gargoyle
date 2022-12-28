@@ -352,20 +352,19 @@ CONFIG_EXTERNAL_KERNEL_TREE=""
 CONFIG_KERNEL_GIT_CLONE_URI=""
 CONFIG_BUILD_LOG_DIR=""
 CONFIG_EXTRA_OPTIMIZATION="-fno-caller-saves -fno-plt"
+CONFIG_USE_GARGOYLE_PROFILE_PKGS=y
 
 #
-# Gargoyle packages choice shortcut
-#
-
-#
-# Select Gargoyle package inclusion level
+# Standard Gargoyle package sets
 #
 # CONFIG_GARGOYLE_BASIC is not set
 # CONFIG_GARGOYLE_USB is not set
-# CONFIG_GARGOYLE_large is not set
-# end of Select Gargoyle package inclusion level
-# end of Gargoyle packages choice shortcut
+# CONFIG_GARGOYLE_LARGE is not set
+# end of Standard Gargoyle package sets
 
+CONFIG_GARGOYLE_LANGUAGE_PKGS=m
+CONFIG_GARGOYLE_THEME_PKGS=m
+CONFIG_GARGOYLE_OTHER_PKGS=m
 CONFIG_TARGET_OPTIMIZATION="-Os -pipe -march=pentium4"
 # CONFIG_EXTRA_TARGET_ARCH is not set
 CONFIG_EXTRA_BINUTILS_CONFIG_OPTIONS=""

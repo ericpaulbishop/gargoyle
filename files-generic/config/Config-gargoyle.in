@@ -11,6 +11,7 @@ menuconfig USE_GARGOYLE_PROFILE_PKGS
 	select BUSYBOX_CONFIG_ARPING
 	select BUSYBOX_CONFIG_SHA1SUM
 	select PACKAGE_gargoyle
+	select PACKAGE_gargoyle-i18n
 	select PACKAGE_plugin-gargoyle-i18n-English-EN
 	if USE_GARGOYLE_PROFILE_PKGS
 
@@ -29,7 +30,7 @@ menuconfig USE_GARGOYLE_PROFILE_PKGS
 				help
 				  Choose basic packages and those required to support USB functionality (but no network sharing).
 
-			config GARGOYLE_large
+			config GARGOYLE_LARGE
 				tristate "Full Functionality"
 				default m
 				select PACKAGE_gargoyle-large
