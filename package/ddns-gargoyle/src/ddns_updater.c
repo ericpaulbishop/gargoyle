@@ -5,7 +5,7 @@
  * 			http://www.gargoyle-router.com
  * 		  
  *
- *  Copyright © 2008-2011 by Eric Bishop <eric@gargoyle-router.com>
+ *  Copyright ï¿½ 2008-2011 by Eric Bishop <eric@gargoyle-router.com>
  * 
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -88,7 +88,7 @@ char default_ip_lookup_url_data[][MAX_LOOKUP_URL_LENGTH] = {
 							"http://www.tracemyip.org",
 							"http://checkip.dyndns.org",
 							"http://checkip.org",
-							"https://aruljohn.com/ip/",
+							"https://api.aruljohn.com/ip",
 							"http://www.lawrencegoetz.com/programs/ipinfo/",
 							"http://myipinfo.net",
 							"http://www.myipnumber.com",
@@ -113,6 +113,7 @@ char default_ip6_lookup_url_data[][MAX_LOOKUP_URL_LENGTH] = {
 							"https://ifconfig.co/ip",
 							"https://ipapi.co/ip",
 							"https://api.ip.sb/ip",
+							"https://api.aruljohn.com/ip",
 							"\0"
 							};
 
