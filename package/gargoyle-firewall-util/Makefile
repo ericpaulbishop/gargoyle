@@ -15,7 +15,7 @@ define Package/gargoyle-firewall-util
 	SECTION:=net
 	CATEGORY:=Network
 	TITLE:=A couple of shell script routines for firewall initialization
-	DEPENDS:=+ebtables +libericstools +uci +libiptbwctl +iptables-mod-filter +iptables-mod-ipopt +iptables-mod-conntrack-extra +iptables-mod-nat-extra +iptables-mod-extra +iptables-mod-iprange +iptables-mod-bandwidth +iptables-mod-timerange +iptables-mod-weburl +kmod-gre +kmod-pptp +kmod-tun +kmod-nf-nathelper +kmod-nf-nathelper-extra
+	DEPENDS:=+ebtables +libericstools +uci +libiptbwctl +iptables-mod-filter +iptables-mod-ipopt +iptables-mod-conntrack-extra +iptables-mod-nat-extra +iptables-mod-extra +iptables-mod-iprange +iptables-mod-bandwidth +iptables-mod-timerange +iptables-mod-weburl +kmod-gre +kmod-pptp +kmod-tun +kmod-nf-nathelper +kmod-nf-nathelper-extra +ipset +kmod-ipt-ipset
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
 endef
 
@@ -61,6 +61,7 @@ define Package/gargoyle-firewall-util/install
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/restore_quotas $(1)/usr/bin/restore_quotas
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/print_quotas $(1)/usr/bin/print_quotas
 	
+	$(INSTALL_BIN) ./files/cache_dhcpv4_leases.sh $(1)/usr/lib/gargoyle_firewall_util/cache_dhcpv4_leases.sh
 	$(INSTALL_BIN) ./files/gargoyle_firewall_util.sh $(1)/usr/lib/gargoyle_firewall_util/gargoyle_firewall_util.sh
 	$(INSTALL_BIN) ./files/gargoyle_additions.firewall $(1)/usr/lib/gargoyle_firewall_util/gargoyle_additions.firewall 
 	$(INSTALL_BIN) ./files/gargoyle_firewall.hotplug $(1)/etc/hotplug.d/iface/21-gargoyle_firewall

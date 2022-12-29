@@ -159,7 +159,7 @@ endef
 define Package/gargoyle-tor
 $(call Package/gargoyle-tor/Default)
   TITLE:=An anonymous Internet communication system
-  DEPENDS:=+obfsproxy-legacy +libevent2 +libopenssl +libpthread +librt +zlib +libcap +ipset +kmod-ipt-ipset +gargoyle-firewall-util
+  DEPENDS:=+obfsproxy-legacy +libevent2 +libopenssl +libpthread +librt +zlib +libcap +gargoyle-firewall-util
 endef
 
 define Package/gargoyle-tor-geoip

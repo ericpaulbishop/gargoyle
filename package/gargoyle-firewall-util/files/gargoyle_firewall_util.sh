@@ -582,6 +582,11 @@ enforce_dhcp_assignments()
 {
 	enforce_assignments=$(uci get firewall.@defaults[0].enforce_dhcp_assignments 2> /dev/null)
 	delete_chain_from_table "filter" "lease_mismatch_check"
+	ipset -X lease_mismatch_ips 2>/dev/null
+	ipset -X lease_mismatch_macs 2>/dev/null
+	ipset -X lease_mismatch_pairs 2>/dev/null
+
+	network_get_subnet lan_mask lan
 
 	local pairs1
 	local pairs2
@@ -589,16 +594,20 @@ enforce_dhcp_assignments()
 	pairs1=""
 	pairs2=""
 	if [ -e /tmp/dhcp.leases ] ; then
-		pairs1=$(cat /tmp/dhcp.leases | sed '/^[ \t]*$/d' | awk ' { print $2"^"$3"\n" ; } ' )
+		pairs1=$(cat /tmp/dhcp.leases | sed '/^[ \t]*$/d' | awk ' { print tolower($2)"^"$3"\n" ; } ' )
 	fi
-	if [ -e /etc/ethers ] ; then
-		pairs2=$(cat /etc/ethers | sed '/^[ \t]*$/d' | awk ' { print $1"^"$2"\n" ; } ' )
+	/usr/lib/gargoyle_firewall_util/cache_dhcpv4_leases.sh
+	if [ -e /tmp/dhcpv4configleases.gargoyle ] ; then
+		pairs2=$(cat /tmp/dhcpv4configleases.gargoyle | sed '/^[ \t]*$/d' | awk ' { print tolower($1)"^"$2"\n" ; } ' )
 	fi
 	pairs=$( printf "$pairs1\n$pairs2\n" | sort | uniq )
 
 
 	if [ "$enforce_assignments" = "1" ] && [ -n "$pairs" ] ; then
 		iptables -t filter -N lease_mismatch_check
+		ipset create lease_mismatch_ips hash:ip
+		ipset create lease_mismatch_macs hash:mac
+		ipset create lease_mismatch_pairs bitmap:ip,mac range "$lan_mask"
 		local p
 		for p in $pairs ; do
 			local mac
@@ -606,11 +615,14 @@ enforce_dhcp_assignments()
 			mac=$(echo $p | sed 's/\^.*$//g')
 			ip=$(echo $p | sed 's/^.*\^//g')
 			if [ -n "$ip" ] && [ -n "$mac" ] ; then
-				iptables -t filter -A lease_mismatch_check  ! -s  "$ip"  -m mac --mac-source  "$mac"  -j REJECT
-				iptables -t filter -A lease_mismatch_check  -s  "$ip"  -m mac ! --mac-source  "$mac"  -j REJECT
+				ipset add lease_mismatch_ips "$ip"
+				ipset add lease_mismatch_macs "$mac"
+				ipset add lease_mismatch_pairs "$ip,$mac"
 			fi
 		done
-		iptables -t filter -I delegate_forward -j lease_mismatch_check
+		iptables -t filter -I forwarding_rule -j lease_mismatch_check
+		iptables -t filter -I lease_mismatch_check -m set ! --match-set lease_mismatch_pairs src,src -j REJECT
+		iptables -t filter -I lease_mismatch_check -m set ! --match-set lease_mismatch_ips src -m set ! --match-set lease_mismatch_macs src -j RETURN
 	fi
 }
 
