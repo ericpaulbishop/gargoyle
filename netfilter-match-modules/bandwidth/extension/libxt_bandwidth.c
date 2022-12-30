@@ -33,6 +33,10 @@
 
 #include <arpa/inet.h>
 
+#ifndef ktime_t
+#define ktime_t time_t
+#endif
+
 #include <xtables.h>
 #include <linux/netfilter.h>
 #include <linux/netfilter/xt_bandwidth.h>

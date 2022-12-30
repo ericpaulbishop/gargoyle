@@ -570,9 +570,6 @@ for target in $targets ; do
 				fi
 			done
 		done
-		
-		make defconfig
-		loc_or_i18n "$target" "$active_lang"
 
 		#enter build directory and make sure we get rid of all those pesky .svn files, 
 		#and any crap left over from editing
@@ -580,6 +577,9 @@ for target in $targets ; do
 		find . -name ".svn"  | xargs rm -rf
 		find . -name "*~"    | xargs rm -rf
 		find . -name ".*sw*" | xargs rm -rf
+		
+		make defconfig
+		loc_or_i18n "$target" "$active_lang"
 		
 		branch_name=$(cat "OPENWRT_BRANCH")
 		openwrt_commit=$(cat "OPENWRT_REVISION")

@@ -117,6 +117,13 @@ TOPDIR:=..
 INCLUDE_DIR:=$(TOPDIR)/include
 SCRIPT_DIR:=$(TOPDIR)/scripts
 DL_DIR:=$(TOPDIR)/dl
+STAGING_DIR_HOST:=$(TOPDIR)/staging_dir/host
+MKHASH:=$(STAGING_DIR_HOST)/bin/mkhash
+# MKHASH is used in /scripts, so we export it here.
+export MKHASH
+# DOWNLOAD_CHECK_CERTIFICATE is used in /scripts, so we export it here.
+DOWNLOAD_CHECK_CERTIFICATE:=$(CONFIG_DOWNLOAD_CHECK_CERTIFICATE)
+export DOWNLOAD_CHECK_CERTIFICATE
 EOF
 
 	printf "$defines\n" >> nf-patch-build/linux-download-make
@@ -157,7 +164,6 @@ define filter_series
 sed -e s,\\#.*,, $(1) | grep -E \[a-zA-Z0-9\]
 endef
 
-
 all:
 	if [ ! -e "$(DL_DIR)/$(LINUX_SOURCE)" ] ; then TOPDIR="$(TOPDIR)"  $(SCRIPT_DIR)/download.pl $(DL_DIR) $(LINUX_SOURCE) $(LINUX_KERNEL_HASH) $(LINUX_SOURCE) $(LINUX_SITE) ; fi ; 
 	cp $(DL_DIR)/$(LINUX_SOURCE) . 
@@ -194,6 +200,13 @@ EOF
 	echo 'TOPDIR:=..' >> nf-patch-build/iptables-download-make
 	echo 'SCRIPT_DIR:=$(TOPDIR)/scripts' >> nf-patch-build/iptables-download-make
 	echo 'DL_DIR:=$(TOPDIR)/dl' >> nf-patch-build/iptables-download-make
+	echo 'STAGING_DIR_HOST:=$(TOPDIR)/staging_dir/host' >> nf-patch-build/iptables-download-make
+	echo 'MKHASH:=$(STAGING_DIR_HOST)/bin/mkhash' >> nf-patch-build/iptables-download-make
+	echo '# MKHASH is used in /scripts, so we export it here.' >> nf-patch-build/iptables-download-make
+	echo 'export MKHASH' >> nf-patch-build/iptables-download-make
+	echo '# DOWNLOAD_CHECK_CERTIFICATE is used in /scripts, so we export it here.' >> nf-patch-build/iptables-download-make
+	echo 'DOWNLOAD_CHECK_CERTIFICATE:=$(CONFIG_DOWNLOAD_CHECK_CERTIFICATE)' >> nf-patch-build/iptables-download-make
+	echo 'export DOWNLOAD_CHECK_CERTIFICATE' >> nf-patch-build/iptables-download-make
 	egrep "CONFIG_LINUX_.*=y" .config | sed 's/=/:=/g' >> nf-patch-build/iptables-download-make
 
 	package_include_line_num=$(cat package/network/utils/iptables/Makefile | egrep -n "include.*package.mk" | sed 's/:.*$//g' )

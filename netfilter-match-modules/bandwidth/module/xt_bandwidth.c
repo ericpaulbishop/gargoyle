@@ -76,7 +76,7 @@ MODULE_ALIAS("ip6t_bandwidth");
 extern struct timezone sys_tz; 
 static int local_minutes_west;
 static int local_seconds_west;
-static time_t last_local_mw_update;
+static ktime_t last_local_mw_update;
 
 
 static spinlock_t bandwidth_lock = __SPIN_LOCK_UNLOCKED(bandwidth_lock);
@@ -97,9 +97,9 @@ typedef struct info_and_maps_struct
 
 typedef struct history_struct
 {
-	time_t first_start;
-	time_t first_end;
-	time_t last_end; /* also beginning of current time frame */
+	ktime_t first_start;
+	ktime_t first_end;
+	ktime_t last_end; /* also beginning of current time frame */
 	uint32_t max_nodes;
 	uint32_t num_nodes;
 	uint32_t non_zero_nodes;
@@ -123,30 +123,30 @@ static char set_id[BANDWIDTH_MAX_ID_LENGTH] = "";
 
 static void adjust_ip_for_backwards_time_shift(char* key, void* value);
 static void adjust_id_for_backwards_time_shift(char* key, void* value);
-static void check_for_backwards_time_shift(time_t now);
+static void check_for_backwards_time_shift(ktime_t now);
 
 
 static void shift_timezone_of_ip(char* key, void* value);
 static void shift_timezone_of_id(char* key, void* value);
-static void check_for_timezone_shift(time_t now, int already_locked);
+static void check_for_timezone_shift(ktime_t now, int already_locked);
 
 
 
 static bw_history* initialize_history(uint32_t max_nodes);
-static unsigned char update_history(bw_history* history, time_t interval_start, time_t interval_end, struct xt_bandwidth_info* info);
+static unsigned char update_history(bw_history* history, ktime_t interval_start, ktime_t interval_end, struct xt_bandwidth_info* info);
 
 
 
 static void do_reset(char* key, void* value);
 static void set_bandwidth_to_zero(char* key, void* value);
-static void handle_interval_reset(info_and_maps* iam, time_t now);
+static void handle_interval_reset(info_and_maps* iam, ktime_t now);
 
 static uint64_t pow64(uint64_t base, uint64_t pow);
 static uint64_t get_bw_record_max(void); /* called by init to set global variable */
 
 static inline int is_leap(unsigned int y);
-static time_t get_next_reset_time(struct xt_bandwidth_info *info, time_t now, time_t previous_reset);
-static time_t get_nominal_previous_reset_time(struct xt_bandwidth_info *info, time_t current_next_reset);
+static ktime_t get_next_reset_time(struct xt_bandwidth_info *info, ktime_t now, ktime_t previous_reset);
+static ktime_t get_nominal_previous_reset_time(struct xt_bandwidth_info *info, ktime_t current_next_reset);
 
 static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, char* ip, uint64_t initial_bandwidth, uint32_t family);
 
@@ -167,10 +167,10 @@ int free_null_terminated_string_array(char** strs)
 }
 
 
-static time_t backwards_check = 0;
-static time_t backwards_adjust_current_time = 0;
-static time_t backwards_adjust_info_previous_reset = 0;
-static time_t backwards_adjust_ips_zeroed = 0;
+static ktime_t backwards_check = 0;
+static ktime_t backwards_adjust_current_time = 0;
+static ktime_t backwards_adjust_info_previous_reset = 0;
+static ktime_t backwards_adjust_ips_zeroed = 0;
 static info_and_maps* backwards_adjust_iam = NULL;
 
 /*
@@ -237,7 +237,7 @@ static void adjust_ip_for_backwards_time_shift(char* key, void* value)
 		 * last time the current time was set to the interval to which we just jumped back
 		 */
 		uint32_t next_old_index;
-		time_t old_next_start =  old_history->first_start == 0 ? backwards_adjust_info_previous_reset : old_history->first_start; /* first time point in old history */
+		ktime_t old_next_start =  old_history->first_start == 0 ? backwards_adjust_info_previous_reset : old_history->first_start; /* first time point in old history */
 		bw_history* new_history = initialize_history(old_history->max_nodes);
 		if(new_history == NULL)
 		{
@@ -259,7 +259,7 @@ static void adjust_ip_for_backwards_time_shift(char* key, void* value)
 		/* iterate through old history, rebuilding in new history*/
 		while( old_next_start < backwards_adjust_current_time )
 		{
-			time_t old_next_end = get_next_reset_time(backwards_adjust_iam->info, old_next_start, old_next_start); /* 2nd param = last reset, 3rd param = current time */
+			ktime_t old_next_end = get_next_reset_time(backwards_adjust_iam->info, old_next_start, old_next_start); /* 2nd param = last reset, 3rd param = current time */
 			if(  old_next_end < backwards_adjust_current_time)
 			{
 				update_history(new_history, old_next_start, old_next_end, backwards_adjust_iam->info);
@@ -329,7 +329,7 @@ static void adjust_id_for_backwards_time_shift(char* key, void* value)
 	}
 	else
 	{
-		time_t next_reset_after_adjustment = get_next_reset_time(iam->info, backwards_adjust_current_time, backwards_adjust_current_time);
+		ktime_t next_reset_after_adjustment = get_next_reset_time(iam->info, backwards_adjust_current_time, backwards_adjust_current_time);
 		if(next_reset_after_adjustment < iam->info->next_reset)
 		{
 			iam->info->previous_reset = backwards_adjust_current_time;
@@ -338,7 +338,7 @@ static void adjust_id_for_backwards_time_shift(char* key, void* value)
 	}
 	backwards_adjust_iam = NULL;
 }
-static void check_for_backwards_time_shift(time_t now)
+static void check_for_backwards_time_shift(ktime_t now)
 {
 	spin_lock_bh(&bandwidth_lock);
 	if(now < backwards_check && backwards_check != 0)
@@ -360,8 +360,8 @@ static void check_for_backwards_time_shift(time_t now)
 
 
 static int old_minutes_west;
-static time_t shift_timezone_current_time;
-static time_t shift_timezone_info_previous_reset;
+static ktime_t shift_timezone_current_time;
+static ktime_t shift_timezone_info_previous_reset;
 static info_and_maps* shift_timezone_iam = NULL;
 static void shift_timezone_of_ip(char* key, void* value)
 {
@@ -382,8 +382,8 @@ static void shift_timezone_of_ip(char* key, void* value)
 	#endif
 	
 	/* given time after shift, calculate next and previous reset times */
-	time_t next_reset = get_next_reset_time(shift_timezone_iam->info, shift_timezone_current_time, 0);
-	time_t previous_reset = get_nominal_previous_reset_time(shift_timezone_iam->info, next_reset);
+	ktime_t next_reset = get_next_reset_time(shift_timezone_iam->info, shift_timezone_current_time, 0);
+	ktime_t previous_reset = get_nominal_previous_reset_time(shift_timezone_iam->info, next_reset);
 	shift_timezone_iam->info->next_reset = next_reset;
 
 	/*if we're resetting on a constant interval, we can just adjust -- no need to worry about relationship to constant boundaries, e.g. end of day */
@@ -493,7 +493,7 @@ static void shift_timezone_of_id(char* key, void* value)
 	shift_timezone_iam = NULL;
 }
 
-static void check_for_timezone_shift(time_t now, int already_locked)
+static void check_for_timezone_shift(ktime_t now, int already_locked)
 {
 	
 	if(already_locked == 0) { spin_lock_bh(&bandwidth_lock); }
@@ -561,7 +561,7 @@ static bw_history* initialize_history(uint32_t max_nodes)
 }
 
 /* returns 1 if there are non-zero nodes in history, 0 if history is empty (all zero) */
-static unsigned char update_history(bw_history* history, time_t interval_start, time_t interval_end, struct xt_bandwidth_info* info)
+static unsigned char update_history(bw_history* history, ktime_t interval_start, ktime_t interval_end, struct xt_bandwidth_info* info)
 {
 	unsigned char history_is_nonzero = 0;
 	if(history != NULL) /* should never be null, but let's be sure */
@@ -613,8 +613,8 @@ static unsigned char update_history(bw_history* history, time_t interval_start, 
 static struct xt_bandwidth_info* do_reset_info = NULL;
 static string_map* do_reset_ip_map = NULL;
 static string_map* do_reset_delete_ips = NULL;
-static time_t do_reset_interval_start = 0;
-static time_t do_reset_interval_end = 0;
+static ktime_t do_reset_interval_start = 0;
+static ktime_t do_reset_interval_end = 0;
 static void do_reset(char* key, void* value)
 {
 	bw_history* history = (bw_history*)value;
@@ -684,7 +684,7 @@ static void reset_histories(char* key, void* value)
 }
 
 
-static void handle_interval_reset(info_and_maps* iam, time_t now)
+static void handle_interval_reset(info_and_maps* iam, ktime_t now)
 {
 	struct xt_bandwidth_info* info;
 
@@ -901,15 +901,15 @@ static inline int is_leap(unsigned int y)
 /* end of code  yoinked from xt_time */
 
 
-static time_t get_nominal_previous_reset_time(struct xt_bandwidth_info *info, time_t current_next_reset)
+static ktime_t get_nominal_previous_reset_time(struct xt_bandwidth_info *info, ktime_t current_next_reset)
 {
-	time_t previous_reset = current_next_reset;
+	ktime_t previous_reset = current_next_reset;
 	if(info->reset_is_constant_interval == 0)
 	{
 		/* skip backwards in halves of interval after next, until  */
-		time_t next = get_next_reset_time(info, current_next_reset, 0);
-		time_t half_interval = (next-current_next_reset)/2;
-		time_t half_count, tmp;
+		ktime_t next = get_next_reset_time(info, current_next_reset, 0);
+		ktime_t half_interval = (next-current_next_reset)/2;
+		ktime_t half_count, tmp;
 		half_interval = half_interval == 0 ? 1 : half_interval; /* must be at least one second, otherwise we loop forever*/
 	
 		half_count = 1;
@@ -929,10 +929,10 @@ static time_t get_nominal_previous_reset_time(struct xt_bandwidth_info *info, ti
 }
 
 
-static time_t get_next_reset_time(struct xt_bandwidth_info *info, time_t now, time_t previous_reset)
+static ktime_t get_next_reset_time(struct xt_bandwidth_info *info, ktime_t now, ktime_t previous_reset)
 {
 	//first calculate when next reset would be if reset_time is 0 (which it may be)
-	time_t next_reset = 0;
+	ktime_t next_reset = 0;
 	if(info->reset_is_constant_interval == 0)
 	{
 		if(info->reset_interval == BANDWIDTH_MINUTE)
@@ -940,7 +940,7 @@ static time_t get_next_reset_time(struct xt_bandwidth_info *info, time_t now, ti
 			next_reset = ( (long)(now/60) + 1)*60;
 			if(info->reset_time > 0)
 			{
-				time_t alt_reset = next_reset + info->reset_time - 60;
+				ktime_t alt_reset = next_reset + info->reset_time - 60;
 				next_reset = alt_reset > now ? alt_reset : next_reset+info->reset_time;
 			}
 		}
@@ -949,7 +949,7 @@ static time_t get_next_reset_time(struct xt_bandwidth_info *info, time_t now, ti
 			next_reset = ( (long)(now/(60*60)) + 1)*60*60;
 			if(info->reset_time > 0)
 			{
-				time_t alt_reset = next_reset + info->reset_time - (60*60);
+				ktime_t alt_reset = next_reset + info->reset_time - (60*60);
 				next_reset = alt_reset > now ? alt_reset : next_reset+info->reset_time;
 			}
 		}
@@ -958,7 +958,7 @@ static time_t get_next_reset_time(struct xt_bandwidth_info *info, time_t now, ti
 			next_reset = ( (long)(now/(60*60*24)) + 1)*60*60*24;
 			if(info->reset_time > 0)
 			{
-				time_t alt_reset = next_reset + info->reset_time - (60*60*24);
+				ktime_t alt_reset = next_reset + info->reset_time - (60*60*24);
 				next_reset = alt_reset > now ? alt_reset : next_reset+info->reset_time;
 			}
 		}	
@@ -969,7 +969,7 @@ static time_t get_next_reset_time(struct xt_bandwidth_info *info, time_t now, ti
 			next_reset = (days_since_epoch + (7-current_weekday) )*(60*60*24);
 			if(info->reset_time > 0)
 			{
-				time_t alt_reset = next_reset + info->reset_time - (60*60*24*7);
+				ktime_t alt_reset = next_reset + info->reset_time - (60*60*24*7);
 				next_reset = alt_reset > now ? alt_reset : next_reset+info->reset_time;
 			}
 		}
@@ -982,7 +982,7 @@ static time_t get_next_reset_time(struct xt_bandwidth_info *info, time_t now, ti
 			int month;
 			long days_since_epoch = now/(60*60*24);
 			uint16_t* month_start_days;	
-			time_t alt_reset;
+			ktime_t alt_reset;
 
 			for (year_index = 0, year = DSE_FIRST; days_since_epoch_for_each_year_start[year_index] > days_since_epoch; year_index++)
 			{
@@ -1181,7 +1181,7 @@ static bool bandwidth_mt4(const struct sk_buff *skb, struct xt_action_param *par
 {
 	struct xt_bandwidth_info *info = ((const struct xt_bandwidth_info*)(par->matchinfo))->non_const_self;
 	
-	time_t now;
+	ktime_t now;
 	int match_found;
 
 
@@ -1420,7 +1420,7 @@ static bool bandwidth_mt6(const struct sk_buff *skb, struct xt_action_param *par
 {
 	struct xt_bandwidth_info *info = ((const struct xt_bandwidth_info*)(par->matchinfo))->non_const_self;
 	
-	time_t now;
+	ktime_t now;
 	int match_found;
 
 
@@ -2000,7 +2000,7 @@ static int xt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 	uint64_t* reset_time;
 	unsigned char* reset_is_constant_interval;
 	uint32_t  current_output_index;
-	time_t now = get_seconds();
+	ktime_t now = get_seconds();
 	check_for_timezone_shift(now, 0);
 	check_for_backwards_time_shift(now);
 	now = now -  local_seconds_west;  /* Adjust for local timezone */
@@ -2127,7 +2127,7 @@ static int xt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 	 *
 	 * if history WAS queried we have
 	 *   (note we are using 64 bit integers for time here
-	 *   even though time_t is 32 bits on most 32 bit systems
+	 *   even though ktime_t is 32 bits on most 32 bit systems
 	 *   just to be on the safe side)
 	 * bytes 1-4 : family
 	 * bytes 5-20 : ip
@@ -2246,13 +2246,13 @@ typedef struct set_header_struct
 	uint32_t num_ips_in_buffer;
 	unsigned char history_included;
 	unsigned char zero_unset_ips;
-	time_t last_backup;
+	ktime_t last_backup;
 	char id[BANDWIDTH_MAX_ID_LENGTH];
 } set_header;
 
 static int handle_set_failure(int ret_value, int unlock_user_sem, int unlock_bandwidth_spin, unsigned char* free_buffer );
 static void parse_set_header(unsigned char* input_buffer, set_header* header);
-static void set_single_ip_data(unsigned char history_included, info_and_maps* iam, unsigned char* buffer, uint32_t* buffer_index, time_t now);
+static void set_single_ip_data(unsigned char history_included, info_and_maps* iam, unsigned char* buffer, uint32_t* buffer_index, ktime_t now);
 
 static int handle_set_failure(int ret_value, int unlock_user_sem, int unlock_bandwidth_spin, unsigned char* free_buffer )
 {
@@ -2290,7 +2290,7 @@ static void parse_set_header(unsigned char* input_buffer, set_header* header)
 	header->num_ips_in_buffer = *num_ips_in_buffer;
 	header->history_included = *history_included;
 	header->zero_unset_ips = *zero_unset_ips;
-	header->last_backup = (time_t)*last_backup;
+	header->last_backup = (ktime_t)*last_backup;
 	memcpy(header->id, input_buffer+22, BANDWIDTH_MAX_ID_LENGTH);
 	(header->id)[BANDWIDTH_MAX_ID_LENGTH-1] = '\0'; /* make sure id is null terminated no matter what */
 
@@ -2304,7 +2304,7 @@ static void parse_set_header(unsigned char* input_buffer, set_header* header)
 		printk("  id                = %s\n", header->id);
 	#endif
 }
-static void set_single_ip_data(unsigned char history_included, info_and_maps* iam, unsigned char* buffer, uint32_t* buffer_index, time_t now)
+static void set_single_ip_data(unsigned char history_included, info_and_maps* iam, unsigned char* buffer, uint32_t* buffer_index, ktime_t now)
 {
 	/* 
 	 * note that times stored within the module are adjusted so they are equal to seconds 
@@ -2341,9 +2341,9 @@ static void set_single_ip_data(unsigned char history_included, info_and_maps* ia
 		uint32_t num_history_nodes = *( (uint32_t*)(buffer + *buffer_index+20));
 		if(iam->info->num_intervals_to_save > 0 && iam->ip_history_map != NULL)
 		{
-			time_t first_start = (time_t) *( (uint64_t*)(buffer + *buffer_index+24));
-			time_t next_start;
-			time_t next_end;
+			ktime_t first_start = (ktime_t) *( (uint64_t*)(buffer + *buffer_index+24));
+			ktime_t next_start;
+			ktime_t next_end;
 			uint32_t node_index;
 			uint32_t zero_count;
 			bw_history* history;
@@ -2457,7 +2457,7 @@ static void set_single_ip_data(unsigned char history_included, info_and_maps* ia
 
 }
 
-static int xt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t len)
+static int xt_bandwidth_set_ctl(struct sock *sk, int cmd, sockptr_t arg, u_int32_t len)
 {
 	/* check for timezone shift & adjust if necessary */
 	char* buffer;
@@ -2465,7 +2465,7 @@ static int xt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t 
 	info_and_maps* iam;
 	uint32_t buffer_index;
 	uint32_t next_ip_index;
-	time_t now = get_seconds();
+	ktime_t now = get_seconds();
 	check_for_timezone_shift(now, 0);
 	check_for_backwards_time_shift(now);
 	now = now -  local_seconds_west;  /* Adjust for local timezone */
@@ -2488,7 +2488,7 @@ static int xt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t 
 	{
 		return handle_set_failure(0, 1, 0, NULL);
 	}
-	copy_from_user(buffer, user, len);
+	copy_from_sockptr(buffer, arg, len);
 	parse_set_header(buffer, &header);
 
 	
@@ -2586,8 +2586,8 @@ static int xt_bandwidth_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t 
 	 */
 	if(header.last_backup > 0 && iam->info->num_intervals_to_save == 0 && (iam->info->reset_is_constant_interval == 0 || iam->info->reset_time != 0) )
 	{
-		time_t adjusted_last_backup_time = header.last_backup - (60 * local_minutes_west); 
-		time_t next_reset_of_last_backup = get_next_reset_time(iam->info, adjusted_last_backup_time, adjusted_last_backup_time);
+		ktime_t adjusted_last_backup_time = header.last_backup - (60 * local_minutes_west); 
+		ktime_t next_reset_of_last_backup = get_next_reset_time(iam->info, adjusted_last_backup_time, adjusted_last_backup_time);
 		if(next_reset_of_last_backup != iam->info->next_reset)
 		{
 			return handle_set_failure(0, 1, 1, buffer);
@@ -2773,7 +2773,7 @@ static int checkentry(const struct xt_mtchk_param *par, int family)
 
 			if(info->reset_interval != BANDWIDTH_NEVER)
 			{
-				time_t now = get_seconds();
+				ktime_t now = get_seconds();
 				if(now != last_local_mw_update )
 				{
 					check_for_timezone_shift(now, 1);
@@ -2796,8 +2796,8 @@ static int checkentry(const struct xt_mtchk_param *par, int family)
 					 */
 					if(info->last_backup_time != 0 && info->type == BANDWIDTH_COMBINED)
 					{
-						time_t adjusted_last_backup_time = info->last_backup_time - (60 * local_minutes_west); 
-						time_t next_reset_of_last_backup = get_next_reset_time(info, adjusted_last_backup_time, adjusted_last_backup_time);
+						ktime_t adjusted_last_backup_time = info->last_backup_time - (60 * local_minutes_west); 
+						ktime_t next_reset_of_last_backup = get_next_reset_time(info, adjusted_last_backup_time, adjusted_last_backup_time);
 						if(next_reset_of_last_backup != info->next_reset)
 						{
 							info->current_bandwidth = 0;

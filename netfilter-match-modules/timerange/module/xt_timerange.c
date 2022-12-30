@@ -56,7 +56,7 @@ static bool timerange_mt(const struct sk_buff *skb, struct xt_action_param *par)
 	const struct xt_timerange_info *info = (const struct xt_timerange_info*)(par->matchinfo);
 
 	
-	time_t stamp_time;
+	ktime_t stamp_time;
 	int weekday;
 	int seconds_since_midnight;
 	int test_index;
@@ -100,7 +100,7 @@ static bool timerange_mt(const struct sk_buff *skb, struct xt_action_param *par)
 	}
 	else if(info->type == WEEKLY_RANGE)
 	{
-		time_t seconds_since_sunday_midnight = seconds_since_midnight + (weekday*86400);
+		ktime_t seconds_since_sunday_midnight = seconds_since_midnight + (weekday*86400);
 		for(test_index=0; info->ranges[test_index] != -1 && match_found == 0 && seconds_since_sunday_midnight >= info->ranges[test_index]; test_index=test_index+2)
 		{
 			match_found = seconds_since_sunday_midnight >= info->ranges[test_index] && seconds_since_sunday_midnight <= info->ranges[test_index+1] ? 1 : match_found;

@@ -89,13 +89,13 @@ struct xt_bandwidth_info
 
 	unsigned char cmp;
 	unsigned char reset_is_constant_interval;
-	time_t reset_interval; //specific fixed type (see above) or interval length in seconds
-	time_t reset_time; //seconds from start of month/week/day/hour/minute to do reset, or start point of interval if it is a constant interval
+	ktime_t reset_interval; //specific fixed type (see above) or interval length in seconds
+	ktime_t reset_time; //seconds from start of month/week/day/hour/minute to do reset, or start point of interval if it is a constant interval
 	uint64_t bandwidth_cutoff;
 	uint64_t current_bandwidth;
-	time_t next_reset;
-	time_t previous_reset;
-	time_t last_backup_time;
+	ktime_t next_reset;
+	ktime_t previous_reset;
+	ktime_t last_backup_time;
 
 	uint32_t num_intervals_to_save;
 

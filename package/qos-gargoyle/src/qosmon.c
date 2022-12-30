@@ -422,7 +422,6 @@ char pr_pack( void *buf, int cc, struct sockaddr_storage *from )
 //These variables referenced but not used by the tc code we link to.
 int filter_ifindex;
 int use_iec = 0;
-int resolve_hosts = 0;
 
 
 int print_class(struct nlmsghdr *n, void *arg)

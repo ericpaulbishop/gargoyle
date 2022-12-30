@@ -695,24 +695,22 @@ static int webmon_proc_search_open(struct inode *inode, struct file* file)
 	return seq_open(file, &webmon_proc_search_sops);
 }
 
-static struct file_operations webmon_proc_domain_fops = {
-	.owner   = THIS_MODULE,
-	.open    = webmon_proc_domain_open,
-	.read    = seq_read,
-	.llseek  = seq_lseek,
-	.release = seq_release
+static struct proc_ops webmon_proc_domain_pops = {
+	.proc_open    = webmon_proc_domain_open,
+	.proc_read    = seq_read,
+	.proc_lseek   = seq_lseek,
+	.proc_release = seq_release
 };
-static struct file_operations webmon_proc_search_fops = {
-	.owner   = THIS_MODULE,
-	.open    = webmon_proc_search_open,
-	.read    = seq_read,
-	.llseek  = seq_lseek,
-	.release = seq_release
+static struct proc_ops webmon_proc_search_pops = {
+	.proc_open    = webmon_proc_search_open,
+	.proc_read    = seq_read,
+	.proc_lseek   = seq_lseek,
+	.proc_release = seq_release
 };
 
 #endif
 
-static int xt_webmon_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t len)
+static int xt_webmon_set_ctl(struct sock *sk, int cmd, sockptr_t arg, u_int32_t len)
 {
 
 	char* buffer = kmalloc(len, GFP_ATOMIC);
@@ -721,7 +719,7 @@ static int xt_webmon_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t len
 		return 0;
 	}
 	spin_lock_bh(&webmon_lock);
-	copy_from_user(buffer, user, len);
+	copy_from_sockptr(buffer, arg, len);
 
 	if(len > 1 + sizeof(uint32_t)) 
 	{
@@ -778,7 +776,7 @@ static int xt_webmon_set_ctl(struct sock *sk, int cmd, void *user, u_int32_t len
 					for(length=0; split[length] != NULL ; length++){}
 					if(length == 4)
 					{
-						time_t time;
+						ktime_t time;
 						if(split[1] == NFPROTO_IPV4)
 						{
 							int parsed_ip[4];
@@ -1706,8 +1704,8 @@ static int __init init(void)
 
 
 	#ifdef CONFIG_PROC_FS
-		proc_create("webmon_recent_domains",  0, NULL, &webmon_proc_domain_fops);
-		proc_create("webmon_recent_searches", 0, NULL, &webmon_proc_search_fops);
+		proc_create("webmon_recent_domains",  0, NULL, &webmon_proc_domain_pops);
+		proc_create("webmon_recent_searches", 0, NULL, &webmon_proc_search_pops);
 	#endif
 	
 	if (nf_register_sockopt(&xt_webmon_sockopts) < 0)
