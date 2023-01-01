@@ -1,0 +1,17 @@
+if PACKAGE_plugin-gargoyle-usb-storage-full
+
+comment "SMB Server"
+
+choice
+	prompt "Select Default SMB Server"
+	default GARGOYLE_SMB_KSMBD
+
+	config GARGOYLE_SMB_KSMBD
+		bool "KSMBD"
+
+	config GARGOYLE_SMB_SAMBA
+		bool "Samba"
+
+endchoice
+
+endif
