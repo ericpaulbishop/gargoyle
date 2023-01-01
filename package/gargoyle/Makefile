@@ -30,12 +30,16 @@ define Package/gargoyle
 	SECTION:=admin
 	CATEGORY:=Administration
 	TITLE:=Gargoyle Web Interface
-	DEPENDS:=+uci +libuci +libjson-c +haserl-i18n +uhttpd +libustream-openssl +bwmon-gargoyle +webmon-gargoyle +gargoyle-firewall-util +libericstools +gpkg +gargoyle-ip-query  $(ATH_DEPS) $(BRCM_DEPS) $(LED_DEPS)
+	DEPENDS:=+uci +libuci +libjson-c +haserl-i18n +uhttpd +libustream-openssl +bwmon-gargoyle +webmon-gargoyle +libericstools +gpkg +gargoyle-ip-query  $(ATH_DEPS) $(BRCM_DEPS) $(LED_DEPS)
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
 endef
 
 define Package/gargoyle/description
 	A user-friendly web interface for OpenWrt
+endef
+
+define Package/gargoyle/config
+	select PACKAGE_gargoyle-firewall-util
 endef
 
 define Build/Prepare
