@@ -10,6 +10,7 @@ include $(INCLUDE_DIR)/package.mk
 
 define Package/gargoyle-profiles/Default
 	CATEGORY:=Administration
+	SUBMENU:=Gargoyle Profile Meta-packages
 	SECTION:=admin
 	TITLE:=Gargoyle device profile -
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
