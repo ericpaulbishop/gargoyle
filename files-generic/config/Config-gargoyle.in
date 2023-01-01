@@ -93,6 +93,8 @@ menuconfig USE_GARGOYLE_PROFILE_PKGS
 			select PACKAGE_plugin-gargoyle-webshell
 			select PACKAGE_plugin-gargoyle-wifi-schedule
 			select PACKAGE_resolveip
+			select PACKAGE_ksmbd-server if !GARGOYLE_SMB_KSMBD
+			select PACKAGE_samba36-server if !GARGOYLE_SMB_SAMBA
 			help
 				Other plugin packages
 
