@@ -8,7 +8,7 @@
 +boot()
 +{
 +	dev=$(cat /tmp/sysinfo/board_name | grep "netgear,r7800")
-+	[ -n "$dev" ] && {echo "performance" > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor; echo "performance" > /sys/devices/system/cpu/cpufreq/policy1/scaling_governor;}
++	[ -n "$dev" ] && { echo "performance" > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor; echo "performance" > /sys/devices/system/cpu/cpufreq/policy1/scaling_governor; }
 +}
 --- a/package/base-files/Makefile
 +++ b/package/base-files/Makefile
