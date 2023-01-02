@@ -15,7 +15,7 @@ define Package/plugin-gargoyle-diagnostics
 	SUBMENU:=Gargoyle Web Interface
 	TITLE:=Diagnostics (crash dumps, ping, traceroute, nslookup) for Gargoyle
 	MAINTAINER:=Michael Gray <support@lantisproject.com>
-	DEPENDS:=+gargoyle
+	DEPENDS:=+gargoyle +kmod-ramoops
 	PKGARCH:=all
 endef
 

@@ -13,7 +13,7 @@ define Package/plugin-gargoyle-webcam
 	CATEGORY:=Administration
 	SUBMENU:=Gargoyle Web Interface
 	TITLE:=Webcam Support for Gargoyle
-	DEPENDS:=+gargoyle +gargoyle-mjpg-streamer +kmod-video-core +kmod-video-gspca-core +kmod-video-uvc +kmod-video-gspca-zc3xx +kmod-video-gspca-ov534
+	DEPENDS:=+gargoyle +gargoyle-mjpg-streamer +gargoyle-mjpg-streamer-input-uvc +gargoyle-mjpg-streamer-output-http +kmod-video-core +kmod-video-gspca-core +kmod-video-uvc +kmod-video-gspca-zc3xx +kmod-video-gspca-ov534
 	MAINTAINER:=Cezary Jackiewicz <cezary@eko.one.pl>
 endef
 
