@@ -29,7 +29,7 @@
 #include <asm/uaccess.h>
 #include <net/ip.h>
 #include <linux/inet.h>
-
+#include <linux/math64.h>
 #include <linux/time.h>
 
 #include <linux/semaphore.h> 
@@ -908,7 +908,7 @@ static ktime_t get_nominal_previous_reset_time(struct xt_bandwidth_info *info, k
 	{
 		/* skip backwards in halves of interval after next, until  */
 		ktime_t next = get_next_reset_time(info, current_next_reset, 0);
-		ktime_t half_interval = (next-current_next_reset)/2;
+		ktime_t half_interval = div_s64((next-current_next_reset),2);
 		ktime_t half_count, tmp;
 		half_interval = half_interval == 0 ? 1 : half_interval; /* must be at least one second, otherwise we loop forever*/
 	
@@ -933,11 +933,12 @@ static ktime_t get_next_reset_time(struct xt_bandwidth_info *info, ktime_t now, 
 {
 	//first calculate when next reset would be if reset_time is 0 (which it may be)
 	ktime_t next_reset = 0;
+	s64 weeks_since_epoch;
 	if(info->reset_is_constant_interval == 0)
 	{
 		if(info->reset_interval == BANDWIDTH_MINUTE)
 		{
-			next_reset = ( (long)(now/60) + 1)*60;
+			next_reset = (div_s64(now,60) + 1)*60;
 			if(info->reset_time > 0)
 			{
 				ktime_t alt_reset = next_reset + info->reset_time - 60;
@@ -946,7 +947,7 @@ static ktime_t get_next_reset_time(struct xt_bandwidth_info *info, ktime_t now, 
 		}
 		else if(info->reset_interval == BANDWIDTH_HOUR)
 		{
-			next_reset = ( (long)(now/(60*60)) + 1)*60*60;
+			next_reset = (div_s64(now,(60*60)) + 1)*60*60;
 			if(info->reset_time > 0)
 			{
 				ktime_t alt_reset = next_reset + info->reset_time - (60*60);
@@ -955,7 +956,7 @@ static ktime_t get_next_reset_time(struct xt_bandwidth_info *info, ktime_t now, 
 		}
 		else if(info->reset_interval == BANDWIDTH_DAY)
 		{
-			next_reset = ( (long)(now/(60*60*24)) + 1)*60*60*24;
+			next_reset = (div_s64(now,(60*60*24)) + 1)*60*60*24;
 			if(info->reset_time > 0)
 			{
 				ktime_t alt_reset = next_reset + info->reset_time - (60*60*24);
@@ -964,8 +965,9 @@ static ktime_t get_next_reset_time(struct xt_bandwidth_info *info, ktime_t now, 
 		}	
 		else if(info->reset_interval == BANDWIDTH_WEEK)
 		{
-			long days_since_epoch = now/(60*60*24);
-			long current_weekday = (4 + days_since_epoch ) % 7 ;
+			int current_weekday;
+			s64 days_since_epoch = div_s64(now,(60*60*24));
+			weeks_since_epoch = div_s64_rem((4 + days_since_epoch),7,&current_weekday);
 			next_reset = (days_since_epoch + (7-current_weekday) )*(60*60*24);
 			if(info->reset_time > 0)
 			{
@@ -980,7 +982,7 @@ static ktime_t get_next_reset_time(struct xt_bandwidth_info *info, ktime_t now, 
 			int year_index;
 			int year_day;
 			int month;
-			long days_since_epoch = now/(60*60*24);
+			s64 days_since_epoch = div_s64(now,(60*60*24));
 			uint16_t* month_start_days;	
 			ktime_t alt_reset;
 
@@ -1031,7 +1033,7 @@ static ktime_t get_next_reset_time(struct xt_bandwidth_info *info, ktime_t now, 
 			
 			if(info->reset_time > now)
 			{
-				unsigned long whole_intervals = ((info->reset_time - now)/info->reset_interval) + 1; /* add one to make sure integer gets rounded UP (since we're subtracting) */
+				s64 whole_intervals = div_s64((info->reset_time - now),info->reset_interval) + 1; /* add one to make sure integer gets rounded UP (since we're subtracting) */
 				next_reset = info->reset_time - (whole_intervals*info->reset_interval);
 				while(next_reset <= now)
 				{
@@ -1041,7 +1043,7 @@ static ktime_t get_next_reset_time(struct xt_bandwidth_info *info, ktime_t now, 
 			}
 			else /* info->reset_time <= now */
 			{
-				unsigned long whole_intervals = (now-info->reset_time)/info->reset_interval; /* integer gets rounded down */
+				s64 whole_intervals = div_s64((now-info->reset_time),info->reset_interval); /* integer gets rounded down */
 				next_reset = info->reset_time + (whole_intervals*info->reset_interval);
 				while(next_reset <= now)
 				{
@@ -1054,7 +1056,7 @@ static ktime_t get_next_reset_time(struct xt_bandwidth_info *info, ktime_t now, 
 			next_reset = previous_reset;
 			if(next_reset <= now) /* check just to be sure, if this is not true VERY BAD THINGS will happen */
 			{
-				unsigned long  whole_intervals = (now-next_reset)/info->reset_interval; /* integer gets rounded down */
+				s64 whole_intervals = div_s64((now-next_reset),info->reset_interval); /* integer gets rounded down */
 				next_reset = next_reset + (whole_intervals*info->reset_interval);
 				while(next_reset <= now)
 				{

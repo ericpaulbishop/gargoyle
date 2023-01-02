@@ -33,7 +33,7 @@
 
 #include <linux/netfilter/x_tables.h>
 #include <linux/netfilter/xt_timerange.h>
-
+#include <linux/math64.h>
 #include <linux/ktime.h>
 
 
@@ -59,6 +59,8 @@ static bool timerange_mt(const struct sk_buff *skb, struct xt_action_param *par)
 	ktime_t stamp_time;
 	int weekday;
 	int seconds_since_midnight;
+	s64 days_since_epoch;
+	s64 weeks_since_epoch;
 	int test_index;
 	int match_found;
 
@@ -67,8 +69,8 @@ static bool timerange_mt(const struct sk_buff *skb, struct xt_action_param *par)
 	ktime_get_real_ts64(&test_time);
 	stamp_time = test_time.tv_sec;
 	stamp_time = stamp_time -  (60 * sys_tz.tz_minuteswest);  /* Adjust for local timezone */
-	seconds_since_midnight = stamp_time % 86400; /* 86400 seconds per day */
-	weekday = (4 + (stamp_time/86400)) % 7;      /* 1970-01-01 (time=0) was a Thursday (4). */
+	days_since_epoch = div_s64_rem(stamp_time,86400,&seconds_since_midnight); /* 86400 seconds per day */
+	weeks_since_epoch = div_s64_rem(4 + days_since_epoch,7,&weekday);      /* 1970-01-01 (time=0) was a Thursday (4). */
 
 	/*
 	printk("time=%d, since midnight = %d, day=%d, minuteswest=%d\n", stamp_time, seconds_since_midnight, weekday, sys_tz.tz_minuteswest);

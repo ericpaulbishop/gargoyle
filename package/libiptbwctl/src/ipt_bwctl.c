@@ -1505,8 +1505,8 @@ void set_kernel_timezone(void)
 
 	/* Get tv to pass to settimeofday(2) to be sure we avoid hour-sized warp */
 	/* (see gettimeofday(2) man page, or /usr/src/linux/kernel/time.c) */
-	syscall(SYS_gettimeofday, &tv, &old_tz);
+	gettimeofday(&tv, &old_tz);
 
 	/* set timezone */
-	syscall(SYS_settimeofday, &tv, &new_tz);
+	settimeofday(&tv, &new_tz);
 }
