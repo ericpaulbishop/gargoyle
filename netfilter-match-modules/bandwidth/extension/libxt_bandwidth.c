@@ -265,7 +265,7 @@ static int parse(	int c,
 			{
 				info->reset_interval = BANDWIDTH_NEVER;
 			}
-			else if(sscanf(argv[optind-1], "%ld", &read_time) > 0)
+			else if(sscanf(argv[optind-1], "%lld", &read_time) > 0)
 			{
 				info->reset_interval = read_time;
 				info->reset_is_constant_interval = 1;
@@ -284,7 +284,7 @@ static int parse(	int c,
 			c=0;
 			break;
 		case BANDWIDTH_RESET_TIME:
-			num_read = sscanf(argv[optind-1], "%ld", &read_time);
+			num_read = sscanf(argv[optind-1], "%lld", &read_time);
 			if(num_read > 0 )
 			{
 				info->reset_time = read_time;
@@ -292,7 +292,7 @@ static int parse(	int c,
 			}	
 			break;
 		case BANDWIDTH_LAST_BACKUP:
-			num_read = sscanf(argv[optind-1], "%ld", &read_time);
+			num_read = sscanf(argv[optind-1], "%lld", &read_time);
 			if(num_read > 0 )
 			{
 				info->last_backup_time = read_time;
@@ -447,7 +447,7 @@ static void print_bandwidth_args(struct xt_bandwidth_info* info, int family)
 		}
 		if(info->reset_is_constant_interval)
 		{
-			printf("--reset_interval %ld ", info->reset_interval);
+			printf("--reset_interval %lld ", info->reset_interval);
 		}
 		else
 		{
@@ -474,7 +474,7 @@ static void print_bandwidth_args(struct xt_bandwidth_info* info, int family)
 		}
 		if(info->reset_time > 0)
 		{
-			printf("--reset_time %ld ", info->reset_time);
+			printf("--reset_time %lld ", info->reset_time);
 		}
 		if(info->num_intervals_to_save > 0)
 		{
@@ -531,7 +531,7 @@ static void save_mt4(const void *ip, const struct xt_entry_match *match)
 	print_bandwidth_args(info, NFPROTO_IPV4);
 	
 	time(&now);
-	printf("--last_backup-time %ld ", now);
+	printf("--last_backup-time %lld ", now);
 }
 
 static void save_mt6(const void *ip, const struct xt_entry_match *match)
@@ -542,7 +542,7 @@ static void save_mt6(const void *ip, const struct xt_entry_match *match)
 	print_bandwidth_args(info, NFPROTO_IPV6);
 	
 	time(&now);
-	printf("--last_backup-time %ld ", now);
+	printf("--last_backup-time %lld ", now);
 }
 
 static struct xtables_match bandwidth_mt_reg[] = 

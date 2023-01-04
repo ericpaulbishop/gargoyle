@@ -1382,9 +1382,9 @@ void print_histories(FILE* out, char* id, ip_bw_history* histories, unsigned lon
 
 			if(output_type == 'm')
 			{
-				printf("%ld\n", history.first_start);
-				printf("%ld\n", history.first_end);
-				printf("%ld\n", history.last_end);
+				printf("%lld\n", history.first_start);
+				printf("%lld\n", history.first_end);
+				printf("%lld\n", history.last_end);
 			}
 			else
 			{
