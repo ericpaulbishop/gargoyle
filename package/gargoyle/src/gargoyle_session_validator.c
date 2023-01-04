@@ -103,7 +103,7 @@ int main (int argc, char **argv)
 		{
 			// first check that session hasn't expired
 			time_t exp_time;
-			int read = sscanf(cookie_exp, "%ld", &exp_time);
+			int read = sscanf(cookie_exp, "%lld", &exp_time);
 			if(read > 0)
 			{
 				expired = 1;
@@ -142,7 +142,7 @@ int main (int argc, char **argv)
 			char* combined;
 			char new_exp[100] = "";
 			time_t new_exp_t = now+(timeout_minutes*60);
-			sprintf(new_exp, "%ld", new_exp_t);
+			sprintf(new_exp, "%lld", new_exp_t);
 			char* cookie_exp;
 		       	if( browser_time > 0 && ((browser_time - now) < (-5*60) || (browser_time - now) > (5*60)) )
 			{
