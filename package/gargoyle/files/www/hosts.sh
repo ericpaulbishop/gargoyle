@@ -77,14 +77,14 @@ var wlanLines;
 </div>
 
 <div class="row">
-	<div class="col-lg-12">
+	<div id="wifi_data" class="col-lg-12">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ ConWifiHosts %></h3>
 			</div>
 
 			<div class="panel-body">
-				<div id="wifi_data" class="form-group form-inline">
+				<div class="form-group form-inline">
 					<div id="wifi_table_container" class="table-responsive"></div>
 				</div>
 
@@ -93,14 +93,14 @@ var wlanLines;
 		</div>
 	</div>
 
-	<div class="col-lg-12">
+	<div id="client_wifi_data" class="col-lg-12">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ ConClientWifi %></h3>
 			</div>
 
 			<div class="panel-body">
-				<div id="client_wifi_data" class="form-group form-inline">
+				<div class="form-group form-inline">
 					<div id="client_wifi_table_container" class="table-responsive"></div>
 				</div>
 			</div>
