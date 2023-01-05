@@ -51,7 +51,21 @@
 			</div>
 		</div>
 	</div>
+</div>
 
+<div class="modal fade" tabindex="-1" role="dialog" id="quotas_modal" aria-hidden="true" aria-labelledby="quotas_modal_title">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 id="quotas_modal_title" class="panel-title"><%~ SetQuota %></h3>
+			</div>
+			<div class="modal-body">
+				<%in templates/set_quotas_template %>
+			</div>
+			<div class="modal-footer" id="quotas_modal_button_container">
+			</div>
+		</div>
+	</div>
 </div>
 
 <script>
