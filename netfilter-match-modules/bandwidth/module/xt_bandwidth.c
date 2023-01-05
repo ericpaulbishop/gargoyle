@@ -1635,7 +1635,7 @@ static bool bandwidth_mt6(const struct sk_buff *skb, struct xt_action_param *par
 			uint64_t* combined_oldval = info->combined_bw;
 			if(combined_oldval == NULL)
 			{
-				combined_oldval = initialize_map_entries_for_ip(iam, "0.0.0.0", (uint64_t)skb->len, family);
+				combined_oldval = initialize_map_entries_for_ip(iam, "0.0.0.0", (uint64_t)skb->len, NFPROTO_IPV4);
 			}
 			else
 			{
@@ -2329,9 +2329,19 @@ static void set_single_ip_data(unsigned char history_included, info_and_maps* ia
 	{
 		sprintf(ipstr, STRIP6, NIP6(ip));
 	}
-			
+	
+	// We only ever want to use 0.0.0.0 for COMBINED bw. If an attempt is made to set the ipv6 equivalent, silently redirect it
+	if(strcmp(ipstr,"0000:0000:0000:0000:0000:0000:0000:0000") == 0)
+	{
+		#ifdef BANDWIDTH_DEBUG
+			printk("found combined ipv6 data, redirecting to ipv4\n");
+		#endif
+		strcpy(ipstr, "0.0.0.0");
+		family = NFPROTO_IPV4;
+	}
+	
 	#ifdef BANDWIDTH_DEBUG
-		printk("doing set for ip = %s\n", ipstr);
+		printk("doing set for ip = %s, family = %d\n", ipstr, family);
 		printk("ip index = %d\n", *buffer_index);
 	#endif
 	
