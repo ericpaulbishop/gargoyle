@@ -1085,7 +1085,7 @@ CONFIG_PER_FEED_REPO=y
 # Base system
 #
 CONFIG_PACKAGE_base-files=y
-CONFIG_PACKAGE_block-mount=y
+CONFIG_PACKAGE_block-mount=m
 # CONFIG_PACKAGE_blockd is not set
 CONFIG_PACKAGE_busybox=y
 CONFIG_BUSYBOX_CUSTOM=y
@@ -3377,7 +3377,7 @@ CONFIG_PACKAGE_kmod-dm=m
 # CONFIG_PACKAGE_kmod-md-mod is not set
 # CONFIG_PACKAGE_kmod-nbd is not set
 # CONFIG_PACKAGE_kmod-scsi-cdrom is not set
-CONFIG_PACKAGE_kmod-scsi-core=y
+CONFIG_PACKAGE_kmod-scsi-core=m
 # CONFIG_PACKAGE_kmod-scsi-generic is not set
 # CONFIG_PACKAGE_kmod-scsi-tape is not set
 # end of Block Devices
@@ -3803,7 +3803,7 @@ CONFIG_PACKAGE_kmod-dnsresolver=m
 # CONFIG_PACKAGE_kmod-fou is not set
 # CONFIG_PACKAGE_kmod-fou6 is not set
 # CONFIG_PACKAGE_kmod-geneve is not set
-CONFIG_PACKAGE_kmod-gre=y
+CONFIG_PACKAGE_kmod-gre=m
 # CONFIG_PACKAGE_kmod-gre6 is not set
 # CONFIG_PACKAGE_kmod-ip6-tunnel is not set
 # CONFIG_PACKAGE_kmod-ipip is not set
@@ -3830,7 +3830,7 @@ CONFIG_PACKAGE_kmod-ppp=y
 CONFIG_PACKAGE_kmod-pppoe=y
 # CONFIG_PACKAGE_kmod-pppol2tp is not set
 CONFIG_PACKAGE_kmod-pppox=y
-CONFIG_PACKAGE_kmod-pptp=y
+CONFIG_PACKAGE_kmod-pptp=m
 CONFIG_PACKAGE_kmod-sched=y
 # CONFIG_PACKAGE_kmod-sched-act-vlan is not set
 # CONFIG_PACKAGE_kmod-sched-bpf is not set
@@ -4371,7 +4371,7 @@ CONFIG_PACKAGE_libcap=m
 CONFIG_PACKAGE_libcap-ng=m
 # CONFIG_PACKAGE_libcap-ng-bin is not set
 # CONFIG_PACKAGE_libcharset is not set
-CONFIG_PACKAGE_libcomerr=y
+CONFIG_PACKAGE_libcomerr=m
 # CONFIG_PACKAGE_libctf is not set
 CONFIG_PACKAGE_libcurl=m
 
@@ -4420,7 +4420,7 @@ CONFIG_LIBCURL_PROXY=y
 CONFIG_PACKAGE_libdevmapper=m
 # CONFIG_PACKAGE_libdevmapper-selinux is not set
 # CONFIG_PACKAGE_libdw is not set
-CONFIG_PACKAGE_libelf=y
+# CONFIG_PACKAGE_libelf is not set
 CONFIG_PACKAGE_libericstools=y
 CONFIG_PACKAGE_libevent2=m
 # CONFIG_PACKAGE_libevent2-core is not set
@@ -4428,10 +4428,10 @@ CONFIG_PACKAGE_libevent2=m
 # CONFIG_PACKAGE_libevent2-openssl is not set
 # CONFIG_PACKAGE_libevent2-pthreads is not set
 CONFIG_PACKAGE_libexif=m
-CONFIG_PACKAGE_libext2fs=y
+CONFIG_PACKAGE_libext2fs=m
 # CONFIG_PACKAGE_libf2fs is not set
 # CONFIG_PACKAGE_libf2fs-selinux is not set
-CONFIG_PACKAGE_libfdisk=y
+CONFIG_PACKAGE_libfdisk=m
 # CONFIG_PACKAGE_libfdt is not set
 # CONFIG_PACKAGE_libffi is not set
 CONFIG_PACKAGE_libffmpeg-audio-dec=m
@@ -4460,7 +4460,7 @@ CONFIG_PACKAGE_liblzo=m
 # CONFIG_PACKAGE_libmatrixssl-nothread is not set
 CONFIG_PACKAGE_libmnl=y
 # CONFIG_PACKAGE_libmount is not set
-CONFIG_PACKAGE_libncurses=y
+CONFIG_PACKAGE_libncurses=m
 # CONFIG_PACKAGE_libnetfilter-conntrack is not set
 # CONFIG_PACKAGE_libnettle is not set
 # CONFIG_PACKAGE_libnfnetlink is not set
@@ -4485,9 +4485,9 @@ CONFIG_PACKAGE_libogg=m
 # CONFIG_PACKAGE_libselinux is not set
 # CONFIG_PACKAGE_libsemanage is not set
 # CONFIG_PACKAGE_libsepol is not set
-CONFIG_PACKAGE_libsmartcols=y
+CONFIG_PACKAGE_libsmartcols=m
 # CONFIG_PACKAGE_libsocks is not set
-CONFIG_PACKAGE_libss=y
+CONFIG_PACKAGE_libss=m
 # CONFIG_PACKAGE_libtasn1 is not set
 CONFIG_PACKAGE_libtirpc=m
 CONFIG_PACKAGE_libubox=y
@@ -4496,13 +4496,13 @@ CONFIG_PACKAGE_libubus=y
 # CONFIG_PACKAGE_libubus-lua is not set
 CONFIG_PACKAGE_libuci=y
 # CONFIG_PACKAGE_libuci-lua is not set
-CONFIG_PACKAGE_libuclient=m
+CONFIG_PACKAGE_libuclient=y
 # CONFIG_PACKAGE_libunwind is not set
-CONFIG_PACKAGE_libusb-1.0=y
+CONFIG_PACKAGE_libusb-1.0=m
 # CONFIG_PACKAGE_libustream-mbedtls is not set
 CONFIG_PACKAGE_libustream-openssl=y
 CONFIG_PACKAGE_libustream-wolfssl=m
-CONFIG_PACKAGE_libuuid=y
+CONFIG_PACKAGE_libuuid=m
 # CONFIG_PACKAGE_libv4l is not set
 CONFIG_PACKAGE_libvorbis=m
 CONFIG_PACKAGE_libwrap=m
@@ -4510,9 +4510,9 @@ CONFIG_PACKAGE_libxml2=m
 # CONFIG_PACKAGE_linux-atm is not set
 # CONFIG_PACKAGE_musl-fts is not set
 # CONFIG_PACKAGE_p11-kit is not set
-CONFIG_PACKAGE_terminfo=y
+CONFIG_PACKAGE_terminfo=m
 # CONFIG_PACKAGE_uclibcxx is not set
-CONFIG_PACKAGE_zlib=y
+CONFIG_PACKAGE_zlib=m
 
 #
 # Configuration
@@ -4940,11 +4940,11 @@ CONFIG_PACKAGE_zip=m
 # Disc
 #
 # CONFIG_PACKAGE_blkdiscard is not set
-CONFIG_PACKAGE_blkid=y
+CONFIG_PACKAGE_blkid=m
 # CONFIG_PACKAGE_blockdev is not set
 # CONFIG_PACKAGE_cfdisk is not set
 # CONFIG_PACKAGE_eject is not set
-CONFIG_PACKAGE_fdisk=y
+CONFIG_PACKAGE_fdisk=m
 # CONFIG_PACKAGE_findfs is not set
 # CONFIG_PACKAGE_lsblk is not set
 # CONFIG_PACKAGE_lvm2 is not set
@@ -4972,7 +4972,7 @@ CONFIG_PACKAGE_fdisk=y
 CONFIG_PACKAGE_badblocks=m
 # CONFIG_PACKAGE_chattr is not set
 # CONFIG_PACKAGE_debugfs is not set
-CONFIG_PACKAGE_disktype=y
+CONFIG_PACKAGE_disktype=m
 # CONFIG_PACKAGE_dosfstools is not set
 # CONFIG_PACKAGE_dumpe2fs is not set
 # CONFIG_PACKAGE_e2freefrag is not set
@@ -5115,7 +5115,7 @@ CONFIG_STRACE_NONE=y
 # CONFIG_STRACE_LIBUNWIND is not set
 # CONFIG_PACKAGE_ugps is not set
 # CONFIG_PACKAGE_unshare is not set
-CONFIG_PACKAGE_usb-modeswitch=y
+CONFIG_PACKAGE_usb-modeswitch=m
 # CONFIG_PACKAGE_uuidd is not set
 # CONFIG_PACKAGE_uuidgen is not set
 # CONFIG_PACKAGE_v4l-utils is not set
