@@ -55,7 +55,7 @@ int main(int argc, char **argv)
 				break;
 			case 'b':
 			case 'B':
-				if(sscanf(optarg, "%ld", &last_backup) == 0)
+				if(sscanf(optarg, "%lld", &last_backup) == 0)
 				{
 					fprintf(stderr, "ERROR: invalid backup time specified. Should be unix epoch seconds -- number of seconds since 1970 (UTC)\n");
 					exit(0);
@@ -154,7 +154,7 @@ int main(int argc, char **argv)
 			
 			if((!valid) && (!last_backup_from_cl))
 			{
-				sscanf(data_parts[data_index], "%ld", &last_backup);
+				sscanf(data_parts[data_index], "%lld", &last_backup);
 			}
 			data_index++;
 
