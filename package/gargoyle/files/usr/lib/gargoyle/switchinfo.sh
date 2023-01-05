@@ -15,6 +15,7 @@
 convert_link_speed()
 {
 	linkspeed="$1"
+	linkspeed="${linkspeed%"${linkspeed##*[![:space:]]}"}"
 	case "$linkspeed" in
 		"link:down") STATUS="-";;
 		"link:up speed:1000baseT") STATUS="1Gbps";;
