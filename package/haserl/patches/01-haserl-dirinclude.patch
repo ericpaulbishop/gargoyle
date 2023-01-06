@@ -1,0 +1,107 @@
+--- a/src/h_error.c
++++ b/src/h_error.c
+@@ -40,6 +40,7 @@ char *g_err_msg[] = {
+   "",
+   "Memory Allocation Failure",
+   "Unable to open file %s",
++  "Unable to open directory %s",
+   "%c&gt; before &lt;%c",
+   "Missing %c&gt;",
+   "Unknown operation",
+--- a/src/h_error.h
++++ b/src/h_error.h
+@@ -5,7 +5,7 @@
+ #define H_ERROR_H	1
+ 
+ 
+-enum error_types { E_NO_ERROR, E_MALLOC_FAIL, E_FILE_OPEN_FAIL,
++enum error_types { E_NO_ERROR, E_MALLOC_FAIL, E_FILE_OPEN_FAIL, E_DIR_OPEN_FAIL,
+ 		   E_END_BEFORE_BEGIN, E_NO_END_MARKER ,
+ 		   E_NO_OP, E_SUBSHELL_FAIL, E_WHATEVER };
+ 
+--- a/src/h_script.c
++++ b/src/h_script.c
+@@ -38,17 +38,19 @@
+ #include "h_translate.h"
+ #include "h_bash.h"
+ #include "haserl.h"
++#include <dirent.h>
+ 
+ #ifdef BASHEXTENSIONS
+-/* HTML, RUN, INCLUDE, EVAL, COMMENT, IF, ELIF, ELSE, ENDIF, CASE, WHEN,
++/* HTML, RUN, INCLUDE, DIRINCLUDE, EVAL, COMMENT, IF, ELIF, ELSE, ENDIF, CASE, WHEN,
+    OTHERWISE, ENDCASE, WHILE, ENDWHILE, UNTIL, ENDUNTIL, FOR, ENDFOR,
+    UNLESS, ELUN, UNELSE, ENDUNLESS, NOOP }; */
+ #else
+-/* HTML, RUN, INCLUDE, EVAL, COMMENT, NOOP */
++/* HTML, RUN, INCLUDE, DIRINCLUDE, EVAL, COMMENT, NOOP */
+ #endif
+ 
+ const char *g_tag[] = {
+   "",
+   "",
+   "in",
++  "din",
+   "=",
+   "#",
+ #ifdef BASHEXTENSIONS
+@@ -343,6 +345,9 @@ preprocess_token_list (token_t * tokenlist)
+   script_t *newscript;
+   token_t *me;
+   char *cp;
++  struct dirent** dentries;
++  int num_entry_paths;
++  int entry_path_index;
+ 
+   me = tokenlist;
+   /* walk the chain to fill in the tags */
+@@ -369,8 +374,34 @@ preprocess_token_list (token_t * tokenlist)
+ 	      newscript = load_script (me->buf, me->script);
+ 	      build_token_list (newscript, me);
+ 	    }
++	  else if (memcmp (cp, g_tag[DIRINCLUDE], 3) == 0)
++	    {
++	      me->tag = DIRINCLUDE;
++	      /* skip the first word - din */
++	      me->buf = find_whitespace (me->buf);
++	      me->buf = skip_whitespace (me->buf);
++	      cp = find_whitespace (me->buf);
++	      *cp = '\0';
++	      me->len = strlen (me->buf) + 1;
++		  /* Find files in directory */
++		  num_entry_paths = scandir(me->buf, &dentries, NULL, alphasort);
++		  if(num_entry_paths == -1)
++		  {
++			  die_with_message (me->script, cp, g_err_msg[E_DIR_OPEN_FAIL], me->buf);
++		  }
++		  for(entry_path_index=0; entry_path_index < num_entry_paths; entry_path_index++)
++		  {
++			  struct dirent* dentry = dentries[entry_path_index];
++			  if(dentry->d_type != DT_DIR)
++			  {
++				char* entry_path = (char*)xmalloc(strlen(me->buf) + strlen(dentry->d_name) + 2);
++				sprintf(entry_path,"%s/%s", me->buf, dentry->d_name);
++				newscript = load_script(entry_path, me->script);
++				build_token_list(newscript, me);
++			  }
++		  }
++	    }
+ 	  else if (memcmp (cp, g_tag[EVAL], 1) == 0)
+-
+ 	    {
+ 	      me->tag = EVAL;
+ 	      me->buf = find_whitespace (me->buf);
+--- a/src/h_script.h
++++ b/src/h_script.h
+@@ -18,9 +18,9 @@ typedef struct {
+ 
+ /* tag types */
+ #ifdef BASHEXTENSIONS
+-enum tag_t { HTML, RUN, INCLUDE, EVAL, COMMENT, IF, ELIF, ELSE, ENDIF, CASE, WHEN, OTHERWISE, ENDCASE, WHILE, ENDWHILE, UNTIL, ENDUNTIL, FOR, ENDFOR, UNLESS, ELUN, UNELSE, ENDUNLESS, NOOP };
++enum tag_t { HTML, RUN, INCLUDE, DIRINCLUDE, EVAL, COMMENT, IF, ELIF, ELSE, ENDIF, CASE, WHEN, OTHERWISE, ENDCASE, WHILE, ENDWHILE, UNTIL, ENDUNTIL, FOR, ENDFOR, UNLESS, ELUN, UNELSE, ENDUNLESS, NOOP };
+ #else
+-enum tag_t { HTML, RUN, INCLUDE, EVAL, COMMENT, NOOP };
++enum tag_t { HTML, RUN, INCLUDE, DIRINCLUDE, EVAL, COMMENT, NOOP };
+ #endif
+ 
+ 
