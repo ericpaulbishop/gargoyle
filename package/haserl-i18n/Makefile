@@ -8,7 +8,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=haserl-i18n
-PKG_VERSION:=0.9.26
+PKG_VERSION:=0.9.36
 PKG_RELEASE:=1
 
 PKG_BUILD_DIR := $(BUILD_DIR)/$(PKG_NAME)
@@ -23,14 +23,12 @@ define Package/haserl-i18n
   URL:=http://haserl.sourceforge.net/
 endef
 
-
+TARGET_LDFLAGS += -lericstools -luci
 
 define Build/Prepare
 	mkdir -p $(PKG_BUILD_DIR)
 	$(CP) ./src/* $(PKG_BUILD_DIR)/
 endef
-
-
 
 define Package/haserl-i18n/install
 	$(INSTALL_DIR) $(1)/usr/bin

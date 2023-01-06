@@ -1,21 +1,22 @@
 /* --------------------------------------------------------------------------
- * functions shared among both Lua shells
- * Copyright (c) 2003-2007   Nathan Angelacos (nangel@users.sourceforge.net)
+ * Copyright 2003-2011 (inclusive) Nathan Angelacos 
+ *                   (nangel@users.sourceforge.net)
+ * 
+ *   This file is part of haserl.
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License, version 2,
- * as published by the Free Software Foundation.
+ *   Haserl is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License version 2,
+ *   as published by the Free Software Foundation.
  *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
- * General Public License for more details.
+ *   Haserl is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *   You should have received a copy of the GNU General Public License
+ *   along with haserl.  If not, see <http://www.gnu.org/licenses/>.
  *
- ------------------------------------------------------------------------- */
+ * ------------------------------------------------------------------------ */
 
 #if HAVE_CONFIG_H
 #include <config.h>
