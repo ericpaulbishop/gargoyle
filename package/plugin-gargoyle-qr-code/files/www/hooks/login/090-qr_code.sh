@@ -32,7 +32,7 @@
 	# Using sed since UCI CLI seems to lack a way to get all section names of a section type.
 	# Only section names allow to distinguish between home and guest wireless networks.
 	# Additionally, ignore anonymous dummy sections on first boot with /ap_.*/.
-	aps=$(uci show wireless | sed -n 's/^wireless\.\(ap_.*\)=wifi-iface$/\1/p')
+	aps=$(uci -q show wireless | sed -n 's/^wireless\.\(ap_.*\)=wifi-iface$/\1/p')
 	for ap in $aps; do
 		# Whether home or guest wireless network.
 		echo "$ap" | grep -q _gn_ && gn=1 || gn=0
