@@ -3,6 +3,8 @@ buffalo_wzr-hp-ag300h-squashfs-
 buffalo_wzr-hp-g300nh-rb-squashfs-
 buffalo_wzr-hp-g300nh-s-squashfs-
 buffalo_wzr-hp-g450h-squashfs-
+comfast_cf-e375ac-squashfs-
+devolo_dlan-pro-1200plus-ac-squashfs-
 dlink_dir-505-squashfs-
 dlink_dir-825-c1-squashfs-
 dlink_dir-835-a1-squashfs-
@@ -11,6 +13,7 @@ dlink_dir-842-c2-squashfs-
 dlink_dir-842-c3-squashfs-
 dlink_dir-859-a1-squashfs-
 engenius_eap300-v2-squashfs-
+glinet_6416-squashfs-
 glinet_gl-ar150-squashfs-
 glinet_gl-ar300m16-squashfs-
 glinet_gl-ar750-squashfs-
@@ -29,6 +32,7 @@ openmesh_mr600-v1-squashfs-
 openmesh_mr600-v2-squashfs-
 openmesh_om2p-v2-squashfs-
 openmesh_om2p-v4-squashfs-
+openmesh_om5p-ac-v1-squashfs-
 openmesh_om5p-ac-v2-squashfs-
 openmesh_om5p-squashfs-
 qxwlan_e1700ac-v2-16m-squashfs-
@@ -75,8 +79,11 @@ ubnt_bullet-m-xw-squashfs-
 ubnt_nanostation-m-squashfs-
 ubnt_nanostation-m-xw-squashfs-
 ubnt_rocket-m-squashfs-
+ubnt_routerstation-pro-squashfs-
+ubnt_routerstation-squashfs-
 ubnt_unifi-ap-outdoor-plus-squashfs-
 ubnt_unifi-ap-pro-squashfs-
 ubnt_unifi-squashfs-
+wd_mynet-n600-squashfs-
 wd_mynet-n750-squashfs-
 wd_mynet-wifi-rangeextender-squashfs-
