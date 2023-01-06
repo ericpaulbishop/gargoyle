@@ -45,8 +45,7 @@
 		i=$((i+1))
 	done
 	if [ -d "$web_root/hooks/login" ] ; then
-		sh_hooks=$(ls "$web_root/hooks/login/"*.sh | sort )
-		js_hooks=$(ls "$web_root/hooks/login" | sort | awk " \$1 ~ /js\$/ { print \"../hooks/login/\"\$1  }")
+		js_hooks=$(ls "$web_root/hooks/login/js" | sort | awk " \$1 ~ /js\$/ { print \"../hooks/login/js/\"\$1  }")
 		js_hooks=$(echo $js_hooks)
 		js="$js $js_hooks"
 		i18n_hooks=$(echo "$js" | awk -F '[ /]' '{ for(i = 1; i <= NF; i++) {  print $i; } }' | awk '/.js/')
@@ -146,11 +145,7 @@ var passInvalid = false;
 		</div>
 	</div>
 </div>
-<%
-	for h in $sh_hooks ; do
-		haserl $h
-	done
-%>
+<%din hooks/login/ %>
 
 <script>
 <!--
