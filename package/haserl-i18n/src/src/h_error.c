@@ -40,6 +40,7 @@ char *g_err_msg[] = {
   "",
   "Memory Allocation Failure",
   "Unable to open file %s",
+  "Unable to open directory %s",
   "%c&gt; before &lt;%c",
   "Missing %c&gt;",
   "Unknown operation",

@@ -40,17 +40,18 @@
 #include "haserl.h"
 
 #ifdef BASHEXTENSIONS
-/* HTML, RUN, INCLUDE, EVAL, COMMENT, IF, ELIF, ELSE, ENDIF, CASE, WHEN,
+/* HTML, RUN, INCLUDE, DIRINCLUDE, EVAL, COMMENT, TRANSLATE, IF, ELIF, ELSE, ENDIF, CASE, WHEN,
    OTHERWISE, ENDCASE, WHILE, ENDWHILE, UNTIL, ENDUNTIL, FOR, ENDFOR,
    UNLESS, ELUN, UNELSE, ENDUNLESS, NOOP }; */
 #else
-/* HTML, RUN, INCLUDE, EVAL, COMMENT, TRANSLATE, NOOP */
+/* HTML, RUN, INCLUDE, DIRINCLUDE, EVAL, COMMENT, TRANSLATE, NOOP */
 #endif
 
 const char *g_tag[] = {
   "",
   "",
   "in",
+  "din",
   "=",
   "#",
   "~"
@@ -343,6 +344,9 @@ preprocess_token_list (token_t * tokenlist)
   script_t *newscript;
   token_t *me;
   char *cp;
+  struct dirent** dentries;
+  int num_entry_paths;
+  int entry_path_index;
 
   me = tokenlist;
   /* walk the chain to fill in the tags */
@@ -369,8 +373,34 @@ preprocess_token_list (token_t * tokenlist)
 	      newscript = load_script (me->buf, me->script);
 	      build_token_list (newscript, me);
 	    }
+	  else if (memcmp (cp, g_tag[DIRINCLUDE], 3) == 0)
+	    {
+	      me->tag = DIRINCLUDE;
+	      /* skip the first word - din */
+	      me->buf = find_whitespace (me->buf);
+	      me->buf = skip_whitespace (me->buf);
+	      cp = find_whitespace (me->buf);
+	      *cp = '\0';
+	      me->len = strlen (me->buf) + 1;
+		  /* Find files in directory */
+		  num_entry_paths = scandir(me->buf, &dentries, NULL, alphasort);
+		  if(num_entry_paths == -1)
+		  {
+			  die_with_message (me->script, cp, g_err_msg[E_DIR_OPEN_FAIL], me->buf);
+		  }
+		  for(entry_path_index=0; entry_path_index < num_entry_paths; entry_path_index++)
+		  {
+			  struct dirent* dentry = dentries[entry_path_index];
+			  if(dentry->d_type != DT_DIR)
+			  {
+				char* entry_path = (char*)xmalloc(strlen(me->buf) + strlen(dentry->d_name) + 2);
+				sprintf(entry_path,"%s/%s", me->buf, dentry->d_name);
+				newscript = load_script(entry_path, me->script);
+				build_token_list(newscript, me);
+			  }
+		  }
+	    }
 	  else if (memcmp (cp, g_tag[EVAL], 1) == 0)
-
 	    {
 	      me->tag = EVAL;
 	      me->buf = find_whitespace (me->buf);
