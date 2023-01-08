@@ -14,14 +14,25 @@ print_mac80211_channels_for_wifi_dev()
 	phyname=$(iwinfo nl80211 phyname $wifi_dev)
 	[ "$phyname" = "Phy not found" ] && phyname="phy$dev_num"
 
-	wifiN=$(iwinfo $wifi_dev h | sed 's/\bVHT[0-9]\{2,3\}\(+[0-9]\{2\}\)\?//g' | sed 's/^[ ]*//')
-	wifiAC=$(iwinfo $wifi_dev h | sed 's/\bHT[0-9]\{2,3\}//g' | sed 's/^[ ]*//')
+	htpat="\bHT[0-9]\{2,3\}"
+	vhtpat="\bVHT[0-9]\{2,3\}\(+[0-9]\{2\}\)\?"
+	hepat="\bHE[0-9]\{2,3\}\(+[0-9]\{2\}\)\?"
+	wifiN=$(iwinfo $wifi_dev h | sed -e "s/$vhtpat//g" -e "s/$hepat//g" -e 's/^[ ]*//')
+	wifiAC=$(iwinfo $wifi_dev h | sed -e "s/$htpat//g" -e "s/$hepat//g" -e 's/^[ ]*//')
+	wifiAX=$(iwinfo $wifi_dev h | sed -e "s/$htpat//g" -e "s/$vhtpat//g" -e 's/^[ ]*//')
 	if [ "$wifiAC" ] ; then
 		maxAC=$(echo $wifiAC | awk -F " VHT" '{print $NF}')
 		AC80P80=$(echo $wifiAC | grep "VHT80+80")
 	else
 		maxAC="0"
 		AC80P80=""
+	fi
+	if [ "$wifiAX" ] ; then
+		maxAX=$(echo $wifiAX | awk -F " HE" '{print $NF}')
+		AX80P80=$(echo $wifiAX | grep "HE80+80")
+	else
+		maxAX="0"
+		AX80P80=""
 	fi
 
 	#802.11ac should only be able to operate on the "A" device
@@ -39,14 +50,26 @@ print_mac80211_channels_for_wifi_dev()
 		else
 			echo "var AwifiAC = false;" >> "$out"
 		fi
+		if [ "$wifiAX" ] ; then
+			echo "var AwifiAX = true;" >> "$out"
+		else
+			echo "var AwifiAX = false;" >> "$out"
+		fi
 		if [ "$dualband" == false ] ; then
 			echo "var GwifiN = false;" >> "$out"
+			echo "var GwifiAX = false;" >> "$out"
 		fi
 		echo "var maxACwidth = \"$maxAC\" ;" >> "$out"
 		if [ "$AC80P80" ] ; then
 			echo "var AC80P80 = true;" >> "$out"
 		else
 			echo "var AC80P80 = false;" >> "$out"
+		fi
+		echo "var maxAXwidth = \"$maxAX\" ;" >> "$out"
+		if [ "$AX80P80" ] ; then
+			echo "var AX80P80 = true;" >> "$out"
+		else
+			echo "var AX80P80 = false;" >> "$out"
 		fi
 	else
 		chId="G"
@@ -56,9 +79,15 @@ print_mac80211_channels_for_wifi_dev()
 		else
 			echo "var GwifiN = false;" >> "$out"
 		fi
+		if [ "$wifiAX" ] ; then
+			echo "var GwifiAX = true;" >> "$out"
+		else
+			echo "var GwifiAX = false;" >> "$out"
+		fi
 		if [ "$dualband" == false ] ; then
 			echo "var AwifiN = false;" >> "$out"
 			echo "var AwifiAC = false;" >> "$out"
+			echo "var AwifiAX = false;" >> "$out"
 		fi
 	fi
 	
@@ -66,15 +95,13 @@ print_mac80211_channels_for_wifi_dev()
 	# however, as far as I can tell there is no other way to get max txpower for each channel
 	# so... here it goes.
 	# If stuff gets FUBAR, take a look at iw output, and see if this god-awful expression still works
-	iw "$phyname" info 2>&1 | sed -e '/MHz/!d; /GI/d; /disabled/d; /radar detect /d; /Supported Channel Width/d; s/[:blank:]*\*[:blank:]*//g; s:[]()[]::g; s/\..*$//g' | awk ' { print "nextCh.push("$3"); nextChFreq["$3"] = \""$1"MHz\"; nextChPwr["$3"] = "$4";"   ; } ' >> "$out"
+	iw "$phyname" info 2>&1 | sed -e '/MHz/!d; /GI/d; /disabled/d; /radar detect /d; /Supported Channel Width/d; /STBC/d; /PPDU/d; /MCS/d; s/[:blank:]*\*[:blank:]*//g; s:[]()[]::g; s/\..*$//g' | awk ' { print "nextCh.push("$3"); nextChFreq["$3"] = \""$1"MHz\"; nextChPwr["$3"] = "$4";"   ; } ' >> "$out"
 
 	echo "mac80211Channels[\"$chId\"] = nextCh ;"     >> "$out"
 	echo "mac80211ChFreqs[\"$chId\"]  = nextChFreq ;" >> "$out"
 	echo "mac80211ChPwrs[\"$chId\"]   = nextChPwr ;"  >> "$out"
 
 }
-
-
 
 out_file="/var/cached_basic_vars"
 if [ -e "$out_file" ] ; then
@@ -128,12 +155,10 @@ elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" ] ; then
 	echo 'var mac80211ChFreqs = [];' >> "$out_file"
 	echo 'var mac80211ChPwrs = [];' >> "$out_file"
 
-
-
 	echo "var nextCh=[];" >> "$out_file"
 	
 	#test for dual band
-	if [ `uci show wireless | grep wifi-device | wc -l`"" = "2" ] && [ -e "/sys/class/ieee80211/phy1" ] && [ ! `uci get wireless.@wifi-device[0].band`"" = `uci get wireless.@wifi-device[1].band`""  ] ; then
+	if [ "$(uci show wireless | grep wifi-device | wc -l)" = "2" ] && [ -e "/sys/class/ieee80211/phy1" ] && [ ! "$(uci get wireless.@wifi-device[0].band)" = "$(uci get wireless.@wifi-device[1].band)"  ] ; then
 		echo "var dualBandWireless=true;" >> "$out_file"
 		dualband='true'
 	else
@@ -150,8 +175,10 @@ elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" ] ; then
 else
 	echo "var wirelessDriver=\"\";" >> "$out_file"
 	echo "var GwifiN = false;" >> "$out_file"
+	echo "var GwifiAX = false;" >> "$out_file"
 	echo "var AwifiN = false;" >> "$out_file"
 	echo "var AwifiAC = false;" >> "$out_file"
+	echo "var AwifiAX = false;" >> "$out_file"
 	echo "var dualBandWireless=false;" >> "$out_file"
 fi
 

@@ -210,6 +210,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 						<select id="bridge_hwmode" class="form-control" onchange="setHwMode(this)">
 							<option value="11gn">B+G+N</option>
 							<option value="11g">B+G</option>
+							<option value="11anacax">A+N+AC+AX</option>
 							<option value="11anac">A+N+AC</option>
 							<option value="11an">A+N</option>
 							<option value="11a">A</option>
@@ -256,6 +257,11 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 							<option value="VHT80">80MHz</option>
 							<option value="VHT160">160MHz</option>
 							<option value="VHT80P80">80+80MHz</option>
+							<option value="HE20">20MHz</option>
+							<option value="HE40">40MHz</option>
+							<option value="HE80">80MHz</option>
+							<option value="HE160">160MHz</option>
+							<option value="HE80P80">80+80MHz</option>
 						</select>
 					</span>
 				</div>
@@ -803,6 +809,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 							<option value="11a">A</option>
 							<option value="11an">A+N</option>
 							<option value="11anac">A+N+AC</option>
+							<option value="11anacax">A+N+AC+AX</option>
 						</select>
 					</span>
 				</div>
@@ -819,6 +826,11 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 							<option value="VHT80">80MHz</option>
 							<option value="VHT160">160MHz</option>
 							<option value="VHT80P80">80+80MHz</option>
+							<option value="HE20">20MHz</option>
+							<option value="HE40">40MHz</option>
+							<option value="HE80">80MHz</option>
+							<option value="HE160">160MHz</option>
+							<option value="HE80P80">80+80MHz</option>
 						</select>
 					</span>
 				</div>
