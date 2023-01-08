@@ -1,0 +1,16 @@
+--- a/include/image.mk
++++ b/include/image.mk
+@@ -168,8 +168,11 @@ DTC_FLAGS += \
+   -Wno-unique_unit_address
+ 
+ define Image/pad-to
+-	dd if=$(1) of=$(1).new bs=$(2) conv=sync
+-	mv $(1).new $(1)
++	if [ -e "$(1)" ]; then \
++		dd if=$(1) of=$(1).new bs=$(2) conv=sync; \
++		mv $(1).new $(1); \
++	fi; \
++	echo ""
+ endef
+ 
+ ROOTFS_PARTSIZE=$(shell echo $$(($(CONFIG_TARGET_ROOTFS_PARTSIZE)*1024*1024)))
