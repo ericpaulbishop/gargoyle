@@ -1,0 +1,16 @@
+menu "Diagnostics Plugin Configuration"
+	depends on PACKAGE_plugin-gargoyle-diagnostics
+
+config GARGOYLE_DIAGNOSTICS
+	bool "Include utilities for diagnostics"
+	select BUSYBOX_CUSTOM
+	select BUSYBOX_CONFIG_NSLOOKUP
+	select BUSYBOX_CONFIG_PING
+	select BUSYBOX_CONFIG_PING6
+	select BUSYBOX_CONFIG_TRACEROUTE
+	select BUSYBOX_CONFIG_TRACEROUTE6
+	help
+		This includes utilities such as ping, traceroute and nslookup.
+	default y
+
+endmenu

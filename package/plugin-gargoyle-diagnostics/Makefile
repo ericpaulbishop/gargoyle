@@ -32,6 +32,10 @@ endef
 define Build/Compile
 endef
 
+define Package/plugin-gargoyle-diagnostics/config
+source "$(SOURCE)/Config.in"
+endef
+
 define Package/plugin-gargoyle-diagnostics/postinst
 #!/bin/sh
 
