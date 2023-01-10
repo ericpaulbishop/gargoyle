@@ -66,29 +66,32 @@ function doPing()
 {
 	var family = byId("ping_ipv4").checked ? "4" : "6";
 	var pingtarget = byId("ping_target").value;
-	var commands = "ping -" + family + " -c 5 " + pingtarget + " 2>&1";
-	runCommandsWithOutput(commands);
+	var param = getParameterDefinition("pingfamily", family) + "&" + getParameterDefinition("pingtarget", pingtarget);
+
+	runUtilityWithOutput('do_ping', param);
 }
 
 function doTracert()
 {
 	var family = byId("tracert_ipv4").checked ? "4" : "6";
 	var tracerttarget = byId("tracert_target").value;
-	var commands = "traceroute -" + family + " -w 1 " + tracerttarget + " 2>&1";
-	runCommandsWithOutput(commands);
+	var param = getParameterDefinition("tracertfamily", family) + "&" + getParameterDefinition("tracerttarget", tracerttarget);
+
+	runUtilityWithOutput('do_traceroute', param);
 }
 
 function doNSLookup()
 {
 	var nslookuptarget = byId("nslookup_target").value;
-	var commands = "nslookup " + nslookuptarget + " 2>&1";
-	runCommandsWithOutput(commands);
+	var param = getParameterDefinition("nslookuptarget", nslookuptarget);
+
+	runUtilityWithOutput('do_nslookup', param);
 }
 
-function runCommandsWithOutput(commands)
+function runUtilityWithOutput(utility, param)
 {
 	setControlsEnabled(false,true,UI.Wait);
-	var param = getParameterDefinition("commands", commands)  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+	var params = param + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 
 	var stateChangeFunction = function(req)
 	{
@@ -98,5 +101,5 @@ function runCommandsWithOutput(commands)
 			setControlsEnabled(true);
 		}
 	}
-	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
+	runAjax("POST", "utility/" + utility + ".sh", params, stateChangeFunction);
 }
