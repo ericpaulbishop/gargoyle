@@ -2945,7 +2945,7 @@ function setSsidVisibility(selectId)
 			{
 				if(AwifiAX)
 				{
-					var modes = ['11anaxax','11anac','11an','11a'];
+					var modes = ['11anacax','11anac','11an','11a'];
 					var mnames = ['A+N+AC+AX','A+N+AC','A+N','A'];
 				}
 				else if(AwifiAC)
