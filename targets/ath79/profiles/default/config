@@ -5028,7 +5028,7 @@ CONFIG_PACKAGE_wpad-openssl=y
 # CONFIG_PACKAGE_bpftool-full is not set
 # CONFIG_PACKAGE_bpftool-minimal is not set
 CONFIG_PACKAGE_bwmon-gargoyle=y
-CONFIG_PACKAGE_chat=y
+CONFIG_PACKAGE_chat=m
 CONFIG_PACKAGE_ddns-gargoyle=m
 # CONFIG_PACKAGE_ds-lite is not set
 CONFIG_PACKAGE_etherwake=m
