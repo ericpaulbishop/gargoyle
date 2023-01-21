@@ -14,3 +14,33 @@
  endef
  
  ROOTFS_PARTSIZE=$(shell echo $$(($(CONFIG_TARGET_ROOTFS_PARTSIZE)*1024*1024)))
+--- a/target/linux/ramips/image/Makefile
++++ b/target/linux/ramips/image/Makefile
+@@ -84,8 +84,11 @@ define Build/mkdlinkfw-factory
+ 		-F $@ \
+ 		-o $@.new \
+ 		$(if $(DLINK_IMAGE_OFFSET), -O $(DLINK_IMAGE_OFFSET)) \
+-		-s $(DLINK_FIRMWARE_SIZE)
+-	mv $@.new $@
++		-s $(DLINK_FIRMWARE_SIZE); \
++	if [ -e "$@.new" ]; then \
++		mv $@.new $@; \
++	fi; \
++	echo ""
+ endef
+ 
+ define Build/mkdlinkfw-loader
+@@ -94,8 +97,11 @@ define Build/mkdlinkfw-loader
+ 		-r $@ \
+ 		-o $@.new \
+ 		$(if $(DLINK_IMAGE_OFFSET), -O $(DLINK_IMAGE_OFFSET)) \
+-		-s $(DLINK_FIRMWARE_SIZE)
+-	mv $@.new $@
++		-s $(DLINK_FIRMWARE_SIZE); \
++	if [ -e "$@.new" ]; then \
++		mv $@.new $@; \
++	fi; \
++	echo ""
+ endef
+ 
+ define Build/netis-tail
