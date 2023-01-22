@@ -3881,7 +3881,8 @@ function getMaxTxPower(band)
 	if(wirelessDriver == "mac80211")
 	{
 		var ch = getSelectedValue( band == "A" ? "wifi_channel1_5ghz" : "wifi_channel1");
-		var ch2 = band == "A" ? getSelectedValue("wifi_channel1_seg2_5ghz"): null;
+		var ch2 = (band == "A") && (getSelectedValue("wifi_channel_width_5ghz").match(/.*80P80/) != null);
+		var ch2 = ch2 ? getSelectedValue("wifi_channel1_seg2_5ghz"): null;
 		var b = mac80211ChPwrs[band];
 		var p = b == null ? null : b[ch];
 		var p2 = ch2 == null ? p : (b == null ? null : b[ch2]);
