@@ -4226,8 +4226,8 @@ function setNthBitToX(val, n, x)
 function testChannels()
 {
 	var error = null;
-	//VHT80P80 only thing we need to check for now
-	if(getSelectedValue("wifi_channel_width_5ghz") == "VHT80P80")
+	var chanwidth = getSelectedValue("wifi_channel_width_5ghz");
+	if(chanwidth == "VHT80P80" || chanwidth == "HE80P80")
 	{
 		var seg1 = getSelectedValue("wifi_channel1_5ghz");
 		var seg2 = getSelectedValue("wifi_channel1_seg2_5ghz");
