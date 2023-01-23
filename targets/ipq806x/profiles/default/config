@@ -88,30 +88,31 @@ CONFIG_TARGET_PER_DEVICE_ROOTFS=y
 # CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_compex_wpq864 is not set
 # CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_edgecore_ecw5410 is not set
 CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_linksys_ea7500-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ipq806x_generic_DEVICE_linksys_ea7500-v1="kmod-ath10k-ct ath10k-firmware-qca99x0-ct"
+CONFIG_TARGET_DEVICE_PACKAGES_ipq806x_generic_DEVICE_linksys_ea7500-v1="gargoyle-large"
 CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_linksys_ea8500=y
-CONFIG_TARGET_DEVICE_PACKAGES_ipq806x_generic_DEVICE_linksys_ea8500="kmod-ath10k-ct ath10k-firmware-qca99x0-ct"
+CONFIG_TARGET_DEVICE_PACKAGES_ipq806x_generic_DEVICE_linksys_ea8500="gargoyle-large"
 # CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_nec_wg2600hp is not set
 # CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_nec_wg2600hp3 is not set
 CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_netgear_d7800=y
-CONFIG_TARGET_DEVICE_PACKAGES_ipq806x_generic_DEVICE_netgear_d7800="kmod-ath10k-ct ath10k-firmware-qca99x0-ct"
+CONFIG_TARGET_DEVICE_PACKAGES_ipq806x_generic_DEVICE_netgear_d7800="gargoyle-large"
 # CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_netgear_r7500 is not set
 CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_netgear_r7500v2=y
-CONFIG_TARGET_DEVICE_PACKAGES_ipq806x_generic_DEVICE_netgear_r7500v2="kmod-ath10k-ct ath10k-firmware-qca99x0-ct"
+CONFIG_TARGET_DEVICE_PACKAGES_ipq806x_generic_DEVICE_netgear_r7500v2="gargoyle-large"
 CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_netgear_r7800=y
-CONFIG_TARGET_DEVICE_PACKAGES_ipq806x_generic_DEVICE_netgear_r7800="kmod-ath10k-ct ath10k-firmware-qca9984-ct"
-# CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_netgear_xr500 is not set
+CONFIG_TARGET_DEVICE_PACKAGES_ipq806x_generic_DEVICE_netgear_r7800="gargoyle-large"
+CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_netgear_xr500=y
+CONFIG_TARGET_DEVICE_PACKAGES_ipq806x_generic_DEVICE_netgear_xr500="gargoyle-large"
 # CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_qcom_ipq8064-ap148-legacy is not set
 # CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_qcom_ipq8064-ap148 is not set
 # CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_qcom_ipq8064-ap161 is not set
 # CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_qcom_ipq8064-db149 is not set
 # CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_tplink_ad7200 is not set
 CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_tplink_c2600=y
-CONFIG_TARGET_DEVICE_PACKAGES_ipq806x_generic_DEVICE_tplink_c2600="kmod-ath10k-ct ath10k-firmware-qca99x0-ct"
+CONFIG_TARGET_DEVICE_PACKAGES_ipq806x_generic_DEVICE_tplink_c2600="gargoyle-large"
 # CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_tplink_vr2600v is not set
 # CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_ubnt_unifi-ac-hd is not set
 CONFIG_TARGET_DEVICE_ipq806x_generic_DEVICE_zyxel_nbg6817=y
-CONFIG_TARGET_DEVICE_PACKAGES_ipq806x_generic_DEVICE_zyxel_nbg6817="kmod-ath10k-ct ath10k-firmware-qca9984-ct"
+CONFIG_TARGET_DEVICE_PACKAGES_ipq806x_generic_DEVICE_zyxel_nbg6817="gargoyle-large"
 # end of Target Devices
 
 CONFIG_HAS_SUBTARGETS=y
@@ -2578,9 +2579,9 @@ CONFIG_PACKAGE_usign=y
 #
 # Gargoyle Profile Meta-packages
 #
-# CONFIG_PACKAGE_gargoyle-basic is not set
-# CONFIG_PACKAGE_gargoyle-large is not set
-# CONFIG_PACKAGE_gargoyle-usb is not set
+CONFIG_PACKAGE_gargoyle-basic=m
+CONFIG_PACKAGE_gargoyle-large=m
+CONFIG_PACKAGE_gargoyle-usb=m
 # end of Gargoyle Profile Meta-packages
 
 #
