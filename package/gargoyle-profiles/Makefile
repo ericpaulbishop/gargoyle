@@ -45,7 +45,7 @@ endef
 define Package/gargoyle-usb
 	$(call Package/gargoyle-profiles/Default)
 	TITLE+= basic functionality, USB local storage, USB networking
-	DEPENDS+= +plugin-gargoyle-usb-storage-noshare
+	DEPENDS+= +plugin-gargoyle-usb-storage-extroot
 endef
 
 define Package/gargoyle-usb/description
