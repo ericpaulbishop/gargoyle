@@ -2645,6 +2645,7 @@ CONFIG_PACKAGE_plugin-gargoyle-usb-storage-full=m
 #
 CONFIG_GARGOYLE_SMB_KSMBD=y
 # CONFIG_GARGOYLE_SMB_SAMBA is not set
+CONFIG_PACKAGE_plugin-gargoyle-usb-storage-extroot=m
 CONFIG_PACKAGE_plugin-gargoyle-usb-storage-noshare=m
 CONFIG_PACKAGE_plugin-gargoyle-webcam=m
 CONFIG_PACKAGE_plugin-gargoyle-webshell=m
@@ -4558,7 +4559,7 @@ CONFIG_PACKAGE_NTFS-3G_HAS_PROBE=y
 # CONFIG_PACKAGE_ntfs-3g-low is not set
 # CONFIG_PACKAGE_ntfs-3g-utils is not set
 # CONFIG_PACKAGE_resize2fs is not set
-CONFIG_PACKAGE_swap-utils=y
+CONFIG_PACKAGE_swap-utils=m
 # CONFIG_PACKAGE_sysfsutils is not set
 # CONFIG_PACKAGE_tune2fs is not set
 # end of Filesystem
