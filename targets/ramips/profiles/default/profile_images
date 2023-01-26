@@ -12,8 +12,11 @@ comfast_cf-wr800n-
 dlink_dch-m225-
 dlink_dir-810l-
 dlink_dwr-116-a1-squashfs-
+dlink_dwr-118-a1-squashfs-
+dlink_dwr-118-a2-squashfs-
 dlink_dwr-921-c1-squashfs-
 dlink_dwr-921-c3-squashfs-
+dlink_dwr-922-e2-squashfs-
 dovado_tiny-ac-
 elecom_wrh-300cr-squashfs-
 glinet_gl-mt300a-
@@ -46,7 +49,6 @@ ralink_mt7620a-evb-
 ralink_mt7620a-mt7530-evb-
 ralink_mt7620a-mt7610e-evb-
 ralink_mt7620a-v22sg-evb-
-ravpower_rp-wd03-
 sanlinking_d240-
 sercomm_na930-
 tplink_archer-c20-v1-squashfs-
@@ -62,8 +64,9 @@ zbtlink_zbt-ape522ii-
 zbtlink_zbt-cpe102-
 zbtlink_zbt-wa05-
 zbtlink_zbt-we1026-5g-16m-
+zbtlink_zbt-we1026-h-32m-
 zbtlink_zbt-we2026-
 zbtlink_zbt-we826-16m-
 zbtlink_zbt-we826-32m-
 zbtlink_zbt-wr8305rt-
-zbtlink_zte-q7-
+zte_q7-
