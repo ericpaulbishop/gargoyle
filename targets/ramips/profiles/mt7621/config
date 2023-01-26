@@ -293,17 +293,17 @@ CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_edimax_re23s="gargoyle-large"
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_elecom_wrc-1167ghbk2-s=y
 CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_elecom_wrc-1167ghbk2-s="gargoyle-large"
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_elecom_wrc-1167gs2-b=y
-CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_elecom_wrc-1167gs2-b="gargoyle-large"
+CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_elecom_wrc-1167gs2-b="gargoyle-basic"
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_elecom_wrc-1167gst2=y
 CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_elecom_wrc-1167gst2="gargoyle-large"
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_elecom_wrc-1750gs=y
-CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_elecom_wrc-1750gs="gargoyle-large"
+CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_elecom_wrc-1750gs="gargoyle-basic"
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_elecom_wrc-1750gst2=y
 CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_elecom_wrc-1750gst2="gargoyle-large"
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_elecom_wrc-1750gsv=y
-CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_elecom_wrc-1750gsv="gargoyle-large"
+CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_elecom_wrc-1750gsv="gargoyle-basic"
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_elecom_wrc-1900gst=y
-CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_elecom_wrc-1900gst="gargoyle-large"
+CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_elecom_wrc-1900gst="gargoyle-basic"
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_elecom_wrc-2533ghbk-i=y
 CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_elecom_wrc-2533ghbk-i="gargoyle-basic"
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_elecom_wrc-2533gs2=y
@@ -311,7 +311,7 @@ CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_elecom_wrc-2533gs2="gargoyle-
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_elecom_wrc-2533gst=y
 CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_elecom_wrc-2533gst="gargoyle-basic"
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_elecom_wrc-2533gst2=y
-CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_elecom_wrc-2533gst2="gargoyle-basic"
+CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_elecom_wrc-2533gst2="gargoyle-large"
 # CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_firefly_firewrt is not set
 # CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_gehua_ghl-r-001 is not set
 # CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_winstars_ws-wn583a6 is not set
@@ -371,7 +371,7 @@ CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_mikrotik_routerboard-750gr3="
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_netgear_r6700-v2=y
 CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_netgear_r6700-v2="gargoyle-large"
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_netgear_r6220=y
-CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_netgear_r6220="gargoyle-usb"
+CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_netgear_r6220="gargoyle-large"
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_netgear_r6260=y
 CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_netgear_r6260="gargoyle-large"
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_netgear_r6350=y
@@ -421,19 +421,17 @@ CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_tplink_archer-c6-v3="gargoyle
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_tplink_archer-c6u-v1=y
 CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_tplink_archer-c6u-v1="gargoyle-large"
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_tplink_eap235-wall-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_tplink_eap235-wall-v1="gargoyle-large"
+CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_tplink_eap235-wall-v1="gargoyle-basic"
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_tplink_eap615-wall-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_tplink_eap615-wall-v1="gargoyle-large"
-CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_tplink_re350-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_tplink_re350-v1="gargoyle-large"
+CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_tplink_eap615-wall-v1="gargoyle-basic"
+# CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_tplink_re350-v1 is not set
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_tplink_re500-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_tplink_re500-v1="gargoyle-large"
+CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_tplink_re500-v1="gargoyle-basic"
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_tplink_re650-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_tplink_re650-v1="gargoyle-large"
+CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_tplink_re650-v1="gargoyle-basic"
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_tplink_re650-v2=y
 CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_tplink_re650-v2="gargoyle-basic"
-CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_tplink_tl-wpa8631p-v3=y
-CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_tplink_tl-wpa8631p-v3="gargoyle-basic"
+# CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_tplink_tl-wpa8631p-v3 is not set
 # CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_ubnt_edgerouter-x-sfp is not set
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_ubnt_edgerouter-x=y
 CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_ubnt_edgerouter-x="gargoyle-large"
@@ -615,7 +613,7 @@ CONFIG_EXTERNAL_CPIO=""
 #
 # CONFIG_TARGET_ROOTFS_EXT4FS is not set
 CONFIG_TARGET_ROOTFS_SQUASHFS=y
-CONFIG_TARGET_SQUASHFS_BLOCK_SIZE=256
+CONFIG_TARGET_SQUASHFS_BLOCK_SIZE=1024
 CONFIG_TARGET_UBIFS_FREE_SPACE_FIXUP=y
 CONFIG_TARGET_UBIFS_JOURNAL_SIZE=""
 
@@ -660,23 +658,23 @@ CONFIG_KERNEL_BUILD_USER=""
 CONFIG_KERNEL_BUILD_DOMAIN=""
 CONFIG_KERNEL_PRINTK=y
 CONFIG_KERNEL_SWAP=y
-# CONFIG_KERNEL_PROC_STRIPPED is not set
+CONFIG_KERNEL_PROC_STRIPPED=y
 CONFIG_KERNEL_DEBUG_FS=y
 # CONFIG_KERNEL_PERF_EVENTS is not set
 # CONFIG_KERNEL_PROFILING is not set
 # CONFIG_KERNEL_UBSAN is not set
 # CONFIG_KERNEL_KCOV is not set
 # CONFIG_KERNEL_TASKSTATS is not set
-CONFIG_KERNEL_KALLSYMS=y
+# CONFIG_KERNEL_KALLSYMS is not set
 # CONFIG_KERNEL_FTRACE is not set
-CONFIG_KERNEL_DEBUG_KERNEL=y
-CONFIG_KERNEL_DEBUG_INFO=y
+# CONFIG_KERNEL_DEBUG_KERNEL is not set
+# CONFIG_KERNEL_DEBUG_INFO is not set
 # CONFIG_KERNEL_DYNAMIC_DEBUG is not set
 # CONFIG_KERNEL_KPROBES is not set
-CONFIG_KERNEL_AIO=y
-CONFIG_KERNEL_IO_URING=y
-CONFIG_KERNEL_FHANDLE=y
-CONFIG_KERNEL_FANOTIFY=y
+# CONFIG_KERNEL_AIO is not set
+# CONFIG_KERNEL_IO_URING is not set
+# CONFIG_KERNEL_FHANDLE is not set
+# CONFIG_KERNEL_FANOTIFY is not set
 # CONFIG_KERNEL_BLK_DEV_BSG is not set
 # CONFIG_KERNEL_HUGETLB_PAGE is not set
 CONFIG_KERNEL_MAGIC_SYSRQ=y
@@ -698,51 +696,13 @@ CONFIG_KERNEL_RELAY=y
 # CONFIG_USE_RFKILL is not set
 # CONFIG_USE_SPARSE is not set
 # CONFIG_KERNEL_DEVTMPFS is not set
-CONFIG_KERNEL_KEYS=y
-# CONFIG_KERNEL_PERSISTENT_KEYRINGS is not set
-# CONFIG_KERNEL_KEYS_REQUEST_CACHE is not set
-# CONFIG_KERNEL_BIG_KEYS is not set
-CONFIG_KERNEL_CGROUPS=y
-# CONFIG_KERNEL_CGROUP_DEBUG is not set
-CONFIG_KERNEL_FREEZER=y
-# CONFIG_KERNEL_CGROUP_FREEZER is not set
-# CONFIG_KERNEL_CGROUP_DEVICE is not set
-# CONFIG_KERNEL_CGROUP_HUGETLB is not set
-CONFIG_KERNEL_CGROUP_PIDS=y
-CONFIG_KERNEL_CGROUP_RDMA=y
-CONFIG_KERNEL_CGROUP_BPF=y
-CONFIG_KERNEL_CPUSETS=y
-# CONFIG_KERNEL_PROC_PID_CPUSET is not set
-CONFIG_KERNEL_CGROUP_CPUACCT=y
-CONFIG_KERNEL_RESOURCE_COUNTERS=y
-CONFIG_KERNEL_MM_OWNER=y
-CONFIG_KERNEL_MEMCG=y
-CONFIG_KERNEL_MEMCG_SWAP=y
-# CONFIG_KERNEL_MEMCG_SWAP_ENABLED is not set
-CONFIG_KERNEL_MEMCG_KMEM=y
-# CONFIG_KERNEL_CGROUP_PERF is not set
-CONFIG_KERNEL_CGROUP_SCHED=y
-CONFIG_KERNEL_FAIR_GROUP_SCHED=y
-CONFIG_KERNEL_CFS_BANDWIDTH=y
-CONFIG_KERNEL_RT_GROUP_SCHED=y
-CONFIG_KERNEL_BLK_CGROUP=y
-# CONFIG_KERNEL_CFQ_GROUP_IOSCHED is not set
-CONFIG_KERNEL_BLK_DEV_THROTTLING=y
-# CONFIG_KERNEL_BLK_DEV_THROTTLING_LOW is not set
-# CONFIG_KERNEL_DEBUG_BLK_CGROUP is not set
-# CONFIG_KERNEL_NET_CLS_CGROUP is not set
-# CONFIG_KERNEL_CGROUP_NET_CLASSID is not set
-# CONFIG_KERNEL_CGROUP_NET_PRIO is not set
-CONFIG_KERNEL_NAMESPACES=y
-CONFIG_KERNEL_UTS_NS=y
-CONFIG_KERNEL_IPC_NS=y
-CONFIG_KERNEL_USER_NS=y
-CONFIG_KERNEL_PID_NS=y
-CONFIG_KERNEL_NET_NS=y
-CONFIG_KERNEL_DEVPTS_MULTIPLE_INSTANCES=y
-CONFIG_KERNEL_POSIX_MQUEUE=y
+# CONFIG_KERNEL_KEYS is not set
+# CONFIG_KERNEL_CGROUPS is not set
+# CONFIG_KERNEL_NAMESPACES is not set
+# CONFIG_KERNEL_DEVPTS_MULTIPLE_INSTANCES is not set
+# CONFIG_KERNEL_POSIX_MQUEUE is not set
 CONFIG_KERNEL_SECCOMP_FILTER=y
-CONFIG_KERNEL_SECCOMP=y
+# CONFIG_KERNEL_SECCOMP is not set
 CONFIG_KERNEL_IP_MROUTE=y
 CONFIG_KERNEL_IP_MROUTE_MULTIPLE_TABLES=y
 CONFIG_KERNEL_IP_PIMSM_V1=y
@@ -834,7 +794,7 @@ CONFIG_PKG_FORTIFY_SOURCE_1=y
 # CONFIG_PKG_RELRO_PARTIAL is not set
 CONFIG_PKG_RELRO_FULL=y
 # CONFIG_SELINUX is not set
-CONFIG_SECCOMP=y
+# CONFIG_SECCOMP is not set
 # end of Global build settings
 
 # CONFIG_DEVEL is not set
@@ -858,9 +818,9 @@ CONFIG_USE_GARGOYLE_PROFILE_PKGS=y
 #
 # Standard Gargoyle package sets
 #
-CONFIG_GARGOYLE_BASIC=m
-CONFIG_GARGOYLE_USB=m
-CONFIG_GARGOYLE_LARGE=m
+# CONFIG_GARGOYLE_BASIC is not set
+# CONFIG_GARGOYLE_USB is not set
+# CONFIG_GARGOYLE_LARGE is not set
 # end of Standard Gargoyle package sets
 
 CONFIG_GARGOYLE_LANGUAGE_PKGS=m
@@ -2945,9 +2905,8 @@ CONFIG_PACKAGE_procd=y
 # CONFIG_PROCD_SHOW_BOOT is not set
 # end of Configuration
 
-CONFIG_PACKAGE_procd-seccomp=y
 # CONFIG_PACKAGE_procd-selinux is not set
-CONFIG_PACKAGE_procd-ujail=y
+# CONFIG_PACKAGE_procd-ujail is not set
 # CONFIG_PACKAGE_qos-scripts is not set
 # CONFIG_PACKAGE_refpolicy is not set
 CONFIG_PACKAGE_resolveip=m
@@ -3044,6 +3003,7 @@ CONFIG_PACKAGE_plugin-gargoyle-usb-storage-full=m
 #
 CONFIG_GARGOYLE_SMB_KSMBD=y
 # CONFIG_GARGOYLE_SMB_SAMBA is not set
+CONFIG_PACKAGE_plugin-gargoyle-usb-storage-extroot=m
 CONFIG_PACKAGE_plugin-gargoyle-usb-storage-noshare=m
 CONFIG_PACKAGE_plugin-gargoyle-webcam=m
 CONFIG_PACKAGE_plugin-gargoyle-webshell=m
@@ -3488,7 +3448,7 @@ CONFIG_PACKAGE_kmod-input-core=m
 # LED modules
 #
 # CONFIG_PACKAGE_kmod-input-leds is not set
-CONFIG_PACKAGE_kmod-leds-gpio=y
+CONFIG_PACKAGE_kmod-leds-gpio=m
 # CONFIG_PACKAGE_kmod-leds-pca963x is not set
 # CONFIG_PACKAGE_kmod-leds-tlc591xx is not set
 # CONFIG_PACKAGE_kmod-leds-uleds is not set
@@ -3800,7 +3760,7 @@ CONFIG_PACKAGE_kmod-eeprom-93cx6=m
 # CONFIG_PACKAGE_kmod-eeprom-at24 is not set
 # CONFIG_PACKAGE_kmod-eeprom-at25 is not set
 # CONFIG_PACKAGE_kmod-gpio-beeper is not set
-CONFIG_PACKAGE_kmod-gpio-button-hotplug=y
+CONFIG_PACKAGE_kmod-gpio-button-hotplug=m
 # CONFIG_PACKAGE_kmod-gpio-mcp23s08 is not set
 # CONFIG_PACKAGE_kmod-gpio-nxp-74hc164 is not set
 # CONFIG_PACKAGE_kmod-gpio-pca953x is not set
@@ -4432,7 +4392,7 @@ CONFIG_PACKAGE_libubus=y
 # CONFIG_PACKAGE_libubus-lua is not set
 CONFIG_PACKAGE_libuci=y
 # CONFIG_PACKAGE_libuci-lua is not set
-CONFIG_PACKAGE_libuclient=y
+CONFIG_PACKAGE_libuclient=m
 # CONFIG_PACKAGE_libunwind is not set
 CONFIG_PACKAGE_libusb-1.0=m
 # CONFIG_PACKAGE_libustream-mbedtls is not set
@@ -4758,13 +4718,13 @@ CONFIG_DRIVER_11AX_SUPPORT=y
 # CONFIG_PACKAGE_wpa-supplicant-wolfssl is not set
 # CONFIG_PACKAGE_wpad is not set
 # CONFIG_PACKAGE_wpad-basic is not set
-CONFIG_PACKAGE_wpad-basic-openssl=m
+# CONFIG_PACKAGE_wpad-basic-openssl is not set
 CONFIG_PACKAGE_wpad-basic-wolfssl=m
 # CONFIG_PACKAGE_wpad-mesh-openssl is not set
 # CONFIG_PACKAGE_wpad-mesh-wolfssl is not set
 # CONFIG_PACKAGE_wpad-mini is not set
 CONFIG_PACKAGE_wpad-openssl=y
-CONFIG_PACKAGE_wpad-wolfssl=m
+# CONFIG_PACKAGE_wpad-wolfssl is not set
 # end of WirelessAPD
 
 # CONFIG_PACKAGE_464xlat is not set
@@ -4833,7 +4793,7 @@ CONFIG_PACKAGE_SAMBA_MAX_DEBUG_LEVEL=-1
 # CONFIG_PACKAGE_soloscli is not set
 # CONFIG_PACKAGE_tcpdump is not set
 # CONFIG_PACKAGE_tcpdump-mini is not set
-CONFIG_PACKAGE_uclient-fetch=y
+CONFIG_PACKAGE_uclient-fetch=m
 # CONFIG_PACKAGE_umdns is not set
 CONFIG_PACKAGE_usteer=m
 # CONFIG_PACKAGE_ustp is not set
