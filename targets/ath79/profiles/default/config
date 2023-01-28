@@ -588,7 +588,7 @@ CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_om5p-ac-v2="gargoyle
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_qxwlan_e1700ac-v2-16m=y
 CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_qxwlan_e1700ac-v2-16m="gargoyle-large"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_qxwlan_e1700ac-v2-8m=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_qxwlan_e1700ac-v2-8m="gargoyle-usb"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_qxwlan_e1700ac-v2-8m="gargoyle-basic"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_qxwlan_e558-v2-16m is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_qxwlan_e558-v2-8m is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_qxwlan_e600g-v2-16m is not set
@@ -718,7 +718,7 @@ CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr842n-v1="gargoyle
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr842n-v2=y
 CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr842n-v2="gargoyle-usb"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr902ac-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr902ac-v1="gargoyle-usb"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr902ac-v1="gargoyle-basic"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr941hp-v1 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_wbs210-v1 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_wbs210-v2 is not set
