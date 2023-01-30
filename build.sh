@@ -705,7 +705,7 @@ for target in $targets ; do
 		openwrt_target=$(get_target_from_config "./.config")
 		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$openwrt_abbrev_commit" "package/base-files/files/etc/banner" "."
 
-		make $num_build_thread_str V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$default_profile"
+		make $num_build_thread_str V=s GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$default_profile"
 
 	fi
 	
@@ -833,7 +833,7 @@ for target in $targets ; do
 		if [ "$verbosity" = "0" ] ; then
 			make $num_build_thread_str  GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$profile_name"
 		else
-			make $num_build_thread_str V=99 GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$profile_name"
+			make $num_build_thread_str V=s GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$profile_name"
 		fi
 
 		#if we didn't build anything, die horribly

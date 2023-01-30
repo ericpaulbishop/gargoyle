@@ -1,5 +1,5 @@
 GARGOYLE_VERSION:=1.15.X (Built $(shell echo "`date -u +%Y%m%d-%H%M` git@`git log -1 --pretty=format:%h`"))
-V=99
+V=s
 FULL_BUILD=false
 CUSTOM_TEMPLATE=ath79
 CUSTOM_TARGET=ath79
