@@ -34,8 +34,8 @@ then
 	while read line
 	do
 	time=`echo $line | awk '{split($0,a," "); print a[1]}'`
-	ip=`echo $line | awk '{split($0,a," "); print a[2]}'`
-	domain=`echo $line | awk '{split($0,a," "); print a[3]}'`
+	ip=`echo $line | awk '{split($0,a," "); print a[3]}'`
+	domain=`echo $line | awk '{split($0,a," "); print a[4]}'`
 	converttime=$(date -d @$time);
 	echo "<tr><td $tdstyle>"$converttime"</td><td $tdstyle>"$ip"</td><td $tdstyle>"$domain"</td></tr>" >> /tmp/email-log.txt;
 	done < /tmp/work.tmp
@@ -52,8 +52,8 @@ then
 	while read line 
 	do
 	time=`echo $line | awk '{split($0,a," "); print a[1]}'`
-	ip=`echo $line | awk '{split($0,a," "); print a[2]}'`
-	domain=`echo $line | awk '{split($0,a," "); print a[3]}'`
+	ip=`echo $line | awk '{split($0,a," "); print a[3]}'`
+	domain=`echo $line | awk '{split($0,a," "); print a[4]}'`
 	converttime=$(date -d @$time);
 	echo "<tr><td $tdstyle>"$converttime"</td><td $tdstyle>"$ip"</td><td $tdstyle>"$domain"</td></tr>" >> /tmp/email-log.txt;
 	done < /tmp/work.tmp
