@@ -313,7 +313,7 @@ function saveChanges()
 			var server_pubkey = document.getElementById(prefix + "server_pubkey").value;
 			uci.set("wireguard_gargoyle", "client", "server_public_key", server_pubkey)
 			uci.removeAllSectionsOfType("network","wireguard_wg0");
-			configureAC("wgserver",server_pubkey,[allowed_ips],endpoint_host,endpoint_port);
+			configureAC("wgserver",server_pubkey,allowed_ips.split(','),endpoint_host,endpoint_port);
 		}
 
 
@@ -353,7 +353,8 @@ function setWireguardVisibility()
 	if(mode == "disabled")
 	{
 		document.getElementById("wireguard_server_fieldset").style.display = "none";
-		document.getElementById("wireguard_allowed_client_fieldset").style.display = "none";			document.getElementById("wireguard_client_fieldset").style.display = "none";
+		document.getElementById("wireguard_allowed_client_fieldset").style.display = "none";
+		document.getElementById("wireguard_client_fieldset").style.display = "none";
 	}
 	else
 	{
@@ -449,28 +450,53 @@ function downloadAc()
 {
 	var downloadRow=this.parentNode.parentNode;
 	var downloadId = downloadRow.childNodes[1].firstChild.id;
+	var wgServerIP = uci.get("wireguard_gargoyle","server","ip");
+	var wgServerLanMask = uci.get("wireguard_gargoyle","server","submask");
+	var allClientTraffic = uci.get("wireguard_gargoyle","server","all_client_traffic");
 	// Generate config
 	commands = [];
 	commands.push("touch /tmp/wg.ac.tmp.conf");
 	commands.push("rm /tmp/wg.ac.tmp.conf");
 	commands.push("touch /tmp/wg.ac.tmp.conf");
+	
 	// Create Interface Section
 	var intaddr = uci.get("wireguard_gargoyle",downloadId,"ip") + "/32";
 	var intprivkey = uci.get("wireguard_gargoyle",downloadId,"private_key");
 	commands.push("echo '[Interface]' >> /tmp/wg.ac.tmp.conf");
 	commands.push("echo 'Address = " + intaddr + "' >> /tmp/wg.ac.tmp.conf");
-	commands.push("echo 'PrivateKey = " + intprivkey + "' >> /tmp/wg.ac.tmp.conf");
-	// Create Peer Section
-	commands.push("echo '' >> /tmp/wg.ac.tmp.conf");
-	var prroutedips = "0.0.0.0/0";
-	if(uci.get("wireguard_gargoyle","server","all_client_traffic") == "false")
+	if(allClientTraffic == "true")
 	{
-		prroutedips = ipToStr(parseIp(currentLanIp) & parseIp(currentLanMask)) + "/" + parseCidr(currentLanMask);
+		commands.push("echo 'DNS = " + wgServerIP + "' >> /tmp/wg.ac.tmp.conf");
 	}
+	commands.push("echo 'PrivateKey = " + intprivkey + "' >> /tmp/wg.ac.tmp.conf");
+	
+	// Create Peer Section
+	var prroutedips = ["0.0.0.0/0"];
 	var prendpoint = uci.get("wireguard_gargoyle",downloadId,"remote") + ":" + uci.get("wireguard_gargoyle","server","port");
 	var prpubkey = uci.get("wireguard_gargoyle","server","public_key");
+	if(allClientTraffic == "false")
+	{
+		prroutedips = [wgServerIP + "/" + parseCidr(wgServerLanMask)];
+		prroutedips.push(ipToStr(parseIp(currentLanIp) & parseIp(currentLanMask)) + "/" + parseCidr(currentLanMask));
+		wgACs = uci.getAllSectionsOfType("wireguard_gargoyle","allowed_client");
+		var wgACIdx = 0;
+		for(wgACIdx = 0; wgACIdx < wgACs.length; wgACIdx ++)
+		{
+			if(uci.get("wireguard_gargoyle",wgACs[wgACIdx],"enabled") == "1" && uci.get("wireguard_gargoyle",wgACs[wgACIdx],"id") != downloadId)
+			{
+				var subnetip = uci.get("wireguard_gargoyle",wgACs[wgACIdx],"subnet_ip");
+				var subnetmask = uci.get("wireguard_gargoyle",wgACs[wgACIdx],"subnet_mask");
+				if(subnetip != "" && subnetmask != "")
+				{
+					subnetmask = parseCidr(subnetmask);
+					prroutedips.push(subnetip + "/" + subnetmask);
+				}
+			}
+		}
+	}
+	commands.push("echo '' >> /tmp/wg.ac.tmp.conf");
 	commands.push("echo '[Peer]' >> /tmp/wg.ac.tmp.conf");
-	commands.push("echo 'AllowedIPs = " + prroutedips + "' >> /tmp/wg.ac.tmp.conf");
+	commands.push("echo 'AllowedIPs = " + prroutedips.join(",") + "' >> /tmp/wg.ac.tmp.conf");
 	commands.push("echo 'Endpoint = " + prendpoint + "' >> /tmp/wg.ac.tmp.conf");
 	commands.push("echo 'PersistentKeepalive = 25' >> /tmp/wg.ac.tmp.conf");
 	commands.push("echo 'PublicKey = " + prpubkey + "' >> /tmp/wg.ac.tmp.conf");
