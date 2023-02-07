@@ -31,5 +31,3 @@ dhcpS.AErr="Nie można dodać wiersza.";
 dhcpS.RtrAdv="Rozgłaszanie routera";
 dhcpS.RtrAdvMgm="Zarządzenia rozgłaszaniem routera";
 dhcpS.Relayed="Przekazywane";
-dhcpS.Sttfl="Statefull";
-dhcpS.Sttlss="Stateless";

@@ -21,3 +21,4 @@ hostsStr.ActiveConx="Aktywne poł. TCP";
 hostsStr.RecentConx="Ostatnie poł. TCP";
 hostsStr.UDPConx="Poł. UDP";
 hostsStr.Band="Pasmo";
+hostsStr.Remote="Zdalny";

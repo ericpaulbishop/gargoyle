@@ -12,6 +12,7 @@ abt.TButler="Implementacja wielu ulepszeń w wyświetlaniu tabel oraz dużych pr
 abt.IFedorenko="Dołączenie numeru zmian w repozytorum do numeru wersji";
 abt.BCoy="Wiele pomocnych sugestii dotyczących budowy strony i szablonów stylów Gargoyle";
 abt.FRiC="Wykazał się pomocą przy testowaniu Gargoyle, szczególnie w obszarze funkcjonalnym PPPoE";
+abt.MGray="Implementacja funkcjonalności IPv6 oraz stały rozwój i ulepszenia/poprawki";
 abt.logo="Logo Gargoyle pochodzi z fontu Gargoyle stworzonego przez Manfreda Klein, który udostępnił je do komercyjnego i niekomercyjnego użycia";
 abt.openwrt="Interfejs Gargoyle jest nakładką na wspaniały projekt OpenWrt, który nie zaistniał by bez ciężkiej pracy zespołu OpenWrt";
 abt.LSect="Licencja";

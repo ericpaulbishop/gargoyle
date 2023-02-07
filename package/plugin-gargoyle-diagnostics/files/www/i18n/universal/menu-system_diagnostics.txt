@@ -2,7 +2,7 @@
 
 fallback=Diagnostics
 EN=Diagnostics
-PL=Diagnostics
+PL=Diagnostyka
 RU=Diagnostics
 NO=Diagnostics
 ZH-CN=Diagnostics

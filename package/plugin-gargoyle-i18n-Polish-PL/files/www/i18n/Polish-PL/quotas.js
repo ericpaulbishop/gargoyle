@@ -70,3 +70,7 @@ quotasStr.USect="Wykorzystanie limitów";
 quotasStr.All="Wszystkie";
 quotasStr.Alws="Zawsze";
 quotasStr.ColNms=["Urządzenie", "Aktywny", "łącznego", "pobierania", "wysyłania" ];
+quotasStr.SetQuota="Ustaw użycie limitu";
+quotasStr.Up="Wysyłanie";
+quotasStr.Down="Pobieranie";
+quotasStr.Total="Łącznie";

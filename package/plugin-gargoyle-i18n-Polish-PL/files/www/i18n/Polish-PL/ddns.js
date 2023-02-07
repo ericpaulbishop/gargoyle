@@ -35,3 +35,4 @@ DyDNS.Eml="E-mail";
 DyDNS.Key="Klucz";
 DyDNS.AKey="Klucz API";
 DyDNS.Tokn="Token";
+DyDNS.Host="Urządzenie";
