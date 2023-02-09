@@ -29,7 +29,7 @@ define Package/plugin-gargoyle-usb-storage-extroot
 	DEPENDS+=+libusb-1.0 +chat +kmod-usb-acm +kmod-usb-serial +comgt +comgt-ncm +usb-modeswitch
 	DEPENDS+=+kmod-usb-wdm +kmod-usb-net-qmi-wwan +uqmi +kmod-usb-net-cdc-ncm +kmod-usb-net-huawei-cdc-ncm +kmod-usb-net-cdc-ether +kmod-usb-net-rndis
 	DEPENDS+=+umbim +kmod-usb-net-cdc-mbim
-	DEPENDS+=+kmod-usb2 +kmod-usb-storage-uas +kmod-usb-net +kmod-usb-serial-option +kmod-usb-serial-qualcomm +kmod-usb-serial-wwan +kmod-usb-serial-sierrawireless
+	DEPENDS+=+kmod-usb-storage-uas +kmod-usb-net +kmod-usb-serial-option +kmod-usb-serial-qualcomm +kmod-usb-serial-wwan +kmod-usb-serial-sierrawireless
 	DEPENDS+=+kmod-usb-net-sierrawireless +e2fsprogs +kmod-usb-storage +kmod-usb-storage-extras +block-mount
 	DEPENDS+=+badblocks +kmod-fs-ext4 +kmod-fs-msdos +kmod-fs-vfat
 	DEPENDS+=+kmod-nls-base +kmod-nls-cp437 +kmod-nls-iso8859-1
