@@ -70,6 +70,16 @@ menuconfig USE_GARGOYLE_PROFILE_PKGS
 			help
 				Plugins for alternative display themes
 
+		menu "Extra Gargoyle package sets"
+			config GARGOYLE_EXTRA_USB_ETHERNET
+				tristate "USB to Ethernet Drivers"
+				default m
+				select PACKAGE_gargoyle-extra-usb-ethernet
+				help
+				  Drivers for Acquantia, Asix and Realtek based USB2/USB3 to Ethernet adapters.
+
+		endmenu
+
 		config GARGOYLE_OTHER_PKGS
 			tristate "Other Gargoyle plugins"
 			default m
