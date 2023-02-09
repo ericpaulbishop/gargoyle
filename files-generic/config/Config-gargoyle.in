@@ -73,6 +73,7 @@ menuconfig USE_GARGOYLE_PROFILE_PKGS
 		menu "Extra Gargoyle package sets"
 			config GARGOYLE_EXTRA_USB_ETHERNET
 				tristate "USB to Ethernet Drivers"
+				default y if TARGET_bcm27xx
 				default m
 				select PACKAGE_gargoyle-extra-usb-ethernet
 				help
