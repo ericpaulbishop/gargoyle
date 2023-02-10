@@ -17,6 +17,7 @@ ifeq ($(GARGOYLE_VERSION),)
      PKG_VERSION:=1.0.0
 endif
 PKG_RELEASE:=1
+PKG_FLAGS:=nonshared
 
 PKG_BUILD_DIR:=$(BUILD_DIR)/gpkg
 
