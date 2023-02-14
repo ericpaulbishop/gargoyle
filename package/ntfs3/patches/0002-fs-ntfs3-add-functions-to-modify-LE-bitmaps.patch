@@ -1,0 +1,128 @@
+From 650643a21e250a94230e9e048fdbcbce52fdc13e Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Thomas=20K=C3=BChnel?= <thomas.kuehnel@avm.de>
+Date: Tue, 7 Dec 2021 11:24:54 +0100
+Subject: [PATCH 2/8] fs/ntfs3: add functions to modify LE bitmaps
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+__bitmap_set/__bitmap_clear only works with bitmaps in CPU order.
+Define a variant of these functions in ntfs3 to handle modifying bitmaps
+read from the filesystem.
+
+Signed-off-by: Thomas Kühnel <thomas.kuehnel@avm.de>
+Reviewed-by: Nicolas Schier <n.schier@avm.de>
+---
+ kernel/ntfs3/src/bitmap.c  | 46 +++++++++++++++++++++++++++++++++++---
+ kernel/ntfs3/src/fslog.c   |  4 ++--
+ kernel/ntfs3/src/ntfs_fs.h |  3 +++
+ 3 files changed, 48 insertions(+), 5 deletions(-)
+
+diff --git a/bitmap.c b/bitmap.c
+--- a/bitmap.c
++++ b/bitmap.c
+@@ -741,7 +741,7 @@ int wnd_set_free(struct wnd_bitmap *wnd, size_t bit, size_t bits)
+
+ 		lock_buffer(bh);
+
+-		__bitmap_clear(buf, wbit, op);
++		ntfs_bitmap_clear_le(buf, wbit, op);
+
+ 		wnd->free_bits[iw] += op;
+
+@@ -793,7 +793,7 @@ int wnd_set_used(struct wnd_bitmap *wnd, size_t bit, size_t bits)
+
+ 		lock_buffer(bh);
+
+-		__bitmap_set(buf, wbit, op);
++		ntfs_bitmap_set_le(buf, wbit, op);
+ 		wnd->free_bits[iw] -= op;
+
+ 		set_buffer_uptodate(bh);
+@@ -1370,7 +1370,7 @@ int wnd_extend(struct wnd_bitmap *wnd, size_t new_bits)
+ 		lock_buffer(bh);
+ 		buf = (ulong *)bh->b_data;
+
+-		__bitmap_clear(buf, b0, blocksize * 8 - b0);
++		ntfs_bitmap_clear_le(buf, b0, blocksize * 8 - b0);
+ 		frb = wbits - __bitmap_weight(buf, wbits);
+ 		wnd->total_zeroes += frb - wnd->free_bits[iw];
+ 		wnd->free_bits[iw] = frb;
+@@ -1489,3 +1489,43 @@ out:
+
+ 	return err;
+ }
++
++void ntfs_bitmap_set_le(unsigned long *map, unsigned int start, int len)
++{
++	unsigned long *p = map + BIT_WORD(start);
++	const unsigned int size = start + len;
++	int bits_to_set = BITS_PER_LONG - (start % BITS_PER_LONG);
++	unsigned long mask_to_set = cpu_to_le32(BITMAP_FIRST_WORD_MASK(start));
++
++	while (len - bits_to_set >= 0) {
++		*p |= mask_to_set;
++		len -= bits_to_set;
++		bits_to_set = BITS_PER_LONG;
++		mask_to_set = ~0UL;
++		p++;
++	}
++	if (len) {
++		mask_to_set &= cpu_to_le32(BITMAP_LAST_WORD_MASK(size));
++		*p |= mask_to_set;
++	}
++}
++
++void ntfs_bitmap_clear_le(unsigned long *map, unsigned int start, int len)
++{
++	unsigned long *p = map + BIT_WORD(start);
++	const unsigned int size = start + len;
++	int bits_to_clear = BITS_PER_LONG - (start % BITS_PER_LONG);
++	unsigned long mask_to_clear = cpu_to_le32(BITMAP_FIRST_WORD_MASK(start));
++
++	while (len - bits_to_clear >= 0) {
++		*p &= ~mask_to_clear;
++		len -= bits_to_clear;
++		bits_to_clear = BITS_PER_LONG;
++		mask_to_clear = ~0UL;
++		p++;
++	}
++	if (len) {
++		mask_to_clear &= cpu_to_le32(BITMAP_LAST_WORD_MASK(size));
++		*p &= ~mask_to_clear;
++	}
++}
+diff --git a/fslog.c b/fslog.c
+--- a/fslog.c
++++ b/fslog.c
+@@ -3644,7 +3644,7 @@ move_data:
+ 			goto dirty_vol;
+ 		}
+
+-		__bitmap_set(Add2Ptr(buffer_le, roff), bmp_off, bmp_bits);
++		ntfs_bitmap_set_le(Add2Ptr(buffer_le, roff), bmp_off, bmp_bits);
+ 		a_dirty = true;
+ 		break;
+
+@@ -3658,7 +3658,7 @@ move_data:
+ 			goto dirty_vol;
+ 		}
+
+-		__bitmap_clear(Add2Ptr(buffer_le, roff), bmp_off, bmp_bits);
++		ntfs_bitmap_clear_le(Add2Ptr(buffer_le, roff), bmp_off, bmp_bits);
+ 		a_dirty = true;
+ 		break;
+
+diff --git a/ntfs_fs.h b/ntfs_fs.h
+--- a/ntfs_fs.h
++++ b/ntfs_fs.h
+@@ -828,6 +828,9 @@ int wnd_extend(struct wnd_bitmap *wnd, size_t new_bits);
+ void wnd_zone_set(struct wnd_bitmap *wnd, size_t Lcn, size_t Len);
+ int ntfs_trim_fs(struct ntfs_sb_info *sbi, struct fstrim_range *range);
+
++void ntfs_bitmap_set_le(unsigned long *map, unsigned int start, int len);
++void ntfs_bitmap_clear_le(unsigned long *map, unsigned int start, int len);
++
+ /* Globals from upcase.c */
+ int ntfs_cmp_names(const __le16 *s1, size_t l1, const __le16 *s2, size_t l2,
+ 		   const u16 *upcase, bool bothcase);

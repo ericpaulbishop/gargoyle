@@ -1,0 +1,169 @@
+From 5a00dfb45ae11d43b1c429efacbb440c369907e7 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Thomas=20K=C3=BChnel?= <thomas.kuehnel@avm.de>
+Date: Tue, 7 Dec 2021 11:24:55 +0100
+Subject: [PATCH 3/8] fs/ntfs3: use _le variants of bitops functions
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+The functions from bitops.h already have _le variants so use them to
+prevent invalid reads/writes of the bitmap on big endian systems.
+
+Signed-off-by: Thomas Kühnel <thomas.kuehnel@avm.de>
+---
+ kernel/ntfs3/src/bitmap.c | 10 +++++-----
+ kernel/ntfs3/src/fsntfs.c |  8 ++++----
+ kernel/ntfs3/src/index.c  | 14 +++++++-------
+ 3 files changed, 16 insertions(+), 16 deletions(-)
+
+diff --git a/bitmap.c b/bitmap.c
+--- a/bitmap.c
++++ b/bitmap.c
+@@ -71,7 +71,7 @@ static size_t wnd_scan(const ulong *buf, size_t wbit, u32 wpos, u32 wend,
+ 	while (wpos < wend) {
+ 		size_t free_len;
+ 		u32 free_bits, end;
+-		u32 used = find_next_zero_bit(buf, wend, wpos);
++		u32 used = find_next_zero_bit_le(buf, wend, wpos);
+
+ 		if (used >= wend) {
+ 			if (*b_len < *prev_tail) {
+@@ -97,7 +97,7 @@ static size_t wnd_scan(const ulong *buf, size_t wbit, u32 wpos, u32 wend,
+ 		 * Now we have a fragment [wpos, wend) staring with 0.
+ 		 */
+ 		end = wpos + to_alloc - *prev_tail;
+-		free_bits = find_next_bit(buf, min(end, wend), wpos);
++		free_bits = find_next_bit_le(buf, min(end, wend), wpos);
+
+ 		free_len = *prev_tail + free_bits - wpos;
+
+@@ -579,7 +579,7 @@ static int wnd_rescan(struct wnd_bitmap *wnd)
+ 			wbits = wnd->nbits - wbit;
+
+ 		do {
+-			used = find_next_zero_bit(buf, wbits, wpos);
++			used = find_next_zero_bit_le(buf, wbits, wpos);
+
+ 			if (used > wpos && prev_tail) {
+ 				wnd_add_free_ext(wnd, wbit + wpos - prev_tail,
+@@ -595,7 +595,7 @@ static int wnd_rescan(struct wnd_bitmap *wnd)
+ 				break;
+ 			}
+
+-			frb = find_next_bit(buf, wbits, wpos);
++			frb = find_next_bit_le(buf, wbits, wpos);
+ 			if (frb >= wbits) {
+ 				/* Keep last free block. */
+ 				prev_tail += frb - wpos;
+@@ -1457,7 +1457,7 @@ int ntfs_trim_fs(struct ntfs_sb_info *sbi, struct fstrim_range *range)
+ 		buf = (ulong *)bh->b_data;
+
+ 		for (; wbit < wbits; wbit++) {
+-			if (!test_bit(wbit, buf)) {
++			if (!test_bit_le(wbit, buf)) {
+ 				if (!len)
+ 					lcn = lcn_wnd + wbit;
+ 				len += 1;
+diff --git a/fsntfs.c b/fsntfs.c
+--- a/fsntfs.c
++++ b/fsntfs.c
+@@ -618,13 +618,13 @@ next:
+ 						 NULL, 0, NULL, NULL))
+ 					goto next;
+
+-				__clear_bit(ir - MFT_REC_RESERVED,
++				__clear_bit_le(ir - MFT_REC_RESERVED,
+ 					    &sbi->mft.reserved_bitmap);
+ 			}
+ 		}
+
+ 		/* Scan 5 bits for zero. Bit 0 == MFT_REC_RESERVED */
+-		zbit = find_next_zero_bit(&sbi->mft.reserved_bitmap,
++		zbit = find_next_zero_bit_le(&sbi->mft.reserved_bitmap,
+ 					  MFT_REC_FREE, MFT_REC_RESERVED);
+ 		if (zbit >= MFT_REC_FREE) {
+ 			sbi->mft.next_reserved = MFT_REC_FREE;
+@@ -692,7 +692,7 @@ found:
+ 	if (*rno >= MFT_REC_FREE)
+ 		wnd_set_used(wnd, *rno, 1);
+ 	else if (*rno >= MFT_REC_RESERVED && sbi->mft.reserved_bitmap_inited)
+-		__set_bit(*rno - MFT_REC_RESERVED, &sbi->mft.reserved_bitmap);
++		__set_bit_le(*rno - MFT_REC_RESERVED, &sbi->mft.reserved_bitmap);
+
+ out:
+ 	if (!mft)
+@@ -718,7 +718,7 @@ void ntfs_mark_rec_free(struct ntfs_sb_info *sbi, CLST rno)
+ 		else
+ 			wnd_set_free(wnd, rno, 1);
+ 	} else if (rno >= MFT_REC_RESERVED && sbi->mft.reserved_bitmap_inited) {
+-		__clear_bit(rno - MFT_REC_RESERVED, &sbi->mft.reserved_bitmap);
++		__clear_bit_le(rno - MFT_REC_RESERVED, &sbi->mft.reserved_bitmap);
+ 	}
+
+ 	if (rno < wnd_zone_bit(wnd))
+diff --git a/index.c b/index.c
+--- a/index.c
++++ b/index.c
+@@ -323,7 +323,7 @@ static int indx_mark_used(struct ntfs_index *indx, struct ntfs_inode *ni,
+ 	if (err)
+ 		return err;
+
+-	__set_bit(bit - bbuf.bit, bbuf.buf);
++	__set_bit_le(bit - bbuf.bit, bbuf.buf);
+
+ 	bmp_buf_put(&bbuf, true);
+
+@@ -343,7 +343,7 @@ static int indx_mark_free(struct ntfs_index *indx, struct ntfs_inode *ni,
+ 	if (err)
+ 		return err;
+
+-	__clear_bit(bit - bbuf.bit, bbuf.buf);
++	__clear_bit_le(bit - bbuf.bit, bbuf.buf);
+
+ 	bmp_buf_put(&bbuf, true);
+
+@@ -457,7 +457,7 @@ next_run:
+
+ static bool scan_for_free(const ulong *buf, u32 bit, u32 bits, size_t *ret)
+ {
+-	size_t pos = find_next_zero_bit(buf, bits, bit);
++	size_t pos = find_next_zero_bit_le(buf, bits, bit);
+
+ 	if (pos >= bits)
+ 		return false;
+@@ -489,7 +489,7 @@ static int indx_find_free(struct ntfs_index *indx, struct ntfs_inode *ni,
+
+ 	if (!b->non_res) {
+ 		u32 nbits = 8 * le32_to_cpu(b->res.data_size);
+-		size_t pos = find_next_zero_bit(resident_data(b), nbits, 0);
++		size_t pos = find_next_zero_bit_le(resident_data(b), nbits, 0);
+
+ 		if (pos < nbits)
+ 			*bit = pos;
+@@ -505,7 +505,7 @@ static int indx_find_free(struct ntfs_index *indx, struct ntfs_inode *ni,
+
+ static bool scan_for_used(const ulong *buf, u32 bit, u32 bits, size_t *ret)
+ {
+-	size_t pos = find_next_bit(buf, bits, bit);
++	size_t pos = find_next_bit_le(buf, bits, bit);
+
+ 	if (pos >= bits)
+ 		return false;
+@@ -536,7 +536,7 @@ int indx_used_bit(struct ntfs_index *indx, struct ntfs_inode *ni, size_t *bit)
+
+ 	if (!b->non_res) {
+ 		u32 nbits = le32_to_cpu(b->res.data_size) * 8;
+-		size_t pos = find_next_bit(resident_data(b), nbits, from);
++		size_t pos = find_next_bit_le(resident_data(b), nbits, from);
+
+ 		if (pos < nbits)
+ 			*bit = pos;
+@@ -1954,7 +1954,7 @@ static int indx_shrink(struct ntfs_index *indx, struct ntfs_inode *ni,
+ 		if (bit >= nbits)
+ 			return 0;
+
+-		pos = find_next_bit(bm, nbits, bit);
++		pos = find_next_bit_le(bm, nbits, bit);
+ 		if (pos < nbits)
+ 			return 0;
+ 	} else {
