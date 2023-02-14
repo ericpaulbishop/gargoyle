@@ -86,7 +86,7 @@ do_start()
 				mkdir -p "/tmp/usb_mount/$id"
 				chmod 777  "/tmp/usb_mount/$id"
 				umount "/tmp/usb_mount/$id" 2>/dev/null
-				ntfs-3g "$d" "/tmp/usb_mount/$id" || umount "/tmp/usb_mount/$id"
+				mount -t ntfs3 -o iocharset=utf8,prealloc "$d" "/tmp/usb_mount/$id" || umount "/tmp/usb_mount/$id"
 			;;
 			'exFAT')
 				mkdir -p "/tmp/usb_mount/$id"
