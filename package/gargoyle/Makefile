@@ -59,6 +59,8 @@ define Package/gargoyle/install
 	$(INSTALL_DIR) $(1)
 	$(CP) ./files/* $(1)/
 	mkdir -p $(1)/www/data/
+	mkdir -p $(1)/www/hooks/
+	mkdir -p $(1)/www/hooks/login/
 
 	( \
 		if [ -n "$(OFFICIAL_VERSION)" ] ; then \
