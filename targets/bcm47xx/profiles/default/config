@@ -413,6 +413,13 @@ CONFIG_USE_GARGOYLE_PROFILE_PKGS=y
 
 CONFIG_GARGOYLE_LANGUAGE_PKGS=m
 CONFIG_GARGOYLE_THEME_PKGS=m
+
+#
+# Extra Gargoyle package sets
+#
+# CONFIG_GARGOYLE_EXTRA_USB_ETHERNET is not set
+# end of Extra Gargoyle package sets
+
 CONFIG_GARGOYLE_OTHER_PKGS=m
 CONFIG_TARGET_OPTIMIZATION="-Os -pipe -mno-branch-likely -mips32 -mtune=mips32"
 CONFIG_SOFT_FLOAT=y
@@ -2522,6 +2529,12 @@ CONFIG_PACKAGE_usign=y
 #
 
 #
+# Gargoyle Extra Package Sets
+#
+# CONFIG_PACKAGE_gargoyle-extra-usb-ethernet is not set
+# end of Gargoyle Extra Package Sets
+
+#
 # Gargoyle Profile Meta-packages
 #
 # CONFIG_PACKAGE_gargoyle-basic is not set
@@ -2583,6 +2596,7 @@ CONFIG_PACKAGE_plugin-gargoyle-theme-xeye=m
 # CONFIG_PACKAGE_plugin-gargoyle-tor is not set
 CONFIG_PACKAGE_plugin-gargoyle-upnp=m
 # CONFIG_PACKAGE_plugin-gargoyle-usb-printer is not set
+# CONFIG_PACKAGE_plugin-gargoyle-usb-storage-extroot is not set
 # CONFIG_PACKAGE_plugin-gargoyle-usb-storage-full is not set
 # CONFIG_PACKAGE_plugin-gargoyle-usb-storage-noshare is not set
 # CONFIG_PACKAGE_plugin-gargoyle-webcam is not set
