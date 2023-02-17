@@ -1,0 +1,10 @@
+--- a/target/linux/bcm27xx/base-files/etc/board.d/02_network	2021-08-21 22:15:47.655631601 +1000
++++ b/target/linux/bcm27xx/base-files/etc/board.d/02_network	2021-08-31 23:40:12.527169670 +1000
+@@ -21,6 +21,7 @@
+ raspberrypi,4-compute-module |\
+ raspberrypi,4-model-b)
+ 	ucidef_set_interface_lan "eth0"
++	[ -d /sys/class/net/eth1 ] && ucidef_set_interface_wan "eth1"
+ 	;;
+ 
+ raspberrypi,model-zero-w)
