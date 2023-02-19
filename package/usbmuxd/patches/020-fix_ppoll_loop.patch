@@ -1,0 +1,20 @@
+--- a/src/main.c
++++ b/src/main.c
+@@ -164,7 +164,7 @@ static void set_signal_handlers(void)
+ 	sigaction(SIGUSR2, &sa, NULL);
+ }
+ 
+-#ifndef HAVE_PPOLL
++//#ifndef HAVE_PPOLL
+ static int ppoll(struct pollfd *fds, nfds_t nfds, const struct timespec *timeout, const sigset_t *sigmask)
+ {
+ 	int ready;
+@@ -177,7 +177,7 @@ static int ppoll(struct pollfd *fds, nfd
+ 
+ 	return ready;
+ }
+-#endif
++//#endif
+ 
+ static int main_loop(int listenfd)
+ {
