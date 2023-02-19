@@ -1239,7 +1239,7 @@ function unmountAllUsb()
 	setControlsEnabled(false, true, usbSStr.UDisk);
 
 
-	var commands = "/etc/init.d/samba stop ; /etc/init.d/vsftpd stop ; /etc/init.d/nfsd stop ; /etc/init.d/usb_storage stop ; "
+	var commands = "/etc/init.d/" + sambapkg + " stop ; /etc/init.d/vsftpd stop ; /etc/init.d/nfsd stop ; /etc/init.d/usb_storage stop ; "
 
 	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 	var stateChangeFunction = function(req)
@@ -1260,7 +1260,7 @@ function mountAllUsb()
 	setControlsEnabled(false, true, usbSStr.MDisk);
 
 
-	var commands = "/etc/init.d/usb_storage restart; /etc/init.d/samba restart; /etc/init.d/vsftpd restart; /etc/init.d/nfsd restart;";
+	var commands = "/etc/init.d/usb_storage restart; /etc/init.d/" + sambapkg + " restart; /etc/init.d/vsftpd restart; /etc/init.d/nfsd restart;";
 
 	var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 	var stateChangeFunction = function(req)
