@@ -1322,12 +1322,11 @@ function setGlobalVisibility()
 	else
 	{
 		currentMode=getSelectedValue('wifi_mode');
-		setAllowableSelections('wifi_mode', ['ap', 'ap+wds', 'adhoc', 'disabled'], [basicS.AcPt+' (AP)', 'AP+WDS', 'Ad Hoc', UI.Disabled]);
+		setAllowableSelections('wifi_mode', ['ap', 'ap+wds', 'disabled'], [basicS.AcPt+' (AP)', 'AP+WDS', UI.Disabled]);
 		if(wirelessDriver == "")
 		{
 			removeOptionFromSelectElementByValue("wifi_mode", "ap", document);
 			removeOptionFromSelectElementByValue("wifi_mode", "ap+wds", document);
-			removeOptionFromSelectElementByValue("wifi_mode", "adhoc", document);
 		}
 		if(currentMode == 'ap+sta' || currentMode == 'sta')
 		{
@@ -1490,40 +1489,25 @@ function setWifiVisibility()
 		setAllowableSelections('wifi_encryption1', values, names);
 	}
 
-	if(wifiMode == 'adhoc')
+	document.getElementById("wifi_ssid2_label").firstChild.data = basicS.Join+":";
+	var values = ['none', 'psk2', 'psk'];
+	var names = [basicS.None, 'WPA2 PSK', 'WPA PSK'];
+	if(wpad_wep)
 	{
-		var values = ['none'];
-		var names = [basicS.None];
-		if(wpad_wep)
-		{
-			values.push('wep');
-			names.push('WEP');
-		}
-		setAllowableSelections('wifi_encryption2', values, names);
-		document.getElementById("wifi_ssid2_label").firstChild.data = "SSID:";
+		values.push('wep');
+		names.push('WEP');
 	}
-	else
+	if(wpad_sae)
 	{
-		document.getElementById("wifi_ssid2_label").firstChild.data = basicS.Join+":";
-		var values = ['none', 'psk2', 'psk'];
-		var names = [basicS.None, 'WPA2 PSK', 'WPA PSK'];
-		if(wpad_wep)
-		{
-			values.push('wep');
-			names.push('WEP');
-		}
-		if(wpad_sae)
-		{
-			values.splice(values.indexOf('psk2'),0,'sae-mixed','sae');
-			names.splice(names.indexOf('WPA2 PSK'),0,'WPA3/WPA2 SAE/PSK','WPA3 SAE');
-		}
-		if(wpad_owe)
-		{
-			values.push('owe');
-			names.push('OWE');
-		}
-		setAllowableSelections('wifi_encryption2', values, names);
+		values.splice(values.indexOf('psk2'),0,'sae-mixed','sae');
+		names.splice(names.indexOf('WPA2 PSK'),0,'WPA3/WPA2 SAE/PSK','WPA3 SAE');
 	}
+	if(wpad_owe)
+	{
+		values.push('owe');
+		names.push('OWE');
+	}
+	setAllowableSelections('wifi_encryption2', values, names);
 
 	var Gwifi_vals = ['disabled'];
 	var Gwifi_names = [UI.Disabled];
@@ -1656,7 +1640,6 @@ function setWifiVisibility()
 	wifiVisibilities['ap+wds']   = [1,1,gw,g,ae,aw,a,1,mf,   1,0,1,0,0,0,p1,k1,1,1,1,p1,w1,r1,r1,   gns,gng,gna,gp1,gn,gn,gn,gp1,gw1,gns,   b,b,  0,0,0,0,0,0,0,0,0,0,0,0 ];
 	wifiVisibilities['sta']      = [1,1,gw,g,ae,aw,a,1,mf,   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,       0,0,0,0,0,0,0,0,0,0,                  0,0,  0,0,0,1,g,0,a,0,1,0,p2,w2];
 	wifiVisibilities['ap+sta']   = [1,1,gw,g,ae,aw,a,1,mf,   1,a,1,0,a,as2,p1,k1,1,1,1,p1,w1,r1,r1,   gns,gng,gna,gp1,gn,gn,gn,gp1,gw1,gns,   0,0,  1,0,0,1,g,0,a,a,1,0,p2,w2];
-	wifiVisibilities['adhoc']    = [1,1,gw,g,ae,aw,a,1,mf,   0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,       0,0,0,0,0,0,0,0,0,0,                  0,0,  0,0,0,1,g,0,a,0,1,0,p2,w2];
 	wifiVisibilities['disabled'] = [0,0,0,0,0,0,0,0,0,       0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,       0,0,0,0,0,0,0,0,0,0,                  0,0,  0,0,0,0,0,0,0,0,0,0,0,0 ];
 
 	var wifiVisibility = wifiVisibilities[ wifiMode ];

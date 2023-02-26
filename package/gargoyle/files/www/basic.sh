@@ -762,7 +762,6 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 							<option value="ap+wds">AP+WDS</option>
 							<option value="sta"><%~ Clnt %></option>
 							<option value="ap+sta"><%~ Clnt %>+AP</option>
-							<option value="adhoc">Ad Hoc</option>
 							<option value="disabled"><%~ Disabled %></option>
 						</select>
 					</span>
