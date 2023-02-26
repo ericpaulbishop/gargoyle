@@ -365,7 +365,6 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 							<option value="sae">WPA3 SAE</option>
 							<option value="psk2">WPA2 PSK</option>
 							<option value="psk">WPA PSK</option>
-							<option value="wep">WEP</option>
 							<option value="owe">OWE</option>
 						</select>
 					</span>
@@ -382,13 +381,6 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 						<input type="password" id="bridge_pass" class="form-control" size="20" oninput="proofreadPass(this, 'bridge_encryption')" autocomplete="new-password"/>
 						<input type="checkbox" id="show_bridge_pass" onclick="togglePass('bridge_pass')" autocomplete="off"/>
 						<label for="show_bridge_pass" id="show_bridge_pass_label"><%~ rvel %></label>
-					</span>
-				</div>
-
-				<div id="bridge_wep_container" class="row form-group">
-					<label class="col-xs-5" for="bridge_wep" id="bridge_wep_label" ><%~ HexK %>:</label>
-					<span class="col-xs-7">
-						<input type="text" id="bridge_wep" class="form-control" size="30" maxLength="26" oninput="proofreadWep(this)"/>
 					</span>
 				</div>
 
@@ -954,7 +946,6 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 							<option value="none"><%~ None %></option>
 							<option value="psk2">WPA2 PSK</option>
 							<option value="psk">WPA PSK</option>
-							<option value="wep">WEP</option>
 						</select>
 					</span>
 				</div>
@@ -970,13 +961,6 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 						<input type="password" id="wifi_pass2" class="form-control" size="20" oninput="proofreadPass(this, 'wifi_encryption2')" autocomplete="new-password"/>&nbsp;&nbsp;
 						<input type="checkbox" id="show_pass2" onclick="togglePass('wifi_pass2')" autocomplete="off"/>
 						<label for="show_pass2" id="show_pass2_label"><%~ rvel %></label><br/>
-					</span>
-				</div>
-
-				<div id="wifi_wep2_container" class="row indent">
-					<label class="col-xs-5" for="wifi_wep2" id="wifi_wep2_label"><%~ HexK %>:</label>
-					<span class="col-xs-7">
-						<input type="text" id="wifi_wep2" class="form-control" size="30" maxLength="26" oninput="proofreadWep(this)"/>
 					</span>
 				</div>
 
@@ -1048,7 +1032,6 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 							<option value="sae">WPA3 SAE</option>
 							<option value="psk2">WPA2 PSK</option>
 							<option value="psk">WPA PSK</option>
-							<option value="wep">WEP</option>
 							<option value="owe">OWE</option>
 							<option value="wpa">WPA RADIUS</option>
 							<option value="wpa2">WPA2 RADIUS</option>
@@ -1062,17 +1045,6 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 						<input type="password" id="wifi_pass1" class="form-control" size="20" oninput="proofreadPass(this, 'wifi_encryption1')" autocomplete="new-password"/>&nbsp;&nbsp;
 						<input type="checkbox" id="show_pass1" onclick="togglePass('wifi_pass1')" autocomplete="off"/>
 						<label for="show_pass1" id="show_pass1_label"><%~ rvel %></label><br/>
-					</span>
-				</div>
-
-				<div id="wifi_wep1_container" class="row indent">
-					<label class="col-xs-5" for="wifi_wep1" id="wifi_wep1_label"><%~ HexK %>:</label>
-					<span class="col-xs-7" >
-						<input type="text" id="wifi_wep1" class="form-control" size="30" maxLength="26" oninput="proofreadWep(this)"/>
-						<div class="second_row_right_column">	
-							<button class="btn btn-default" id="wep1gen40" onclick="setToWepKey('wifi_wep1',10)"><%~ Rndm %> 40/64 Bit WEP Key</button>
-							<button class="btn btn-default" id="wep1gen104" onclick="setToWepKey('wifi_wep1',26)"><%~ Rndm %> 104/128 Bit WEP Key</button>
-						</div>
 					</span>
 				</div>
 
@@ -1183,7 +1155,6 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 								<option value="none"><%~ None %></option>
 								<option value="psk2">WPA2 PSK</option>
 								<option value="psk">WPA PSK</option>
-								<option value="wep">WEP</option>
 							</select>
 						</span>
 					</div>
@@ -1194,17 +1165,6 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 							<input type="password" id="wifi_guest_pass1" class="form-control" size="20" oninput="proofreadPass(this, 'wifi_guest_encryption1')" autocomplete="new-password"/>&nbsp;&nbsp;
 							<input type="checkbox" id="show_guest_pass1" onclick="togglePass('wifi_guest_pass1')" autocomplete="off"/>
 							<label for="show_guest_pass1" id="show_guest_pass1_label"><%~ rvel %></label><br/>
-						</span>
-					</div>
-
-					<div id="wifi_guest_wep1_container" class="row indent">
-						<label class="col-xs-5" for="wifi_guest_wep1" id="wifi_guest_wep1_label"><%~ HexK %>:</label>
-						<span class="col-xs-7">
-							<input type="text" id="wifi_guest_wep1" class="form-control" size="30" maxLength="26" oninput="proofreadWep(this)"/>
-							<div class="second_row_right_column form-group">
-								<button class="btn btn-default" id="guestwep1gen40" onclick="setToWepKey('wifi_guest_wep1',10)"><%~ Rndm %> 40/64 Bit WEP Key</button>
-								<button class="btn btn-default" id="guestwep1gen104" onclick="setToWepKey('wifi_guest_wep1',26)"><%~ Rndm %> 104/128 Bit WEP Key</button>
-							</div>
 						</span>
 					</div>
 
