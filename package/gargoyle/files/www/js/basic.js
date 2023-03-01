@@ -3228,7 +3228,7 @@ function setChannelWidth(selectCtl, band)
 			aChannels = []
 			var valid40 = [36, 44, 52, 60, 100, 108, 116, 124, 132, 140, 149, 157, 165, 173]
 			var valid80 = [36, 52, 100, 116, 132, 149, 165]
-			var valid160 = [36, 100]
+			var valid160 = [36, 100, 149]
 			valid40 = channelBondCheck(origAChan,band,valid40,2,1);
 			valid80 = channelBondCheck(origAChan,band,valid80,4,1);
 			valid160 = channelBondCheck(origAChan,band,valid160,8,1);
