@@ -943,7 +943,6 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 					<span class="col-xs-7">
 						<select class="form-control" id="wifi_encryption2" onchange="setWifiVisibility(); proofreadPass('wifi_pass2', this)">
 							<option value="none"><%~ None %></option>
-							<option value="sae-mixed">WPA3/WPA2 SAE/PSK</option>
 							<option value="sae">WPA3 SAE</option>
 							<option value="psk2">WPA2 PSK</option>
 							<option value="psk">WPA PSK</option>
