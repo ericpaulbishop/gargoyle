@@ -1477,8 +1477,8 @@ function setWifiVisibility()
 	var names = [basicS.None, 'WPA2 PSK', 'WPA PSK'];
 	if(wpad_sae)
 	{
-		values.splice(values.indexOf('psk2'),0,'sae-mixed','sae');
-		names.splice(names.indexOf('WPA2 PSK'),0,'WPA3/WPA2 SAE/PSK','WPA3 SAE');
+		values.splice(values.indexOf('psk2'),0,'sae');
+		names.splice(names.indexOf('WPA2 PSK'),0,'WPA3 SAE');
 	}
 	if(wpad_owe)
 	{
@@ -1658,8 +1658,8 @@ function setBridgeVisibility()
 		var names = [basicS.None, 'WPA2 PSK', 'WPA PSK'];
 		if(wpad_sae)
 		{
-			values.splice(values.indexOf('psk2'),0,'sae-mixed','sae');
-			names.splice(names.indexOf('WPA2 PSK'),0,'WPA3/WPA2 SAE/PSK','WPA3 SAE');
+			values.splice(values.indexOf('psk2'),0,'sae');
+			names.splice(names.indexOf('WPA2 PSK'),0,'WPA3 SAE');
 		}
 		if(wpad_owe)
 		{
