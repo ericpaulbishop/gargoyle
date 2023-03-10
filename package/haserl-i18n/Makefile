@@ -12,6 +12,7 @@ PKG_VERSION:=0.9.36
 PKG_RELEASE:=1
 
 PKG_BUILD_DIR := $(BUILD_DIR)/$(PKG_NAME)
+PKG_FIXUP:=autoreconf
 
 include $(INCLUDE_DIR)/package.mk
 
