@@ -246,7 +246,7 @@ function saveChanges()
 			if(anonymousAccess != "none")
 			{
 				haveAnonymousFtp = true;
-				uci.set(pkg, shareId, "users_" + anonymousAccess, [ "anonymous" ], true);
+				uci.set(pkg, shareId, "users_" + anonymousAccess, (anonymousAccess == "ro" ? roUsers : rwUsers).concat(["anonymous"]), true);
 			}
 
 		}
