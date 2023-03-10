@@ -25,3 +25,5 @@ userlist_file=/tmp/vsftpd/userlist
 use_sendfile=no
 secure_chroot_dir=/tmp/vsftpd/secure_chroot
 ftp_username=ftp
+seccomp_sandbox=no
+isolate_network=no
