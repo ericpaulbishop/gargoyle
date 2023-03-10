@@ -8,12 +8,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=vsftpd
-PKG_VERSION:=3.0.3
-PKG_RELEASE:=3
+PKG_VERSION:=3.0.5
+PKG_RELEASE:=$(AUTORELEASE)
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://security.appspot.com/downloads/
-PKG_HASH:=9d4d2bf6e6e2884852ba4e69e157a2cecd68c5a7635d66a3a8cf8d898c955ef7
+PKG_HASH:=26b602ae454b0ba6d99ef44a09b6b9e0dfa7f67228106736df1f278c70bc91d3
 
 PKG_LICENSE:=GPLv2
 PKG_CPE_ID:=cpe:/a:beasts:vsftpd
@@ -25,9 +25,22 @@ define Package/vsftpd
   SECTION:=net
   CATEGORY:=Network
   TITLE:=A fast and secure FTP server
-  URL:=http://vsftpd.beasts.org/
+  URL:=https://security.appspot.com/vsftpd.html
   MAINTAINER:=Eric Bishop
   DEPENDS:=+gargoyle +share-users
+endef
+
+define Package/vsftpd
+$(call Package/vsftpd/Default)
+  VARIANT:=notls
+  TITLE+= (no TLS)
+endef
+
+define Package/vsftpd-tls
+$(call Package/vsftpd/Default)
+  VARIANT:=tls
+  TITLE+= (TLS)
+  DEPENDS+=+libopenssl
 endef
 
 define Package/vsftpd/conffiles
@@ -44,17 +57,29 @@ endif
 
 TARGET_CFLAGS += -D_GNU_SOURCE -include fcntl.h
 
-
-
-define Build/Compile
+ifeq ($(BUILD_VARIANT),notls)
+ define Build/Compile
 	$(SED) 's/-lcrypt -lnsl/$(NLSSTRING)/' $(PKG_BUILD_DIR)/Makefile
 	$(MAKE) -C $(PKG_BUILD_DIR) \
 		CC="$(TARGET_CC)" \
 		CFLAGS="$(TARGET_CFLAGS) $(TARGET_CPPFLAGS)" \
 		LDFLAGS="$(TARGET_LDFLAGS)" \
 		vsftpd
-endef
+ endef
+endif
 
+ifeq ($(BUILD_VARIANT),tls)
+ define Build/Compile
+	$(SED) 's/#undef VSF_BUILD_SSL/#define VSF_BUILD_SSL/' $(PKG_BUILD_DIR)/builddefs.h
+	$(SED) 's/-lcrypt -lnsl/-lcrypt -lnsl -lssl -lcrypto/' $(PKG_BUILD_DIR)/Makefile
+	$(SED) 's/-lcrypt -lnsl/$(NLSSTRING)/' $(PKG_BUILD_DIR)/Makefile
+	$(MAKE) -C $(PKG_BUILD_DIR) \
+		CC="$(TARGET_CC)" \
+		CFLAGS="$(TARGET_CFLAGS) $(TARGET_CPPFLAGS)" \
+		LDFLAGS="$(TARGET_LDFLAGS)" \
+		vsftpd
+ endef
+endif
 
 define Package/vsftpd/install
 	$(INSTALL_DIR) $(1)/usr/sbin
@@ -67,4 +92,7 @@ define Package/vsftpd/install
 	$(INSTALL_CONF) ./files/$(PKG_NAME).config $(1)/etc/config/$(PKG_NAME)
 endef
 
+Package/vsftpd-tls/install=$(Package/vsftpd/install)
+
 $(eval $(call BuildPackage,vsftpd))
+$(eval $(call BuildPackage,vsftpd-tls))

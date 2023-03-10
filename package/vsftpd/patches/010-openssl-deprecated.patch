@@ -8,8 +8,6 @@ Signed-off-by: Rosen Penev <rosenp@gmail.com>
  ssl.c | 11 +++++++++++
  1 file changed, 11 insertions(+)
 
-diff --git a/ssl.c b/ssl.c
-index c362983..845f77b 100644
 --- a/ssl.c
 +++ b/ssl.c
 @@ -28,6 +28,9 @@
@@ -22,7 +20,7 @@ index c362983..845f77b 100644
  #include <errno.h>
  #include <limits.h>
  
-@@ -59,8 +62,12 @@ ssl_init(struct vsf_session* p_sess)
+@@ -66,8 +69,12 @@ ssl_init(struct vsf_session* p_sess)
      SSL_CTX* p_ctx;
      long options;
      int verify_option = 0;
@@ -35,7 +33,7 @@ index c362983..845f77b 100644
      if (p_ctx == NULL)
      {
        die("SSL: could not allocate SSL context");
-@@ -120,6 +127,7 @@ ssl_init(struct vsf_session* p_sess)
+@@ -139,6 +146,7 @@ ssl_init(struct vsf_session* p_sess)
      {
        die("SSL: RNG is not seeded");
      }
@@ -43,7 +41,7 @@ index c362983..845f77b 100644
      {
        EC_KEY* key = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
        if (key == NULL)
-@@ -129,6 +137,7 @@ ssl_init(struct vsf_session* p_sess)
+@@ -148,6 +156,7 @@ ssl_init(struct vsf_session* p_sess)
        SSL_CTX_set_tmp_ecdh(p_ctx, key);
        EC_KEY_free(key);
      }
@@ -51,7 +49,7 @@ index c362983..845f77b 100644
      if (tunable_ssl_request_cert)
      {
        verify_option |= SSL_VERIFY_PEER;
-@@ -660,7 +669,9 @@ ssl_cert_digest(SSL* p_ssl, struct vsf_session* p_sess, struct mystr* p_str)
+@@ -685,7 +694,9 @@ ssl_cert_digest(SSL* p_ssl, struct vsf_s
  static char*
  get_ssl_error()
  {
@@ -61,6 +59,3 @@ index c362983..845f77b 100644
    return ERR_error_string(ERR_get_error(), NULL);
  }
  
--- 
-2.19.1
-
