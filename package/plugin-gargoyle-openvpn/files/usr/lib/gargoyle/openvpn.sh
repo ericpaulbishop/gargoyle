@@ -172,7 +172,9 @@ EOF
 		./easyrsa build-ca nopass
 		./easyrsa build-server-full server nopass
 		openvpn --genkey --secret ta.key
-		cp keys/issued/server.crt keys/private/server.key keys/ca.crt keys/private/ca.key keys/dh.pem keys/index.txt keys/index.txt.attr keys/serial ta.key "$OPENVPN_DIR"/
+		mkdir -p ./keys/issued/ ./keys/certs_by_serial/
+		./easyrsa gen-crl
+		cp keys/issued/server.crt keys/private/server.key keys/ca.crt keys/private/ca.key keys/dh.pem keys/index.txt keys/index.txt.attr keys/serial keys/crl.pem ta.key "$OPENVPN_DIR"/
 	fi
 
 	touch "$OPENVPN_DIR/server.conf"
@@ -496,6 +498,27 @@ revoke_client_certificate()
 	mkdir -p "$random_dir"
 	cd "$random_dir"
 	cp -r "$EASY_RSA_PATH/"* .
+
+	cat << 'EOF' >vars
+set_var EASYRSA_BATCH "yes"
+set_var EASYRSA_RAND_SN "no"
+set_var EASYRSA_DN "org"
+set_var EASYRSA_KEY_SIZE 1024
+set_var EASYRSA_REQ_COUNTRY "??"
+set_var EASYRSA_REQ_PROVINCE "UnknownProvince"
+set_var EASYRSA_REQ_CITY "UnknownCity"
+set_var EASYRSA_REQ_ORG "UnknownOrg"
+set_var EASYRSA_REQ_OU "UnknownOrgUnit"
+EOF
+cat << EOF >>vars
+set_var EASYRSA_CA_EXPIRE $EXPIRATION_MAX
+set_var EASYRSA_CERT_EXPIRE $EXPIRATION_MAX
+set_var EASYRSA_REQ_EMAIL '$openvpn_client_id@$random_domain.com'
+set_var EASYRSA_REQ_CN '$openvpn_client_id'
+set_var EASYRSA '$random_dir'
+set_var EASYRSA_PKI '$random_dir/keys'
+set_var EASYRSA_OPENSSL "$SSLVARIANT"
+EOF
 	
 	./easyrsa init-pki
 	mkdir -p ./keys/issued/ ./keys/certs_by_serial/
@@ -504,6 +527,7 @@ revoke_client_certificate()
 	cp "$OPENVPN_DIR/server.key" "$OPENVPN_DIR/ca.key" ./keys/private/
 
 	./easyrsa revoke $1
+	./easyrsa gen-crl
 
 	cp "keys/index.txt" "keys/index.txt.attr" "keys/serial" "keys/crl.pem" "$OPENVPN_DIR/"
 
