@@ -445,8 +445,7 @@ CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_comfast_cf-e375ac="gargoyle-l
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_dlink_dch-g020-a1 is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_dlink_dir-505=y
 CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_dlink_dir-505="gargoyle-usb"
-CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_dlink_dir-825-b1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_dlink_dir-825-b1="gargoyle-basic"
+# CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_dlink_dir-825-b1 is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_dlink_dir-825-c1=y
 CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_dlink_dir-825-c1="gargoyle-large"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_dlink_dir-835-a1=y
@@ -724,8 +723,7 @@ CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr902ac-v1="gargoyl
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_wbs210-v2 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_wbs510-v1 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_wbs510-v2 is not set
-CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_trendnet_tew-673gru=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_trendnet_tew-673gru="gargoyle-usb"
+# CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_trendnet_tew-673gru is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_trendnet_tew-823dru=y
 CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_trendnet_tew-823dru="gargoyle-large"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_aircube-ac is not set
