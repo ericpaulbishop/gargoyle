@@ -2365,7 +2365,7 @@ CONFIG_BUSYBOX_CONFIG_LOGGER=y
 # end of System Logging Utilities
 
 # CONFIG_PACKAGE_busybox-selinux is not set
-CONFIG_PACKAGE_ca-bundle=m
+CONFIG_PACKAGE_ca-bundle=y
 # CONFIG_PACKAGE_ca-certificates is not set
 CONFIG_PACKAGE_dnsmasq=y
 # CONFIG_PACKAGE_dnsmasq-dhcpv6 is not set

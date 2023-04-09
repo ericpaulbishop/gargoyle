@@ -2469,7 +2469,7 @@ CONFIG_BUSYBOX_CONFIG_LOGGER=y
 # end of System Logging Utilities
 
 # CONFIG_PACKAGE_busybox-selinux is not set
-CONFIG_PACKAGE_ca-bundle=m
+CONFIG_PACKAGE_ca-bundle=y
 # CONFIG_PACKAGE_ca-certificates is not set
 CONFIG_PACKAGE_dnsmasq=y
 # CONFIG_PACKAGE_dnsmasq-dhcpv6 is not set
@@ -3084,7 +3084,7 @@ CONFIG_PACKAGE_kmod-input-evdev=m
 # LED modules
 #
 # CONFIG_PACKAGE_kmod-input-leds is not set
-CONFIG_PACKAGE_kmod-leds-gpio=m
+CONFIG_PACKAGE_kmod-leds-gpio=y
 # CONFIG_PACKAGE_kmod-leds-pca963x is not set
 # CONFIG_PACKAGE_kmod-leds-tlc591xx is not set
 CONFIG_PACKAGE_kmod-leds-ubnt-ledbar=m
