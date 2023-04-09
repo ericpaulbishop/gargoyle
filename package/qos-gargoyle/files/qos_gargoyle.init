@@ -679,6 +679,7 @@ initialize_qos()
 		# Make sure all packets get sent through IFB
 		tc qdisc add dev $qos_interface handle ffff: ingress
 		tc filter add dev $qos_interface parent ffff: protocol ip u32 match u8 0 0 action connmark action mirred egress redirect dev $qos_ifb flowid ffff:1
+		tc filter add dev $qos_interface parent ffff: protocol ipv6 u32 match u8 0 0 action connmark action mirred egress redirect dev $qos_ifb flowid ffff:1
 
 		#save current mark to connmark at end of chain
 		apply_xtables_rule "-t mangle -A qos_ingress -j CONNMARK --save-mark --mask $download_mask" "any"
