@@ -403,7 +403,8 @@ CONFIG_TARGET_PER_DEVICE_ROOTFS=y
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_avm_fritz450e is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_avm_fritzdvbc is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_belkin_f9j1108-v2 is not set
-# CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_belkin_f9k1115-v2 is not set
+CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_belkin_f9k1115-v2=y
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_belkin_f9k1115-v2="gargoyle-large"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_buffalo_bhr-4grv is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_buffalo_bhr-4grv2 is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_buffalo_wzr-600dhp=y
