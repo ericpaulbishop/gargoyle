@@ -138,6 +138,7 @@ CONFIG_TARGET_MULTI_PROFILE=y
 # CONFIG_TARGET_ramips_mt7621_DEVICE_linksys_re6500 is not set
 # CONFIG_TARGET_ramips_mt7621_DEVICE_mediatek_ap-mt7621a-v60 is not set
 # CONFIG_TARGET_ramips_mt7621_DEVICE_mediatek_mt7621-eval-board is not set
+# CONFIG_TARGET_ramips_mt7621_DEVICE_mercusys_mr70x-v1 is not set
 # CONFIG_TARGET_ramips_mt7621_DEVICE_mikrotik_routerboard-750gr3 is not set
 # CONFIG_TARGET_ramips_mt7621_DEVICE_mikrotik_routerboard-760igs is not set
 # CONFIG_TARGET_ramips_mt7621_DEVICE_mikrotik_routerboard-m11g is not set
@@ -174,6 +175,7 @@ CONFIG_TARGET_MULTI_PROFILE=y
 # CONFIG_TARGET_ramips_mt7621_DEVICE_thunder_timecloud is not set
 # CONFIG_TARGET_ramips_mt7621_DEVICE_totolink_a7000r is not set
 # CONFIG_TARGET_ramips_mt7621_DEVICE_totolink_x5000r is not set
+# CONFIG_TARGET_ramips_mt7621_DEVICE_tplink_archer-ax23-v1 is not set
 # CONFIG_TARGET_ramips_mt7621_DEVICE_tplink_archer-a6-v3 is not set
 # CONFIG_TARGET_ramips_mt7621_DEVICE_tplink_archer-c6-v3 is not set
 # CONFIG_TARGET_ramips_mt7621_DEVICE_tplink_archer-c6u-v1 is not set
@@ -359,6 +361,8 @@ CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_linksys_re6500=y
 CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_linksys_re6500="gargoyle-basic"
 # CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_mediatek_ap-mt7621a-v60 is not set
 # CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_mediatek_mt7621-eval-board is not set
+CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_mercusys_mr70x-v1=y
+CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_mercusys_mr70x-v1="gargoyle-large"
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_mikrotik_routerboard-750gr3=y
 CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_mikrotik_routerboard-750gr3="gargoyle-large"
 # CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_mikrotik_routerboard-760igs is not set
@@ -416,6 +420,8 @@ CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_totolink_x5000r=y
 CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_totolink_x5000r="gargoyle-large"
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_tplink_archer-a6-v3=y
 CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_tplink_archer-a6-v3="gargoyle-large"
+CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_tplink_archer-ax23-v1=y
+CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_tplink_archer-ax23-v1="gargoyle-large"
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_tplink_archer-c6-v3=y
 CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_tplink_archer-c6-v3="gargoyle-large"
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_tplink_archer-c6u-v1=y
