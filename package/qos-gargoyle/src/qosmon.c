@@ -764,6 +764,9 @@ void update_status( FILE* fd )
               cptr->cbw_flt/1000);
         cptr++;
     }
+    time_t now;
+    time(&now);
+    printw("Print time: %s\n",ctime(&now));
 
     refresh();
 #endif
@@ -1012,7 +1015,12 @@ int main(int argc, char *argv[])
         //select() returns 1 if there is data to read.
         //                 0 if the time has expired.
         //                -1 if a signal arrived. 
-        while  (sel_err=select(s+1, &fdmask, NULL, NULL, &timeout)) {
+        while  (sel_err=select(s+1, &fdmask, NULL, NULL, &timeout))
+        {
+              //Reset timeout value which may have been overwritten by select()
+              //Also halve it so that the loop is tighter
+              timeout.tv_sec = 0;
+              timeout.tv_usec = period*0.5*1000;
 
               //Signal arrived, just loop and keep waiting.
               if (sel_err == -1) continue;
