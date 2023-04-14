@@ -1,6 +1,6 @@
 --- a/package/network/utils/comgt/files/3g.sh
 +++ b/package/network/utils/comgt/files/3g.sh
-@@ -65,13 +65,32 @@
+@@ -65,15 +65,34 @@
  				export MODE="AT_OPSYS=${CODE}"
  			elif echo "$cardinfo" | grep -q "Sierra Wireless"; then
  				SIERRA=1
@@ -30,10 +30,12 @@
 +					*) CODE="0,0,0";;
 +				esac
 +				export MODE="AT+ZSNT=${CODE}"
+ 			elif echo "$cardinfo" | grep -q "MikroTik"; then
+ 				COMMAND="AT+CFUN=1" gcom -d "$device" -s /etc/gcom/runcommand.gcom || return 1
  			fi
  
  			if [ -n "$pincode" ]; then
-@@ -81,6 +100,7 @@
+@@ -83,6 +102,7 @@
  					return 1
  				}
  			fi
@@ -41,7 +43,7 @@
  			[ -n "$MODE" ] && gcom -d "$device" -s /etc/gcom/setmode.gcom
  
  			# wait for carrier to avoid firmware stability bugs
-@@ -95,6 +115,8 @@
+@@ -97,6 +117,8 @@
  		;;
  	esac
  
