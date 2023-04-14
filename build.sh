@@ -288,6 +288,18 @@ copy_buildinfo ()
 	fi
 }
 
+bail_on_error ()
+{
+	echo ""
+	echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+	echo "@@                                                                      @@"
+	echo "@@  $1  @@"
+	echo "@@                                                                      @@"
+	echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+	echo ""
+	exit 1
+}
+
 
 ######################################################################################################
 ## Begin Main Body of Build Script                                                                  ##
@@ -671,8 +683,10 @@ for target in $targets ; do
 	if [ "$verbosity" = "0" ] ; then
 		cp -r "$files_dir/." .
 		cp -r "$targets_dir/$target/files/." .
-		scripts/patch-kernel.sh . "$patches_dir/" >/dev/null 2>&1
-		scripts/patch-kernel.sh . "$targets_dir/$target/patches/" >/dev/null 2>&1
+		scripts/patch-kernel.sh . "$patches_dir/" >/dev/null 2>&1 || bail_on_error "generic patch failure"
+		if [ -d "$targets_dir/$target/patches" ] ; then
+			scripts/patch-kernel.sh . "$targets_dir/$target/patches/" >/dev/null 2>&1 || bail_on_error "$target patch failure"
+		fi
 		
 		sh $netfilter_patch_script . "$top_dir/netfilter-match-modules" 1 0 >/dev/null 2>&1
 		make defconfig
@@ -691,8 +705,11 @@ for target in $targets ; do
 	else
 		cp -r "$files_dir/." .
 		cp -r "$targets_dir/$target/files/." .
-		scripts/patch-kernel.sh . "$patches_dir/" 
-		scripts/patch-kernel.sh . "$targets_dir/$target/patches/" 
+		scripts/patch-kernel.sh . "$patches_dir/" || bail_on_error "generic patch failure"
+		if [ -d "$targets_dir/$target/patches" ] ; then
+			scripts/patch-kernel.sh . "$targets_dir/$target/patches/" || bail_on_error "$target patch failure"
+		fi
+
 		sh $netfilter_patch_script . "$top_dir/netfilter-match-modules" 1 0
 		make defconfig
 		set_custom_target "$target" "$default_profile" "$custom_target"
