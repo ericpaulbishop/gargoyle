@@ -11,6 +11,7 @@ PKG_FIXUP:=autoreconf
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
 PKG_SOURCE_URL:=https://git.torproject.org/pluggable-transports/obfsproxy-legacy.git
+PKG_HASH:=76649f3b9f3f31995e3d387d597c2d3a15b74f9e30c7ff4523f0dc2e805a3769
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_VERSION:=obfsproxy-0.1.4
 PKG_SOURCE_SUBDIR:=obfsproxy-legacy
