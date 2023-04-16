@@ -24,7 +24,7 @@ define Package/plugin-gargoyle-upnp
 	CATEGORY:=Administration
 	SUBMENU:=Gargoyle Web Interface
 	TITLE:=UPnP Support for Gargoyle
-	DEPENDS:=+miniupnpd +gargoyle
+	DEPENDS:=+miniupnpd-iptables +gargoyle
 	MAINTAINER:=Eric Bishop
 	PKGARCH:=all
 endef

@@ -9,18 +9,20 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=ffmpeg
-PKG_VERSION:=4.3.3
+PKG_VERSION:=5.1
 PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
 PKG_SOURCE_URL:=https://ffmpeg.org/releases/
-PKG_HASH:=9f0a68fbd74feb4e50dc220bddd59d84626774a53687fb737806ae00e5c6e9e6
+PKG_HASH:=55eb6aab5ee235550fa54a33eaf8bf1b4ec66c01453182b12f6a993d75698b03
 PKG_MAINTAINER:=Ted Hess <thess@kitschensync.net>, \
 		Ian Leonard <antonlacon@gmail.com>
 
 PKG_LICENSE:=LGPL-2.1-or-later GPL-2.0-or-later LGPL-3.0-or-later
 PKG_LICENSE_FILES:=COPYING.GPLv2 COPYING.GPLv3 COPYING.LGPLv2.1 COPYING.LGPLv3
 PKG_CPE_ID:=cpe:/a:ffmpeg:ffmpeg
+
+PKG_BUILD_PARALLEL:=1
 
 FFMPEG_CUSTOM_ENCODERS:= \
 	ac3 \
@@ -331,6 +333,7 @@ define Package/libffmpeg-audio-dec
 $(call Package/libffmpeg/Default)
  TITLE+= (audio)
  VARIANT:=audio-dec
+ CONFLICTS:=libffmpeg-full
 endef
 
 define Package/libffmpeg-audio-dec/description
@@ -349,6 +352,7 @@ $(call Package/libffmpeg/Default)
     +PACKAGE_libx264:libx264 \
     +!PACKAGE_libx264:fdk-aac
  VARIANT:=full
+ PROVIDES+=libffmpeg-mini libffmpeg-audio-dec
 endef
 
 
@@ -363,6 +367,7 @@ define Package/libffmpeg-mini
 $(call Package/libffmpeg/Default)
  TITLE+= (mini)
  VARIANT:=mini
+ CONFLICTS:=libffmpeg-full
 endef
 
 define Package/libffmpeg-mini/description
@@ -630,7 +635,7 @@ define Build/Configure
 endef
 
 define Build/Compile
-	$(MAKE) -C $(PKG_BUILD_DIR) \
+	+$(MAKE) $(PKG_JOBS) -C $(PKG_BUILD_DIR) \
 		DESTDIR="$(PKG_INSTALL_DIR)" \
 		all install
 endef

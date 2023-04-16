@@ -8,12 +8,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=bash
-PKG_VERSION:=5.1
-PKG_RELEASE:=2
+PKG_VERSION:=5.2.15
+PKG_RELEASE:=$(AUTORELEASE)
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=@GNU/bash
-PKG_HASH:=cc012bc860406dcf42f64431bcd3d2fa7560c02915a601aba9cd597a39329baa
+PKG_HASH:=13720965b5f4fc3a0d4b61dd37e7565c741da9a5be24edc2ae00182fc1b3588c
 
 PKG_MAINTAINER:=Marcel Denia <naoir@gmx.net>
 PKG_LICENSE:=GPL-3.0-or-later
@@ -43,6 +43,7 @@ endef
 define Package/bash/conffiles
 /etc/bash.bashrc
 /etc/bash.bash_logout
+/etc/profile.d/sys_bashrc.sh
 endef
 
 # Bash detects and enables certain features by runtest simple piece of code

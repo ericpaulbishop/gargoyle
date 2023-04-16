@@ -9,14 +9,14 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=openvpn
 
-PKG_VERSION:=2.5.3
+PKG_VERSION:=2.5.7
 PKG_RELEASE:=3
 
 PKG_SOURCE_URL:=\
 	https://build.openvpn.net/downloads/releases/ \
 	https://swupdate.openvpn.net/community/releases/
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
-PKG_HASH:=fb6a9943c603a1951ca13e9267653f8dd650c02f84bccd2b9d20f06a4c9c9a7e
+PKG_HASH:=313bca7e996a4f59ef9940dd87c6c4b9168064db9be6cabebd37cd65f13759ed
 
 PKG_MAINTAINER:=Magnus Kroken <mkroken@gmail.com>
 
@@ -42,6 +42,7 @@ endef
 
 Package/openvpn-gargoyle-openssl=$(call Package/openvpn/Default,openssl,OpenSSL,+PACKAGE_openvpn-gargoyle-openssl:libopenssl)
 Package/openvpn-gargoyle-mbedtls=$(call Package/openvpn/Default,mbedtls,mbedTLS,+PACKAGE_openvpn-gargoyle-mbedtls:libmbedtls)
+Package/openvpn-gargoyle-wolfssl=$(call Package/openvpn/Default,wolfssl,WolfSSL \(experimental\),+PACKAGE_openvpn-gargoyle-wolfssl:libwolfssl)
 
 define Package/openvpn/config/Default
 	source "$(SOURCE)/Config-$(1).in"
@@ -49,12 +50,16 @@ endef
 
 Package/openvpn-gargoyle-openssl/config=$(call Package/openvpn/config/Default,openssl)
 Package/openvpn-gargoyle-mbedtls/config=$(call Package/openvpn/config/Default,mbedtls)
+Package/openvpn-gargoyle-wolfssl/config=$(call Package/openvpn/config/Default,wolfssl)
 
 ifeq ($(BUILD_VARIANT),mbedtls)
 CONFIG_OPENVPN_gargoyle_MBEDTLS:=y
 endif
 ifeq ($(BUILD_VARIANT),openssl)
 CONFIG_OPENVPN_gargoyle_OPENSSL:=y
+endif
+ifeq ($(BUILD_VARIANT),wolfssl)
+CONFIG_OPENVPN_gargoyle_WOLFSSL:=y
 endif
 
 CONFIGURE_VARS += \
@@ -82,8 +87,9 @@ define Build/Configure
 		$(if $(CONFIG_OPENVPN_gargoyle_$(BUILD_VARIANT)_ENABLE_DEF_AUTH),--enable,--disable)-def-auth \
 		$(if $(CONFIG_OPENVPN_gargoyle_$(BUILD_VARIANT)_ENABLE_PF),--enable,--disable)-pf \
 		$(if $(CONFIG_OPENVPN_gargoyle_$(BUILD_VARIANT)_ENABLE_PORT_SHARE),--enable,--disable)-port-share \
-		$(if $(CONFIG_OPENVPN_gargoyle_OPENSSL),--with-crypto-library=openssl) \
+		$(if $(CONFIG_OPENVPN_gargoyle_OPENSSL),--with-crypto-library=openssl --with-openssl-engine=no) \
 		$(if $(CONFIG_OPENVPN_gargoyle_MBEDTLS),--with-crypto-library=mbedtls) \
+		$(if $(CONFIG_OPENVPN_gargoyle_WOLFSSL),--with-crypto-library=wolfssl) \
 	)
 endef
 
@@ -142,3 +148,4 @@ endef
 
 $(eval $(call BuildPackage,openvpn-gargoyle-openssl))
 $(eval $(call BuildPackage,openvpn-gargoyle-mbedtls))
+$(eval $(call BuildPackage,openvpn-gargoyle-wolfssl))

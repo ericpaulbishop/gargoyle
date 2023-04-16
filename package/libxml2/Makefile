@@ -8,12 +8,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libxml2
-PKG_VERSION:=2.9.9
-PKG_RELEASE:=3
+PKG_VERSION:=2.10.3
+PKG_RELEASE:=1
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=http://xmlsoft.org/sources/
-PKG_HASH:=94fb70890143e3c6549f265cee93ec064c80a84c42ad0f23e85ee1fd6540a871
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
+PKG_SOURCE_URL:=@GNOME/libxml2/$(basename $(PKG_VERSION))
+PKG_HASH:=5d2cc3d78bec3dbe212a9d7fa629ada25a7da928af432c93060ff5c17ee28a9c
 
 PKG_LICENSE:=MIT
 PKG_LICENSE_FILES:=COPYING
@@ -21,23 +21,51 @@ PKG_CPE_ID:=cpe:/a:xmlsoft:libxml2
 
 PKG_MAINTAINER:=Michael Heimpold <mhei@heimpold.de>
 
-PKG_FIXUP:=autoreconf
 PKG_INSTALL:=1
 PKG_BUILD_PARALLEL:=0
 
 include $(INCLUDE_DIR)/host-build.mk
 include $(INCLUDE_DIR)/package.mk
+include $(INCLUDE_DIR)/nls.mk
 
 define Package/libxml2
   SECTION:=libs
   CATEGORY:=Libraries
   TITLE:=Gnome XML library
   URL:=http://xmlsoft.org/
-  DEPENDS:=+libpthread +zlib
+  DEPENDS:=+libpthread +zlib $(ICONV_DEPENDS)
 endef
 
 define Package/libxml2/description
   A library for manipulating XML and HTML resources.
+endef
+
+define Package/libxml2-dev
+  SECTION:=devel
+  CATEGORY:=Development
+  SUBMENU:=Libraries
+  TITLE:=Development files for libxml2
+  URL:=http://xmlsoft.org/
+  DEPENDS:=+libxml2
+endef
+
+define Package/libxml2-dev/description
+  A library for manipulating XML and HTML resources.
+
+  This package contains the headers and xml2-config binary.
+endef
+
+define Package/libxml2-utils
+  SECTION:=utils
+  CATEGORY:=Utilities
+  TITLE:=XML command line utilities (xmllint...)
+  URL:=http://xmlsoft.org/
+  DEPENDS:=+libxml2
+endef
+
+define Package/libxml2-utils/description
+  This package contains the binaries xmllint and xmlcatalog
+  from libxml2, a library for manipulating XML and HTML resources.
 endef
 
 TARGET_CFLAGS += $(FPIC)
@@ -48,11 +76,9 @@ CONFIGURE_ARGS += \
 	--with-c14n \
 	--without-catalog \
 	--with-debug \
-	--without-docbook \
 	--with-html \
 	--without-ftp \
 	--without-http \
-	--without-iconv \
 	--without-iso8859x \
 	--without-legacy \
 	--with-output \
@@ -75,12 +101,12 @@ CONFIGURE_ARGS += \
 	--without-lzma
 
 HOST_CONFIGURE_ARGS += \
-	--enable-shared \
+	--disable-shared \
 	--enable-static \
+	--with-pic \
 	--with-c14n \
 	--without-catalog \
 	--with-debug \
-	--without-docbook \
 	--with-html \
 	--without-ftp \
 	--without-http \
@@ -139,8 +165,35 @@ endef
 
 define Package/libxml2/install
 	$(INSTALL_DIR) $(1)/usr/lib
-	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libxml2.so* $(1)/usr/lib/
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libxml2.so.* $(1)/usr/lib/
+endef
+
+define Package/libxml2-dev/install
+	$(INSTALL_DIR) $(1)/usr/bin
+	$(CP) $(PKG_INSTALL_DIR)/usr/bin/xml2-config $(1)/usr/bin/
+	$(SED) "s,$(STAGING_DIR),,g" $(1)/usr/bin/xml2-config
+
+	$(INSTALL_DIR) $(1)/usr/include/
+	$(CP) $(PKG_INSTALL_DIR)/usr/include/* $(1)/usr/include/
+
+	$(INSTALL_DIR) $(1)/usr/lib
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libxml2.so $(1)/usr/lib/
+
+	$(INSTALL_DIR) $(1)/usr/lib/{cmake,pkgconfig}
+	$(CP) $(PKG_INSTALL_DIR)/usr/lib/{cmake,pkgconfig} $(1)/usr/lib/
+	$(SED) "s,$(STAGING_DIR),,g" $(1)/usr/lib/pkgconfig/*.pc
+
+	$(INSTALL_DIR) $(1)/usr/share/aclocal
+	$(CP) $(PKG_INSTALL_DIR)/usr/share/aclocal/* $(1)/usr/share/aclocal
+endef
+
+define Package/libxml2-utils/install
+	$(INSTALL_DIR) $(1)/usr/bin
+	$(CP) $(PKG_INSTALL_DIR)/usr/bin/xmllint $(1)/usr/bin/
+	$(CP) $(PKG_INSTALL_DIR)/usr/bin/xmlcatalog $(1)/usr/bin/
 endef
 
 $(eval $(call HostBuild))
 $(eval $(call BuildPackage,libxml2))
+$(eval $(call BuildPackage,libxml2-dev))
+$(eval $(call BuildPackage,libxml2-utils))

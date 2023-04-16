@@ -1,19 +1,18 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libjpeg-turbo
-PKG_VERSION:=2.0.6
-PKG_RELEASE:=1
+PKG_VERSION:=2.1.2
+PKG_RELEASE:=$(AUTORELEASE)
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=@SF/$(PKG_NAME)
-PKG_HASH:=d74b92ac33b0e3657123ddcf6728788c90dc84dcb6a52013d758af3c4af481bb
+PKG_HASH:=09b96cb8cbff9ea556a9c2d173485fd19488844d55276ed4f42240e1e2073ce5
 
 PKG_MAINTAINER:=Rosen Penev <rosenp@gmail.com>
 PKG_LICENSE:=BSD-3-Clause IJG zlib
 PKG_LICENSE_FILES:=LICENSE.md
 
 PKG_USE_MIPS16:=0 #Allows ASM compilation for speed.
-PKG_BUILD_PARALLEL:=1
 
 include $(INCLUDE_DIR)/package.mk
 include $(INCLUDE_DIR)/cmake.mk
@@ -59,9 +58,15 @@ CMAKE_OPTIONS += \
 	-DWITH_JAVA=OFF \
 	-DWITH_JPEG7=OFF \
 	-DWITH_JPEG8=OFF \
-	-DWITH_MEM_SRCDST=OFF \
+	-DWITH_MEM_SRCDST=ON \
 	-DWITH_SIMD=O$(if $(findstring mips,$(CONFIG_ARCH)),FF,N) \
 	-DWITH_TURBOJPEG=OFF
+
+ifneq ($(findstring arm,$(CONFIG_ARCH)),)
+ifeq ($(findstring neon,$(CONFIG_CPU_TYPE)),)
+	CMAKE_OPTIONS += -DWITH_SIMD=OFF
+endif
+endif
 
 define Build/InstallDev
 	$(INSTALL_DIR) $(1)/usr/include

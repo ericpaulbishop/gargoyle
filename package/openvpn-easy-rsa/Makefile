@@ -10,10 +10,18 @@ include $(TOPDIR)/rules.mk
 PKG_NAME:=openvpn-gargoyle-easy-rsa
 
 PKG_VERSION:=3.0.8
-PKG_RELEASE:=3
+PKG_RELEASE:=4
 PKG_SOURCE_URL:=https://codeload.github.com/OpenVPN/easy-rsa/tar.gz/v$(PKG_VERSION)?
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_HASH:=fd6b67d867c3b8afd53efa2ca015477f6658a02323e1799432083472ac0dd200
+
+# For git snapshots
+#PKG_SOURCE_PROTO:=git
+#PKG_RELEASE=0git$(PKG_SOURCE_DATE)
+#PKG_SOURCE_URL:=https://github.com/OpenVPN/easy-rsa.git
+#PKG_SOURCE_DATE:=2020-03-30
+#PKG_SOURCE_VERSION:=945c9359f6ae3796df21e2986e49489718e0d5f8
+#PKG_MIRROR_HASH:=
 
 PKG_LICENSE:=GPL-2.0
 PKG_MAINTAINER:=Luiz Angelo Daros de Luca <luizluca@gmail.com>
