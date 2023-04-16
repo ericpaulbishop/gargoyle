@@ -3209,6 +3209,7 @@ CONFIG_PACKAGE_plugin-gargoyle-wol=y
 # Libraries
 #
 # CONFIG_PACKAGE_libncurses-dev is not set
+# CONFIG_PACKAGE_libxml2-dev is not set
 # CONFIG_PACKAGE_zlib-dev is not set
 # end of Libraries
 
@@ -3226,6 +3227,8 @@ CONFIG_PACKAGE_plugin-gargoyle-wol=y
 # Extra packages
 #
 CONFIG_PACKAGE_libiwinfo-data=y
+CONFIG_PACKAGE_vsftpd=y
+# CONFIG_PACKAGE_vsftpd-tls is not set
 # end of Extra packages
 
 #
@@ -3368,10 +3371,6 @@ CONFIG_PACKAGE_wireless-regdb=y
 # CONFIG_PACKAGE_wl12xx-firmware is not set
 # CONFIG_PACKAGE_wl18xx-firmware is not set
 # end of Firmware
-
-#
-# Kernel
-#
 
 #
 # Kernel modules
@@ -3738,7 +3737,7 @@ CONFIG_PACKAGE_kmod-ipt-timerange=y
 CONFIG_PACKAGE_kmod-ipt-webmon=y
 CONFIG_PACKAGE_kmod-ipt-weburl=y
 CONFIG_PACKAGE_kmod-nf-conntrack=y
-# CONFIG_PACKAGE_kmod-nf-conntrack-netlink is not set
+CONFIG_PACKAGE_kmod-nf-conntrack-netlink=y
 CONFIG_PACKAGE_kmod-nf-conntrack6=y
 CONFIG_PACKAGE_kmod-nf-flow=y
 CONFIG_PACKAGE_kmod-nf-ipt=y
@@ -4315,11 +4314,12 @@ CONFIG_PACKAGE_libsqlite3=y
 #
 # Configuration
 #
+# CONFIG_SQLITE3_BATCH_ATOMIC_WRITE is not set
+CONFIG_SQLITE3_COLUMN_METADATA=y
 CONFIG_SQLITE3_DYNAMIC_EXTENSIONS=y
 CONFIG_SQLITE3_FTS3=y
 CONFIG_SQLITE3_FTS4=y
 CONFIG_SQLITE3_FTS5=y
-CONFIG_SQLITE3_JSON1=y
 CONFIG_SQLITE3_RTREE=y
 # CONFIG_SQLITE3_SESSION is not set
 # end of Configuration
@@ -4426,7 +4426,6 @@ CONFIG_WOLFSSL_HAS_NO_HW=y
 #
 CONFIG_PACKAGE_libimobiledevice=y
 CONFIG_PACKAGE_libplist=y
-# CONFIG_PACKAGE_libplistcxx is not set
 CONFIG_PACKAGE_libusbmuxd=y
 # end of libimobiledevice
 
@@ -4537,9 +4536,9 @@ CONFIG_PACKAGE_liblzo=y
 CONFIG_PACKAGE_libmnl=y
 # CONFIG_PACKAGE_libmount is not set
 CONFIG_PACKAGE_libncurses=y
-# CONFIG_PACKAGE_libnetfilter-conntrack is not set
+CONFIG_PACKAGE_libnetfilter-conntrack=y
 # CONFIG_PACKAGE_libnettle is not set
-# CONFIG_PACKAGE_libnfnetlink is not set
+CONFIG_PACKAGE_libnfnetlink=y
 # CONFIG_PACKAGE_libnftnl is not set
 CONFIG_PACKAGE_libnghttp2=m
 # CONFIG_PACKAGE_libnl is not set
@@ -4631,7 +4630,6 @@ CONFIG_PACKAGE_minidlna=y
 # File Transfer
 #
 CONFIG_PACKAGE_curl=m
-CONFIG_PACKAGE_vsftpd=y
 # end of File Transfer
 
 #
@@ -4691,7 +4689,8 @@ CONFIG_PACKAGE_iptables-mod-webmon=y
 CONFIG_PACKAGE_iptables-mod-weburl=y
 # CONFIG_PACKAGE_iptables-nft is not set
 CONFIG_PACKAGE_iptables-zz-legacy=y
-CONFIG_PACKAGE_miniupnpd=y
+CONFIG_PACKAGE_miniupnpd-iptables=y
+# CONFIG_PACKAGE_miniupnpd-nftables is not set
 # CONFIG_PACKAGE_nftables-json is not set
 # CONFIG_PACKAGE_nftables-nojson is not set
 CONFIG_PACKAGE_xtables-legacy=y
@@ -4834,6 +4833,7 @@ CONFIG_OPENVPN_gargoyle_openssl_ENABLE_DEF_AUTH=y
 CONFIG_OPENVPN_gargoyle_openssl_ENABLE_PF=y
 # CONFIG_OPENVPN_gargoyle_openssl_ENABLE_IPROUTE2 is not set
 CONFIG_OPENVPN_gargoyle_openssl_ENABLE_SMALL=y
+# CONFIG_PACKAGE_openvpn-gargoyle-wolfssl is not set
 CONFIG_PACKAGE_wireguard-tools=y
 # end of VPN
 
@@ -5071,8 +5071,6 @@ CONFIG_PACKAGE_e2fsprogs=y
 CONFIG_PACKAGE_nfs-utils=y
 CONFIG_PACKAGE_nfs-utils-libs=y
 # CONFIG_PACKAGE_ntfs-3g is not set
-# CONFIG_PACKAGE_NTFS-3G_USE_LIBFUSE is not set
-CONFIG_PACKAGE_NTFS-3G_HAS_PROBE=y
 # CONFIG_PACKAGE_ntfs-3g-low is not set
 # CONFIG_PACKAGE_ntfs-3g-utils is not set
 # CONFIG_PACKAGE_resize2fs is not set
@@ -5171,6 +5169,7 @@ CONFIG_PACKAGE_iwinfo=y
 CONFIG_PACKAGE_jshn=y
 CONFIG_PACKAGE_libjson-script=y
 # CONFIG_PACKAGE_libucode is not set
+# CONFIG_PACKAGE_libxml2-utils is not set
 # CONFIG_PACKAGE_logger is not set
 # CONFIG_PACKAGE_look is not set
 # CONFIG_PACKAGE_losetup is not set

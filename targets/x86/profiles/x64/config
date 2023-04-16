@@ -2589,6 +2589,7 @@ CONFIG_PACKAGE_grub2-efi=y
 # Libraries
 #
 # CONFIG_PACKAGE_libncurses-dev is not set
+# CONFIG_PACKAGE_libxml2-dev is not set
 # CONFIG_PACKAGE_zlib-dev is not set
 # end of Libraries
 
@@ -2606,6 +2607,8 @@ CONFIG_PACKAGE_grub2-efi=y
 # Extra packages
 #
 CONFIG_PACKAGE_libiwinfo-data=m
+CONFIG_PACKAGE_vsftpd=y
+# CONFIG_PACKAGE_vsftpd-tls is not set
 # end of Extra packages
 
 #
@@ -2750,10 +2753,6 @@ CONFIG_PACKAGE_r8169-firmware=y
 # CONFIG_PACKAGE_wl12xx-firmware is not set
 # CONFIG_PACKAGE_wl18xx-firmware is not set
 # end of Firmware
-
-#
-# Kernel
-#
 
 #
 # Kernel modules
@@ -2909,7 +2908,7 @@ CONFIG_PACKAGE_kmod-pstore=y
 # CONFIG_PACKAGE_kmod-hwmon-adcxx is not set
 # CONFIG_PACKAGE_kmod-hwmon-adt7410 is not set
 # CONFIG_PACKAGE_kmod-hwmon-adt7475 is not set
-# CONFIG_PACKAGE_kmod-hwmon-core is not set
+CONFIG_PACKAGE_kmod-hwmon-core=y
 # CONFIG_PACKAGE_kmod-hwmon-dme1737 is not set
 # CONFIG_PACKAGE_kmod-hwmon-drivetemp is not set
 # CONFIG_PACKAGE_kmod-hwmon-f71882fg is not set
@@ -2949,10 +2948,10 @@ CONFIG_PACKAGE_kmod-pstore=y
 #
 # I2C support
 #
-# CONFIG_PACKAGE_kmod-i2c-algo-bit is not set
+CONFIG_PACKAGE_kmod-i2c-algo-bit=y
 # CONFIG_PACKAGE_kmod-i2c-algo-pca is not set
 # CONFIG_PACKAGE_kmod-i2c-algo-pcf is not set
-# CONFIG_PACKAGE_kmod-i2c-core is not set
+CONFIG_PACKAGE_kmod-i2c-core=y
 # CONFIG_PACKAGE_kmod-i2c-designware-pci is not set
 # CONFIG_PACKAGE_kmod-i2c-gpio is not set
 # CONFIG_PACKAGE_kmod-i2c-i801 is not set
@@ -3049,6 +3048,7 @@ CONFIG_PACKAGE_kmod-lib-crc32c=y
 # CONFIG_PACKAGE_kmod-lib-crc8 is not set
 # CONFIG_PACKAGE_kmod-lib-lz4 is not set
 CONFIG_PACKAGE_kmod-lib-textsearch=y
+CONFIG_PACKAGE_kmod-lib-zlib-inflate=m
 # CONFIG_PACKAGE_kmod-lib-zstd is not set
 CONFIG_PACKAGE_kmod-oid-registry=y
 # end of Libraries
@@ -3131,7 +3131,7 @@ CONFIG_PACKAGE_kmod-ipt-timerange=y
 CONFIG_PACKAGE_kmod-ipt-webmon=y
 CONFIG_PACKAGE_kmod-ipt-weburl=y
 CONFIG_PACKAGE_kmod-nf-conntrack=y
-# CONFIG_PACKAGE_kmod-nf-conntrack-netlink is not set
+CONFIG_PACKAGE_kmod-nf-conntrack-netlink=y
 CONFIG_PACKAGE_kmod-nf-conntrack6=y
 CONFIG_PACKAGE_kmod-nf-flow=y
 CONFIG_PACKAGE_kmod-nf-ipt=y
@@ -3272,6 +3272,7 @@ CONFIG_PACKAGE_kmod-iptunnel=y
 # CONFIG_PACKAGE_kmod-l2tp-eth is not set
 # CONFIG_PACKAGE_kmod-l2tp-ip is not set
 # CONFIG_PACKAGE_kmod-macsec is not set
+CONFIG_PACKAGE_kmod-mdio=y
 # CONFIG_PACKAGE_kmod-misdn is not set
 # CONFIG_PACKAGE_kmod-mpls is not set
 # CONFIG_PACKAGE_kmod-nat46 is not set
@@ -3719,11 +3720,12 @@ CONFIG_PACKAGE_libsqlite3=y
 #
 # Configuration
 #
+# CONFIG_SQLITE3_BATCH_ATOMIC_WRITE is not set
+CONFIG_SQLITE3_COLUMN_METADATA=y
 CONFIG_SQLITE3_DYNAMIC_EXTENSIONS=y
 CONFIG_SQLITE3_FTS3=y
 CONFIG_SQLITE3_FTS4=y
 CONFIG_SQLITE3_FTS5=y
-CONFIG_SQLITE3_JSON1=y
 CONFIG_SQLITE3_RTREE=y
 # CONFIG_SQLITE3_SESSION is not set
 # end of Configuration
@@ -3832,7 +3834,6 @@ CONFIG_WOLFSSL_HAS_NO_HW=y
 #
 CONFIG_PACKAGE_libimobiledevice=y
 CONFIG_PACKAGE_libplist=y
-# CONFIG_PACKAGE_libplistcxx is not set
 CONFIG_PACKAGE_libusbmuxd=y
 # end of libimobiledevice
 
@@ -3944,9 +3945,9 @@ CONFIG_PACKAGE_liblzo=y
 CONFIG_PACKAGE_libmnl=y
 # CONFIG_PACKAGE_libmount is not set
 CONFIG_PACKAGE_libncurses=y
-# CONFIG_PACKAGE_libnetfilter-conntrack is not set
+CONFIG_PACKAGE_libnetfilter-conntrack=y
 # CONFIG_PACKAGE_libnettle is not set
-# CONFIG_PACKAGE_libnfnetlink is not set
+CONFIG_PACKAGE_libnfnetlink=y
 CONFIG_PACKAGE_libnftnl=y
 CONFIG_PACKAGE_libnghttp2=m
 # CONFIG_PACKAGE_libnl is not set
@@ -4039,7 +4040,6 @@ CONFIG_PACKAGE_minidlna=y
 # File Transfer
 #
 CONFIG_PACKAGE_curl=m
-CONFIG_PACKAGE_vsftpd=y
 # end of File Transfer
 
 #
@@ -4099,7 +4099,8 @@ CONFIG_PACKAGE_iptables-mod-webmon=y
 CONFIG_PACKAGE_iptables-mod-weburl=y
 # CONFIG_PACKAGE_iptables-nft is not set
 CONFIG_PACKAGE_iptables-zz-legacy=y
-CONFIG_PACKAGE_miniupnpd=y
+CONFIG_PACKAGE_miniupnpd-iptables=y
+# CONFIG_PACKAGE_miniupnpd-nftables is not set
 # CONFIG_PACKAGE_nftables-json is not set
 # CONFIG_PACKAGE_nftables-nojson is not set
 CONFIG_PACKAGE_xtables-legacy=y
@@ -4242,6 +4243,7 @@ CONFIG_OPENVPN_gargoyle_openssl_ENABLE_DEF_AUTH=y
 CONFIG_OPENVPN_gargoyle_openssl_ENABLE_PF=y
 # CONFIG_OPENVPN_gargoyle_openssl_ENABLE_IPROUTE2 is not set
 CONFIG_OPENVPN_gargoyle_openssl_ENABLE_SMALL=y
+# CONFIG_PACKAGE_openvpn-gargoyle-wolfssl is not set
 CONFIG_PACKAGE_wireguard-tools=y
 # end of VPN
 
@@ -4472,8 +4474,6 @@ CONFIG_PACKAGE_mkf2fs=y
 CONFIG_PACKAGE_nfs-utils=y
 CONFIG_PACKAGE_nfs-utils-libs=y
 # CONFIG_PACKAGE_ntfs-3g is not set
-# CONFIG_PACKAGE_NTFS-3G_USE_LIBFUSE is not set
-CONFIG_PACKAGE_NTFS-3G_HAS_PROBE=y
 # CONFIG_PACKAGE_ntfs-3g-low is not set
 # CONFIG_PACKAGE_ntfs-3g-utils is not set
 # CONFIG_PACKAGE_resize2fs is not set
@@ -4575,6 +4575,7 @@ CONFIG_PACKAGE_jshn=y
 # CONFIG_PACKAGE_kexec-tools is not set
 CONFIG_PACKAGE_libjson-script=y
 # CONFIG_PACKAGE_libucode is not set
+# CONFIG_PACKAGE_libxml2-utils is not set
 # CONFIG_PACKAGE_logger is not set
 # CONFIG_PACKAGE_look is not set
 # CONFIG_PACKAGE_losetup is not set

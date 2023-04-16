@@ -2620,6 +2620,7 @@ CONFIG_PACKAGE_plugin-gargoyle-wol=y
 # Libraries
 #
 # CONFIG_PACKAGE_libncurses-dev is not set
+# CONFIG_PACKAGE_libxml2-dev is not set
 # CONFIG_PACKAGE_zlib-dev is not set
 # end of Libraries
 
@@ -2637,6 +2638,8 @@ CONFIG_PACKAGE_plugin-gargoyle-wol=y
 # Extra packages
 #
 CONFIG_PACKAGE_libiwinfo-data=y
+# CONFIG_PACKAGE_vsftpd is not set
+# CONFIG_PACKAGE_vsftpd-tls is not set
 # end of Extra packages
 
 #
@@ -2783,10 +2786,6 @@ CONFIG_PACKAGE_wireless-regdb=y
 # end of Firmware
 
 #
-# Kernel
-#
-
-#
 # Kernel modules
 #
 
@@ -2906,6 +2905,7 @@ CONFIG_PACKAGE_kmod-fs-nfs-common-rpcsec=m
 # CONFIG_PACKAGE_kmod-fs-nfs-v4 is not set
 CONFIG_PACKAGE_kmod-fs-nfsd=m
 # CONFIG_PACKAGE_kmod-fs-ntfs is not set
+# CONFIG_PACKAGE_kmod-fs-ntfs3 is not set
 # CONFIG_PACKAGE_kmod-fs-reiserfs is not set
 # CONFIG_PACKAGE_kmod-fs-squashfs is not set
 # CONFIG_PACKAGE_kmod-fs-udf is not set
@@ -3148,7 +3148,7 @@ CONFIG_PACKAGE_kmod-ipt-timerange=y
 CONFIG_PACKAGE_kmod-ipt-webmon=y
 CONFIG_PACKAGE_kmod-ipt-weburl=y
 CONFIG_PACKAGE_kmod-nf-conntrack=y
-# CONFIG_PACKAGE_kmod-nf-conntrack-netlink is not set
+CONFIG_PACKAGE_kmod-nf-conntrack-netlink=m
 CONFIG_PACKAGE_kmod-nf-conntrack6=y
 CONFIG_PACKAGE_kmod-nf-flow=y
 CONFIG_PACKAGE_kmod-nf-ipt=y
@@ -3794,7 +3794,6 @@ CONFIG_WOLFSSL_HAS_NO_HW=y
 #
 # CONFIG_PACKAGE_libimobiledevice is not set
 # CONFIG_PACKAGE_libplist is not set
-# CONFIG_PACKAGE_libplistcxx is not set
 # CONFIG_PACKAGE_libusbmuxd is not set
 # end of libimobiledevice
 
@@ -3904,9 +3903,9 @@ CONFIG_PACKAGE_libjson-c=y
 CONFIG_PACKAGE_libmnl=y
 # CONFIG_PACKAGE_libmount is not set
 # CONFIG_PACKAGE_libncurses is not set
-# CONFIG_PACKAGE_libnetfilter-conntrack is not set
+CONFIG_PACKAGE_libnetfilter-conntrack=m
 # CONFIG_PACKAGE_libnettle is not set
-# CONFIG_PACKAGE_libnfnetlink is not set
+CONFIG_PACKAGE_libnfnetlink=m
 # CONFIG_PACKAGE_libnftnl is not set
 # CONFIG_PACKAGE_libnghttp2 is not set
 # CONFIG_PACKAGE_libnl is not set
@@ -3988,7 +3987,6 @@ CONFIG_PACKAGE_msmtp-nossl=m
 # File Transfer
 #
 CONFIG_PACKAGE_curl=m
-# CONFIG_PACKAGE_vsftpd is not set
 # end of File Transfer
 
 #
@@ -4039,7 +4037,8 @@ CONFIG_PACKAGE_iptables-mod-webmon=y
 CONFIG_PACKAGE_iptables-mod-weburl=y
 # CONFIG_PACKAGE_iptables-nft is not set
 CONFIG_PACKAGE_iptables-zz-legacy=y
-CONFIG_PACKAGE_miniupnpd=m
+CONFIG_PACKAGE_miniupnpd-iptables=m
+# CONFIG_PACKAGE_miniupnpd-nftables is not set
 # CONFIG_PACKAGE_nftables-json is not set
 # CONFIG_PACKAGE_nftables-nojson is not set
 CONFIG_PACKAGE_xtables-legacy=y
@@ -4171,6 +4170,7 @@ CONFIG_PACKAGE_tc-tiny=y
 # CONFIG_PACKAGE_openvpn-gargoyle-easy-rsa is not set
 # CONFIG_PACKAGE_openvpn-gargoyle-mbedtls is not set
 # CONFIG_PACKAGE_openvpn-gargoyle-openssl is not set
+# CONFIG_PACKAGE_openvpn-gargoyle-wolfssl is not set
 CONFIG_PACKAGE_wireguard-tools=m
 # end of VPN
 
@@ -4503,6 +4503,7 @@ CONFIG_PACKAGE_iwinfo=y
 CONFIG_PACKAGE_jshn=y
 CONFIG_PACKAGE_libjson-script=y
 # CONFIG_PACKAGE_libucode is not set
+# CONFIG_PACKAGE_libxml2-utils is not set
 # CONFIG_PACKAGE_logger is not set
 # CONFIG_PACKAGE_look is not set
 # CONFIG_PACKAGE_losetup is not set
