@@ -324,7 +324,8 @@ CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_sercomm_na930=y
 CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7620_DEVICE_sercomm_na930="gargoyle-usb"
 # CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_sitecom_wlr-4100-v1-002 is not set
 # CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_wavlink_wl-wn535k1 is not set
-# CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_tplink_archer-c2-v1 is not set
+CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_tplink_archer-c2-v1=y
+CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7620_DEVICE_tplink_archer-c2-v1="gargoyle-usb"
 CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_tplink_archer-c20-v1=y
 CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7620_DEVICE_tplink_archer-c20-v1="gargoyle-usb"
 CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_tplink_archer-c20i=y
