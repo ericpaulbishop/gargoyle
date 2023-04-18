@@ -65,6 +65,8 @@ mask_to_cidr()
 
 define_wan_if()
 {
+	no_wan="$(uci -q get network.wan)"
+	if [ -z "$no_wan" ] ; then return ; fi
 	if  [ -z "$wan_if" ] ;  then
 		#Wait for up to 15 seconds for the wan interface to indicate it is up.
 		wait_sec=15
