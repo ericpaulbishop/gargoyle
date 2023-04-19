@@ -1,6 +1,6 @@
 --- /dev/null
 +++ b/package/base-files/files/etc/init.d/r7800stability
-@@ -0,0 +1,9 @@
+@@ -0,0 +1,12 @@
 +#!/bin/sh /etc/rc.common
 +
 +START=99
@@ -8,6 +8,9 @@
 +boot()
 +{
 +	dev=$(cat /tmp/sysinfo/board_name | grep "netgear,r7800")
++	if [ -z "$dev" ] ; then
++		dev=$(cat /tmp/sysinfo/board_name | grep "netgear,xr500")
++	fi
 +	[ -n "$dev" ] && { echo "performance" > /sys/devices/system/cpu/cpufreq/policy0/scaling_governor; echo "performance" > /sys/devices/system/cpu/cpufreq/policy1/scaling_governor; }
 +}
 --- a/package/base-files/Makefile
