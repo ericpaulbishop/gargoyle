@@ -1,0 +1,9 @@
+#!/bin/sh /etc/rc.common
+
+START=99
+
+boot() {
+	# pin ethernet interface interrupts
+	awk '/eth0/ { gsub(/:/,""); print $1 }' /proc/interrupts | while read irq; do echo "1" > /proc/irq/$irq/smp_affinity; done
+	awk '/eth1/ { gsub(/:/,""); print $1 }' /proc/interrupts | while read irq; do echo "2" > /proc/irq/$irq/smp_affinity; done
+}
