@@ -694,8 +694,12 @@ isolate_guest_networks()
 				if [ -n "$is_guest" ] ; then
 					echo "$lif with mac $gmac is wireless guest"
 
-					#Allow access to WAN but not other LAN hosts for anyone on guest network
-					ebtables -t filter -A FORWARD -i "$lif" --logical-out br-lan -j DROP
+					#Allow access to WAN and DHCP/DNS servers on LAN, but not other LAN hosts for anyone on guest network
+					ebtables -t filter -I FORWARD -i "$lif" -p IPV4 --ip-protocol udp --ip-destination-port 53 -j ACCEPT
+					ebtables -t filter -I FORWARD -i "$lif" -p IPV4 --ip-protocol udp --ip-destination-port 67 -j ACCEPT
+					ebtables -t filter -A FORWARD -i "$lif" --logical-out br-lan -p IPV4 --ip-destination 192.168.0.0/16 -j DROP
+					ebtables -t filter -A FORWARD -i "$lif" --logical-out br-lan -p IPV4 --ip-destination 172.16.0.0/12 -j DROP
+					ebtables -t filter -A FORWARD -i "$lif" --logical-out br-lan -p IPV4 --ip-destination 10.0.0.0/8 -j DROP
 
 					#Only allow DHCP/DNS access to router for anyone on guest network
 					ebtables -t filter -A INPUT -i "$lif" -p ARP -j ACCEPT
