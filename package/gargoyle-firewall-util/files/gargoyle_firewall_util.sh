@@ -657,7 +657,7 @@ initialize_firewall()
 	enforce_dhcp_assignments
 	force_router_dns
 	add_adsl_modem_routes
-        isolate_guest_networks
+	isolate_guest_networks
 }
 
 
@@ -700,13 +700,14 @@ isolate_guest_networks()
 					ebtables -t filter -A FORWARD -i "$lif" --logical-out br-lan -p IPV4 --ip-destination 192.168.0.0/16 -j DROP
 					ebtables -t filter -A FORWARD -i "$lif" --logical-out br-lan -p IPV4 --ip-destination 172.16.0.0/12 -j DROP
 					ebtables -t filter -A FORWARD -i "$lif" --logical-out br-lan -p IPV4 --ip-destination 10.0.0.0/8 -j DROP
+					ebtables -t filter -A FORWARD -i "$lif" --logical-out br-lan -p IPV6 -j DROP
 
 					#Only allow DHCP/DNS access to router for anyone on guest network
 					ebtables -t filter -A INPUT -i "$lif" -p ARP -j ACCEPT
 					ebtables -t filter -A INPUT -i "$lif" -p IPV4 --ip-protocol udp --ip-destination-port 53 -j ACCEPT
 					ebtables -t filter -A INPUT -i "$lif" -p IPV4 --ip-protocol udp --ip-destination-port 67 -j ACCEPT
 					ebtables -t filter -A INPUT -i "$lif" -p IPV4 --ip-destination $lan_ip -j DROP
-
+					ebtables -t filter -A INPUT -i "$lif" -p IPV6 -j DROP
 				fi
 			done
 		done
