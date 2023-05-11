@@ -90,6 +90,8 @@ if [ -n "$printer" ] ; then
 	domain=$(uci get dhcp.@dnsmasq[0].domain)
 	hostname=$(uci get system.@system[0].hostname)
 	revip=$(uci get network.lan.ipaddr | sed 's/\./ /g' | awk ' { print "0."$3"."$2"."$1 ; }')
+	printername="${printer// /_}"
+	manufacturer=$(printf "%s" "$usb_device_lines" | grep "Driver=usblp" | sed 's/^.*Manufacturer=//g' | sed 's/ .:.*$//g'| head -n1)
 	dnsmasqConfLines=""
 	dnsmasqConfLines=$(printf "${dnsmasqConfLines}\nptr-record=b._dns-sd._udp.$revip.in-addr.arpa,$domain\n")
 	dnsmasqConfLines=$(printf "${dnsmasqConfLines}\nptr-record=db._dns-sd._udp.$revip.in-addr.arpa,$domain\n")
@@ -97,9 +99,9 @@ if [ -n "$printer" ] ; then
 	dnsmasqConfLines=$(printf "${dnsmasqConfLines}\nptr-record=dr._dns-sd._udp.$revip.in-addr.arpa,$domain\n")
 	dnsmasqConfLines=$(printf "${dnsmasqConfLines}\nptr-record=lb._dns-sd._udp.$revip.in-addr.arpa,$domain\n")
 	dnsmasqConfLines=$(printf "${dnsmasqConfLines}\nptr-record=_services._dns-sd._udp.$domain,_pdl-datastream._tcp.$domain\n")
-	dnsmasqConfLines=$(printf "${dnsmasqConfLines}\nptr-record=_pdl-datastream._tcp.$domain,$hostname._pdl-datastream._tcp.$domain\n")
-	dnsmasqConfLines=$(printf "${dnsmasqConfLines}\nsrv-host=Gargoyle._pdl-datastream._tcp.$domain,$hostname.$domain,9100\n")
-	dnsmasqConfLines=$(printf "${dnsmasqConfLines}\ntxt-record=$hostname._pdl-datastream._tcp.$domain,ty=$printer,product=($printer),usb_MDL=$printer,txtvers=1,qtotal=1,priority=20\n")
+	dnsmasqConfLines=$(printf "${dnsmasqConfLines}\nptr-record=_pdl-datastream._tcp.$domain,$printername._pdl-datastream._tcp.$domain\n")
+	dnsmasqConfLines=$(printf "${dnsmasqConfLines}\nsrv-host=$printername._pdl-datastream._tcp.$domain,$hostname.$domain,9100\n")
+	dnsmasqConfLines=$(printf "${dnsmasqConfLines}\ntxt-record=$printername._pdl-datastream._tcp.$domain,ty=$printer,product=($printer),usb_MDL=$printer,usb_MFG=$manufacturer,note=$hostname,pdl=raw,txtvers=1,qtotal=1,priority=20\n")
 
 
 	update_dnsmasq_conf "/etc/dnsmasq.conf" "$dnsmasqConfLines"
