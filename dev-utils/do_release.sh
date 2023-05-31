@@ -60,7 +60,7 @@ if [ -z  "$gargoyle_checkout_branchname" ] ; then
 fi
 mkdir src
 cd src
-git clone git://github.com/ericpaulbishop/gargoyle.git
+git clone https://github.com/ericpaulbishop/gargoyle.git
 cd gargoyle
 git checkout "$gargoyle_checkout_branchname"
 cd ..
