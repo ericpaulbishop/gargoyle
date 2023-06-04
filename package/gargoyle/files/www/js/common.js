@@ -1035,17 +1035,17 @@ function resetProofreadFields(inputIds)
 function parseBytes(bytes, units, abbr, dDgt)
 {
 	var parsed;
-	units = units != "KBytes" && units != "MBytes" && units != "GBytes" && units != "TBytes" ? "mixed" : units;
+	units = ["KBytes","MBytes","GBytes","TBytes",UI.KBy,UI.MBy,UI.GBy,UI.TBy].indexOf(units) < 0 ? "mixed" : units;
 	spcr = abbr==null||abbr==0 ? " " : "";
-	if( (units == "mixed" && bytes > 1024*1024*1024*1024) || units == "TBytes")
+	if( (units == "mixed" && bytes > 1024*1024*1024*1024) || ["TBytes",UI.TBy].indexOf(units) >= 0)
 	{
 		parsed = (bytes/(1024*1024*1024*1024)).toFixed(dDgt||3) + spcr + (abbr?UI.TB:UI.TBy);
 	}
-	else if( (units == "mixed" && bytes > 1024*1024*1024) || units == "GBytes")
+	else if( (units == "mixed" && bytes > 1024*1024*1024) || ["GBytes",UI.GBy].indexOf(units) >= 0)
 	{
 		parsed = (bytes/(1024*1024*1024)).toFixed(dDgt||3) + spcr + (abbr?UI.GB:UI.GBy);
 	}
-	else if( (units == "mixed" && bytes > 1024*1024) || units == "MBytes" )
+	else if( (units == "mixed" && bytes > 1024*1024) || ["MBytes",UI.MBy].indexOf(units) >= 0)
 	{
 		parsed = (bytes/(1024*1024)).toFixed(dDgt||3) + spcr + (abbr?UI.MB:UI.MBy);
 	}
