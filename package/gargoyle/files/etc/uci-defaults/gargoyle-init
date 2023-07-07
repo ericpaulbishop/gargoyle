@@ -33,6 +33,9 @@ if [ "$settings_not_preserved" == "1" ] ; then
 	# Set hostname to Gargoyle
 	uci set system.@system[0].hostname="Gargoyle" 2>/dev/null
 	echo "Gargoyle" > /proc/sys/kernel/hostname   2>/dev/null
+	
+	# Set domain to home.arpa
+	uci set dhcp.@dnsmasq[0].domain="home.arpa" 2>/dev/null
 
 	# disable logging for cron -- it tends to clutter up logs, and it logs all jobs at "error" level, which is wrong
 	uci set system.@system[0].cronloglevel=9
