@@ -476,7 +476,7 @@ function downloadAc()
 	var prpubkey = uci.get("wireguard_gargoyle","server","public_key");
 	if(allClientTraffic == "false")
 	{
-		prroutedips = [wgServerIP + "/" + parseCidr(wgServerLanMask)];
+		prroutedips = [ipToStr(parseIp(wgServerIP) & parseIp(wgServerLanMask)) + "/" + parseCidr(wgServerLanMask)];
 		prroutedips.push(ipToStr(parseIp(currentLanIp) & parseIp(currentLanMask)) + "/" + parseCidr(currentLanMask));
 		wgACs = uci.getAllSectionsOfType("wireguard_gargoyle","allowed_client");
 		var wgACIdx = 0;
