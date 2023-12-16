@@ -12,9 +12,9 @@
  	[ -n "$acs_exclude_dfs" ] && [ "$acs_exclude_dfs" -gt 0 ] &&
  		append base_cfg "acs_exclude_dfs=1" "$N"
  
--	json_get_vars noscan ht_coex
-+	json_get_vars noscan ht_coex channel2
- 	json_get_values ht_capab_list ht_capab tx_burst
+-	json_get_vars noscan ht_coex min_tx_power:0 tx_burst
++	json_get_vars noscan ht_coex min_tx_power:0 tx_burst channel2
+ 	json_get_values ht_capab_list ht_capab
  	json_get_values channel_list channels
  
 @@ -157,7 +158,7 @@ mac80211_hostapd_setup_base() {
