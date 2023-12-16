@@ -65,7 +65,7 @@ MODULE_ALIAS("ip6t_webmon");
 	ntohs(((uint16_t*)&addr)[5]), \
 	ntohs(((uint16_t*)&addr)[6]), \
 	ntohs(((uint16_t*)&addr)[7])
-#define STRIP6 "%04x:%04x:%04x:%04x:%04x:%04x:%04x:%04x"
+#define STRIP6 "%04hu:%04hu:%04hu:%04hu:%04hu:%04hu:%04hu:%04hu"
 
 typedef union
 {
@@ -535,7 +535,7 @@ static void extract_url_https(const unsigned char* packet_data, int packet_lengt
 	int x, packet_limit;
 	unsigned short cslen, ext_type, ext_len, maxextlen;
 	unsigned char conttype, hndshktype, sidlen, cmplen;
-	unsigned char* packet_ptr;
+	const unsigned char* packet_ptr;
 
 	domain[0] = '\0';
 	packet_ptr = packet_data;
@@ -777,7 +777,7 @@ static int xt_webmon_set_ctl(struct sock *sk, int cmd, sockptr_t arg, u_int32_t 
 					if(length == 4)
 					{
 						ktime_t time;
-						if(split[1] == NFPROTO_IPV4)
+						if(*split[1] == NFPROTO_IPV4)
 						{
 							int parsed_ip[4];
 							int valid_ip = sscanf(split[2], "%d.%d.%d.%d", parsed_ip, parsed_ip+1, parsed_ip+2, parsed_ip+3);
@@ -901,11 +901,15 @@ static bool webmon_mt4(const struct sk_buff *skb, struct xt_action_param *par)
 			/* are we dealing with a web page request */
 			if(strnicmp((char*)payload, "GET ", 4) == 0 || strnicmp(  (char*)payload, "POST ", 5) == 0 || strnicmp((char*)payload, "HEAD ", 5) == 0)
 			{
-				char domain[650];
-				char path[650];
-				char domain_key[700];
+				char* domain;
+				char* path;
+				char* domain_key;
 				unsigned char save = info->exclude_type == WEBMON_EXCLUDE ? 1 : 0;
 				uint32_t ip_index;
+				
+				domain = (char*)malloc(650*sizeof(char));
+				path = (char*)malloc(650*sizeof(char));
+				domain_key = (char*)malloc(700*sizeof(char));
 
 			
 				for(ip_index = 0; ip_index < info->num_exclude_ips; ip_index++)
@@ -1081,9 +1085,12 @@ static bool webmon_mt4(const struct sk_buff *skb, struct xt_action_param *par)
 						if(search_part != NULL)
 						{
 							int spi, si;
-							char search_key[700];
-							char search[650];
+							char* search_key;
+							char* search;
 							queue_node *recent_node = recent_searches->first;
+							
+							search_key = (char*)malloc(700*sizeof(char));
+							search = (char*)malloc(650*sizeof(char));
 							
 							/*unescape, replacing whitespace with + */
 							si = 0;
@@ -1134,7 +1141,8 @@ static bool webmon_mt4(const struct sk_buff *skb, struct xt_action_param *par)
 									ktime_get_real_ts64(&t);
 									if( (recent_node->time).tv_sec + 1 >= t.tv_sec || ((recent_node->time).tv_sec + 5 >= t.tv_sec && within_edit_distance(search, recent_node->value, 2)))
 									{
-										char recent_key[700];
+										char* recent_key;
+										recent_key = (char*)malloc(700*sizeof(char));
 										
 										sprintf(recent_key, STRIP"@%s", NIPQUAD(recent_node->src_ip.ip4.s_addr), recent_node->value);
 										remove_map_element(search_map, recent_key);
@@ -1148,6 +1156,7 @@ static bool webmon_mt4(const struct sk_buff *skb, struct xt_action_param *par)
 										recent_searches->length = recent_searches->length - 1 ;
 										free(recent_node->value);
 										free(recent_node);
+										free(recent_key);
 									}
 								}
 							}
@@ -1164,17 +1173,27 @@ static bool webmon_mt4(const struct sk_buff *skb, struct xt_action_param *par)
 								//add
 								add_queue_node(NFPROTO_IPV4, src_ip, search, recent_searches, search_map, search_key, max_search_queue_length );
 							}
+							
+							free(search_key);
+							free(search);
 						}
 						spin_unlock_bh(&webmon_lock);
 					}
 				}
+				
+				free(domain);
+				free(path);
+				free(domain_key);
 			}
 			else if ((unsigned short)ntohs(tcp_hdr->dest) == 443)	// broad assumption that traffic on 443 is HTTPS. make effort to return fast as soon as we know we are wrong to not slow down processing
 			{
-				char domain[650];
-				char domain_key[700];
+				char* domain;
+				char* domain_key;
 				unsigned char save = info->exclude_type == WEBMON_EXCLUDE ? 1 : 0;
 				uint32_t ip_index;
+				
+				domain = (char*)malloc(650*sizeof(char));
+				domain_key = (char*)malloc(700*sizeof(char));
 
 				for(ip_index = 0; ip_index < info->num_exclude_ips; ip_index++)
 				{
@@ -1217,6 +1236,9 @@ static bool webmon_mt4(const struct sk_buff *skb, struct xt_action_param *par)
 						spin_unlock_bh(&webmon_lock);
 					}
 				}
+				
+				free(domain);
+				free(domain_key);
 			}
 		}
 	}
@@ -1235,6 +1257,8 @@ static bool webmon_mt4(const struct sk_buff *skb, struct xt_action_param *par)
 static bool webmon_mt6(const struct sk_buff *skb, struct xt_action_param *par)
 {
 	const struct xt_webmon_info *info = (const struct xt_webmon_info*)(par->matchinfo);
+	int ip6proto;
+	int thoff = 0;
 
 	
 	struct ipv6hdr* iph;
@@ -1258,8 +1282,7 @@ static bool webmon_mt6(const struct sk_buff *skb, struct xt_action_param *par)
 
 	/* ignore packets that are not TCP */
 	iph = (struct ipv6hdr*)(skb_network_header(skb));
-	int thoff = 0;
-	int ip6proto = ipv6_find_hdr(skb, &thoff, -1, NULL, NULL);
+	ip6proto = ipv6_find_hdr(skb, &thoff, -1, NULL, NULL);
 	if(ip6proto == IPPROTO_TCP)
 	{
 		/* get payload */
@@ -1279,11 +1302,15 @@ static bool webmon_mt6(const struct sk_buff *skb, struct xt_action_param *par)
 				/* are we dealing with a web page request */
 				if(strnicmp((char*)payload, "GET ", 4) == 0 || strnicmp(  (char*)payload, "POST ", 5) == 0 || strnicmp((char*)payload, "HEAD ", 5) == 0)
 				{
-					char domain[650];
-					char path[650];
-					char domain_key[700];
+					char* domain;
+					char* path;
+					char* domain_key;
 					unsigned char save = info->exclude_type == WEBMON_EXCLUDE ? 1 : 0;
 					uint32_t ip_index;
+					
+					domain = (char*)malloc(650*sizeof(char));
+					path = (char*)malloc(650*sizeof(char));
+					domain_key = (char*)malloc(700*sizeof(char));
 	
 				
 					for(ip_index = 0; ip_index < info->num_exclude_ips; ip_index++)
@@ -1459,9 +1486,12 @@ static bool webmon_mt6(const struct sk_buff *skb, struct xt_action_param *par)
 							if(search_part != NULL)
 							{
 								int spi, si;
-								char search_key[700];
-								char search[650];
+								char* search_key;
+								char* search;
 								queue_node *recent_node = recent_searches->first;
+								
+								search_key = (char*)malloc(700*sizeof(char));
+								search = (char*)malloc(650*sizeof(char));
 								
 								/*unescape, replacing whitespace with + */
 								si = 0;
@@ -1512,8 +1542,9 @@ static bool webmon_mt6(const struct sk_buff *skb, struct xt_action_param *par)
 										ktime_get_real_ts64(&t);
 										if( (recent_node->time).tv_sec + 1 >= t.tv_sec || ((recent_node->time).tv_sec + 5 >= t.tv_sec && within_edit_distance(search, recent_node->value, 2)))
 										{
-											char recent_key[700];
+											char* recent_key;
 											
+											recent_key = (char*)malloc(700*sizeof(char));
 											sprintf(recent_key, STRIP6"@%s", NIP6(recent_node->src_ip.ip6.s6_addr), recent_node->value);
 											remove_map_element(search_map, recent_key);
 											
@@ -1526,6 +1557,7 @@ static bool webmon_mt6(const struct sk_buff *skb, struct xt_action_param *par)
 											recent_searches->length = recent_searches->length - 1 ;
 											free(recent_node->value);
 											free(recent_node);
+											free(recent_key);
 										}
 									}
 								}
@@ -1542,17 +1574,27 @@ static bool webmon_mt6(const struct sk_buff *skb, struct xt_action_param *par)
 									//add
 									add_queue_node(NFPROTO_IPV6, src_ip, search, recent_searches, search_map, search_key, max_search_queue_length );
 								}
+								
+								free(search_key);
+								free(search);
 							}
 							spin_unlock_bh(&webmon_lock);
 						}
 					}
+					
+					free(domain);
+					free(path);
+					free(domain_key);
 				}
 				else if ((unsigned short)ntohs(tcp_hdr->dest) == 443)	// broad assumption that traffic on 443 is HTTPS. make effort to return fast as soon as we know we are wrong to not slow down processing
 				{
-					char domain[650];
-					char domain_key[700];
+					char* domain;
+					char* domain_key;
 					unsigned char save = info->exclude_type == WEBMON_EXCLUDE ? 1 : 0;
 					uint32_t ip_index;
+					
+					domain = (char*)malloc(650*sizeof(char));
+					domain_key = (char*)malloc(700*sizeof(char));
 	
 					for(ip_index = 0; ip_index < info->num_exclude_ips; ip_index++)
 					{
@@ -1683,8 +1725,8 @@ static int __init init(void)
 {
 
 	#ifdef CONFIG_PROC_FS
-		struct proc_dir_entry *proc_webmon_recent_domains;
-		struct proc_dir_entry *proc_webmon_recent_searches;
+		//struct proc_dir_entry *proc_webmon_recent_domains;
+		//struct proc_dir_entry *proc_webmon_recent_searches;
 	#endif
 
 	spin_lock_bh(&webmon_lock);

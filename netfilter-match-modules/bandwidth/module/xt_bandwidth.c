@@ -1216,7 +1216,7 @@ static bool bandwidth_mt4(const struct sk_buff *skb, struct xt_action_param *par
 	 * number crunching so we shouldn't 
 	 * already be locked.
 	 */
-	now = get_seconds();
+	now = ktime_get_real_seconds();
 	
 
 	if(now != last_local_mw_update )
@@ -1298,12 +1298,12 @@ static bool bandwidth_mt4(const struct sk_buff *skb, struct xt_action_param *par
 	}
 	else
 	{
+		struct iphdr* iph = (struct iphdr*)(skb_network_header(skb));
 		uint32_t bw_ip_index;
 		char* bw_ip = NULL;
 		char bw_ips[2][INET_ADDRSTRLEN];
 		strcpy(bw_ips[0], "0.0.0.0");
 		strcpy(bw_ips[1], "0.0.0.0");
-		struct iphdr* iph = (struct iphdr*)(skb_network_header(skb));
 		if(info->type == BANDWIDTH_INDIVIDUAL_SRC)
 		{
 			//src ip
@@ -1455,7 +1455,7 @@ static bool bandwidth_mt6(const struct sk_buff *skb, struct xt_action_param *par
 	 * number crunching so we shouldn't 
 	 * already be locked.
 	 */
-	now = get_seconds();
+	now = ktime_get_real_seconds();
 	
 
 	if(now != last_local_mw_update )
@@ -1537,12 +1537,12 @@ static bool bandwidth_mt6(const struct sk_buff *skb, struct xt_action_param *par
 	}
 	else
 	{
+		struct ipv6hdr* iph = (struct ipv6hdr*)(skb_network_header(skb));
 		uint32_t bw_ip_index;
 		char* bw_ip = NULL;
 		char bw_ips[2][INET6_ADDRSTRLEN];
 		strcpy(bw_ips[0], "0.0.0.0");
 		strcpy(bw_ips[1], "0.0.0.0");
-		struct ipv6hdr* iph = (struct ipv6hdr*)(skb_network_header(skb));
 		if(info->type == BANDWIDTH_INDIVIDUAL_SRC)
 		{
 			//src ip
@@ -1927,7 +1927,8 @@ static char add_ip_block(uint32_t family,
  */
 static int handle_get_failure(int ret_value, int unlock_user_sem, int unlock_bandwidth_spin, unsigned char error_code, unsigned char* out_buffer, unsigned char* free_buffer )
 {
-	copy_to_user(out_buffer, &error_code, 1);
+	unsigned long retval;
+	retval = copy_to_user(out_buffer, &error_code, 1);
 	if( free_buffer != NULL ) { kfree(free_buffer); }
 	if(unlock_bandwidth_spin) { spin_unlock_bh(&bandwidth_lock); }
 	if(unlock_user_sem) { up(&userspace_lock); }
@@ -1994,6 +1995,7 @@ static int xt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 	get_request query;
 	info_and_maps* iam;
 
+	uint32_t testblk[4];
 	unsigned char* error;
 	uint32_t* total_ips;
 	uint32_t* start_index;
@@ -2002,7 +2004,8 @@ static int xt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 	uint64_t* reset_time;
 	unsigned char* reset_is_constant_interval;
 	uint32_t  current_output_index;
-	ktime_t now = get_seconds();
+	unsigned long retval;
+	ktime_t now = ktime_get_real_seconds();
 	check_for_timezone_shift(now, 0);
 	check_for_backwards_time_shift(now);
 	now = now -  local_seconds_west;  /* Adjust for local timezone */
@@ -2026,7 +2029,7 @@ static int xt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 	{
 		return handle_get_failure(0, 1, 0, ERROR_UNKNOWN, user, NULL);
 	}
-	copy_from_user(buffer, user, *len);
+	retval = copy_from_user(buffer, user, *len);
 	parse_get_request(buffer, &query);
 	
 
@@ -2056,7 +2059,6 @@ static int xt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 	}
 	
 	/* allocate ip list if this is first query */
-	uint32_t testblk[4];
 	memset(testblk, 0, sizeof(uint32_t)*4);
 	if((query.next_ip_index == 0 || query.next_ip_index == __UINT32_MAX__) && memcmp(testblk, query.ip, sizeof(uint32_t)*4) == 0)
 	{
@@ -2222,7 +2224,7 @@ static int xt_bandwidth_get_ctl(struct sock *sk, int cmd, void *user, int *len)
 
 	spin_unlock_bh(&bandwidth_lock);
 	
-	copy_to_user(user, buffer, *len);
+	retval = copy_to_user(user, buffer, *len);
 	kfree(buffer);
 
 
@@ -2314,13 +2316,14 @@ static void set_single_ip_data(unsigned char history_included, info_and_maps* ia
 	 * that is equal to the wall-clock time in the current time-zone.  Incoming values must 
 	 * be adjusted similarly
 	 */
+	char ipstr[INET6_ADDRSTRLEN];
+	uint32_t testblk[4];
 	uint32_t family = *( (uint32_t*)(buffer + *buffer_index) );
 	uint32_t ip[4];
 	ip[0] = *( (uint32_t*)(buffer + *buffer_index+4) );
 	ip[1] = *( (uint32_t*)(buffer + *buffer_index+8) );
 	ip[2] = *( (uint32_t*)(buffer + *buffer_index+12) );
 	ip[3] = *( (uint32_t*)(buffer + *buffer_index+16) );
-	char ipstr[INET6_ADDRSTRLEN];
 	if(family == NFPROTO_IPV4)
 	{
 		sprintf(ipstr, STRIP, NIPQUAD(ip));
@@ -2345,7 +2348,6 @@ static void set_single_ip_data(unsigned char history_included, info_and_maps* ia
 		printk("ip index = %d\n", *buffer_index);
 	#endif
 	
-	uint32_t testblk[4];
 	memset(testblk, 0, sizeof(uint32_t)*4);
 
 	if(history_included)
@@ -2477,7 +2479,7 @@ static int xt_bandwidth_set_ctl(struct sock *sk, int cmd, sockptr_t arg, u_int32
 	info_and_maps* iam;
 	uint32_t buffer_index;
 	uint32_t next_ip_index;
-	ktime_t now = get_seconds();
+	ktime_t now = ktime_get_real_seconds();
 	check_for_timezone_shift(now, 0);
 	check_for_backwards_time_shift(now);
 	now = now -  local_seconds_west;  /* Adjust for local timezone */
@@ -2551,8 +2553,9 @@ static int xt_bandwidth_set_ctl(struct sock *sk, int cmd, sockptr_t arg, u_int32
 				char** iplist = (char**)get_string_map_keys(iam->ip_map, &num_ips);
 				for(ip_index = 0; ip_index < num_ips; ip_index++)
 				{
+					uint32_t* fam = NULL;
 					remove_string_map_element(iam->ip_map, iplist[ip_index]);
-					uint32_t* fam = remove_string_map_element(iam->ip_family_map, iplist[ip_index]);
+					fam = remove_string_map_element(iam->ip_family_map, iplist[ip_index]);
 					kfree(fam);
 				}
 				/* ignore return value for bw -- it's actually malloced in history, not here */
@@ -2581,9 +2584,10 @@ static int xt_bandwidth_set_ctl(struct sock *sk, int cmd, sockptr_t arg, u_int32
 				char** iplist = (char**)get_string_map_keys(iam->ip_map, &num_ips);
 				for(ip_index = 0; ip_index < num_ips; ip_index++)
 				{
+					uint32_t* fam = NULL;
 					uint64_t *bw = remove_string_map_element(iam->ip_map, iplist[ip_index]);
 					kfree(bw);
-					uint32_t* fam = remove_string_map_element(iam->ip_family_map, iplist[ip_index]);
+					fam = remove_string_map_element(iam->ip_family_map, iplist[ip_index]);
 					kfree(fam);
 				}
 				free_null_terminated_string_array(iplist);
@@ -2785,7 +2789,7 @@ static int checkentry(const struct xt_mtchk_param *par, int family)
 
 			if(info->reset_interval != BANDWIDTH_NEVER)
 			{
-				ktime_t now = get_seconds();
+				ktime_t now = ktime_get_real_seconds();
 				if(now != last_local_mw_update )
 				{
 					check_for_timezone_shift(now, 1);
@@ -2892,13 +2896,13 @@ static void destroy(const struct xt_mtdtor_param *par, int family)
 	
 	if(*(info->ref_count) == 0)
 	{
+		int destroying_primary = 0;
 		info_and_maps* iam;
 		down(&userspace_lock);
 		spin_lock_bh(&bandwidth_lock);
 		
 		// Check if we need to preserve iam due to other protocol rule
 		iam = (info_and_maps*)get_string_map_element(id_map, info->id);
-		int destroying_primary = 0;
 		if(iam != NULL)
 		{
 			if(iam->info_family == family)
@@ -3052,7 +3056,7 @@ static int __init init(void)
 	bandwidth_record_max = get_bw_record_max();
 	local_minutes_west = old_minutes_west = sys_tz.tz_minuteswest;
 	local_seconds_west = local_minutes_west*60;
-	last_local_mw_update = get_seconds();
+	last_local_mw_update = ktime_get_real_seconds();
 	if(local_seconds_west > last_local_mw_update)
 	{
 		/* we can't let adjusted time be < 0 -- pretend timezone is still UTC */
