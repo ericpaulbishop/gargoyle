@@ -26,15 +26,15 @@ set_version_variables()
 {
 
 	#openwrt branch
-	branch_name="22.03"
-	branch_id="openwrt-22.03"
-	packages_branch="openwrt-22.03"
+	branch_name="23.05"
+	branch_id="openwrt-22.05"
+	packages_branch="openwrt-22.05"
 
 
 	# set precise commit in repo to use 
 	# you can set this to an alternate commit 
 	# or empty to checkout latest
-	openwrt_commit="f372b715d439d03d81755062d77f80eb4ce77e33"
+	openwrt_commit="fcf08d9db6a50a3ca6f0b64d105d975ab896cc35"
 	openwrt_abbrev_commit=$( echo "$openwrt_commit" | cut -b 1-7 )
 	
 
