@@ -68,7 +68,7 @@ define Package/gargoyle-large
 		+openvpn-gargoyle-openssl +plugin-gargoyle-openvpn \
 		+openvpn-gargoyle-easy-rsa +plugin-gargoyle-tor \
 		+wireguard-tools +plugin-gargoyle-wireguard \
-		+plugin-gargoyle-ipheth-tether +ksmbd-utils
+		+plugin-gargoyle-ipheth-tether
 endef
 
 define Package/gargoyle-large/description

@@ -1,6 +1,6 @@
 --- /dev/null
 +++ b/package/kernel/mac80211/patches/subsys/969-allow-sta-bridge.patch
-@@ -0,0 +1,46 @@
+@@ -0,0 +1,47 @@
 +--- a/net/wireless/core.c
 ++++ b/net/wireless/core.c
 +@@ -1270,8 +1270,7 @@ void cfg80211_init_wdev(struct wireless_
@@ -34,15 +34,16 @@
 + 		     ntype == NL80211_IFTYPE_P2P_CLIENT))
 + 			return -EBUSY;
 + 
-+@@ -1081,11 +1080,6 @@ int cfg80211_change_iface(struct cfg8021
-+ 	if (!err) {
++@@ -1082,10 +1081,9 @@ int cfg80211_change_iface(struct cfg8021
 + 		dev->priv_flags &= ~IFF_DONT_BRIDGE;
 + 		switch (ntype) {
-+-		case NL80211_IFTYPE_STATION:
++ 		case NL80211_IFTYPE_STATION:
 +-			if (dev->ieee80211_ptr->use_4addr)
 +-				break;
 +-			fallthrough;
-+-		case NL80211_IFTYPE_OCB:
++ 		case NL80211_IFTYPE_OCB:
+++		    /* we bridge STA now OK? */
+++		    break;
 + 		case NL80211_IFTYPE_P2P_CLIENT:
 + 		case NL80211_IFTYPE_ADHOC:
 + 			dev->priv_flags |= IFF_DONT_BRIDGE;
