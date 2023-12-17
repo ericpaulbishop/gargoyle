@@ -14,4 +14,3 @@ ports that returns non-null.
  			break;
  
  		if (retries == MAX_BRP_RETRIES) {
-

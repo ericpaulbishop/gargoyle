@@ -149,3 +149,7 @@ reload() {
 	/usr/sbin/exportfs -r
 }
 
+service_triggers() {
+	local export_dirs="$(while read mp _r ; do echo -n "$mp " ; done < /etc/exports)"
+	procd_add_reload_mount_trigger $export_dirs
+}
