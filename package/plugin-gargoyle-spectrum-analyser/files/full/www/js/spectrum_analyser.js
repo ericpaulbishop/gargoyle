@@ -85,24 +85,24 @@ function parseInterfaces(lines)
 	var interfaceData = [];
 	lineIndex = 0;
 
-	//lines is of the format:	wlanX ##; wlanY ##; etc etc.
+	//lines is of the format:	radioX ##; radioY ##; etc etc.
 	for(lineIndex=0; lineIndex < lines.length; lineIndex++)
 	{
 		var nextLine = lines[lineIndex];
 		var wlan = nextLine.split(" ");
 
-		var guest  = wlan[0].indexOf("-");
+		var guest  = wlan[0].indexOf("-ap1");
 		if(guest != -1)
 		{
 			continue;
 		}
 
 		var interfaceid = wlan[0];
-		if(wlan[1] > 14)
+		if(wlan[1] == '5g')
 		{
 			var interfaceband = "5GHz";
 		}
-		else
+		else if(wlan[1] == '2g')
 		{
 			var interfaceband = "2.4GHz";
 		}
@@ -120,7 +120,7 @@ function getWifiData()
 	var selectedband = interfaces[document.getElementById("interface").selectedIndex][0];
 
 	//scan command, substituting the correct WLAN
-	Commands.push("iw " + selectedband + " scan 2>&1 | awk -F'\\\n' '{print \"\\\"\"$0\"\\\"\" }'");
+	Commands.push("iwinfo " + selectedband + " scan 2>&1 | awk -F'\\\n' '{print \"\\\"\"$0\"\\\"\" }'");
 
 	var param = getParameterDefinition("commands", Commands.join("\n")) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));	
 	var stateChangeFunction = function(req)
@@ -152,72 +152,10 @@ function parseWifiData(rawScanOutput)
 {
 	if((rawScanOutput != null) && (rawScanOutput.indexOf("\n") != 0) && (rawScanOutput.indexOf("\r") != 0) && (rawScanOutput.match(/command failed: Resource busy/g) == null))
 	{
-		var parsed = [ [],[],[],[],[],[],[],[],[],[] ];
-		//var cells = rawScanOutput.split(/BSS [A-Fa-f0-9]{2}[:]/g);
-		//above looks for bss then mac address but that is undesirable behaviour
-		//if we see IBSS or QBSS we might be in trouble...
-		//splitStringWithException should handle this
-		//pass the string, the phrase the match, and then any letters beforehand that shouln'dt match
+		var parsed = [ [],[],[],[],[],[],[],[],[],[],[] ];
+		var cells = rawScanOutput.split(/Cell [0-9]+ - /g);
+		cells.shift(); //get rid of anything before first AP data
 		
-		///////// new method ///////////////////
-		function splitStringWithException(str, toMatch, Exceptions)
-		{
-			var retval = [];
-			var toMatchLength = toMatch.length;
-			var indexMatches = [];
-			var match, i = 0;
-			
-			while ((match = str.indexOf(toMatch,i)) > -1)
-			{
-				indexMatches.push(match);
-				i = match + toMatchLength;
-			}
-			
-			var x, y = 0;
-			for (x = 0; x < indexMatches.length; x++)
-			{
-				for (y = 0; y < Exceptions.length; y++)
-				{
-					//if index 0, we can skip. no need to check index -1
-					if(indexMatches[x] > 0)
-					{
-						if(str.charAt(indexMatches[x]-1) == Exceptions[y])
-						{
-							//remove this match as it is false
-							indexMatches.splice(x, 1);
-						}
-					}
-				}
-			}
-			
-			//now we should have an arrayh of indexMatches without any false positives in them (no IBSS or QBSS)
-			for (x = 0; x < indexMatches.length; x++)
-			{
-				//if its anything but the last one, return everything up to the next match
-				//if its the last one, return to the end of the string
-				if(x < indexMatches.length - 1)
-				{
-					retval.push(str.substring(indexMatches[x],indexMatches[x+1]-1));
-				}
-				else
-				{
-					retval.push(str.substring(indexMatches[x]));
-				}
-			}
-			
-			return retval;
-		}
-		
-		var stringSplit = "BSS";
-		var exceptions = ["I","i","Q"]
-		var cells = splitStringWithException(rawScanOutput, stringSplit, exceptions);
-		////////////////////////////////////////
-		
-		///////// old method ///////////////////
-		//var cells = rawScanOutput.split(/BSS/g);
-		//cells.shift(); //get rid of anything before first AP data
-		////////////////////////////////////////
-	
 		var getCellValues=function(id, cellLines)
 		{
 			var vals=[];
@@ -243,7 +181,7 @@ function parseWifiData(rawScanOutput)
 					val = val.replace(/channel /g,"");
 					vals.push(val);
 				}
-				if(id == "BSSID")
+				if(id == "Address")
 				{
 					var pat = /([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})/g;
 					if (pat.test(line) == true)
@@ -260,44 +198,69 @@ function parseWifiData(rawScanOutput)
 			return vals;
 		}
 
+		var splitDoubleSpace = function(cellLines)
+		{
+			var splitIDs = [
+				['Mode','Frequency','Band','Channel'],
+				['Signal','Quality']
+			];
+
+			for(var x = 0; x < cellLines.length; x++)
+			{
+				var cellLine = cellLines[x];
+				var lineMatch = splitIDs.some(function(splitID) {
+					return splitID.every(function(split) {
+						return cellLine.indexOf(split) > -1;
+					});
+				});
+				if(lineMatch)
+				{
+					var newCellLines = cellLine.trim().split('  ');
+					newCellLines.forEach(function(newCellLine,idx) {
+						if(idx == 0)
+						{
+							cellLines.splice(x,1,newCellLine);
+						}
+						else
+						{
+							cellLines.splice(x+idx,0,newCellLine);
+						}
+					});
+				}
+			}
+
+			return cellLines;
+		}
+
 		while(cells.length > 0)
 		{
 			var cellData  = cells.shift();
 			var cellLines = cellData.split(/[\r\n]+/);
+			cellLines = splitDoubleSpace(cellLines);
 			var htmode = 0;
 			var vhtmode = 0;
 
-			var bssid = getCellValues("BSSID", cellLines).shift();
-			var ssid = getCellValues("SSID", cellLines).shift();
-			var sigStr = getCellValues("signal", cellLines).shift();
-			//var encryption = getCellValues("RSN:", cellLines).shift();
-			if(getCellValues("* primary channel", cellLines).shift())
+			var bssid = getCellValues("Address", cellLines).shift();
+			var ssid = getCellValues("ESSID", cellLines).shift();
+			var sigStr = getCellValues("Signal", cellLines).shift();
+			var encryption = getCellValues("Encryption", cellLines).shift();
+			if(getCellValues(" HT Operation", cellLines).length > 0)
 			{
 				//we are in High Throughput
-				var prichannel = getCellValues("* primary channel", cellLines).shift();
-				var secchannel = getCellValues("secondary channel offset", cellLines).shift();
+				var prichannel = getCellValues("Primary Channel", cellLines).shift();
+				var secchannel = getCellValues("Secondary Channel Offset", cellLines).shift();
 				htmode = 1;
 			}
-			else
+			if(prichannel == undefined || prichannel == 0)
 			{
 				//if we are not in HT, we can interpret the freq to get the primary channel
-				var prichannel = getCellValues("freq", cellLines).shift()/1000;
-				if(band == "2.4GHz")
-				{
-					prichannel = gband[1].indexOf(prichannel);
-					prichannel = gband[0][prichannel].toString();
-				}
-				else
-				{
-					prichannel = aband[1].indexOf(prichannel);
-					prichannel = aband[0][prichannel].toString();
-				}
+				var prichannel = getCellValues("Channel", cellLines).shift();
 			}
-			if(getCellValues("* channel width", cellLines).shift())
+			if(getCellValues("VHT Operation", cellLines).length > 0)
 			{
-				var vhtwidth = getCellValues("* channel width", cellLines).shift();
-				var vhtseg1 = getCellValues("* center freq segment 1", cellLines).shift();
-				var vhtseg2 = getCellValues("* center freq segment 2", cellLines).shift();
+				var vhtwidth = getCellValues("Channel Width", cellLines).shift();
+				var vhtseg1 = getCellValues("Center Frequency 1", cellLines).shift();
+				var vhtseg2 = getCellValues("Center Frequency 2", cellLines).shift();
 				vhtmode = 1;
 			}
 
@@ -306,14 +269,10 @@ function parseWifiData(rawScanOutput)
 				secchannel = "no secondary";	//if we don't get a result for the secondary channel, set it to this so we don't error
 			}
 			//if no encryption, set to "None"
-			/*if (! encryption)
+			if (! encryption)
 			{
-				encryption = "None/WEP/WPA";
+				encryption = "none";
 			}
-			else
-			{
-				encryption = "WPA2";
-			}*/
 
 			if(ssid != null && prichannel != null && secchannel != null && sigStr != null && bssid != null ) 
 			{
@@ -327,8 +286,7 @@ function parseWifiData(rawScanOutput)
 				parsed[7].push(bssid);
 				parsed[8].push(htmode);
 				parsed[9].push(vhtmode);
-				//parsed[8].push(encryption);
-				//parsed[4].push( prichannel > 30 ? "5GHz" : "2.4GHz")	we don't need this anymore
+				parsed[10].push(encryption);
 			}
 		}
 		//check for duplicate bssid data and append _# if necessary
@@ -504,7 +462,7 @@ function generateTableData(detected)
 	var x = 0;
 	var htoffset = 4;	//for 802.11n channels
 	var vhtoffset = 12;	//for 802.11ac channels, double this for vht160
-	var columnNames = [ spectrum.SSID, spectrum.BSSID, spectrum.Channel, spectrum.Width, spectrum.Mode, spectrum.Signal];
+	var columnNames = [ spectrum.SSID, spectrum.BSSID, spectrum.Channel, spectrum.Width, spectrum.Mode, spectrum.Encryption, spectrum.Signal];
 	var TableData = new Array();
 	
 	for(x = 0; x < detected[0].length; x++)
@@ -519,48 +477,48 @@ function generateTableData(detected)
 		var BSSID = detected[7][x].toUpperCase();
 		var htmode = detected[8][x];
 		var vhtmode = detected[9][x];
-		//var encryption = detected[8][x];
+		var encryption = detected[10][x];
 		
 		if(band == "2.4GHz")
 		{
 			if(secondary == "no secondary")					//20mhz
 			{
-				TableData.push([ SSID, BSSID, channel, "20MHz", (htmode)?"b,g,n":"b,g", level+"dBm" ]);
+				TableData.push([ SSID, BSSID, channel, "20MHz", (htmode)?"b,g,n":"b,g", encryption, level+"dBm" ]);
 			}
 			else if(secondary == "above")						//40mhz
 			{
-				TableData.push([ SSID, BSSID, channel+"-"+(channel-(-htoffset)), "40MHz", "b,g,n", level+"dBm" ]);
+				TableData.push([ SSID, BSSID, channel+"-"+(channel-(-htoffset)), "40MHz", "b,g,n", encryption, level+"dBm" ]);
 			}
 			else if(secondary == "below")						//40mhz
 			{
-				TableData.push([ SSID, BSSID, channel+"-"+(channel-htoffset), "40MHz", "b,g,n", level+"dBm" ]);
+				TableData.push([ SSID, BSSID, channel+"-"+(channel-htoffset), "40MHz", "b,g,n", encryption, level+"dBm" ]);
 			}
 		}
 		else if(band == "5GHz")
 		{
 			if(secondary == "no secondary")					//20mhz
 			{
-				TableData.push([ SSID, BSSID, channel, "20MHz", (htmode)?((vhtmode)?"a,n,ac":"a,n"):"a", level+"dBm" ]);
+				TableData.push([ SSID, BSSID, channel, "20MHz", (htmode)?((vhtmode)?"a,n,ac":"a,n"):"a", encryption, level+"dBm" ]);
 			}
 			else if(secondary == "above")
 			{
 				if(! vhtwidth)								//40mhz
 				{
-					TableData.push([ SSID, BSSID, channel+"-"+(channel-(-htoffset)), "40MHz", (vhtmode)?"a,n,ac":"a,n", level+"dBm" ]);
+					TableData.push([ SSID, BSSID, channel+"-"+(channel-(-htoffset)), "40MHz", (vhtmode)?"a,n,ac":"a,n", encryption, level+"dBm" ]);
 				}
 				else
 				{
 					if(! vhtseg2)							//80mhz
 					{
-						TableData.push([ SSID, BSSID, (vhtseg1-(0.5*vhtoffset))+"-"+(vhtseg1-(-0.5*vhtoffset)), "80MHz", "n,ac", level+"dBm" ]);
+						TableData.push([ SSID, BSSID, (vhtseg1-(0.5*vhtoffset))+"-"+(vhtseg1-(-0.5*vhtoffset)), "80MHz", "n,ac", encryption, level+"dBm" ]);
 					}
 					else if(Math.abs(vhtseg1 - vhtseg2) == 8)	//160mhz
 					{
-						TableData.push([ SSID, BSSID, (vhtseg2-(2+vhtoffset))+"-"+(vhtseg2-(-2-vhtoffset)), "160MHz", "n,ac", level+"dBm" ]);
+						TableData.push([ SSID, BSSID, (vhtseg2-(2+vhtoffset))+"-"+(vhtseg2-(-2-vhtoffset)), "160MHz", "n,ac", encryption, level+"dBm" ]);
 					}
 					else									//80+80mhz
 					{
-						TableData.push([ SSID, BSSID, ((vhtseg1-(0.5*vhtoffset))+"-"+(vhtseg1-(-0.5*vhtoffset)))+","+((vhtseg2-(0.5*vhtoffset))+"-"+(vhtseg2-(-0.5*vhtoffset))), "80+80MHz", "n,ac", level+"dBm" ]);
+						TableData.push([ SSID, BSSID, ((vhtseg1-(0.5*vhtoffset))+"-"+(vhtseg1-(-0.5*vhtoffset)))+","+((vhtseg2-(0.5*vhtoffset))+"-"+(vhtseg2-(-0.5*vhtoffset))), "80+80MHz", "n,ac", encryption, level+"dBm" ]);
 					}
 				}
 			}
@@ -568,21 +526,21 @@ function generateTableData(detected)
 			{
 				if(! vhtwidth)								//40mhz
 				{
-					TableData.push([ SSID, BSSID, channel+"-"+(channel-htoffset), "40MHz", (vhtmode)?"a,n,ac":"a,n", level+"dBm" ]);
+					TableData.push([ SSID, BSSID, channel+"-"+(channel-htoffset), "40MHz", (vhtmode)?"a,n,ac":"a,n", encryption, level+"dBm" ]);
 				}
 				else
 				{
 					if(! vhtseg2)							//80mhz
 					{
-						TableData.push([ SSID, BSSID, (vhtseg1-(0.5*vhtoffset))+"-"+(vhtseg1-(-0.5*vhtoffset)), "80MHz", "n,ac", level+"dBm" ]);
+						TableData.push([ SSID, BSSID, (vhtseg1-(0.5*vhtoffset))+"-"+(vhtseg1-(-0.5*vhtoffset)), "80MHz", "n,ac", encryption, level+"dBm" ]);
 					}
 					else if(Math.abs(vhtseg1 - vhtseg2) == 8)	//160mhz
 					{
-						TableData.push([ SSID, BSSID, (vhtseg2-(2+vhtoffset))+"-"+(vhtseg2-(-2-vhtoffset)), "160MHz", "n,ac", level+"dBm" ]);
+						TableData.push([ SSID, BSSID, (vhtseg2-(2+vhtoffset))+"-"+(vhtseg2-(-2-vhtoffset)), "160MHz", "n,ac", encryption, level+"dBm" ]);
 					}
 					else									//80+80mhz. i believe this is the same above or below
 					{
-						TableData.push([ SSID, BSSID, ((vhtseg1-(0.5*vhtoffset))+"-"+(vhtseg1-(-0.5*vhtoffset)))+","+((vhtseg2-(0.5*vhtoffset))+"-"+(vhtseg2-(-0.5*vhtoffset))), "80+80MHz", "n,ac", level+"dBm" ]);
+						TableData.push([ SSID, BSSID, ((vhtseg1-(0.5*vhtoffset))+"-"+(vhtseg1-(-0.5*vhtoffset)))+","+((vhtseg2-(0.5*vhtoffset))+"-"+(vhtseg2-(-0.5*vhtoffset))), "80+80MHz", "n,ac", encryption, level+"dBm" ]);
 					}
 				}
 			}

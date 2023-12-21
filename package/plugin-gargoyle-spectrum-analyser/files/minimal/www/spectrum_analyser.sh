@@ -15,9 +15,11 @@
 <%
 	#we need to find out which wireless interfaces exist.
 	echo "var wifiLines = new Array();"
-	aps=$( iwinfo | grep ESSID | awk ' { print $1 ; } ' )
-	for ap in $aps ; do
-		iwinfo $ap info | awk ' /^wlan/ { printf "wifiLines.push(\""$1" " ;} /Channel:/ {print ""$4"\");"}'
+	radios=$(uci show wireless | grep 'wifi-device' | sed -e 's/wireless\.//g' -e 's/=wifi-device//g')
+	for radio in $radios ; do
+		band=$(uci get wireless.$radio.band)
+		phy=$(iwinfo nl80211 phyname $radio)
+		echo "wifiLines.push(\"$phy $band\");"
 	done
 %>
 </script>

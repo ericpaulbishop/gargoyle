@@ -19,9 +19,9 @@ print_mac80211_channels_for_wifi_dev()
 	htpat="\bHT[0-9]\{2,3\}"
 	vhtpat="\bVHT[0-9]\{2,3\}\(+[0-9]\{2\}\)\?"
 	hepat="\bHE[0-9]\{2,3\}\(+[0-9]\{2\}\)\?"
-	wifiN=$(iwinfo $phyname h | sed -e "s/$vhtpat//g" -e "s/$hepat//g" -e 's/^[ ]*//')
-	wifiAC=$(iwinfo $phyname h | sed -e "s/$htpat//g" -e "s/$hepat//g" -e 's/^[ ]*//')
-	wifiAX=$(iwinfo $phyname h | sed -e "s/$htpat//g" -e "s/$vhtpat//g" -e 's/^[ ]*//')
+	wifiN=$(iwinfo $wifi_dev h | sed -e "s/$vhtpat//g" -e "s/$hepat//g" -e 's/^[ ]*//')
+	wifiAC=$(iwinfo $wifi_dev h | sed -e "s/$htpat//g" -e "s/$hepat//g" -e 's/^[ ]*//')
+	wifiAX=$(iwinfo $wifi_dev h | sed -e "s/$htpat//g" -e "s/$vhtpat//g" -e 's/^[ ]*//')
 	if [ "$wifiAC" ] ; then
 		maxAC=$(echo $wifiAC | awk -F " VHT" '{print $NF}')
 		AC80P80=$(echo $wifiAC | grep "VHT80+80")

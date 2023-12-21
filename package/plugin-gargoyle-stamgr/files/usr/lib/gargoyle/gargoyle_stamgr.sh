@@ -113,7 +113,7 @@ reload_wifi()
 check_sta()
 {
 	sta_radio="$(uci_get "wireless" "$stacfgsec" "device")"
-	sta_wlan="$(echo $sta_radio | sed 's/radio/wlan/g')"
+	sta_wlan="$(echo "$sta_radio-sta0" | sed 's/radio/wl/g' )"
 	wireless_info="$(iwinfo $sta_wlan i 2>/dev/null)"
 	
 	
@@ -282,13 +282,13 @@ main_loop()
 					
 					[ -z "$stamgr_ssid" ] && [ -z "$stamgr_bssid" ] && { log_print "DEBUG" "Missing minimum attributes in sta_section $sta_section. Skipping."; sta_idx=$((sta_idx + 1 )); continue; }
 					
-					[ -n "$stamgr_bssid" ] && bssid_rgx="\"$stamgr_bssid\"" || bssid_rgx=".*"
+					[ -n "$stamgr_bssid" ] && bssid_rgx="$stamgr_bssid" || bssid_rgx=".*"
 					[ -n "$stamgr_ssid" ] && ssid_rgx="\"$stamgr_ssid\"" || ssid_rgx=".*"
 					[ -n "$stamgr_radio" ] && radio_rgx="$stamgr_radio" || radio_rgx=".*"
 					
 					regex_str="${bssid_rgx},${ssid_rgx},[\+-],${radio_rgx}\$"
 					
-					match="$(echo "$scan_results" | grep $regex_str)"
+					match="$(echo "$scan_results" | grep -m 1 $regex_str)"
 					[ -z "$match" ] && { log_print "DEBUG" "sta_section $sta_section not found in scan. Skipping."; sta_idx=$((sta_idx + 1 )); continue; }
 					scan_quality="$(echo "$match" | cut -d',' -f 1)"
 					if [ "$scan_quality" -gt "$connect_quality_threshold" ] ; then
@@ -347,13 +347,13 @@ main_loop()
 				
 				[ -z "$stamgr_ssid" ] && [ -z "$stamgr_bssid" ] && { log_print "DEBUG" "Missing minimum attributes in sta_section $sta_section. Skipping."; sta_idx=$((sta_idx + 1 )); continue; }
 				
-				[ -n "$stamgr_bssid" ] && bssid_rgx="\"$stamgr_bssid\"" || bssid_rgx=".*"
+				[ -n "$stamgr_bssid" ] && bssid_rgx="$stamgr_bssid" || bssid_rgx=".*"
 				[ -n "$stamgr_ssid" ] && ssid_rgx="\"$stamgr_ssid\"" || ssid_rgx=".*"
 				[ -n "$stamgr_radio" ] && radio_rgx="$stamgr_radio" || radio_rgx=".*"
 
 				regex_str="${bssid_rgx},${ssid_rgx},[\+-],${radio_rgx}\$"
 				
-				match="$(echo "$scan_results" | grep $regex_str)"
+				match="$(echo "$scan_results" | grep -m 1 $regex_str)"
 				[ -z "$match" ] && { log_print "DEBUG" "sta_section $sta_section not found in scan. Skipping."; sta_idx=$((sta_idx + 1 )); continue; }
 				scan_quality="$(echo "$match" | cut -d',' -f 1)"
 				if [ "$scan_quality" -gt "$connect_quality_threshold" ] ; then
