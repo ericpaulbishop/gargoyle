@@ -611,7 +611,6 @@ int parse_sub(char* subnet_string, ipany* subnet, ipany* subnet_mask, int family
 				{
 					subnet_mask->ip4 = *mask_add;
 					mask_valid = 1;
-					free(mask_add);
 				}
 			}
 			else
@@ -632,7 +631,6 @@ int parse_sub(char* subnet_string, ipany* subnet, ipany* subnet_mask, int family
 			{
 				valid = 1;
 			}
-			free(tsub);
 		}
 
 		if(valid)
@@ -657,7 +655,6 @@ int parse_sub(char* subnet_string, ipany* subnet, ipany* subnet_mask, int family
 				{
 					subnet_mask->ip6 = *mask_add;
 					mask_valid = 1;
-					free(mask_add);
 				}
 			}
 			else
@@ -682,7 +679,6 @@ int parse_sub(char* subnet_string, ipany* subnet, ipany* subnet_mask, int family
 			{
 				valid = 1;
 			}
-			free(tsub);
 		}
 		
 		if(valid)
