@@ -146,7 +146,8 @@ CONFIG_TARGET_DEVICE_PACKAGES_ipq40xx_generic_DEVICE_avm_fritzbox-7530="gargoyle
 # CONFIG_TARGET_DEVICE_ipq40xx_generic_DEVICE_edgecore_ecw5211 is not set
 # CONFIG_TARGET_DEVICE_ipq40xx_generic_DEVICE_extreme-networks_ws-ap3915i is not set
 # CONFIG_TARGET_DEVICE_ipq40xx_generic_DEVICE_ezviz_cs-w3-wd1200g-eup is not set
-# CONFIG_TARGET_DEVICE_ipq40xx_generic_DEVICE_glinet_gl-a1300 is not set
+CONFIG_TARGET_DEVICE_ipq40xx_generic_DEVICE_glinet_gl-a1300=y
+CONFIG_TARGET_DEVICE_PACKAGES_ipq40xx_generic_DEVICE_glinet_gl-a1300="gargoyle-large"
 CONFIG_TARGET_DEVICE_ipq40xx_generic_DEVICE_glinet_gl-ap1300=y
 CONFIG_TARGET_DEVICE_PACKAGES_ipq40xx_generic_DEVICE_glinet_gl-ap1300="gargoyle-large"
 CONFIG_TARGET_DEVICE_ipq40xx_generic_DEVICE_glinet_gl-b1300=y
@@ -171,8 +172,10 @@ CONFIG_TARGET_DEVICE_ipq40xx_generic_DEVICE_netgear_rbr50=y
 CONFIG_TARGET_DEVICE_PACKAGES_ipq40xx_generic_DEVICE_netgear_rbr50="gargoyle-large"
 CONFIG_TARGET_DEVICE_ipq40xx_generic_DEVICE_netgear_rbs50=y
 CONFIG_TARGET_DEVICE_PACKAGES_ipq40xx_generic_DEVICE_netgear_rbs50="gargoyle-large"
-# CONFIG_TARGET_DEVICE_ipq40xx_generic_DEVICE_netgear_srr60 is not set
-# CONFIG_TARGET_DEVICE_ipq40xx_generic_DEVICE_netgear_srs60 is not set
+CONFIG_TARGET_DEVICE_ipq40xx_generic_DEVICE_netgear_srr60=y
+CONFIG_TARGET_DEVICE_PACKAGES_ipq40xx_generic_DEVICE_netgear_srr60="gargoyle-large"
+CONFIG_TARGET_DEVICE_ipq40xx_generic_DEVICE_netgear_srs60=y
+CONFIG_TARGET_DEVICE_PACKAGES_ipq40xx_generic_DEVICE_netgear_srs60="gargoyle-large"
 # CONFIG_TARGET_DEVICE_ipq40xx_generic_DEVICE_netgear_wac510 is not set
 # CONFIG_TARGET_DEVICE_ipq40xx_generic_DEVICE_openmesh_a42 is not set
 # CONFIG_TARGET_DEVICE_ipq40xx_generic_DEVICE_openmesh_a62 is not set
@@ -186,7 +189,8 @@ CONFIG_TARGET_DEVICE_PACKAGES_ipq40xx_generic_DEVICE_netgear_rbs50="gargoyle-lar
 # CONFIG_TARGET_DEVICE_ipq40xx_generic_DEVICE_qxwlan_e2600ac-c1 is not set
 # CONFIG_TARGET_DEVICE_ipq40xx_generic_DEVICE_qxwlan_e2600ac-c2 is not set
 # CONFIG_TARGET_DEVICE_ipq40xx_generic_DEVICE_sony_ncp-hg100-cellular is not set
-# CONFIG_TARGET_DEVICE_ipq40xx_generic_DEVICE_teltonika_rutx50 is not set
+CONFIG_TARGET_DEVICE_ipq40xx_generic_DEVICE_teltonika_rutx50=y
+CONFIG_TARGET_DEVICE_PACKAGES_ipq40xx_generic_DEVICE_teltonika_rutx50="gargoyle-large"
 # CONFIG_TARGET_DEVICE_ipq40xx_generic_DEVICE_wallys_dr40x9 is not set
 # CONFIG_TARGET_DEVICE_ipq40xx_generic_DEVICE_zte_mf18a is not set
 # CONFIG_TARGET_DEVICE_ipq40xx_generic_DEVICE_zte_mf286d is not set
@@ -232,6 +236,7 @@ CONFIG_DEFAULT_fstools=y
 CONFIG_MODULE_DEFAULT_fstools=y
 CONFIG_DEFAULT_ip6tables-legacy=y
 CONFIG_MODULE_DEFAULT_ip6tables-legacy=y
+CONFIG_MODULE_DEFAULT_ipq-wifi-teltonika_rutx=y
 CONFIG_DEFAULT_iptables-legacy=y
 CONFIG_MODULE_DEFAULT_iptables-legacy=y
 CONFIG_DEFAULT_iwinfo=y
@@ -2683,7 +2688,7 @@ CONFIG_PACKAGE_resolveip=m
 # CONFIG_PACKAGE_rpcd is not set
 # CONFIG_PACKAGE_selinux-policy is not set
 # CONFIG_PACKAGE_snapshot-tool is not set
-CONFIG_PACKAGE_swconfig=y
+# CONFIG_PACKAGE_swconfig is not set
 CONFIG_PACKAGE_ubox=y
 CONFIG_PACKAGE_ubus=y
 CONFIG_PACKAGE_ubusd=y
@@ -3709,7 +3714,6 @@ CONFIG_PACKAGE_kmod-usb-core=y
 # CONFIG_PACKAGE_kmod-usb-dwc2-pci is not set
 CONFIG_PACKAGE_kmod-usb-dwc3=y
 CONFIG_PACKAGE_kmod-usb-dwc3-qcom=y
-CONFIG_PACKAGE_kmod-usb-ehci=m
 # CONFIG_PACKAGE_kmod-usb-hid is not set
 # CONFIG_PACKAGE_kmod-usb-hid-cp2112 is not set
 # CONFIG_PACKAGE_kmod-usb-hid-mcp2221 is not set
@@ -3774,7 +3778,7 @@ CONFIG_PACKAGE_kmod-usb-storage-uas=m
 CONFIG_PACKAGE_kmod-usb-wdm=m
 CONFIG_PACKAGE_kmod-usb-xhci-hcd=y
 # CONFIG_PACKAGE_kmod-usb-yealink is not set
-CONFIG_PACKAGE_kmod-usb2=m
+# CONFIG_PACKAGE_kmod-usb2 is not set
 # CONFIG_PACKAGE_kmod-usb2-pci is not set
 CONFIG_PACKAGE_kmod-usb3=y
 # CONFIG_PACKAGE_kmod-usbip is not set
@@ -4144,7 +4148,7 @@ CONFIG_OPENSSL_ENGINE=y
 CONFIG_PACKAGE_libopenssl-conf=m
 # CONFIG_PACKAGE_libopenssl-devcrypto is not set
 CONFIG_PACKAGE_libopenssl-legacy=m
-CONFIG_PACKAGE_libwolfssl=m
+# CONFIG_PACKAGE_libwolfssl is not set
 
 #
 # wolfSSL Library Configuration
@@ -4164,14 +4168,7 @@ CONFIG_WOLFSSL_HAS_ECC25519=y
 # CONFIG_WOLFSSL_HAS_ECC448 is not set
 CONFIG_WOLFSSL_HAS_OPENVPN=y
 CONFIG_WOLFSSL_ALT_NAMES=y
-CONFIG_WOLFSSL_HAS_NO_HW=y
-# CONFIG_WOLFSSL_HAS_AFALG is not set
-# CONFIG_WOLFSSL_HAS_DEVCRYPTO_CBC is not set
-# CONFIG_WOLFSSL_HAS_DEVCRYPTO_AES is not set
-# CONFIG_WOLFSSL_HAS_DEVCRYPTO_FULL is not set
 # end of wolfSSL Library Configuration
-
-# CONFIG_PACKAGE_libwolfssl-benchmark is not set
 # end of SSL
 
 #
@@ -4333,7 +4330,7 @@ CONFIG_PACKAGE_libucode=y
 CONFIG_PACKAGE_libusb-1.0=m
 CONFIG_PACKAGE_libustream-mbedtls=m
 CONFIG_PACKAGE_libustream-openssl=y
-CONFIG_PACKAGE_libustream-wolfssl=m
+# CONFIG_PACKAGE_libustream-wolfssl is not set
 CONFIG_PACKAGE_libuuid=y
 # CONFIG_PACKAGE_libv4l is not set
 CONFIG_PACKAGE_libvorbis=m
@@ -4645,7 +4642,7 @@ CONFIG_PACKAGE_hostapd-common=y
 # CONFIG_PACKAGE_wpa-supplicant is not set
 # CONFIG_WPA_RFKILL_SUPPORT is not set
 CONFIG_WPA_MSG_MIN_PRIORITY=3
-CONFIG_WPA_WOLFSSL=y
+# CONFIG_WPA_WOLFSSL is not set
 CONFIG_DRIVER_11AC_SUPPORT=y
 # CONFIG_DRIVER_11AX_SUPPORT is not set
 # CONFIG_WPA_ENABLE_WEP is not set
@@ -4663,7 +4660,7 @@ CONFIG_WPA_MBO_SUPPORT=y
 # CONFIG_PACKAGE_wpad-basic is not set
 CONFIG_PACKAGE_wpad-basic-mbedtls=m
 # CONFIG_PACKAGE_wpad-basic-openssl is not set
-CONFIG_PACKAGE_wpad-basic-wolfssl=m
+# CONFIG_PACKAGE_wpad-basic-wolfssl is not set
 # CONFIG_PACKAGE_wpad-mbedtls is not set
 # CONFIG_PACKAGE_wpad-mesh-mbedtls is not set
 # CONFIG_PACKAGE_wpad-mesh-openssl is not set
