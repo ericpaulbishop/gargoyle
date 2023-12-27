@@ -113,7 +113,9 @@ reload_wifi()
 check_sta()
 {
 	sta_radio="$(uci_get "wireless" "$stacfgsec" "device")"
-	sta_wlan="$(echo "$sta_radio-sta0" | sed 's/radio/wl/g' )"
+	phywl="$(iwinfo nl80211 phyname $sta_radio 2>&1 | sed 's/[0-9]//g')"
+	[ "$phywl" == "Phy not found" ] && phywl="phy"
+	sta_wlan="$(echo "$sta_radio-sta0" | sed "s/radio/$phywl/g" )"
 	wireless_info="$(iwinfo $sta_wlan i 2>/dev/null)"
 	
 	
