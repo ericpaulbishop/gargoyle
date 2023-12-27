@@ -17,7 +17,7 @@ if [ -e /tmp/hosts/odhcpd ] ; then
 fi
 
 echo "wlanLines = new Array();"
-iwinfo | awk '/^wl/ { printf "wlanLines.push(\""$1" "} /ESSID:/ {gsub(/"/,"",$3); printf ""$3" "} /Access Point:/ {printf ""$3"\");" }'
+iwinfo | awk '/^(phy|wl)/ { printf "wlanLines.push(\""$1" "} /ESSID:/ {gsub(/"/,"",$3); printf ""$3" "} /Access Point:/ {printf ""$3"\");" }'
 
 echo "wifiLines = new Array();"
 echo "wifiClientLines = new Array();"
