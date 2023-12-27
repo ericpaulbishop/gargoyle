@@ -8,7 +8,7 @@ PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)-$(PKG_VERSION)
 
 include $(INCLUDE_DIR)/package.mk
 
-define Package/plugin-gargoyle-spectrum-analyser/Default
+define Package/plugin-gargoyle-spectrum-analyser
 	SECTION:=admin
 	CATEGORY:=Administration
 	SUBMENU:=Gargoyle Web Interface
@@ -18,24 +18,8 @@ define Package/plugin-gargoyle-spectrum-analyser/Default
 	PKGARCH:=all
 endef
 
-define Package/plugin-gargoyle-spectrum-analyser
-$(call Package/plugin-gargoyle-spectrum-analyser/Default)
-	TITLE+= (Full)
-	VARIANT:=full
-endef
-
-define Package/plugin-gargoyle-spectrum-analyser-minimal
-$(call Package/plugin-gargoyle-spectrum-analyser/Default)
-	TITLE+= (Minimal)
-	VARIANT:=minimal
-endef
-
 define Package/plugin-gargoyle-spectrum-analyser/description
 	Graphical WiFi scanning support for Gargoyle (Full)
-endef
-
-define Package/plugin-gargoyle-spectrum-analyser-minimal/description
-	Graphical WiFi scanning support for Gargoyle (Minimal)
 endef
 
 define Build/Prepare
@@ -78,13 +62,7 @@ endef
 
 define Package/plugin-gargoyle-spectrum-analyser/install
 	$(INSTALL_DIR) $(1)
-	$(CP) ./files/full/* $(1)/
+	$(CP) ./files/* $(1)/
 endef
 
-define Package/plugin-gargoyle-spectrum-analyser-minimal/install
-	$(INSTALL_DIR) $(1)
-	$(CP) ./files/minimal/* $(1)/
-endef
-
-$(eval $(call BuildPackage,plugin-gargoyle-spectrum-analyser-minimal))
 $(eval $(call BuildPackage,plugin-gargoyle-spectrum-analyser))
