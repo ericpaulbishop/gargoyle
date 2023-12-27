@@ -2,11 +2,12 @@
 asus_rt-ac42u-squashfs-
 asus_rt-ac58u-squashfs-
 avm_fritzbox-4040-squashfs-
+avm_fritzbox-7520-squashfs-
 avm_fritzbox-7530-squashfs-
+glinet_gl-a1300-squashfs-
 glinet_gl-ap1300-squashfs-
 glinet_gl-b1300-squashfs-
 glinet_gl-b2200-squashfs-
-glinet_gl-s1300-squashfs-
 linksys_ea6350v3-squashfs-
 linksys_ea8300-squashfs-
 linksys_mr8300-squashfs-
@@ -14,7 +15,9 @@ netgear_ex6100v2-squashfs-
 netgear_ex6150v2-squashfs-
 netgear_rbr50-squashfs-
 netgear_rbs50-squashfs-
-teltonika_rutx10-squashfs-
+netgear_srr60-squashfs-
+netgear_srs60-squashfs-
+teltonika_rutx50-squashfs-
 zyxel_nbg6617-squashfs-
 uboot-fritz
 upload-to-f
