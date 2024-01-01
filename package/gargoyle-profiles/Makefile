@@ -18,7 +18,7 @@ define Package/gargoyle-profiles/Default
 		+qos-gargoyle +plugin-gargoyle-qos \
 		+ddns-gargoyle +plugin-gargoyle-ddns \
 		+plugin-gargoyle-wol \
-		+ewget +relayd +wpad-openssl +kmod-ipt-nat6 +kmod-ipt-raw6 \
+		+ewget +relayd +wpad-mbedtls +kmod-ipt-nat6 +kmod-ipt-raw6 \
 		+kmod-nf-nat6 +ip6tables-mod-nat +usteer
 endef
 
@@ -65,7 +65,7 @@ define Package/gargoyle-large
 	TITLE+= full functionality
 	DEPENDS+= +plugin-gargoyle-usb-storage-full +plugin-gargoyle-minidlna \
 		+plugin-gargoyle-usb-printer +plugin-gargoyle-webcam \
-		+openvpn-gargoyle-openssl +plugin-gargoyle-openvpn \
+		+openvpn-gargoyle-mbedtls +plugin-gargoyle-openvpn \
 		+openvpn-gargoyle-easy-rsa +plugin-gargoyle-tor \
 		+wireguard-tools +plugin-gargoyle-wireguard \
 		+plugin-gargoyle-ipheth-tether
