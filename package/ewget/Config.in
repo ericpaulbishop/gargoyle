@@ -1,0 +1,17 @@
+if PACKAGE_ewget
+
+comment "SSL support"
+
+choice
+	prompt "Selected SSL library"
+	default EWGET_MBEDTLS
+
+	config EWGET_MBEDTLS
+		bool "mbed TLS"
+
+	config EWGET_OPENSSL
+		bool "OpenSSL"
+
+endchoice
+
+endif

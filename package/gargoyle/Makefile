@@ -30,7 +30,7 @@ define Package/gargoyle
 	SECTION:=admin
 	CATEGORY:=Administration
 	TITLE:=Gargoyle Web Interface
-	DEPENDS:=+uci +libuci +libjson-c +haserl-i18n +uhttpd +libustream-openssl +bwmon-gargoyle +webmon-gargoyle +libericstools +gpkg +gargoyle-ip-query  $(ATH_DEPS) $(BRCM_DEPS) $(LED_DEPS)
+	DEPENDS:=+uci +libuci +libjson-c +haserl-i18n +uhttpd +libustream-mbedtls +bwmon-gargoyle +webmon-gargoyle +libericstools +gpkg +gargoyle-ip-query  $(ATH_DEPS) $(BRCM_DEPS) $(LED_DEPS)
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
 endef
 

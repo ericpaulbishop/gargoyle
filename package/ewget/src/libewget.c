@@ -121,7 +121,7 @@ static int alarm_socket = -1;
 static int alarm_socket_closed=0;
 static void alarm_triggered(int sig); 
 
-
+#include <sys/random.h>
 /* SSL definitions */
 #ifdef HAVE_SSL
 
@@ -130,18 +130,8 @@ static void alarm_triggered(int sig);
 		static int ssl_servername_cb(SSL *s, int *ad, void *arg);
 	#endif
 	
-	#ifdef USE_CYASSL
-		#ifdef USE_CYASSL_INCLUDE_DIR
-			#include <cyassl/openssl/ssl.h>
-		#else
-			#include <openssl/ssl.h>
-		#endif
-	#endif
-	
-	#ifdef USE_MBEDTLS	
-	
-		#define mbedtls_time_t     time_t
-		#include <mbedtls/net.h>
+	#ifdef USE_MBEDTLS
+		#include <mbedtls/net_sockets.h>
 		#include <mbedtls/ssl.h>
 		#include <mbedtls/certs.h>
 		#include <mbedtls/x509.h>
@@ -149,49 +139,41 @@ static void alarm_triggered(int sig);
 		#include <mbedtls/error.h>
 		#include <mbedtls/version.h>
 		#include <mbedtls/entropy.h>
+		
+		#define AES_GCM_CIPHERS(v)                              \
+				MBEDTLS_TLS_##v##_WITH_AES_128_GCM_SHA256,      \
+				MBEDTLS_TLS_##v##_WITH_AES_256_GCM_SHA384
+
+		#define AES_CBC_CIPHERS(v)                              \
+				MBEDTLS_TLS_##v##_WITH_AES_128_CBC_SHA,         \
+				MBEDTLS_TLS_##v##_WITH_AES_256_CBC_SHA
+
+		#define AES_CIPHERS(v)                                  \
+				AES_GCM_CIPHERS(v),                             \
+				AES_CBC_CIPHERS(v)
 
 		static const int default_ciphersuites[] =
 		{
-			#if defined(MBEDTLS_AES_C)
-			#if defined(MBEDTLS_SHA2_C)
-			    MBEDTLS_TLS_RSA_WITH_AES_256_CBC_SHA256,
-			#endif /* MBEDTLS_SHA2_C */
-			#if defined(MBEDTLS_GCM_C) && defined(MBEDTLS_SHA4_C)
-			    MBEDTLS_TLS_RSA_WITH_AES_256_GCM_SHA384,
-			#endif /* MBEDTLS_SHA2_C */
-			    MBEDTLS_TLS_RSA_WITH_AES_256_CBC_SHA,
+			MBEDTLS_TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
+			AES_GCM_CIPHERS(ECDHE_ECDSA),
+			MBEDTLS_TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
+			AES_GCM_CIPHERS(ECDHE_RSA),
+			MBEDTLS_TLS_DHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
+			AES_GCM_CIPHERS(DHE_RSA),
+			AES_CBC_CIPHERS(ECDHE_ECDSA),
+			AES_CBC_CIPHERS(ECDHE_RSA),
+			AES_CBC_CIPHERS(DHE_RSA),
+			/* Removed in Mbed TLS 3.0.0 */
+			#ifdef MBEDTLS_TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA
+				MBEDTLS_TLS_DHE_RSA_WITH_3DES_EDE_CBC_SHA,
 			#endif
-			#if defined(MBEDTLS_CAMELLIA_C)
-			#if defined(MBEDTLS_SHA2_C)
-			    MBEDTLS_TLS_RSA_WITH_CAMELLIA_256_CBC_SHA256,
-			#endif /* MBEDTLS_SHA2_C */
-			    MBEDTLS_TLS_RSA_WITH_CAMELLIA_256_CBC_SHA,
+			AES_CIPHERS(RSA),
+			/* Removed in Mbed TLS 3.0.0 */
+			#ifdef MBEDTLS_TLS_RSA_WITH_3DES_EDE_CBC_SHA
+				MBEDTLS_TLS_RSA_WITH_3DES_EDE_CBC_SHA,
 			#endif
-			#if defined(MBEDTLS_AES_C)
-			#if defined(MBEDTLS_SHA2_C)
-			    MBEDTLS_TLS_RSA_WITH_AES_128_CBC_SHA256,
-			#endif /* MBEDTLS_SHA2_C */
-			#if defined(MBEDTLS_GCM_C) && defined(MBEDTLS_SHA2_C)
-			    MBEDTLS_TLS_RSA_WITH_AES_128_GCM_SHA256,
-			#endif /* MBEDTLS_SHA2_C */
-			    MBEDTLS_TLS_RSA_WITH_AES_128_CBC_SHA,
-			#endif
-			#if defined(MBEDTLS_CAMELLIA_C)
-			#if defined(MBEDTLS_SHA2_C)
-			    MBEDTLS_TLS_RSA_WITH_CAMELLIA_128_CBC_SHA256,
-			#endif /* MBEDTLS_SHA2_C */
-			    MBEDTLS_TLS_RSA_WITH_CAMELLIA_128_CBC_SHA,
-			#endif
-			#if defined(MBEDTLS_DES_C)
-			    MBEDTLS_TLS_RSA_WITH_3DES_EDE_CBC_SHA,
-			#endif
-			#if defined(MBEDTLS_ARC4_C)
-			    MBEDTLS_TLS_RSA_WITH_RC4_128_SHA,
-			    MBEDTLS_TLS_RSA_WITH_RC4_128_MD5,
-			#endif
-			    0
+			0
 		};
-
 
 		typedef mbedtls_ssl_context SSL;
 		typedef struct pctx
@@ -201,7 +183,6 @@ static void alarm_triggered(int sig);
 			mbedtls_x509_crt ssl_client_cert;
 			mbedtls_pk_context key;
 			mbedtls_ssl_session ssl_client_session;
-
 		} SSL_CTX;
 		
 		static void SSL_free( SSL* ssl ) { mbedtls_ssl_free(ssl); free(ssl); }
@@ -210,13 +191,6 @@ static void alarm_triggered(int sig);
 		static int SSL_read( SSL* ssl, char *buf, size_t len ) { return mbedtls_ssl_read(ssl, (unsigned char*)buf, len); }
 		static int SSL_write( SSL* ssl, char *buf, size_t len ) { return mbedtls_ssl_write(ssl, (unsigned char*)buf, len); }
 
-	#endif
-	
-
-	#ifdef USE_MATRIXSSL
-		#include "matrixssl_helper.h"
-		typedef sslKeys_t SSL_CTX;
-		static void SSL_CTX_free(SSL_CTX* ctx){ free(ctx); }
 	#endif
 
 	typedef struct
@@ -349,9 +323,6 @@ int write_url_request_to_stream(url_request** url, FILE* header_stream, FILE* bo
 
 }
 
-
-
-
 void free_http_response(http_response* page)
 {
 	if(page != NULL)
@@ -367,8 +338,6 @@ void free_http_response(http_response* page)
 		free(page);
 	}
 }
-
-
 
 url_request* parse_url(char* url, char* user_agent, int family)
 {
@@ -389,10 +358,6 @@ url_request* parse_url(char* url, char* user_agent, int family)
 	{
 		return new_url;
 	}
-	
-
-	
-
 	
 	/* step 1, parse out protocol */
 	lower_url = strdup(url);
@@ -557,7 +522,6 @@ url_request* parse_url(char* url, char* user_agent, int family)
 	return new_url;
 }
 
-
 void free_url_request(url_request* url)
 {
 	if(url != NULL)
@@ -585,8 +549,6 @@ void free_url_request(url_request* url)
 		free(url);
 	}
 }
-
-
 
 void set_ewget_read_buffer_size(unsigned long size)
 {
@@ -652,10 +614,6 @@ static char* http_unescape(const char* escaped)
 	return unescaped;
 }
 
-
-
-
-
 static void alarm_triggered(int sig)
 {
 	if(alarm_socket >= 0)
@@ -686,7 +644,6 @@ void parse_redirect(url_request** url, char* redirect_url)
 	
 	*url = new_url;
 }
-
 
 static http_response* retrieve_http(	url_request *url, 
 					void* (*initialize_connection)(char*, int, int), 
@@ -737,10 +694,6 @@ static http_response* retrieve_http(	url_request *url,
 	}
 	return reply;
 }
-
-
-
-
 
 static char* create_http_request(url_request* url)
 {
@@ -801,7 +754,6 @@ static char* create_http_request(url_request* url)
 
 	return req_str1;
 }
-
 
 static void get_http_response(void* connection_data, int (*read_connection)(void*, char*, int), http_response *reply, FILE* header_stream, FILE* body_stream, FILE* combined_stream, int follow_redirects, char** redirect_url)
 {
@@ -990,126 +942,12 @@ static void get_http_response(void* connection_data, int (*read_connection)(void
 
 }
 
-/*
-
-static http_response* get_http_response(void* connection_data, int (*read_connection)(void*, char*, int))
-{
-
-
-	char* http_data = NULL;
-	int read_buffer_size = DEFAULT_READ_BUFFER_SIZE;
-	char* read_buffer = (char*)malloc((read_buffer_size+1)*sizeof(char));
-	int total_bytes_read = 0;
-	int bytes_read;
-	
-	http_response *reply = (http_response*)malloc(sizeof(http_response));
-	reply->header = NULL;
-	reply->data = NULL;
-	reply->is_text = 0;
-	reply->length = 0;
-
-
-	bytes_read = read_connection(connection_data, read_buffer, read_buffer_size);
-	bytes_read = bytes_read < 0 ? 0 : bytes_read;
-	read_buffer[bytes_read] = '\0'; // facilitates string processing 
-	while(bytes_read > 0)
-	{
-		int updated_header = 0;
-		if(reply->header == NULL)
-		{
-			int header_end = -1;
-			char* cr_end = strstr(read_buffer, "\n\r\n");
-			char* lf_end = strstr(read_buffer, "\n\n");
-			if(cr_end != NULL && lf_end != NULL)
-			{
-				char *first_end = cr_end < lf_end ? cr_end : lf_end;
-				int modifier = cr_end < lf_end ? 2 : 1;
-				header_end = modifier+ (int)(first_end - read_buffer);
-			}
-			else if(cr_end != NULL)
-			{
-				header_end = 2+ (int)(cr_end - read_buffer);
-			}
-			else if(lf_end != NULL)
-			{
-				header_end = 1 + (int)(lf_end - read_buffer);
-			}
-			if(header_end < 0 && bytes_read < read_buffer_size)
-			{
-				header_end = bytes_read-1;
-			}
-			if(header_end > 0)
-			{
-				char* header = (char*)malloc((total_bytes_read+header_end+1)*sizeof(char));
-				char* content_start;
-				
-				updated_header = 1;
-			
-				if(total_bytes_read > 0)
-				{
-					memcpy(header, http_data, total_bytes_read);
-				}
-				memcpy(header, read_buffer, header_end);
-				header[total_bytes_read+header_end] = '\0';
-				reply->header= strdup(header);
-
-				free(http_data);
-				total_bytes_read = (bytes_read-(header_end+1)) >= 0 ? (bytes_read-(header_end+1)) : 0;
-				http_data = (char*)malloc( (total_bytes_read+1)*sizeof(char));
-				memcpy(http_data, read_buffer+header_end+1, total_bytes_read );
-				
-				to_lowercase(header);
-				content_start = strstr(header, "content-type:");
-				if(content_start != NULL)
-				{
-					int content_end = char_index(content_start, '\n');
-					char *content = (char*)malloc((content_end+1)*sizeof(char));
-					memcpy(content, content_start, content_end);
-					content[content_end] = '\0';
-					reply->is_text = strstr(content, "text") == NULL ? 0 : 1;
-					free(content);
-				}
-				free(header);
-			}
-		}
-		if(updated_header ==0)
-		{
-			char* old_http_data = http_data;
-			http_data = (char*)malloc((total_bytes_read + bytes_read+1)*sizeof(char));
-			memcpy(http_data, old_http_data, total_bytes_read);
-			memcpy(http_data+total_bytes_read, read_buffer, bytes_read);
-			if(old_http_data != NULL)
-			{
-				free(old_http_data);
-			}
-			total_bytes_read = total_bytes_read + bytes_read;
-		}
-		bytes_read=read_connection(connection_data, read_buffer, read_buffer_size);
-		bytes_read = bytes_read < 0 ? 0 : bytes_read;
-		read_buffer[bytes_read] = '\0'; // facilitates string processing 
-	}
-	if(http_data == NULL)
-	{
-		http_data = (char*)malloc(sizeof(char));
-	}
-	http_data[total_bytes_read] = '\0';
-	reply->length = total_bytes_read;
-	reply->data = http_data;
-
-	free(read_buffer);
-	return reply;
-}
-
-*/
-
-
 static int char_index(char* str, int ch)
 {
 	char* result = strchr(str, ch);
 	int return_value = result == NULL ? -1 : (int)(result - str);
 	return return_value;
 }
-
 
 static int tcp_connect(char* hostname, int port, int family)
 {
@@ -1121,8 +959,6 @@ static int tcp_connect(char* hostname, int port, int family)
 	int connection;
 	char portstr[6];
 	int gairet;
-
-
 
 	if(hostname == NULL)
 	{
@@ -1246,7 +1082,6 @@ static int tcp_connect(char* hostname, int port, int family)
 	return sockfd;
 }
 
-
 static char* escape_chars_to_hex(char* str, char* chars_to_escape)
 {
 	
@@ -1298,7 +1133,6 @@ static char* escape_chars_to_hex(char* str, char* chars_to_escape)
 	}	
 	return new_str;
 }
-
 
 static char* encode_base_64_str( char* original, int linesize )
 {
@@ -1363,8 +1197,6 @@ static void encode_block_base64( unsigned char in[3], unsigned char out[4], int 
 }
 
 #ifndef USE_ERICS_TOOLS
-
-
 char* dynamic_replace(char* template_str, char* old, char* new)
 {
 	char *ret;
@@ -1404,7 +1236,6 @@ char* dynamic_replace(char* template_str, char* old, char* new)
 	return ret;
 }
 
-
 static void to_lowercase(char* str)
 {
 	int i;
@@ -1414,10 +1245,8 @@ static void to_lowercase(char* str)
 	}
 }
 
-
 char* dynamic_strcat(int num_strs, ...)
 {
-	
 	va_list strs;
 	int new_length = 0;
 	int i;
@@ -1452,10 +1281,7 @@ char* dynamic_strcat(int num_strs, ...)
 	
 	return new_str;
 }
-
-
 #endif
-
 
 /* returns data upon success, NULL on failure */
 static void* initialize_connection_http(char* host, int port, int family)
@@ -1518,26 +1344,12 @@ static void destroy_connection_http(void* connection_data)
 #ifdef HAVE_SSL
 
 #ifdef USE_MBEDTLS
-
-static int urandom_fd = -1;
-static int ewget_urandom_init(void)
-{
-	if (urandom_fd > -1)
-	{
-		return 1;
-	}
-
-	urandom_fd = open("/dev/urandom", O_RDONLY);
-	if (urandom_fd < 0)
-	{
-		return -1;
-	}
-
-	return 1;
-}
 static int ewget_urandom(void *ctx, unsigned char *out, size_t len)
 {
-	if (read(urandom_fd, out, len) < 0)
+	ssize_t ret;
+	
+	ret = getrandom(out, len, 0);
+	if(ret < 0 || (size_t)ret != len)
 		return MBEDTLS_ERR_ENTROPY_SOURCE_FAILED;
 
 	return 0;
@@ -1600,73 +1412,35 @@ static void* initialize_connection_https(char* host, int port, int family)
 		#endif
 
 		#ifdef USE_MBEDTLS
-			if(ewget_urandom_init() > 0)
-			{
-				ssl = (SSL*)malloc(sizeof(SSL));
-				memset(ssl, 0, sizeof(SSL));
-				
-				ctx = (SSL_CTX*)malloc(sizeof(SSL_CTX));	
-				memset(ctx, 0, sizeof(SSL_CTX));
-				mbedtls_pk_init(&ctx->key);
-
-
-				/* if(mbedtls_ssl_init(ssl) == 0) */
-				mbedtls_ssl_init(ssl);
-				mbedtls_ssl_config_init(&(ctx->conf));
-				mbedtls_ssl_config_defaults( &(ctx->conf),
-					MBEDTLS_SSL_IS_CLIENT,
-					MBEDTLS_SSL_TRANSPORT_STREAM,
-					MBEDTLS_SSL_PRESET_DEFAULT );
-				
-				mbedtls_ssl_conf_endpoint(&(ctx->conf), MBEDTLS_SSL_IS_CLIENT);
-				mbedtls_ssl_conf_authmode(&(ctx->conf), MBEDTLS_SSL_VERIFY_NONE);
-				mbedtls_ssl_conf_rng(&(ctx->conf), ewget_urandom, NULL);
-				mbedtls_ssl_conf_own_cert(&(ctx->conf), &(ctx->ssl_client_cert), &(ctx->key)); 
-				mbedtls_ssl_conf_ciphersuites(&(ctx->conf), default_ciphersuites);
-				mbedtls_ssl_setup( ssl, &(ctx->conf) );
-				
-				ctx->socket = socket;
-				mbedtls_ssl_set_bio(ssl, &(ctx->socket), mbedtls_net_send, mbedtls_net_recv, NULL);
+			ssl = (SSL*)malloc(sizeof(SSL));
+			memset(ssl, 0, sizeof(SSL));
 			
-				mbedtls_ssl_session_reset(ssl);
-				initialized = mbedtls_ssl_handshake(ssl);
-				
-			}
+			ctx = (SSL_CTX*)malloc(sizeof(SSL_CTX));
+			memset(ctx, 0, sizeof(SSL_CTX));
+			mbedtls_pk_init(&ctx->key);
+
+			mbedtls_ssl_init(ssl);
+			mbedtls_ssl_config_init(&(ctx->conf));
+			mbedtls_ssl_config_defaults( &(ctx->conf),
+				MBEDTLS_SSL_IS_CLIENT,
+				MBEDTLS_SSL_TRANSPORT_STREAM,
+				MBEDTLS_SSL_PRESET_DEFAULT );
+			
+			mbedtls_ssl_conf_authmode(&(ctx->conf), MBEDTLS_SSL_VERIFY_NONE);
+			mbedtls_ssl_conf_rng(&(ctx->conf), ewget_urandom, NULL);
+			mbedtls_ssl_conf_own_cert(&(ctx->conf), &(ctx->ssl_client_cert), &(ctx->key)); 
+			mbedtls_ssl_conf_ciphersuites(&(ctx->conf), default_ciphersuites);
+			mbedtls_ssl_set_hostname( ssl, host );
+			mbedtls_ssl_setup( ssl, &(ctx->conf) );
+			
+			ctx->socket = socket;
+			mbedtls_ssl_set_bio(ssl, &(ctx->socket), mbedtls_net_send, mbedtls_net_recv, NULL);
+
+			mbedtls_ssl_session_reset(ssl);
+			initialized = mbedtls_ssl_handshake(ssl);
+			/* would check cert here if we were doing it */
 		#endif
 
-
-
-		#ifdef USE_CYASSL
-			SSL_METHOD*  method  = 0;
-			#if defined(CYASSL_DTLS)
-				method  = DTLSv1_client_method();
-			#elif  !defined(NO_TLS)
-				method  = TLSv1_client_method();
-			#else
-				method  = SSLv3_client_method();
-			#endif
-			ctx = SSL_CTX_new(method);
-			SSL_CTX_set_verify(ctx, SSL_VERIFY_NONE, 0);
-    			ssl = SSL_new(ctx);
-			SSL_set_fd(ssl, socket);
-			initialized = SSL_connect(ssl);
-		#endif
-
-		#ifdef USE_MATRIXSSL
-			matrixSslOpen();
-			initialized = -1;
-		       	if(matrixSslOpen() >= 0)
-			{
-				int key_test = matrixSslReadKeys(&ctx, NULL, NULL, NULL, NULL);
-				ssl = SSL_new(ctx, 0);
-				if(ssl != NULL && key_test >=0)
-				{
-					SSL_set_fd(ssl, socket);
-					/* would define cert checker here if we were doing it */
-					initialized = SSL_connect(ssl, NULL, NULL); 
-				}
-			}
-		#endif
 		if(initialized >= 0)
 		{
 			connection_data = (ssl_connection_data*)malloc(sizeof(ssl_connection_data));
@@ -1679,16 +1453,12 @@ static void* initialize_connection_https(char* host, int port, int family)
 			close(socket);
 			SSL_free(ssl);
 			SSL_CTX_free(ctx);
-			#ifdef USE_MATRIXSSL
-				matrixSslClose();
-			#endif
-
 		}
 	}
 
-
 	return connection_data;
 }
+
 static int read_https(void* connection_data, char* read_buffer, int read_length)
 {
 	ssl_connection_data *cd = (ssl_connection_data*)connection_data;
@@ -1703,11 +1473,13 @@ static int read_https(void* connection_data, char* read_buffer, int read_length)
 	return bytes_read;
 
 }
+
 static int write_https(void* connection_data, char* data, int data_length)
 {
 	ssl_connection_data *cd = (ssl_connection_data*)connection_data;
 	return SSL_write(cd->ssl, data, data_length);
 }
+
 static void destroy_connection_https(void* connection_data)
 {
 	if(connection_data != NULL)
@@ -1722,11 +1494,6 @@ static void destroy_connection_https(void* connection_data)
 		SSL_free(cd->ssl);
 		SSL_CTX_free(cd->ctx);
 		free(cd);
-		#ifdef USE_MATRIXSSL
-			matrixSslClose();
-		#endif
 	}
 }
-
 #endif /* end HAVE_SSL definitions */
-

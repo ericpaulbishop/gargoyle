@@ -8,12 +8,11 @@ endif
 
 
 #for ssl, uncomment the (one and only one) ssl library to link with
-#USE_MATRIXSSL:=1
-#USE_CYASSL:=1
-USE_OPENSSL:=1
+#USE_MBEDTLS:=1
+#USE_OPENSSL:=1
 
 #uncomment to link to ericstools instead of compiling as static
-STATIC_LIBS:=1
+#STATIC_LIBS:=1
 
 CFLAGS:=$(CFLAGS) -Wall -Os
 LIBS:=
@@ -22,27 +21,17 @@ STATIC_OBJS:=
 ERICSTOOLS_DIR:=./ericstools
 EWGET_DIR:=./ewget
 
-ifeq ($(USE_CYASSL), 1)
-	SSL_DEFS:= -DUSE_CYASSL -DHAVE_SSL
-	ifeq ($(USE_CYASSL_INCLUDE_DIR), 1)
-		SSL_DEFS:=$(SSL_DEFS) -DUSE_CYASSL_INCLUDE_DIR
-	endif
-	LIBS:=$(LIBS) -lcyassl -lm
-	USE_MATRIXSSL=
+ifeq ($(USE_MBEDTLS), 1)
+	SSL_DEFS:= -DUSE_MBEDTLS -DHAVE_SSL
+	LIBS:=$(LIBS) -lmbedtls
+	USE_MBEDTLS=1
 	USE_OPENSSL=
-endif
-ifeq ($(USE_MATRIXSSL), 1)
-	SSL_DEFS:= -DUSE_MATRIXSSL  -DHAVE_SSL 
-	LIBS:=$(LIBS) -lmatrixssl
-	USE_CYASSL=
-	USE_OPENSSL=
-	
 endif
 ifeq ($(USE_OPENSSL), 1)
 	SSL_DEFS:= -DUSE_OPENSSL -DHAVE_SSL
 	LIBS:=$(LIBS) -lcrypto -lssl
-	USE_MATRIXSSL=
-	USE_CYASSL=
+	USE_MBEDTLS=
+	USE_OPENSSL=1
 endif
 
 ifeq ($(STATIC_LIBS), 1)
