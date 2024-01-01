@@ -149,6 +149,7 @@ create_server_conf()
 		random_domain=$( random_string 15 )
 		cat << 'EOF' >vars
 set_var EASYRSA_BATCH "yes"
+set_var EASYRSA_SILENT "yes"
 set_var EASYRSA_RAND_SN "no"
 set_var EASYRSA_DN "org"
 set_var EASYRSA_KEY_SIZE 1024
@@ -162,7 +163,6 @@ cat << EOF >>vars
 set_var EASYRSA_CA_EXPIRE $EXPIRATION_MAX
 set_var EASYRSA_CERT_EXPIRE $EXPIRATION_MAX
 set_var EASYRSA_REQ_EMAIL '$name@$random_domain.com'
-set_var EASYRSA_REQ_CN '$name'
 set_var EASYRSA '$random_dir'
 set_var EASYRSA_PKI '$random_dir/keys'
 set_var EASYRSA_OPENSSL "$SSLVARIANT"
@@ -171,7 +171,7 @@ EOF
 		./easyrsa gen-dh
 		./easyrsa build-ca nopass
 		./easyrsa build-server-full server nopass
-		openvpn --genkey --secret ta.key
+		openvpn --genkey secret ta.key
 		mkdir -p ./keys/issued/ ./keys/certs_by_serial/
 		./easyrsa gen-crl
 		cp keys/issued/server.crt keys/private/server.key keys/ca.crt keys/private/ca.key keys/dh.pem keys/index.txt keys/index.txt.attr keys/serial keys/crl.pem ta.key "$OPENVPN_DIR"/
@@ -289,6 +289,7 @@ create_allowed_client_conf()
 		random_domain=$( random_string 15 )
 		cat << 'EOF' >vars
 set_var EASYRSA_BATCH "yes"
+set_var EASYRSA_SILENT "yes"
 set_var EASYRSA_RAND_SN "no"
 set_var EASYRSA_DN "org"
 set_var EASYRSA_KEY_SIZE 1024
@@ -302,7 +303,6 @@ cat << EOF >>vars
 set_var EASYRSA_CA_EXPIRE $EXPIRATION_MAX
 set_var EASYRSA_CERT_EXPIRE $EXPIRATION_MAX
 set_var EASYRSA_REQ_EMAIL '$openvpn_client_id@$random_domain.com'
-set_var EASYRSA_REQ_CN '$openvpn_client_id'
 set_var EASYRSA '$random_dir'
 set_var EASYRSA_PKI '$random_dir/keys'
 set_var EASYRSA_OPENSSL "$SSLVARIANT"
@@ -501,6 +501,7 @@ revoke_client_certificate()
 
 	cat << 'EOF' >vars
 set_var EASYRSA_BATCH "yes"
+set_var EASYRSA_SILENT "yes"
 set_var EASYRSA_RAND_SN "no"
 set_var EASYRSA_DN "org"
 set_var EASYRSA_KEY_SIZE 1024
