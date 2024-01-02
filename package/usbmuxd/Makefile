@@ -8,20 +8,24 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=usbmuxd
-PKG_VERSION:=1.1.1
+PKG_VERSION:=1.1.2
 PKG_RELEASE:=1
+PKG_REV:=360619c5f721f93f0b9d8af1a2df0b926fbcf281
 
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
-PKG_SOURCE_URL:=https://www.libimobiledevice.org/downloads
-PKG_HASH:=c0ec9700172bf635ccb5bed98daae607d2925c2bc3597f25706ecd9dfbfd2d9e
+PKG_SOURCE_PROTO:=git
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
+PKG_SOURCE_URL:=https://github.com/libimobiledevice/usbmuxd.git
+PKG_MIRROR_HASH:=1efdf33829471dde04308bc457298add45c974825cf41b5200af783a8e572b70
+PKG_SOURCE_VERSION:=$(PKG_REV)
 
-PKG_MAINTAINER:=Rosen Penev <rosenp@gmail.com>
+PKG_MAINTAINER:=Michael Gray <support@lantisproject.com>
 PKG_LICENSE:=GPL-2.0-or-later
 PKG_LICENSE_FILES:=COPYING.GPLv2
 PKG_CPE_ID:=cpe:/a:libimobiledevice:usbmuxd
 
 PKG_INSTALL:=1
 PKG_BUILD_PARALLEL:=1
+PKG_FIXUP:=autoreconf
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -31,7 +35,7 @@ define Package/usbmuxd
   SUBMENU:=libimobiledevice
   TITLE:=USB multiplexing daemon
   URL:=https://www.libimobiledevice.org/
-  DEPENDS:=+librt +libusb-1.0 +libusbmuxd +libopenssl +libimobiledevice
+  DEPENDS:=+librt +libusb-1.0 +libusbmuxd +libmbedtls +libimobiledevice
 endef
 
 define Package/usbmuxd/description
@@ -48,6 +52,11 @@ define Package/usbmuxd/conffiles
 endef
 
 CONFIGURE_ARGS += --with-systemd
+
+define Build/Prepare
+	echo "$(PKG_VERSION)" > $(PKG_BUILD_DIR)/.tarball-version
+	$(call Build/Prepare/Default)
+endef
 
 define Package/usbmuxd/install
 	$(INSTALL_DIR) $(1)/etc/init.d
