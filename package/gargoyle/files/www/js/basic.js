@@ -218,7 +218,7 @@ function saveChanges()
 				}
 				else if(getSelectedValue("wan_protocol").match(/iph/))
 				{
-					uci.set('network', 'wan', 'ifname', iphif);
+					uci.set('network', 'wan', 'device', iphif);
 				}
 				else
 				{
