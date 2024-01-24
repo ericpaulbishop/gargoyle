@@ -11,7 +11,7 @@ LIBS:=-lmbedtls -lmbedx509 -lmbedcrypto -lericstools
 STATIC_OBJS:=mbedtlsclu_common.c
 DEFS:=-DDEBUG -DOPENSSL_ENV_CONF_COMPAT
 
-all: mbedtlsclu_common.o dhparam genpkey req
+all: mbedtlsclu_common.o dhparam genpkey req ca
 mbedtlsclu_common.o: mbedtlsclu_common.c
 	$(CC) $(CFLAGS) $(DEFS) -c mbedtlsclu_common.c -o $@
 	
@@ -33,5 +33,11 @@ req: req.o $(STATIC_OBJS)
 req.o: req.c $(STATIC_OBJS)
 	$(CC) $(CFLAGS) $(DEFS) -c req.c -o $@
 
+ca: ca.o $(STATIC_OBJS)
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ $(LIBS)
+
+ca.o: ca.c $(STATIC_OBJS)
+	$(CC) $(CFLAGS) $(DEFS) -c ca.c -o $@
+
 clean:
-	rm -rf *.o *.a *~ .*sw* mbedtlsclu_common dhparam genpkey req
+	rm -rf *.o *.a *~ .*sw* mbedtlsclu_common dhparam genpkey req ca

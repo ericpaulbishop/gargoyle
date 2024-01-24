@@ -28,16 +28,6 @@
  */
 
 #include "mbedtlsclu_common.h"
-#include "erics_tools.h"
-#define malloc safe_malloc
-#define strdup safe_strdup
-
-#define FORMAT_PEM              0
-#define FORMAT_DER              1
-
-#define REQ_TYPE_CSR			0
-#define REQ_TYPE_CRT			1
-#define REQ_TYPE_UNSPEC			-1
 
 #define DFL_FILENAME            "keyfile.key"
 #define DFL_PASSWORD            NULL
@@ -53,15 +43,6 @@
 #define DFL_SERIAL				"1"
 #define DFL_DAYS				365
 #define DFL_VERSION				MBEDTLS_X509_CRT_VERSION_3
-
-#ifdef OPENSSL_ENV_CONF_COMPAT
-/*
- * If OPENSSL_ENV_CONF_COMPAT then we will allow the use of the OpenSSL version of the ENV variable
- * We will prefer the mbedTls variant where both are provided
- */
-#define OPENSSL_ENV_CONF	"OPENSSL_CONF"
-#endif
-#define MBEDTLS_ENV_CONF	"MBEDTLS_CONF"
 
 #define USAGE \
     "\n usage: req [options]\n"																				\
@@ -120,344 +101,6 @@ int main(void)
 #include "mbedtls/error.h"
 
 #include <errno.h>
-
-typedef enum {
-    SERIAL_FRMT_UNSPEC,
-    SERIAL_FRMT_DEC,
-    SERIAL_FRMT_HEX
-} serial_format_t;
-
-typedef struct conf_req_csr_parameters {
-	char* default_bits;
-	char* default_keyfile;
-	char* default_md;
-	char* distinguished_name_tag;
-	char* x509_extensions_tag;
-	
-	char* default_country;
-	char* default_state;
-	char* default_locality;
-	char* default_org;
-	char* default_orgunit;
-	char* default_commonname;
-	char* default_email;
-	char* default_serial;
-	
-	char* subject_key_identifier;
-	char* authority_key_identifier;
-	char* basic_contraints;
-	char* key_usage;
-	char* ns_cert_type;
-}
-conf_req_csr_parameters;
-
-typedef struct conf_req_crt_parameters {
-	char* default_ca_tag;
-	char* x509_extensions_tag;
-	char* crl_extensions_tag;
-	char* policy_tag;
-	
-	char* pki_dir;
-	char* certs_dir;
-	char* crl_dir;
-	char* database;
-	char* new_certs_dir;
-	
-	char* certificate;
-	char* serial;
-	char* crl;
-	char* private_key;
-	
-	char* default_days;
-	char* default_crl_days;
-	char* default_md;
-	
-	char* preserve;
-	char* unique_subject;
-	
-	char* policy_country;
-	char* policy_state;
-	char* policy_locality;
-	char* policy_org;
-	char* policy_orgunit;
-	char* policy_commonname;
-	char* policy_email;
-}
-conf_req_crt_parameters;
-
-int read_config_file(char* conffile, char*** contents, unsigned long* lines)
-{
-	int ret = 0;
-	char** filecontents = NULL;
-	unsigned long lines_read = 0;
-	
-	filecontents = get_file_lines(conffile, &lines_read);
-	
-	if(filecontents == NULL)
-	{
-		ret = -1;
-		return ret;
-	}
-	
-	*contents = filecontents;
-	*lines = lines_read;
-	
-	return ret;
-}
-
-int locate_tag(char** haystack, unsigned long haystack_size, char* needle, int* needleLoc, int* endNeedleLoc)
-{
-	int ret = -1;
-	int local_needleLoc = -1;
-	int local_endNeedleLoc = -1;
-	
-	for(int i = 0; i < haystack_size; i++)
-	{
-		char* line = haystack[i];
-		//mbedtls_debug_printf("locate_tag: line: %s\n", line);
-		if(line[0] == '[' && local_needleLoc == -1)
-		{
-			// We have a tag, interrogate
-			//mbedtls_debug_printf("locate_tag: potential tag found\n");
-			unsigned long num_line_pieces;
-			char* separators = "[]#";
-			char** line_pieces = split_on_separators(line, separators, 3, 1, 0, &num_line_pieces);
-			
-			if(num_line_pieces == 1)
-			{
-				// cleanup potential tag
-				//mbedtls_debug_printf("locate_tag: potential tag: %s\n", line_pieces[0]);
-				char* trimmed = trim_flanking_whitespace(line_pieces[0]);
-				//mbedtls_debug_printf("locate_tag: trimmed potential tag: %s\n", trimmed);
-				if(strcmp(trimmed,needle) == 0)
-				{
-					// Found our needle
-					local_needleLoc = i;
-					//return local_needleLoc;
-					*needleLoc = local_needleLoc;
-				}
-			}
-			
-			free_null_terminated_string_array(line_pieces);
-		}
-		else if(line[0] == '[')
-		{
-			local_endNeedleLoc = i;
-			//return local_needleLoc;
-			*endNeedleLoc = local_endNeedleLoc;
-			return 0;
-		}
-	}
-	if(local_needleLoc > -1)
-	{
-		// We reached the end of the file without finding another tag
-		// Set the last line as the end
-		local_endNeedleLoc = haystack_size - 1;
-		//return local_needleLoc;
-		*endNeedleLoc = local_endNeedleLoc;
-		return 0;
-	}
-	
-	return ret;
-}
-
-/*
- * When parsing the config file, sometimes options may be specified twice. Setting the last input to TRUE 
- * continues searching the file and takes the last value if it appears more than once.
- * FALSE returns immediately after locating the first instance.
- */
-int locate_value(char** haystack, int startline, int endline, char* needle, char** value, int keepsearching)
-{
-	int ret = -1;
-	
-	for(int i = startline; i <= endline; i++)
-	{
-		char* line = haystack[i];
-		//mbedtls_debug_printf("locate_value: line: %s\n", line);
-		unsigned long num_line_pieces;
-		char* separators = "=#";
-		char** line_pieces = split_on_separators(line, separators, 2, 2, 0, &num_line_pieces);
-		
-		if(num_line_pieces == 2)
-		{
-			char* trimmed = trim_flanking_whitespace(line_pieces[0]);
-			if(strcmp(trimmed,needle) == 0)
-			{
-				// Found our tag, copy out the value
-				char* trimmed = trim_flanking_whitespace(line_pieces[1]);
-				if(*value != NULL)
-				{
-					// We already found a previous value, free it first
-					free(*value);
-				}
-				*value = strdup(trimmed);
-				ret = 0;
-				if(!keepsearching)
-				{
-					free_null_terminated_string_array(line_pieces);
-					return ret;
-				}
-			}
-		}
-		
-		free_null_terminated_string_array(line_pieces);
-	}
-	
-	return ret;
-}
-
-int parse_config_file(char* conffile, int reqtype, conf_req_csr_parameters* req_params, conf_req_crt_parameters* ca_params)
-{
-	int ret = 0;
-	char** contents = NULL;
-	unsigned long lines = 0;
-	
-	if(conffile == NULL)
-	{
-		mbedtls_debug_printf("No config file provided. Skipping.\n");
-		return ret;
-	}
-	
-	if((ret = read_config_file(conffile, &contents, &lines)) != 0)
-	{
-		mbedtls_debug_printf("Failed to read config file\n");
-		return ret;
-	}
-	
-#ifdef DEBUG
-	// print the config file
-	/*for(int i = 0; i < lines; i++)
-	{
-		char* line = contents[i];
-		mbedtls_debug_printf("config_line %d: %s\n",i, line);
-	}*/
-#endif
-	
-	if(reqtype == REQ_TYPE_CSR && req_params != NULL)
-	{
-		// We need to hunt the "[ req ]" tag
-		int req_start_line = 0;
-		int req_end_line = 0;
-		if((ret = locate_tag(contents, lines, "req", &req_start_line, &req_end_line)) < 0)
-		{
-			mbedtls_debug_printf("[ req ] not found in config file\n");
-			free_null_terminated_string_array(contents);
-			ret = 0;
-			return ret;
-		}
-
-		ret = locate_value(contents, req_start_line, req_end_line, "default_keyfile", &(req_params->default_keyfile),1);
-		ret = locate_value(contents, req_start_line, req_end_line, "default_md", &(req_params->default_md),1);
-		ret = locate_value(contents, req_start_line, req_end_line, "distinguished_name", &(req_params->distinguished_name_tag),1);
-		ret = locate_value(contents, req_start_line, req_end_line, "x509_extensions", &(req_params->x509_extensions_tag),1);
-		
-		ret = 0;
-		if(req_params->distinguished_name_tag != NULL)
-		{
-			// We found a distinguished name tag to try and hunt
-			int dnt_start_line = 0;
-			int dnt_end_line = 0;
-			if((ret = locate_tag(contents, lines, req_params->distinguished_name_tag, &dnt_start_line, &dnt_end_line)) < 0)
-			{
-				mbedtls_debug_printf("[ %s ] not found in config file\n",req_params->distinguished_name_tag);
-				ret = 0;
-			}
-			else
-			{
-				ret = locate_value(contents, dnt_start_line, dnt_end_line, "countryName_default", &(req_params->default_country),1);
-				ret = locate_value(contents, dnt_start_line, dnt_end_line, "stateOrProvinceName_default", &(req_params->default_state),1);
-				ret = locate_value(contents, dnt_start_line, dnt_end_line, "localityName_default", &(req_params->default_locality),1);
-				ret = locate_value(contents, dnt_start_line, dnt_end_line, "0.organizationName_default", &(req_params->default_org),1);
-				ret = locate_value(contents, dnt_start_line, dnt_end_line, "organizationalUnitName_default", &(req_params->default_orgunit),1);
-				ret = locate_value(contents, dnt_start_line, dnt_end_line, "commonName_default", &(req_params->default_commonname),1);
-				ret = locate_value(contents, dnt_start_line, dnt_end_line, "emailAddress_default", &(req_params->default_email),1);
-				ret = locate_value(contents, dnt_start_line, dnt_end_line, "serialNumber_default", &(req_params->default_serial),1);
-				
-				ret = 0;
-			}
-		}
-		if(req_params->x509_extensions_tag != NULL)
-		{
-			// We found a x509 extensions tag to try and hunt
-			int xet_start_line = 0;
-			int xet_end_line = 0;
-			if((ret = locate_tag(contents, lines, req_params->x509_extensions_tag, &xet_start_line, &xet_end_line)) < 0)
-			{
-				mbedtls_debug_printf("[ %s ] not found in config file\n",req_params->x509_extensions_tag);
-				ret = 0;
-			}
-			else
-			{
-				ret = locate_value(contents, xet_start_line, xet_end_line, "subjectKeyIdentifier", &(req_params->subject_key_identifier),1);
-				ret = locate_value(contents, xet_start_line, xet_end_line, "authorityKeyIdentifier", &(req_params->authority_key_identifier),1);
-				ret = locate_value(contents, xet_start_line, xet_end_line, "basicConstraints", &(req_params->basic_contraints),1);
-				ret = locate_value(contents, xet_start_line, xet_end_line, "keyUsage", &(req_params->key_usage),1);
-				ret = locate_value(contents, xet_start_line, xet_end_line, "nsCertType", &(req_params->ns_cert_type),1);
-				
-				ret = 0;
-			}
-		}
-	}
-	else if(reqtype == REQ_TYPE_UNSPEC && ca_params != NULL)
-	{
-		// We need to hunt the "[ ca ]" tag
-		int ca_start_line = 0;
-		int ca_end_line = 0;
-		
-		if((ret = locate_tag(contents, lines, "ca", &ca_start_line, &ca_end_line)) < 0)
-		{
-			mbedtls_debug_printf("[ ca ] not found in config file\n");
-			free_null_terminated_string_array(contents);
-			ret = 0;
-			return ret;
-		}
-		
-		ret = locate_value(contents, ca_start_line, ca_end_line, "default_ca", &(ca_params->default_ca_tag),1);
-		
-		ret = 0;
-		if(ca_params->default_ca_tag != NULL)
-		{
-			// We found a default ca tag to try and hunt
-			int dca_start_line = 0;
-			int dca_end_line = 0;
-			if((ret = locate_tag(contents, lines, ca_params->default_ca_tag, &dca_start_line, &dca_end_line)) < 0)
-			{
-				mbedtls_debug_printf("[ %s ] not found in config file\n",ca_params->default_ca_tag);
-				ret = 0;
-			}
-			else
-			{
-				ret = locate_value(contents, dca_start_line, dca_end_line, "dir", &(ca_params->pki_dir),1);
-				ret = locate_value(contents, dca_start_line, dca_end_line, "certs", &(ca_params->certs_dir),1);
-				ret = locate_value(contents, dca_start_line, dca_end_line, "crl_dir", &(ca_params->crl_dir),1);
-				ret = locate_value(contents, dca_start_line, dca_end_line, "new_certs_dir", &(ca_params->new_certs_dir),1);
-				
-				ret = locate_value(contents, dca_start_line, dca_end_line, "certificate", &(ca_params->certificate),1);
-				ret = locate_value(contents, dca_start_line, dca_end_line, "serial", &(ca_params->serial),1);
-				ret = locate_value(contents, dca_start_line, dca_end_line, "crl", &(ca_params->crl),1);
-				ret = locate_value(contents, dca_start_line, dca_end_line, "private_key", &(ca_params->private_key),1);
-				
-				ret = locate_value(contents, dca_start_line, dca_end_line, "x509_extensions", &(ca_params->x509_extensions_tag),1); // Don't chase
-				
-				ret = locate_value(contents, dca_start_line, dca_end_line, "crl_extensions", &(ca_params->crl_extensions_tag),1); // Don't chase
-				
-				ret = locate_value(contents, dca_start_line, dca_end_line, "default_days", &(ca_params->default_days),1);
-				ret = locate_value(contents, dca_start_line, dca_end_line, "default_crl_days", &(ca_params->default_crl_days),1);
-				ret = locate_value(contents, dca_start_line, dca_end_line, "default_md", &(ca_params->default_md),1);
-				
-				ret = locate_value(contents, dca_start_line, dca_end_line, "preserve", &(ca_params->preserve),1);
-				ret = locate_value(contents, dca_start_line, dca_end_line, "unique_subject", &(ca_params->unique_subject),1);
-				
-				ret = locate_value(contents, dca_start_line, dca_end_line, "policy", &(ca_params->policy_tag),1); // Don't chase
-				
-				ret = 0;
-			}
-		}
-	}
-	
-	free_null_terminated_string_array(contents);
-	return ret;
-}
 
 int write_certificate_request_buffer(mbedtls_x509write_csr *req, int format, char* output_buf,
                               size_t output_buf_size, size_t* len,
@@ -551,99 +194,6 @@ int write_certificate(mbedtls_x509write_cert *crt, const char *output_file,
     fclose(f);
 
     return 0;
-}
-
-int parse_serial_decimal_format(unsigned char *obuf, size_t obufmax,
-                                const char *ibuf, size_t *len)
-{
-    unsigned long long int dec;
-    unsigned int remaining_bytes = sizeof(dec);
-    unsigned char *p = obuf;
-    unsigned char val;
-    char *end_ptr = NULL;
-
-    errno = 0;
-    dec = strtoull(ibuf, &end_ptr, 10);
-
-    if ((errno != 0) || (end_ptr == ibuf)) {
-        return -1;
-    }
-
-    *len = 0;
-
-    while (remaining_bytes > 0) {
-        if (obufmax < (*len + 1)) {
-            return -1;
-        }
-
-        val = (dec >> ((remaining_bytes - 1) * 8)) & 0xFF;
-
-        /* Skip leading zeros */
-        if ((val != 0) || (*len != 0)) {
-            *p = val;
-            (*len)++;
-            p++;
-        }
-
-        remaining_bytes--;
-    }
-
-    return 0;
-}
-
-void initialise_conf_req_csr_parameters(conf_req_csr_parameters* X)
-{
-	X->default_keyfile = NULL;
-	X->default_md = NULL;
-	X->distinguished_name_tag = NULL;
-	X->x509_extensions_tag = NULL;
-	
-	X->default_country = NULL;
-	X->default_state = NULL;
-	X->default_locality = NULL;
-	X->default_org = NULL;
-	X->default_orgunit = NULL;
-	X->default_commonname = NULL;
-	X->default_email = NULL;
-	X->default_serial = NULL;
-	
-	return;
-}
-
-void initialise_conf_req_crt_parameters(conf_req_crt_parameters* X)
-{
-	X->default_ca_tag = NULL;
-	X->x509_extensions_tag = NULL;
-	X->crl_extensions_tag = NULL;
-	X->policy_tag = NULL;
-	
-	X->pki_dir = NULL;
-	X->certs_dir = NULL;
-	X->crl_dir = NULL;
-	X->database = NULL;
-	X->new_certs_dir = NULL;
-	
-	X->certificate = NULL;
-	X->serial = NULL;
-	X->crl = NULL;
-	X->private_key = NULL;
-	
-	X->default_days = NULL;
-	X->default_crl_days = NULL;
-	X->default_md = NULL;
-	
-	X->preserve = NULL;
-	X->unique_subject = NULL;
-	
-	X->policy_country = NULL;
-	X->policy_state = NULL;
-	X->policy_locality = NULL;
-	X->policy_org = NULL;
-	X->policy_orgunit = NULL;
-	X->policy_commonname = NULL;
-	X->policy_email = NULL;
-	
-	return;
 }
 
 int main(int argc, char** argv)
@@ -879,7 +429,7 @@ usage:
 	mbedtls_debug_printf("Final conffile: %s\n", conffile);
 	
 	mbedtls_debug_printf("  . Parsing the config file...");
-	if((ret = parse_config_file(conffile, REQ_TYPE_CSR, &req_params, NULL)) != 0)
+	if((ret = parse_config_file(conffile, REQ_TYPE_CSR, (void*)(&req_params))) != 0)
 	{
 		mbedtls_debug_printf(" failed\n  !  parse_config_file returned %d", ret);
         goto exit;
@@ -1135,11 +685,9 @@ usage:
 		mbedtls_x509_csr csr;
 #endif
 		mbedtls_x509write_cert crt;
-		serial_format_t serial_frmt = SERIAL_FRMT_UNSPEC;
 		mbedtls_mpi serial;
 		char* serialval = NULL;
 		mbedtls_asn1_sequence *ext_key_usage;
-		//mbedtls_x509_san_list *cur, *prev;
 		mbedtls_asn1_named_data *ext_san_dirname = NULL;
 		uint8_t ip[4] = { 0 };
 		int version = DFL_VERSION;
@@ -1148,8 +696,6 @@ usage:
 		char time_notbefore[256];
 		char time_notafter[256];
 		
-		/*conf_req_crt_parameters ca_params;
-		initialise_conf_req_crt_parameters(&ca_params);*/
 		/*
 		 * Set to sane values
 		 */
@@ -1163,37 +709,6 @@ usage:
 		mbedtls_mpi_init(&serial);
 		
 		mbedtls_debug_printf("\n  . Starting certificate writing process ...");
-		/*mbedtls_debug_printf("  . Parsing the config file...");
-		if((ret = parse_config_file(conffile, REQ_TYPE_CRT, NULL, &ca_params)) != 0)
-		{
-			mbedtls_debug_printf(" failed\n  !  parse_config_file returned %d", ret);
-			goto exit;
-		}
-		mbedtls_debug_printf("conf: default_ca_tag %s\n", ca_params.default_ca_tag);
-		mbedtls_debug_printf("conf: x509_extensions_tag %s\n", ca_params.x509_extensions_tag);
-		mbedtls_debug_printf("conf: crl_extensions_tag %s\n", ca_params.crl_extensions_tag);
-		mbedtls_debug_printf("conf: policy_tag %s\n", ca_params.policy_tag);
-		mbedtls_debug_printf("conf: pki_dir %s\n", ca_params.pki_dir);
-		mbedtls_debug_printf("conf: certs_dir %s\n", ca_params.certs_dir);
-		mbedtls_debug_printf("conf: crl_dir %s\n", ca_params.crl_dir);
-		mbedtls_debug_printf("conf: database %s\n", ca_params.database);
-		mbedtls_debug_printf("conf: new_certs_dir %s\n", ca_params.new_certs_dir);
-		mbedtls_debug_printf("conf: certificate %s\n", ca_params.certificate);
-		mbedtls_debug_printf("conf: serial %s\n", ca_params.serial);
-		mbedtls_debug_printf("conf: crl %s\n", ca_params.crl);
-		mbedtls_debug_printf("conf: private_key %s\n", ca_params.private_key);
-		mbedtls_debug_printf("conf: default_days %s\n", ca_params.default_days);
-		mbedtls_debug_printf("conf: default_crl_days %s\n", ca_params.default_crl_days);
-		mbedtls_debug_printf("conf: default_md %s\n", ca_params.default_md);
-		mbedtls_debug_printf("conf: preserve %s\n", ca_params.preserve);
-		mbedtls_debug_printf("conf: unique_subject %s\n", ca_params.unique_subject);
-		mbedtls_debug_printf("conf: policy_country %s\n", ca_params.policy_country);
-		mbedtls_debug_printf("conf: policy_state %s\n", ca_params.policy_state);
-		mbedtls_debug_printf("conf: policy_locality %s\n", ca_params.policy_locality);
-		mbedtls_debug_printf("conf: policy_org %s\n", ca_params.policy_org);
-		mbedtls_debug_printf("conf: policy_orgunit %s\n", ca_params.policy_orgunit);
-		mbedtls_debug_printf("conf: policy_commonname %s\n", ca_params.policy_commonname);
-		mbedtls_debug_printf("conf: policy_email %s\n", ca_params.policy_email);*/
 		
 		// Parse serial to MPI
 		// Can come from either command line input or conf input
@@ -1205,24 +720,6 @@ usage:
 			// CLI input
 			serialval = serialin;
 		}
-		/*else if(ca_params.serial != NULL)
-		{
-			// Config input
-			// The serial entry is a file path that we must now consume
-			FILE* f;
-			if ((f = fopen(ca_params.serial, "rb")) == NULL) {
-				mbedtls_debug_printf(" failed\n  ! Could not open serial file: %s\n", ca_params.serial);
-				goto exit;
-			}
-			
-			if((ret = mbedtls_mpi_read_file(&serial, 10, f)) != 0)
-			{
-				mbedtls_strerror(ret, buf, 1024);
-				mbedtls_debug_printf(" failed\n  !  mbedtls_mpi_read_file "
-							   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
-				goto exit;
-			}
-		}*/
 		/*else if(req_params.default_serial != NULL)
 		{
 			// Config input -- maybe we don't want this in x509 mode?
@@ -1332,11 +829,6 @@ usage:
 			// CLI input
 			days = atoi(daysin);
 		}
-		/*else if(ca_params.default_days != NULL)
-		{
-			// Config file input
-			days = atoi(ca_params.default_days);
-		}*/
 		else
 		{
 			// Set a default value

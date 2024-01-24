@@ -91,3 +91,346 @@ int print_mpi_hex_text(mbedtls_mpi* X, char* heading)
 	
 	return ret;
 }
+
+void initialise_conf_req_csr_parameters(conf_req_csr_parameters* X)
+{
+	X->default_keyfile = NULL;
+	X->default_md = NULL;
+	X->distinguished_name_tag = NULL;
+	X->x509_extensions_tag = NULL;
+	
+	X->default_country = NULL;
+	X->default_state = NULL;
+	X->default_locality = NULL;
+	X->default_org = NULL;
+	X->default_orgunit = NULL;
+	X->default_commonname = NULL;
+	X->default_email = NULL;
+	X->default_serial = NULL;
+	
+	X->subject_key_identifier = NULL;
+	X->authority_key_identifier = NULL;
+	X->basic_contraints = NULL;
+	X->key_usage = NULL;
+	X->ns_cert_type = NULL;
+	
+	return;
+}
+
+void initialise_conf_req_crt_parameters(conf_req_crt_parameters* X)
+{
+	X->default_ca_tag = NULL;
+	X->x509_extensions_tag = NULL;
+	X->crl_extensions_tag = NULL;
+	X->policy_tag = NULL;
+	
+	X->pki_dir = NULL;
+	X->certs_dir = NULL;
+	X->crl_dir = NULL;
+	X->database = NULL;
+	X->new_certs_dir = NULL;
+	
+	X->certificate = NULL;
+	X->serial = NULL;
+	X->crl = NULL;
+	X->private_key = NULL;
+	
+	X->default_days = NULL;
+	X->default_crl_days = NULL;
+	X->default_md = NULL;
+	
+	X->preserve = NULL;
+	X->unique_subject = NULL;
+	
+	X->policy_country = NULL;
+	X->policy_state = NULL;
+	X->policy_locality = NULL;
+	X->policy_org = NULL;
+	X->policy_orgunit = NULL;
+	X->policy_commonname = NULL;
+	X->policy_email = NULL;
+	
+	X->subject_key_identifier = NULL;
+	X->authority_key_identifier = NULL;
+	X->basic_contraints = NULL;
+	X->key_usage = NULL;
+	X->ns_cert_type = NULL;
+	
+	return;
+}
+
+int read_config_file(char* conffile, char*** contents, unsigned long* lines)
+{
+	int ret = 0;
+	char** filecontents = NULL;
+	unsigned long lines_read = 0;
+	
+	filecontents = get_file_lines(conffile, &lines_read);
+	
+	if(filecontents == NULL)
+	{
+		ret = -1;
+		return ret;
+	}
+	
+	*contents = filecontents;
+	*lines = lines_read;
+	
+	return ret;
+}
+
+int locate_tag(char** haystack, unsigned long haystack_size, char* needle, int* needleLoc, int* endNeedleLoc)
+{
+	int ret = -1;
+	int local_needleLoc = -1;
+	int local_endNeedleLoc = -1;
+	
+	for(int i = 0; i < haystack_size; i++)
+	{
+		char* line = haystack[i];
+		//mbedtls_debug_printf("locate_tag: line: %s\n", line);
+		if(line[0] == '[' && local_needleLoc == -1)
+		{
+			// We have a tag, interrogate
+			//mbedtls_debug_printf("locate_tag: potential tag found\n");
+			unsigned long num_line_pieces;
+			char* separators = "[]#";
+			char** line_pieces = split_on_separators(line, separators, 3, 1, 0, &num_line_pieces);
+			
+			if(num_line_pieces == 1)
+			{
+				// cleanup potential tag
+				//mbedtls_debug_printf("locate_tag: potential tag: %s\n", line_pieces[0]);
+				char* trimmed = trim_flanking_whitespace(line_pieces[0]);
+				//mbedtls_debug_printf("locate_tag: trimmed potential tag: %s\n", trimmed);
+				if(strcmp(trimmed,needle) == 0)
+				{
+					// Found our needle
+					local_needleLoc = i;
+					//return local_needleLoc;
+					*needleLoc = local_needleLoc;
+				}
+			}
+			
+			free_null_terminated_string_array(line_pieces);
+		}
+		else if(line[0] == '[')
+		{
+			local_endNeedleLoc = i;
+			//return local_needleLoc;
+			*endNeedleLoc = local_endNeedleLoc;
+			return 0;
+		}
+	}
+	if(local_needleLoc > -1)
+	{
+		// We reached the end of the file without finding another tag
+		// Set the last line as the end
+		local_endNeedleLoc = haystack_size - 1;
+		//return local_needleLoc;
+		*endNeedleLoc = local_endNeedleLoc;
+		return 0;
+	}
+	
+	return ret;
+}
+
+/*
+ * When parsing the config file, sometimes options may be specified twice. Setting the last input to TRUE 
+ * continues searching the file and takes the last value if it appears more than once.
+ * FALSE returns immediately after locating the first instance.
+ */
+int locate_value(char** haystack, int startline, int endline, char* needle, char** value, int keepsearching)
+{
+	int ret = -1;
+	
+	for(int i = startline; i <= endline; i++)
+	{
+		char* line = haystack[i];
+		//mbedtls_debug_printf("locate_value: line: %s\n", line);
+		unsigned long num_line_pieces;
+		char* separators = "=#";
+		char** line_pieces = split_on_separators(line, separators, 2, 2, 0, &num_line_pieces);
+		
+		if(num_line_pieces == 2)
+		{
+			char* trimmed = trim_flanking_whitespace(line_pieces[0]);
+			if(strcmp(trimmed,needle) == 0)
+			{
+				// Found our tag, copy out the value
+				char* trimmed = trim_flanking_whitespace(line_pieces[1]);
+				if(*value != NULL)
+				{
+					// We already found a previous value, free it first
+					free(*value);
+				}
+				*value = strdup(trimmed);
+				ret = 0;
+				if(!keepsearching)
+				{
+					free_null_terminated_string_array(line_pieces);
+					return ret;
+				}
+			}
+		}
+		
+		free_null_terminated_string_array(line_pieces);
+	}
+	
+	return ret;
+}
+
+int parse_config_file(char* conffile, int reqtype, void* void_params)
+{
+	int ret = 0;
+	char** contents = NULL;
+	unsigned long lines = 0;
+	
+	if(conffile == NULL)
+	{
+		mbedtls_debug_printf("No config file provided. Skipping.\n");
+		return ret;
+	}
+	
+	if((ret = read_config_file(conffile, &contents, &lines)) != 0)
+	{
+		mbedtls_debug_printf("Failed to read config file\n");
+		return ret;
+	}
+	
+#ifdef DEBUG
+	// print the config file
+	/*for(int i = 0; i < lines; i++)
+	{
+		char* line = contents[i];
+		mbedtls_debug_printf("config_line %d: %s\n",i, line);
+	}*/
+#endif
+	
+	if(reqtype == REQ_TYPE_CSR && void_params != NULL)
+	{
+		conf_req_csr_parameters* req_params = void_params;
+		// We need to hunt the "[ req ]" tag
+		int req_start_line = 0;
+		int req_end_line = 0;
+		if((ret = locate_tag(contents, lines, "req", &req_start_line, &req_end_line)) < 0)
+		{
+			mbedtls_debug_printf("[ req ] not found in config file\n");
+			free_null_terminated_string_array(contents);
+			ret = 0;
+			return ret;
+		}
+
+		ret = locate_value(contents, req_start_line, req_end_line, "default_keyfile", &(req_params->default_keyfile),1);
+		ret = locate_value(contents, req_start_line, req_end_line, "default_md", &(req_params->default_md),1);
+		ret = locate_value(contents, req_start_line, req_end_line, "distinguished_name", &(req_params->distinguished_name_tag),1);
+		ret = locate_value(contents, req_start_line, req_end_line, "x509_extensions", &(req_params->x509_extensions_tag),1);
+		
+		ret = 0;
+		if(req_params->distinguished_name_tag != NULL)
+		{
+			// We found a distinguished name tag to try and hunt
+			int dnt_start_line = 0;
+			int dnt_end_line = 0;
+			if((ret = locate_tag(contents, lines, req_params->distinguished_name_tag, &dnt_start_line, &dnt_end_line)) < 0)
+			{
+				mbedtls_debug_printf("[ %s ] not found in config file\n",req_params->distinguished_name_tag);
+				ret = 0;
+			}
+			else
+			{
+				ret = locate_value(contents, dnt_start_line, dnt_end_line, "countryName_default", &(req_params->default_country),1);
+				ret = locate_value(contents, dnt_start_line, dnt_end_line, "stateOrProvinceName_default", &(req_params->default_state),1);
+				ret = locate_value(contents, dnt_start_line, dnt_end_line, "localityName_default", &(req_params->default_locality),1);
+				ret = locate_value(contents, dnt_start_line, dnt_end_line, "0.organizationName_default", &(req_params->default_org),1);
+				ret = locate_value(contents, dnt_start_line, dnt_end_line, "organizationalUnitName_default", &(req_params->default_orgunit),1);
+				ret = locate_value(contents, dnt_start_line, dnt_end_line, "commonName_default", &(req_params->default_commonname),1);
+				ret = locate_value(contents, dnt_start_line, dnt_end_line, "emailAddress_default", &(req_params->default_email),1);
+				ret = locate_value(contents, dnt_start_line, dnt_end_line, "serialNumber_default", &(req_params->default_serial),1);
+				
+				ret = 0;
+			}
+		}
+		if(req_params->x509_extensions_tag != NULL)
+		{
+			// We found a x509 extensions tag to try and hunt
+			int xet_start_line = 0;
+			int xet_end_line = 0;
+			if((ret = locate_tag(contents, lines, req_params->x509_extensions_tag, &xet_start_line, &xet_end_line)) < 0)
+			{
+				mbedtls_debug_printf("[ %s ] not found in config file\n",req_params->x509_extensions_tag);
+				ret = 0;
+			}
+			else
+			{
+				ret = locate_value(contents, xet_start_line, xet_end_line, "subjectKeyIdentifier", &(req_params->subject_key_identifier),1);
+				ret = locate_value(contents, xet_start_line, xet_end_line, "authorityKeyIdentifier", &(req_params->authority_key_identifier),1);
+				ret = locate_value(contents, xet_start_line, xet_end_line, "basicConstraints", &(req_params->basic_contraints),1);
+				ret = locate_value(contents, xet_start_line, xet_end_line, "keyUsage", &(req_params->key_usage),1);
+				ret = locate_value(contents, xet_start_line, xet_end_line, "nsCertType", &(req_params->ns_cert_type),1);
+				
+				ret = 0;
+			}
+		}
+	}
+	else if(reqtype == REQ_TYPE_UNSPEC && void_params != NULL)
+	{
+		conf_req_crt_parameters* ca_params = void_params;
+		// We need to hunt the "[ ca ]" tag
+		int ca_start_line = 0;
+		int ca_end_line = 0;
+		
+		if((ret = locate_tag(contents, lines, "ca", &ca_start_line, &ca_end_line)) < 0)
+		{
+			mbedtls_debug_printf("[ ca ] not found in config file\n");
+			free_null_terminated_string_array(contents);
+			ret = 0;
+			return ret;
+		}
+		
+		ret = locate_value(contents, ca_start_line, ca_end_line, "default_ca", &(ca_params->default_ca_tag),1);
+		
+		ret = 0;
+		if(ca_params->default_ca_tag != NULL)
+		{
+			// We found a default ca tag to try and hunt
+			int dca_start_line = 0;
+			int dca_end_line = 0;
+			if((ret = locate_tag(contents, lines, ca_params->default_ca_tag, &dca_start_line, &dca_end_line)) < 0)
+			{
+				mbedtls_debug_printf("[ %s ] not found in config file\n",ca_params->default_ca_tag);
+				ret = 0;
+			}
+			else
+			{
+				ret = locate_value(contents, dca_start_line, dca_end_line, "dir", &(ca_params->pki_dir),1);
+				ret = locate_value(contents, dca_start_line, dca_end_line, "certs", &(ca_params->certs_dir),1);
+				ret = locate_value(contents, dca_start_line, dca_end_line, "crl_dir", &(ca_params->crl_dir),1);
+				ret = locate_value(contents, dca_start_line, dca_end_line, "new_certs_dir", &(ca_params->new_certs_dir),1);
+				
+				ret = locate_value(contents, dca_start_line, dca_end_line, "certificate", &(ca_params->certificate),1);
+				ret = locate_value(contents, dca_start_line, dca_end_line, "serial", &(ca_params->serial),1);
+				ret = locate_value(contents, dca_start_line, dca_end_line, "crl", &(ca_params->crl),1);
+				ret = locate_value(contents, dca_start_line, dca_end_line, "private_key", &(ca_params->private_key),1);
+				
+				ret = locate_value(contents, dca_start_line, dca_end_line, "x509_extensions", &(ca_params->x509_extensions_tag),1); // Don't chase
+				
+				ret = locate_value(contents, dca_start_line, dca_end_line, "crl_extensions", &(ca_params->crl_extensions_tag),1); // Don't chase
+				
+				ret = locate_value(contents, dca_start_line, dca_end_line, "default_days", &(ca_params->default_days),1);
+				ret = locate_value(contents, dca_start_line, dca_end_line, "default_crl_days", &(ca_params->default_crl_days),1);
+				ret = locate_value(contents, dca_start_line, dca_end_line, "default_md", &(ca_params->default_md),1);
+				
+				ret = locate_value(contents, dca_start_line, dca_end_line, "preserve", &(ca_params->preserve),1);
+				ret = locate_value(contents, dca_start_line, dca_end_line, "unique_subject", &(ca_params->unique_subject),1);
+				
+				ret = locate_value(contents, dca_start_line, dca_end_line, "policy", &(ca_params->policy_tag),1); // Don't chase
+				
+				ret = 0;
+			}
+		}
+	}
+	
+	free_null_terminated_string_array(contents);
+	return ret;
+}
