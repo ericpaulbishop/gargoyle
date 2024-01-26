@@ -35,6 +35,7 @@
 #define DFL_OUTPUT_FILENAME     "cert.req"
 #define DFL_SUBJECT_NAME        "CN=Cert,O=mbed TLS,C=UK"
 #define DFL_KEY_USAGE           0
+#define DFL_EXT_KEY_USAGE       0
 #define DFL_FORCE_KEY_USAGE     0
 #define DFL_NS_CERT_TYPE        0
 #define DFL_FORCE_NS_CERT_TYPE  0
@@ -56,9 +57,6 @@
     "							NOTE: Command line parameters will override any config file equivalents\n"	\
     "							Config file can also be set through environment variables\n"				\
     "							NOTE: Environment variable config file will override command line\n"		\
-    "    -name val				UNSUPPORTED The particular CA definition to use\n"							\
-    "    -section val			UNSUPPORTED An alias for -name\n"											\
-    "    -policy val			UNSUPPORTED The CA 'policy' to support\n"									\
 	"\n\n Certificate options:\n"																			\
     "    -startdate val			Cert notBefore, YYMMDDHHMMSSZ\n"											\
     "    -enddate val			Cert notAfter, YYMMDDHHMMSSZ\n"												\
@@ -94,10 +92,100 @@ int main(void)
 	
 #include "mbedtls/x509_crt.h"
 #include "mbedtls/x509_csr.h"
+#include "mbedtls/oid.h"
 #include "mbedtls/entropy.h"
 #include "mbedtls/ctr_drbg.h"
 #include "mbedtls/md.h"
 #include "mbedtls/error.h"
+
+#define SET_OID(x, oid) \
+    do { x.len = MBEDTLS_OID_SIZE(oid); x.p = (unsigned char*)oid; } while( 0 )
+
+int write_database_old_new(char* databasefile, ca_db* ca_database, unsigned long database_len, int write_attr)
+{
+	int ret = 0;
+	FILE* fout = NULL;
+	char* oldout = dynamic_strcat(2,databasefile,".old");
+	mbedtls_debug_printf("Database read from file. Updating...\n");
+	// Move the current database to the index.old file
+	mbedtls_debug_printf("Moving %s to %s\n",databasefile,oldout);
+	if((ret = rename(databasefile,oldout)) != 0)
+	{
+		mbedtls_printf(" failed\n  ! Could not move %s\n\n",databasefile);
+		return ret;
+	}
+	free(oldout);
+	
+	// Write the new database to the index file
+	mbedtls_debug_printf("Writing %s\n",databasefile);
+	if((fout = fopen(databasefile,"wb+")) == NULL)
+	{
+		mbedtls_printf(" failed\n  ! Could not create %s\n\n",databasefile);
+		return ret;
+	}
+	for(int x = 0; x < database_len; x++)
+	{
+		// Check if the cert has expired and update status accordingly
+		struct tm expiry;
+		// Beware, %y handles 2 digit years differently to how we do everywhere else. A sacrifice I'm willing to make...
+		strptime(ca_database->ca_database_entries[x].expiration_date,"%y%m%d%H%M%SZ",&expiry);
+		time_t timenow = time(NULL);
+		time_t expiry_t = mktime(&expiry);
+		double diff = difftime(timenow,expiry_t);
+		if(diff > 0)
+		{
+			mbedtls_debug_printf("Certificate expired with serial: %s\n",ca_database->ca_database_entries[x].serial);
+			ca_database->ca_database_entries[x].status[0] = 'E';
+		}
+		
+		fprintf(fout, "%s\t%s\t%s\t%s\t%s\t%s\n",
+			ca_database->ca_database_entries[x].status,
+			ca_database->ca_database_entries[x].expiration_date,
+			(ca_database->ca_database_entries[x].revocation_date == NULL ? "" : ca_database->ca_database_entries[x].revocation_date),
+			ca_database->ca_database_entries[x].serial,
+			ca_database->ca_database_entries[x].filename,
+			ca_database->ca_database_entries[x].dn);
+	}
+
+	fclose(fout);
+	
+	if(write_attr)
+	{
+		ret = write_database_attr_old_new(databasefile, ca_database);
+	}
+	
+	return ret;
+}
+
+int write_database_attr_old_new(char* databasefile, ca_db* ca_database)
+{
+	int ret = 0;
+	FILE* fout = NULL;
+	// Write the database attr files. Currently old == new
+	char* attrout = dynamic_strcat(2,databasefile,".attr");
+	char* oldout = dynamic_strcat(2,attrout,".old");
+	mbedtls_debug_printf("Moving %s to %s\n",attrout,oldout);
+	if((ret = rename(attrout,oldout)) != 0)
+	{
+		mbedtls_printf(" failed\n  ! Could not move %s\n\n",attrout);
+		return ret;
+	}
+
+	free(oldout);
+	
+	mbedtls_debug_printf("Writing %s\n",attrout);
+	if((fout = fopen(attrout,"wb+")) == NULL)
+	{
+		mbedtls_printf(" failed\n  ! Could not create %s\n\n",attrout);
+		return ret;
+	}
+	
+	fprintf(fout, "unique_subject = %s\n",ca_database->unique_subject);
+	fclose(fout);
+	free(attrout);
+	
+	return ret;
+}
 
 int write_certificate(mbedtls_x509write_cert *crt, const char *output_file,
                       int (*f_rng)(void *, unsigned char *, size_t),
@@ -134,7 +222,7 @@ int main(int argc, char** argv)
 {
     int ret = 1;
     int exit_code = MBEDTLS_EXIT_FAILURE;
-    mbedtls_x509_crt issuer_crt;
+    mbedtls_x509_crt issuer_crt, revoke_crt;
     mbedtls_pk_context loaded_issuer_key, loaded_subject_key;
     mbedtls_pk_context *issuer_key = &loaded_issuer_key,
                        *subject_key = &loaded_subject_key;
@@ -173,6 +261,7 @@ int main(int argc, char** argv)
 	char* key_passin = NULL;
 	char* cacrt_filein = NULL;
 	char* serialval = NULL;
+	char* crtrevoke_in = NULL;
 	
 	int version = DFL_VERSION;
 	int days = 0;
@@ -182,6 +271,9 @@ int main(int argc, char** argv)
 	
 	conf_req_crt_parameters ca_params;
 	initialise_conf_req_crt_parameters(&ca_params);
+	
+	ca_db ca_database;
+	unsigned long ca_database_count = 0;
 
     /*
      * Set to sane values
@@ -196,6 +288,7 @@ int main(int argc, char** argv)
     mbedtls_x509_csr_init(&csr);
 #endif
     mbedtls_x509_crt_init(&issuer_crt);
+    mbedtls_x509_crt_init(&revoke_crt);
     memset(buf, 0, 1024);
 
 #if defined(MBEDTLS_USE_PSA_CRYPTO)
@@ -361,6 +454,13 @@ usage:
 			p = argv[i];
 			cacrt_filein = strdup(p);
 		}
+		else if(strcmp(p,"-revoke") == 0 && i + 1 < argc)
+		{
+			// argv[i+1] should be the cert file to revoke. Advance i
+			i += 1;
+			p = argv[i];
+			crtrevoke_in = strdup(p);
+		}
 		else if(i == argc - 1)
 		{
 			// Last arg should be the certificate request if it has not already been handled
@@ -377,7 +477,7 @@ usage:
 		}
 	}
 	
-	if(outfile == NULL || csr_infile == NULL)
+	if((outfile == NULL || csr_infile == NULL) && crtrevoke_in == NULL)
 	{
 		goto usage;
 	}
@@ -395,6 +495,7 @@ usage:
 	mbedtls_debug_printf("cl: key_filein: %s\n", key_filein);
 	mbedtls_debug_printf("cl: key_passin: %s\n", key_passin);
 	mbedtls_debug_printf("cl: cacrt_filein: %s\n", cacrt_filein);
+	mbedtls_debug_printf("cl: crtrevoke_in: %s\n", crtrevoke_in);
 	
 	// Check if the ENV has a config file defined
 	mbedtls_env_conf = getenv(MBEDTLS_ENV_CONF);
@@ -455,7 +556,9 @@ usage:
 	mbedtls_debug_printf("conf: authority_key_identifier %s\n", ca_params.authority_key_identifier);
 	mbedtls_debug_printf("conf: basic_contraints %s\n", ca_params.basic_contraints);
 	mbedtls_debug_printf("conf: key_usage %s\n", ca_params.key_usage);
+	mbedtls_debug_printf("conf: extended_key_usage %s\n", ca_params.extended_key_usage);
 	mbedtls_debug_printf("conf: ns_cert_type %s\n", ca_params.ns_cert_type);
+	mbedtls_debug_printf("conf: crl_authority_key_identifier %s\n", ca_params.crl_authority_key_identifier);
 	
 	
 	// Set the CA keyfile
@@ -516,562 +619,911 @@ usage:
 	mbedtls_debug_printf("Final cakeyfile: %s\n", key_filein);
 	mbedtls_debug_printf("Final cacrt: %s\n", cacrt_filein);
 	
+	/*
+     * -1. Read the database
+     */
+	if(ca_params.database != NULL)
+	{
+		mbedtls_debug_printf("  . Reading the CA database...");
+		char* databaseattr = dynamic_strcat(2,ca_params.database,".attr");
+		char** filecontents = NULL;
+		ca_database_count = 0;
+		
+		// Read the database
+		filecontents = get_file_lines(ca_params.database, &ca_database_count);
+		
+		if(filecontents == NULL)
+		{
+			mbedtls_debug_printf(" failed\n  !  get_file_lines Database file %s could not be read\n",ca_params.database);
+			goto exit;
+		}
+		
+		ca_database.ca_database_entries = malloc(ca_database_count * sizeof(ca_db_entry));
+		ca_database.unique_subject = NULL;
+		for(int x = 0; x < ca_database_count; x++)
+		{
+			char* line = filecontents[x];
+			unsigned long num_line_pieces;
+			char* separators = "\t";
+			char** line_pieces = split_on_separators(line, separators, 1, 6, 0, &num_line_pieces);
+			if(num_line_pieces >= 5)
+			{
+				char* trimmed = NULL;
+				trimmed = trim_flanking_whitespace(line_pieces[0]);
+				ca_database.ca_database_entries[x].status = strdup(trimmed);
+				trimmed = trim_flanking_whitespace(line_pieces[1]);
+				ca_database.ca_database_entries[x].expiration_date = strdup(trimmed);
+				if(num_line_pieces == 5)
+				{
+					ca_database.ca_database_entries[x].revocation_date = NULL;
+					trimmed = trim_flanking_whitespace(line_pieces[2]);
+					ca_database.ca_database_entries[x].serial = strdup(trimmed);
+					trimmed = trim_flanking_whitespace(line_pieces[3]);
+					ca_database.ca_database_entries[x].filename = strdup(trimmed);
+					trimmed = trim_flanking_whitespace(line_pieces[4]);
+					ca_database.ca_database_entries[x].dn = strdup(trimmed);
+				}
+				else
+				{
+					trimmed = trim_flanking_whitespace(line_pieces[2]);
+					ca_database.ca_database_entries[x].revocation_date = strdup(trimmed);
+					trimmed = trim_flanking_whitespace(line_pieces[3]);
+					ca_database.ca_database_entries[x].serial = strdup(trimmed);
+					trimmed = trim_flanking_whitespace(line_pieces[4]);
+					ca_database.ca_database_entries[x].filename = strdup(trimmed);
+					trimmed = trim_flanking_whitespace(line_pieces[5]);
+					ca_database.ca_database_entries[x].dn = strdup(trimmed);
+				}
+			}
+			
+			free_null_terminated_string_array(line_pieces);
+		}
+		
+		free_null_terminated_string_array(filecontents);
+		
+		// Print the DB for debugging purposes
+		for(int x = 0; x < ca_database_count; x++)
+		{
+			mbedtls_debug_printf("ca_db[%d]: status: %s\n",x,ca_database.ca_database_entries[x].status);
+			mbedtls_debug_printf("ca_db[%d]: expiration_date: %s\n",x,ca_database.ca_database_entries[x].expiration_date);
+			mbedtls_debug_printf("ca_db[%d]: revocation_date: %s\n",x,ca_database.ca_database_entries[x].revocation_date);
+			mbedtls_debug_printf("ca_db[%d]: serial: %s\n",x,ca_database.ca_database_entries[x].serial);
+			mbedtls_debug_printf("ca_db[%d]: filename: %s\n",x,ca_database.ca_database_entries[x].filename);
+			mbedtls_debug_printf("ca_db[%d]: dn: %s\n",x,ca_database.ca_database_entries[x].dn);
+		}
+		
+		// Read the attr file
+		filecontents = NULL;
+		unsigned long lines_read = 0;
+		filecontents = get_file_lines(databaseattr, &lines_read);
+		
+		if(filecontents == NULL)
+		{
+			mbedtls_debug_printf(" failed\n  !  get_file_lines Database attr file %s could not be read\n",databaseattr);
+			goto exit;
+		}
+		
+		char* line = strdup(filecontents[0]);
+		if((q = strchr(line,'=')) != NULL)
+		{
+			*q++ = '\0';
+			char* trimmed = trim_flanking_whitespace(line);
+			if(strcmp(trimmed,"unique_subject") == 0)
+			{
+				trimmed = trim_flanking_whitespace(q);
+				to_lowercase(trimmed);
+				ca_database.unique_subject = strdup(trimmed);
+			}
+		}
+		mbedtls_debug_printf("ca_db: unique_subject: %s\n",ca_database.unique_subject);
+		free(line);
+		free_null_terminated_string_array(filecontents);
+		
+		mbedtls_debug_printf(" ok\n");
+	}
+	
 	
 	/*
      * 0. Seed the PRNG
      */
-    mbedtls_printf("  . Seeding the random number generator...");
+    mbedtls_debug_printf("  . Seeding the random number generator...");
     fflush(stdout);
 
     if ((ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy,
                                      (const unsigned char *) pers,
                                      strlen(pers))) != 0) {
         mbedtls_strerror(ret, buf, 1024);
-        mbedtls_printf(" failed\n  !  mbedtls_ctr_drbg_seed returned %d - %s\n",
+        mbedtls_debug_printf(" failed\n  !  mbedtls_ctr_drbg_seed returned %d - %s\n",
                        ret, buf);
         goto exit;
     }
 
-    mbedtls_printf(" ok\n");
+    mbedtls_debug_printf(" ok\n");
 	
-	// Parse serial to MPI
-	//
-	mbedtls_debug_printf("  . Reading serial number...");
-	fflush(stdout);
-	
-	// Read the serial from the PKI or set it randomly
-	if(ca_params.serial != NULL)
+	if(crtrevoke_in != NULL)
 	{
-		char** filecontents = NULL;
-		char* line = NULL;
-		unsigned long lines_read = 0;
-		filecontents = get_file_lines(ca_params.serial, &lines_read);
-		
-		if(filecontents == NULL)
-		{
-			mbedtls_printf(" failed\n  !  get_file_lines Serial file %s could not be read\n",ca_params.serial);
-			goto exit;
-		}
-		
-		serialval = strdup(filecontents[0]);
-		free_null_terminated_string_array(filecontents);
-	}
-	else
-	{
-		//serialval = strdup(DFL_SERIAL);
-		mbedtls_mpi_fill_random(&serial, 20, mbedtls_ctr_drbg_random, &ctr_drbg);
-		mbedtls_mpi_write_file("serial: ", &serial, 16, NULL);
-	}
-	
-	if(serialval != NULL)
-	{
-		if ((ret = mbedtls_mpi_read_string(&serial, 10, serialval)) != 0) {
+		// Doing a revoke
+		// Parse Certificate to be revoked
+		//
+		/*
+		 * 1.0. Load the certificates
+		 */
+		char serialbuf[256];
+		mbedtls_debug_printf("  . Loading the certificate to be revoked ...");
+		fflush(stdout);
+
+		if ((ret = mbedtls_x509_crt_parse_file(&revoke_crt, crtrevoke_in)) != 0) {
 			mbedtls_strerror(ret, buf, 1024);
-			mbedtls_debug_printf(" failed\n  !  mbedtls_mpi_read_string "
+			mbedtls_debug_printf(" failed\n  !  mbedtls_x509_crt_parse_file "
 						   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
 			goto exit;
 		}
-	}
-	
-	mbedtls_debug_printf(" ok\n");
-	
-	// Parse CA (issuer) certificate
-    //
-	/*
-	 * 1.0.a. Load the certificates
-	 */
-	mbedtls_printf("  . Loading the CA (issuer) certificate ...");
-	fflush(stdout);
 
-	if ((ret = mbedtls_x509_crt_parse_file(&issuer_crt, cacrt_filein)) != 0) {
-		mbedtls_strerror(ret, buf, 1024);
-		mbedtls_printf(" failed\n  !  mbedtls_x509_crt_parse_file "
-					   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
-		goto exit;
-	}
+		ret = mbedtls_x509_serial_gets(serialbuf, 256, &revoke_crt.serial);
+		if (ret < 0) {
+			mbedtls_strerror(ret, buf, 1024);
+			mbedtls_debug_printf(" failed\n  !  mbedtls_x509_serial_gets "
+						   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
+			goto exit;
+		}
 
-	ret = mbedtls_x509_dn_gets(issuer_name, sizeof(issuer_name),
-							   &issuer_crt.subject);
-	if (ret < 0) {
-		mbedtls_strerror(ret, buf, 1024);
-		mbedtls_printf(" failed\n  !  mbedtls_x509_dn_gets "
-					   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
-		goto exit;
-	}
-
-	mbedtls_printf(" ok\n");
-	
-#if defined(MBEDTLS_X509_CSR_PARSE_C)
-    // Parse certificate request CSR
-    //
-	/*
-	 * 1.0.b. Load the CSR
-	 */
-	mbedtls_printf("  . Loading the certificate request ...");
-	fflush(stdout);
-
-	if ((ret = mbedtls_x509_csr_parse_file(&csr, csr_infile)) != 0) {
-		mbedtls_strerror(ret, buf, 1024);
-		mbedtls_printf(" failed\n  !  mbedtls_x509_csr_parse_file "
-					   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
-		goto exit;
-	}
-
-	ret = mbedtls_x509_dn_gets(subject_name, sizeof(subject_name),
-							   &csr.subject);
-	if (ret < 0) {
-		mbedtls_strerror(ret, buf, 1024);
-		mbedtls_printf(" failed\n  !  mbedtls_x509_dn_gets "
-					   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
-		goto exit;
-	}
-
-	subject_key = &csr.pk;
-	mbedtls_x509write_crt_set_subject_key(&crt, subject_key);
-
-	mbedtls_printf(" ok\n");
-#endif /* MBEDTLS_X509_CSR_PARSE_C */
-
-	/*
-     * 1.1. Load the keys
-     */
-    mbedtls_printf("  . Loading the issuer key ...");
-    fflush(stdout);
-
-    ret = mbedtls_pk_parse_keyfile(&loaded_issuer_key, key_filein,
-                                   key_passin);
-    if (ret != 0) {
-        mbedtls_strerror(ret, buf, 1024);
-        mbedtls_printf(" failed\n  !  mbedtls_pk_parse_keyfile "
-                       "returned -x%02x - %s\n\n", (unsigned int) -ret, buf);
-        goto exit;
-    }
-
-    // Check if key and issuer certificate match
-    //
-	if (mbedtls_pk_check_pair(&issuer_crt.pk, issuer_key) != 0) {
-		mbedtls_printf(" failed\n  !  issuer_key does not match "
-					   "issuer certificate\n\n");
-		goto exit;
-	}
-
-    mbedtls_x509write_crt_set_issuer_key(&crt, issuer_key);
-	mbedtls_printf(" ok\n");
-
-	/*
-     * 1.0. Check the names for validity
-     */
-    if ((ret = mbedtls_x509write_crt_set_subject_name(&crt, subject_name)) != 0) {
-        mbedtls_strerror(ret, buf, 1024);
-        mbedtls_printf(" failed\n  !  mbedtls_x509write_crt_set_subject_name "
-                       "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
-        goto exit;
-    }
-
-    if ((ret = mbedtls_x509write_crt_set_issuer_name(&crt, issuer_name)) != 0) {
-        mbedtls_strerror(ret, buf, 1024);
-        mbedtls_printf(" failed\n  !  mbedtls_x509write_crt_set_issuer_name "
-                       "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
-        goto exit;
-    }
-    
-	mbedtls_printf("  . Setting certificate values ...");
-    fflush(stdout);
-
-    mbedtls_x509write_crt_set_version(&crt, version);
-    mbedtls_x509write_crt_set_md_alg(&crt, md_alg);
-
-    ret = mbedtls_x509write_crt_set_serial(&crt, &serial);
-    if (ret != 0) {
-        mbedtls_strerror(ret, buf, 1024);
-        mbedtls_printf(" failed\n  !  mbedtls_x509write_crt_set_serial "
-                       "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
-        goto exit;
-    }
-
-    // Create validity
-	if(startdate_in != NULL && enddate_in != NULL)
-	{
-		// start/end provided. Parse
-		// Format will either be YYMMDDHHMMSSZ or YYYYMMDDHHMMSSZ
-		if(strlen(startdate_in) == 13)
+		mbedtls_debug_printf(" ok\n");
+		mbedtls_debug_printf("Serial to be revoked: %s\n",serialbuf);
+		int match = 0;
+		
+		// Check CA DB for serial
+		for(int x = 0; x < ca_database_count; x++)
 		{
-			//YYMMDDHHMMSSZ
-			char* tmpStr = strdup(startdate_in);
-			tmpStr[2] = '\0';
-			unsigned long int year = atoi(tmpStr);
-			if(year > 50)
+			mbedtls_debug_printf("ca_db[%d]: serial: %s\n",x,ca_database.ca_database_entries[x].serial);
+			
+			if(strcmp(ca_database.ca_database_entries[x].serial,serialbuf) == 0)
 			{
-				year+= 1900;
+				// Got a match
+				match = 1;
+				// Calculate expiry
+				struct tm timenow_tm;
+				time_t timenow = time(NULL);
+				char revoke[60];
+				timenow_tm = *gmtime(&timenow);
+				sprintf(revoke, "%02d%02d%02d%02d%02d%02dZ", (timenow_tm.tm_year + 1900) % 100, timenow_tm.tm_mon + 1, timenow_tm.tm_mday,
+						timenow_tm.tm_hour, timenow_tm.tm_min, timenow_tm.tm_sec);
+
+				ca_database.ca_database_entries[x].status[0] = 'R';
+				ca_database.ca_database_entries[x].revocation_date = strdup(revoke);
+				
+				// No point searching the rest of the DB
+				break;
 			}
-			else
-			{
-				year+= 2000;
-			}
-			free(tmpStr);
-			snprintf(time_notbefore,15,"%s%s",(year > 50 ? "19" : "20"),startdate_in); // Set the buffer small to eliminate the trailing "Z"
 		}
-		else if(strlen(startdate_in) == 15)
+		
+		if(!match)
 		{
-			//YYYYMMDDHHMMSSZ
-			snprintf(time_notbefore,15,"%s",startdate_in); // Set the buffer small to eliminate the trailing "Z"
+			ret = -1;
+			mbedtls_debug_printf("Could not locate serial %s in database\n", serialbuf);
+			goto exit;
 		}
-		else
+		
+		/*
+		 * 1.1. Writing the updated database
+		 */
+		if((ret = write_database_old_new(ca_params.database, &ca_database, ca_database_count, 0)) != 0)
 		{
-			goto usage;
+			mbedtls_printf(" failed\n  ! Could not write database\n\n");
+			goto exit;
 		}
-		if(strlen(enddate_in) == 13)
-		{
-			//YYMMDDHHMMSSZ
-			char* tmpStr = strdup(enddate_in);
-			tmpStr[2] = '\0';
-			unsigned long int year = atoi(tmpStr);
-			if(year > 50)
-			{
-				year+= 1900;
-			}
-			else
-			{
-				year+= 2000;
-			}
-			free(tmpStr);
-			snprintf(time_notafter,15,"%s%s",(year > 50 ? "19" : "20"),enddate_in); // Set the buffer small to eliminate the trailing "Z"
-		}
-		else if(strlen(enddate_in) == 15)
-		{
-			//YYYYMMDDHHMMSSZ
-			snprintf(time_notafter,15,"%s",enddate_in); // Set the buffer small to eliminate the trailing "Z"
-		}
-		else
-		{
-			goto usage;
-		}
-	}
-	else if(daysin != NULL)
-	{
-		// CLI input
-		days = atoi(daysin);
-	}
-	else if(ca_params.default_days != NULL)
-	{
-		// Conf input
-		days = atoi(ca_params.default_days);
 	}
 	else
 	{
-		// Set a default value
-		days = DFL_DAYS;
-	}
-	mbedtls_debug_printf("days: %d\n",days);
-	if(startdate_in == NULL && enddate_in == NULL && days <= 0)
-	{
-		mbedtls_debug_printf("Days cannot be <= 0\n");
-		goto usage;
-	}
-	else if(startdate_in == NULL && enddate_in == NULL && days > 0)
-	{
-		// Calculate not_before and not_after
-		struct tm today, future;
-		const time_t ONEDAY = 24 * 60 * 60;
-		time_t timenow = time(NULL);
-		today = *gmtime(&timenow);
-		timenow += (days * ONEDAY);
-		future = *gmtime(&timenow);
-		sprintf(time_notbefore, "%04d%02d%02d%02d%02d%02d", today.tm_year + 1900, today.tm_mon + 1, today.tm_mday,
-				today.tm_hour, today.tm_min, today.tm_sec);
+		// Signing a certificate
+		// Parse serial to MPI
+		//
+		mbedtls_debug_printf("  . Reading serial number...");
+		fflush(stdout);
 		
-		sprintf(time_notafter, "%04d%02d%02d%02d%02d%02d", future.tm_year + 1900, future.tm_mon + 1, future.tm_mday,
-				future.tm_hour, future.tm_min, future.tm_sec);
-	}
-	mbedtls_debug_printf("notbefore: %s, notafter: %s\n",time_notbefore, time_notafter);
-	ret = mbedtls_x509write_crt_set_validity(&crt, time_notbefore, time_notafter);
-	if (ret != 0) {
-		mbedtls_strerror(ret, buf, sizeof(buf));
-		mbedtls_debug_printf(" failed\n  !  mbedtls_x509write_crt_set_validity "
-					   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
-		goto exit;
-	}
-
-	mbedtls_debug_printf(" ok\n");
-
-	if(version == MBEDTLS_X509_CRT_VERSION_3)
-	{
-		char key_usage = 0;
-		char ns_cert_type = 0;
-		if(ca_params.basic_contraints != NULL)
+		// Read the serial from the PKI or set it randomly
+		if(ca_params.serial != NULL)
 		{
-			// Config input
-			mbedtls_debug_printf("  . Adding the Basic Constraints extension ...");
-			fflush(stdout);
+			char** filecontents = NULL;
+			unsigned long lines_read = 0;
+			filecontents = get_file_lines(ca_params.serial, &lines_read);
 			
-			int is_ca = 1;
-			int max_pathlen = -1;
-			char* line = ca_params.basic_contraints;
-			unsigned long num_line_pieces;
-			char* separators = ",";
-			char** line_pieces = split_on_separators(line, separators, 1, -1, 0, &num_line_pieces);
-			
-			for(int i = 0; i < num_line_pieces; i++)
+			if(filecontents == NULL)
 			{
-				char* line_piece = trim_flanking_whitespace(line_pieces[i]);
-				if(strstr(line_piece, "CA:") != NULL)
-				{
-					// Found CA constraint
-					char* tmp = strdup(line_piece+3);
-					to_lowercase(tmp);
-					if(strcmp(tmp,"true") == 0)
-					{
-						is_ca = 1;
-					}
-					else
-					{
-						is_ca = 0;
-					}
-					free(tmp);
-				}
-				else if(strstr(line_piece, "pathlen:") != NULL)
-				{
-					// Found path length constraint
-					char* tmp = strdup(line_piece+8);
-					max_pathlen = atoi(tmp);
-					free(tmp);
-				}
+				mbedtls_debug_printf(" failed\n  !  get_file_lines Serial file %s could not be read\n",ca_params.serial);
+				goto exit;
 			}
 			
-			free_null_terminated_string_array(line_pieces);
-			
-			ret = mbedtls_x509write_crt_set_basic_constraints(&crt, is_ca, max_pathlen);
-			if (ret != 0) {
+			serialval = strdup(filecontents[0]);
+			free_null_terminated_string_array(filecontents);
+		}
+		else
+		{
+			//serialval = strdup(DFL_SERIAL);
+			mbedtls_mpi_fill_random(&serial, 20, mbedtls_ctr_drbg_random, &ctr_drbg);
+			mbedtls_mpi_write_file("serial: ", &serial, 16, NULL);
+		}
+		
+		if(serialval != NULL)
+		{
+			if ((ret = mbedtls_mpi_read_string(&serial, 16, serialval)) != 0) {
 				mbedtls_strerror(ret, buf, 1024);
-				mbedtls_debug_printf(" failed\n  !  x509write_crt_set_basic_constraints "
+				mbedtls_debug_printf(" failed\n  !  mbedtls_mpi_read_string "
 							   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
 				goto exit;
 			}
-
-			mbedtls_debug_printf(" ok\n");
 		}
 		
+		mbedtls_debug_printf(" ok\n");
+		
+		// Parse CA (issuer) certificate
+		//
+		/*
+		 * 1.0.a. Load the certificates
+		 */
+		mbedtls_debug_printf("  . Loading the CA (issuer) certificate ...");
+		fflush(stdout);
+
+		if ((ret = mbedtls_x509_crt_parse_file(&issuer_crt, cacrt_filein)) != 0) {
+			mbedtls_strerror(ret, buf, 1024);
+			mbedtls_debug_printf(" failed\n  !  mbedtls_x509_crt_parse_file "
+						   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
+			goto exit;
+		}
+
+		ret = mbedtls_x509_dn_gets(issuer_name, sizeof(issuer_name),
+								   &issuer_crt.subject);
+		if (ret < 0) {
+			mbedtls_strerror(ret, buf, 1024);
+			mbedtls_debug_printf(" failed\n  !  mbedtls_x509_dn_gets "
+						   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
+			goto exit;
+		}
+
+		mbedtls_debug_printf(" ok\n");
+		
+#if defined(MBEDTLS_X509_CSR_PARSE_C)
+		// Parse certificate request CSR
+		//
+		/*
+		 * 1.0.b. Load the CSR
+		 */
+		mbedtls_debug_printf("  . Loading the certificate request ...");
+		fflush(stdout);
+
+		if ((ret = mbedtls_x509_csr_parse_file(&csr, csr_infile)) != 0) {
+			mbedtls_strerror(ret, buf, 1024);
+			mbedtls_debug_printf(" failed\n  !  mbedtls_x509_csr_parse_file "
+						   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
+			goto exit;
+		}
+
+		ret = mbedtls_x509_dn_gets(subject_name, sizeof(subject_name),
+								   &csr.subject);
+		if (ret < 0) {
+			mbedtls_strerror(ret, buf, 1024);
+			mbedtls_debug_printf(" failed\n  !  mbedtls_x509_dn_gets "
+						   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
+			goto exit;
+		}
+
+		subject_key = &csr.pk;
+		mbedtls_x509write_crt_set_subject_key(&crt, subject_key);
+
+		mbedtls_debug_printf(" ok\n");
+#endif /* MBEDTLS_X509_CSR_PARSE_C */
+
+		/*
+		 * 1.1. Load the keys
+		 */
+		mbedtls_debug_printf("  . Loading the issuer key ...");
+		fflush(stdout);
+
+		ret = mbedtls_pk_parse_keyfile(&loaded_issuer_key, key_filein,
+									   key_passin);
+		if (ret != 0) {
+			mbedtls_strerror(ret, buf, 1024);
+			mbedtls_debug_printf(" failed\n  !  mbedtls_pk_parse_keyfile "
+						   "returned -x%02x - %s\n\n", (unsigned int) -ret, buf);
+			goto exit;
+		}
+
+		// Check if key and issuer certificate match
+		//
+		if (mbedtls_pk_check_pair(&issuer_crt.pk, issuer_key) != 0) {
+			mbedtls_debug_printf(" failed\n  !  issuer_key does not match "
+						   "issuer certificate\n\n");
+			goto exit;
+		}
+
+		mbedtls_x509write_crt_set_issuer_key(&crt, issuer_key);
+		mbedtls_debug_printf(" ok\n");
+
+		/*
+		 * 1.0. Check the names for validity
+		 */
+		if ((ret = mbedtls_x509write_crt_set_subject_name(&crt, subject_name)) != 0) {
+			mbedtls_strerror(ret, buf, 1024);
+			mbedtls_debug_printf(" failed\n  !  mbedtls_x509write_crt_set_subject_name "
+						   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
+			goto exit;
+		}
+
+		if ((ret = mbedtls_x509write_crt_set_issuer_name(&crt, issuer_name)) != 0) {
+			mbedtls_strerror(ret, buf, 1024);
+			mbedtls_debug_printf(" failed\n  !  mbedtls_x509write_crt_set_issuer_name "
+						   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
+			goto exit;
+		}
+		
+		/*
+		 * 1.0.1 Check if the subject_name is unique
+		 */
+		if(strcmp(ca_database.unique_subject,"yes") == 0)
+		{
+			mbedtls_debug_printf("  . Checking for unique subjects ...\n");
+			// Database says we should be looking at a unique subject
+			mbedtls_debug_printf("subject_name: %s\n",subject_name);
+			for(int x = 0; x < ca_database_count; x++)
+			{
+				mbedtls_debug_printf("db[%d]: dn: %s\n",x,ca_database.ca_database_entries[x].dn);
+				char* replaced = NULL;
+				if(ca_database.ca_database_entries[x].dn[0] == '/')
+				{
+					// Remove the leading "/"
+					replaced = dynamic_replace(ca_database.ca_database_entries[x].dn + 1,"/",", ");
+				}
+				else
+				{
+					replaced = dynamic_replace(ca_database.ca_database_entries[x].dn,"/",", ");
+				}
+				mbedtls_debug_printf("db[%d]: dn comma sep: %s\n",x,replaced);
+				
+				// Try to suck this into the right datatype
+				mbedtls_asn1_named_data* dntmp = NULL;
+				if((ret = mbedtls_x509_string_to_names(&dntmp,replaced)) != 0)
+				{
+					// This should never happen... but let's be careful
+					mbedtls_debug_printf(" failed\n  !  subject_name could not be parsed as valid\n");
+					goto exit;
+				}
+				
+				if((ret = x509_name_cmp(dntmp, crt.subject)) == 0)
+				{
+					// Uh oh...
+					mbedtls_debug_printf(" failed\n  !  subject_name was already found in the ca_database\n");
+					goto exit;
+				}
+
+				mbedtls_asn1_free_named_data_list(&dntmp);
+			}
+		}
+		
+		mbedtls_debug_printf("  . Setting certificate values ...");
+		fflush(stdout);
+
+		mbedtls_x509write_crt_set_version(&crt, version);
+		mbedtls_x509write_crt_set_md_alg(&crt, md_alg);
+
+		ret = mbedtls_x509write_crt_set_serial(&crt, &serial);
+		if (ret != 0) {
+			mbedtls_strerror(ret, buf, 1024);
+			mbedtls_debug_printf(" failed\n  !  mbedtls_x509write_crt_set_serial "
+						   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
+			goto exit;
+		}
+
+		// Create validity
+		if(startdate_in != NULL && enddate_in != NULL)
+		{
+			// start/end provided. Parse
+			// Format will either be YYMMDDHHMMSSZ or YYYYMMDDHHMMSSZ
+			if(strlen(startdate_in) == 13)
+			{
+				//YYMMDDHHMMSSZ
+				char* tmpStr = strdup(startdate_in);
+				tmpStr[2] = '\0';
+				unsigned long int year = atoi(tmpStr);
+				free(tmpStr);
+				snprintf(time_notbefore,15,"%s%s",(year > 50 ? "19" : "20"),startdate_in); // Set the buffer small to eliminate the trailing "Z"
+			}
+			else if(strlen(startdate_in) == 15)
+			{
+				//YYYYMMDDHHMMSSZ
+				snprintf(time_notbefore,15,"%s",startdate_in); // Set the buffer small to eliminate the trailing "Z"
+			}
+			else
+			{
+				goto usage;
+			}
+			if(strlen(enddate_in) == 13)
+			{
+				//YYMMDDHHMMSSZ
+				char* tmpStr = strdup(enddate_in);
+				tmpStr[2] = '\0';
+				unsigned long int year = atoi(tmpStr);
+				free(tmpStr);
+				snprintf(time_notafter,15,"%s%s",(year > 50 ? "19" : "20"),enddate_in); // Set the buffer small to eliminate the trailing "Z"
+			}
+			else if(strlen(enddate_in) == 15)
+			{
+				//YYYYMMDDHHMMSSZ
+				snprintf(time_notafter,15,"%s",enddate_in); // Set the buffer small to eliminate the trailing "Z"
+			}
+			else
+			{
+				goto usage;
+			}
+		}
+		else if(daysin != NULL)
+		{
+			// CLI input
+			days = atoi(daysin);
+		}
+		else if(ca_params.default_days != NULL)
+		{
+			// Conf input
+			days = atoi(ca_params.default_days);
+		}
+		else
+		{
+			// Set a default value
+			days = DFL_DAYS;
+		}
+		mbedtls_debug_printf("days: %d\n",days);
+		if(startdate_in == NULL && enddate_in == NULL && days <= 0)
+		{
+			mbedtls_debug_printf("Days cannot be <= 0\n");
+			goto usage;
+		}
+		else if(startdate_in == NULL && enddate_in == NULL && days > 0)
+		{
+			// Calculate not_before and not_after
+			struct tm today, future;
+			const time_t ONEDAY = 24 * 60 * 60;
+			time_t timenow = time(NULL);
+			today = *gmtime(&timenow);
+			timenow += (days * ONEDAY);
+			future = *gmtime(&timenow);
+			sprintf(time_notbefore, "%04d%02d%02d%02d%02d%02d", today.tm_year + 1900, today.tm_mon + 1, today.tm_mday,
+					today.tm_hour, today.tm_min, today.tm_sec);
+			
+			sprintf(time_notafter, "%04d%02d%02d%02d%02d%02d", future.tm_year + 1900, future.tm_mon + 1, future.tm_mday,
+					future.tm_hour, future.tm_min, future.tm_sec);
+		}
+		mbedtls_debug_printf("notbefore: %s, notafter: %s\n",time_notbefore, time_notafter);
+		ret = mbedtls_x509write_crt_set_validity(&crt, time_notbefore, time_notafter);
+		if (ret != 0) {
+			mbedtls_strerror(ret, buf, sizeof(buf));
+			mbedtls_debug_printf(" failed\n  !  mbedtls_x509write_crt_set_validity "
+						   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
+			goto exit;
+		}
+
+		mbedtls_debug_printf(" ok\n");
+
+		if(version == MBEDTLS_X509_CRT_VERSION_3)
+		{
+			unsigned int key_usage = 0;
+			unsigned int ns_cert_type = 0;
+			if(ca_params.basic_contraints != NULL)
+			{
+				// Config input
+				mbedtls_debug_printf("  . Adding the Basic Constraints extension ...");
+				fflush(stdout);
+				
+				int is_ca = 1;
+				int max_pathlen = -1;
+				char* line = ca_params.basic_contraints;
+				unsigned long num_line_pieces;
+				char* separators = ",";
+				char** line_pieces = split_on_separators(line, separators, 1, -1, 0, &num_line_pieces);
+				
+				for(int i = 0; i < num_line_pieces; i++)
+				{
+					char* line_piece = trim_flanking_whitespace(line_pieces[i]);
+					if(strstr(line_piece, "CA:") != NULL)
+					{
+						// Found CA constraint
+						char* tmp = strdup(line_piece+3);
+						to_lowercase(tmp);
+						if(strcmp(tmp,"true") == 0)
+						{
+							is_ca = 1;
+						}
+						else
+						{
+							is_ca = 0;
+						}
+						free(tmp);
+					}
+					else if(strstr(line_piece, "pathlen:") != NULL)
+					{
+						// Found path length constraint
+						char* tmp = strdup(line_piece+8);
+						max_pathlen = atoi(tmp);
+						free(tmp);
+					}
+				}
+				
+				free_null_terminated_string_array(line_pieces);
+				
+				ret = mbedtls_x509write_crt_set_basic_constraints(&crt, is_ca, max_pathlen);
+				if (ret != 0) {
+					mbedtls_strerror(ret, buf, 1024);
+					mbedtls_debug_printf(" failed\n  !  x509write_crt_set_basic_constraints "
+								   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
+					goto exit;
+				}
+
+				mbedtls_debug_printf(" ok\n");
+			}
+			
 #if defined(MBEDTLS_SHA1_C)
-		if(ca_params.subject_key_identifier != NULL)
-		{
-			int setExt = 1; // for req, ca, x509 this should be the default anyway
-			char* line = ca_params.subject_key_identifier;
-			unsigned long num_line_pieces;
-			char* separators = ",";
-			char** line_pieces = split_on_separators(line, separators, 1, -1, 0, &num_line_pieces);
-			
-			for(int i = 0; i < num_line_pieces; i++)
+			if(ca_params.subject_key_identifier != NULL)
 			{
-				char* line_piece = trim_flanking_whitespace(line_pieces[i]);
-				to_lowercase(line_piece);
-				if(strcmp(line_piece, "hash") == 0)
+				int setExt = 1; // for req, ca, x509 this should be the default anyway
+				char* line = ca_params.subject_key_identifier;
+				unsigned long num_line_pieces;
+				char* separators = ",";
+				char** line_pieces = split_on_separators(line, separators, 1, -1, 0, &num_line_pieces);
+				
+				for(int i = 0; i < num_line_pieces; i++)
 				{
-					setExt = 1;
+					char* line_piece = trim_flanking_whitespace(line_pieces[i]);
+					to_lowercase(line_piece);
+					if(strcmp(line_piece, "hash") == 0)
+					{
+						setExt = 1;
+					}
+					else if(strcmp(line_piece, "none") == 0)
+					{
+						setExt = 0;
+					}
 				}
-				else if(strcmp(line_piece, "none") == 0)
+				
+				free_null_terminated_string_array(line_pieces);
+				
+				if(setExt)
 				{
-					setExt = 0;
+					mbedtls_debug_printf("  . Adding the Subject Key Identifier ...");
+					fflush(stdout);
+
+					ret = mbedtls_x509write_crt_set_subject_key_identifier(&crt);
+					if (ret != 0) {
+						mbedtls_strerror(ret, buf, 1024);
+						mbedtls_debug_printf(" failed\n  !  mbedtls_x509write_crt_set_subject"
+									   "_key_identifier returned -0x%04x - %s\n\n",
+									   (unsigned int) -ret, buf);
+						goto exit;
+					}
+
+					mbedtls_debug_printf(" ok\n");
 				}
 			}
 			
-			free_null_terminated_string_array(line_pieces);
-			
-			if(setExt)
+			if(ca_params.authority_key_identifier != NULL)
 			{
-				mbedtls_debug_printf("  . Adding the Subject Key Identifier ...");
-				fflush(stdout);
-
-				ret = mbedtls_x509write_crt_set_subject_key_identifier(&crt);
-				if (ret != 0) {
-					mbedtls_strerror(ret, buf, 1024);
-					mbedtls_debug_printf(" failed\n  !  mbedtls_x509write_crt_set_subject"
-								   "_key_identifier returned -0x%04x - %s\n\n",
-								   (unsigned int) -ret, buf);
-					goto exit;
-				}
-
-				mbedtls_debug_printf(" ok\n");
-			}
-		}
-		
-		if(ca_params.authority_key_identifier != NULL)
-		{
-			int setExt = 0; // for req, ca, x509 this should be the default for self-signed
-			char* line = ca_params.authority_key_identifier;
-			unsigned long num_line_pieces;
-			char* separators = ",";
-			char** line_pieces = split_on_separators(line, separators, 1, -1, 0, &num_line_pieces);
-			
-			for(int i = 0; i < num_line_pieces; i++)
-			{
-				char* line_piece = trim_flanking_whitespace(line_pieces[i]);
-				to_lowercase(line_piece);
-				if(strstr(line_piece, "keyid") != NULL)
+				int setExt = 0; // for req, ca, x509 this should be the default for self-signed
+				char* line = ca_params.authority_key_identifier;
+				unsigned long num_line_pieces;
+				char* separators = ",";
+				char** line_pieces = split_on_separators(line, separators, 1, -1, 0, &num_line_pieces);
+				
+				for(int i = 0; i < num_line_pieces; i++)
 				{
-					setExt = 1;
+					char* line_piece = trim_flanking_whitespace(line_pieces[i]);
+					to_lowercase(line_piece);
+					if(strstr(line_piece, "keyid") != NULL)
+					{
+						setExt = 1;
+					}
+					else if(strstr(line_piece, "issuer") != NULL)
+					{
+						// Note we don't write out the issuer name/serial currently, so this is silently ignored
+						setExt = 1;
+					}
+					else if(strstr(line_piece, "none") != NULL)
+					{
+						setExt = 0;
+					}
 				}
-				else if(strstr(line_piece, "issuer") != NULL)
+				
+				free_null_terminated_string_array(line_pieces);
+				
+				if(setExt)
 				{
-					// Note we don't write out the issuer name/serial currently, so this is silently ignored
-					setExt = 1;
-				}
-				else if(strstr(line_piece, "none") != NULL)
-				{
-					setExt = 0;
+					mbedtls_debug_printf("  . Adding the Authority Key Identifier ...");
+					fflush(stdout);
+
+					ret = mbedtls_x509write_crt_set_authority_key_identifier(&crt);
+					if (ret != 0) {
+						mbedtls_strerror(ret, buf, 1024);
+						mbedtls_debug_printf(" failed\n  !  mbedtls_x509write_crt_set_authority_"
+									   "key_identifier returned -0x%04x - %s\n\n",
+									   (unsigned int) -ret, buf);
+						goto exit;
+					}
+
+					mbedtls_debug_printf(" ok\n");
 				}
 			}
 			
-			free_null_terminated_string_array(line_pieces);
-			
-			if(setExt)
-			{
-				mbedtls_debug_printf("  . Adding the Authority Key Identifier ...");
-				fflush(stdout);
-
-				ret = mbedtls_x509write_crt_set_authority_key_identifier(&crt);
-				if (ret != 0) {
-					mbedtls_strerror(ret, buf, 1024);
-					mbedtls_debug_printf(" failed\n  !  mbedtls_x509write_crt_set_authority_"
-								   "key_identifier returned -0x%04x - %s\n\n",
-								   (unsigned int) -ret, buf);
-					goto exit;
-				}
-
-				mbedtls_debug_printf(" ok\n");
-			}
-		}
-		
 #endif
-		if(ca_params.key_usage != NULL)
-		{
-			char* line = ca_params.key_usage;
-			unsigned long num_line_pieces;
-			char* separators = ",";
-			char** line_pieces = split_on_separators(line, separators, 1, -1, 0, &num_line_pieces);
-			
-			for(int i = 0; i < num_line_pieces; i++)
+			if(ca_params.key_usage != NULL)
 			{
-				char* line_piece = trim_flanking_whitespace(line_pieces[i]);
-				to_lowercase(line_piece);
-				if(strcmp(line_piece, "digitalsignature") == 0)
+				char* line = ca_params.key_usage;
+				unsigned long num_line_pieces;
+				char* separators = ",";
+				char** line_pieces = split_on_separators(line, separators, 1, -1, 0, &num_line_pieces);
+				
+				for(int i = 0; i < num_line_pieces; i++)
 				{
-					key_usage |= MBEDTLS_X509_KU_DIGITAL_SIGNATURE;
+					char* line_piece = trim_flanking_whitespace(line_pieces[i]);
+					to_lowercase(line_piece);
+					if(strcmp(line_piece, "digitalsignature") == 0)
+					{
+						key_usage |= MBEDTLS_X509_KU_DIGITAL_SIGNATURE;
+					}
+					else if(strcmp(line_piece, "nonrepudiation") == 0)
+					{
+						key_usage |= MBEDTLS_X509_KU_NON_REPUDIATION;
+					}
+					else if(strcmp(line_piece, "keyencipherment") == 0)
+					{
+						key_usage |= MBEDTLS_X509_KU_KEY_ENCIPHERMENT;
+					}
+					else if(strcmp(line_piece, "dataencipherment") == 0)
+					{
+						key_usage |= MBEDTLS_X509_KU_DATA_ENCIPHERMENT;
+					}
+					else if(strcmp(line_piece, "keyagreement") == 0)
+					{
+						key_usage |= MBEDTLS_X509_KU_KEY_AGREEMENT;
+					}
+					else if(strcmp(line_piece, "keycertsign") == 0)
+					{
+						key_usage |= MBEDTLS_X509_KU_KEY_CERT_SIGN;
+					}
+					else if(strcmp(line_piece, "crlsign") == 0)
+					{
+						key_usage |= MBEDTLS_X509_KU_CRL_SIGN;
+					}
 				}
-				else if(strcmp(line_piece, "nonrepudiation") == 0)
-				{
-					key_usage |= MBEDTLS_X509_KU_NON_REPUDIATION;
+
+				free_null_terminated_string_array(line_pieces);
+				
+				mbedtls_debug_printf("  . Adding the Key Usage extension ...");
+				fflush(stdout);
+
+				ret = mbedtls_x509write_crt_set_key_usage(&crt, key_usage);
+				if (ret != 0) {
+					mbedtls_strerror(ret, buf, 1024);
+					mbedtls_debug_printf(" failed\n  !  mbedtls_x509write_crt_set_key_usage "
+								   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
+					goto exit;
 				}
-				else if(strcmp(line_piece, "keyencipherment") == 0)
-				{
-					key_usage |= MBEDTLS_X509_KU_KEY_ENCIPHERMENT;
-				}
-				else if(strcmp(line_piece, "dataencipherment") == 0)
-				{
-					key_usage |= MBEDTLS_X509_KU_DATA_ENCIPHERMENT;
-				}
-				else if(strcmp(line_piece, "keyagreement") == 0)
-				{
-					key_usage |= MBEDTLS_X509_KU_KEY_AGREEMENT;
-				}
-				else if(strcmp(line_piece, "keycertsign") == 0)
-				{
-					key_usage |= MBEDTLS_X509_KU_KEY_CERT_SIGN;
-				}
-				else if(strcmp(line_piece, "crlsign") == 0)
-				{
-					key_usage |= MBEDTLS_X509_KU_CRL_SIGN;
-				}
+
+				mbedtls_debug_printf(" ok\n");
 			}
 			
-			free_null_terminated_string_array(line_pieces);
-			
-			mbedtls_debug_printf("  . Adding the Key Usage extension ...");
-			fflush(stdout);
+			if(ca_params.extended_key_usage != NULL)
+			{
+				char* line = ca_params.extended_key_usage;
+				unsigned long num_line_pieces;
+				char* separators = ",";
+				char** line_pieces = split_on_separators(line, separators, 1, -1, 0, &num_line_pieces);
+				mbedtls_asn1_sequence* opt_ext_key_usage;
+				mbedtls_asn1_sequence** tail = &opt_ext_key_usage;
+				mbedtls_asn1_sequence* ext_key_usage;
+				
+				for(int i = 0; i < num_line_pieces; i++)
+				{
+					mbedtls_asn1_sequence* ext_key_usage = mbedtls_calloc(1,sizeof(mbedtls_asn1_sequence));
+					ext_key_usage->buf.tag = MBEDTLS_ASN1_OID;
+					char* line_piece = trim_flanking_whitespace(line_pieces[i]);
+					to_lowercase(line_piece);
+					if(strcmp(line_piece, "serverauth") == 0)
+					{
+						SET_OID(ext_key_usage->buf, MBEDTLS_OID_SERVER_AUTH);
+					}
+					else if(strcmp(line_piece, "clientauth") == 0)
+					{
+						SET_OID(ext_key_usage->buf, MBEDTLS_OID_CLIENT_AUTH);
+					}
+					else if(strcmp(line_piece, "codesigning") == 0)
+					{
+						SET_OID(ext_key_usage->buf, MBEDTLS_OID_CODE_SIGNING);
+					}
+					else if(strcmp(line_piece, "emailprotection") == 0)
+					{
+						SET_OID(ext_key_usage->buf, MBEDTLS_OID_EMAIL_PROTECTION);
+					}
+					else if(strcmp(line_piece, "timestamping") == 0)
+					{
+						SET_OID(ext_key_usage->buf, MBEDTLS_OID_TIME_STAMPING);
+					}
+					else if(strcmp(line_piece, "ocspsigning") == 0)
+					{
+						SET_OID(ext_key_usage->buf, MBEDTLS_OID_OCSP_SIGNING);
+					}
+					else if(strcmp(line_piece, "any") == 0)
+					{
+						SET_OID(ext_key_usage->buf, MBEDTLS_OID_ANY_EXTENDED_KEY_USAGE);
+					}
+					*tail = ext_key_usage;
+					tail = &ext_key_usage->next;
+				}
+				
+				free_null_terminated_string_array(line_pieces);
+				
+				mbedtls_debug_printf("  . Adding the Extended Key Usage extension ...");
+				fflush(stdout);
 
-			ret = mbedtls_x509write_crt_set_key_usage(&crt, key_usage);
-			if (ret != 0) {
-				mbedtls_strerror(ret, buf, 1024);
-				mbedtls_debug_printf(" failed\n  !  mbedtls_x509write_crt_set_key_usage "
-							   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
+				ret = mbedtls_x509write_crt_set_ext_key_usage(&crt, opt_ext_key_usage);
+				if (ret != 0) {
+					mbedtls_strerror(ret, buf, 1024);
+					mbedtls_debug_printf(" failed\n  !  mbedtls_x509write_crt_set_ext_key_usage "
+								   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
+					goto exit;
+				}
+
+				mbedtls_debug_printf(" ok\n");
+			}
+			
+			if(ca_params.ns_cert_type != NULL)
+			{
+				char* line = ca_params.ns_cert_type;
+				unsigned long num_line_pieces;
+				char* separators = ",";
+				char** line_pieces = split_on_separators(line, separators, 1, -1, 0, &num_line_pieces);
+				
+				for(int i = 0; i < num_line_pieces; i++)
+				{
+					char* line_piece = trim_flanking_whitespace(line_pieces[i]);
+					to_lowercase(line_piece);
+					if(strcmp(line_piece, "client") == 0)
+					{
+						ns_cert_type |= MBEDTLS_X509_NS_CERT_TYPE_SSL_CLIENT;
+					}
+					else if(strcmp(line_piece, "server") == 0)
+					{
+						ns_cert_type |= MBEDTLS_X509_NS_CERT_TYPE_SSL_SERVER;
+					}
+					else if(strcmp(line_piece, "email") == 0)
+					{
+						ns_cert_type |= MBEDTLS_X509_NS_CERT_TYPE_EMAIL;
+					}
+					else if(strcmp(line_piece, "objsign") == 0)
+					{
+						ns_cert_type |= MBEDTLS_X509_NS_CERT_TYPE_OBJECT_SIGNING;
+					}
+					else if(strcmp(line_piece, "sslca") == 0)
+					{
+						ns_cert_type |= MBEDTLS_X509_NS_CERT_TYPE_SSL_CA;
+					}
+					else if(strcmp(line_piece, "emailca") == 0)
+					{
+						ns_cert_type |= MBEDTLS_X509_NS_CERT_TYPE_EMAIL_CA;
+					}
+					else if(strcmp(line_piece, "objca") == 0)
+					{
+						ns_cert_type |= MBEDTLS_X509_NS_CERT_TYPE_OBJECT_SIGNING_CA;
+					}
+				}
+				
+				free_null_terminated_string_array(line_pieces);
+				
+				mbedtls_debug_printf("  . Adding the NS Cert Type extension ...");
+				fflush(stdout);
+
+				ret = mbedtls_x509write_crt_set_ns_cert_type(&crt, ns_cert_type);
+				if (ret != 0) {
+					mbedtls_strerror(ret, buf, 1024);
+					mbedtls_debug_printf(" failed\n  !  mbedtls_x509write_crt_set_ns_cert_type "
+								   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
+					goto exit;
+				}
+
+				mbedtls_debug_printf(" ok\n");
+			}
+		}
+
+		/*
+		 * 1.2. Writing the certificate
+		 */
+		mbedtls_debug_printf("  . Writing the certificate...");
+		fflush(stdout);
+
+		if ((ret = write_certificate(&crt, outfile,
+									 mbedtls_ctr_drbg_random, &ctr_drbg)) != 0) {
+			mbedtls_strerror(ret, buf, 1024);
+			mbedtls_debug_printf(" failed\n  !  write_certificate -0x%04x - %s\n\n",
+						   (unsigned int) -ret, buf);
+			goto exit;
+		}
+
+		mbedtls_debug_printf(" ok\n");
+		
+		/*
+		 * 1.3. Writing the updated serial
+		 */
+		if(ca_params.serial != NULL)
+		{
+			FILE* fout = NULL;
+			char* oldout = dynamic_strcat(2,ca_params.serial,".old");
+			mbedtls_debug_printf("Serial read from file. Updating...\n");
+			// Write the current serial to the serial.old file
+			if((fout = fopen(oldout,"wb+")) == NULL)
+			{
+				mbedtls_debug_printf(" failed\n  ! Could not create %s\n\n",oldout);
 				goto exit;
 			}
-
+			if((ret = mbedtls_mpi_write_file(NULL, &serial, 16, fout)) != 0)
+			{
+				mbedtls_debug_printf(" failed\n  ! mbedtls_mpi_write_file returned %d\n\n", ret);
+				fclose(fout);
+				goto exit;
+			}
+			fclose(fout);
+			free(oldout);
+			
+			// Increment the serial and write it to the serial file
+			mbedtls_mpi newserial;
+			mbedtls_mpi_init(&newserial);
+			mbedtls_mpi_add_int(&newserial, &serial, 1);
+			if((fout = fopen(ca_params.serial,"wb+")) == NULL)
+			{
+				mbedtls_debug_printf(" failed\n  ! Could not create %s\n\n",ca_params.serial);
+				goto exit;
+			}
+			if((ret = mbedtls_mpi_write_file(NULL, &newserial, 16, fout)) != 0)
+			{
+				mbedtls_debug_printf(" failed\n  ! mbedtls_mpi_write_file returned %d\n\n", ret);
+				fclose(fout);
+				goto exit;
+			}
+			fclose(fout);
+			
 			mbedtls_debug_printf(" ok\n");
 		}
 		
-		if(ca_params.ns_cert_type != NULL)
+		/*
+		 * 1.4. Writing the updated database
+		 */
+		if(ca_params.database != NULL)
 		{
-			char* line = ca_params.ns_cert_type;
-			unsigned long num_line_pieces;
-			char* separators = ",";
-			char** line_pieces = split_on_separators(line, separators, 1, -1, 0, &num_line_pieces);
-			
-			for(int i = 0; i < num_line_pieces; i++)
+			// Add the new entry to the database and print the new file
+			ca_db_entry* tmp_ptr = realloc(ca_database.ca_database_entries, (ca_database_count + 1) * sizeof(ca_db_entry));
+			if(tmp_ptr != NULL)
 			{
-				char* line_piece = trim_flanking_whitespace(line_pieces[i]);
-				to_lowercase(line_piece);
-				if(strcmp(line_piece, "client") == 0)
-				{
-					ns_cert_type |= MBEDTLS_X509_NS_CERT_TYPE_SSL_CLIENT;
-				}
-				else if(strcmp(line_piece, "server") == 0)
-				{
-					ns_cert_type |= MBEDTLS_X509_NS_CERT_TYPE_SSL_SERVER;
-				}
-				else if(strcmp(line_piece, "email") == 0)
-				{
-					ns_cert_type |= MBEDTLS_X509_NS_CERT_TYPE_EMAIL;
-				}
-				else if(strcmp(line_piece, "objsign") == 0)
-				{
-					ns_cert_type |= MBEDTLS_X509_NS_CERT_TYPE_OBJECT_SIGNING;
-				}
-				else if(strcmp(line_piece, "sslca") == 0)
-				{
-					ns_cert_type |= MBEDTLS_X509_NS_CERT_TYPE_SSL_CA;
-				}
-				else if(strcmp(line_piece, "emailca") == 0)
-				{
-					ns_cert_type |= MBEDTLS_X509_NS_CERT_TYPE_EMAIL_CA;
-				}
-				else if(strcmp(line_piece, "objca") == 0)
-				{
-					ns_cert_type |= MBEDTLS_X509_NS_CERT_TYPE_OBJECT_SIGNING_CA;
-				}
+				ca_database.ca_database_entries = tmp_ptr;
+				ca_database_count += 1;
 			}
-			
-			free_null_terminated_string_array(line_pieces);
-			
-			mbedtls_debug_printf("  . Adding the NS Cert Type extension ...");
-			fflush(stdout);
-
-			ret = mbedtls_x509write_crt_set_ns_cert_type(&crt, ns_cert_type);
-			if (ret != 0) {
-				mbedtls_strerror(ret, buf, 1024);
-				mbedtls_debug_printf(" failed\n  !  mbedtls_x509write_crt_set_ns_cert_type "
-							   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
+			else
+			{
+				mbedtls_printf(" failed\n  ! Could not allocate additional memory for database\n\n");
 				goto exit;
 			}
+			
+			ca_database.ca_database_entries[ca_database_count - 1].status = strdup("V"); // We will check for expiry later, but issuing a new cert already expired would be weird.
+			ca_database.ca_database_entries[ca_database_count - 1].expiration_date = dynamic_strcat(2,time_notafter+2,"Z"); // Remove leading 2 digits from 4 digit year representation and add "Z"
+			ca_database.ca_database_entries[ca_database_count - 1].revocation_date = NULL;
+			char tmpserial[256];
+			size_t tmpseriallen = 0;
+			mbedtls_mpi_write_string(&serial, 16, tmpserial, 256,&tmpseriallen);
+			ca_database.ca_database_entries[ca_database_count - 1].serial = tmpserial;
+			ca_database.ca_database_entries[ca_database_count - 1].filename = strdup("unknown"); // This is never used seemingly
+			char* tmp_subject = dynamic_replace(subject_name,", ","/");
+			ca_database.ca_database_entries[ca_database_count - 1].dn = dynamic_strcat(2,"/",tmp_subject);
+			free(tmp_subject);
 
-			mbedtls_debug_printf(" ok\n");
+			if((ret = write_database_old_new(ca_params.database, &ca_database, ca_database_count, 1)) != 0)
+			{
+				mbedtls_printf(" failed\n  ! Could not write database\n\n");
+				goto exit;
+			}
 		}
 	}
-
-    /*
-     * 1.2. Writing the certificate
-     */
-    mbedtls_printf("  . Writing the certificate...");
-    fflush(stdout);
-
-    if ((ret = write_certificate(&crt, outfile,
-                                 mbedtls_ctr_drbg_random, &ctr_drbg)) != 0) {
-        mbedtls_strerror(ret, buf, 1024);
-        mbedtls_printf(" failed\n  !  write_certificate -0x%04x - %s\n\n",
-                       (unsigned int) -ret, buf);
-        goto exit;
-    }
-
-    mbedtls_printf(" ok\n");
 
     exit_code = MBEDTLS_EXIT_SUCCESS;
 

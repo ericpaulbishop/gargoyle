@@ -25,6 +25,7 @@
 #include "mbedtls/platform.h"
 
 #include "mbedtls/bignum.h"
+#include "mbedtls/x509.h"
 
 #ifdef DEBUG
 #define mbedtls_debug_printf(...)  mbedtls_printf(__VA_ARGS__)
@@ -78,6 +79,7 @@ typedef struct conf_req_csr_parameters {
 	char* authority_key_identifier;
 	char* basic_contraints;
 	char* key_usage;
+	char* extended_key_usage;
 	char* ns_cert_type;
 }
 conf_req_csr_parameters;
@@ -118,9 +120,28 @@ typedef struct conf_req_crt_parameters {
 	char* authority_key_identifier;
 	char* basic_contraints;
 	char* key_usage;
+	char* extended_key_usage;
 	char* ns_cert_type;
+	
+	char* crl_authority_key_identifier;
 }
 conf_req_crt_parameters;
+
+typedef struct ca_db_entry {
+	char* status;
+	char* expiration_date;
+	char* revocation_date;
+	char* serial;
+	char* filename;
+	char* dn;
+}
+ca_db_entry;
+
+typedef struct ca_db {
+	ca_db_entry* ca_database_entries;
+	char* unique_subject;
+}
+ca_db;
 
 /* Prints an MPI in both Decimal and Hex formats */
 int print_mpi_inthex_text(mbedtls_mpi* X, char* heading);
@@ -140,3 +161,7 @@ int read_config_file(char* conffile, char*** contents, unsigned long* lines);
 int locate_tag(char** haystack, unsigned long haystack_size, char* needle, int* needleLoc, int* endNeedleLoc);
 int locate_value(char** haystack, int startline, int endline, char* needle, char** value, int keepsearching);
 int parse_config_file(char* conffile, int reqtype, void* void_params);
+
+static int x509_memcasecmp(const void *s1, const void *s2, size_t len);
+static int x509_string_cmp(const mbedtls_x509_buf *a, const mbedtls_x509_buf *b);
+int x509_name_cmp(const mbedtls_x509_name *a, const mbedtls_x509_name *b);
