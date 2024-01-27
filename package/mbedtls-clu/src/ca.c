@@ -68,28 +68,27 @@
     "    -cert infile			The CA cert\n"																\
 	"\n\n Revocation options:\n"																			\
 	"    -gencrl				Generate a new CRL\n"														\
-	"    -crlexts val			CRL extension section (override value in config file)\n"					\
 	"    -crl_reason val		revocation reason\n"														\
 	"    -crl_days +int			Days until the next CRL is due\n"											\
 	"    -revoke infile			Revoke a cert (given in file)\n"											\
 	"\n\n Parameters:\n"																					\
 	"    certreq				Certificate request to be signed (optional)\n"
 
-#if !defined(MBEDTLS_X509_CRT_WRITE_C) || \
+#if !defined(MBEDTLS_X509_CRL_PARSE_C) || !defined(MBEDTLS_X509_CRT_WRITE_C) || \
     !defined(MBEDTLS_X509_CRT_PARSE_C) || !defined(MBEDTLS_FS_IO) || \
     !defined(MBEDTLS_ENTROPY_C) || !defined(MBEDTLS_CTR_DRBG_C) || \
     !defined(MBEDTLS_ERROR_C) || !defined(MBEDTLS_SHA256_C) || \
     !defined(MBEDTLS_PEM_WRITE_C)
 int main(void)
 {
-    mbedtls_printf("MBEDTLS_X509_CRT_WRITE_C and/or MBEDTLS_X509_CRT_PARSE_C and/or "
+    mbedtls_printf("MBEDTLS_X509_CRL_PARSE_C and/or MBEDTLS_X509_CRT_WRITE_C and/or MBEDTLS_X509_CRT_PARSE_C and/or "
                    "MBEDTLS_FS_IO and/or MBEDTLS_SHA256_C and/or "
                    "MBEDTLS_ENTROPY_C and/or MBEDTLS_CTR_DRBG_C and/or "
                    "MBEDTLS_ERROR_C not defined.\n");
     mbedtls_exit(0);
 }
 #else
-	
+
 #include "mbedtls/x509_crt.h"
 #include "mbedtls/x509_csr.h"
 #include "mbedtls/oid.h"
@@ -98,8 +97,40 @@ int main(void)
 #include "mbedtls/md.h"
 #include "mbedtls/error.h"
 
+#include "x509write_crl.h"
+
 #define SET_OID(x, oid) \
     do { x.len = MBEDTLS_OID_SIZE(oid); x.p = (unsigned char*)oid; } while( 0 )
+
+int write_database_attr_old_new(char* databasefile, ca_db* ca_database)
+{
+	int ret = 0;
+	FILE* fout = NULL;
+	// Write the database attr files. Currently old == new
+	char* attrout = dynamic_strcat(2,databasefile,".attr");
+	char* oldout = dynamic_strcat(2,attrout,".old");
+	mbedtls_debug_printf("Moving %s to %s\n",attrout,oldout);
+	if((ret = rename(attrout,oldout)) != 0)
+	{
+		mbedtls_printf(" failed\n  ! Could not move %s\n\n",attrout);
+		return ret;
+	}
+
+	free(oldout);
+	
+	mbedtls_debug_printf("Writing %s\n",attrout);
+	if((fout = fopen(attrout,"wb+")) == NULL)
+	{
+		mbedtls_printf(" failed\n  ! Could not create %s\n\n",attrout);
+		return ret;
+	}
+	
+	fprintf(fout, "unique_subject = %s\n",ca_database->unique_subject);
+	fclose(fout);
+	free(attrout);
+	
+	return ret;
+}
 
 int write_database_old_new(char* databasefile, ca_db* ca_database, unsigned long database_len, int write_attr)
 {
@@ -157,36 +188,6 @@ int write_database_old_new(char* databasefile, ca_db* ca_database, unsigned long
 	return ret;
 }
 
-int write_database_attr_old_new(char* databasefile, ca_db* ca_database)
-{
-	int ret = 0;
-	FILE* fout = NULL;
-	// Write the database attr files. Currently old == new
-	char* attrout = dynamic_strcat(2,databasefile,".attr");
-	char* oldout = dynamic_strcat(2,attrout,".old");
-	mbedtls_debug_printf("Moving %s to %s\n",attrout,oldout);
-	if((ret = rename(attrout,oldout)) != 0)
-	{
-		mbedtls_printf(" failed\n  ! Could not move %s\n\n",attrout);
-		return ret;
-	}
-
-	free(oldout);
-	
-	mbedtls_debug_printf("Writing %s\n",attrout);
-	if((fout = fopen(attrout,"wb+")) == NULL)
-	{
-		mbedtls_printf(" failed\n  ! Could not create %s\n\n",attrout);
-		return ret;
-	}
-	
-	fprintf(fout, "unique_subject = %s\n",ca_database->unique_subject);
-	fclose(fout);
-	free(attrout);
-	
-	return ret;
-}
-
 int write_certificate(mbedtls_x509write_cert *crt, const char *output_file,
                       int (*f_rng)(void *, unsigned char *, size_t),
                       void *p_rng)
@@ -198,6 +199,37 @@ int write_certificate(mbedtls_x509write_cert *crt, const char *output_file,
 
     memset(output_buf, 0, 4096);
     if ((ret = mbedtls_x509write_crt_pem(crt, output_buf, 4096,
+                                         f_rng, p_rng)) < 0) {
+        return ret;
+    }
+
+    len = strlen((char *) output_buf);
+
+    if ((f = fopen(output_file, "w")) == NULL) {
+        return -1;
+    }
+
+    if (fwrite(output_buf, 1, len, f) != len) {
+        fclose(f);
+        return -1;
+    }
+
+    fclose(f);
+
+    return 0;
+}
+
+int write_crl(mbedtls_x509write_crl *crl, const char *output_file,
+                      int (*f_rng)(void *, unsigned char *, size_t),
+                      void *p_rng)
+{
+    int ret;
+    FILE *f;
+    unsigned char output_buf[100000];
+    size_t len = 0;
+
+    memset(output_buf, 0, 100000);
+    if ((ret = mbedtls_x509write_crl_pem(crl, output_buf, 100000,
                                          f_rng, p_rng)) < 0) {
         return ret;
     }
@@ -262,6 +294,7 @@ int main(int argc, char** argv)
 	char* cacrt_filein = NULL;
 	char* serialval = NULL;
 	char* crtrevoke_in = NULL;
+	int gencrl = 0;
 	
 	int version = DFL_VERSION;
 	int days = 0;
@@ -457,9 +490,23 @@ usage:
 		else if(strcmp(p,"-revoke") == 0 && i + 1 < argc)
 		{
 			// argv[i+1] should be the cert file to revoke. Advance i
+			if(gencrl)
+			{
+				// Can't do both at the same time
+				goto usage;
+			}
 			i += 1;
 			p = argv[i];
 			crtrevoke_in = strdup(p);
+		}
+		else if(strcmp(p,"-gencrl") == 0)
+		{
+			if(crtrevoke_in != NULL)
+			{
+				// Can't do both at the same time
+				goto usage;
+			}
+			gencrl = 1;
 		}
 		else if(i == argc - 1)
 		{
@@ -477,7 +524,8 @@ usage:
 		}
 	}
 	
-	if((outfile == NULL || csr_infile == NULL) && crtrevoke_in == NULL)
+	if(((outfile == NULL || csr_infile == NULL) && crtrevoke_in == NULL && !gencrl) ||
+		(gencrl && outfile == NULL))
 	{
 		goto usage;
 	}
@@ -496,6 +544,7 @@ usage:
 	mbedtls_debug_printf("cl: key_passin: %s\n", key_passin);
 	mbedtls_debug_printf("cl: cacrt_filein: %s\n", cacrt_filein);
 	mbedtls_debug_printf("cl: crtrevoke_in: %s\n", crtrevoke_in);
+	mbedtls_debug_printf("cl: gencrl: %d\n", gencrl);
 	
 	// Check if the ENV has a config file defined
 	mbedtls_env_conf = getenv(MBEDTLS_ENV_CONF);
@@ -614,7 +663,6 @@ usage:
 		goto usage;
 	}
 	
-	
 	mbedtls_debug_printf("Final digest: %s\n", md_alg_name);
 	mbedtls_debug_printf("Final cakeyfile: %s\n", key_filein);
 	mbedtls_debug_printf("Final cacrt: %s\n", cacrt_filein);
@@ -682,7 +730,7 @@ usage:
 		free_null_terminated_string_array(filecontents);
 		
 		// Print the DB for debugging purposes
-		for(int x = 0; x < ca_database_count; x++)
+		/*for(int x = 0; x < ca_database_count; x++)
 		{
 			mbedtls_debug_printf("ca_db[%d]: status: %s\n",x,ca_database.ca_database_entries[x].status);
 			mbedtls_debug_printf("ca_db[%d]: expiration_date: %s\n",x,ca_database.ca_database_entries[x].expiration_date);
@@ -690,7 +738,7 @@ usage:
 			mbedtls_debug_printf("ca_db[%d]: serial: %s\n",x,ca_database.ca_database_entries[x].serial);
 			mbedtls_debug_printf("ca_db[%d]: filename: %s\n",x,ca_database.ca_database_entries[x].filename);
 			mbedtls_debug_printf("ca_db[%d]: dn: %s\n",x,ca_database.ca_database_entries[x].dn);
-		}
+		}*/
 		
 		// Read the attr file
 		filecontents = NULL;
@@ -721,6 +769,7 @@ usage:
 		
 		mbedtls_debug_printf(" ok\n");
 	}
+	mbedtls_debug_printf("CA DB Size: %ld\n", ca_database_count);
 	
 	
 	/*
@@ -811,6 +860,169 @@ usage:
 			mbedtls_printf(" failed\n  ! Could not write database\n\n");
 			goto exit;
 		}
+	}
+	else if(gencrl)
+	{
+		// Generate a CRL
+		unsigned char buf[100000];
+		mbedtls_x509_crl crl;
+		
+		/*
+		 * 1.1. Load the CRL
+		 */
+		mbedtls_printf("\n  . Loading the CRL ...");
+		fflush(stdout);
+
+		ret = mbedtls_x509_crl_parse_file(&crl, ca_params.crl);
+
+		if (ret != 0) {
+			mbedtls_printf(" failed\n  !  mbedtls_x509_crl_parse_file returned %d\n\n", ret);
+			mbedtls_x509_crl_free(&crl);
+			goto exit;
+		}
+
+		mbedtls_printf(" ok\n");
+
+		/*
+		 * 1.2 Print the CRL
+		 */
+		mbedtls_printf("  . CRL information    ...\n");
+		ret = mbedtls_x509_crl_info((char *) buf, sizeof(buf) - 1, "      ", &crl);
+		if (ret == -1) {
+			mbedtls_printf(" failed\n  !  mbedtls_x509_crl_info returned %d\n\n", ret);
+			mbedtls_x509_crl_free(&crl);
+			goto exit;
+		}
+
+		mbedtls_printf("%s\n", buf);
+		
+		mbedtls_x509write_crl crlwrite;
+		mbedtls_x509write_crl_init(&crlwrite);
+		
+		mbedtls_x509write_crl_set_version(&crlwrite, MBEDTLS_X509_CRL_VERSION_2);
+		
+		char time_thisupdate[60];
+		char time_nextupdate[60];
+		sprintf(time_thisupdate, "%04d%02d%02d%02d%02d%02d", crl.this_update.year, crl.this_update.mon,
+                           crl.this_update.day,  crl.this_update.hour,
+                           crl.this_update.min,  crl.this_update.sec);
+		sprintf(time_nextupdate, "%04d%02d%02d%02d%02d%02d", crl.next_update.year, crl.next_update.mon,
+                           crl.next_update.day,  crl.next_update.hour,
+                           crl.next_update.min,  crl.next_update.sec);
+		mbedtls_x509write_crl_set_validity(&crlwrite, time_thisupdate, time_nextupdate);
+		
+		// Parse CA (issuer) certificate
+		mbedtls_debug_printf("  . Loading the CA (issuer) certificate ...");
+		fflush(stdout);
+
+		if ((ret = mbedtls_x509_crt_parse_file(&issuer_crt, cacrt_filein)) != 0) {
+			mbedtls_strerror(ret, buf, 1024);
+			mbedtls_debug_printf(" failed\n  !  mbedtls_x509_crt_parse_file "
+						   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
+			goto exit;
+		}
+
+		ret = mbedtls_x509_dn_gets(issuer_name, sizeof(issuer_name),
+								   &issuer_crt.subject);
+		if (ret < 0) {
+			mbedtls_strerror(ret, buf, 1024);
+			mbedtls_debug_printf(" failed\n  !  mbedtls_x509_dn_gets "
+						   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
+			goto exit;
+		}
+
+		mbedtls_x509write_crl_set_issuer_name(&crlwrite, issuer_name);
+		mbedtls_debug_printf(" ok\n");
+		
+		mbedtls_debug_printf("  . Loading the issuer key ...");
+		fflush(stdout);
+
+		ret = mbedtls_pk_parse_keyfile(&loaded_issuer_key, key_filein,
+									   key_passin);
+		if (ret != 0) {
+			mbedtls_strerror(ret, buf, 1024);
+			mbedtls_debug_printf(" failed\n  !  mbedtls_pk_parse_keyfile "
+						   "returned -x%02x - %s\n\n", (unsigned int) -ret, buf);
+			goto exit;
+		}
+
+		// Check if key and issuer certificate match
+		//
+		if (mbedtls_pk_check_pair(&issuer_crt.pk, issuer_key) != 0) {
+			mbedtls_debug_printf(" failed\n  !  issuer_key does not match "
+						   "issuer certificate\n\n");
+			goto exit;
+		}
+
+		mbedtls_x509write_crl_set_issuer_key(&crlwrite, issuer_key);
+		mbedtls_debug_printf(" ok\n");
+		
+		mbedtls_x509write_crl_set_md_alg(&crlwrite, crl.sig_md);
+		
+		if(crlwrite.version == MBEDTLS_X509_CRL_VERSION_2)
+		{
+			if ((ret = mbedtls_x509write_crl_set_authority_key_identifier(&crlwrite)) != 0) {
+				mbedtls_strerror(ret, buf, 1024);
+				mbedtls_debug_printf(" failed\n  !  mbedtls_x509write_crl_set_authority_key_identifier "
+							   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
+				goto exit;
+			}
+		}
+		
+		for(int x = 0; x < ca_database_count; x++)
+		{
+			if(ca_database.ca_database_entries[x].status[0] == 'R')
+			{
+				// Revoked, add an entry to CRL
+				char* tmprevocation = ca_database.ca_database_entries[x].revocation_date;
+				if(strlen(tmprevocation) == 13)
+				{
+					// Add 4 digit year -- ugly and awful FIXME
+					if(tmprevocation[0] == '0' ||
+						tmprevocation[0] == '1' ||
+						tmprevocation[0] == '2' ||
+						tmprevocation[0] == '3' ||
+						tmprevocation[0] == '4')
+					{
+						tmprevocation = dynamic_strcat(2,"20",tmprevocation);
+					}
+					else
+					{
+						tmprevocation = dynamic_strcat(2,"19",tmprevocation);
+					}
+					// Remove trailing "Z" (it gets added by the write function)
+					tmprevocation[14] = '\0';
+				}
+				if ((ret = mbedtls_x509write_crl_add_revoked_cert(&crlwrite,ca_database.ca_database_entries[x].serial,tmprevocation)) != 0) {
+					mbedtls_strerror(ret, buf, 1024);
+					mbedtls_debug_printf(" failed\n  !  mbedtls_x509write_crl_add_revoked_cert "
+								   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
+					goto exit;
+				}
+			}
+		}
+		
+		/*
+		 * 1.3. Writing the crl
+		 */
+		mbedtls_debug_printf("  . Writing the CRL...");
+		fflush(stdout);
+
+		if ((ret = write_crl(&crlwrite, outfile,
+									 mbedtls_ctr_drbg_random, &ctr_drbg)) != 0) {
+			mbedtls_strerror(ret, buf, 1024);
+			mbedtls_debug_printf(" failed\n  !  write_crl -0x%04x - %s\n\n",
+						   (unsigned int) -ret, buf);
+			goto exit;
+		}
+
+		mbedtls_debug_printf(" ok\n");
+		
+		mbedtls_x509write_crl_free(&crlwrite);
+		
+		ret = 0;
+		
+		goto exit;
 	}
 	else
 	{

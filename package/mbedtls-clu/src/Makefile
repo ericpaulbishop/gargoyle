@@ -8,12 +8,15 @@ endif
 
 CFLAGS:=$(CFLAGS) -Wall -Os
 LIBS:=-lmbedtls -lmbedx509 -lmbedcrypto -lericstools
-STATIC_OBJS:=mbedtlsclu_common.c
+STATIC_OBJS:=mbedtlsclu_common.c x509write_crl.c
 DEFS:=-DDEBUG -DOPENSSL_ENV_CONF_COMPAT
 
-all: mbedtlsclu_common.o dhparam genpkey req ca
+all: mbedtlsclu_common.o x509write_crl.o dhparam genpkey req ca
 mbedtlsclu_common.o: mbedtlsclu_common.c
 	$(CC) $(CFLAGS) $(DEFS) -c mbedtlsclu_common.c -o $@
+
+x509write_crl.o: x509write_crl.c
+	$(CC) $(CFLAGS) $(DEFS) -c x509write_crl.c -o $@
 	
 dhparam: dhparam.o $(STATIC_OBJS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ $(LIBS)
@@ -40,4 +43,4 @@ ca.o: ca.c $(STATIC_OBJS)
 	$(CC) $(CFLAGS) $(DEFS) -c ca.c -o $@
 
 clean:
-	rm -rf *.o *.a *~ .*sw* mbedtlsclu_common dhparam genpkey req ca
+	rm -rf *.o *.a *~ .*sw* mbedtlsclu_common x509write_crl dhparam genpkey req ca
