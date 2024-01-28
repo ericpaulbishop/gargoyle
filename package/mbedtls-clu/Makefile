@@ -39,7 +39,7 @@ endef
 
 define Package/mbedtls-clu/install
 	$(INSTALL_DIR) $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/dhparam $(1)/usr/bin/dhparam
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/mbedtls-clu $(1)/usr/bin/mbedtls
 endef
 
 $(eval $(call BuildPackage,mbedtls-clu))

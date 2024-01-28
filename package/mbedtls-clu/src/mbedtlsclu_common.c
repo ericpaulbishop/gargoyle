@@ -578,3 +578,34 @@ int x509_name_cmp(const mbedtls_x509_name *a, const mbedtls_x509_name *b)
     /* a == NULL == b */
     return 0;
 }
+
+int write_certificate(mbedtls_x509write_cert *crt, const char *output_file,
+                      int (*f_rng)(void *, unsigned char *, size_t),
+                      void *p_rng)
+{
+    int ret;
+    FILE *f;
+    unsigned char output_buf[4096];
+    size_t len = 0;
+
+    memset(output_buf, 0, 4096);
+    if ((ret = mbedtls_x509write_crt_pem(crt, output_buf, 4096,
+                                         f_rng, p_rng)) < 0) {
+        return ret;
+    }
+
+    len = strlen((char *) output_buf);
+
+    if ((f = fopen(output_file, "w")) == NULL) {
+        return -1;
+    }
+
+    if (fwrite(output_buf, 1, len, f) != len) {
+        fclose(f);
+        return -1;
+    }
+
+    fclose(f);
+
+    return 0;
+}

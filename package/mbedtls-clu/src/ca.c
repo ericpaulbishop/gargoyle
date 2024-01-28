@@ -27,7 +27,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "mbedtlsclu_common.h"
+#include "ca.h"
 
 #define DFL_FILENAME            "keyfile.key"
 #define DFL_PASSWORD            NULL
@@ -43,6 +43,7 @@
 
 #define DFL_SERIAL				"1"
 #define DFL_DAYS				365
+#define DFL_CRL_DAYS            180
 #define DFL_VERSION				MBEDTLS_X509_CRT_VERSION_3
 
 #define USAGE \
@@ -68,7 +69,7 @@
     "    -cert infile			The CA cert\n"																\
 	"\n\n Revocation options:\n"																			\
 	"    -gencrl				Generate a new CRL\n"														\
-	"    -crl_reason val		revocation reason\n"														\
+	"    -crl_reason val		UNSUPPORTED revocation reason\n"														\
 	"    -crl_days +int			Days until the next CRL is due\n"											\
 	"    -revoke infile			Revoke a cert (given in file)\n"											\
 	"\n\n Parameters:\n"																					\
@@ -79,7 +80,7 @@
     !defined(MBEDTLS_ENTROPY_C) || !defined(MBEDTLS_CTR_DRBG_C) || \
     !defined(MBEDTLS_ERROR_C) || !defined(MBEDTLS_SHA256_C) || \
     !defined(MBEDTLS_PEM_WRITE_C)
-int main(void)
+int ca_main(void)
 {
     mbedtls_printf("MBEDTLS_X509_CRL_PARSE_C and/or MBEDTLS_X509_CRT_WRITE_C and/or MBEDTLS_X509_CRT_PARSE_C and/or "
                    "MBEDTLS_FS_IO and/or MBEDTLS_SHA256_C and/or "
@@ -88,16 +89,6 @@ int main(void)
     mbedtls_exit(0);
 }
 #else
-
-#include "mbedtls/x509_crt.h"
-#include "mbedtls/x509_csr.h"
-#include "mbedtls/oid.h"
-#include "mbedtls/entropy.h"
-#include "mbedtls/ctr_drbg.h"
-#include "mbedtls/md.h"
-#include "mbedtls/error.h"
-
-#include "x509write_crl.h"
 
 #define SET_OID(x, oid) \
     do { x.len = MBEDTLS_OID_SIZE(oid); x.p = (unsigned char*)oid; } while( 0 )
@@ -188,37 +179,6 @@ int write_database_old_new(char* databasefile, ca_db* ca_database, unsigned long
 	return ret;
 }
 
-int write_certificate(mbedtls_x509write_cert *crt, const char *output_file,
-                      int (*f_rng)(void *, unsigned char *, size_t),
-                      void *p_rng)
-{
-    int ret;
-    FILE *f;
-    unsigned char output_buf[4096];
-    size_t len = 0;
-
-    memset(output_buf, 0, 4096);
-    if ((ret = mbedtls_x509write_crt_pem(crt, output_buf, 4096,
-                                         f_rng, p_rng)) < 0) {
-        return ret;
-    }
-
-    len = strlen((char *) output_buf);
-
-    if ((f = fopen(output_file, "w")) == NULL) {
-        return -1;
-    }
-
-    if (fwrite(output_buf, 1, len, f) != len) {
-        fclose(f);
-        return -1;
-    }
-
-    fclose(f);
-
-    return 0;
-}
-
 int write_crl(mbedtls_x509write_crl *crl, const char *output_file,
                       int (*f_rng)(void *, unsigned char *, size_t),
                       void *p_rng)
@@ -250,7 +210,8 @@ int write_crl(mbedtls_x509write_crl *crl, const char *output_file,
     return 0;
 }
 
-int main(int argc, char** argv)
+//int main(int argc, char** argv)
+int ca_main(int argc, char** argv, int argi)
 {
     int ret = 1;
     int exit_code = MBEDTLS_EXIT_FAILURE;
@@ -295,6 +256,7 @@ int main(int argc, char** argv)
 	char* serialval = NULL;
 	char* crtrevoke_in = NULL;
 	int gencrl = 0;
+	char* crldays_in = NULL;
 	
 	int version = DFL_VERSION;
 	int days = 0;
@@ -340,7 +302,7 @@ usage:
 		goto exit;
 	}
 	
-	for(i = 1; i < argc; i++)
+	for(i = argi; i < argc; i++)
 	{
 		p = argv[i];
 		
@@ -507,6 +469,13 @@ usage:
 				goto usage;
 			}
 			gencrl = 1;
+		}
+		else if(strcmp(p,"-crl_days") == 0 && i + 1 < argc)
+		{
+			// argv[i+1] should be the crl days. Advance i
+			i += 1;
+			p = argv[i];
+			crldays_in = strdup(p);
 		}
 		else if(i == argc - 1)
 		{
@@ -865,51 +834,52 @@ usage:
 	{
 		// Generate a CRL
 		unsigned char buf[100000];
-		mbedtls_x509_crl crl;
+		mbedtls_x509write_crl crl;
+		mbedtls_x509write_crl_init(&crl);
 		
 		/*
-		 * 1.1. Load the CRL
+		 * 1.1. Setup the CRL
 		 */
-		mbedtls_printf("\n  . Loading the CRL ...");
-		fflush(stdout);
-
-		ret = mbedtls_x509_crl_parse_file(&crl, ca_params.crl);
-
-		if (ret != 0) {
-			mbedtls_printf(" failed\n  !  mbedtls_x509_crl_parse_file returned %d\n\n", ret);
-			mbedtls_x509_crl_free(&crl);
-			goto exit;
-		}
-
-		mbedtls_printf(" ok\n");
-
-		/*
-		 * 1.2 Print the CRL
-		 */
-		mbedtls_printf("  . CRL information    ...\n");
-		ret = mbedtls_x509_crl_info((char *) buf, sizeof(buf) - 1, "      ", &crl);
-		if (ret == -1) {
-			mbedtls_printf(" failed\n  !  mbedtls_x509_crl_info returned %d\n\n", ret);
-			mbedtls_x509_crl_free(&crl);
-			goto exit;
-		}
-
-		mbedtls_printf("%s\n", buf);
-		
-		mbedtls_x509write_crl crlwrite;
-		mbedtls_x509write_crl_init(&crlwrite);
-		
-		mbedtls_x509write_crl_set_version(&crlwrite, MBEDTLS_X509_CRL_VERSION_2);
+		mbedtls_x509write_crl_set_version(&crl, MBEDTLS_X509_CRL_VERSION_2);
 		
 		char time_thisupdate[60];
 		char time_nextupdate[60];
-		sprintf(time_thisupdate, "%04d%02d%02d%02d%02d%02d", crl.this_update.year, crl.this_update.mon,
-                           crl.this_update.day,  crl.this_update.hour,
-                           crl.this_update.min,  crl.this_update.sec);
-		sprintf(time_nextupdate, "%04d%02d%02d%02d%02d%02d", crl.next_update.year, crl.next_update.mon,
-                           crl.next_update.day,  crl.next_update.hour,
-                           crl.next_update.min,  crl.next_update.sec);
-		mbedtls_x509write_crl_set_validity(&crlwrite, time_thisupdate, time_nextupdate);
+		// Calculate not_before and not_after
+		struct tm today, future;
+		const time_t ONEDAY = 24 * 60 * 60;
+		time_t timenow = time(NULL);
+		today = *gmtime(&timenow);
+		sprintf(time_thisupdate, "%04d%02d%02d%02d%02d%02d", today.tm_year + 1900, today.tm_mon + 1, today.tm_mday,
+				today.tm_hour, today.tm_min, today.tm_sec);
+		
+		int days = 0;
+		if(crldays_in != NULL)
+		{
+			// cli input
+			days = atoi(crldays_in);
+		}
+		else if(ca_params.default_crl_days != NULL)
+		{
+			// conf input
+			days = atoi(ca_params.default_crl_days);
+		}
+		else
+		{
+			days = DFL_CRL_DAYS;
+		}
+		
+		if(days == 0)
+		{
+			goto usage;
+		}
+		mbedtls_debug_printf("CRL Days: %d\n",days);
+		timenow += (days * ONEDAY);
+		future = *gmtime(&timenow);
+		
+		sprintf(time_nextupdate, "%04d%02d%02d%02d%02d%02d", future.tm_year + 1900, future.tm_mon + 1, future.tm_mday,
+				future.tm_hour, future.tm_min, future.tm_sec);
+		
+		mbedtls_x509write_crl_set_validity(&crl, time_thisupdate, time_nextupdate);
 		
 		// Parse CA (issuer) certificate
 		mbedtls_debug_printf("  . Loading the CA (issuer) certificate ...");
@@ -931,7 +901,7 @@ usage:
 			goto exit;
 		}
 
-		mbedtls_x509write_crl_set_issuer_name(&crlwrite, issuer_name);
+		mbedtls_x509write_crl_set_issuer_name(&crl, issuer_name);
 		mbedtls_debug_printf(" ok\n");
 		
 		mbedtls_debug_printf("  . Loading the issuer key ...");
@@ -954,14 +924,14 @@ usage:
 			goto exit;
 		}
 
-		mbedtls_x509write_crl_set_issuer_key(&crlwrite, issuer_key);
+		mbedtls_x509write_crl_set_issuer_key(&crl, issuer_key);
 		mbedtls_debug_printf(" ok\n");
 		
-		mbedtls_x509write_crl_set_md_alg(&crlwrite, crl.sig_md);
+		mbedtls_x509write_crl_set_md_alg(&crl, md_alg);
 		
-		if(crlwrite.version == MBEDTLS_X509_CRL_VERSION_2)
+		if(crl.version == MBEDTLS_X509_CRL_VERSION_2)
 		{
-			if ((ret = mbedtls_x509write_crl_set_authority_key_identifier(&crlwrite)) != 0) {
+			if ((ret = mbedtls_x509write_crl_set_authority_key_identifier(&crl)) != 0) {
 				mbedtls_strerror(ret, buf, 1024);
 				mbedtls_debug_printf(" failed\n  !  mbedtls_x509write_crl_set_authority_key_identifier "
 							   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
@@ -969,6 +939,9 @@ usage:
 			}
 		}
 		
+		/*
+		 * 1.2. Write revoked certificate records
+		 */
 		for(int x = 0; x < ca_database_count; x++)
 		{
 			if(ca_database.ca_database_entries[x].status[0] == 'R')
@@ -993,7 +966,7 @@ usage:
 					// Remove trailing "Z" (it gets added by the write function)
 					tmprevocation[14] = '\0';
 				}
-				if ((ret = mbedtls_x509write_crl_add_revoked_cert(&crlwrite,ca_database.ca_database_entries[x].serial,tmprevocation)) != 0) {
+				if ((ret = mbedtls_x509write_crl_add_revoked_cert(&crl,ca_database.ca_database_entries[x].serial,tmprevocation)) != 0) {
 					mbedtls_strerror(ret, buf, 1024);
 					mbedtls_debug_printf(" failed\n  !  mbedtls_x509write_crl_add_revoked_cert "
 								   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
@@ -1008,7 +981,7 @@ usage:
 		mbedtls_debug_printf("  . Writing the CRL...");
 		fflush(stdout);
 
-		if ((ret = write_crl(&crlwrite, outfile,
+		if ((ret = write_crl(&crl, outfile,
 									 mbedtls_ctr_drbg_random, &ctr_drbg)) != 0) {
 			mbedtls_strerror(ret, buf, 1024);
 			mbedtls_debug_printf(" failed\n  !  write_crl -0x%04x - %s\n\n",
@@ -1018,7 +991,7 @@ usage:
 
 		mbedtls_debug_printf(" ok\n");
 		
-		mbedtls_x509write_crl_free(&crlwrite);
+		mbedtls_x509write_crl_free(&crl);
 		
 		ret = 0;
 		
@@ -1741,15 +1714,6 @@ usage:
 
 exit:
 
-    if (exit_code != MBEDTLS_EXIT_SUCCESS) {
-#ifdef MBEDTLS_ERROR_C
-        mbedtls_strerror(ret, buf, sizeof(buf));
-        mbedtls_debug_printf(" - %s\n", buf);
-#else
-        mbedtls_debug_printf("\n");
-#endif
-    }
-
 #if defined(MBEDTLS_X509_CSR_PARSE_C)
     mbedtls_x509_csr_free(&csr);
 #endif /* MBEDTLS_X509_CSR_PARSE_C */
@@ -1764,7 +1728,7 @@ exit:
     mbedtls_psa_crypto_free();
 #endif /* MBEDTLS_USE_PSA_CRYPTO */
 
-    mbedtls_exit(exit_code);
+    return exit_code;
 }
 #endif /* MBEDTLS_X509_CSR_WRITE_C && MBEDTLS_PK_PARSE_C && MBEDTLS_FS_IO &&
           MBEDTLS_ENTROPY_C && MBEDTLS_CTR_DRBG_C && MBEDTLS_PEM_WRITE_C */

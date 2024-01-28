@@ -27,17 +27,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "mbedtlsclu_common.h"
+#include "genpkey.h"
 
 #if defined(MBEDTLS_PK_WRITE_C) && defined(MBEDTLS_FS_IO) && \
     defined(MBEDTLS_ENTROPY_C) && defined(MBEDTLS_CTR_DRBG_C)
-#include "mbedtls/error.h"
-#include "mbedtls/pk.h"
-#include "mbedtls/ecdsa.h"
-#include "mbedtls/rsa.h"
-#include "mbedtls/error.h"
-#include "mbedtls/entropy.h"
-#include "mbedtls/ctr_drbg.h"
 
 #define DEV_RANDOM_THRESHOLD        32
 
@@ -132,7 +125,7 @@ int dev_random_entropy_poll(void *data, unsigned char *output,
 #if !defined(MBEDTLS_PK_WRITE_C) || !defined(MBEDTLS_PEM_WRITE_C) || \
     !defined(MBEDTLS_FS_IO) || !defined(MBEDTLS_ENTROPY_C) || \
     !defined(MBEDTLS_CTR_DRBG_C)
-int main(void)
+int genpkey_main(void)
 {
     mbedtls_printf("MBEDTLS_PK_WRITE_C and/or MBEDTLS_FS_IO and/or "
                    "MBEDTLS_ENTROPY_C and/or MBEDTLS_CTR_DRBG_C and/or "
@@ -323,7 +316,7 @@ static int write_private_key(mbedtls_pk_context *key, int textout, int format, c
     return 0;
 }
 
-int main(int argc, char** argv)
+int genpkey_main(int argc, char** argv, int argi)
 {
 	int ret = 1;
     int exit_code = MBEDTLS_EXIT_FAILURE;
@@ -374,7 +367,7 @@ usage:
 		goto exit;
 	}
 	
-	for(i = 1; i < argc; i++)
+	for(i = argi; i < argc; i++)
 	{
 		p = argv[i];
 		
@@ -641,14 +634,6 @@ usage:
     exit_code = MBEDTLS_EXIT_SUCCESS;
 
 exit:
-	if (exit_code != MBEDTLS_EXIT_SUCCESS) {
-#ifdef MBEDTLS_ERROR_C
-        mbedtls_strerror(ret, buf, sizeof(buf));
-        mbedtls_debug_printf(" - %s\n", buf);
-#else
-        mbedtls_debug_printf("\n");
-#endif
-    }
 
     mbedtls_pk_free(&key);
     mbedtls_ctr_drbg_free(&ctr_drbg);
@@ -657,6 +642,6 @@ exit:
     mbedtls_psa_crypto_free();
 #endif /* MBEDTLS_USE_PSA_CRYPTO */
 
-    mbedtls_exit(exit_code);
+    return exit_code;
 }
 #endif

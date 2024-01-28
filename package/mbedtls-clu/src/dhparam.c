@@ -27,12 +27,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "mbedtlsclu_common.h"
+#include "dhparam.h"
 
 #if !defined(MBEDTLS_BIGNUM_C) || !defined(MBEDTLS_ENTROPY_C) ||   \
     !defined(MBEDTLS_FS_IO) || !defined(MBEDTLS_CTR_DRBG_C) ||     \
     !defined(MBEDTLS_GENPRIME)
-int main(void)
+int dhparam_main(void)
 {
     mbedtls_printf("MBEDTLS_BIGNUM_C and/or MBEDTLS_ENTROPY_C and/or "
                    "MBEDTLS_FS_IO and/or MBEDTLS_CTR_DRBG_C and/or "
@@ -40,14 +40,6 @@ int main(void)
     mbedtls_exit(0);
 }
 #else
-
-#include "mbedtls/entropy.h"
-#include "mbedtls/ctr_drbg.h"
-#include "mbedtls/asn1write.h"
-#include "mbedtls/base64.h"
-#include "mbedtls/dhm.h"
-#include "mbedtls/error.h"
-#include "mbedtls/pem.h"
 
 #define USAGE \
     "\n usage: dhparam [options] [numbits]\n"														\
@@ -264,7 +256,7 @@ int write_dhm_params(mbedtls_mpi* G, mbedtls_mpi* P, int textout, int output_for
     return 0;
 }
 
-int main(int argc, char** argv)
+int dhparam_main(int argc, char** argv, int argi)
 {
 	int ret = 1;
     int exit_code = MBEDTLS_EXIT_FAILURE;
@@ -294,7 +286,7 @@ usage:
 		goto exit;
 	}
 	
-	for(i = 1; i < argc; i++)
+	for(i = argi; i < argc; i++)
 	{
 		p = argv[i];
 		
@@ -472,6 +464,6 @@ exit:
     mbedtls_ctr_drbg_free(&ctr_drbg);
     mbedtls_entropy_free(&entropy);
 	
-	mbedtls_exit(exit_code);
+	return exit_code;
 }
 #endif

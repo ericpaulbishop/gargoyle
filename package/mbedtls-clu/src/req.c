@@ -27,7 +27,7 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "mbedtlsclu_common.h"
+#include "req.h"
 
 #define DFL_FILENAME            "keyfile.key"
 #define DFL_PASSWORD            NULL
@@ -80,7 +80,7 @@
 	!defined(MBEDTLS_X509_CRT_WRITE_C) || \
     !defined(MBEDTLS_X509_CRT_PARSE_C) || \
     !defined(MBEDTLS_ERROR_C)
-int main(void)
+int req_main(void)
 {
     mbedtls_printf("MBEDTLS_X509_CSR_WRITE_C and/or MBEDTLS_FS_IO and/or "
                    "MBEDTLS_PK_PARSE_C and/or MBEDTLS_SHA256_C and/or "
@@ -91,16 +91,6 @@ int main(void)
     mbedtls_exit(0);
 }
 #else
-	
-#include "mbedtls/x509_crt.h"
-#include "mbedtls/x509_csr.h"
-#include "mbedtls/oid.h"
-#include "mbedtls/entropy.h"
-#include "mbedtls/ctr_drbg.h"
-#include "mbedtls/md.h"
-#include "mbedtls/error.h"
-
-#include <errno.h>
 
 int write_certificate_request_buffer(mbedtls_x509write_csr *req, int format, char* output_buf,
                               size_t output_buf_size, size_t* len,
@@ -165,38 +155,7 @@ int write_certificate_request(mbedtls_x509write_csr *req, int format, const char
     return 0;
 }
 
-int write_certificate(mbedtls_x509write_cert *crt, const char *output_file,
-                      int (*f_rng)(void *, unsigned char *, size_t),
-                      void *p_rng)
-{
-    int ret;
-    FILE *f;
-    unsigned char output_buf[4096];
-    size_t len = 0;
-
-    memset(output_buf, 0, 4096);
-    if ((ret = mbedtls_x509write_crt_pem(crt, output_buf, 4096,
-                                         f_rng, p_rng)) < 0) {
-        return ret;
-    }
-
-    len = strlen((char *) output_buf);
-
-    if ((f = fopen(output_file, "w")) == NULL) {
-        return -1;
-    }
-
-    if (fwrite(output_buf, 1, len, f) != len) {
-        fclose(f);
-        return -1;
-    }
-
-    fclose(f);
-
-    return 0;
-}
-
-int main(int argc, char** argv)
+int req_main(int argc, char** argv, int argi)
 {
     int ret = 1;
     int exit_code = MBEDTLS_EXIT_FAILURE;
@@ -263,7 +222,7 @@ usage:
 		goto exit;
 	}
 	
-	for(i = 1; i < argc; i++)
+	for(i = argi; i < argc; i++)
 	{
 		p = argv[i];
 		
@@ -1154,15 +1113,6 @@ usage:
 
 exit:
 
-    if (exit_code != MBEDTLS_EXIT_SUCCESS) {
-#ifdef MBEDTLS_ERROR_C
-        mbedtls_strerror(ret, buf, sizeof(buf));
-        mbedtls_debug_printf(" - %s\n", buf);
-#else
-        mbedtls_debug_printf("\n");
-#endif
-    }
-
     mbedtls_x509write_csr_free(&req);
     mbedtls_pk_free(&key);
     mbedtls_ctr_drbg_free(&ctr_drbg);
@@ -1171,7 +1121,7 @@ exit:
     mbedtls_psa_crypto_free();
 #endif /* MBEDTLS_USE_PSA_CRYPTO */
 
-    mbedtls_exit(exit_code);
+    return exit_code;
 }
 #endif /* MBEDTLS_X509_CSR_WRITE_C && MBEDTLS_PK_PARSE_C && MBEDTLS_FS_IO &&
           MBEDTLS_ENTROPY_C && MBEDTLS_CTR_DRBG_C && MBEDTLS_PEM_WRITE_C */

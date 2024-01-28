@@ -16,6 +16,9 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef MBEDTLSCLU_COMMON
+#define MBEDTLSCLU_COMMON
+
 #if !defined(MBEDTLS_CONFIG_FILE)
 #include "mbedtls/config.h"
 #else
@@ -26,6 +29,10 @@
 
 #include "mbedtls/bignum.h"
 #include "mbedtls/x509.h"
+#include "mbedtls/x509_crt.h"
+#include "mbedtls/error.h"
+#include "mbedtls/entropy.h"
+#include "mbedtls/ctr_drbg.h"
 
 #ifdef DEBUG
 #define mbedtls_debug_printf(...)  mbedtls_printf(__VA_ARGS__)
@@ -165,3 +172,8 @@ int parse_config_file(char* conffile, int reqtype, void* void_params);
 static int x509_memcasecmp(const void *s1, const void *s2, size_t len);
 static int x509_string_cmp(const mbedtls_x509_buf *a, const mbedtls_x509_buf *b);
 int x509_name_cmp(const mbedtls_x509_name *a, const mbedtls_x509_name *b);
+
+int write_certificate(mbedtls_x509write_cert *crt, const char *output_file,
+                      int (*f_rng)(void *, unsigned char *, size_t),
+                      void *p_rng);
+#endif
