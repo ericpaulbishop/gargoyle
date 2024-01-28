@@ -536,19 +536,19 @@ usage:
 			goto usage;
 		}
 		
-		externcmd = dynamic_strcat(6,"genpkey -algorithm ", algorithm, " -pkeyopt rsa_keygen_bits:", rsa_keysize, " -out ", newkey_outfile);
-		mbedtls_debug_printf("About to run external program: %s\n",externcmd);
-		status = system(externcmd);
-		if(WEXITSTATUS(status) != MBEDTLS_EXIT_SUCCESS)
-		{
-			mbedtls_debug_printf("External program was unsuccessful. Bailing out.\n");
-			goto exit;
-		}
-		mbedtls_debug_printf("External program was successful\n");
+		char** genpkey_args = (char**)malloc(7*sizeof(char*));
+		genpkey_args[0] = strdup("genpkey");
+		genpkey_args[1] = strdup("-algorithm");
+		genpkey_args[2] = strdup(algorithm);
+		genpkey_args[3] = strdup("-pkeyopt");
+		genpkey_args[4] = dynamic_strcat(2,"rsa_keygen_bits:",rsa_keysize);
+		genpkey_args[5] = strdup("-out");
+		genpkey_args[6] = strdup(newkey_outfile);
+		mbedtls_debug_printf("Calling genpkey internally\n");
+		genpkey_main(7,genpkey_args,1);
 		
 		free(algorithm);
 		free(rsa_keysize);
-		free(externcmd);
 		
 		key_filein = newkey_outfile;
 	}
