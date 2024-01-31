@@ -18,6 +18,10 @@
 
 #include "mbedtlsclu_common.h"
 
+#ifndef DEBUG
+int mbedtls_debug_printf() { return 0; }
+#endif
+
 int print_mpi_inthex_text(mbedtls_mpi* X, char* heading)
 {
 	int ret = 0;
@@ -263,12 +267,14 @@ int locate_value(char** haystack, int startline, int endline, char* needle, char
 			{
 				// Found our tag, copy out the value
 				char* trimmed = trim_flanking_whitespace(line_pieces[1]);
+				// Strip quotes which may be added by easyrsa expand_ssl_config()
+				char* stripped = dynamic_replace(trimmed,"\"","");
 				if(*value != NULL)
 				{
 					// We already found a previous value, free it first
 					free(*value);
 				}
-				*value = strdup(trimmed);
+				*value = strdup(stripped);
 				ret = 0;
 				if(!keepsearching)
 				{
@@ -279,6 +285,36 @@ int locate_value(char** haystack, int startline, int endline, char* needle, char
 		}
 		
 		free_null_terminated_string_array(line_pieces);
+	}
+	
+	return ret;
+}
+
+int parse_x509_extensions(char** contents, int start_line, int end_line, int reqtype, void* void_params)
+{
+	int ret = 0;
+	
+	if(reqtype == REQ_TYPE_CSR)
+	{
+		conf_req_csr_parameters* req_params = void_params;
+		
+		ret = locate_value(contents, start_line, end_line, "subjectKeyIdentifier", &(req_params->subject_key_identifier),1);
+		ret = locate_value(contents, start_line, end_line, "authorityKeyIdentifier", &(req_params->authority_key_identifier),1);
+		ret = locate_value(contents, start_line, end_line, "basicConstraints", &(req_params->basic_contraints),1);
+		ret = locate_value(contents, start_line, end_line, "keyUsage", &(req_params->key_usage),1);
+		ret = locate_value(contents, start_line, end_line, "extendedKeyUsage", &(req_params->extended_key_usage),1);
+		ret = locate_value(contents, start_line, end_line, "nsCertType", &(req_params->ns_cert_type),1);
+	}
+	else if(reqtype == REQ_TYPE_CRT || reqtype == REQ_TYPE_EXTFILE)
+	{
+		conf_req_crt_parameters* ca_params = void_params;
+		
+		ret = locate_value(contents, start_line, end_line, "subjectKeyIdentifier", &(ca_params->subject_key_identifier),1);
+		ret = locate_value(contents, start_line, end_line, "authorityKeyIdentifier", &(ca_params->authority_key_identifier),1);
+		ret = locate_value(contents, start_line, end_line, "basicConstraints", &(ca_params->basic_contraints),1);
+		ret = locate_value(contents, start_line, end_line, "keyUsage", &(ca_params->key_usage),1);
+		ret = locate_value(contents, start_line, end_line, "extendedKeyUsage", &(ca_params->extended_key_usage),1);
+		ret = locate_value(contents, start_line, end_line, "nsCertType", &(ca_params->ns_cert_type),1);
 	}
 	
 	return ret;
@@ -367,12 +403,7 @@ int parse_config_file(char* conffile, int reqtype, void* void_params)
 			}
 			else
 			{
-				ret = locate_value(contents, xet_start_line, xet_end_line, "subjectKeyIdentifier", &(req_params->subject_key_identifier),1);
-				ret = locate_value(contents, xet_start_line, xet_end_line, "authorityKeyIdentifier", &(req_params->authority_key_identifier),1);
-				ret = locate_value(contents, xet_start_line, xet_end_line, "basicConstraints", &(req_params->basic_contraints),1);
-				ret = locate_value(contents, xet_start_line, xet_end_line, "keyUsage", &(req_params->key_usage),1);
-				ret = locate_value(contents, xet_start_line, xet_end_line, "extendedKeyUsage", &(req_params->extended_key_usage),1);
-				ret = locate_value(contents, xet_start_line, xet_end_line, "nsCertType", &(req_params->ns_cert_type),1);
+				ret = parse_x509_extensions(contents, xet_start_line, xet_end_line, reqtype, (void*)req_params);
 				
 				ret = 0;
 			}
@@ -446,12 +477,7 @@ int parse_config_file(char* conffile, int reqtype, void* void_params)
 					}
 					else
 					{
-						ret = locate_value(contents, xet_start_line, xet_end_line, "subjectKeyIdentifier", &(ca_params->subject_key_identifier),1);
-						ret = locate_value(contents, xet_start_line, xet_end_line, "authorityKeyIdentifier", &(ca_params->authority_key_identifier),1);
-						ret = locate_value(contents, xet_start_line, xet_end_line, "basicConstraints", &(ca_params->basic_contraints),1);
-						ret = locate_value(contents, xet_start_line, xet_end_line, "keyUsage", &(ca_params->key_usage),1);
-						ret = locate_value(contents, xet_start_line, xet_end_line, "extendedKeyUsage", &(ca_params->extended_key_usage),1);
-						ret = locate_value(contents, xet_start_line, xet_end_line, "nsCertType", &(ca_params->ns_cert_type),1);
+						ret = parse_x509_extensions(contents, xet_start_line, xet_end_line, reqtype, (void*)ca_params);
 						
 						ret = 0;
 					}
@@ -469,13 +495,22 @@ int parse_config_file(char* conffile, int reqtype, void* void_params)
 					}
 					else
 					{
-						ret = locate_value(contents, cet_start_line, cet_end_line, "authorityKeyIdentifier", &(ca_params->crl_authority_key_identifier),1);
+						ret = parse_x509_extensions(contents, cet_start_line, cet_end_line, reqtype, (void*)ca_params);
 						
 						ret = 0;
 					}
 				}
 			}
 		}
+	}
+	else if(reqtype == REQ_TYPE_EXTFILE && void_params != NULL)
+	{
+		// The extension file should not contain any tags, just key=value pairs
+		// So search the entire file 0..length
+		conf_req_crt_parameters* ca_params = void_params;
+		ret = parse_x509_extensions(contents, 0, lines, reqtype, (void*)ca_params);
+		
+		ret = 0;
 	}
 	
 	free_null_terminated_string_array(contents);

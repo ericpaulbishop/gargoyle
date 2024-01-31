@@ -24,11 +24,13 @@
 
 #include "mbedtlsclu.h"
 #include "mbedtls/error.h"
+#include "mbedtls/version.h"
 
 #define USAGE \
     "\n usage: mbedtls [utility] [utility options]\n"											\
     "\n\n Utility:\n"																			\
     "    help					Display this summary\n"											\
+    "    version				Display the version\n\n"										\
     "    ca						Mini Certificate Authority\n"									\
     "    dhparam				Generate Diffie-Hellman Parameters\n"							\
     "    genpkey				Generate Private Keys\n"										\
@@ -49,6 +51,7 @@ int main(int argc, char** argv)
 	int launchCA = 0;
 	int launchDHParam = 0;
 	int launchGenPKey = 0;
+	int launchRand = 0;
 	int launchReq = 0;
 	
 	if(argc < 2)
@@ -66,6 +69,10 @@ usage:
 		{
 			goto usage;
 		}
+		if(strcmp(p,"version") == 0)
+		{
+			mbedtls_printf("MbedTLS-CLU %s (Library: %s)\n",MBEDTLSCLU_VERSION,MBEDTLS_VERSION_STRING_FULL);
+		}
 		else if(strcmp(p,"ca") == 0)
 		{
 			launchCA = 1;
@@ -79,6 +86,11 @@ usage:
 		else if(strcmp(p,"genpkey") == 0)
 		{
 			launchGenPKey = 1;
+			break;
+		}
+		else if(strcmp(p,"rand") == 0)
+		{
+			launchRand = 1;
 			break;
 		}
 		else if(strcmp(p,"req") == 0)
@@ -105,7 +117,12 @@ usage:
 	else if(launchGenPKey)
 	{
 		mbedtls_debug_printf("Calling genpkey...\n");
-		genpkey_main(argc, argv, i+1);
+		exit_code = genpkey_main(argc, argv, i+1);
+	}
+	else if(launchRand)
+	{
+		mbedtls_debug_printf("Calling rand...\n");
+		exit_code = rand_main(argc, argv, i+1);
 	}
 	else if(launchReq)
 	{
@@ -113,7 +130,7 @@ usage:
 		exit_code = req_main(argc, argv, i+1);
 	}
 
-    exit_code = MBEDTLS_EXIT_SUCCESS;
+    //exit_code = MBEDTLS_EXIT_SUCCESS;
 
 exit:
     if (exit_code != MBEDTLS_EXIT_SUCCESS) {

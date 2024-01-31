@@ -257,6 +257,7 @@ int ca_main(int argc, char** argv, int argi)
 	char* crtrevoke_in = NULL;
 	int gencrl = 0;
 	char* crldays_in = NULL;
+	char* extfile_in = NULL;
 	
 	int version = DFL_VERSION;
 	int days = 0;
@@ -305,10 +306,19 @@ usage:
 	for(i = argi; i < argc; i++)
 	{
 		p = argv[i];
+		mbedtls_debug_printf("argv[%d]: %s\n",i,p);
 		
 		if(strcmp(p,"-help") == 0)
 		{
 			goto usage;
+		}
+		else if(strcmp(p,"-batch") == 0 || strcmp(p,"-utf8") == 0 /*|| strcmp(p,"-nodes") == 0 || strcmp(p,"-noenc") == 0*/)
+		{
+			// These parameters are silently ignored. They are included for compatibility with the openssl equivalent utility
+			// -new is implied as we don't support taking an existing request and signing it
+			// We don't support interactive mode so -batch is the default
+			// We don't support -utf8
+			// We don't support password encrypting so nodes/noenc are implied
 		}
 		else if(strcmp(p,"-in") == 0 && i + 1 < argc)
 		{
@@ -477,6 +487,13 @@ usage:
 			p = argv[i];
 			crldays_in = strdup(p);
 		}
+		else if(strcmp(p,"-extfile") == 0 && i + 1 < argc)
+		{
+			// argv[i+1] should be the x509 extension file to parse. Advance i
+			i += 1;
+			p = argv[i];
+			extfile_in = strdup(p);
+		}
 		else if(i == argc - 1)
 		{
 			// Last arg should be the certificate request if it has not already been handled
@@ -544,6 +561,15 @@ usage:
 	{
 		mbedtls_debug_printf(" failed\n  !  parse_config_file returned %d", ret);
 		goto exit;
+	}
+	if(extfile_in != NULL)
+	{
+		mbedtls_debug_printf("\n  . Parsing the x509 ext file...");
+		if((ret = parse_config_file(extfile_in, REQ_TYPE_EXTFILE, (void*)(&ca_params))) != 0)
+		{
+			mbedtls_debug_printf(" failed\n  !  parse_config_file returned %d", ret);
+			goto exit;
+		}
 	}
 	mbedtls_debug_printf("conf: default_ca_tag %s\n", ca_params.default_ca_tag);
 	mbedtls_debug_printf("conf: x509_extensions_tag %s\n", ca_params.x509_extensions_tag);
@@ -993,7 +1019,7 @@ usage:
 		
 		mbedtls_x509write_crl_free(&crl);
 		
-		ret = 0;
+		exit_code = MBEDTLS_EXIT_SUCCESS;
 		
 		goto exit;
 	}

@@ -45,6 +45,9 @@ int dhparam_main(void)
     "\n usage: dhparam [options] [numbits]\n"														\
     "\n\n General options:\n"																		\
     "    -help					Display this summary\n"												\
+	"\n\n Input options:\n"																			\
+	"    -in infile				Input file\n"														\
+	"    -check					Check for valid/safe DH Params\n"									\
 	"\n\n Output options:\n"																		\
 	"    -out outfile			Output file\n"														\
 	"    -outform PEM|DER		Output format, DER or PEM\n"										\
@@ -274,6 +277,8 @@ int dhparam_main(int argc, char** argv, int argi)
 	int output_format = OUTPUT_FORMAT_PEM;
 	int noout = 0;
 	int text = 0;
+	char* infile = NULL;
+	int check = 0;
 	
 	mbedtls_mpi_init(&G); mbedtls_mpi_init(&P); mbedtls_mpi_init(&Q);
     mbedtls_ctr_drbg_init(&ctr_drbg);
@@ -339,6 +344,16 @@ usage:
 		{
 			gstr = strdup("5");
 		}
+		else if(strcmp(p,"-in") == 0 && i + 1 < argc)
+		{
+			// argv[i+1] should be the filepath. Advance i
+			i += 1;
+			infile = strdup(argv[i]);
+		}
+		else if(strcmp(p,"-check") == 0)
+		{
+			check = 1;
+		}
 		else if(i == argc - 1)
 		{
 			// last arg should be bits (optional) if it has not already been handled
@@ -350,7 +365,7 @@ usage:
 		}
 	}
 	
-	if(outfile == NULL && !noout)
+	if((outfile == NULL && !noout && !check) || (check && infile == NULL))
 	{
 		goto usage;
 	}
@@ -371,90 +386,153 @@ usage:
 	mbedtls_debug_printf("text: %d\n", text);
 	mbedtls_debug_printf("bits: %d\n", nbits);
 	mbedtls_debug_printf("generator: %s\n", gstr);
+	mbedtls_debug_printf("infile: %s\n", infile);
+	mbedtls_debug_printf("check: %d\n", check);
 	
-	// Set generator value
-	if ((ret = mbedtls_mpi_read_string(&G, 10, gstr)) != 0) {
-		mbedtls_debug_printf(" failed\n  ! mbedtls_mpi_read_string returned %d\n", ret);
-        goto exit;
-    }
-	
-	mbedtls_printf("Generating DH parameters, %d bit long safe prime\n", nbits);
-	mbedtls_debug_printf("\n  . Seeding the random number generator...");
-	if ((ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy,
-                                     (const unsigned char *) pers,
-                                     strlen(pers))) != 0) {
-        mbedtls_debug_printf(" failed\n  ! mbedtls_ctr_drbg_seed returned %d\n", ret);
-        goto exit;
-    }
-	
-	mbedtls_debug_printf(" ok\n  . Generating the modulus, please wait...");
-    fflush(stdout);
-
-    //Generate the prime number. This can take a long time...
-    if ((ret = mbedtls_mpi_gen_prime(&P, nbits, 1,
-                                     mbedtls_ctr_drbg_random, &ctr_drbg)) != 0) {
-        mbedtls_debug_printf(" failed\n  ! mbedtls_mpi_gen_prime returned %d\n\n", ret);
-        goto exit;
-    }
-
-	// Verify it is actually prime
-    mbedtls_debug_printf(" ok\n  . Verifying that Q = (P-1)/2 is prime...");
-    fflush(stdout);
-
-    if ((ret = mbedtls_mpi_sub_int(&Q, &P, 1)) != 0) {
-        mbedtls_debug_printf(" failed\n  ! mbedtls_mpi_sub_int returned %d\n\n", ret);
-        goto exit;
-    }
-
-    if ((ret = mbedtls_mpi_div_int(&Q, NULL, &Q, 2)) != 0) {
-        mbedtls_debug_printf(" failed\n  ! mbedtls_mpi_div_int returned %d\n\n", ret);
-        goto exit;
-    }
-
-    if ((ret = mbedtls_mpi_is_prime_ext(&Q, 50, mbedtls_ctr_drbg_random, &ctr_drbg)) != 0) {
-        mbedtls_debug_printf(" failed\n  ! mbedtls_mpi_is_prime returned %d\n\n", ret);
-        goto exit;
-    }
-
-	if(!noout)
+	if(check)
 	{
-		// Write the values out
-#ifdef DEBUG
-		// START DEBUG PRINT TO FILE
-		debugoutfile = strdup(outfile);
-		strcat(debugoutfile,".debug");
-		mbedtls_debug_printf(" ok\n  . Exporting the debug values in %s...", debugoutfile);
-		fflush(stdout);
-
-		if ((fout = fopen(debugoutfile, "wb+")) == NULL) {
-			mbedtls_debug_printf(" failed\n  ! Could not create %s\n\n",debugoutfile);
+		mbedtls_debug_printf("Checking DH Params...\n");
+		mbedtls_dhm_context dhm;
+		mbedtls_dhm_init(&dhm);
+		
+		mbedtls_debug_printf("\n  . Seeding the random number generator...");
+		if ((ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy,
+										 (const unsigned char *) pers,
+										 strlen(pers))) != 0) {
+			mbedtls_debug_printf(" failed\n  ! mbedtls_ctr_drbg_seed returned %d\n", ret);
 			goto exit;
 		}
-
-		if (((ret = mbedtls_mpi_write_file("P = ", &P, 16, fout)) != 0) ||
-			((ret = mbedtls_mpi_write_file("G = ", &G, 16, fout)) != 0)) {
-			mbedtls_debug_printf(" failed\n  ! mbedtls_mpi_write_file returned %d\n\n", ret);
-			fclose(fout);
+		
+		mbedtls_debug_printf(" ok\n  . Parsing DHM File...");
+		if ((ret = mbedtls_dhm_parse_dhmfile(&dhm, infile)) != 0) {
+			mbedtls_debug_printf(" failed\n  ! mbedtls_dhm_parse_dhmfile %d\n", ret);
+			mbedtls_printf("DH parameters not OK\n");
 			goto exit;
 		}
-
-		mbedtls_debug_printf(" ok\n\n");
-		fclose(fout);
-		// END DEBUG PRINT TO FILE
-#endif
-
-		mbedtls_debug_printf(" ok\n  . Exporting the values in %s...", outfile);
-		fflush(stdout);
-
-		if((ret = write_dhm_params(&G, &P, text, output_format, outfile)) != 0) {
-			mbedtls_debug_printf(" failed\n  ! write_dhm_params returned %d\n\n", ret);
+		
+		mbedtls_debug_printf(" ok\n  . Checking DHM modulus P size...");
+		int n = mbedtls_mpi_bitlen(&dhm.P);
+		if (n < 512 || n > 10000) {
+			mbedtls_debug_printf(" failed\n  ! Invalid DHM modulus size\n\n");
+			mbedtls_printf("DH parameters not OK\n");
 			goto exit;
 		}
-		mbedtls_debug_printf(" ok\n\n");
+		
+		mbedtls_debug_printf(" ok\n  . Checking P is (probably) prime...");
+		n = mbedtls_mpi_get_bit(&dhm.P, 0);
+		if(n != 1)
+		{
+			mbedtls_debug_printf(" failed\n  ! mbedtls_mpi_get_bit returned %d\n\n", n);
+			mbedtls_printf("DH parameters not OK\n");
+			goto exit;
+		}
+		
+		mbedtls_debug_printf(" ok\n  . Checking DHM generator G is suitable...");
+		// Must be > 1
+		if ((ret = mbedtls_mpi_cmp_int(&dhm.G, 1)) <= 0) {
+			mbedtls_debug_printf(" failed\n  ! mbedtls_mpi_cmp_int returned %d\n\n", ret);
+			mbedtls_printf("DH parameters not OK\n");
+			goto exit;
+		}
+		
+		mbedtls_debug_printf(" ok\n  . Checking DHM modulus P > generator G...");
+		if ((ret = mbedtls_mpi_cmp_mpi(&dhm.P, &dhm.G)) <= 0) {
+			mbedtls_debug_printf(" failed\n  ! mbedtls_mpi_cmp_mpi returned %d\n\n", ret);
+			mbedtls_printf("DH parameters not OK\n");
+			goto exit;
+		}
+		mbedtls_debug_printf(" ok\n");
+		
+		mbedtls_dhm_free(&dhm);
+		
+		mbedtls_printf("DH parameters appear to be OK\n");
 	}
 	else
 	{
-		mbedtls_debug_printf(" ok\n  . No Out requested...\n");
+		// Set generator value
+		if ((ret = mbedtls_mpi_read_string(&G, 10, gstr)) != 0) {
+			mbedtls_debug_printf(" failed\n  ! mbedtls_mpi_read_string returned %d\n", ret);
+			goto exit;
+		}
+		
+		mbedtls_printf("Generating DH parameters, %d bit long safe prime\n", nbits);
+		mbedtls_debug_printf("\n  . Seeding the random number generator...");
+		if ((ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy,
+										 (const unsigned char *) pers,
+										 strlen(pers))) != 0) {
+			mbedtls_debug_printf(" failed\n  ! mbedtls_ctr_drbg_seed returned %d\n", ret);
+			goto exit;
+		}
+		
+		mbedtls_debug_printf(" ok\n  . Generating the modulus, please wait...");
+		fflush(stdout);
+
+		//Generate the prime number. This can take a long time...
+		if ((ret = mbedtls_mpi_gen_prime(&P, nbits, 1,
+										 mbedtls_ctr_drbg_random, &ctr_drbg)) != 0) {
+			mbedtls_debug_printf(" failed\n  ! mbedtls_mpi_gen_prime returned %d\n\n", ret);
+			goto exit;
+		}
+
+		// Verify it is actually prime
+		mbedtls_debug_printf(" ok\n  . Verifying that Q = (P-1)/2 is prime...");
+		fflush(stdout);
+
+		if ((ret = mbedtls_mpi_sub_int(&Q, &P, 1)) != 0) {
+			mbedtls_debug_printf(" failed\n  ! mbedtls_mpi_sub_int returned %d\n\n", ret);
+			goto exit;
+		}
+
+		if ((ret = mbedtls_mpi_div_int(&Q, NULL, &Q, 2)) != 0) {
+			mbedtls_debug_printf(" failed\n  ! mbedtls_mpi_div_int returned %d\n\n", ret);
+			goto exit;
+		}
+
+		if ((ret = mbedtls_mpi_is_prime_ext(&Q, 50, mbedtls_ctr_drbg_random, &ctr_drbg)) != 0) {
+			mbedtls_debug_printf(" failed\n  ! mbedtls_mpi_is_prime returned %d\n\n", ret);
+			goto exit;
+		}
+
+		if(!noout)
+		{
+			// Write the values out
+#ifdef DEBUG
+			// START DEBUG PRINT TO FILE
+			debugoutfile = strdup(outfile);
+			strcat(debugoutfile,".debug");
+			mbedtls_debug_printf(" ok\n  . Exporting the debug values in %s...", debugoutfile);
+			fflush(stdout);
+
+			if ((fout = fopen(debugoutfile, "wb+")) == NULL) {
+				mbedtls_debug_printf(" failed\n  ! Could not create %s\n\n",debugoutfile);
+				goto exit;
+			}
+
+			if (((ret = mbedtls_mpi_write_file("P = ", &P, 16, fout)) != 0) ||
+				((ret = mbedtls_mpi_write_file("G = ", &G, 16, fout)) != 0)) {
+				mbedtls_debug_printf(" failed\n  ! mbedtls_mpi_write_file returned %d\n\n", ret);
+				fclose(fout);
+				goto exit;
+			}
+
+			mbedtls_debug_printf(" ok\n\n");
+			fclose(fout);
+			// END DEBUG PRINT TO FILE
+#endif
+
+			mbedtls_debug_printf(" ok\n  . Exporting the values in %s...", outfile);
+			fflush(stdout);
+
+			if((ret = write_dhm_params(&G, &P, text, output_format, outfile)) != 0) {
+				mbedtls_debug_printf(" failed\n  ! write_dhm_params returned %d\n\n", ret);
+				goto exit;
+			}
+			mbedtls_debug_printf(" ok\n\n");
+		}
+		else
+		{
+			mbedtls_debug_printf(" ok\n  . No Out requested...\n");
+		}
 	}
 
     exit_code = MBEDTLS_EXIT_SUCCESS;

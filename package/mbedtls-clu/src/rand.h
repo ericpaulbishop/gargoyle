@@ -1,4 +1,4 @@
-/* mbedtlsclu -	Utility lauch header file
+/* rand -	rand Utility header file
  *
  * Copyright © 2024 by Michael Gray <support@lantisproject.com>
  *
@@ -18,8 +18,4 @@
 
 #include "mbedtlsclu_common.h"
 
-#include "ca.h"
-#include "rand.h"
-#include "req.h"
-#include "dhparam.h"
-#include "genpkey.h"
+int rand_main(int argc, char** argv, int argi);

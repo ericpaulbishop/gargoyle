@@ -33,4 +33,3 @@ int mbedtls_pem_write_buffer(const char *header, const char *footer,
                              unsigned char *buf, size_t buf_len, size_t *olen);
 int mbedtls_dhm_params_write_pem(mbedtls_mpi* G, mbedtls_mpi* P, unsigned char* buf, size_t size);
 int write_dhm_params(mbedtls_mpi* G, mbedtls_mpi* P, int textout, int output_format, const char* output_file);
-

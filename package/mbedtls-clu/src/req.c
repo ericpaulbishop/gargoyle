@@ -28,6 +28,7 @@
  */
 
 #include "req.h"
+#include "genpkey.h"
 
 #define DFL_FILENAME            "keyfile.key"
 #define DFL_PASSWORD            NULL
@@ -52,6 +53,7 @@
     "							NOTE: Command line parameters will override any config file equivalents\n"	\
     "							Config file can also be set through environment variables\n"				\
     "							NOTE: Environment variable config file will override command line\n"		\
+	"    -in infile				X.509 request input file\n"													\
 	"\n\n Certificate options:\n"																			\
     "    -new					New request\n"																\
     "    -x509					Output an X.509 certificate structure instead of a cert request\n"			\
@@ -194,6 +196,11 @@ int req_main(int argc, char** argv, int argi)
 	char* newkey_outfile = NULL;
 	char* rsa_keysize = NULL;
 	
+	int noenc = 1;
+	int newreq = 0;
+	char* csr_infile = NULL;
+	int noout = 0;
+	
 	conf_req_csr_parameters req_params;
 	initialise_conf_req_csr_parameters(&req_params);
 	
@@ -230,9 +237,34 @@ usage:
 		{
 			goto usage;
 		}
+		else if(strcmp(p,"-batch") == 0 || strcmp(p,"-utf8") == 0 || strcmp(p,"-nodes") == 0 || strcmp(p,"-noenc") == 0)
+		{
+			// These parameters are silently ignored. They are included for compatibility with the openssl equivalent utility
+			// -new is implied as we don't support taking an existing request and signing it
+			// We don't support interactive mode so -batch is the default
+			// We don't support -utf8
+			// We don't support password encrypting so nodes/noenc are implied
+		}
 		else if(strcmp(p,"-new") == 0)
 		{
-			// This seems to just be a throwaway but we will handle it here
+			// Can't request a new file and input a file at the same time
+			if(csr_infile != NULL)
+			{
+				goto usage;
+			}
+			newreq = 1;
+		}
+		else if(strcmp(p,"-in") == 0 && i + 1 < argc)
+		{
+			// Can't request a new file and input a file at the same time
+			if(newreq)
+			{
+				goto usage;
+			}
+			// argv[i+1] should be the CSR file. Advance i
+			i += 1;
+			p = argv[i];
+			csr_infile = strdup(p);
 		}
 		else if(strcmp(p,"-x509") == 0)
 		{
@@ -334,19 +366,37 @@ usage:
 				goto usage;
 			}
 		}
-		else if(i == argc - 1)
+		else if(strcmp(p,"-noout") == 0)
 		{
-			// Last arg should be the md if it has not already been handled
-			// Advance past the "-" and give it a go
-			md_alg_in = strdup(p+1);
+			noout = 1;
 		}
 		else
 		{
-			goto usage;
+			// Check if this is a md algorithm
+			// Advance past the "-" and give it a go
+			if(md_alg_in == NULL)
+			{
+				char* md = strdup(p+1);
+				const mbedtls_md_info_t* md_info;
+				// Compatibility with openssl-util lowercase digests
+				to_uppercase(md);
+				
+				md_info = mbedtls_md_info_from_string(md);
+				if (md_info == NULL) {
+					mbedtls_printf("Invalid digest provided: %s\n", p);
+					goto usage;
+				}
+				md_alg_in = strdup(p+1);
+			}
+			else
+			{
+				// unknown param
+				goto usage;
+			}
 		}
 	}
 	
-	if(outfile == NULL)
+	if(outfile == NULL && csr_infile == NULL)
 	{
 		goto usage;
 	}
@@ -496,9 +546,58 @@ usage:
 		}
 	}
 	
+	if(csr_infile != NULL)
+	{
+		// Just verify the CSR
+		char csrbuf[10000];
+		mbedtls_x509_csr csr;
+		mbedtls_x509_csr_init(&csr);
+		
+		/*
+		 * 1.1. Load the CSR
+		 */
+		mbedtls_debug_printf("\n  . Loading the CSR ...");
+		fflush(stdout);
+
+		ret = mbedtls_x509_csr_parse_file(&csr, csr_infile);
+
+		if (ret != 0) {
+			mbedtls_debug_printf(" failed\n  !  mbedtls_x509_csr_parse_file returned %d\n\n", ret);
+			mbedtls_x509_csr_free(&csr);
+			goto exit;
+		}
+
+		mbedtls_debug_printf(" ok\n");
+		
+		if(!noout)
+		{
+			/*
+			 * 1.2 Print the CSR
+			 */
+			mbedtls_debug_printf("  . CSR information    ...\n");
+			ret = mbedtls_x509_csr_info((char *) csrbuf, sizeof(csrbuf) - 1, "      ", &csr);
+			if (ret == -1) {
+				mbedtls_debug_printf(" failed\n  !  mbedtls_x509_csr_info returned %d\n\n", ret);
+				mbedtls_x509_csr_free(&csr);
+				goto exit;
+			}
+
+			mbedtls_debug_printf("%s\n", csrbuf);
+		}
+		mbedtls_x509_csr_free(&csr);
+		
+		exit_code = MBEDTLS_EXIT_SUCCESS;
+		goto exit;
+	}
+
 	// Generate a new key if requested
 	if(newkey)
 	{
+		if(noout)
+		{
+			mbedtls_debug_printf("Can't ask for a new key AND noout\n");
+			goto usage;
+		}
 		int status;
 		char* algorithm = NULL;
 		char* externcmd = NULL;
@@ -612,19 +711,22 @@ usage:
 
     mbedtls_debug_printf(" ok\n");
 
-    /*
-     * 1.2. Writing the request
-     */
-    mbedtls_debug_printf("  . Writing the certificate request ...");
-    fflush(stdout);
+	if(!noout)
+	{
+		/*
+		 * 1.2. Writing the request
+		 */
+		mbedtls_debug_printf("  . Writing the certificate request ...");
+		fflush(stdout);
 
-    if ((ret = write_certificate_request(&req, output_format, outfile,
-                                         mbedtls_ctr_drbg_random, &ctr_drbg)) != 0) {
-        mbedtls_debug_printf(" failed\n  !  write_certificate_request %d", ret);
-        goto exit;
-    }
+		if ((ret = write_certificate_request(&req, output_format, outfile,
+											 mbedtls_ctr_drbg_random, &ctr_drbg)) != 0) {
+			mbedtls_debug_printf(" failed\n  !  write_certificate_request %d", ret);
+			goto exit;
+		}
 
-    mbedtls_debug_printf(" ok\n");
+		mbedtls_debug_printf(" ok\n");
+	}
 	
 	/*
      * 2.0. Generate a certificate
@@ -688,7 +790,7 @@ usage:
 		{
 			//serialval = strdup(DFL_SERIAL);
 			mbedtls_mpi_fill_random(&serial, 20, mbedtls_ctr_drbg_random, &ctr_drbg);
-			mbedtls_mpi_write_file("serial: ", &serial, 16, NULL);
+			//mbedtls_mpi_write_file("serial: ", &serial, 16, NULL);
 		}
 		
 		if(serialval != NULL)
@@ -1088,21 +1190,24 @@ usage:
 			}
 		}
 		
-		/*
-		 * 1.2. Writing the certificate
-		 */
-		mbedtls_debug_printf("  . Writing the certificate...");
-		fflush(stdout);
+		if(!noout)
+		{
+			/*
+			 * 1.2. Writing the certificate
+			 */
+			mbedtls_debug_printf("  . Writing the certificate...");
+			fflush(stdout);
 
-		if ((ret = write_certificate(&crt, outfile,
-									 mbedtls_ctr_drbg_random, &ctr_drbg)) != 0) {
-			mbedtls_strerror(ret, buf, 1024);
-			mbedtls_debug_printf(" failed\n  !  write_certificate -0x%04x - %s\n\n",
-						   (unsigned int) -ret, buf);
-			goto exit;
+			if ((ret = write_certificate(&crt, outfile,
+										 mbedtls_ctr_drbg_random, &ctr_drbg)) != 0) {
+				mbedtls_strerror(ret, buf, 1024);
+				mbedtls_debug_printf(" failed\n  !  write_certificate -0x%04x - %s\n\n",
+							   (unsigned int) -ret, buf);
+				goto exit;
+			}
+
+			mbedtls_debug_printf(" ok\n");
 		}
-
-		mbedtls_debug_printf(" ok\n");
 
 
 #endif /* MBEDTLS_X509_CSR_PARSE_C */

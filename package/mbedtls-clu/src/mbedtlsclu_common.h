@@ -19,6 +19,8 @@
 #ifndef MBEDTLSCLU_COMMON
 #define MBEDTLSCLU_COMMON
 
+#define MBEDTLSCLU_VERSION	"1.0.0"
+
 #if !defined(MBEDTLS_CONFIG_FILE)
 #include "mbedtls/config.h"
 #else
@@ -37,7 +39,7 @@
 #ifdef DEBUG
 #define mbedtls_debug_printf(...)  mbedtls_printf(__VA_ARGS__)
 #else
-int mbedtls_debug_printf() { return 0; }
+int mbedtls_debug_printf();
 #endif
 
 #include <stdio.h>
@@ -64,6 +66,7 @@ int mbedtls_debug_printf() { return 0; }
 
 #define REQ_TYPE_CSR			0
 #define REQ_TYPE_CRT			1
+#define REQ_TYPE_EXTFILE		2
 #define REQ_TYPE_UNSPEC			-1
 
 typedef struct conf_req_csr_parameters {
