@@ -1,0 +1,17 @@
+if PACKAGE_openvpn-gargoyle-easy-rsa
+
+comment "SSL support"
+
+choice
+	prompt "Selected SSL library"
+	default OPENVPN_GARGOYLE_EASYRSA_MBEDTLS
+
+	config OPENVPN_GARGOYLE_EASYRSA_MBEDTLS
+		bool "mbed TLS"
+
+	config OPENVPN_GARGOYLE_EASYRSA_OPENSSL
+		bool "OpenSSL"
+
+endchoice
+
+endif

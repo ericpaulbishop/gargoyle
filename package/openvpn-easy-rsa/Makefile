@@ -35,7 +35,7 @@ define Package/openvpn-gargoyle-easy-rsa
   CATEGORY:=Network
   URL:=http://openvpn.net
   SUBMENU:=VPN
-  DEPENDS:=+openssl-util
+  DEPENDS:=+OPENVPN_GARGOYLE_EASYRSA_OPENSSL:openssl-util +OPENVPN_GARGOYLE_EASYRSA_MBEDTLS:mbedtls-clu
   PKGARCH:=all
 endef
 
@@ -44,6 +44,10 @@ define Package/openvpn-gargoyle-easy-rsa/conffiles
 /etc/easy-rsa/openssl-3.0.cnf
 /etc/easy-rsa/openssl-easyrsa.cnf
 /etc/profile.d/50-$(PKG_NAME).sh
+endef
+
+define Package/openvpn-gargoyle-easy-rsa/config
+  source "$(SOURCE)/Config.in"
 endef
 
 define Build/Configure

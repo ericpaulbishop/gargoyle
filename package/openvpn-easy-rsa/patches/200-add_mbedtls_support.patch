@@ -1,0 +1,21 @@
+--- a/easyrsa3/easyrsa
++++ b/easyrsa3/easyrsa
+@@ -1017,7 +1017,7 @@ expand_ssl_config() {
+ 		# Has run once
+ 		verbose "expand_ssl_config: BYPASSED"
+ 		return
+-	elif [ "$ssl_lib" = libressl ]; then
++	elif [ "$ssl_lib" = libressl -o "$ssl_lib" = mbedtls ]; then
+ 		# Always run
+ 		verbose "expand_ssl_config: REQUIRED"
+ 	elif [ "$ssl_lib" = openssl ]; then
+@@ -1183,6 +1183,9 @@ verify_ssl_lib() {
+ 	LibreSSL)
+ 		ssl_lib=libressl
+ 	;;
++	MbedTLS-CLU)
++		ssl_lib=mbedtls
++	;;
+ 	*)
+ 		error_msg="$("$EASYRSA_OPENSSL" version 2>&1)"
+ 		user_error "\
