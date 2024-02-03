@@ -1,6 +1,8 @@
 #!/bin/sh
 
-SSLVARIANT="openssl"
+SSLVARIANT="mbedtls"
+which $SSLVARIANT || SSLVARIANT="openssl"
+which $SSLVARIANT || echo "ERROR: no SSL library available"
 
 # global config directory
 OPENVPN_DIR="/etc/openvpn"
