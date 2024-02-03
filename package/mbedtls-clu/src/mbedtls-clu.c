@@ -35,6 +35,7 @@
     "    dhparam				Generate Diffie-Hellman Parameters\n"							\
     "    genpkey				Generate Private Keys\n"										\
     "    req					Generate Certificates and Certificate Signing Requests\n"		\
+    "    x509					Certificate display\n"											\
 	"\n\n Utility options:\n"																	\
 	"    -help					See the help/usage summary for each utility\n"
 
@@ -53,6 +54,7 @@ int main(int argc, char** argv)
 	int launchGenPKey = 0;
 	int launchRand = 0;
 	int launchReq = 0;
+	int launchX509 = 0;
 	
 	if(argc < 2)
 	{
@@ -98,6 +100,11 @@ usage:
 			launchReq = 1;
 			break;
 		}
+		else if(strcmp(p,"x509") == 0)
+		{
+			launchX509 = 1;
+			break;
+		}
 		else
 		{
 			goto usage;
@@ -106,28 +113,33 @@ usage:
 	
 	if(launchCA)
 	{
-		mbedtls_debug_printf("Calling ca...\n");
+		mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"Calling ca...\n");
 		exit_code = ca_main(argc, argv, i+1);
 	}
 	else if(launchDHParam)
 	{
-		mbedtls_debug_printf("Calling dhparam...\n");
+		mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"Calling dhparam...\n");
 		exit_code = dhparam_main(argc, argv, i+1);
 	}
 	else if(launchGenPKey)
 	{
-		mbedtls_debug_printf("Calling genpkey...\n");
+		mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"Calling genpkey...\n");
 		exit_code = genpkey_main(argc, argv, i+1);
 	}
 	else if(launchRand)
 	{
-		mbedtls_debug_printf("Calling rand...\n");
+		mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"Calling rand...\n");
 		exit_code = rand_main(argc, argv, i+1);
 	}
 	else if(launchReq)
 	{
-		mbedtls_debug_printf("Calling req...\n");
+		mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"Calling req...\n");
 		exit_code = req_main(argc, argv, i+1);
+	}
+	else if(launchX509)
+	{
+		mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"Calling x509...\n");
+		exit_code = x509_main(argc, argv, i+1);
 	}
 
     //exit_code = MBEDTLS_EXIT_SUCCESS;
@@ -136,9 +148,9 @@ exit:
     if (exit_code != MBEDTLS_EXIT_SUCCESS) {
 #ifdef MBEDTLS_ERROR_C
         mbedtls_strerror(ret, buf, sizeof(buf));
-        mbedtls_debug_printf(" - %s\n", buf);
+        mbedtlsclu_prio_printf(MBEDTLSCLU_ERR," - %s\n", buf);
 #else
-        mbedtls_debug_printf("\n");
+        mbedtlsclu_prio_printf(MBEDTLSCLU_ERR,"\n");
 #endif
     }
 	

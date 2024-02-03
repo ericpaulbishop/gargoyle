@@ -73,7 +73,7 @@ int rand_main(int argc, char** argv, int argi)
 #if defined(MBEDTLS_USE_PSA_CRYPTO)
     psa_status_t status = psa_crypto_init();
     if (status != PSA_SUCCESS) {
-        mbedtls_debug_printf(stderr, "Failed to initialize PSA Crypto implementation: %d\n",
+        mbedtlsclu_prio_printf(MBEDTLSCLU_ERR, "Failed to initialize PSA Crypto implementation: %d\n",
                         (int) status);
         goto exit;
     }
@@ -109,23 +109,23 @@ usage:
 		}
 	}
 	
-	mbedtls_debug_printf("cl: output_format: %s\n", (output_format == OUTPUT_FORMAT_HEX ? "HEX" : "??"));
-	mbedtls_debug_printf("cl: numbytes: %d\n", numbytes);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"cl: output_format: %s\n", (output_format == OUTPUT_FORMAT_HEX ? "HEX" : "??"));
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"cl: numbytes: %d\n", numbytes);
 	
 	/*
      * 0. Seed the PRNG
      */
-    mbedtls_debug_printf("  . Seeding the random number generator...");
+    mbedtlsclu_prio_printf(MBEDTLSCLU_INFO,"  . Seeding the random number generator...");
     fflush(stdout);
 
     if ((ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy,
                                      (const unsigned char *) pers,
                                      strlen(pers))) != 0) {
-        mbedtls_debug_printf(" failed\n  !  mbedtls_ctr_drbg_seed returned %d", ret);
+        mbedtlsclu_prio_printf(MBEDTLSCLU_ERR," failed\n  !  mbedtls_ctr_drbg_seed returned %d", ret);
         goto exit;
     }
 
-    mbedtls_debug_printf(" ok\n");
+    mbedtlsclu_prio_printf(MBEDTLSCLU_INFO," ok\n");
 	
 	/*
      * 1. Generate random bytes

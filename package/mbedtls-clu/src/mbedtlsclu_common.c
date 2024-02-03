@@ -18,9 +18,7 @@
 
 #include "mbedtlsclu_common.h"
 
-#ifndef DEBUG
-int mbedtls_debug_printf() { return 0; }
-#endif
+int log_level = MBEDTLSCLU_DFL_MSG_LEVEL;
 
 int print_mpi_inthex_text(mbedtls_mpi* X, char* heading)
 {
@@ -196,11 +194,11 @@ int locate_tag(char** haystack, unsigned long haystack_size, char* needle, int* 
 	for(int i = 0; i < haystack_size; i++)
 	{
 		char* line = haystack[i];
-		//mbedtls_debug_printf("locate_tag: line: %s\n", line);
+		mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"locate_tag: line: %s\n", line);
 		if(line[0] == '[' && local_needleLoc == -1)
 		{
 			// We have a tag, interrogate
-			//mbedtls_debug_printf("locate_tag: potential tag found\n");
+			mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"locate_tag: potential tag found\n");
 			unsigned long num_line_pieces;
 			char* separators = "[]#";
 			char** line_pieces = split_on_separators(line, separators, 3, 1, 0, &num_line_pieces);
@@ -208,9 +206,9 @@ int locate_tag(char** haystack, unsigned long haystack_size, char* needle, int* 
 			if(num_line_pieces == 1)
 			{
 				// cleanup potential tag
-				//mbedtls_debug_printf("locate_tag: potential tag: %s\n", line_pieces[0]);
+				mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"locate_tag: potential tag: %s\n", line_pieces[0]);
 				char* trimmed = trim_flanking_whitespace(line_pieces[0]);
-				//mbedtls_debug_printf("locate_tag: trimmed potential tag: %s\n", trimmed);
+				mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"locate_tag: trimmed potential tag: %s\n", trimmed);
 				if(strcmp(trimmed,needle) == 0)
 				{
 					// Found our needle
@@ -255,7 +253,7 @@ int locate_value(char** haystack, int startline, int endline, char* needle, char
 	for(int i = startline; i <= endline; i++)
 	{
 		char* line = haystack[i];
-		//mbedtls_debug_printf("locate_value: line: %s\n", line);
+		mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"locate_value: line: %s\n", line);
 		unsigned long num_line_pieces;
 		char* separators = "=#";
 		char** line_pieces = split_on_separators(line, separators, 2, 2, 0, &num_line_pieces);
@@ -328,23 +326,23 @@ int parse_config_file(char* conffile, int reqtype, void* void_params)
 	
 	if(conffile == NULL)
 	{
-		mbedtls_debug_printf("No config file provided. Skipping.\n");
+		mbedtlsclu_prio_printf(MBEDTLSCLU_NOTICE,"No config file provided. Skipping.\n");
 		return ret;
 	}
 	
 	if((ret = read_config_file(conffile, &contents, &lines)) != 0)
 	{
-		mbedtls_debug_printf("Failed to read config file\n");
+		mbedtlsclu_prio_printf(MBEDTLSCLU_ERR,"Failed to read config file\n");
 		return ret;
 	}
 	
 #ifdef DEBUG
 	// print the config file
-	/*for(int i = 0; i < lines; i++)
+	for(int i = 0; i < lines; i++)
 	{
 		char* line = contents[i];
-		mbedtls_debug_printf("config_line %d: %s\n",i, line);
-	}*/
+		mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"config_line %d: %s\n",i, line);
+	}
 #endif
 	
 	if(reqtype == REQ_TYPE_CSR && void_params != NULL)
@@ -355,7 +353,7 @@ int parse_config_file(char* conffile, int reqtype, void* void_params)
 		int req_end_line = 0;
 		if((ret = locate_tag(contents, lines, "req", &req_start_line, &req_end_line)) < 0)
 		{
-			mbedtls_debug_printf("[ req ] not found in config file\n");
+			mbedtlsclu_prio_printf(MBEDTLSCLU_WARNING,"[ req ] not found in config file\n");
 			free_null_terminated_string_array(contents);
 			ret = 0;
 			return ret;
@@ -374,7 +372,7 @@ int parse_config_file(char* conffile, int reqtype, void* void_params)
 			int dnt_end_line = 0;
 			if((ret = locate_tag(contents, lines, req_params->distinguished_name_tag, &dnt_start_line, &dnt_end_line)) < 0)
 			{
-				mbedtls_debug_printf("[ %s ] not found in config file\n",req_params->distinguished_name_tag);
+				mbedtlsclu_prio_printf(MBEDTLSCLU_WARNING,"[ %s ] not found in config file\n",req_params->distinguished_name_tag);
 				ret = 0;
 			}
 			else
@@ -398,7 +396,7 @@ int parse_config_file(char* conffile, int reqtype, void* void_params)
 			int xet_end_line = 0;
 			if((ret = locate_tag(contents, lines, req_params->x509_extensions_tag, &xet_start_line, &xet_end_line)) < 0)
 			{
-				mbedtls_debug_printf("[ %s ] not found in config file\n",req_params->x509_extensions_tag);
+				mbedtlsclu_prio_printf(MBEDTLSCLU_WARNING,"[ %s ] not found in config file\n",req_params->x509_extensions_tag);
 				ret = 0;
 			}
 			else
@@ -418,7 +416,7 @@ int parse_config_file(char* conffile, int reqtype, void* void_params)
 		
 		if((ret = locate_tag(contents, lines, "ca", &ca_start_line, &ca_end_line)) < 0)
 		{
-			mbedtls_debug_printf("[ ca ] not found in config file\n");
+			mbedtlsclu_prio_printf(MBEDTLSCLU_WARNING,"[ ca ] not found in config file\n");
 			free_null_terminated_string_array(contents);
 			ret = 0;
 			return ret;
@@ -434,7 +432,7 @@ int parse_config_file(char* conffile, int reqtype, void* void_params)
 			int dca_end_line = 0;
 			if((ret = locate_tag(contents, lines, ca_params->default_ca_tag, &dca_start_line, &dca_end_line)) < 0)
 			{
-				mbedtls_debug_printf("[ %s ] not found in config file\n",ca_params->default_ca_tag);
+				mbedtlsclu_prio_printf(MBEDTLSCLU_WARNING,"[ %s ] not found in config file\n",ca_params->default_ca_tag);
 				ret = 0;
 			}
 			else
@@ -472,7 +470,7 @@ int parse_config_file(char* conffile, int reqtype, void* void_params)
 					int xet_end_line = 0;
 					if((ret = locate_tag(contents, lines, ca_params->x509_extensions_tag, &xet_start_line, &xet_end_line)) < 0)
 					{
-						mbedtls_debug_printf("[ %s ] not found in config file\n",ca_params->x509_extensions_tag);
+						mbedtlsclu_prio_printf(MBEDTLSCLU_WARNING,"[ %s ] not found in config file\n",ca_params->x509_extensions_tag);
 						ret = 0;
 					}
 					else
@@ -490,7 +488,7 @@ int parse_config_file(char* conffile, int reqtype, void* void_params)
 					int cet_end_line = 0;
 					if((ret = locate_tag(contents, lines, ca_params->crl_extensions_tag, &cet_start_line, &cet_end_line)) < 0)
 					{
-						mbedtls_debug_printf("[ %s ] not found in config file\n",ca_params->crl_extensions_tag);
+						mbedtlsclu_prio_printf(MBEDTLSCLU_WARNING,"[ %s ] not found in config file\n",ca_params->crl_extensions_tag);
 						ret = 0;
 					}
 					else

@@ -36,10 +36,20 @@
 #include "mbedtls/entropy.h"
 #include "mbedtls/ctr_drbg.h"
 
+#define MBEDTLSCLU_NONE		-1
+#define MBEDTLSCLU_EMERG	0
+#define MBEDTLSCLU_ALERT	1
+#define MBEDTLSCLU_CRIT		2
+#define MBEDTLSCLU_ERR		3
+#define MBEDTLSCLU_WARNING	4
+#define MBEDTLSCLU_NOTICE	5
+#define MBEDTLSCLU_INFO		6
+#define MBEDTLSCLU_DEBUG	7
+
 #ifdef DEBUG
-#define mbedtls_debug_printf(...)  mbedtls_printf(__VA_ARGS__)
+#define MBEDTLSCLU_DFL_MSG_LEVEL	MBEDTLSCLU_DEBUG
 #else
-int mbedtls_debug_printf();
+#define MBEDTLSCLU_DFL_MSG_LEVEL	MBEDTLSCLU_WARNING
 #endif
 
 #include <stdio.h>
@@ -68,6 +78,11 @@ int mbedtls_debug_printf();
 #define REQ_TYPE_CRT			1
 #define REQ_TYPE_EXTFILE		2
 #define REQ_TYPE_UNSPEC			-1
+
+extern int log_level;
+#define mbedtlsclu_prio_printf(priority,format,args...) \
+	if(priority <= log_level) \
+		mbedtls_printf(format, ## args);
 
 typedef struct conf_req_csr_parameters {
 	char* default_bits;

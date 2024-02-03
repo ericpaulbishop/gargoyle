@@ -216,7 +216,7 @@ int req_main(int argc, char** argv, int argi)
 #if defined(MBEDTLS_USE_PSA_CRYPTO)
     psa_status_t status = psa_crypto_init();
     if (status != PSA_SUCCESS) {
-        mbedtls_debug_printf(stderr, "Failed to initialize PSA Crypto implementation: %d\n",
+        mbedtlsclu_prio_printf(MBEDTLSCLU_ERR,"Failed to initialize PSA Crypto implementation: %d\n",
                         (int) status);
         goto exit;
     }
@@ -401,24 +401,24 @@ usage:
 		goto usage;
 	}
 	
-	mbedtls_debug_printf("cl: out: %s\n", outfile);
-	mbedtls_debug_printf("cl: outform: %s\n", (output_format == FORMAT_PEM ? "PEM" : "DER"));
-	mbedtls_debug_printf("cl: text: %d\n", text);
-	mbedtls_debug_printf("cl: digest: %s\n", md_alg_in);
-	mbedtls_debug_printf("cl: key: %s\n", key_filein);
-	mbedtls_debug_printf("cl: key_passin: %s\n", key_passin);
-	mbedtls_debug_printf("cl: subj: %s\n", subject_name);
-	mbedtls_debug_printf("cl: newkey: %d\n", newkey);
-	mbedtls_debug_printf("cl: newkey_opts: %s\n", newkey_optsin);
-	mbedtls_debug_printf("cl: newkey_outfile: %s\n", newkey_outfile);
-	mbedtls_debug_printf("cl: conffile: %s\n", conffilein);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"cl: out: %s\n", outfile);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"cl: outform: %s\n", (output_format == FORMAT_PEM ? "PEM" : "DER"));
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"cl: text: %d\n", text);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"cl: digest: %s\n", md_alg_in);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"cl: key: %s\n", key_filein);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"cl: key_passin: %s\n", key_passin);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"cl: subj: %s\n", subject_name);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"cl: newkey: %d\n", newkey);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"cl: newkey_opts: %s\n", newkey_optsin);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"cl: newkey_outfile: %s\n", newkey_outfile);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"cl: conffile: %s\n", conffilein);
 	
 	// Check if the ENV has a config file defined
 	mbedtls_env_conf = getenv(MBEDTLS_ENV_CONF);
-	mbedtls_debug_printf("env: mbedtls_conf: %s\n", mbedtls_env_conf);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"env: mbedtls_conf: %s\n", mbedtls_env_conf);
 #ifdef OPENSSL_ENV_CONF_COMPAT
 	openssl_env_conf = getenv(OPENSSL_ENV_CONF);
-	mbedtls_debug_printf("env: openssl_conf: %s\n", openssl_env_conf);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"env: openssl_conf: %s\n", openssl_env_conf);
 #endif
 	if(mbedtls_env_conf != NULL)
 	{
@@ -435,32 +435,32 @@ usage:
 		conffile = conffilein;
 	}
 	
-	mbedtls_debug_printf("Final conffile: %s\n", conffile);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"Final conffile: %s\n", conffile);
 	
-	mbedtls_debug_printf("  . Parsing the config file...");
+	mbedtlsclu_prio_printf(MBEDTLSCLU_INFO,"  . Parsing the config file...");
 	if((ret = parse_config_file(conffile, REQ_TYPE_CSR, (void*)(&req_params))) != 0)
 	{
-		mbedtls_debug_printf(" failed\n  !  parse_config_file returned %d", ret);
+		mbedtlsclu_prio_printf(MBEDTLSCLU_ERR," failed\n  !  parse_config_file returned %d", ret);
         goto exit;
 	}
-	mbedtls_debug_printf("conf: default_bits %s\n", req_params.default_bits);
-	mbedtls_debug_printf("conf: default_keyfile %s\n", req_params.default_keyfile);
-	mbedtls_debug_printf("conf: default_md %s\n", req_params.default_md);
-	mbedtls_debug_printf("conf: distinguished_name %s\n", req_params.distinguished_name_tag);
-	mbedtls_debug_printf("conf: x509_extensions %s\n", req_params.x509_extensions_tag);
-	mbedtls_debug_printf("conf: default_country %s\n", req_params.default_country);
-	mbedtls_debug_printf("conf: default_state %s\n", req_params.default_state);
-	mbedtls_debug_printf("conf: default_locality %s\n", req_params.default_locality);
-	mbedtls_debug_printf("conf: default_org %s\n", req_params.default_org);
-	mbedtls_debug_printf("conf: default_orgunit %s\n", req_params.default_orgunit);
-	mbedtls_debug_printf("conf: default_commonname %s\n", req_params.default_commonname);
-	mbedtls_debug_printf("conf: default_email %s\n", req_params.default_email);
-	mbedtls_debug_printf("conf: default_serial %s\n", req_params.default_serial);
-	mbedtls_debug_printf("conf: subject_key_identifier %s\n", req_params.subject_key_identifier);
-	mbedtls_debug_printf("conf: authority_key_identifier %s\n", req_params.authority_key_identifier);
-	mbedtls_debug_printf("conf: basic_contraints %s\n", req_params.basic_contraints);
-	mbedtls_debug_printf("conf: key_usage %s\n", req_params.key_usage);
-	mbedtls_debug_printf("conf: ns_cert_type %s\n", req_params.ns_cert_type);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"conf: default_bits %s\n", req_params.default_bits);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"conf: default_keyfile %s\n", req_params.default_keyfile);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"conf: default_md %s\n", req_params.default_md);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"conf: distinguished_name %s\n", req_params.distinguished_name_tag);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"conf: x509_extensions %s\n", req_params.x509_extensions_tag);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"conf: default_country %s\n", req_params.default_country);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"conf: default_state %s\n", req_params.default_state);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"conf: default_locality %s\n", req_params.default_locality);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"conf: default_org %s\n", req_params.default_org);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"conf: default_orgunit %s\n", req_params.default_orgunit);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"conf: default_commonname %s\n", req_params.default_commonname);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"conf: default_email %s\n", req_params.default_email);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"conf: default_serial %s\n", req_params.default_serial);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"conf: subject_key_identifier %s\n", req_params.subject_key_identifier);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"conf: authority_key_identifier %s\n", req_params.authority_key_identifier);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"conf: basic_contraints %s\n", req_params.basic_contraints);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"conf: key_usage %s\n", req_params.key_usage);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"conf: ns_cert_type %s\n", req_params.ns_cert_type);
 	
 	// Set the keyfile
 	if(key_filein == NULL && req_params.default_keyfile == NULL)
@@ -556,33 +556,33 @@ usage:
 		/*
 		 * 1.1. Load the CSR
 		 */
-		mbedtls_debug_printf("\n  . Loading the CSR ...");
+		mbedtlsclu_prio_printf(MBEDTLSCLU_INFO,"\n  . Loading the CSR ...");
 		fflush(stdout);
 
 		ret = mbedtls_x509_csr_parse_file(&csr, csr_infile);
 
 		if (ret != 0) {
-			mbedtls_debug_printf(" failed\n  !  mbedtls_x509_csr_parse_file returned %d\n\n", ret);
+			mbedtlsclu_prio_printf(MBEDTLSCLU_ERR," failed\n  !  mbedtls_x509_csr_parse_file returned %d\n\n", ret);
 			mbedtls_x509_csr_free(&csr);
 			goto exit;
 		}
 
-		mbedtls_debug_printf(" ok\n");
+		mbedtlsclu_prio_printf(MBEDTLSCLU_INFO," ok\n");
 		
 		if(!noout)
 		{
 			/*
 			 * 1.2 Print the CSR
 			 */
-			mbedtls_debug_printf("  . CSR information    ...\n");
+			mbedtlsclu_prio_printf(MBEDTLSCLU_INFO,"  . CSR information    ...\n");
 			ret = mbedtls_x509_csr_info((char *) csrbuf, sizeof(csrbuf) - 1, "      ", &csr);
 			if (ret == -1) {
-				mbedtls_debug_printf(" failed\n  !  mbedtls_x509_csr_info returned %d\n\n", ret);
+				mbedtlsclu_prio_printf(MBEDTLSCLU_ERR," failed\n  !  mbedtls_x509_csr_info returned %d\n\n", ret);
 				mbedtls_x509_csr_free(&csr);
 				goto exit;
 			}
 
-			mbedtls_debug_printf("%s\n", csrbuf);
+			mbedtls_printf("%s\n", csrbuf);
 		}
 		mbedtls_x509_csr_free(&csr);
 		
@@ -595,7 +595,7 @@ usage:
 	{
 		if(noout)
 		{
-			mbedtls_debug_printf("Can't ask for a new key AND noout\n");
+			mbedtlsclu_prio_printf(MBEDTLSCLU_ERR,"Can't ask for a new key AND noout\n");
 			goto usage;
 		}
 		int status;
@@ -603,7 +603,7 @@ usage:
 		char* externcmd = NULL;
 		int exitcode;
 		
-		mbedtls_debug_printf("New Key Generation requested\n");
+		mbedtlsclu_prio_printf(MBEDTLSCLU_INFO,"New Key Generation requested\n");
 		
 		if(newkey_optsin == NULL || newkey_outfile == NULL)
 		{
@@ -643,7 +643,7 @@ usage:
 		genpkey_args[4] = dynamic_strcat(2,"rsa_keygen_bits:",rsa_keysize);
 		genpkey_args[5] = strdup("-out");
 		genpkey_args[6] = strdup(newkey_outfile);
-		mbedtls_debug_printf("Calling genpkey internally\n");
+		mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"Calling genpkey internally\n");
 		genpkey_main(7,genpkey_args,1);
 		
 		free(algorithm);
@@ -652,9 +652,9 @@ usage:
 		key_filein = newkey_outfile;
 	}
 	
-	mbedtls_debug_printf("Final subject name: %s\n", subject_name);
-	mbedtls_debug_printf("Final digest: %s\n", md_alg_name);
-	mbedtls_debug_printf("Final keyfile: %s\n", key_filein);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"Final subject name: %s\n", subject_name);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"Final digest: %s\n", md_alg_name);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"Final keyfile: %s\n", key_filein);
 	
 	mbedtls_x509write_csr_set_md_alg(&req, md_alg);
 
@@ -669,63 +669,63 @@ usage:
     /*
      * 0. Seed the PRNG
      */
-    mbedtls_debug_printf("  . Seeding the random number generator...");
+    mbedtlsclu_prio_printf(MBEDTLSCLU_INFO,"  . Seeding the random number generator...");
     fflush(stdout);
 
     if ((ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy,
                                      (const unsigned char *) pers,
                                      strlen(pers))) != 0) {
-        mbedtls_debug_printf(" failed\n  !  mbedtls_ctr_drbg_seed returned %d", ret);
+        mbedtlsclu_prio_printf(MBEDTLSCLU_ERR," failed\n  !  mbedtls_ctr_drbg_seed returned %d", ret);
         goto exit;
     }
 
-    mbedtls_debug_printf(" ok\n");
+    mbedtlsclu_prio_printf(MBEDTLSCLU_INFO," ok\n");
 
 	/*
      * 1.0. Check the subject name for validity
      */
-    mbedtls_debug_printf("  . Checking subject name...");
+    mbedtlsclu_prio_printf(MBEDTLSCLU_INFO,"  . Checking subject name...");
     fflush(stdout);
 
     if ((ret = mbedtls_x509write_csr_set_subject_name(&req, subject_name)) != 0) {
-        mbedtls_debug_printf(" failed\n  !  mbedtls_x509write_csr_set_subject_name returned %d", ret);
+        mbedtlsclu_prio_printf(MBEDTLSCLU_ERR," failed\n  !  mbedtls_x509write_csr_set_subject_name returned %d", ret);
         goto exit;
     }
 
-    mbedtls_debug_printf(" ok\n");
+    mbedtlsclu_prio_printf(MBEDTLSCLU_INFO," ok\n");
 
     /*
      * 1.1. Load the key
      */
-    mbedtls_debug_printf("  . Loading the private key ...");
+    mbedtlsclu_prio_printf(MBEDTLSCLU_INFO,"  . Loading the private key ...");
     fflush(stdout);
 
     ret = mbedtls_pk_parse_keyfile(&key, key_filein, key_passin);
 
     if (ret != 0) {
-        mbedtls_debug_printf(" failed\n  !  mbedtls_pk_parse_keyfile returned %d", ret);
+        mbedtlsclu_prio_printf(MBEDTLSCLU_ERR," failed\n  !  mbedtls_pk_parse_keyfile returned %d", ret);
         goto exit;
     }
 
     mbedtls_x509write_csr_set_key(&req, &key);
 
-    mbedtls_debug_printf(" ok\n");
+    mbedtlsclu_prio_printf(MBEDTLSCLU_INFO," ok\n");
 
 	if(!noout)
 	{
 		/*
 		 * 1.2. Writing the request
 		 */
-		mbedtls_debug_printf("  . Writing the certificate request ...");
+		mbedtlsclu_prio_printf(MBEDTLSCLU_INFO,"  . Writing the certificate request ...");
 		fflush(stdout);
 
 		if ((ret = write_certificate_request(&req, output_format, outfile,
 											 mbedtls_ctr_drbg_random, &ctr_drbg)) != 0) {
-			mbedtls_debug_printf(" failed\n  !  write_certificate_request %d", ret);
+			mbedtlsclu_prio_printf(MBEDTLSCLU_ERR," failed\n  !  write_certificate_request %d", ret);
 			goto exit;
 		}
 
-		mbedtls_debug_printf(" ok\n");
+		mbedtlsclu_prio_printf(MBEDTLSCLU_INFO," ok\n");
 	}
 	
 	/*
@@ -769,11 +769,11 @@ usage:
 		mbedtls_x509_crt_init(&issuer_crt);
 		mbedtls_mpi_init(&serial);
 		
-		mbedtls_debug_printf("\n  . Starting certificate writing process ...");
+		mbedtlsclu_prio_printf(MBEDTLSCLU_INFO,"\n  . Starting certificate writing process ...");
 		
 		// Parse serial to MPI
 		// Can come from either command line input or conf input
-		mbedtls_debug_printf("  . Reading serial number...");
+		mbedtlsclu_prio_printf(MBEDTLSCLU_INFO,"  . Reading serial number...");
 		fflush(stdout);
 		
 		if(serialin != NULL)
@@ -797,17 +797,17 @@ usage:
 		{
 			if ((ret = mbedtls_mpi_read_string(&serial, 10, serialval)) != 0) {
 				mbedtls_strerror(ret, buf, 1024);
-				mbedtls_debug_printf(" failed\n  !  mbedtls_mpi_read_string "
+				mbedtlsclu_prio_printf(MBEDTLSCLU_ERR," failed\n  !  mbedtls_mpi_read_string "
 							   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
 				goto exit;
 			}
 		}
 		
-		mbedtls_debug_printf(" ok\n");
+		mbedtlsclu_prio_printf(MBEDTLSCLU_INFO," ok\n");
 		
 #if defined(MBEDTLS_X509_CSR_PARSE_C)
 		// Use the certificate request we just generated
-		mbedtls_debug_printf("  . Parsing certificate request...");
+		mbedtlsclu_prio_printf(MBEDTLSCLU_INFO,"  . Parsing certificate request...");
 		
 		unsigned char output_buf[4096];
 		unsigned char* c = output_buf;
@@ -817,7 +817,7 @@ usage:
 		
 		if((ret = write_certificate_request_buffer(&req, output_format, output_buf, sizeof(output_buf), &len, mbedtls_ctr_drbg_random, &ctr_drbg)) < 0)
 		{
-			mbedtls_debug_printf(" failed\n  !  write_certificate_request_buffer returned %d\n", ret);
+			mbedtlsclu_prio_printf(MBEDTLSCLU_ERR," failed\n  !  write_certificate_request_buffer returned %d\n", ret);
 			goto exit;
 		}
 		if(output_format == FORMAT_DER)
@@ -825,10 +825,10 @@ usage:
 			c = output_buf + sizeof(output_buf) - len;
 		}
 		
-		mbedtls_debug_printf("output_buf: %s\n", c);
+		mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"output_buf: %s\n", c);
 		if((ret = mbedtls_x509_csr_parse(&csr, c, len+1)) != 0)
 		{
-			mbedtls_debug_printf(" failed \n  !  mbedtls_x509_csr_parser returned %d\n", ret);
+			mbedtlsclu_prio_printf(MBEDTLSCLU_ERR," failed \n  !  mbedtls_x509_csr_parser returned %d\n", ret);
 			goto exit;
 		}
 
@@ -838,12 +838,12 @@ usage:
 								   &csr.subject);
 		if (ret < 0) {
 			mbedtls_strerror(ret, buf, sizeof(buf));
-			mbedtls_debug_printf(" failed\n  !  mbedtls_x509_dn_gets "
+			mbedtlsclu_prio_printf(MBEDTLSCLU_ERR," failed\n  !  mbedtls_x509_dn_gets "
 						   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
 			goto exit;
 		}
-		mbedtls_debug_printf(" ok\n");
-		mbedtls_debug_printf("subject_name: %s\n", subject_name);
+		mbedtlsclu_prio_printf(MBEDTLSCLU_INFO," ok\n");
+		mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"subject_name: %s\n", subject_name);
 		subject_key = &csr.pk;
 		
 		issuer_key = &key;
@@ -858,19 +858,19 @@ usage:
 		 */
 		if ((ret = mbedtls_x509write_crt_set_subject_name(&crt, subject_name)) != 0) {
 			mbedtls_strerror(ret, buf, sizeof(buf));
-			mbedtls_debug_printf(" failed\n  !  mbedtls_x509write_crt_set_subject_name "
+			mbedtlsclu_prio_printf(MBEDTLSCLU_ERR," failed\n  !  mbedtls_x509write_crt_set_subject_name "
 						   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
 			goto exit;
 		}
 
 		if ((ret = mbedtls_x509write_crt_set_issuer_name(&crt, issuer_name)) != 0) {
 			mbedtls_strerror(ret, buf, sizeof(buf));
-			mbedtls_debug_printf(" failed\n  !  mbedtls_x509write_crt_set_issuer_name "
+			mbedtlsclu_prio_printf(MBEDTLSCLU_ERR," failed\n  !  mbedtls_x509write_crt_set_issuer_name "
 						   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
 			goto exit;
 		}
 
-		mbedtls_debug_printf("  . Setting certificate values ...");
+		mbedtlsclu_prio_printf(MBEDTLSCLU_INFO,"  . Setting certificate values ...");
 		fflush(stdout);
 
 		mbedtls_x509write_crt_set_version(&crt, version);
@@ -879,7 +879,7 @@ usage:
 		ret = mbedtls_x509write_crt_set_serial(&crt, &serial);
 		if (ret != 0) {
 			mbedtls_strerror(ret, buf, sizeof(buf));
-			mbedtls_debug_printf(" failed\n  !  mbedtls_x509write_crt_set_serial "
+			mbedtlsclu_prio_printf(MBEDTLSCLU_ERR," failed\n  !  mbedtls_x509write_crt_set_serial "
 						   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
 			goto exit;
 		}
@@ -895,10 +895,10 @@ usage:
 			// Set a default value
 			days = DFL_DAYS;
 		}
-		mbedtls_debug_printf("days: %d\n",days);
+		mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"days: %d\n",days);
 		if(days <= 0)
 		{
-			mbedtls_debug_printf("Days cannot be <= 0\n");
+			mbedtlsclu_prio_printf(MBEDTLSCLU_ERR,"Days cannot be <= 0\n");
 			goto usage;
 		}
 		else
@@ -916,16 +916,16 @@ usage:
 			sprintf(time_notafter, "%04d%02d%02d%02d%02d%02d", future.tm_year + 1900, future.tm_mon + 1, future.tm_mday,
 					future.tm_hour, future.tm_min, future.tm_sec);
 		}
-		mbedtls_debug_printf("notbefore: %s, notafter: %s\n",time_notbefore, time_notafter);
+		mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"notbefore: %s, notafter: %s\n",time_notbefore, time_notafter);
 		ret = mbedtls_x509write_crt_set_validity(&crt, time_notbefore, time_notafter);
 		if (ret != 0) {
 			mbedtls_strerror(ret, buf, sizeof(buf));
-			mbedtls_debug_printf(" failed\n  !  mbedtls_x509write_crt_set_validity "
+			mbedtlsclu_prio_printf(MBEDTLSCLU_ERR," failed\n  !  mbedtls_x509write_crt_set_validity "
 						   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
 			goto exit;
 		}
 
-		mbedtls_debug_printf(" ok\n");
+		mbedtlsclu_prio_printf(MBEDTLSCLU_INFO," ok\n");
 		
 		if(version == MBEDTLS_X509_CRT_VERSION_3)
 		{
@@ -934,7 +934,7 @@ usage:
 			if(req_params.basic_contraints != NULL)
 			{
 				// Config input
-				mbedtls_debug_printf("  . Adding the Basic Constraints extension ...");
+				mbedtlsclu_prio_printf(MBEDTLSCLU_INFO,"  . Adding the Basic Constraints extension ...");
 				fflush(stdout);
 				
 				int is_ca = 1;
@@ -976,12 +976,12 @@ usage:
 				ret = mbedtls_x509write_crt_set_basic_constraints(&crt, is_ca, max_pathlen);
 				if (ret != 0) {
 					mbedtls_strerror(ret, buf, 1024);
-					mbedtls_debug_printf(" failed\n  !  x509write_crt_set_basic_constraints "
+					mbedtlsclu_prio_printf(MBEDTLSCLU_ERR," failed\n  !  x509write_crt_set_basic_constraints "
 								   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
 					goto exit;
 				}
 
-				mbedtls_debug_printf(" ok\n");
+				mbedtlsclu_prio_printf(MBEDTLSCLU_INFO," ok\n");
 			}
 			
 #if defined(MBEDTLS_SHA1_C)
@@ -1011,19 +1011,19 @@ usage:
 				
 				if(setExt)
 				{
-					mbedtls_debug_printf("  . Adding the Subject Key Identifier ...");
+					mbedtlsclu_prio_printf(MBEDTLSCLU_INFO,"  . Adding the Subject Key Identifier ...");
 					fflush(stdout);
 
 					ret = mbedtls_x509write_crt_set_subject_key_identifier(&crt);
 					if (ret != 0) {
 						mbedtls_strerror(ret, buf, 1024);
-						mbedtls_debug_printf(" failed\n  !  mbedtls_x509write_crt_set_subject"
+						mbedtlsclu_prio_printf(MBEDTLSCLU_ERR," failed\n  !  mbedtls_x509write_crt_set_subject"
 									   "_key_identifier returned -0x%04x - %s\n\n",
 									   (unsigned int) -ret, buf);
 						goto exit;
 					}
 
-					mbedtls_debug_printf(" ok\n");
+					mbedtlsclu_prio_printf(MBEDTLSCLU_INFO," ok\n");
 				}
 			}
 			
@@ -1058,19 +1058,19 @@ usage:
 				
 				if(setExt)
 				{
-					mbedtls_debug_printf("  . Adding the Authority Key Identifier ...");
+					mbedtlsclu_prio_printf(MBEDTLSCLU_INFO,"  . Adding the Authority Key Identifier ...");
 					fflush(stdout);
 
 					ret = mbedtls_x509write_crt_set_authority_key_identifier(&crt);
 					if (ret != 0) {
 						mbedtls_strerror(ret, buf, 1024);
-						mbedtls_debug_printf(" failed\n  !  mbedtls_x509write_crt_set_authority_"
+						mbedtlsclu_prio_printf(MBEDTLSCLU_ERR," failed\n  !  mbedtls_x509write_crt_set_authority_"
 									   "key_identifier returned -0x%04x - %s\n\n",
 									   (unsigned int) -ret, buf);
 						goto exit;
 					}
 
-					mbedtls_debug_printf(" ok\n");
+					mbedtlsclu_prio_printf(MBEDTLSCLU_INFO," ok\n");
 				}
 			}
 			
@@ -1118,18 +1118,18 @@ usage:
 				
 				free_null_terminated_string_array(line_pieces);
 				
-				mbedtls_debug_printf("  . Adding the Key Usage extension ...");
+				mbedtlsclu_prio_printf(MBEDTLSCLU_INFO,"  . Adding the Key Usage extension ...");
 				fflush(stdout);
 
 				ret = mbedtls_x509write_crt_set_key_usage(&crt, key_usage);
 				if (ret != 0) {
 					mbedtls_strerror(ret, buf, 1024);
-					mbedtls_debug_printf(" failed\n  !  mbedtls_x509write_crt_set_key_usage "
+					mbedtlsclu_prio_printf(MBEDTLSCLU_ERR," failed\n  !  mbedtls_x509write_crt_set_key_usage "
 								   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
 					goto exit;
 				}
 
-				mbedtls_debug_printf(" ok\n");
+				mbedtlsclu_prio_printf(MBEDTLSCLU_INFO," ok\n");
 			}
 			
 			if(req_params.ns_cert_type != NULL)
@@ -1175,18 +1175,18 @@ usage:
 				
 				free_null_terminated_string_array(line_pieces);
 				
-				mbedtls_debug_printf("  . Adding the NS Cert Type extension ...");
+				mbedtlsclu_prio_printf(MBEDTLSCLU_INFO,"  . Adding the NS Cert Type extension ...");
 				fflush(stdout);
 
 				ret = mbedtls_x509write_crt_set_ns_cert_type(&crt, ns_cert_type);
 				if (ret != 0) {
 					mbedtls_strerror(ret, buf, 1024);
-					mbedtls_debug_printf(" failed\n  !  mbedtls_x509write_crt_set_ns_cert_type "
+					mbedtlsclu_prio_printf(MBEDTLSCLU_ERR," failed\n  !  mbedtls_x509write_crt_set_ns_cert_type "
 								   "returned -0x%04x - %s\n\n", (unsigned int) -ret, buf);
 					goto exit;
 				}
 
-				mbedtls_debug_printf(" ok\n");
+				mbedtlsclu_prio_printf(MBEDTLSCLU_INFO," ok\n");
 			}
 		}
 		
@@ -1195,18 +1195,18 @@ usage:
 			/*
 			 * 1.2. Writing the certificate
 			 */
-			mbedtls_debug_printf("  . Writing the certificate...");
+			mbedtlsclu_prio_printf(MBEDTLSCLU_INFO,"  . Writing the certificate...");
 			fflush(stdout);
 
 			if ((ret = write_certificate(&crt, outfile,
 										 mbedtls_ctr_drbg_random, &ctr_drbg)) != 0) {
 				mbedtls_strerror(ret, buf, 1024);
-				mbedtls_debug_printf(" failed\n  !  write_certificate -0x%04x - %s\n\n",
+				mbedtlsclu_prio_printf(MBEDTLSCLU_ERR," failed\n  !  write_certificate -0x%04x - %s\n\n",
 							   (unsigned int) -ret, buf);
 				goto exit;
 			}
 
-			mbedtls_debug_printf(" ok\n");
+			mbedtlsclu_prio_printf(MBEDTLSCLU_INFO," ok\n");
 		}
 
 

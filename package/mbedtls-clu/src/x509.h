@@ -1,4 +1,4 @@
-/* mbedtlsclu -	Utility lauch header file
+/* x509 -	x509 Utility header file
  *
  * Copyright © 2024 by Michael Gray <support@lantisproject.com>
  *
@@ -18,9 +18,4 @@
 
 #include "mbedtlsclu_common.h"
 
-#include "ca.h"
-#include "rand.h"
-#include "req.h"
-#include "dhparam.h"
-#include "genpkey.h"
-#include "x509.h"
+int x509_main(int argc, char** argv, int argi);

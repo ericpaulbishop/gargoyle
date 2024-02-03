@@ -13,7 +13,7 @@ STATIC_OBJS:=mbedtlsclu_common.o
 DEFS:=-DOPENSSL_ENV_CONF_COMPAT
 
 #all: mbedtlsclu_common.o x509write_crl.o dhparam genpkey rand req ca
-all: mbedtlsclu_common.o x509write_crl.o dhparam.o genpkey.o rand.o req.o ca.o mbedtls-clu
+all: mbedtlsclu_common.o x509write_crl.o dhparam.o genpkey.o rand.o req.o ca.o x509.o mbedtls-clu
 mbedtlsclu_common.o: mbedtlsclu_common.c
 	$(CC) $(CFLAGS) $(DEFS) -c mbedtlsclu_common.c -o $@
 
@@ -50,11 +50,17 @@ req.o: req.c $(STATIC_OBJS)
 ca.o: ca.c $(STATIC_OBJS)
 	$(CC) $(CFLAGS) $(DEFS) -c ca.c -o $@
 
-mbedtls-clu: mbedtls-clu.o $(STATIC_OBJS) ca.o dhparam.o genpkey.o rand.o req.o x509write_crl.o
+#x509: x509.o $(STATIC_OBJS)
+#	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ $(LIBS)
+
+x509.o: x509.c $(STATIC_OBJS)
+	$(CC) $(CFLAGS) $(DEFS) -c x509.c -o $@
+
+mbedtls-clu: mbedtls-clu.o $(STATIC_OBJS) ca.o dhparam.o genpkey.o rand.o req.o x509.o x509write_crl.o
 	$(CC) $(CFLAGS) $(LDFLAGS) $^ -o $@ $(LIBS)
 
 mbedtls-clu.o: mbedtls-clu.c $(STATIC_OBJS)
 	$(CC) $(CFLAGS) $(DEFS) -c mbedtls-clu.c -o $@
 
 clean:
-	rm -rf *.o *.a *~ .*sw* mbedtlsclu_common x509write_crl dhparam genpkey rand req ca mbedtls-clu
+	rm -rf *.o *.a *~ .*sw* mbedtlsclu_common x509write_crl dhparam genpkey rand req ca x509 mbedtls-clu

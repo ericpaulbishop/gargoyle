@@ -229,7 +229,7 @@ static int write_private_key(mbedtls_pk_context *key, int textout, int format, c
 
 			if ((ret = mbedtls_rsa_export(rsa, &N, &P, &Q, &D, &E)) != 0 ||
 				(ret = mbedtls_rsa_export_crt(rsa, &DP, &DQ, &QP))      != 0) {
-				mbedtls_debug_printf(" failed\n  ! could not export RSA parameters\n\n");
+				mbedtlsclu_prio_printf(MBEDTLSCLU_ERR," failed\n  ! could not export RSA parameters\n\n");
 				return ret;
 			}
 			
@@ -346,7 +346,7 @@ int genpkey_main(int argc, char** argv, int argi)
 #if defined(MBEDTLS_USE_PSA_CRYPTO)
     psa_status_t status = psa_crypto_init();
     if (status != PSA_SUCCESS) {
-        mbedtls_fprintf(stderr, "Failed to initialize PSA Crypto implementation: %d\n",
+        mbedtlsclu_prio_printf(MBEDTLSCLU_ERR, "Failed to initialize PSA Crypto implementation: %d\n",
                         (int) status);
         goto exit;
     }
@@ -483,25 +483,25 @@ usage:
 		goto usage;
 	}
 	
-	mbedtls_debug_printf("out: %s\n", outfile);
-	mbedtls_debug_printf("outform: %s\n", (output_format == FORMAT_PEM ? "PEM" : "DER"));
-	mbedtls_debug_printf("text: %d\n", text);
-	mbedtls_debug_printf("algo: %s\n", (algo == MBEDTLS_PK_RSA ? "RSA" : "EC"));
-	mbedtls_debug_printf("rsa_bits: %d\n", rsa_keysize);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"out: %s\n", outfile);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"outform: %s\n", (output_format == FORMAT_PEM ? "PEM" : "DER"));
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"text: %d\n", text);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"algo: %s\n", (algo == MBEDTLS_PK_RSA ? "RSA" : "EC"));
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"rsa_bits: %d\n", rsa_keysize);
 	mbedtls_ecp_curve_info* tmpcurve;
 	tmpcurve = mbedtls_ecp_curve_info_from_grp_id(ec_curve);
 	if(tmpcurve != NULL)
 	{
-		mbedtls_debug_printf("ec_curve: %s\n", tmpcurve->name);
+		mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"ec_curve: %s\n", tmpcurve->name);
 	}
 	else
 	{
-		mbedtls_debug_printf("ec_curve: %s\n", "NULL");
+		mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"ec_curve: %s\n", "NULL");
 	}
-	mbedtls_debug_printf("ec_param_enc: %s\n", (ec_curve_paramenc == FORMAT_NAMED_CURVE ? "named curve" : "explicit"));
-	mbedtls_debug_printf("usedevrandom: %d\n", use_dev_random);
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"ec_param_enc: %s\n", (ec_curve_paramenc == FORMAT_NAMED_CURVE ? "named curve" : "explicit"));
+	mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"usedevrandom: %d\n", use_dev_random);
 	
-	mbedtls_debug_printf("\n  . Seeding the random number generator...");
+	mbedtlsclu_prio_printf(MBEDTLSCLU_INFO,"\n  . Seeding the random number generator...");
 	fflush(stdout);
 
     mbedtls_entropy_init(&entropy);
@@ -510,12 +510,12 @@ usage:
         if ((ret = mbedtls_entropy_add_source(&entropy, dev_random_entropy_poll,
                                               NULL, DEV_RANDOM_THRESHOLD,
                                               MBEDTLS_ENTROPY_SOURCE_STRONG)) != 0) {
-            mbedtls_debug_printf(" failed\n  ! mbedtls_entropy_add_source returned -0x%04x\n",
+            mbedtlsclu_prio_printf(MBEDTLSCLU_ERR," failed\n  ! mbedtls_entropy_add_source returned -0x%04x\n",
                            (unsigned int) -ret);
             goto exit;
         }
 
-        mbedtls_debug_printf("\n    Using /dev/random, so can take a long time! ");
+        mbedtlsclu_prio_printf(MBEDTLSCLU_INFO,"\n    Using /dev/random, so can take a long time! ");
         fflush(stdout);
     }
 #endif /* MBEDTLS_FS_IO */
@@ -523,7 +523,7 @@ usage:
 	if ((ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy,
                                      (const unsigned char *) pers,
                                      strlen(pers))) != 0) {
-        mbedtls_debug_printf(" failed\n  ! mbedtls_ctr_drbg_seed returned -0x%04x\n",
+        mbedtlsclu_prio_printf(MBEDTLSCLU_ERR," failed\n  ! mbedtls_ctr_drbg_seed returned -0x%04x\n",
                        (unsigned int) -ret);
         goto exit;
     }
@@ -531,12 +531,12 @@ usage:
 	/*
      * 1.1. Generate the key
      */
-    mbedtls_debug_printf("\n  . Generating the private key ...");
+    mbedtlsclu_prio_printf(MBEDTLSCLU_INFO,"\n  . Generating the private key ...");
     fflush(stdout);
 
     if ((ret = mbedtls_pk_setup(&key,
                                 mbedtls_pk_info_from_type((mbedtls_pk_type_t) algo))) != 0) {
-        mbedtls_debug_printf(" failed\n  !  mbedtls_pk_setup returned -0x%04x", (unsigned int) -ret);
+        mbedtlsclu_prio_printf(MBEDTLSCLU_ERR," failed\n  !  mbedtls_pk_setup returned -0x%04x", (unsigned int) -ret);
         goto exit;
     }
 	
@@ -545,7 +545,7 @@ usage:
         ret = mbedtls_rsa_gen_key(mbedtls_pk_rsa(key), mbedtls_ctr_drbg_random, &ctr_drbg,
                                   rsa_keysize, 65537);
         if (ret != 0) {
-            mbedtls_debug_printf(" failed\n  !  mbedtls_rsa_gen_key returned -0x%04x",
+            mbedtlsclu_prio_printf(MBEDTLSCLU_ERR," failed\n  !  mbedtls_rsa_gen_key returned -0x%04x",
                            (unsigned int) -ret);
             goto exit;
         }
@@ -557,14 +557,14 @@ usage:
                                   mbedtls_pk_ec(key),
                                   mbedtls_ctr_drbg_random, &ctr_drbg);
         if (ret != 0) {
-            mbedtls_debug_printf(" failed\n  !  mbedtls_ecp_gen_key returned -0x%04x",
+            mbedtlsclu_prio_printf(MBEDTLSCLU_ERR," failed\n  !  mbedtls_ecp_gen_key returned -0x%04x",
                            (unsigned int) -ret);
             goto exit;
         }
     } else
 #endif /* MBEDTLS_ECP_C */
     {
-        mbedtls_debug_printf(" failed\n  !  key type not supported\n");
+        mbedtlsclu_prio_printf(MBEDTLSCLU_ERR," failed\n  !  key type not supported\n");
         goto exit;
     }
 	
@@ -572,7 +572,7 @@ usage:
 	/*
      * 1.2 Print the key
      */
-    mbedtls_debug_printf(" ok\n  . Key information:\n");
+    mbedtlsclu_prio_printf(MBEDTLSCLU_INFO," ok\n  . Key information:\n");
 
 #if defined(MBEDTLS_RSA_C)
     if (mbedtls_pk_get_type(&key) == MBEDTLS_PK_RSA) {
@@ -585,7 +585,7 @@ usage:
 
         if ((ret = mbedtls_rsa_export(rsa, &N, &P, &Q, &D, &E)) != 0 ||
             (ret = mbedtls_rsa_export_crt(rsa, &DP, &DQ, &QP))      != 0) {
-            mbedtls_debug_printf(" failed\n  ! could not export RSA parameters\n\n");
+            mbedtlsclu_prio_printf(MBEDTLSCLU_ERR," failed\n  ! could not export RSA parameters\n\n");
             goto exit;
         }
 
@@ -607,29 +607,29 @@ usage:
     if (mbedtls_pk_get_type(&key) == MBEDTLS_PK_ECKEY) {
         mbedtls_ecp_keypair* ecp = mbedtls_pk_ec(key);
 		mbedtls_ecp_curve_info* curveinfo = mbedtls_ecp_curve_info_from_grp_id(ecp->grp.id);
-        mbedtls_debug_printf("curve: %s\n",curveinfo->name);
+        mbedtlsclu_prio_printf(MBEDTLSCLU_DEBUG,"curve: %s\n",curveinfo->name);
 
 		mbedtls_mpi_write_file("X_Q:   ", &ecp->Q.X, 16, NULL);
 		mbedtls_mpi_write_file("Y_Q:   ", &ecp->Q.Y, 16, NULL);
 		mbedtls_mpi_write_file("D:     ", &ecp->d, 16, NULL);
     } else
 #endif
-    mbedtls_debug_printf("  ! key type not supported\n");
+    mbedtlsclu_prio_printf(MBEDTLSCLU_WARNING,"  ! key type not supported\n");
 #else
-	mbedtls_debug_printf(" ok\n");
+	mbedtlsclu_prio_printf(MBEDTLSCLU_INFO," ok\n");
 #endif /* DEBUG */
 
     /*
      * 1.3 Export key
      */
-    mbedtls_debug_printf("  . Writing key to file...");
+    mbedtlsclu_prio_printf(MBEDTLSCLU_INFO,"  . Writing key to file...");
 
     if ((ret = write_private_key(&key, text, output_format, outfile)) != 0) {
-        mbedtls_debug_printf(" failed\n");
+        mbedtlsclu_prio_printf(MBEDTLSCLU_ERR," failed\n");
         goto exit;
     }
 
-    mbedtls_debug_printf(" ok\n");
+    mbedtlsclu_prio_printf(MBEDTLSCLU_INFO," ok\n");
 
     exit_code = MBEDTLS_EXIT_SUCCESS;
 
