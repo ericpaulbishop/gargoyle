@@ -66,7 +66,7 @@ define Package/gargoyle-large
 	DEPENDS+= +plugin-gargoyle-usb-storage-full +plugin-gargoyle-minidlna \
 		+plugin-gargoyle-usb-printer +plugin-gargoyle-webcam \
 		+openvpn-gargoyle-mbedtls +plugin-gargoyle-openvpn \
-		+openvpn-gargoyle-easy-rsa +plugin-gargoyle-tor \
+		+openvpn-gargoyle-easy-rsa \
 		+wireguard-tools +plugin-gargoyle-wireguard \
 		+plugin-gargoyle-ipheth-tether
 endef
