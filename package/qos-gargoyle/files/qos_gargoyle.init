@@ -509,8 +509,6 @@ initialize_qos()
 		# Set up egress chain
 		apply_xtables_rule "-t mangle -N qos_egress" "any"
 		apply_xtables_rule "-t mangle -A POSTROUTING -o $qos_interface -j qos_egress" "any"
-		# Clear MARKs before we get to Quotas/QoS. They have been restored by act_connmark
-		apply_xtables_rule "-t mangle -I POSTROUTING -o $qos_interface -j MARK --set-mark 0" "any"
 
 		#Next the user entered rules.
 		$echo_off
@@ -832,6 +830,11 @@ stop()
 	# eliminate existing rules in mangle table
 	delete_chain_from_table "mangle" "qos_egress"
 	delete_chain_from_table "mangle" "qos_ingress"
+	if [ -z "$qos_interface" ] ; then
+		define_interface
+	fi
+	apply_xtables_rule "-t mangle -D PREROUTING -i $qos_interface -j MARK --set-mark 0" "any"
+
 	$echo_off
 }
 
