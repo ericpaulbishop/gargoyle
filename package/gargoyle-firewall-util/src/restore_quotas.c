@@ -908,6 +908,8 @@ int main(int argc, char** argv)
 			run_shell_command(dynamic_strcat(4, cmdarray[cmdidx], " -t ", quota_table, " -A ingress_quotas -j CONNMARK --set-mark 0x0/0xFF000000 2>/dev/null"), 1);
 			run_shell_command(dynamic_strcat(4, cmdarray[cmdidx], " -t ", quota_table, " -A combined_quotas -j CONNMARK --set-mark 0x0/0xFF000000 2>/dev/null"), 1);
 			run_shell_command(dynamic_strcat(6, cmdarray[cmdidx], " -t filter -I FORWARD -m connmark --mark ", death_mark, "/", death_mask, " -j REJECT 2>/dev/null"), 1);
+			run_shell_command(dynamic_strcat(6, cmdarray[cmdidx], " -t ", quota_table, " -A combined_quotas -o ", wan_if, " -m mark ! --mark 0x0/0x7f -j CONNMARK --save-mark --mask 0x7f 2>/dev/null"), 1);
+			run_shell_command(dynamic_strcat(6, cmdarray[cmdidx], " -t ", quota_table, " -A combined_quotas -i ", wan_if, " -m mark ! --mark 0x0/0x7f00 -j CONNMARK --save-mark --mask 0x7f00 2>/dev/null"), 1);
 		}
 
 		//make sure crontab is up to date

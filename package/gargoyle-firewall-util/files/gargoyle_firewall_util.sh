@@ -11,6 +11,9 @@ ra_mark="$ra_mask/$ra_mask"
 death_mask=0x8000
 death_mark="$death_mask"
 
+quota_up_mask="0x7f"
+quota_dn_mask="0x7f00"
+
 wan_if=""
 
 apply_xtables_rule()
@@ -553,10 +556,11 @@ initialize_quota_qos()
 		upload_shift=0
 		for rate_kb in $unique_up ; do
 			kbit=$(echo $((rate_kb*8))kbit)
-			mark=$(($cur_band << $upload_shift))
-			tc filter add dev $wan_if parent 1:0 prio $cur_band protocol ip  handle $mark fw flowid 1:$cur_band
+			mark=$(printf "0x%x\n" $(($cur_band << $upload_shift)))
+			tc filter add dev $wan_if parent 1:0 prio $cur_band protocol ip  handle $mark/$quota_up_mask fw flowid 1:$cur_band
+			tc filter add dev $wan_if parent 1:0 prio $(($cur_band+1)) protocol ipv6 handle $mark/$quota_up_mask fw flowid 1:$cur_band
 			tc qdisc  add dev $wan_if parent 1:$cur_band handle $cur_band: tbf rate $kbit burst $kbit limit $kbit
-			cur_band=$(($cur_band+1))
+			cur_band=$(($cur_band+2))
 		done
 
 		#ingress/download
@@ -566,14 +570,16 @@ initialize_quota_qos()
 		download_shift=8
 		for rate_kb in $unique_down ; do
 			kbit=$(echo $((rate_kb*8))kbit)
-			mark=$(($cur_band << $download_shift))
-			tc filter add dev ifb0 parent 1:0 prio $cur_band protocol ip  handle $mark fw flowid 1:$cur_band
+			mark=$(printf "0x%x\n" $(($cur_band << $download_shift)))
+			tc filter add dev ifb0 parent 1:0 prio $cur_band protocol ip  handle $mark/$quota_dn_mask fw flowid 1:$cur_band
+			tc filter add dev ifb0 parent 1:0 prio $(($cur_band+1)) protocol ipv6 handle $mark/$quota_dn_mask fw flowid 1:$cur_band
 			tc qdisc  add dev ifb0 parent 1:$cur_band handle $cur_band: tbf rate $kbit burst $kbit limit $kbit
-			cur_band=$(($cur_band+1))
+			cur_band=$(($cur_band+2))
 		done
 
 		tc qdisc add dev $wan_if handle ffff: ingress
 		tc filter add dev $wan_if parent ffff: protocol ip u32 match u8 0 0 action connmark action mirred egress redirect dev ifb0 flowid ffff:1
+		tc filter add dev $wan_if parent ffff: protocol ipv6 u32 match u8 0 0 action connmark action mirred egress redirect dev ifb0 flowid ffff:1
 
 		#tc -s qdisc show dev $wan_if
 		#tc -s qdisc show dev ifb0
