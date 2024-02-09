@@ -1,6 +1,6 @@
 --- a/package/utils/busybox/Config-defaults.in
 +++ b/package/utils/busybox/Config-defaults.in
-@@ -468,10 +468,10 @@ config BUSYBOX_DEFAULT_FEATURE_TAR_SELIN
+@@ -477,10 +477,10 @@ config BUSYBOX_DEFAULT_FEATURE_TAR_SELIN
  	default n
  config BUSYBOX_DEFAULT_UNZIP
  	bool
@@ -13,7 +13,7 @@
  config BUSYBOX_DEFAULT_FEATURE_UNZIP_BZIP2
  	bool
  	default n
-@@ -672,7 +672,7 @@ config BUSYBOX_DEFAULT_MD5SUM
+@@ -702,7 +702,7 @@ config BUSYBOX_DEFAULT_MD5SUM
  	default y
  config BUSYBOX_DEFAULT_SHA1SUM
  	bool
@@ -22,7 +22,7 @@
  config BUSYBOX_DEFAULT_SHA256SUM
  	bool
  	default y
-@@ -2204,7 +2204,7 @@ config BUSYBOX_DEFAULT_ARP
+@@ -2267,7 +2267,7 @@ config BUSYBOX_DEFAULT_ARP
  	default n
  config BUSYBOX_DEFAULT_ARPING
  	bool

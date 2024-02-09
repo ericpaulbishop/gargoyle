@@ -1,6 +1,6 @@
 --- a/package/kernel/mac80211/files/lib/wifi/mac80211.sh
 +++ b/package/kernel/mac80211/files/lib/wifi/mac80211.sh
-@@ -181,7 +181,7 @@ detect_mac80211() {
+@@ -209,7 +209,7 @@ detect_mac80211() {
  			set wireless.default_${name}.device=${name}
  			set wireless.default_${name}.network=lan
  			set wireless.default_${name}.mode=ap

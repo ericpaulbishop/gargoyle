@@ -1,7 +1,7 @@
 --- a/include/image.mk
 +++ b/include/image.mk
-@@ -168,8 +168,11 @@ DTC_FLAGS += \
-   -Wno-unique_unit_address
+@@ -165,8 +165,11 @@ DTC_FLAGS += \
+ DTCO_FLAGS += $(DTC_WARN_FLAGS)
  
  define Image/pad-to
 -	dd if=$(1) of=$(1).new bs=$(2) conv=sync
@@ -13,10 +13,10 @@
 +	echo ""
  endef
  
- ROOTFS_PARTSIZE=$(shell echo $$(($(CONFIG_TARGET_ROOTFS_PARTSIZE)*1024*1024)))
+ ifeq ($(DUMP),)
 --- a/target/linux/ramips/image/Makefile
 +++ b/target/linux/ramips/image/Makefile
-@@ -84,8 +84,11 @@ define Build/mkdlinkfw-factory
+@@ -83,8 +83,11 @@ define Build/mkdlinkfw-factory
  		-F $@ \
  		-o $@.new \
  		$(if $(DLINK_IMAGE_OFFSET), -O $(DLINK_IMAGE_OFFSET)) \
@@ -30,7 +30,7 @@
  endef
  
  define Build/mkdlinkfw-loader
-@@ -94,8 +97,11 @@ define Build/mkdlinkfw-loader
+@@ -93,8 +96,11 @@ define Build/mkdlinkfw-loader
  		-r $@ \
  		-o $@.new \
  		$(if $(DLINK_IMAGE_OFFSET), -O $(DLINK_IMAGE_OFFSET)) \
