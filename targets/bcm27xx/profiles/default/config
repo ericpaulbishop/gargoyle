@@ -2567,7 +2567,7 @@ CONFIG_PACKAGE_plugin-gargoyle-theme-green=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-horchata=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-light=m
 CONFIG_PACKAGE_plugin-gargoyle-theme-xeye=m
-CONFIG_PACKAGE_plugin-gargoyle-tor=y
+CONFIG_PACKAGE_plugin-gargoyle-tor=m
 CONFIG_PACKAGE_plugin-gargoyle-upnp=y
 CONFIG_PACKAGE_plugin-gargoyle-usb-printer=y
 CONFIG_PACKAGE_plugin-gargoyle-usb-storage-extroot=y
@@ -3713,7 +3713,7 @@ CONFIG_PACKAGE_libxtables=y
 #
 # SSL
 #
-CONFIG_PACKAGE_libmbedtls=m
+CONFIG_PACKAGE_libmbedtls=y
 
 #
 # Option details in source code: include/mbedtls/mbedtls_config.h
@@ -3826,10 +3826,10 @@ CONFIG_OPENSSL_WITH_PSK=y
 #
 CONFIG_OPENSSL_ENGINE=y
 # CONFIG_OPENSSL_ENGINE_BUILTIN is not set
-CONFIG_PACKAGE_libopenssl-conf=y
+CONFIG_PACKAGE_libopenssl-conf=m
 # CONFIG_PACKAGE_libopenssl-devcrypto is not set
-CONFIG_PACKAGE_libopenssl-legacy=y
-CONFIG_PACKAGE_libwolfssl=m
+CONFIG_PACKAGE_libopenssl-legacy=m
+# CONFIG_PACKAGE_libwolfssl is not set
 
 #
 # wolfSSL Library Configuration
@@ -3849,20 +3849,14 @@ CONFIG_WOLFSSL_HAS_WPAS=y
 # CONFIG_WOLFSSL_HAS_ECC448 is not set
 CONFIG_WOLFSSL_HAS_OPENVPN=y
 CONFIG_WOLFSSL_ALT_NAMES=y
-CONFIG_WOLFSSL_HAS_NO_HW=y
-# CONFIG_WOLFSSL_HAS_AFALG is not set
-# CONFIG_WOLFSSL_HAS_DEVCRYPTO_CBC is not set
-# CONFIG_WOLFSSL_HAS_DEVCRYPTO_AES is not set
-# CONFIG_WOLFSSL_HAS_DEVCRYPTO_FULL is not set
 # end of wolfSSL Library Configuration
-
-# CONFIG_PACKAGE_libwolfssl-benchmark is not set
 # end of SSL
 
 #
 # libimobiledevice
 #
 CONFIG_PACKAGE_libimobiledevice=y
+CONFIG_PACKAGE_libimobiledevice-glue=y
 CONFIG_PACKAGE_libplist=y
 CONFIG_PACKAGE_libusbmuxd=y
 # end of libimobiledevice
@@ -3892,9 +3886,9 @@ CONFIG_PACKAGE_libcurl=m
 #
 # SSL support
 #
-# CONFIG_LIBCURL_MBEDTLS is not set
+CONFIG_LIBCURL_MBEDTLS=y
 # CONFIG_LIBCURL_WOLFSSL is not set
-CONFIG_LIBCURL_OPENSSL=y
+# CONFIG_LIBCURL_OPENSSL is not set
 # CONFIG_LIBCURL_GNUTLS is not set
 # CONFIG_LIBCURL_NOSSL is not set
 
@@ -3969,7 +3963,6 @@ CONFIG_PACKAGE_libkeyutils=y
 # CONFIG_PACKAGE_liblua is not set
 # CONFIG_PACKAGE_liblua5.3 is not set
 CONFIG_PACKAGE_liblzo=y
-# CONFIG_PACKAGE_libmatrixssl-nothread is not set
 # CONFIG_PACKAGE_libmd is not set
 CONFIG_PACKAGE_libmnl=y
 # CONFIG_PACKAGE_libmount is not set
@@ -4016,8 +4009,8 @@ CONFIG_PACKAGE_libucode=y
 # CONFIG_PACKAGE_libunistring is not set
 # CONFIG_PACKAGE_libunwind is not set
 CONFIG_PACKAGE_libusb-1.0=y
-# CONFIG_PACKAGE_libustream-mbedtls is not set
-CONFIG_PACKAGE_libustream-openssl=y
+CONFIG_PACKAGE_libustream-mbedtls=y
+CONFIG_PACKAGE_libustream-openssl=m
 # CONFIG_PACKAGE_libustream-wolfssl is not set
 CONFIG_PACKAGE_libuuid=y
 # CONFIG_PACKAGE_libv4l is not set
@@ -4265,8 +4258,24 @@ CONFIG_PACKAGE_tc-tiny=y
 # VPN
 #
 CONFIG_PACKAGE_openvpn-gargoyle-easy-rsa=y
-# CONFIG_PACKAGE_openvpn-gargoyle-mbedtls is not set
-CONFIG_PACKAGE_openvpn-gargoyle-openssl=y
+
+#
+# SSL support
+#
+CONFIG_OPENVPN_GARGOYLE_EASYRSA_MBEDTLS=y
+# CONFIG_OPENVPN_GARGOYLE_EASYRSA_OPENSSL is not set
+CONFIG_PACKAGE_openvpn-gargoyle-mbedtls=y
+# CONFIG_OPENVPN_gargoyle_mbedtls_ENABLE_LZO is not set
+CONFIG_OPENVPN_gargoyle_mbedtls_ENABLE_LZ4=y
+# CONFIG_OPENVPN_gargoyle_mbedtls_ENABLE_MANAGEMENT is not set
+CONFIG_OPENVPN_gargoyle_mbedtls_ENABLE_FRAGMENT=y
+CONFIG_OPENVPN_gargoyle_mbedtls_ENABLE_MULTIHOME=y
+CONFIG_OPENVPN_gargoyle_mbedtls_ENABLE_PORT_SHARE=y
+CONFIG_OPENVPN_gargoyle_mbedtls_ENABLE_DEF_AUTH=y
+CONFIG_OPENVPN_gargoyle_mbedtls_ENABLE_PF=y
+# CONFIG_OPENVPN_gargoyle_mbedtls_ENABLE_IPROUTE2 is not set
+CONFIG_OPENVPN_gargoyle_mbedtls_ENABLE_SMALL=y
+CONFIG_PACKAGE_openvpn-gargoyle-openssl=m
 CONFIG_OPENVPN_gargoyle_openssl_ENABLE_LZO=y
 CONFIG_OPENVPN_gargoyle_openssl_ENABLE_LZ4=y
 # CONFIG_OPENVPN_gargoyle_openssl_ENABLE_X509_ALT_USERNAME is not set
@@ -4330,7 +4339,7 @@ CONFIG_PACKAGE_hostapd-common=y
 # CONFIG_PACKAGE_wpa-supplicant is not set
 # CONFIG_WPA_RFKILL_SUPPORT is not set
 CONFIG_WPA_MSG_MIN_PRIORITY=3
-CONFIG_WPA_WOLFSSL=y
+# CONFIG_WPA_WOLFSSL is not set
 CONFIG_DRIVER_11AC_SUPPORT=y
 # CONFIG_DRIVER_11AX_SUPPORT is not set
 # CONFIG_WPA_ENABLE_WEP is not set
@@ -4348,13 +4357,13 @@ CONFIG_WPA_MBO_SUPPORT=y
 # CONFIG_PACKAGE_wpad-basic is not set
 CONFIG_PACKAGE_wpad-basic-mbedtls=m
 # CONFIG_PACKAGE_wpad-basic-openssl is not set
-CONFIG_PACKAGE_wpad-basic-wolfssl=m
-# CONFIG_PACKAGE_wpad-mbedtls is not set
+# CONFIG_PACKAGE_wpad-basic-wolfssl is not set
+CONFIG_PACKAGE_wpad-mbedtls=y
 # CONFIG_PACKAGE_wpad-mesh-mbedtls is not set
 # CONFIG_PACKAGE_wpad-mesh-openssl is not set
 # CONFIG_PACKAGE_wpad-mesh-wolfssl is not set
 # CONFIG_PACKAGE_wpad-mini is not set
-CONFIG_PACKAGE_wpad-openssl=y
+CONFIG_PACKAGE_wpad-openssl=m
 # CONFIG_PACKAGE_wpad-wolfssl is not set
 # end of WirelessAPD
 
@@ -4372,9 +4381,15 @@ CONFIG_PACKAGE_etherwake=y
 # CONFIG_PACKAGE_ethtool is not set
 # CONFIG_PACKAGE_ethtool-full is not set
 CONFIG_PACKAGE_ewget=y
+
+#
+# SSL support
+#
+CONFIG_EWGET_MBEDTLS=y
+# CONFIG_EWGET_OPENSSL is not set
 CONFIG_PACKAGE_gargoyle-firewall-util=y
 CONFIG_PACKAGE_gargoyle-ip-query=y
-CONFIG_PACKAGE_gargoyle-tor=y
+CONFIG_PACKAGE_gargoyle-tor=m
 # CONFIG_PACKAGE_gargoyle-tor-basic is not set
 # CONFIG_PACKAGE_gargoyle-tor-gencert is not set
 # CONFIG_PACKAGE_gre is not set
@@ -4386,7 +4401,7 @@ CONFIG_PACKAGE_iw=y
 CONFIG_PACKAGE_libipset=y
 CONFIG_PACKAGE_libiptbwctl=y
 # CONFIG_PACKAGE_map is not set
-CONFIG_PACKAGE_obfsproxy-legacy=y
+CONFIG_PACKAGE_obfsproxy-legacy=m
 CONFIG_PACKAGE_odhcp6c=y
 CONFIG_PACKAGE_odhcp6c_ext_cer_id=0
 # CONFIG_PACKAGE_odhcpd is not set
@@ -4643,13 +4658,14 @@ CONFIG_PACKAGE_libjson-script=y
 # CONFIG_PACKAGE_lscpu is not set
 # CONFIG_PACKAGE_lslocks is not set
 # CONFIG_PACKAGE_lsns is not set
+CONFIG_PACKAGE_mbedtls-clu=y
 # CONFIG_PACKAGE_mbedtls-util is not set
 # CONFIG_PACKAGE_mcookie is not set
 # CONFIG_PACKAGE_more is not set
 # CONFIG_PACKAGE_mount-utils is not set
 # CONFIG_PACKAGE_namei is not set
 # CONFIG_PACKAGE_nsenter is not set
-CONFIG_PACKAGE_openssl-util=y
+CONFIG_PACKAGE_openssl-util=m
 # CONFIG_PACKAGE_opkg-more is not set
 # CONFIG_PACKAGE_policycoreutils is not set
 # CONFIG_PACKAGE_prlimit is not set
