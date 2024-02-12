@@ -446,8 +446,8 @@ CONFIG_CLEAN_IPKG_PARTIAL=y
 CONFIG_KERNEL_BUILD_USER=""
 CONFIG_KERNEL_BUILD_DOMAIN=""
 CONFIG_KERNEL_PRINTK=y
-CONFIG_KERNEL_SWAP=y
-CONFIG_KERNEL_PROC_STRIPPED=y
+# CONFIG_KERNEL_SWAP is not set
+# CONFIG_KERNEL_PROC_STRIPPED is not set
 CONFIG_KERNEL_DEBUG_FS=y
 # CONFIG_KERNEL_PERF_EVENTS is not set
 # CONFIG_KERNEL_PROFILING is not set
@@ -3817,6 +3817,7 @@ CONFIG_PACKAGE_MAC80211_MESH=y
 # CONFIG_PACKAGE_kmod-mt7921-firmware is not set
 # CONFIG_PACKAGE_kmod-mt7921s is not set
 # CONFIG_PACKAGE_kmod-mt7921u is not set
+# CONFIG_PACKAGE_kmod-mt7922-firmware is not set
 # CONFIG_PACKAGE_kmod-mwifiex-sdio is not set
 # CONFIG_PACKAGE_kmod-rsi91x is not set
 # CONFIG_PACKAGE_kmod-rsi91x-sdio is not set
@@ -4487,18 +4488,7 @@ CONFIG_OPENVPN_gargoyle_mbedtls_ENABLE_DEF_AUTH=y
 CONFIG_OPENVPN_gargoyle_mbedtls_ENABLE_PF=y
 # CONFIG_OPENVPN_gargoyle_mbedtls_ENABLE_IPROUTE2 is not set
 CONFIG_OPENVPN_gargoyle_mbedtls_ENABLE_SMALL=y
-CONFIG_PACKAGE_openvpn-gargoyle-openssl=m
-CONFIG_OPENVPN_gargoyle_openssl_ENABLE_LZO=y
-CONFIG_OPENVPN_gargoyle_openssl_ENABLE_LZ4=y
-# CONFIG_OPENVPN_gargoyle_openssl_ENABLE_X509_ALT_USERNAME is not set
-# CONFIG_OPENVPN_gargoyle_openssl_ENABLE_MANAGEMENT is not set
-CONFIG_OPENVPN_gargoyle_openssl_ENABLE_FRAGMENT=y
-CONFIG_OPENVPN_gargoyle_openssl_ENABLE_MULTIHOME=y
-CONFIG_OPENVPN_gargoyle_openssl_ENABLE_PORT_SHARE=y
-CONFIG_OPENVPN_gargoyle_openssl_ENABLE_DEF_AUTH=y
-CONFIG_OPENVPN_gargoyle_openssl_ENABLE_PF=y
-# CONFIG_OPENVPN_gargoyle_openssl_ENABLE_IPROUTE2 is not set
-CONFIG_OPENVPN_gargoyle_openssl_ENABLE_SMALL=y
+# CONFIG_PACKAGE_openvpn-gargoyle-openssl is not set
 # CONFIG_PACKAGE_openvpn-gargoyle-wolfssl is not set
 CONFIG_PACKAGE_wireguard-tools=m
 # end of VPN
