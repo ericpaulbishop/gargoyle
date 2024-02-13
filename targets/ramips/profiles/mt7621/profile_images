@@ -1,4 +1,4 @@
-asus_rt-ac57u
+asus_rt-ac57u-v1
 asus_rt-ac65p
 asus_rt-ac85p
 asus_rt-ax54
@@ -36,6 +36,7 @@ elecom_wrc-2533gst
 elecom_wrc-2533gst2
 glinet_gl-mt1300
 linksys_e5600
+linksys_e7350
 linksys_ea6350-v4
 linksys_ea7300-v1
 linksys_ea7300-v2
@@ -46,6 +47,7 @@ linksys_re6500
 linksys_re7000
 mercusys_mr70x-v1
 mikrotik_routerboard-750gr3
+netgear_ex6150
 netgear_r6700-v2
 netgear_r6220
 netgear_r6260
@@ -67,6 +69,7 @@ tplink_archer-c6-v3
 tplink_archer-c6u-v1
 tplink_eap235-wall-v1
 tplink_eap615-wall-v1
+tplink_er605-v2
 tplink_re500-v1
 tplink_re650-v1
 tplink_re650-v2
@@ -86,3 +89,4 @@ zbtlink_zbt-wg3526-16m
 zbtlink_zbt-wg3526-32m
 zyxel_nwa50ax
 zyxel_nwa55axe
+zyxel_wsm20
