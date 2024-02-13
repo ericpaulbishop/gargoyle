@@ -165,9 +165,9 @@ CONFIG_TARGET_DEVICE_PACKAGES_ipq40xx_generic_DEVICE_linksys_mr8300="gargoyle-la
 # CONFIG_TARGET_DEVICE_ipq40xx_generic_DEVICE_luma_wrtq-329acn is not set
 # CONFIG_TARGET_DEVICE_ipq40xx_generic_DEVICE_mobipromo_cm520-79f is not set
 CONFIG_TARGET_DEVICE_ipq40xx_generic_DEVICE_netgear_ex6100v2=y
-CONFIG_TARGET_DEVICE_PACKAGES_ipq40xx_generic_DEVICE_netgear_ex6100v2="gargoyle-large"
+CONFIG_TARGET_DEVICE_PACKAGES_ipq40xx_generic_DEVICE_netgear_ex6100v2="gargoyle-vpn"
 CONFIG_TARGET_DEVICE_ipq40xx_generic_DEVICE_netgear_ex6150v2=y
-CONFIG_TARGET_DEVICE_PACKAGES_ipq40xx_generic_DEVICE_netgear_ex6150v2="gargoyle-large"
+CONFIG_TARGET_DEVICE_PACKAGES_ipq40xx_generic_DEVICE_netgear_ex6150v2="gargoyle-vpn"
 CONFIG_TARGET_DEVICE_ipq40xx_generic_DEVICE_netgear_rbr50=y
 CONFIG_TARGET_DEVICE_PACKAGES_ipq40xx_generic_DEVICE_netgear_rbr50="gargoyle-large"
 CONFIG_TARGET_DEVICE_ipq40xx_generic_DEVICE_netgear_rbs50=y
@@ -571,6 +571,7 @@ CONFIG_USE_GARGOYLE_PROFILE_PKGS=y
 #
 # CONFIG_GARGOYLE_BASIC is not set
 # CONFIG_GARGOYLE_USB is not set
+# CONFIG_GARGOYLE_VPN is not set
 # CONFIG_GARGOYLE_LARGE is not set
 # end of Standard Gargoyle package sets
 
@@ -2722,6 +2723,7 @@ CONFIG_PACKAGE_gargoyle-extra-usb-ethernet=m
 CONFIG_PACKAGE_gargoyle-basic=m
 CONFIG_PACKAGE_gargoyle-large=m
 CONFIG_PACKAGE_gargoyle-usb=m
+CONFIG_PACKAGE_gargoyle-vpn=m
 # end of Gargoyle Profile Meta-packages
 
 #
