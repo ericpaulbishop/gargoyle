@@ -492,21 +492,24 @@ CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_comfast_cf-e375ac="gargoyle-l
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_dlink_dir-505=y
 CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_dlink_dir-505="gargoyle-usb"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_dlink_dir-629-a1 is not set
-# CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_dlink_dir-825-b1 is not set
+CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_dlink_dir-825-b1=y
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_dlink_dir-825-b1="gargoyle-usb"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_dlink_dir-825-c1=y
 CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_dlink_dir-825-c1="gargoyle-large"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_dlink_dir-835-a1=y
 CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_dlink_dir-835-a1="gargoyle-large"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_dlink_dir-842-c1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_dlink_dir-842-c1="gargoyle-large"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_dlink_dir-842-c1="gargoyle-vpn"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_dlink_dir-842-c2=y
 CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_dlink_dir-842-c2="gargoyle-large"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_dlink_dir-842-c3=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_dlink_dir-842-c3="gargoyle-large"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_dlink_dir-842-c3="gargoyle-vpn"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_dlink_dir-859-a1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_dlink_dir-859-a1="gargoyle-large"
-# CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_dlink_dir-859-a3 is not set
-# CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_dlink_dir-869-a1 is not set
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_dlink_dir-859-a1="gargoyle-vpn"
+CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_dlink_dir-859-a3=y
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_dlink_dir-859-a3="gargoyle-vpn"
+CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_dlink_dir-869-a1=y
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_dlink_dir-869-a1="gargoyle-vpn"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_devolo_dlan-pro-1200plus-ac=y
 CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_devolo_dlan-pro-1200plus-ac="gargoyle-large"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_devolo_magic-2-wifi is not set
@@ -523,7 +526,7 @@ CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_devolo_dlan-pro-1200plus-ac="
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_engenius_eap1200h is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_engenius_eap1750h is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_engenius_eap300-v2=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_engenius_eap300-v2="gargoyle-basic"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_engenius_eap300-v2="gargoyle-vpn"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_engenius_eap600 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_engenius_ecb1200 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_engenius_ecb1750 is not set
@@ -602,31 +605,31 @@ CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_netgear_wnr2200-8m="gargoyle-
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_a40 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_a60 is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_mr1750-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_mr1750-v1="gargoyle-basic"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_mr1750-v1="gargoyle-vpn"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_mr1750-v2=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_mr1750-v2="gargoyle-basic"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_mr1750-v2="gargoyle-vpn"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_mr600-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_mr600-v1="gargoyle-basic"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_mr600-v1="gargoyle-vpn"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_mr600-v2=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_mr600-v2="gargoyle-basic"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_mr600-v2="gargoyle-vpn"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_mr900-v1 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_mr900-v2 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_om2p-v1 is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_om2p-v2=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_om2p-v2="gargoyle-basic"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_om2p-v2="gargoyle-vpn"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_om2p-v4=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_om2p-v4="gargoyle-basic"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_om2p-v4="gargoyle-vpn"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_om2p-hs-v1 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_om2p-hs-v2 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_om2p-hs-v3 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_om2p-hs-v4 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_om2p-lc is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_om5p=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_om5p="gargoyle-basic"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_om5p="gargoyle-vpn"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_om5p-ac-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_om5p-ac-v1="gargoyle-basic"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_om5p-ac-v1="gargoyle-vpn"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_om5p-ac-v2=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_om5p-ac-v2="gargoyle-basic"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_om5p-ac-v2="gargoyle-vpn"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_openmesh_om5p-an is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_phicomm_k2t is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_pisen_wmm003n is not set
@@ -643,7 +646,7 @@ CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_openmesh_om5p-ac-v2="gargoyle
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_qxwlan_e1700ac-v2-16m=y
 CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_qxwlan_e1700ac-v2-16m="gargoyle-large"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_qxwlan_e1700ac-v2-8m=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_qxwlan_e1700ac-v2-8m="gargoyle-basic"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_qxwlan_e1700ac-v2-8m="gargoyle-vpn"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_qxwlan_e558-v2-16m is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_qxwlan_e558-v2-8m is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_qxwlan_e600g-v2-16m is not set
@@ -651,7 +654,7 @@ CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_qxwlan_e1700ac-v2-8m="gargoyl
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_qxwlan_e600gac-v2-16m=y
 CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_qxwlan_e600gac-v2-16m="gargoyle-large"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_qxwlan_e600gac-v2-8m=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_qxwlan_e600gac-v2-8m="gargoyle-basic"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_qxwlan_e600gac-v2-8m="gargoyle-vpn"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_qxwlan_e750a-v4-16m is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_qxwlan_e750a-v4-8m is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_qxwlan_e750g-v8-16m is not set
@@ -678,30 +681,30 @@ CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_qxwlan_e600gac-v2-8m="gargoyl
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_teltonika_rut955 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_teltonika_rut955-h7v3c0 is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c6-v2-us=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c6-v2-us="gargoyle-large"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c6-v2-us="gargoyle-vpn"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-a7-v5=y
 CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-a7-v5="gargoyle-large"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-a9-v6 is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c2-v3=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c2-v3="gargoyle-basic"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c2-v3="gargoyle-vpn"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c25-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c25-v1="gargoyle-basic"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c25-v1="gargoyle-vpn"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c5-v1=y
 CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c5-v1="gargoyle-large"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c58-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c58-v1="gargoyle-basic"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c58-v1="gargoyle-vpn"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c59-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c59-v1="gargoyle-usb"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c59-v1="gargoyle-large"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c59-v2=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c59-v2="gargoyle-usb"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c59-v2="gargoyle-large"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c6-v2=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c6-v2="gargoyle-basic"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c6-v2="gargoyle-vpn"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c60-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c60-v1="gargoyle-basic"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c60-v1="gargoyle-vpn"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c60-v2=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c60-v2="gargoyle-basic"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c60-v2="gargoyle-vpn"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c60-v3=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c60-v3="gargoyle-basic"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c60-v3="gargoyle-vpn"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c7-v1=y
 CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_archer-c7-v1="gargoyle-usb"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_archer-c7-v2=y
@@ -754,7 +757,7 @@ CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wdr4300-v1="gargoyl
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wdr7500-v3 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wpa8630-v1 is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr1043n-v5=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr1043n-v5="gargoyle-large"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr1043n-v5="gargoyle-vpn"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr1043nd-v1=y
 CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr1043nd-v1="gargoyle-usb"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr1043nd-v2=y
@@ -773,9 +776,11 @@ CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr710n-v2.1="gargoy
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr810n-v1=y
 CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr810n-v1="gargoyle-usb"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr810n-v2=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr810n-v2="gargoyle-basic"
-# CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr841hp-v2 is not set
-# CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr841hp-v3 is not set
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr810n-v2="gargoyle-vpn"
+CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr841hp-v2=y
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr841hp-v2="gargoyle-vpn"
+CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr841hp-v3=y
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr841hp-v3="gargoyle-vpn"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr842n-v3=y
 CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr842n-v3="gargoyle-large"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr842n-v1=y
@@ -783,21 +788,23 @@ CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr842n-v1="gargoyle
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr842n-v2=y
 CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr842n-v2="gargoyle-usb"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr902ac-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr902ac-v1="gargoyle-basic"
-# CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr941hp-v1 is not set
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr902ac-v1="gargoyle-vpn"
+CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_tl-wr941hp-v1=y
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_tplink_tl-wr941hp-v1="gargoyle-vpn"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_wbs210-v1 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_wbs210-v2 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_wbs510-v1 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_tplink_wbs510-v2 is not set
-# CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_trendnet_tew-673gru is not set
+CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_trendnet_tew-673gru=y
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_trendnet_tew-673gru="gargoyle-usb"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_trendnet_tew-823dru=y
 CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_trendnet_tew-823dru="gargoyle-large"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_aircube-ac is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_aircube-isp is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_bullet-ac=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_bullet-ac="gargoyle-basic"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_bullet-ac="gargoyle-vpn"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_bullet-m-xw=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_bullet-m-xw="gargoyle-basic"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_bullet-m-xw="gargoyle-vpn"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_edgeswitch-5xp is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_edgeswitch-8xp is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_lap-120 is not set
@@ -810,7 +817,7 @@ CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_bullet-m-xw="gargoyle-ba
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_nanostation-ac-loco is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_nanostation-loco-m-xw is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_nanostation-m-xw=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_nanostation-m-xw="gargoyle-basic"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_nanostation-m-xw="gargoyle-vpn"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_powerbeam-5ac-500 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_powerbeam-5ac-gen2 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_powerbeam-m2-xw is not set
@@ -830,9 +837,9 @@ CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_routerstation-pro="gargo
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_unifi-ap is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_unifi-ap-lr is not set
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_unifi-ap-outdoor-plus=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_unifi-ap-outdoor-plus="gargoyle-basic"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_unifi-ap-outdoor-plus="gargoyle-vpn"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_unifi-ap-pro=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_unifi-ap-pro="gargoyle-basic"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_ubnt_unifi-ap-pro="gargoyle-vpn"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_ubnt_uk-ultra is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_wallys_dr531 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_watchguard_ap100 is not set
@@ -843,7 +850,7 @@ CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_wd_mynet-n600="gargoyle-large
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_wd_mynet-n750=y
 CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_wd_mynet-n750="gargoyle-large"
 CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_wd_mynet-wifi-rangeextender=y
-CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_wd_mynet-wifi-rangeextender="gargoyle-basic"
+CONFIG_TARGET_DEVICE_PACKAGES_ath79_generic_DEVICE_wd_mynet-wifi-rangeextender="gargoyle-vpn"
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_winchannel_wb2000 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_xiaomi_aiot-ac2350 is not set
 # CONFIG_TARGET_DEVICE_ath79_generic_DEVICE_xiaomi_mi-router-4q is not set
@@ -1129,8 +1136,8 @@ CONFIG_KERNEL_IPV6_SEG6_LWTUNNEL=y
 # CONFIG_KERNEL_DEVKMEM is not set
 CONFIG_KERNEL_SQUASHFS_FRAGMENT_CACHE_SIZE=3
 # CONFIG_KERNEL_SQUASHFS_XATTR is not set
-CONFIG_KERNEL_CC_OPTIMIZE_FOR_PERFORMANCE=y
-# CONFIG_KERNEL_CC_OPTIMIZE_FOR_SIZE is not set
+# CONFIG_KERNEL_CC_OPTIMIZE_FOR_PERFORMANCE is not set
+CONFIG_KERNEL_CC_OPTIMIZE_FOR_SIZE=y
 # CONFIG_KERNEL_AUDIT is not set
 # CONFIG_KERNEL_SECURITY is not set
 # CONFIG_KERNEL_SECURITY_NETWORK is not set
@@ -1205,6 +1212,7 @@ CONFIG_USE_GARGOYLE_PROFILE_PKGS=y
 #
 # CONFIG_GARGOYLE_BASIC is not set
 # CONFIG_GARGOYLE_USB is not set
+# CONFIG_GARGOYLE_VPN is not set
 # CONFIG_GARGOYLE_LARGE is not set
 # end of Standard Gargoyle package sets
 
@@ -3356,6 +3364,7 @@ CONFIG_PACKAGE_gargoyle-extra-usb-ethernet=m
 CONFIG_PACKAGE_gargoyle-basic=m
 CONFIG_PACKAGE_gargoyle-large=m
 CONFIG_PACKAGE_gargoyle-usb=m
+CONFIG_PACKAGE_gargoyle-vpn=m
 # end of Gargoyle Profile Meta-packages
 
 #

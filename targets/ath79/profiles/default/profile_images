@@ -15,6 +15,8 @@ dlink_dir-842-c1-squashfs-
 dlink_dir-842-c2-squashfs-
 dlink_dir-842-c3-squashfs-
 dlink_dir-859-a1-squashfs-
+dlink_dir-859-a3-squashfs-
+dlink_dir-869-a1-squashfs-
 engenius_eap300-v2-squashfs-
 glinet_6416-squashfs-
 glinet_gl-ar150-squashfs-
@@ -70,10 +72,13 @@ tplink_tl-wr710n-v1-squashfs-
 tplink_tl-wr710n-v2.1-squashfs-
 tplink_tl-wr810n-v1-squashfs-
 tplink_tl-wr810n-v2-squashfs-
+tplink_tl-wr841hp-v2-squashfs-
+tplink_tl-wr841hp-v3-squashfs-
 tplink_tl-wr842n-v1-squashfs-
 tplink_tl-wr842n-v2-squashfs-
 tplink_tl-wr842n-v3-squashfs-
 tplink_tl-wr902ac-v1-squashfs-
+tplink_tl-wr941hp-v1-squashfs-
 trendnet_tew-673gru-squashfs-
 trendnet_tew-823dru-squashfs-
 ubnt_bullet-ac-squashfs-
@@ -81,7 +86,6 @@ ubnt_bullet-m-xw-squashfs-
 ubnt_nanostation-m-xw-squashfs-
 ubnt_routerstation-squashfs-
 ubnt_routerstation-pro-squashfs-
-ubnt_unifi-squashfs-
 ubnt_unifi-ap-outdoor-plus-squashfs-
 ubnt_unifi-ap-pro-squashfs-
 wd_mynet-n600-squashfs-
