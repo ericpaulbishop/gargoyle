@@ -367,6 +367,7 @@ CONFIG_USE_GARGOYLE_PROFILE_PKGS=y
 #
 # CONFIG_GARGOYLE_BASIC is not set
 # CONFIG_GARGOYLE_USB is not set
+# CONFIG_GARGOYLE_VPN is not set
 # CONFIG_GARGOYLE_LARGE is not set
 # end of Standard Gargoyle package sets
 
@@ -2515,6 +2516,7 @@ CONFIG_PACKAGE_gargoyle-extra-usb-ethernet=y
 CONFIG_PACKAGE_gargoyle-basic=m
 CONFIG_PACKAGE_gargoyle-large=y
 CONFIG_PACKAGE_gargoyle-usb=m
+CONFIG_PACKAGE_gargoyle-vpn=m
 # end of Gargoyle Profile Meta-packages
 
 #
