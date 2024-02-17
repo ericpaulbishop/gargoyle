@@ -101,6 +101,7 @@ char default_ip_lookup_url_data[][MAX_LOOKUP_URL_LENGTH] = {
 							"https://ifconfig.co/ip",
 							"https://ipapi.co/ip",
 							"https://api.ip.sb/ip",
+							"https://ip2location.io/ip",
 							"\0"
 							};
 
@@ -114,6 +115,7 @@ char default_ip6_lookup_url_data[][MAX_LOOKUP_URL_LENGTH] = {
 							"https://ipapi.co/ip",
 							"https://api.ip.sb/ip",
 							"https://api.aruljohn.com/ip",
+							"https://ip2location.io/ip",
 							"\0"
 							};
 
