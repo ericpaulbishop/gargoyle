@@ -36,3 +36,4 @@ DyDNS.Key="Key";
 DyDNS.AKey="API Key";
 DyDNS.Tokn="Token";
 DyDNS.Host="Host";
+DyDNS.TestDom="Test Domain";
