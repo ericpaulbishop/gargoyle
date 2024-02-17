@@ -804,8 +804,11 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 	// remote_ips: 		domain -> last value (char*)
 	//
 	string_map* local_ip_updates = initialize_map(1);
+	string_map* local_ip6_updates = initialize_map(1);
 	string_map* local_ips = initialize_map(1);
+	string_map* local_ips6 = initialize_map(1);
 	string_map* remote_ips = initialize_map(1);
+	string_map* remote_ips6 = initialize_map(1);
 
 	//printf("starting update loop\n");
 
@@ -875,7 +878,15 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 					 */ 
 					test_domain = service_config->name;
 				}
-				char* remote_ip = get_map_element(remote_ips, test_domain);
+				char* remote_ip = NULL;
+				if(service_config->ipv6)
+				{
+					remote_ip = get_map_element(remote_ips6, test_domain);
+				}
+				else
+				{
+					remote_ip = get_map_element(remote_ips, test_domain);
+				}
 				if(remote_ip == NULL && perform_force_update == 0)
 				{
 					if(test_domain != NULL)
@@ -883,18 +894,41 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 						remote_ip = lookup_domain_ip(test_domain, service_config->ipv6);
 						if(remote_ip != NULL)
 						{
-							set_map_element(remote_ips, test_domain, remote_ip);
+							if(service_config->ipv6)
+							{
+								set_map_element(remote_ips6, test_domain, remote_ip);
+							}
+							else
+							{
+								set_map_element(remote_ips, test_domain, remote_ip);
+							}
 						}
 					}
 				}
 	
 				//determine local ip, loading from saved list if ip was obtained less than 3 seconds ago (in case of multiple simultaneous updates)
 				char *interface_name = service_config->ip_source == INTERFACE ? service_config->ip_interface : "internet";
-				char *local_ip = (char*)get_map_element(local_ips, interface_name);
+				char *local_ip = NULL;
+				if(service_config->ipv6)
+				{
+					local_ip = (char*)get_map_element(local_ips6, interface_name);
+				}
+				else
+				{
+					local_ip = (char*)get_map_element(local_ips, interface_name);
+				}
 				int using_predefined_local_ip = (local_ip == NULL) ? 0 : 1;
 				if(using_predefined_local_ip == 1)
 				{
-					time_t* update_time = (time_t*)get_map_element(local_ip_updates, interface_name);
+					time_t* update_time = NULL;
+					if(service_config->ipv6)
+					{
+						update_time = (time_t*)get_map_element(local_ip6_updates, interface_name);
+					}
+					else
+					{
+						update_time = (time_t*)get_map_element(local_ip_updates, interface_name);
+					}
 					if(update_time != NULL)
 					{
 						using_predefined_local_ip = (current_time - *update_time) < 3 ? 1 : 0;
@@ -909,7 +943,15 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 					local_ip = get_local_ip(service_config->ip_source, service_config->ip_source == INTERFACE ? (void*)service_config->ip_interface : (void*)service_config->ip_url, service_config->ipv6);
 					if(local_ip != NULL)
 					{
-						time_t *update_time = (time_t*)get_map_element(local_ip_updates, interface_name);
+						time_t* update_time = NULL;
+						if(service_config->ipv6)
+						{
+							update_time = (time_t*)get_map_element(local_ip6_updates, interface_name);
+						}
+						else
+						{
+							update_time = (time_t*)get_map_element(local_ip_updates, interface_name);
+						}
 						if(update_time != NULL)
 						{
 							*update_time = current_time;
@@ -918,9 +960,24 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 						{
 							update_time = (time_t*)malloc(sizeof(time_t));
 							*update_time = current_time;
-							set_map_element(local_ip_updates, interface_name, (void*)update_time);
+							if(service_config->ipv6)
+							{
+								set_map_element(local_ip6_updates, interface_name, (void*)update_time);
+							}
+							else
+							{
+								set_map_element(local_ip_updates, interface_name, (void*)update_time);
+							}
 						}
-						char* old_element = (char*)set_map_element(local_ips, interface_name, (void*)local_ip);
+						char* old_element = NULL;
+						if(service_config->ipv6)
+						{
+							old_element = (char*)set_map_element(local_ips6, interface_name, (void*)local_ip);
+						}
+						else
+						{
+							old_element = (char*)set_map_element(local_ips, interface_name, (void*)local_ip);
+						}
 						if(old_element != NULL )
 						{
 							free(old_element);
@@ -962,7 +1019,16 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 				//schedule next update	
 				if(update_status == UPDATE_SUCCESSFUL)
 				{
-					void* old_element = (char*)set_map_element(remote_ips, test_domain, (void*)strdup(local_ip));
+					void* old_element = NULL;
+					if(service_config->ipv6)
+					{
+						old_element = (char*)set_map_element(remote_ips6, test_domain, (void*)strdup(local_ip));
+					}
+					else
+					{
+						old_element = (char*)set_map_element(remote_ips, test_domain, (void*)strdup(local_ip));
+					}
+					
 					if(old_element != NULL)
 					{
 						free(old_element);
@@ -987,7 +1053,16 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 				{
 					if(remote_ip != NULL)
 					{
-						char* old_element = (char*)set_map_element(remote_ips, test_domain, (void*)remote_ip);
+						char* old_element = NULL;
+						if(service_config->ipv6)
+						{
+							old_element = (char*)set_map_element(remote_ips6, test_domain, (void*)remote_ip);
+						}
+						else
+						{
+							old_element = (char*)set_map_element(remote_ips, test_domain, (void*)remote_ip);
+						}
+						
 						if(old_element != NULL && old_element != remote_ip)
 						{
 							free(old_element);
@@ -1142,8 +1217,11 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 	unsigned long num_destroyed;
 	free_null_terminated_string_array(service_names);
 	destroy_string_map(local_ip_updates, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+	destroy_string_map(local_ip6_updates, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 	destroy_string_map(local_ips, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+	destroy_string_map(local_ips6, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 	destroy_string_map(remote_ips, DESTROY_MODE_FREE_VALUES, &num_destroyed);
+	destroy_string_map(remote_ips6, DESTROY_MODE_FREE_VALUES, &num_destroyed);
 
 
 	unsigned long num_r;
