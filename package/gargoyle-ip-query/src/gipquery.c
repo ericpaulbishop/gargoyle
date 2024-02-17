@@ -51,6 +51,7 @@ char default_ip_lookup_url[][MAX_LOOKUP_URL_LENGTH] = {
 							"https://ifconfig.co/ip",
 							"https://ipapi.co/ip",
 							"https://api.ip.sb/ip",
+							"https://ip2location.io/ip",
 							"\0"
 							};
 
@@ -64,6 +65,7 @@ char default_geoip_lookup_url[][MAX_LOOKUP_URL_LENGTH] = {
 							"https://geoip-db.com/json/[[IP]]",
 							"https://ipapi.co/[[IP]]/json",
 							"https://api.ip.sb/geoip/[[IP]]",
+							"https://api.ip2location.io/?ip=[[IP]]",
 							"\0"
 							};
 
