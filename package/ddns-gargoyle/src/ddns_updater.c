@@ -489,6 +489,12 @@ void run_request(string_map *service_configs, string_map* service_providers, cha
 			char *local_ip = get_local_ip(service_config->ip_source, service_config->ip_source == INTERFACE ? (void*)service_config->ip_interface : (void*)service_config->ip_url, service_config->ipv6);
 
 			char* test_domain = get_map_element(service_config->variable_definitions, "domain");
+			//Check if a specific test domain is specified, and use it
+			char* test_domain_def = get_map_element(service_config->variable_definitions, "test_domain");
+			if(test_domain_def != NULL)
+			{
+				test_domain = test_domain_def;
+			}
 			char* remote_ip = NULL;
 			if(test_domain != NULL)
 			{
@@ -838,6 +844,13 @@ void run_daemon(string_map *service_configs, string_map* service_providers, int 
 				int perform_force_update = current_time - next_update->last_full_update >= service_config->force_interval ? 1 : 0;
 			
 				char* test_domain = get_map_element(service_config->variable_definitions, "domain");
+				//Check if a specific test domain is specified, and use it
+				char* test_domain_def = get_map_element(service_config->variable_definitions, "test_domain");
+				if(test_domain_def != NULL)
+				{
+					test_domain = test_domain_def;
+				}
+				
 				if(perform_force_update)
 				{
 					syslog(LOG_INFO, "Forcing update:");
