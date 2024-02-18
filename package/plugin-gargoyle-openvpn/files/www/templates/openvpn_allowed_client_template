@@ -14,7 +14,7 @@
 				</div>
 				<div id="openvpn_allowed_client_remote_custom_container" class="row form-group" >
 					<span class="col-xs-7 col-xs-offset-5">
-						<input type='text' id='openvpn_allowed_client_remote_custom' size='30' />
+						<input type='text' class='form-control' id='openvpn_allowed_client_remote_custom' size='30' />
 					</span>
 					<span style="clear:both"></span>
 				</div>
