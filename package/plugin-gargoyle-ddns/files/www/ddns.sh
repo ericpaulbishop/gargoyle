@@ -41,7 +41,7 @@
 
 <h1 class="page-header"><%~ ddns.mDDNS %></h1>
 <div class="row">
-	<div class="col-lg-6">
+	<div class="col-lg-8">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ ddns.DYSect %></h3>
