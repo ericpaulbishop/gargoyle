@@ -117,6 +117,8 @@ create_server_conf()
 	openvpn_redirect_gateway=$(load_def "${11}" "push \"redirect-gateway def1\"" "true")
 	openvpn_regenerate_cert="${12}"
 
+	openvpn_extra_subnets="${13}"
+
 	if [ -n "$openvpn_pool" ] ; then
 		openvpn_pool="ifconfig-pool $openvpn_pool"
 	fi
@@ -229,6 +231,13 @@ EOF
 		# save routes -- we need to update all route lines 
 		# once all client ccd files are in place on the server
 		echo "$openvpn_server_local_subnet_ip $openvpn_server_local_subnet_mask $openvpn_server_internal_ip" > "$random_dir/route_data_server"
+	fi
+	if [ -n "$openvpn_extra_subnets" ] ; then
+		for openvpn_extra_subnet in $openvpn_extra_subnets ; do
+			esubnet_ip=$(echo "$openvpn_extra_subnet" | cut -d '_' -f 1)
+			esubnet_mask=$(echo "$openvpn_extra_subnet" | cut -d '_' -f 2)
+			echo "$esubnet_ip $esubnet_mask $openvpn_server_internal_ip" >> "$random_dir/route_data_server"
+		done
 	fi
 
 	copy_if_diff "$random_dir/server.conf"        "$OPENVPN_DIR/server.conf"
@@ -612,7 +621,7 @@ regenerate_server_and_allowed_clients_from_uci()
 	. /lib/functions.sh
 	config_load "openvpn_gargoyle"
 	
-	server_vars="internal_ip internal_mask port proto cipher client_to_client duplicate_cn redirect_gateway subnet_access regenerate_credentials subnet_ip subnet_mask pool"
+	server_vars="internal_ip internal_mask port proto cipher client_to_client duplicate_cn redirect_gateway subnet_access regenerate_credentials subnet_ip subnet_mask pool extra_subnet"
 	for var in $server_vars ; do
 		config_get "$var" "server" "$var"
 	done
@@ -628,7 +637,8 @@ regenerate_server_and_allowed_clients_from_uci()
 				"$duplicate_cn"            \
 				"$pool"                    \
 				"$redirect_gateway"        \
-				"$regenerate_credentials"
+				"$regenerate_credentials"  \
+				"$extra_subnet"
 
 	server_regenerate_credentials="$regenerate_credentials"
 	config_foreach regenerate_allowed_client_from_uci "allowed_client"

@@ -129,10 +129,18 @@ function saveChanges()
 			uci.set("openvpn_gargoyle", "server", "subnet_access", getSelectedValue(prefix + "subnet_access"))
 			uci.set("openvpn_gargoyle", "server", "duplicate_cn", getSelectedValue(prefix + "duplicate_cn"))
 			uci.set("openvpn_gargoyle", "server", "redirect_gateway", getSelectedValue(prefix + "redirect_gateway"))
+			uci.remove("openvpn_gargoyle", "server", "extra_subnet")
 			if( getSelectedValue(prefix + "subnet_access") == "true")
 			{
 				uci.set("openvpn_gargoyle", "server", "subnet_ip",   adjustSubnetIp(currentLanIp, currentLanMask) )
 				uci.set("openvpn_gargoyle", "server", "subnet_mask", currentLanMask )
+
+				var extraSubnets = getTableDataArray(byId('openvpn_server_extra_subnets_table'), true, false);
+				if(extraSubnets.length > 0)
+				{
+					var extraSubnetsUci = extraSubnets.map(function(extraSubnet) {return extraSubnet[0] + "_" + extraSubnet[1]});
+					uci.set("openvpn_gargoyle", "server", "extra_subnet", extraSubnetsUci);
+				}
 			}
 			else
 			{
@@ -457,6 +465,28 @@ function resetData()
 	setSelectedValue("openvpn_server_subnet_access", getServerVarWithDefault("subnet_access", "false"))
 	setSelectedValue("openvpn_server_duplicate_cn", getServerVarWithDefault("duplicate_cn", "false"))
 	setSelectedValue("openvpn_server_redirect_gateway", getServerVarWithDefault("redirect_gateway", "true"))
+
+	var extraSNetTableData = [];
+	var extraSNets = uciOriginal.get('openvpn_gargoyle','server','extra_subnet');
+	var esi;
+	for(esi = 0; esi < extraSNets.length; esi++)
+	{
+		var extraSNet = extraSNets[esi];
+		var splitData = extraSNet.split('_');
+		if(splitData.length == 2)
+		{
+			var ip = splitData[0];
+			var mask = splitData[1];
+			extraSNetTableData.push([ip,mask,createButton(UI.Edit, 'btn-edit', editOvpnServerExtraSubnetsModal, false)]);
+		}
+	}
+	var esTable = createTable([ ovpnS.SubIP, ovpnS.SubM, ""], extraSNetTableData, "openvpn_server_extra_subnets_table", true, false)
+	var tableContainer = document.getElementById("openvpn_server_extra_subnets_table_container");
+	while(tableContainer.firstChild != null)
+	{
+		tableContainer.removeChild(tableContainer.firstChild);
+	}
+	tableContainer.appendChild(esTable);
 
 	var acTableData = []
 	var allowedClients = uciOriginal.getAllSectionsOfType("openvpn_gargoyle", "allowed_client")
@@ -807,9 +837,11 @@ function setOpenvpnVisibility()
 	document.getElementById("openvpn_allowed_client_fieldset").style.display = openvpnMode == "server" ? "block" : "none"
 	document.getElementById("openvpn_client_fieldset").style.display         = openvpnMode == "client" ? "block" : "none"
 	
+	var subnetAccess = getSelectedValue('openvpn_server_subnet_access');
+	document.getElementById('openvpn_server_extra_subnet_container').style.display = subnetAccess == 'true' ? 'block' : 'none';
+
 	var dupeCn = getSelectedValue("openvpn_server_duplicate_cn");
 	dupeCn= dupeCn == "true" || dupeCn == "1"
-
 
 	var allowedTable = document.getElementById("openvpn_allowed_client_table");
 	if(allowedTable != null)
@@ -1169,6 +1201,10 @@ function validateAc(internalServerIp, internalServerMask)
 		var subnetIpEl   = document.getElementById(prefix + "subnet_ip")
 		var subnetMaskEl = document.getElementById(prefix + "subnet_mask")
 		subnetIpEl.value = adjustSubnetIp(subnetIpEl.value, subnetMaskEl.value)
+		if(checkSubnetConflict(subnetIpEl.value,subnetMaskEl.value))
+		{
+			errors.push(ovpnS.SubDup);
+		}
 	}
 
 
@@ -1406,4 +1442,139 @@ function togglePass(name)
 	{
 		password_field.type = 'password';
 	}
+}
+
+// Returns true if there is a conflict, false otherwise
+function checkSubnetConflict(ip,mask)
+{
+	var ipList = [];
+	// OpenVPN IP/subnet
+	var ovpnIp = byId('openvpn_server_ip').value;
+	var ovpnMask = byId('openvpn_server_mask').value;
+	var adjOvpnIp = adjustSubnetIp(ovpnIp,ovpnMask);
+	ipList.push(adjOvpnIp);
+
+	// Client IP/subnets
+	var clientIds = uci.getAllSectionsOfType('openvpn_gargoyle','allowed_client');
+	clientIds.forEach(function(clientId) {
+		var clientIp = uci.get('openvpn_gargoyle',clientId,'subnet_ip');
+		var clientMask = uci.get('openvpn_gargoyle',clientId,'subnet_mask');
+
+		if(clientIp != '' && clientMask != '')
+		{
+			var adjClientIp = adjustSubnetIp(clientIp,clientMask);
+			ipList.push(adjClientIp);
+		}
+	});
+
+	// Additional Subnets
+	var extraSubnets = getTableDataArray(byId('openvpn_server_extra_subnets_table'), true, false);
+	if(extraSubnets.length > 0)
+	{
+		var adjExtraSubnetIps = extraSubnets.map(function(extraSubnet) {return adjustSubnetIp(extraSubnet[0],extraSubnet[1])});
+		ipList = ipList.concat(adjExtraSubnetIps);
+	}
+
+
+	var adjCheckIp = adjustSubnetIp(ip,mask);
+	return ipList.indexOf(adjCheckIp) >= 0;
+}
+
+function addEs()
+{
+	var subnetIp = document.getElementById("openvpn_extra_subnet_ip").value;
+	var subnetMask = document.getElementById("openvpn_extra_subnet_mask").value;
+	var inputIds = [ "openvpn_extra_subnet_ip", "openvpn_extra_subnet_mask" ]
+	var labelIds = [ "openvpn_extra_subnet_ip_label", "openvpn_extra_subnet_mask_label" ]
+	var functions = [ validateIP, validateNetMask ];
+	var validReturnCodes = [0,0]
+
+	var errors = proofreadFields(inputIds, labelIds, functions, validReturnCodes, inputIds, document );
+	if(errors.length > 0)
+	{
+		alert(errors.join("\n") + "\n"+ovpnS.AddESnetErr);
+	}
+	else if(checkSubnetConflict(subnetIp,subnetMask))
+	{
+		alert(ovpnS.SubDup+"\n\n"+ovpnS.AddESnetErr);
+	}
+	else
+	{
+		var adjIp = adjustSubnetIp(subnetIp,subnetMask);
+		var esTable = document.getElementById("openvpn_server_extra_subnets_table");
+
+		var rowData = [ adjIp, subnetMask, createButton(UI.Edit, 'btn-edit', editOvpnServerExtraSubnetsModal, false) ]
+		addTableRow(esTable, rowData, true, false);
+	
+		closeModalWindow('openvpn_server_extra_subnet_modal');
+	}
+
+}
+
+function editEs(editRow)
+{
+	var newIp = document.getElementById("openvpn_extra_subnet_ip").value;
+	var newMask = document.getElementById("openvpn_extra_subnet_mask").value;
+	var inputIds = [ "openvpn_extra_subnet_ip", "openvpn_extra_subnet_mask" ]
+	var labelIds = [ "openvpn_extra_subnet_ip_label", "openvpn_extra_subnet_mask_label" ]
+	var functions = [ validateIP, validateNetMask ];
+	var validReturnCodes = [0,0]
+
+	var errors = proofreadFields(inputIds, labelIds, functions, validReturnCodes, inputIds, document );
+	if(errors.length > 0)
+	{
+		alert(errors.join("\n") + "\n"+ovpnS.AddESnetErr);
+	}
+	else if(checkSubnetConflict(newIp,newMask))
+	{
+		alert(ovpnS.SubDup+"\n\n"+ovpnS.AddESnetErr);
+	}
+	else
+	{
+		//update document with new data
+		var adjNewIp = adjustSubnetIp(newIp,newMask);
+		editRow.childNodes[0].firstChild.data = adjNewIp;
+		editRow.childNodes[1].firstChild.data = newMask;
+		closeModalWindow('openvpn_server_extra_subnet_modal');
+	}
+}
+
+function editOvpnServerExtraSubnetsModal()
+{
+	editRow=this.parentNode.parentNode;
+
+	modalButtons = [
+		{"title" : UI.CApplyChanges, "classes" : "btn btn-primary", "function" : function(){editEs(editRow);}},
+		"defaultDiscard"
+	];
+
+	var ip = editRow.childNodes[0].firstChild.data;
+	var mask = editRow.childNodes[1].firstChild.data;
+
+	modalElements = [
+		{"id" : "openvpn_extra_subnet_ip", "value" : ip},
+		{"id" : "openvpn_extra_subnet_mask", "value" : mask}
+	];
+
+	modalPrepare('openvpn_server_extra_subnet_modal', ovpnS.EditES, modalElements, modalButtons);
+	openModalWindow('openvpn_server_extra_subnet_modal');
+}
+
+function addOvpnServerExtraSubnetsModal()
+{
+	modalButtons = [
+		{"title" : UI.Add, "classes" : "btn btn-primary", "function" : addEs},
+		"defaultDismiss"
+	];
+
+	var ip = "";
+	var mask = "";
+
+	modalElements = [
+		{"id" : "openvpn_extra_subnet_ip", "value" : ip},
+		{"id" : "openvpn_extra_subnet_mask", "value" : mask}
+	];
+
+	modalPrepare('openvpn_server_extra_subnet_modal', ovpnS.SASnetAdd, modalElements, modalButtons);
+	openModalWindow('openvpn_server_extra_subnet_modal');
 }
