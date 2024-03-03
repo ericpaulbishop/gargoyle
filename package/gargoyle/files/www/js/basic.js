@@ -2115,7 +2115,15 @@ function resetData()
 
 	//initialize dns
 	document.getElementById("lan_dns_force").checked = (uciOriginal.get("firewall", firewallDefaultSections[0], "force_router_dns") == "1");
-	document.getElementById("lan_dns_altroot").checked = (uciOriginal.get("dhcp", uciOriginal.getAllSectionsOfType("dhcp", "dnsmasq").shift(), "server") instanceof Array);
+	var dnsmasq_servers = uciOriginal.get("dhcp", uciOriginal.getAllSectionsOfType("dhcp", "dnsmasq").shift(), "server");
+	dnsmasq_servers = dnsmasq_servers == '' ? [] : dnsmasq_servers;
+	var doh_plugin_servers = uciOriginal.get("dhcp", uciOriginal.getAllSectionsOfType("dhcp", "dnsmasq").shift(), "doh_server");
+	doh_plugin_servers = doh_plugin_servers == '' ? [] : doh_plugin_servers;
+	doh_plugin_servers = doh_plugin_servers.concat(['/mask.icloud.com/', '/mask-h2.icloud.com/', '/use-application-dns.net/']);
+	var altroot_server_check = dnsmasq_servers.filter(function(el) {
+		return doh_plugin_servers.indexOf(el) < 0
+	});
+	document.getElementById("lan_dns_altroot").checked = altroot_server_check.length > 0;
 
 	//is ping drop from WAN side?
 	document.getElementById("drop_wan_ping").checked = (uciOriginal.get("firewall", getPingSection(), "target").toLowerCase() == "drop");
