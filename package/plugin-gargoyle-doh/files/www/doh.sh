@@ -19,12 +19,14 @@
 		awk '{print "providerData.push('"\'"'"$0"'"\'"');" ;}' $file
 		echo "providerData.push(',');"
 	done
-	#echo "providerData.push(']');"
 	echo "providerData[providerData.length-1] = ']';"
 	echo "providerData = JSON.parse(providerData.join('\n'));"
 	echo "providerData.sort(function(a,b) {return (a.title < b.title) ? -1 : ((a.title > b.title) ? 1 : 0)});"
-	
+
 	$(curl --version | grep -q 'nghttp2') && echo "curlhttp2=true;" || echo "curlhttp2=false;"
+	hdprunning=$(ubus call service list "{'name':'https-dns-proxy'}" | jsonfilter -q -e "@['https-dns-proxy'].instances[*].running" | uniq)
+	[ "$hdprunning" = "true" ] && echo "serviceRunning=true;" || echo "serviceRunning=false;"
+	echo "serviceRunningPorts='"$(ubus call service list "{'name':'https-dns-proxy'}" | jsonfilter -q -e "@['https-dns-proxy'].instances[*].data.mdns.*.port")"';"
 %>
 //-->
 </script>
@@ -45,6 +47,11 @@
 				<h3 class="panel-title"><%~ doh.DoHSect %></h3>
 			</div>
 			<div class="panel-body">
+				<div class="row form-group">
+					<label class="col-xs-5" id="hdp_status_label" for="hdp_status"><%~ doh.Status %>:</label>
+					<span class="col-xs-7" id="hdp_status"></span>
+				</div>
+
 				<div class="row form-group">
 					<span class="col-xs-12">
 						<input type="checkbox" id="doh_enable"/>

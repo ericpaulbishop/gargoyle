@@ -11,6 +11,10 @@ DoH.BlockiCloud="iCloud Private Relay Resolvers";
 DoH.BlockMozilla="Mozilla Encrypted Resolvers";
 DoH.Prov="Provider";
 DoH.DoHConfInst="Configured Resolvers";
+DoH.Status="Status";
+DoH.Run="Running";
+DoH.NRun="Not Running";
+DoH.Ports="Ports";
 
 /* Values from json files */
 DoH.Filter="Filter";

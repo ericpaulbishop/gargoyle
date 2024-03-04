@@ -68,6 +68,21 @@ function setProviderOptionSelect()
 	byId('select_provider_option').value = defaultSel;
 }
 
+function setStatusText()
+{
+	var statusText = DoH.NRun;
+	var statusColour = '#880000';
+
+	if(serviceRunning)
+	{
+		statusText = DoH.Run + '. ' + DoH.Ports + ': ';
+		statusText = statusText + serviceRunningPorts.replace(' ',',');
+		statusColour = '#008800';
+	}
+
+	setChildText('hdp_status', statusText, statusColour, true, null, document);
+}
+
 function resetData()
 {
 	uci = uciOriginal.clone();
@@ -119,6 +134,8 @@ function resetData()
 	tableContainer.appendChild(confInstTable);
 
 	setProviderSelect();
+
+	setStatusText();
 }
 
 function saveChanges()
@@ -160,6 +177,7 @@ function saveChanges()
 			uciOriginal = uci.clone();
 			resetData();
 			setControlsEnabled(true);
+			window.location.href = window.location.href;
 		}
 	}
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
