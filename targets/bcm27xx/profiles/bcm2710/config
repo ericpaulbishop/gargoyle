@@ -2534,6 +2534,7 @@ CONFIG_PACKAGE_plugin-gargoyle-diagnostics=y
 CONFIG_GARGOYLE_DIAGNOSTICS=y
 # end of Diagnostics Plugin Configuration
 
+CONFIG_PACKAGE_plugin-gargoyle-doh=m
 CONFIG_PACKAGE_plugin-gargoyle-email-notifications=m
 CONFIG_PACKAGE_plugin-gargoyle-email-notifications-nossl=m
 CONFIG_PACKAGE_plugin-gargoyle-i18n-Arabic-AR=y
@@ -4002,6 +4003,7 @@ CONFIG_PACKAGE_libcap=y
 # CONFIG_PACKAGE_libcap-bin is not set
 CONFIG_PACKAGE_libcap-ng=y
 # CONFIG_PACKAGE_libcap-ng-bin is not set
+CONFIG_PACKAGE_libcares=m
 # CONFIG_PACKAGE_libcharset is not set
 CONFIG_PACKAGE_libcomerr=y
 # CONFIG_PACKAGE_libctf is not set
@@ -4054,6 +4056,7 @@ CONFIG_PACKAGE_libdevmapper=y
 # CONFIG_PACKAGE_libdw is not set
 # CONFIG_PACKAGE_libelf is not set
 CONFIG_PACKAGE_libericstools=y
+CONFIG_PACKAGE_libev=m
 CONFIG_PACKAGE_libevent2=y
 # CONFIG_PACKAGE_libevent2-core is not set
 # CONFIG_PACKAGE_libevent2-extra is not set
@@ -4506,6 +4509,7 @@ CONFIG_PACKAGE_gargoyle-tor=m
 # CONFIG_PACKAGE_gargoyle-tor-basic is not set
 # CONFIG_PACKAGE_gargoyle-tor-gencert is not set
 # CONFIG_PACKAGE_gre is not set
+CONFIG_PACKAGE_https-dns-proxy=m
 # CONFIG_PACKAGE_ipip is not set
 CONFIG_PACKAGE_ipset=y
 # CONFIG_PACKAGE_ipset-dns is not set
