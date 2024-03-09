@@ -30,6 +30,7 @@ ovwS.BrID="Bridge SSID";
 ovwS.LIPA="LAN IP Address";
 ovwS.LNmsk="LAN Netmask";
 ovwS.LMAdd="LAN MAC Address";
+ovwS.WPrtSpd="WAN Port Speed";
 ovwS.WIPA="WAN IP Address";
 ovwS.WNmsk="WAN Netmask";
 ovwS.WMAdd="WAN MAC Address";
