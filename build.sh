@@ -288,6 +288,24 @@ copy_buildinfo ()
 	fi
 }
 
+copy_sha256sums ()
+{
+	local owrt_tgt="$1"
+	local subtgt_arch="$2"
+	local tgt="$3"
+	local dprof="$4"
+	
+	#copy sha256sums
+	if [ -e "bin/targets/$owrt_tgt/$subtgt_arch/sha256sums" ] ; then
+		cp "bin/targets/$owrt_tgt/$subtgt_arch/sha256sums" "$top_dir/images/$tgt/$tgt-$dprof.sha256sums"
+		sed -i "s/openwrt/gargoyle_$lower_short_gargoyle_version/g" "$top_dir/images/$tgt/$tgt-$dprof.sha256sums"
+		sed -i "s/config\.buildinfo/$tgt-$dprof.buildinfo/g" "$top_dir/images/$tgt/$tgt-$dprof.sha256sums"
+		sed -i "/version\.buildinfo/d" "$top_dir/images/$tgt/$tgt-$dprof.sha256sums"
+		sed -i "/gargoyle.*\.manifest/d" "$top_dir/images/$tgt/$tgt-$dprof.sha256sums"
+		sed -i "/feeds\.buildinfo/d" "$top_dir/images/$tgt/$tgt-$dprof.sha256sums"
+	fi
+}
+
 bail_on_error ()
 {
 	echo ""
@@ -794,6 +812,7 @@ for target in $targets ; do
 	fi
 
 	copy_buildinfo "$openwrt_target" "$subtarget_arch" "$target" "$default_profile"
+	copy_sha256sums "$openwrt_target" "$subtarget_arch" "$target" "$default_profile"
 
 	#if we didn't build anything, die horribly
 	if [ -z "$image_files" ] ; then
@@ -890,6 +909,7 @@ for target in $targets ; do
 		fi
 
 		copy_buildinfo "$openwrt_target" "$subtarget_arch" "$target" "$profile_name"
+		copy_sha256sums "$openwrt_target" "$subtarget_arch" "$target" "$profile_name"
 	
 		if [ "$distribution" = "true" ] ; then
 			mkdir -p "$top_dir/Distribution/Images/$target-$profile_name"
