@@ -344,15 +344,15 @@ CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7620_DEVICE_sercomm_na930="gargoyle-usb"
 # CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_snr_cpe-w4n-mt is not set
 # CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_wavlink_wl-wn535k1 is not set
 CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_tplink_archer-c2-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7620_DEVICE_archer-c2-v1="gargoyle-usb"
+CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7620_DEVICE_tplink_archer-c2-v1="gargoyle-usb"
 CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_tplink_archer-c20-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7620_DEVICE_archer-c20-v1="gargoyle-usb"
+CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7620_DEVICE_tplink_archer-c20-v1="gargoyle-usb"
 CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_tplink_archer-c20i=y
-CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7620_DEVICE_archer-c20i="gargoyle-usb"
+CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7620_DEVICE_tplink_archer-c20i="gargoyle-usb"
 CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_tplink_archer-c50-v1=y
-CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7620_DEVICE_archer-c50-v1="gargoyle-usb"
+CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7620_DEVICE_tplink_archer-c50-v1="gargoyle-usb"
 CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_tplink_archer-mr200=y
-CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7620_DEVICE_archer-mr200="gargoyle-vpn"
+CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7620_DEVICE_tplink_archer-mr200="gargoyle-usb"
 # CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_tplink_re200-v1 is not set
 # CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_tplink_re210-v1 is not set
 # CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_trendnet_tew-810dr is not set
@@ -406,6 +406,7 @@ CONFIG_TARGET_ARCH_PACKAGES="mipsel_24kc"
 CONFIG_DEFAULT_TARGET_OPTIMIZATION="-Os -pipe -mno-branch-likely -mips32r2 -mtune=24kc"
 CONFIG_CPU_TYPE="24kc"
 CONFIG_LINUX_5_15=y
+CONFIG_MODULE_DEFAULT_adb-enablemodem=y
 CONFIG_DEFAULT_base-files=y
 CONFIG_MODULE_DEFAULT_base-files=y
 CONFIG_MODULE_DEFAULT_block-mount=y
@@ -447,8 +448,11 @@ CONFIG_MODULE_DEFAULT_kmod-scsi-core=y
 CONFIG_MODULE_DEFAULT_kmod-sdhci-mt7620=y
 CONFIG_MODULE_DEFAULT_kmod-sound-core=y
 CONFIG_MODULE_DEFAULT_kmod-sound-mt7620=y
+CONFIG_MODULE_DEFAULT_kmod-switch-rtl8366-smi=y
+CONFIG_MODULE_DEFAULT_kmod-switch-rtl8367b=y
 CONFIG_MODULE_DEFAULT_kmod-usb-ledtrig-usbport=y
 CONFIG_MODULE_DEFAULT_kmod-usb-net-qmi-wwan=y
+CONFIG_MODULE_DEFAULT_kmod-usb-net-rndis=y
 CONFIG_MODULE_DEFAULT_kmod-usb-ohci=y
 CONFIG_MODULE_DEFAULT_kmod-usb-serial-option=y
 CONFIG_MODULE_DEFAULT_kmod-usb-storage=y
