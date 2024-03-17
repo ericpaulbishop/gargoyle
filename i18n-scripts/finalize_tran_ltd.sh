@@ -19,6 +19,6 @@ echo "Using shell script to set i18n language"
 
 touch "$top_dir/$target_dir/.config2"
 
-awk -v lng="$target_lang" '{ lines[x++] = $0 } END { for (y=0; y<=x;) { if (match(lines[y],"CONFIG_PACKAGE_gargoyle-i18n")) { lines[y]=substr(lines[y], 3, length(lines[y])-13)"=y"; } if (match(lines[y],"# CONFIG_PACKAGE_plugin-gargoyle-i18n")) { bld=match(lines[y],lng)?"y":"m"; lines[y]=substr(lines[y], 3, length(lines[y])-13)"="bld; } print lines[y++] } }' "$top_dir/$target_dir/.config" >> "$top_dir/$target_dir/.config2"
+awk -F'\n' -v lng="$target_lang" '/^# CONFIG_PACKAGE_gargoyle-i18n/ { $1=substr($1, 3, length($1)-13)"=y"; }; /^# CONFIG_PACKAGE_plugin-gargoyle-i18n/ { bld=match($1,lng)?"y":"m"; $1=substr($1, 3, length($1)-13)"="bld; }; { print $1 };' "$top_dir/$target_dir/.config" >> "$top_dir/$target_dir/.config2"
 
 mv "$top_dir/$target_dir/.config2" "$top_dir/$target_dir/.config"
