@@ -4317,7 +4317,7 @@ CONFIG_OPENSSL_ENGINE=y
 CONFIG_PACKAGE_libopenssl-conf=m
 # CONFIG_PACKAGE_libopenssl-devcrypto is not set
 CONFIG_PACKAGE_libopenssl-legacy=m
-CONFIG_PACKAGE_libwolfssl=m
+# CONFIG_PACKAGE_libwolfssl is not set
 
 #
 # wolfSSL Library Configuration
@@ -4508,7 +4508,7 @@ CONFIG_PACKAGE_libucode=y
 CONFIG_PACKAGE_libusb-1.0=m
 CONFIG_PACKAGE_libustream-mbedtls=y
 CONFIG_PACKAGE_libustream-openssl=m
-CONFIG_PACKAGE_libustream-wolfssl=m
+# CONFIG_PACKAGE_libustream-wolfssl is not set
 CONFIG_PACKAGE_libuuid=m
 # CONFIG_PACKAGE_libv4l is not set
 CONFIG_PACKAGE_libvorbis=m
