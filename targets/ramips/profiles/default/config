@@ -351,8 +351,7 @@ CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_tplink_archer-c20i=y
 CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7620_DEVICE_tplink_archer-c20i="gargoyle-usb"
 CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_tplink_archer-c50-v1=y
 CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7620_DEVICE_tplink_archer-c50-v1="gargoyle-usb"
-CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_tplink_archer-mr200=y
-CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7620_DEVICE_tplink_archer-mr200="gargoyle-usb"
+# CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_tplink_archer-mr200 is not set
 # CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_tplink_re200-v1 is not set
 # CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_tplink_re210-v1 is not set
 # CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_trendnet_tew-810dr is not set
@@ -406,7 +405,6 @@ CONFIG_TARGET_ARCH_PACKAGES="mipsel_24kc"
 CONFIG_DEFAULT_TARGET_OPTIMIZATION="-Os -pipe -mno-branch-likely -mips32r2 -mtune=24kc"
 CONFIG_CPU_TYPE="24kc"
 CONFIG_LINUX_5_15=y
-CONFIG_MODULE_DEFAULT_adb-enablemodem=y
 CONFIG_DEFAULT_base-files=y
 CONFIG_MODULE_DEFAULT_base-files=y
 CONFIG_MODULE_DEFAULT_block-mount=y
@@ -452,7 +450,6 @@ CONFIG_MODULE_DEFAULT_kmod-switch-rtl8366-smi=y
 CONFIG_MODULE_DEFAULT_kmod-switch-rtl8367b=y
 CONFIG_MODULE_DEFAULT_kmod-usb-ledtrig-usbport=y
 CONFIG_MODULE_DEFAULT_kmod-usb-net-qmi-wwan=y
-CONFIG_MODULE_DEFAULT_kmod-usb-net-rndis=y
 CONFIG_MODULE_DEFAULT_kmod-usb-ohci=y
 CONFIG_MODULE_DEFAULT_kmod-usb-serial-option=y
 CONFIG_MODULE_DEFAULT_kmod-usb-storage=y
@@ -4783,7 +4780,7 @@ CONFIG_PACKAGE_wireguard-tools=m
 #
 # WWAN
 #
-CONFIG_PACKAGE_adb-enablemodem=m
+# CONFIG_PACKAGE_adb-enablemodem is not set
 CONFIG_PACKAGE_comgt=m
 # CONFIG_PACKAGE_comgt-directip is not set
 CONFIG_PACKAGE_comgt-ncm=m
@@ -5107,7 +5104,7 @@ CONFIG_PACKAGE_usbmuxd=m
 # CONFIG_PACKAGE_libselinux-validatetrans is not set
 # end of libselinux tools
 
-CONFIG_PACKAGE_adb=m
+# CONFIG_PACKAGE_adb is not set
 # CONFIG_PACKAGE_bsdiff is not set
 # CONFIG_PACKAGE_bspatch is not set
 # CONFIG_PACKAGE_cal is not set
