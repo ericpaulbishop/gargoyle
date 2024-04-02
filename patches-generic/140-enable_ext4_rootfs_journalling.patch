@@ -1,0 +1,29 @@
+From f9f2426e398cf74d1098ae40317bfba677ac7560 Mon Sep 17 00:00:00 2001
+From: Jordan Woyak <jordan.woyak@gmail.com>
+Date: Mon, 25 Mar 2024 20:56:06 -0500
+Subject: [PATCH] config: Enable ext4 journaling by default.
+
+Not having a journal by default is a major "gotcha".
+
+Because openwrt does not fsck on boot, a power loss without journaling
+can result in a dirty filesystem that openwrt will mount as read-only
+which requires intervention to restore the router to working order.
+
+Signed-off-by: Jordan Woyak <jordan.woyak@gmail.com>
+---
+ config/Config-images.in | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/config/Config-images.in b/config/Config-images.in
+index c2d7af7a80b10..6f2f92643234d 100644
+--- a/config/Config-images.in
++++ b/config/Config-images.in
+@@ -127,6 +127,7 @@ menu "Target Images"
+ 		config TARGET_EXT4_JOURNAL
+ 			bool "Create a journaling filesystem"
+ 			depends on TARGET_ROOTFS_EXT4FS
++			default y
+ 			help
+ 			  Create an ext4 filesystem with a journal.
+ 
+
