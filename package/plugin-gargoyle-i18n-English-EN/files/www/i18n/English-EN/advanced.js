@@ -13,4 +13,6 @@ advancedStr.ShrAPClnts="Share connected Wireless Client information to other Gar
 advancedStr.ModemNet="Create network interface to access upstream modem?";
 advancedStr.ModemSMsk="(same as modem subnet)";
 advancedStr.ModemIP="(IP must be in modem subnet)";
-
+// Network options
+advancedStr.NetOptTitle="Global network options";
+advancedStr.PktSteer="Activate packet steering?";
