@@ -13,3 +13,6 @@ advancedStr.ShrAPClnts="Udostępnianie informacji o podłączonych klientach bez
 advancedStr.ModemNet="Tworzenie interfejsu sieciowego, aby uzyskać dostęp do modemu nadrzędnego";
 advancedStr.ModemSMsk="(taka jak maska modemu)";
 advancedStr.ModemIP="(IP musi być z tej samej klasy co ma modem)";
+// Network options
+advancedStr.NetOptTitle="Opcje sieci globalnej";
+advancedStr.PktSteer="Aktywować sterowanie pakietami?";
