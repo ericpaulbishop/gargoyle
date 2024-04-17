@@ -23,6 +23,8 @@
 	if [ -e ./data/countrylist.txt ] ; then
 		awk '{gsub(/"/, "\\\""); print "countryLines.push(\""$0"\");"}' ./data/countrylist.txt	
 	fi
+
+	echo "var num_cpus=$(grep -c processor /proc/cpuinfo);"
 %>
 //-->
 </script>
@@ -83,6 +85,25 @@
 					<label class="col-xs-5" for="usteer_comms"><%~ ShrAPClnts %>:</label>
 					<div class="col-xs-7">
 						<select class="form-control" id="usteer_comms">
+							<option value="0"><%~ Disabled %></option>
+							<option value="1"><%~ Enabled %></option>
+						</select>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="col-lg-6" id="netopt_container" style="display:none">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ NetOptTitle %></h3>
+			</div>
+			<div class="panel-body">
+				<div id="pktsteer_opt_container" class="row form-group">
+					<label class="col-xs-5" for="pktsteer_opt"><%~ PktSteer %>:</label>
+					<div class="col-xs-7">
+						<select class="form-control" id="pktsteer_opt">
 							<option value="0"><%~ Disabled %></option>
 							<option value="1"><%~ Enabled %></option>
 						</select>
