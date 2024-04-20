@@ -10,4 +10,4 @@ spectrum.Channel="Kanał";
 spectrum.Width="Szerokość kanału";
 spectrum.Mode="Tryb";
 spectrum.Signal="Sygnał";
-
+spectrum.Encryption="Szyfrowanie";

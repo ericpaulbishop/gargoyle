@@ -15,4 +15,4 @@ advancedStr.ModemSMsk="(taka jak maska modemu)";
 advancedStr.ModemIP="(IP musi być z tej samej klasy co ma modem)";
 // Network options
 advancedStr.NetOptTitle="Opcje sieci globalnej";
-advancedStr.PktSteer="Aktywować sterowanie pakietami?";
+advancedStr.PktSteer="Sterowanie pakietami";

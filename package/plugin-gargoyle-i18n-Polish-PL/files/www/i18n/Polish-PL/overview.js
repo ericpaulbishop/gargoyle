@@ -30,6 +30,7 @@ ovwS.BrID="SSID Mostu";
 ovwS.LIPA="Adres IP LAN";
 ovwS.LNmsk="Maska podsieci LAN";
 ovwS.LMAdd="Adres MAC LAN";
+ovwS.WPrtSpd="Szybkość portu WAN";
 ovwS.WIPA="Adres IP WAN";
 ovwS.WNmsk="Maska podsieci WAN";
 ovwS.WMAdd="Adres MAC WAN";
