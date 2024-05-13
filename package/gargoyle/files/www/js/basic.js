@@ -154,6 +154,24 @@ function saveChanges()
 		preCommands = preCommands + "\nuci set network.wan_" + defaultWanIf + "_dev=device\n";
 		uci.set('network', 'wan_' + defaultWanIf + '_dev', 'name', defaultWanIf);
 		uci.set('network', 'wan_' + defaultWanIf + '_dev', 'macaddr', defaultWanMac.toLowerCase());
+		// Remove old WAN VLANs
+		var switchVLANList = uci.getAllSectionsOfType('network','switch_vlan');
+		if(switchVLANList.length > 0)
+		{
+			// We don't deal with swconfig, sorry
+		}
+		else
+		{
+			var devList = uci.getAllSectionsOfType('network','device');
+			devList.forEach(function(devName) {
+				if(devName.match(/wan_vlan[0-9]+_dev/) !== null)
+				{
+					preCommands = preCommands + "\nuci -q del network." + devName;
+					uci.removeSection('network',devName);
+					uciCompare.removeSection('network',devName);
+				}
+			});
+		}
 		if( document.getElementById("global_gateway").checked )
 		{
 			//If we were previously bridged, and are now going to a gateway, we re-enable DHCP for the user
@@ -222,7 +240,29 @@ function saveChanges()
 				}
 				else
 				{
-					uci.set('network', 'wan', 'device', defaultWanIf);
+					if(byId('wan_use_vlan').checked)
+					{
+						var vid = byId('wan_vlan').value;
+						if(switchVLANList.length > 0)
+						{
+							// We don't deal with swconfig, sorry
+						}
+						else
+						{
+							//preCommands = preCommands + "\nuci set network.wan_vlan" + vid + "_dev=device\n";
+							uci.set('network','wan_vlan' + vid + '_dev','','device');
+							uci.set('network','wan_vlan' + vid + '_dev','name','wanv.' + vid);
+							uci.set('network','wan_vlan' + vid + '_dev','type','8021q');
+							uci.set('network','wan_vlan' + vid + '_dev','ifname',defaultWanIf);
+							uci.set('network','wan_vlan' + vid + '_dev','vid',vid);
+
+							uci.set('network','wan','device','wanv.' + vid);
+						}
+					}
+					else
+					{
+						uci.set('network', 'wan', 'device', defaultWanIf);
+					}
 				}
 			}
 
@@ -2106,6 +2146,31 @@ function resetData()
 
 	enableAssociatedField(document.getElementById('wan_use_mac'), 'wan_mac', defaultWanMac);
 	enableAssociatedField(document.getElementById('wan_use_mtu'), 'wan_mtu', 1500);
+
+	// WAN VLAN
+	// If we have swconfig, disable
+	if(uciOriginal.getAllSectionsOfType('network','switch_vlan').length > 0)
+	{
+		byId("wan_use_vlan").disabled = true;
+	}
+	else
+	{
+		byId("wan_use_vlan").disabled = false;
+		var devList = uciOriginal.getAllSectionsOfType('network','device');
+		var wanVLANDev = null;
+		devList.forEach(function(devName) {
+			if(devName.match(/wan_vlan[0-9]+_dev/) !== null)
+			{
+				wanVLANDev = devName;
+			}
+		});
+		byId("wan_use_vlan").checked = wanVLANDev !== null;
+		if(wanVLANDev !== null)
+		{
+			byId("wan_vlan").value = uciOriginal.get('network',wanVLANDev,'vid');
+		}
+		enableAssociatedField(document.getElementById('wan_use_vlan'), 'wan_vlan', 10);
+	}
 
 	//note: we have to set pppoe_reconnect_mode in a custom manner, it is a bit non-standard
 	keepalive=uciOriginal.get("network", "wan", "keepalive");

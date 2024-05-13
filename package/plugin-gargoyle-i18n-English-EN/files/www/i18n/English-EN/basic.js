@@ -79,6 +79,7 @@ basicS.optl="optional";
 basicS.MISP="Mobile ISP";
 basicS.CustMAC="Use Custom MAC Address";
 basicS.CustMTU="Use Custom MTU";
+basicS.CustVLAN="Use Custom VLAN";
 basicS.LANSec="Local Network / LAN";
 basicS.DfltDNS="Default Servers Specified by ISP";
 basicS.OpnSrvs="OpenDNS Servers";
