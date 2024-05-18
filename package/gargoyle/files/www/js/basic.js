@@ -151,14 +151,34 @@ function saveChanges()
 		uci.remove('network', 'brlan_dev', 'ports');
 		uci.set('network', 'brlan_dev', 'ports', defaultLanIf.split(" "));
 		// Create wan_dev
-		preCommands = preCommands + "\nuci set network.wan_" + defaultWanIf + "_dev=device\n";
-		uci.set('network', 'wan_' + defaultWanIf + '_dev', 'name', defaultWanIf);
-		uci.set('network', 'wan_' + defaultWanIf + '_dev', 'macaddr', defaultWanMac.toLowerCase());
+		preCommands = preCommands + "\nuci set network.wan_" + defaultWanIf.replace('.','_') + "_dev=device\n";
+		uci.set('network', 'wan_' + defaultWanIf.replace('.','_') + '_dev', 'name', defaultWanIf);
+		uci.set('network', 'wan_' + defaultWanIf.replace('.','_') + '_dev', 'macaddr', defaultWanMac.toLowerCase());
 		// Remove old WAN VLANs
-		var switchVLANList = uci.getAllSectionsOfType('network','switch_vlan');
-		if(switchVLANList.length > 0)
+		var switchVLAN = uci.get('network','switch_wan_vlan');
+		if(switchVLAN == 'switch_vlan')
 		{
-			// We don't deal with swconfig, sorry
+			// Reset the switch_wan_vlan
+			var origvlan = uci.get('network','switch_wan_vlan','orig_vlan');
+			var origports = uci.get('network','switch_wan_vlan','orig_ports');
+			var vlan = uci.get('network','switch_wan_vlan','vlan');
+			if(origvlan != '' && origports != '')
+			{
+				uci.set('network','switch_wan_vlan','vlan',origvlan);
+				uci.set('network','switch_wan_vlan','ports',origports);
+				uci.remove('network','switch_wan_vlan','orig_vlan');
+				uci.remove('network','switch_wan_vlan','orig_ports');
+				// Clean up old wan_dev not needed
+				var device = defaultWanIf.split('.')[0];
+				if(origvlan != vlan)
+				{
+					uci.removeSection('network','wan_' + device + '_' + vlan + '_dev');
+				}
+			}
+			else
+			{
+				// uh oh
+			}
 		}
 		else
 		{
@@ -243,9 +263,23 @@ function saveChanges()
 					if(byId('wan_use_vlan').checked)
 					{
 						var vid = byId('wan_vlan').value;
-						if(switchVLANList.length > 0)
+						if(switchVLAN == 'switch_vlan')
 						{
-							// We don't deal with swconfig, sorry
+							var origdevice = defaultWanIf.split('.')[0];
+							var origvlan = defaultWanIf.split('.')[1];
+							var origports = uci.get('network','switch_wan_vlan','ports');
+							var taggedports = origports.split(' ').map(port => port.indexOf('t') > -1 ? port : port + 't').join(' ');
+							uci.set('network','switch_wan_vlan','orig_vlan',origvlan);
+							uci.set('network','switch_wan_vlan','orig_ports',origports);
+							uci.set('network','switch_wan_vlan','vlan',vid);
+							uci.set('network','switch_wan_vlan','ports',taggedports);
+
+							uci.set('network','wan','device',origdevice + '.' + vid);
+
+							// Create wan_dev
+							preCommands = preCommands + "\nuci set network.wan_" + origdevice + "_" + vid + "_dev=device\n";
+							uci.set('network', 'wan_' + origdevice + "_" + vid + '_dev', 'name', origdevice + "." + vid);
+							uci.set('network', 'wan_' + origdevice + "_" + vid + '_dev', 'macaddr', defaultWanMac.toLowerCase());
 						}
 						else
 						{
@@ -2148,10 +2182,22 @@ function resetData()
 	enableAssociatedField(document.getElementById('wan_use_mtu'), 'wan_mtu', 1500);
 
 	// WAN VLAN
-	// If we have swconfig, disable
-	if(uciOriginal.getAllSectionsOfType('network','switch_vlan').length > 0)
+	// If we have swconfig and WAN is part of the switch VLAN, handle differently
+	if(uciOriginal.get('network','switch_wan_vlan') == 'switch_vlan')
 	{
-		byId("wan_use_vlan").disabled = true;
+		var origvlan = uciOriginal.get('network','switch_wan_vlan','orig_vlan');
+		var vlan= uciOriginal.get('network','switch_wan_vlan','vlan');
+		var origports = uciOriginal.get('network','switch_wan_vlan','orig_ports');
+		var ports = uciOriginal.get('network','switch_wan_vlan','ports');
+		if(origvlan != ''  && origports != '' && (vlan != origvlan || ports != origports))
+		{
+			byId("wan_vlan").value = vlan;
+			byId("wan_use_vlan").checked = true;
+		}
+		else
+		{
+			byId("wan_use_vlan").checked = false;
+		}
 	}
 	else
 	{
@@ -2169,8 +2215,8 @@ function resetData()
 		{
 			byId("wan_vlan").value = uciOriginal.get('network',wanVLANDev,'vid');
 		}
-		enableAssociatedField(document.getElementById('wan_use_vlan'), 'wan_vlan', 10);
 	}
+	enableAssociatedField(document.getElementById('wan_use_vlan'), 'wan_vlan', '');
 
 	//note: we have to set pppoe_reconnect_mode in a custom manner, it is a bit non-standard
 	keepalive=uciOriginal.get("network", "wan", "keepalive");
