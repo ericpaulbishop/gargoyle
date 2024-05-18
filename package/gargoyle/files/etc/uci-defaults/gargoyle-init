@@ -157,6 +157,7 @@ cat << EOF >/etc/sysupgrade.conf
 /tmp/data
 /usr/data
 /etc/tor
+/etc/gargoyle_default_ifs
 EOF
 
 
