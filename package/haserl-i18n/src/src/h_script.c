@@ -393,19 +393,18 @@ preprocess_token_list (token_t * tokenlist)
 	      me->len = strlen (me->buf) + 1;
 		  /* Find files in directory */
 		  num_entry_paths = scandir(me->buf, &dentries, NULL, alphasort);
-		  if(num_entry_paths == -1)
+		  if(num_entry_paths >= 0)
 		  {
-			  die_with_message (me->script, cp, g_err_msg[E_DIR_OPEN_FAIL], me->buf);
-		  }
-		  for(entry_path_index=0; entry_path_index < num_entry_paths; entry_path_index++)
-		  {
-			  struct dirent* dentry = dentries[entry_path_index];
-			  if(dentry->d_type != DT_DIR)
+			  for(entry_path_index=0; entry_path_index < num_entry_paths; entry_path_index++)
 			  {
-				char* entry_path = (char*)xmalloc(strlen(me->buf) + strlen(dentry->d_name) + 2);
-				sprintf(entry_path,"%s/%s", me->buf, dentry->d_name);
-				newscript = load_script(entry_path, me->script);
-				build_token_list(newscript, me);
+				  struct dirent* dentry = dentries[entry_path_index];
+				  if(dentry->d_type != DT_DIR)
+				  {
+					char* entry_path = (char*)xmalloc(strlen(me->buf) + strlen(dentry->d_name) + 2);
+					sprintf(entry_path,"%s/%s", me->buf, dentry->d_name);
+					newscript = load_script(entry_path, me->script);
+					build_token_list(newscript, me);
+				  }
 			  }
 		  }
 	    }
