@@ -22,3 +22,6 @@ DoH.Filters="Filters";
 DoH.Variant="Variant";
 DoH.Username="Username";
 DoH.Location="Location";
+
+/* Update Hooks */
+DoH.DoHNoDNS="DNS over HTTPS (DoH) is currently enabled.<br>If you upgrade to a new firmware that does not have DoH preinstalled, you will lose DNS connectivity, be unable to browse the internet, and need to manually fix your config files.<br><strong>It is recommended to disable DoH before upgrading unless you know what you are doing.</strong>";

@@ -15,6 +15,7 @@ var devcompatversion = "1.0";
 var storage_size = 0;
 var toggleReload = false;
 var reloadTarget = "";
+var updateServiceWarningCount = 0;
 
 function doUpgrade()
 {
@@ -111,9 +112,11 @@ function failureByBootloader()
 
 function resetData()
 {
+	setUpgradeServiceWarningVisibility();
 	setUpgradeFormat();
 	var systemSecs = uciOriginal.getAllSectionsOfType("system","system");
 	devcompatversion = uciOriginal.get("system",systemSecs[0],"compat_version");
+	devcompatversion = devcompatversion == '' ? '1.0' : devcompatversion;
 	fwtoolJson = JSON.parse(fwtoolStr == "" ? "{}" : fwtoolStr);
 	validateFwJson = JSON.parse(validateFwStr == "" ? "{}" : validateFwStr);
 
@@ -176,11 +179,11 @@ function resetData()
 
 function setUpgradeFormat()
 {
-	if(distribTarget.match(/brcm47xx/))
+	if(distribTarget.match(/bcm47xx/))
 	{
 		setChildText("upgrade_text", upS.brcmT);
 	}
-	else if(distribTarget.match(/ar71xx/))
+	else if(distribTarget.match(/ath79/))
 	{
 		setChildText("upgrade_text", upS.ar71xxT);
 	}
@@ -191,10 +194,6 @@ function setUpgradeFormat()
 	else if(distribTarget.match(/ramips/))
 	{
 		setChildText("upgrade_text", upS.ar71xxT);
-	}
-	else if(distribTarget.match(/ath25/))
-	{
-		setChildText("upgrade_text", upS.othrT);
 	}
 	else
 	{
@@ -344,4 +343,9 @@ function forceUpgradeToggle()
 		document.getElementById("modal_button_upgrade").disabled = true;
 	}
 
+}
+
+function setUpgradeServiceWarningVisibility()
+{
+	byId('upgrade_service_warnings').style = updateServiceWarningCount > 0 ? 'display:block' : 'display:none';
 }

@@ -6,7 +6,35 @@
 	# itself remain covered by the GPL.
 	# See http://gargoyle-router.com/faq.html#qfoss for more information
 	eval $( gargoyle_session_validator -c "$COOKIE_hash" -e "$COOKIE_exp" -a "$HTTP_USER_AGENT" -i "$REMOTE_ADDR" -r "login.sh" -t $(uci get gargoyle.global.session_timeout) -b "$COOKIE_browser_time"  )
-	gargoyle_header_footer -h -s "system" -p "update" -j "update.js" -z "update.js" network system
+
+	web_root=$(uci get gargoyle.global.web_root 2>/dev/null)
+
+	# Append shared login hook resources as whitespace separated strings to default resources.
+	css=""
+	js="update.js"
+	i18n="$js"
+	pkg="network system"
+	# Iterate over section array where [$i].option is simply appended to the $hook string.
+	i=0
+	hook="uci -q get gargoyle.@update_hook"
+	while [ -n "$($hook[$i])" ]; do
+		css="$css $($hook[$i].css)"
+		js="$js $($hook[$i].js)"
+		i18n="$i18n $($hook[$i].i18n)"
+		[ "$($hook[$i].mac)" = "1" ] && mac="-i"
+		[ "$($hook[$i].host)" = "1" ] && host="-n"
+		pkg="$pkg $($hook[$i].pkg)"
+		i=$((i+1))
+	done
+	if [ -d "$web_root/hooks/update" ] ; then
+		js_hooks=$(ls "$web_root/hooks/update/js" | sort | awk " \$1 ~ /js\$/ { print \"../hooks/update/js/\"\$1  }")
+		js_hooks=$(echo $js_hooks)
+		js="$js $js_hooks"
+		i18n_hooks=$(echo "$js" | awk -F '[ /]' '{ for(i = 1; i <= NF; i++) {  print $i; } }' | awk '/.js/')
+		i18n="$i18n $(echo $i18n_hooks)"
+	fi
+
+	gargoyle_header_footer -h -s "system" -p "update" -c "$css" -j "$js" -z "$i18n" $pkg
 %>
 
 <script>
@@ -42,7 +70,7 @@
 
 <h1 class="page-header"><%~ update.UpFrm %></h1>
 <div id="upgrade_section" class="row">
-	<div class="col-lg-12">
+	<div class="col-lg-6">
 		<div class="panel panel-default">
 			<div class="panel-heading">
 				<h3 class="panel-title"><%~ UpFrm %></h3>
@@ -89,6 +117,17 @@
 						</form>
 					</div>
 				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="col-lg-6" id="upgrade_service_warnings" style='display:none'>
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h3 class="panel-title"><%~ UpServWarn %></h3>
+			</div>
+			<div class="panel-body">
+				<%din hooks/update/ %>
 			</div>
 		</div>
 	</div>
