@@ -156,7 +156,12 @@ function saveChanges()
 		uci.set('network', 'wan_' + defaultWanIf.replace('.','_') + '_dev', 'macaddr', defaultWanMac.toLowerCase());
 		// Remove old WAN VLANs
 		var switchVLAN = uci.get('network','switch_wan_vlan');
-		if(switchVLAN == 'switch_vlan')
+		var switchSecs = uci.getAllSectionsOfType('network','switch_vlan');
+		if(switchSecs.length > 0 && switchVLAN == '' && defaultWanIf.indexOf('.') > -1)
+		{
+			// We have switch config but switch_wan_vlan missing and original WAN device was a VLAN, do nothing
+		}
+		else if(switchVLAN == 'switch_vlan')
 		{
 			// Reset the switch_wan_vlan
 			var origvlan = uci.get('network','switch_wan_vlan','orig_vlan');
@@ -177,7 +182,7 @@ function saveChanges()
 			}
 			else
 			{
-				// uh oh
+				// No information on original settings, assume it is OK
 			}
 		}
 		else
@@ -263,7 +268,12 @@ function saveChanges()
 					if(byId('wan_use_vlan').checked)
 					{
 						var vid = byId('wan_vlan').value;
-						if(switchVLAN == 'switch_vlan')
+						if(switchSecs.length > 0 && switchVLAN == '' && defaultWanIf.indexOf('.') > -1)
+						{
+							// We have switch config but switch_wan_vlan missing, do nothing
+							// We should never get here
+						}
+						else if(switchVLAN == 'switch_vlan')
 						{
 							var origdevice = defaultWanIf.split('.')[0];
 							var origvlan = defaultWanIf.split('.')[1];
@@ -2183,7 +2193,14 @@ function resetData()
 
 	// WAN VLAN
 	// If we have swconfig and WAN is part of the switch VLAN, handle differently
-	if(uciOriginal.get('network','switch_wan_vlan') == 'switch_vlan')
+	var switchSecs = uciOriginal.getAllSectionsOfType('network','switch_vlan');
+	var switchVLAN = uciOriginal.get('network','switch_wan_vlan');
+	if(switchSecs.length > 0 && switchVLAN == '' && defaultWanIf.indexOf('.') > -1)
+	{
+		// We have switch config but no wan vlan config and the default WAN device is a VLAN, don't allow the user to configure
+		byId("wan_use_vlan").disabled = true;
+	}
+	else if(switchVLAN == 'switch_vlan')
 	{
 		var origvlan = uciOriginal.get('network','switch_wan_vlan','orig_vlan');
 		var vlan= uciOriginal.get('network','switch_wan_vlan','vlan');
