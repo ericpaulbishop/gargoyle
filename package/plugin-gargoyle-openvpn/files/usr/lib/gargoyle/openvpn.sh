@@ -369,10 +369,8 @@ client
 remote          $openvpn_client_remote $openvpn_port
 dev             tun
 proto           $openvpn_protocol
-status          current_status
 resolv-retry    infinite
 remote-cert-tls server
-topology        subnet
 verb            3
 
 data-ciphers    $openvpn_cipher
