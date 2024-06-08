@@ -1298,7 +1298,10 @@ void save_pkg_status_func(char* key, void* value)
 		for(var_index=0; pkg_vars[var_index] != NULL; var_index++)
 		{
 			char* var_def = (char*)get_string_map_element(pkg, pkg_vars[var_index]);
-			fprintf(__save_pkg_status_stream, "%s: %s\n", pkg_vars[var_index], (var_def == NULL ? "" : var_def));
+			if(var_def != NULL)
+			{
+				fprintf(__save_pkg_status_stream, "%s: %s\n", pkg_vars[var_index], var_def);
+			}
 		}
 		fprintf(__save_pkg_status_stream, "\n");
 	}
