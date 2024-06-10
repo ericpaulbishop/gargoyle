@@ -37,6 +37,7 @@ define Package/openvpn-gargoyle-easy-rsa
   SUBMENU:=VPN
   DEPENDS:=+OPENVPN_GARGOYLE_EASYRSA_OPENSSL:openssl-util +OPENVPN_GARGOYLE_EASYRSA_MBEDTLS:mbedtls-clu
   PKGARCH:=all
+  PROVIDES:=openvpn-easy-rsa
 endef
 
 define Package/openvpn-gargoyle-easy-rsa/conffiles
