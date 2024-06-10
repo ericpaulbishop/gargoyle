@@ -18,6 +18,8 @@
 #include <stdint.h>
 #include <sys/statvfs.h>
 
+#include <libgen.h>
+
 
 #include <erics_tools.h>
 #include <bbtargz.h>
@@ -174,5 +176,8 @@ void do_list(opkg_conf* conf, string_map* parameters, int format);
 void escape_package_variable(char* var_def, char* var_name, int format, char* out_buf, int buf_len);
 void do_print_dest_info(opkg_conf* conf, int format);
 void do_print_info(opkg_conf* conf, string_map* parameters, char* install_root, int format);
+
+/* alternatives.c */
+int update_alternatives(list* pkg_alternatives, string_map* package_data, char* fs_terminated_link_root, char* fs_terminated_overlay_root, char* consider_uninstalled);
 
 #endif

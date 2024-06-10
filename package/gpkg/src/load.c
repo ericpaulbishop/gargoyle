@@ -913,6 +913,20 @@ void load_package_data(char* data_source, int source_is_dir, string_map* existin
 					{
 						pkg_version = strdup(val);
 					}
+					else if(strcmp(key, "Alternatives") == 0 )
+					{
+						unsigned long num_alts;
+						char alt_separators[] = {',',' '};
+						char** alts = split_on_separators(val, alt_separators, 2, -1, 0, &num_alts);
+						unsigned long alt_index = 0;
+						list* alt_list = initialize_list();
+						for(alt_index = 0; alt_index < num_alts; alt_index++)
+						{
+							push_list(alt_list, alts[alt_index]);
+						}
+						set_string_map_element(next_pkg_data, "Alternatives", alt_list);
+						
+					}
 					else if(include_variable(key, next_package_matches, include_next_package, load_variable_def, load_variable_map))
 					{
 						loaded_at_least_one_variable = 1;
@@ -1302,6 +1316,13 @@ void save_pkg_status_func(char* key, void* value)
 			{
 				fprintf(__save_pkg_status_stream, "%s: %s\n", pkg_vars[var_index], var_def);
 			}
+		}
+		if(get_string_map_element(pkg, "Alternatives") != NULL)
+		{
+			unsigned long num_alts;
+			char** alts = (char**)get_list_values(get_string_map_element(pkg, "Alternatives"),&num_alts);
+			char* combined_alts = join_strs(", ", alts, -1, 0, 1);
+			fprintf(__save_pkg_status_stream, "Alternatives: %s\n", combined_alts);
 		}
 		fprintf(__save_pkg_status_stream, "\n");
 	}

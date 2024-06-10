@@ -632,6 +632,7 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 	char* src_id                    = get_string_map_element(install_pkg_data, "Source-ID");
 	char* pkg_filename              = get_string_map_element(install_pkg_data, "Filename");
 	string_map* pkg_dependencies    = get_string_map_element(install_pkg_data, "Required-Depends");
+	list* pkg_alternatives			= get_string_map_element(install_pkg_data, "Alternatives");
 	char* install_root_path         = get_string_map_element(conf->dest_names, install_root_name);
 	char* link_root_path            = link_to_root != NULL && safe_strcmp(link_to_root, install_root_name) != 0 ? get_string_map_element(conf->dest_names, link_to_root) : NULL;
 	char* base_url = NULL;
@@ -987,6 +988,18 @@ int recursively_install(char* pkg_name, char* pkg_version, char* install_root_na
 		if(warn != 0)
 		{
 			fprintf(stderr, "Warning: postinstall script failed for package %s.\n", pkg_name);
+		}
+	}
+	if(err == 0)
+	{
+		// check and configure package alternatives
+		if(pkg_alternatives != NULL)
+		{
+			int warn = update_alternatives(pkg_alternatives, package_data, fs_terminated_link_root, fs_terminated_overlay_root, "");
+			if(warn != 0)
+			{
+				fprintf(stderr, "Warning: failed to process alternatives for package %s.\n", pkg_name);
+			}
 		}
 	}
 	if(err == 0)
