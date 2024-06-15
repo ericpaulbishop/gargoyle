@@ -162,7 +162,7 @@ initialize()
 		# setup client mode firewall rules
 		iptables -t nat    -N tor_client
 		iptables -t filter -N tor_client
-	
+		ip6tables -t filter -N tor_client
 
 		if [ "$client_mode" = "3" ] || [ "$client_mode" = "2" ] ; then
 			#iptables -t nat -A tor_client -p udp --dport 53  -m string --hex-string '|056f6e696f6e00|' --algo bm -j REDIRECT --to-ports $dns_port
@@ -225,6 +225,16 @@ initialize()
 				iptables -t filter -A tor_client -j REJECT
 				iptables -t filter -I zone_${zone}_forward $test_tor_active -j tor_client
 			fi
+
+			# block ipv6 for all hosts (yes, even in mode 2) to prevent leakage
+			ip6tables -t filter -A tor_client -p tcp -j REJECT --reject-with tcp-reset
+			ip6tables -t filter -A tor_client -j REJECT
+			ip6tables -t filter -A forwarding_rule -j tor_client
+			# block ipv6 dns
+			ip6tables -t filter -A output_rule -p tcp --dport 53 -j tor_client
+			ip6tables -t filter -A output_rule -p udp --dport 53 -j tor_client
+			ip6tables -t filter -A input_rule -p tcp --dport 53 -j tor_client
+			ip6tables -t filter -A input_rule -p udp --dport 53 -j tor_client
 		fi
 		iptables -t nat -I zone_${zone}_prerouting -j tor_client
 		
