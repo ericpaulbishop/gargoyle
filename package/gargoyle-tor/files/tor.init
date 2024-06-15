@@ -123,7 +123,7 @@ start()
 		else
 			OPTIONS="$OPTIONS  --TransPort $trans_port --DNSPort $dns_port "
 		fi
-		OPTIONS="$OPTIONS --VirtualAddrNetwork $hidden_service_subnet/$hidden_service_mask_bits --AutomapHostsOnResolve 1 "
+		OPTIONS="$OPTIONS --VirtualAddrNetworkIPv4 $hidden_service_subnet/$hidden_service_mask_bits --AutomapHostsOnResolve 1 "
 
 		use_bridge_ip=$(uci get tor.client.use_bridge_ip 2>/dev/null)
 		use_bridge_port=$(uci get tor.client.use_bridge_port 2>/dev/null)
@@ -151,6 +151,9 @@ start()
 		relay_ip=0.0.0.0
 
 		relay_options=" --ORPort $relay_ip:$relay_port "
+		if [ -z "$obfsproxy_port" ] || [ "$obfsproxy_port" = "0" ] ; then
+			relay_options=" $relay_options --ORPort [::]:$relay_port "
+		fi
 		if [ "$relay_mode" = "1" ] ; then
 			relay_options=" --BridgeRelay 1 $relay_options --BridgeRecordUsageByCountry 0  "
 			if [ -n "$obfsproxy_port" ] && [ "$obfsproxy_port" != "0" ] ; then

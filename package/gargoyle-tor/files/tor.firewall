@@ -249,10 +249,14 @@ initialize()
 	
 		iptables -t filter -N tor_relay
 		iptables -t filter -I tor_relay -p tcp --dport $relay_port -j ACCEPT
+		ip6tables -t filter -N tor_relay
+		ip6tables -t filter -I tor_relay -p tcp --dport $relay_port -j ACCEPT
 		if [ "$relay_mode" = "1" ] && [ -n "$obfsproxy_port" ] && [ "$obfsproxy_port" != "0" ] ; then
 			iptables -t filter -I tor_relay -p tcp --dport $obfsproxy_port -j ACCEPT
+			#ip6tables -t filter -I tor_relay -p tcp --dport $obfsproxy_port -j ACCEPT
 		fi
 		iptables -t filter -I input_${relay_zone}_rule -j tor_relay
+		ip6tables -t filter -I input_${relay_zone}_rule -j tor_relay
 	fi
 	
 	if [ "$enabled" != "0" ]  && [ "$relay_mode$client_mode" != "00" ] ; then
