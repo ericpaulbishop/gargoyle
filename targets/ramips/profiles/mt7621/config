@@ -87,6 +87,7 @@ CONFIG_TARGET_MULTI_PROFILE=y
 # CONFIG_TARGET_ramips_mt7621_DEVICE_cudy_m1800 is not set
 # CONFIG_TARGET_ramips_mt7621_DEVICE_cudy_wr1300-v1 is not set
 # CONFIG_TARGET_ramips_mt7621_DEVICE_cudy_wr1300-v2 is not set
+# CONFIG_TARGET_ramips_mt7621_DEVICE_cudy_wr1300-v3 is not set
 # CONFIG_TARGET_ramips_mt7621_DEVICE_cudy_wr2100 is not set
 # CONFIG_TARGET_ramips_mt7621_DEVICE_cudy_x6-v1 is not set
 # CONFIG_TARGET_ramips_mt7621_DEVICE_cudy_x6-v2 is not set
@@ -229,6 +230,7 @@ CONFIG_TARGET_MULTI_PROFILE=y
 # CONFIG_TARGET_ramips_mt7621_DEVICE_tplink_eap615-wall-v1 is not set
 # CONFIG_TARGET_ramips_mt7621_DEVICE_tplink_ec330-g5u-v1 is not set
 # CONFIG_TARGET_ramips_mt7621_DEVICE_tplink_er605-v2 is not set
+# CONFIG_TARGET_ramips_mt7621_DEVICE_tplink_ex220-v1 is not set
 # CONFIG_TARGET_ramips_mt7621_DEVICE_tplink_mr600-v2-eu is not set
 # CONFIG_TARGET_ramips_mt7621_DEVICE_tplink_re350-v1 is not set
 # CONFIG_TARGET_ramips_mt7621_DEVICE_tplink_re500-v1 is not set
@@ -270,6 +272,8 @@ CONFIG_TARGET_MULTI_PROFILE=y
 # CONFIG_TARGET_ramips_mt7621_DEVICE_yuncore_ax820 is not set
 # CONFIG_TARGET_ramips_mt7621_DEVICE_yuncore_fap640 is not set
 # CONFIG_TARGET_ramips_mt7621_DEVICE_yuncore_fap690 is not set
+# CONFIG_TARGET_ramips_mt7621_DEVICE_yuncore_g720 is not set
+# CONFIG_TARGET_ramips_mt7621_DEVICE_z-router_zr-2660 is not set
 # CONFIG_TARGET_ramips_mt7621_DEVICE_zbtlink_zbt-we1326 is not set
 # CONFIG_TARGET_ramips_mt7621_DEVICE_zbtlink_zbt-we3526 is not set
 # CONFIG_TARGET_ramips_mt7621_DEVICE_zbtlink_zbt-wg1602-16m is not set
@@ -335,6 +339,7 @@ CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_buffalo_wsr-600dhp="gargoyle-
 # CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_cudy_m1800 is not set
 # CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_cudy_wr1300-v1 is not set
 # CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_cudy_wr1300-v2 is not set
+# CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_cudy_wr1300-v3 is not set
 # CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_cudy_wr2100 is not set
 # CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_cudy_x6-v1 is not set
 # CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_cudy_x6-v2 is not set
@@ -508,6 +513,7 @@ CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_netgear_wndr3700-v5="gargoyle
 # CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_renkforce_ws-wn530hp3-a is not set
 # CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_rostelecom_rt-fe-1a is not set
 # CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_rostelecom_rt-sf-1 is not set
+# CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_z-router_zr-2660 is not set
 # CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_samknows_whitebox-v8 is not set
 # CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_sercomm_na502 is not set
 # CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_sercomm_na502s is not set
@@ -542,6 +548,7 @@ CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_tplink_eap615-wall-v1=y
 CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_tplink_eap615-wall-v1="gargoyle-vpn"
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_tplink_er605-v2=y
 CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_tplink_er605-v2="gargoyle-large"
+# CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_tplink_ex220-v1 is not set
 # CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_tplink_mr600-v2-eu is not set
 # CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_tplink_re350-v1 is not set
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_tplink_re500-v1=y
@@ -593,6 +600,7 @@ CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_xiaomi_redmi-router-ac2100="g
 # CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_yuncore_ax820 is not set
 # CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_yuncore_fap640 is not set
 # CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_yuncore_fap690 is not set
+# CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_yuncore_g720 is not set
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_zbtlink_zbt-we3526=y
 CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_zbtlink_zbt-we3526="gargoyle-large"
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_zbtlink_zbt-wg1602-16m=y
@@ -889,6 +897,7 @@ CONFIG_KERNEL_CC_OPTIMIZE_FOR_PERFORMANCE=y
 # CONFIG_KERNEL_F2FS_FS_SECURITY is not set
 # CONFIG_KERNEL_UBIFS_FS_SECURITY is not set
 # CONFIG_KERNEL_JFFS2_FS_SECURITY is not set
+CONFIG_KERNEL_WERROR=y
 # end of Kernel build options
 
 #
@@ -983,6 +992,7 @@ CONFIG_SSP_SUPPORT=y
 CONFIG_BINUTILS_VERSION_2_40=y
 CONFIG_BINUTILS_VERSION="2.40"
 CONFIG_GCC_VERSION="12.3.0"
+CONFIG_GCC_USE_DEFAULT_VERSION=y
 CONFIG_LIBC="musl"
 CONFIG_TARGET_SUFFIX="musl"
 # CONFIG_IB is not set
@@ -3656,6 +3666,8 @@ CONFIG_PACKAGE_kmod-input-core=m
 #
 # CONFIG_PACKAGE_kmod-input-leds is not set
 CONFIG_PACKAGE_kmod-leds-gpio=y
+# CONFIG_PACKAGE_kmod-leds-lp5562 is not set
+# CONFIG_PACKAGE_kmod-leds-lp55xx-common is not set
 # CONFIG_PACKAGE_kmod-leds-pca955x is not set
 # CONFIG_PACKAGE_kmod-leds-pca963x is not set
 # CONFIG_PACKAGE_kmod-leds-tlc591xx is not set
@@ -4284,6 +4296,10 @@ CONFIG_PACKAGE_kmod-mt7915e=m
 # CONFIG_PACKAGE_kmod-mt7921s is not set
 # CONFIG_PACKAGE_kmod-mt7921u is not set
 # CONFIG_PACKAGE_kmod-mt7922-firmware is not set
+# CONFIG_PACKAGE_kmod-mt7925e is not set
+# CONFIG_PACKAGE_kmod-mt7925u is not set
+# CONFIG_PACKAGE_kmod-mt7996-firmware is not set
+# CONFIG_PACKAGE_kmod-mt7996e is not set
 # CONFIG_PACKAGE_kmod-mwifiex-pcie is not set
 # CONFIG_PACKAGE_kmod-mwifiex-sdio is not set
 # CONFIG_PACKAGE_kmod-mwl8k is not set
