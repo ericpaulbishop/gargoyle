@@ -622,7 +622,7 @@ var isb43 = wirelessDriver == "mac80211" && (!GwifiN) ? true : false ;
 
 					<div id="wan_vlan_container" class="row form-group">
 						<span class="col-xs-5">
-							<input type="checkbox" id="wan_use_vlan" onclick="enableAssociatedField(this, 'wan_vlan', '')"/>
+							<input type="checkbox" id="wan_use_vlan" onclick="enableAssociatedField(this, 'wan_vlan', '10')"/>
 							<label class="short-left-pad" for="wan_use_vlan" id="wan_vlan_label"><%~ CustVLAN %>:</label>
 						</span>
 						<span class="col-xs-7"><input type="text" name="wan_vlan" id="wan_vlan" class="form-control" oninput="proofreadNumeric(this)" size="20" maxlength="4"/></span>

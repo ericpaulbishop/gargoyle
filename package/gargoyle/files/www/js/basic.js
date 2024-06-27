@@ -2243,7 +2243,7 @@ function resetData()
 			byId("wan_vlan").value = uciOriginal.get('network',wanVLANDev,'vid');
 		}
 	}
-	enableAssociatedField(document.getElementById('wan_use_vlan'), 'wan_vlan', '');
+	enableAssociatedField(document.getElementById('wan_use_vlan'), 'wan_vlan', '10');
 
 	//note: we have to set pppoe_reconnect_mode in a custom manner, it is a bit non-standard
 	keepalive=uciOriginal.get("network", "wan", "keepalive");
