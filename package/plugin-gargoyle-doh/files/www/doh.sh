@@ -23,7 +23,7 @@
 	echo "providerData = JSON.parse(providerData.join('\n'));"
 	echo "providerData.sort(function(a,b) {return (a.title < b.title) ? -1 : ((a.title > b.title) ? 1 : 0)});"
 
-	$(curl --version | grep -q 'nghttp2') && echo "curlhttp2=true;" || echo "curlhttp2=false;"
+	$(curl --version 2>/dev/null | grep -q 'nghttp2') && echo "curlhttp2=true;" || echo "curlhttp2=false;"
 	hdprunning=$(ubus call service list "{'name':'https-dns-proxy'}" | jsonfilter -q -e "@['https-dns-proxy'].instances[*].running" | uniq)
 	[ "$hdprunning" = "true" ] && echo "serviceRunning=true;" || echo "serviceRunning=false;"
 	echo "serviceRunningPorts='"$(ubus call service list "{'name':'https-dns-proxy'}" | jsonfilter -q -e "@['https-dns-proxy'].instances[*].data.mdns.*.port")"';"
