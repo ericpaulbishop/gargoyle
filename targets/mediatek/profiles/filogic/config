@@ -109,7 +109,8 @@ CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_asus_tuf-ax4200=y
 CONFIG_TARGET_DEVICE_PACKAGES_mediatek_filogic_DEVICE_asus_tuf-ax4200="gargoyle-large"
 CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_asus_tuf-ax6000=y
 CONFIG_TARGET_DEVICE_PACKAGES_mediatek_filogic_DEVICE_asus_tuf-ax6000="gargoyle-large"
-# CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_bananapi_bpi-r3 is not set
+CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_bananapi_bpi-r3=y
+CONFIG_TARGET_DEVICE_PACKAGES_mediatek_filogic_DEVICE_bananapi_bpi-r3="gargoyle-large"
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_cetron_ct3003 is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_cmcc_rax3000m is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_confiabits_mt7981 is not set
@@ -186,6 +187,7 @@ CONFIG_MODULE_DEFAULT_kmod-crypto-hw-safexcel=y
 CONFIG_DEFAULT_kmod-gpio-button-hotplug=y
 CONFIG_MODULE_DEFAULT_kmod-gpio-button-hotplug=y
 CONFIG_MODULE_DEFAULT_kmod-hwmon-pwmfan=y
+CONFIG_MODULE_DEFAULT_kmod-i2c-gpio=y
 CONFIG_DEFAULT_kmod-ipt-offload=y
 CONFIG_MODULE_DEFAULT_kmod-ipt-offload=y
 CONFIG_DEFAULT_kmod-leds-gpio=y
@@ -197,6 +199,7 @@ CONFIG_MODULE_DEFAULT_kmod-mt7981-firmware=y
 CONFIG_MODULE_DEFAULT_kmod-mt7986-firmware=y
 CONFIG_DEFAULT_kmod-phy-aquantia=y
 CONFIG_MODULE_DEFAULT_kmod-phy-aquantia=y
+CONFIG_MODULE_DEFAULT_kmod-sfp=y
 CONFIG_MODULE_DEFAULT_kmod-usb3=y
 CONFIG_DEFAULT_libc=y
 CONFIG_MODULE_DEFAULT_libc=y
@@ -2747,14 +2750,14 @@ CONFIG_PACKAGE_plugin-gargoyle-wol=y
 # CONFIG_PACKAGE_trusted-firmware-a-mt7986-emmc-ddr3 is not set
 CONFIG_PACKAGE_trusted-firmware-a-mt7986-emmc-ddr4=y
 # CONFIG_PACKAGE_trusted-firmware-a-mt7986-nor-ddr3 is not set
-# CONFIG_PACKAGE_trusted-firmware-a-mt7986-nor-ddr4 is not set
+CONFIG_PACKAGE_trusted-firmware-a-mt7986-nor-ddr4=y
 # CONFIG_PACKAGE_trusted-firmware-a-mt7986-sdmmc-ddr3 is not set
-# CONFIG_PACKAGE_trusted-firmware-a-mt7986-sdmmc-ddr4 is not set
+CONFIG_PACKAGE_trusted-firmware-a-mt7986-sdmmc-ddr4=y
 # CONFIG_PACKAGE_trusted-firmware-a-mt7986-snand-ddr3 is not set
 # CONFIG_PACKAGE_trusted-firmware-a-mt7986-snand-ddr4 is not set
 # CONFIG_PACKAGE_trusted-firmware-a-mt7986-spim-nand-4k-ddr4 is not set
 # CONFIG_PACKAGE_trusted-firmware-a-mt7986-spim-nand-ddr3 is not set
-# CONFIG_PACKAGE_trusted-firmware-a-mt7986-spim-nand-ddr4 is not set
+CONFIG_PACKAGE_trusted-firmware-a-mt7986-spim-nand-ddr4=y
 # CONFIG_PACKAGE_trusted-firmware-a-mt7988-emmc-comb is not set
 # CONFIG_PACKAGE_trusted-firmware-a-mt7988-emmc-ddr3 is not set
 # CONFIG_PACKAGE_trusted-firmware-a-mt7988-emmc-ddr4 is not set
@@ -2770,6 +2773,10 @@ CONFIG_PACKAGE_trusted-firmware-a-mt7986-emmc-ddr4=y
 # CONFIG_PACKAGE_trusted-firmware-a-mt7988-spim-nand-comb is not set
 # CONFIG_PACKAGE_trusted-firmware-a-mt7988-spim-nand-ddr3 is not set
 # CONFIG_PACKAGE_trusted-firmware-a-mt7988-spim-nand-ddr4 is not set
+CONFIG_PACKAGE_u-boot-mt7986_bananapi_bpi-r3-emmc=y
+CONFIG_PACKAGE_u-boot-mt7986_bananapi_bpi-r3-nor=y
+CONFIG_PACKAGE_u-boot-mt7986_bananapi_bpi-r3-sdmmc=y
+CONFIG_PACKAGE_u-boot-mt7986_bananapi_bpi-r3-snand=y
 CONFIG_PACKAGE_u-boot-mt7986_glinet_gl-mt6000=y
 # end of Boot Loaders
 
@@ -3169,12 +3176,12 @@ CONFIG_PACKAGE_kmod-hwmon-pwmfan=m
 #
 # I2C support
 #
-# CONFIG_PACKAGE_kmod-i2c-algo-bit is not set
+CONFIG_PACKAGE_kmod-i2c-algo-bit=m
 # CONFIG_PACKAGE_kmod-i2c-algo-pca is not set
 # CONFIG_PACKAGE_kmod-i2c-algo-pcf is not set
 CONFIG_PACKAGE_kmod-i2c-core=y
 # CONFIG_PACKAGE_kmod-i2c-designware-pci is not set
-# CONFIG_PACKAGE_kmod-i2c-gpio is not set
+CONFIG_PACKAGE_kmod-i2c-gpio=m
 # CONFIG_PACKAGE_kmod-i2c-mux is not set
 # CONFIG_PACKAGE_kmod-i2c-mux-gpio is not set
 # CONFIG_PACKAGE_kmod-i2c-mux-pca9541 is not set
@@ -3453,13 +3460,13 @@ CONFIG_PACKAGE_kmod-phy-ax88796b=m
 # CONFIG_PACKAGE_kmod-phy-microchip is not set
 # CONFIG_PACKAGE_kmod-phy-realtek is not set
 # CONFIG_PACKAGE_kmod-phy-smsc is not set
-# CONFIG_PACKAGE_kmod-phylink is not set
+CONFIG_PACKAGE_kmod-phylink=m
 # CONFIG_PACKAGE_kmod-qlcnic is not set
 # CONFIG_PACKAGE_kmod-r6040 is not set
 # CONFIG_PACKAGE_kmod-r8169 is not set
 # CONFIG_PACKAGE_kmod-sfc is not set
 # CONFIG_PACKAGE_kmod-sfc-falcon is not set
-# CONFIG_PACKAGE_kmod-sfp is not set
+CONFIG_PACKAGE_kmod-sfp=m
 # CONFIG_PACKAGE_kmod-sis190 is not set
 # CONFIG_PACKAGE_kmod-sis900 is not set
 # CONFIG_PACKAGE_kmod-skge is not set
