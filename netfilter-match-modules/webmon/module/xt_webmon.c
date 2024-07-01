@@ -65,7 +65,7 @@ MODULE_ALIAS("ip6t_webmon");
 	ntohs(((uint16_t*)&addr)[5]), \
 	ntohs(((uint16_t*)&addr)[6]), \
 	ntohs(((uint16_t*)&addr)[7])
-#define STRIP6 "%04hu:%04hu:%04hu:%04hu:%04hu:%04hu:%04hu:%04hu"
+#define STRIP6 "%04hx:%04hx:%04hx:%04hx:%04hx:%04hx:%04hx:%04hx"
 
 typedef union
 {
@@ -884,7 +884,7 @@ static bool webmon_mt4(const struct sk_buff *skb, struct xt_action_param *par)
 	
 
 	/* ignore packets that are not TCP */
-	iph = (struct iphdr*)(skb_network_header(skb));
+	iph = (struct iphdr*)(skb_network_header(linear_skb));
 	if(iph->protocol == IPPROTO_TCP)
 	{
 		/* get payload */
@@ -1281,13 +1281,13 @@ static bool webmon_mt6(const struct sk_buff *skb, struct xt_action_param *par)
 	
 
 	/* ignore packets that are not TCP */
-	iph = (struct ipv6hdr*)(skb_network_header(skb));
-	ip6proto = ipv6_find_hdr(skb, &thoff, -1, NULL, NULL);
+	iph = (struct ipv6hdr*)(skb_network_header(linear_skb));
+	ip6proto = ipv6_find_hdr(linear_skb, &thoff, -1, NULL, NULL);
 	if(ip6proto == IPPROTO_TCP)
 	{
 		/* get payload */
 		struct tcphdr* tcp_hdr;
-		tcp_hdr = skb_header_pointer(skb, thoff, sizeof(struct tcphdr), tcp_hdr);
+		tcp_hdr = skb_header_pointer(linear_skb, thoff, sizeof(struct tcphdr), tcp_hdr);
 		if(tcp_hdr != NULL)
 		{
 			unsigned short payload_offset 	= (tcp_hdr->doff*4) + thoff;
