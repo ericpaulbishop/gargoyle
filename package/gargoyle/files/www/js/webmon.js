@@ -357,6 +357,7 @@ function updateMonitorTable()
 						else
 						{
 							var splitLine = webmonLines[wmIndex].split(/[\t]+/);
+							if(!splitLine || splitLine.length < 4) continue;
 							loadedData = loadedData && parseInt(splitLine[0]) != "NaN";
 							var lastVisitDate = new Date();
 							lastVisitDate.setTime( 1000*parseInt(splitLine[0]) );
