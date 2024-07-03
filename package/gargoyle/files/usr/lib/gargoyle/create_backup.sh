@@ -31,7 +31,7 @@ if [ -e /tmp/backup ] ; then
 fi
 mkdir -p /tmp/backup
 cd /tmp/backup
-tar cvzf backup.tar.gz $existing_locations
+tar cvzf backup.tar.gz $existing_locations 2>/dev/null
 chmod 777 backup.tar.gz
 garg_web_root=$(uci get gargoyle.global.web_root)
 if [ -z "$garg_web_root" ] ; then
