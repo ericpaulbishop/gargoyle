@@ -62,8 +62,8 @@
 
 	echo "var procmtdLines = [];"
 	echo "var procpartLines = [];"
-	cat /proc/mtd | sed 's/"//g' | awk '{print "procmtdLines.push(\""$0"\");"}'
-	cat /proc/partitions | sed 's/"//g' | awk '{print "procpartLines.push(\""$0"\");"}'
+	cat /proc/mtd 2>/dev/null | sed 's/"//g' | awk '{print "procmtdLines.push(\""$0"\");"}'
+	cat /proc/partitions 2>/dev/null | sed 's/"//g' | awk '{print "procpartLines.push(\""$0"\");"}'
 %>
 //-->
 </script>
