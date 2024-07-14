@@ -1,0 +1,18 @@
+#!/bin/sh
+
+highres="$(uci -q get gargoyle.bandwidth_display.high_res_15m)"
+[ -z "$highres" ] && highres="0"
+uci set bwmon_gargoyle.global.high_res_15m="$highres"
+
+customenable="$(uci -q get gargoyle.bandwidth_display.custom_bwmon_enable)"
+[ -z "$customenable" ] && customenable="0"
+uci set bwmon_gargoyle.custom_monitor="custom_monitor"
+uci set bwmon_gargoyle.custom_monitor.enable="$customenable"
+
+resetday="$(uci -q get gargoyle.bandwidth_display.month_reset_day)"
+[ -z "$resetday" ] && resetday="0"
+uci set bwmon_gargoyle.custom_monitor.month_reset_day="$resetday"
+uci commit bwmon_gargoyle
+
+uci -q delete gargoyle.bandwidth_display
+uci commit gargoyle

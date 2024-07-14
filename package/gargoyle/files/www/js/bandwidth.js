@@ -101,9 +101,9 @@ function initializePlotsAndTable()
 	setSelectedValue("table_time_frame", tableTimeFrame);
 	setSelectedValue("table_units", "mixed");
 
-	document.getElementById("use_high_res_15m").checked = uciOriginal.get("gargoyle", "bandwidth_display", "high_res_15m") == "1" ? true : false;
+	document.getElementById("use_high_res_15m").checked = uciOriginal.get("bwmon_gargoyle", "global", "high_res_15m") == "1" ? true : false;
 
-	var bwUCIval = uciOriginal.get("gargoyle", "bandwidth_display", "custom_bwmon_enable");
+	var bwUCIval = uciOriginal.get("bwmon_gargoyle", "custom_monitor", "enable");
 	var enable_custom_bwmon = (bwUCIval == "0") || (bwUCIval == "") ? 0 : 1;
 	document.getElementById("enable_custom_bwmon").checked = enable_custom_bwmon;
 	document.getElementById("custom_reset_day").disabled = enable_custom_bwmon ? false : true;
@@ -131,7 +131,7 @@ function initializePlotsAndTable()
 		vals.push( (day-1) + "" );
 	}
 	setAllowableSelections("custom_reset_day", vals, names, document);
-	bwUCIval = uciOriginal.get("gargoyle", "bandwidth_display", "month_reset_day");
+	bwUCIval = uciOriginal.get("bwmon_gargoyle", "custom_monitor", "month_reset_day");
 	document.getElementById("custom_reset_day").value = bwUCIval == "" ? "0" : bwUCIval;
 	if(enable_custom_bwmon){addOptionToSelectElement("table_time_frame", bndwS.mnths + " " + bndwS.CustBMon, 6);}
 
@@ -988,8 +988,7 @@ function highResChanged()
 
 	var useHighRes15m = document.getElementById("use_high_res_15m").checked;
 	var commands = [];
-	commands.push("uci set gargoyle.bandwidth_display=bandwidth_display");
-	commands.push("uci set gargoyle.bandwidth_display.high_res_15m=" + (useHighRes15m ? "1" : "0"));
+	commands.push("uci set bwmon_gargoyle.global.high_res_15m=" + (useHighRes15m ? "1" : "0"));
 	commands.push("uci commit");
 	commands.push("/etc/init.d/bwmon_gargoyle restart");
 
@@ -1043,8 +1042,8 @@ function setCustBWMonVisibility()
 
 function checkCustBWMonChanges()
 {
-	var orig_bwcustStatus = uciOriginal.get("gargoyle","bandwidth_display","custom_bwmon_enable");
-	var orig_bwcustResetDay = uciOriginal.get("gargoyle","bandwidth_display","month_reset_day");
+	var orig_bwcustStatus = uciOriginal.get("bwmon_gargoyle","custom_monitor","enable");
+	var orig_bwcustResetDay = uciOriginal.get("bwmon_gargoyle","custom_monitor","month_reset_day");
 
 	var bwcustStatus = document.getElementById("enable_custom_bwmon").checked == true ? 1 : 0;
 	var bwcustResetDay = document.getElementById("custom_reset_day").value;
@@ -1073,8 +1072,9 @@ function bwcustSaveChanges()
 	var bwcustResetDay = document.getElementById("custom_reset_day").value;
 	bwcustResetDay = bwcustResetDay == "" ? "0" : bwcustResetDay;
 	var commands = [];
-	commands.push("uci set gargoyle.bandwidth_display.custom_bwmon_enable=" + bwcustStatus);
-	commands.push("uci set gargoyle.bandwidth_display.month_reset_day=" + bwcustResetDay);
+	commands.push("uci set bwmon_gargoyle.custom_monitor=custom_monitor");
+	commands.push("uci set bwmon_gargoyle.custom_monitor.enable=" + bwcustStatus);
+	commands.push("uci set bwmon_gargoyle.custom_monitor.month_reset_day=" + bwcustResetDay);
 	commands.push("uci commit gargoyle");
 	commands.push("/etc/init.d/bwmon_gargoyle stop");
 	commands.push("rm /tmp/data/bwmon/bdist6* 2>/dev/null");

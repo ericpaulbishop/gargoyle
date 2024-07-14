@@ -50,9 +50,13 @@ define Build/Compile
 endef
 
 define Package/bwmon-gargoyle/install
+	$(INSTALL_DIR) $(1)/etc/config
 	$(INSTALL_DIR) $(1)/etc/init.d
+	$(INSTALL_DIR) $(1)/etc/uci-defaults
 	$(INSTALL_DIR) $(1)/usr/bin
+	$(INSTALL_BIN) ./files/bwmond.config $(1)/etc/config/bwmon_gargoyle
 	$(INSTALL_BIN) ./files/bwmond.init $(1)/etc/init.d/bwmon_gargoyle
+	$(INSTALL_BIN) ./files/bwmond.uci-defaults $(1)/etc/uci-defaults/bwmon_migrate_settings
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/bw_convert $(1)/usr/bin/bw_convert
 endef
 

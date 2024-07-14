@@ -160,7 +160,7 @@ start()
 	bdist5_interval="month"
 	bdist5_num_intervals=12
 
-	custom_reset_time=$(uci get gargoyle.bandwidth_display.month_reset_day 2>/dev/null)
+	custom_reset_time=$(uci get bwmon_gargoyle.custom_monitor.month_reset_day 2>/dev/null)
 	if [ -z "$custom_reset_time" ] ; then
 		custom_reset_time=0
 	fi
@@ -171,7 +171,7 @@ start()
 	ids=""
 
 
-	high_res_15m=$(uci get gargoyle.bandwidth_display.high_res_15m 2>/dev/null)
+	high_res_15m=$(uci get bwmon_gargoyle.global.high_res_15m 2>/dev/null)
 	#echo "high res 15m = $high_res_15m"
 	if [ "$high_res_15m" = "1" ] ; then
 		n=0
@@ -192,7 +192,7 @@ start()
 	fi
 	
 	mon_nums="1 2 3 4 5"
-	custom_bwmon=$(uci get gargoyle.bandwidth_display.custom_bwmon_enable 2>/dev/null)
+	custom_bwmon=$(uci get bwmon_gargoyle.custom_monitor.enable 2>/dev/null)
 	if [ "$custom_bwmon" = "1" ] ; then
 		mon_nums="$mon_nums 6"
 	fi
