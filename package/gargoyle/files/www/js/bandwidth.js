@@ -101,12 +101,14 @@ function initializePlotsAndTable()
 	setSelectedValue("table_time_frame", tableTimeFrame);
 	setSelectedValue("table_units", "mixed");
 
-	document.getElementById("use_high_res_15m").checked = uciOriginal.get("bwmon_gargoyle", "global", "high_res_15m") == "1" ? true : false;
+	var bwmonEnabled = uciOriginal.get("bwmon_gargoyle", "global", "enabled") == "1" ? true : false;
+	byId("enable_bwmon").checked = bwmonEnabled;
+	byId("use_high_res_15m").checked = uciOriginal.get("bwmon_gargoyle", "global", "high_res_15m") == "1" ? true : false;
 
 	var bwUCIval = uciOriginal.get("bwmon_gargoyle", "custom_monitor", "enable");
 	var enable_custom_bwmon = (bwUCIval == "0") || (bwUCIval == "") ? 0 : 1;
-	document.getElementById("enable_custom_bwmon").checked = enable_custom_bwmon;
-	document.getElementById("custom_reset_day").disabled = enable_custom_bwmon ? false : true;
+	byId("enable_custom_bwmon").checked = enable_custom_bwmon;
+	byId("custom_reset_day").disabled = enable_custom_bwmon ? false : true;
 	var vals = [];
 	var names = [];
 	var day=1;
@@ -216,7 +218,10 @@ function initializePlotsAndTable()
 	downloadMonitors = ["","",""];
 	updateInProgress = false;
 	setTimeout(resetPlots, 150); //for some reason Opera 10.50 craps out if we try to load plot functions immediately
-	updateInterval = setInterval(doUpdate, 2000);
+	if(bwmonEnabled)
+	{
+		updateInterval = setInterval(doUpdate, 2000);
+	}
 }
 
 
@@ -982,29 +987,6 @@ function expand(name)
 	runOnWindowLoad(name);
 }
 
-function highResChanged()
-{
-	setControlsEnabled(false, true, bndwS.RstGr);
-
-	var useHighRes15m = document.getElementById("use_high_res_15m").checked;
-	var commands = [];
-	commands.push("uci set bwmon_gargoyle.global.high_res_15m=" + (useHighRes15m ? "1" : "0"));
-	commands.push("uci commit");
-	commands.push("/etc/init.d/bwmon_gargoyle restart");
-
-	var stateChangeFunction = function(req)
-	{
-		if(req.readyState == 4)
-		{
-			window.location = window.location;
-			setControlsEnabled(true);
-		}
-	}
-	var param = getParameterDefinition("commands", commands.join("\n"))  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
-	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
-
-}
-
 function deleteData()
 {
 	if (confirm(bndwS.DelAD) == false)
@@ -1036,50 +1018,42 @@ function setCustBWMonVisibility()
 	var bwcustDisabled = document.getElementById("enable_custom_bwmon").checked == true ? false : true;
 	//document.getElementById("custom_time_frame").disabled = bwcustDisabled;	//Currently always disabled as we only want people to be able to set months
 	document.getElementById("custom_reset_day").disabled = bwcustDisabled;
-
-	checkCustBWMonChanges();
 }
 
-function checkCustBWMonChanges()
+function saveChanges()
 {
-	var orig_bwcustStatus = uciOriginal.get("bwmon_gargoyle","custom_monitor","enable");
-	var orig_bwcustResetDay = uciOriginal.get("bwmon_gargoyle","custom_monitor","month_reset_day");
-
-	var bwcustStatus = document.getElementById("enable_custom_bwmon").checked == true ? 1 : 0;
-	var bwcustResetDay = document.getElementById("custom_reset_day").value;
-
-	if((orig_bwcustStatus != bwcustStatus) || (orig_bwcustResetDay != bwcustResetDay))
-	{
-		//We must have changed something, allow saving
-		document.getElementById("bwcustSaveChanges").disabled = false;
-	}
-	else
-	{
-		document.getElementById("bwcustSaveChanges").disabled = true;
-	}
-}
-
-function bwcustSaveChanges()
-{
-	if (confirm(bndwS.CustBMonWarn) == false)
-	{
-		return;
-	}
-
 	setControlsEnabled(false, true, UI.WaitSettings);
 
-	var bwcustStatus = document.getElementById("enable_custom_bwmon").checked == true ? 1 : 0;
-	var bwcustResetDay = document.getElementById("custom_reset_day").value;
+	var uci = uciOriginal.clone();
+
+	var enableBwmon = byId('enable_bwmon').checked == true ? 1 : 0;
+	uci.set('bwmon_gargoyle','global','enabled',(enableBwmon ? "1" : "0"));
+
+	var useHighRes15m = byId("use_high_res_15m").checked;
+	uci.set('bwmon_gargoyle','global','high_res_15m',(useHighRes15m ? "1" : "0"));
+
+	var bwcustStatus = byId("enable_custom_bwmon").checked == true ? 1 : 0;
+	var bwcustResetDay = byId("custom_reset_day").value;
 	bwcustResetDay = bwcustResetDay == "" ? "0" : bwcustResetDay;
-	var commands = [];
-	commands.push("uci set bwmon_gargoyle.custom_monitor=custom_monitor");
-	commands.push("uci set bwmon_gargoyle.custom_monitor.enable=" + bwcustStatus);
-	commands.push("uci set bwmon_gargoyle.custom_monitor.month_reset_day=" + bwcustResetDay);
-	commands.push("uci commit gargoyle");
-	commands.push("/etc/init.d/bwmon_gargoyle stop");
-	commands.push("rm /tmp/data/bwmon/bdist6* 2>/dev/null");
-	commands.push("rm /usr/data/bwmon/bdist6* 2>/dev/null");
-	commands.push("/etc/init.d/bwmon_gargoyle start");
+	uci.set('bwmon_gargoyle','custom_monitor','enable',(bwcustStatus ? "1" : "0"));
+	uci.set('bwmon_gargoyle','custom_monitor','month_reset_day',bwcustResetDay);
+	var commands = uci.getScriptCommands(uciOriginal);
+	var restartCmd = "/etc/init.d/bwmon_gargoyle restart";
+	if(commands.search(/custom_monitor/) > -1)
+	{
+		// Making a change to custom bwmon
+		if(confirm(bndwS.CustBMonWarn) == false)
+		{
+			setControlsEnabled(true);
+			return;
+		}
+		commands = commands + "\nrm /tmp/data/bwmon/bdist6* 2>/dev/null";
+		commands = commands + "\nrm /usr/data/bwmon/bdist6* 2>/dev/null";
+		commands = "/etc/init.d/bwmon_gargoyle stop\n" + commands;
+		restartCmd = "/etc/init.d/bwmon_gargoyle start";
+	}
+
+	commands = commands + "\n" + restartCmd;
 
 	var stateChangeFunction = function(req)
 	{
@@ -1089,6 +1063,6 @@ function bwcustSaveChanges()
 			setControlsEnabled(true);
 		}
 	}
-	var param = getParameterDefinition("commands", commands.join("\n"))  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+	var param = getParameterDefinition("commands", commands)  + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 	runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 }

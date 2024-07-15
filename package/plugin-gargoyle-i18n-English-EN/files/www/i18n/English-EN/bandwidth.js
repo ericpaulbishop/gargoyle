@@ -3,6 +3,8 @@
  */
 
 bndwS.mBandwidth="Bandwidth Usage";
+bndwS.Sett="Bandwidth Monitor Settings";
+bndwS.Enable="Enable Bandwidth Monitoring";
 bndwS.GOpSect="Bandwidth Graph Display Options";
 bndwS.TFrm="Time Frame";
 bndwS.year="year";
