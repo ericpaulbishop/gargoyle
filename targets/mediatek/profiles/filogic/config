@@ -143,8 +143,10 @@ CONFIG_TARGET_DEVICE_PACKAGES_mediatek_filogic_DEVICE_netgear_wax220="gargoyle-v
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_xiaomi_mi-router-ax3000t-ubootmod is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_xiaomi_mi-router-wr30u-ubootmod is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_xiaomi_mi-router-wr30u-stock is not set
-# CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_xiaomi_redmi-router-ax6000-ubootmod is not set
-# CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_xiaomi_redmi-router-ax6000-stock is not set
+CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_xiaomi_redmi-router-ax6000-ubootmod=y
+CONFIG_TARGET_DEVICE_PACKAGES_mediatek_filogic_DEVICE_xiaomi_redmi-router-ax6000-ubootmod="gargoyle-large"
+CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_xiaomi_redmi-router-ax6000-stock=y
+CONFIG_TARGET_DEVICE_PACKAGES_mediatek_filogic_DEVICE_xiaomi_redmi-router-ax6000-stock="gargoyle-large"
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_zbtlink_zbt-z8102ax is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_zyxel_ex5601-t0-ubootmod is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_zyxel_ex5601-t0-stock is not set
@@ -192,6 +194,7 @@ CONFIG_DEFAULT_kmod-ipt-offload=y
 CONFIG_MODULE_DEFAULT_kmod-ipt-offload=y
 CONFIG_DEFAULT_kmod-leds-gpio=y
 CONFIG_MODULE_DEFAULT_kmod-leds-gpio=y
+CONFIG_MODULE_DEFAULT_kmod-leds-ws2812b=y
 CONFIG_DEFAULT_kmod-mt7915e=y
 CONFIG_MODULE_DEFAULT_kmod-mt7915e=y
 CONFIG_MODULE_DEFAULT_kmod-mt7916-firmware=y
@@ -2778,6 +2781,7 @@ CONFIG_PACKAGE_u-boot-mt7986_bananapi_bpi-r3-nor=y
 CONFIG_PACKAGE_u-boot-mt7986_bananapi_bpi-r3-sdmmc=y
 CONFIG_PACKAGE_u-boot-mt7986_bananapi_bpi-r3-snand=y
 CONFIG_PACKAGE_u-boot-mt7986_glinet_gl-mt6000=y
+CONFIG_PACKAGE_u-boot-mt7986_xiaomi_redmi-router-ax6000=y
 # end of Boot Loaders
 
 #
@@ -3257,7 +3261,7 @@ CONFIG_PACKAGE_kmod-leds-gpio=y
 # CONFIG_PACKAGE_kmod-leds-pca963x is not set
 # CONFIG_PACKAGE_kmod-leds-tlc591xx is not set
 # CONFIG_PACKAGE_kmod-leds-uleds is not set
-# CONFIG_PACKAGE_kmod-leds-ws2812b is not set
+CONFIG_PACKAGE_kmod-leds-ws2812b=m
 # CONFIG_PACKAGE_kmod-ledtrig-activity is not set
 # CONFIG_PACKAGE_kmod-ledtrig-audio is not set
 # CONFIG_PACKAGE_kmod-ledtrig-gpio is not set
