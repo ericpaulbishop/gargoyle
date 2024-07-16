@@ -69,6 +69,8 @@ bw_restore()
 {
 	bw_id="$1"
 	backup_to_tmp="$2"
+
+	backup_to_tmp_only="$(uci -q get bwmon_gargoyle.global.backup_to_tmp_only)"
 	
 	if [ -e "/usr/data/bwmon/$bw_id.bw" ] ; then
 		bw_set -i "$bw_id" -h -f /usr/data/bwmon/$bw_id.bw >/dev/null 2>&1
@@ -85,7 +87,7 @@ bw_restore()
 	fi
 
 	if [ -e "$tmp_cron" ] ; then
-		if [ "$backup_to_tmp" = "1" ] ; then
+		if [ "$backup_to_tmp" = "1" ] || [ "$backup_to_tmp_only" = "1" ] ; then
 			echo "bw_get -i \"$bw_id\" -h -f \"/tmp/data/bwmon/$bw_id.bw\" >/dev/null 2>&1" >> "$backup_script"
 		else
 			echo "bw_get -i \"$bw_id\" -h -f \"/usr/data/bwmon/$bw_id.bw\" >/dev/null 2>&1" >> "$backup_script"
