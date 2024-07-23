@@ -46,6 +46,7 @@ endef
 define Package/plugin-gargoyle-qos/install
 	$(INSTALL_DIR) $(1)
 	$(CP) ./files/* $(1)/
+	chmod 755 $(1)/usr/lib/bwmon-gargoyle/bwmon-gargoyle.d/020-qos.bwmon
 endef
 
 define Package/plugin-gargoyle-qos/postinst

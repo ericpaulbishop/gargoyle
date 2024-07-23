@@ -47,6 +47,7 @@ endef
 define Package/plugin-gargoyle-tor/install
 	$(INSTALL_DIR) $(1)
 	$(CP) ./files/* $(1)/
+	chmod 755 $(1)/usr/lib/bwmon-gargoyle/bwmon-gargoyle.d/050-tor.bwmon
 endef
 
 

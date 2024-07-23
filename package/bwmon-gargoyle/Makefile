@@ -54,6 +54,12 @@ define Package/bwmon-gargoyle/install
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
 	$(INSTALL_DIR) $(1)/usr/bin
+	$(INSTALL_DIR) $(1)/usr/lib
+	$(INSTALL_DIR) $(1)/usr/lib/bwmon-gargoyle
+	
+	$(CP) ./files/bwmon-gargoyle/* $(1)/usr/lib/bwmon-gargoyle/
+	chmod 755 $(1)/usr/lib/bwmon-gargoyle/bwmon-gargoyle.d/010-bdist_total.bwmon
+	
 	$(INSTALL_BIN) ./files/bwmond.config $(1)/etc/config/bwmon_gargoyle
 	$(INSTALL_BIN) ./files/bwmond.init $(1)/etc/init.d/bwmon_gargoyle
 	$(INSTALL_BIN) ./files/bwmond.uci-defaults $(1)/etc/uci-defaults/bwmon_migrate_settings
