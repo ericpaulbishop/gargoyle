@@ -15,8 +15,8 @@ function saveChanges()
 	var commands = "";
 	var errors = "";
 
-	var stopbwmon = "/etc/init.d/bwmon_gargoyle stop ;\n";
-	var startbwmon = "/etc/init.d/bwmon_gargoyle start ;\n";
+	var stopbwmon = "/usr/lib/bwmon-gargoyle/bwmon-gargoyle.d/020-qos.bwmon stop ;\n";
+	var startbwmon = "/usr/lib/bwmon-gargoyle/bwmon-gargoyle.d/020-qos.bwmon start ;\n";
 	var bwmonCleanCommand = "\nif [ -d /usr/data/bwmon/ ] ; then rm /usr/data/bwmon/qos-" + direction + "-* >/dev/null 2>&1 ; fi ;\n";
 	var bwmonCleanCommand = bwmonCleanCommand + "if [ -d /tmp/data/bwmon/ ] ; then rm /tmp/data/bwmon/qos-" + direction + "-* >/dev/null 2>&1 ; fi ;\n";
 
@@ -76,7 +76,7 @@ function saveChanges()
 		}
 		else
 		{
-			commands =  uci.getScriptCommands(uciOriginal) + "\n" +  stopbwmon + commands + bwmonCleanCommand + startbwmon;
+			commands =  uci.getScriptCommands(uciOriginal) + "\n" + commands + stopbwmon + bwmonCleanCommand + startbwmon;
 		}
 	}
 	else if(validateNumeric(document.getElementById("total_bandwidth").value) != 0)
@@ -220,7 +220,7 @@ function saveChanges()
 		else
 		{
 			commands = "\n/etc/init.d/qos_gargoyle start ;\n/etc/init.d/qos_gargoyle enable ;\n";
-			commands = preCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" +stopbwmon + commands + bwmonCleanCommand + startbwmon;
+			commands = preCommands.join("\n") + "\n" + uci.getScriptCommands(uciOriginal) + "\n" + commands + stopbwmon + bwmonCleanCommand + startbwmon;
 		}
 	}
 

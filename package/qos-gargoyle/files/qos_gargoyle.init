@@ -17,6 +17,8 @@ upload_mask="0x007F"
 download_mask="0x7F00"
 qos_mark_file="/etc/qos_class_marks"
 
+bwmonscript="/usr/lib/bwmon-gargoyle/bwmon-gargoyle.d/020-qos.bwmon"
+
 #created while qos is being initialized so hotplug and init script don't
 #both try to initialize qos at the same time
 lock_file="/var/run/qos_updating"
@@ -819,6 +821,7 @@ stop()
 	#Kill the qos monitor in case it is running
 	killall qosmon 2>/dev/null
 
+	[ -e $bwmonscript ] && $bwmonscript "stop"
 
 	$echo_on
 	#Delete the qdiscs we hung on the devices
@@ -868,9 +871,9 @@ start()
 	#load qos_interface from global variables
 	define_interface
 	if [ -n "$qos_interface" ] ; then
-
 		load_all_config_options "$config_file_name" "global"
 		initialize_qos
+		[ -e $bwmonscript ] && $bwmonscript "start"
 	fi
 
 	rm -rf "$lock_file"
