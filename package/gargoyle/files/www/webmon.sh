@@ -111,6 +111,7 @@
 							<option value="hostname"><%~ DspHn %></option>
 							<option value="ip"><%~ DspHIP %></option>
 						</select>
+						<input id="domain_search" type="text" class="form-control" placeholder="Filter" />
 					</span>
 				</div>
 
@@ -166,6 +167,7 @@
 <script>
 <!--
 	resetData();
+	webmonSearchInit('domain_search', 'webmon_domain_table_container');
 //-->
 </script>
 

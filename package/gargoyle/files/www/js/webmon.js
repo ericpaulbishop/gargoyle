@@ -428,3 +428,95 @@ function updateMonitorTable()
 		runAjax("POST", "utility/run_commands.sh", param, stateChangeFunction);
 	}
 }
+
+function webmonSearch(input, container)
+{
+	const table = container.getElementsByTagName('table')[0];
+	if (!table) return;
+
+	// The 'table-striped' used to highlight odd/even rows using CSS
+	// Unfortunately, this cannot be used if some rows are hidden
+	// So removing the class and later assign odd/even classes directly to the rows
+	table.classList.remove('table-striped');
+
+	const tbody = table.getElementsByTagName('tbody')[0];
+	if (!tbody) return;
+
+	const s = input.value.trim();
+	if (s == '')
+	{
+		for (let i = 0, k = tbody.rows.length; i < k; ++i)
+		{
+			tbody.rows[i].style.display = ''; // 'table-row' can also be used
+			tbody.rows[i].className = i % 2 ? 'even' : 'odd';
+		}
+	}
+	else
+	{
+		const S = s.toUpperCase();
+		let visibleIndex = 0;
+		for (let i = 0, k = tbody.rows.length; i < k; ++i)
+		{
+			const row = tbody.rows[i];
+			let host = row.dataset.host;
+			if(host == null)
+			{
+				// Caching host/ip in dataset
+				host = row.cells[0] && row.cells[0].firstChild ? row.cells[0].firstChild.nodeValue.toUpperCase() : '';
+				row.dataset.host = host;
+			}
+			let value = row.dataset.value;
+			if(value == null)
+			{
+				// Caching value (domain/search) in dataset
+				value = row.cells[2] && row.cells[2].firstChild ? row.cells[2].firstChild.getAttribute('href') : '';
+				const proto = value.indexOf('://');
+				if(proto > 0) value = value.slice(proto + 3).toUpperCase();
+				row.dataset.value = value;
+			}
+			if(host.indexOf(S) >= 0 || value.indexOf(S) >= 0)
+			{
+				row.style.display = ''; // 'table-row' can also be used
+				row.className = visibleIndex++ % 2 ? 'even' : 'odd';
+			}
+			else
+			{
+				row.style.display = 'none';
+			}
+		}
+	}
+}
+
+var webmonSearchTimer;
+function webmonSearchInit(inputId, containerId)
+{
+	const input = byId(inputId);
+	if(!input) return;
+
+	const container = byId(containerId);
+	if(!container){
+		// No container for the table exists -- hide filter input
+		input.style.display='none';
+		return;
+	}
+
+	input.addEventListener('keyup', function(evt) {
+		clearTimeout(webmonSearchTimer);
+		webmonSearchTimer = setTimeout(webmonSearch, 1000, input, container);
+	}, false);
+
+	const observer = new MutationObserver(function(mutationList, observer) {
+		if(input.value.trim() == '') return;
+		for (const mutation of mutationList)
+		{
+			if (mutation.type === 'childList' && mutation.addedNodes)
+			{
+				// New table added, re-filtering
+				webmonSearch(input, container);
+				break;
+			}
+		}
+	});
+
+	observer.observe(container, { childList: true });
+}
