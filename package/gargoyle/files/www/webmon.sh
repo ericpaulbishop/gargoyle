@@ -107,11 +107,11 @@
 			<div class="panel-body">
 				<div class="row form-group">
 					<span class="col-xs-12">
-						<select id="domain_host_display" class="row form-group" onchange="updateMonitorTable()">
+						<select id="domain_host_display" class="form-control" onchange="updateMonitorTable()">
 							<option value="hostname"><%~ DspHn %></option>
 							<option value="ip"><%~ DspHIP %></option>
 						</select>
-						<input id="domain_search" type="text" class="form-control" placeholder="Filter" />
+						<input id="domain_search" type="text" class="form-control" placeholder="<%~ Filt %>" />
 					</span>
 				</div>
 

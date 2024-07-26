@@ -20,3 +20,4 @@ webmS.VSit="Visited Sites";
 webmS.SRqst="Search Requests";
 webmS.dCol=['Local Host', 'Last Access Time', 'Website'];
 webmS.sCol=['Local Host', 'Last Access Time', 'Search Text'];
+webmS.Filt="Filter";
