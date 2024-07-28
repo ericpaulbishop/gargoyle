@@ -20,7 +20,7 @@ upS.ChksumMatch="Checksum matches";
 upS.NoPrsv="Preserve settings is not allowed with this firmware";
 upS.ForceWarn="Firmware has been detected as incompatible with this device (wrong device OR too big OR invalid firmware format). Forcing firmware upgrade can result in a bricked device if used incorrectly. Please ensure this firmware is correct for your device!</p><p>If you wish to force the upgrade, please tick <em>Force upgrade</em> below.";
 upS.ForceUpg="Force upgrade";
-upS.UpServWarn="Firwmare Upgrade Warning(s)";
+upS.UpServWarn="Firmware Upgrade Warning(s)";
 
 //javascript
 upS.SelErr="ERROR: You must select a firmware file.";

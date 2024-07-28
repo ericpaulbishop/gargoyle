@@ -3,6 +3,8 @@
  */
 
 bndwS.mBandwidth="Zużycie pasma";
+bndwS.Sett="Ustawienia monitora zużycia";
+bndwS.Enable="Włącz monitor zużycia";
 bndwS.GOpSect="Opcje wyświetlania wykresu zużycia";
 bndwS.TFrm="Przedział czasowy";
 bndwS.year="rok";

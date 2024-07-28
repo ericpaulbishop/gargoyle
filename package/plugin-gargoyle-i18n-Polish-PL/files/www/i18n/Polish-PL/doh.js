@@ -22,3 +22,6 @@ DoH.Filters="Filtry";
 DoH.Variant="Wariant";
 DoH.Username="Nazwa użytkownika";
 DoH.Location="Lokalizacja";
+
+/* Update Hooks */
+DoH.DoHNoDNS="Obecnie włączony jest protokół DNS przez HTTPS (DoH).<br>Jeśli uaktualnisz firmware do nowego, które nie ma wstępnie zainstalowanego protokołu DoH, utracisz łączność DNS, nie będziesz mógł przeglądać internetu i będziesz musiał ręcznie naprawić pliki konfiguracyjne.<br><strong>Zaleca się wyłączenie protokołu DoH przed uaktualnieniem, chyba że wiesz, co robisz.</strong>";

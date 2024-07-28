@@ -20,6 +20,7 @@ upS.ChksumMatch="Dopasowanie sumy kontrolnej";
 upS.NoPrsv="Zachowanie ustawień w tym firmware nie jest dozwolone";
 upS.ForceWarn="Firmware zostało wykryte jako niezgodne z tym urządzeniem (złe urządzenie LUB zbyt duży plik LUB nieprawidłowy format oprogramowania). Wymuszenie aktualizacji firmware może spowodować uszkodzenie urządzenia. Upewnij się, że to firmware jest prawidłowe dla twojego urządzenia!</p><p>Jeśli chcesz wymusić aktualizację, zaznacz <em>Wymuś aktualizację</em> poniżej.";
 upS.ForceUpg="Wymuś aktualizację";
+upS.UpServWarn="Ostrzeżenia dotyczące aktualizacji firmware";
 
 //javascript
 upS.SelErr="BŁĄD: Należy wskazać plik firmware.";

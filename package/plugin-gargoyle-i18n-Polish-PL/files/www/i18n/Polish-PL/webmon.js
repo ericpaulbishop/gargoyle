@@ -20,3 +20,4 @@ webmS.VSit="Witryny";
 webmS.SRqst="Wyszukiwania";
 webmS.dCol=['Urządzenie', 'Ostatni dostęp', 'Witryna'];
 webmS.sCol=['Urządzenie', 'Ostatni dostęp', 'Wyszukiwany tekst'];
+webmS.Filt="Filtr";
