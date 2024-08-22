@@ -184,6 +184,7 @@ CONFIG_TARGET_MULTI_PROFILE=y
 # CONFIG_TARGET_ramips_mt7621_DEVICE_mqmaker_witi is not set
 # CONFIG_TARGET_ramips_mt7621_DEVICE_mtc_wr1201 is not set
 # CONFIG_TARGET_ramips_mt7621_DEVICE_mts_wg430223 is not set
+# CONFIG_TARGET_ramips_mt7621_DEVICE_netgear_eax12 is not set
 # CONFIG_TARGET_ramips_mt7621_DEVICE_netgear_ex6150 is not set
 # CONFIG_TARGET_ramips_mt7621_DEVICE_netgear_r6220 is not set
 # CONFIG_TARGET_ramips_mt7621_DEVICE_netgear_r6260 is not set
@@ -476,6 +477,7 @@ CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_mikrotik_routerboard-750gr3="
 # CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_mqmaker_witi is not set
 # CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_mtc_wr1201 is not set
 # CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_mts_wg430223 is not set
+# CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_netgear_eax12 is not set
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_netgear_ex6150=y
 CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_netgear_ex6150="gargoyle-vpn"
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_netgear_r6700-v2=y
@@ -558,7 +560,8 @@ CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_tplink_re650-v1="gargoyle-vpn
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_tplink_re650-v2=y
 CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_tplink_re650-v2="gargoyle-vpn"
 # CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_tplink_tl-wpa8631p-v3 is not set
-# CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_ubnt_edgerouter-x-sfp is not set
+CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_ubnt_edgerouter-x-sfp=y
+CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_ubnt_edgerouter-x-sfp="gargoyle-vpn"
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_ubnt_edgerouter-x=y
 CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_ubnt_edgerouter-x="gargoyle-vpn"
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_ubnt_unifi-6-lite=y
@@ -658,6 +661,8 @@ CONFIG_MODULE_DEFAULT_iwinfo=y
 CONFIG_MODULE_DEFAULT_kmod-ata-ahci=y
 CONFIG_DEFAULT_kmod-gpio-button-hotplug=y
 CONFIG_MODULE_DEFAULT_kmod-gpio-button-hotplug=y
+CONFIG_MODULE_DEFAULT_kmod-gpio-pca953x=y
+CONFIG_MODULE_DEFAULT_kmod-i2c-algo-pca=y
 CONFIG_DEFAULT_kmod-ipt-offload=y
 CONFIG_MODULE_DEFAULT_kmod-ipt-offload=y
 CONFIG_DEFAULT_kmod-leds-gpio=y
@@ -670,6 +675,7 @@ CONFIG_MODULE_DEFAULT_kmod-mt76x2=y
 CONFIG_MODULE_DEFAULT_kmod-mt7915-firmware=y
 CONFIG_MODULE_DEFAULT_kmod-rt2800-pci=y
 CONFIG_MODULE_DEFAULT_kmod-sdhci-mt7620=y
+CONFIG_MODULE_DEFAULT_kmod-sfp=y
 CONFIG_MODULE_DEFAULT_kmod-usb-ledtrig-usbport=y
 CONFIG_MODULE_DEFAULT_kmod-usb3=y
 CONFIG_DEFAULT_libc=y
@@ -3336,6 +3342,7 @@ CONFIG_PACKAGE_vsftpd=m
 # CONFIG_PACKAGE_iwl3945-firmware is not set
 # CONFIG_PACKAGE_iwl4965-firmware is not set
 # CONFIG_PACKAGE_iwlwifi-firmware-ax200 is not set
+# CONFIG_PACKAGE_iwlwifi-firmware-ax201 is not set
 # CONFIG_PACKAGE_iwlwifi-firmware-ax210 is not set
 # CONFIG_PACKAGE_iwlwifi-firmware-iwl100 is not set
 # CONFIG_PACKAGE_iwlwifi-firmware-iwl1000 is not set
@@ -3449,6 +3456,7 @@ CONFIG_PACKAGE_kmod-scsi-core=m
 CONFIG_PACKAGE_kmod-crypto-aead=m
 CONFIG_PACKAGE_kmod-crypto-arc4=m
 # CONFIG_PACKAGE_kmod-crypto-authenc is not set
+# CONFIG_PACKAGE_kmod-crypto-blake2b is not set
 CONFIG_PACKAGE_kmod-crypto-cbc=m
 CONFIG_PACKAGE_kmod-crypto-ccm=m
 # CONFIG_PACKAGE_kmod-crypto-chacha20poly1305 is not set
@@ -3492,6 +3500,7 @@ CONFIG_PACKAGE_kmod-crypto-sha512=m
 CONFIG_PACKAGE_kmod-crypto-user=m
 # CONFIG_PACKAGE_kmod-crypto-xcbc is not set
 # CONFIG_PACKAGE_kmod-crypto-xts is not set
+# CONFIG_PACKAGE_kmod-crypto-xxhash is not set
 # CONFIG_PACKAGE_kmod-cryptodev is not set
 # end of Cryptographic API modules
 
@@ -3593,9 +3602,9 @@ CONFIG_PACKAGE_kmod-hwmon-core=m
 # I2C support
 #
 # CONFIG_PACKAGE_kmod-i2c-algo-bit is not set
-# CONFIG_PACKAGE_kmod-i2c-algo-pca is not set
+CONFIG_PACKAGE_kmod-i2c-algo-pca=m
 # CONFIG_PACKAGE_kmod-i2c-algo-pcf is not set
-# CONFIG_PACKAGE_kmod-i2c-core is not set
+CONFIG_PACKAGE_kmod-i2c-core=m
 # CONFIG_PACKAGE_kmod-i2c-designware-pci is not set
 # CONFIG_PACKAGE_kmod-i2c-gpio is not set
 # CONFIG_PACKAGE_kmod-i2c-mux is not set
@@ -3696,6 +3705,7 @@ CONFIG_PACKAGE_kmod-lib-crc32c=m
 # CONFIG_PACKAGE_kmod-lib-crc7 is not set
 # CONFIG_PACKAGE_kmod-lib-crc8 is not set
 # CONFIG_PACKAGE_kmod-lib-lz4 is not set
+# CONFIG_PACKAGE_kmod-lib-lz4hc is not set
 CONFIG_PACKAGE_kmod-lib-textsearch=y
 # CONFIG_PACKAGE_kmod-lib-zstd is not set
 CONFIG_PACKAGE_kmod-oid-registry=m
@@ -3875,13 +3885,13 @@ CONFIG_PACKAGE_kmod-phy-ax88796b=m
 # CONFIG_PACKAGE_kmod-phy-microchip is not set
 # CONFIG_PACKAGE_kmod-phy-realtek is not set
 # CONFIG_PACKAGE_kmod-phy-smsc is not set
-# CONFIG_PACKAGE_kmod-phylink is not set
+CONFIG_PACKAGE_kmod-phylink=m
 # CONFIG_PACKAGE_kmod-qlcnic is not set
 # CONFIG_PACKAGE_kmod-r6040 is not set
 # CONFIG_PACKAGE_kmod-r8169 is not set
 # CONFIG_PACKAGE_kmod-sfc is not set
 # CONFIG_PACKAGE_kmod-sfc-falcon is not set
-# CONFIG_PACKAGE_kmod-sfp is not set
+CONFIG_PACKAGE_kmod-sfp=m
 # CONFIG_PACKAGE_kmod-sis190 is not set
 # CONFIG_PACKAGE_kmod-sis900 is not set
 # CONFIG_PACKAGE_kmod-skge is not set
@@ -4006,7 +4016,7 @@ CONFIG_PACKAGE_kmod-eeprom-93cx6=m
 # CONFIG_PACKAGE_kmod-gpio-beeper is not set
 CONFIG_PACKAGE_kmod-gpio-button-hotplug=y
 # CONFIG_PACKAGE_kmod-gpio-nxp-74hc164 is not set
-# CONFIG_PACKAGE_kmod-gpio-pca953x is not set
+CONFIG_PACKAGE_kmod-gpio-pca953x=m
 # CONFIG_PACKAGE_kmod-gpio-pcf857x is not set
 # CONFIG_PACKAGE_kmod-hsdma-mtk is not set
 # CONFIG_PACKAGE_kmod-i6300esb-wdt is not set
@@ -4032,6 +4042,8 @@ CONFIG_PACKAGE_kmod-mmc=m
 CONFIG_PACKAGE_kmod-ramoops=m
 CONFIG_PACKAGE_kmod-random-core=m
 CONFIG_PACKAGE_kmod-reed-solomon=m
+CONFIG_PACKAGE_kmod-regmap-core=m
+CONFIG_PACKAGE_kmod-regmap-i2c=m
 # CONFIG_PACKAGE_kmod-rtc-ds1307 is not set
 # CONFIG_PACKAGE_kmod-rtc-ds1374 is not set
 # CONFIG_PACKAGE_kmod-rtc-ds1672 is not set
@@ -4053,6 +4065,7 @@ CONFIG_PACKAGE_kmod-thermal=m
 CONFIG_PACKAGE_kmod-tpm=m
 # CONFIG_PACKAGE_kmod-tpm-i2c-atmel is not set
 # CONFIG_PACKAGE_kmod-tpm-i2c-infineon is not set
+# CONFIG_PACKAGE_kmod-ubootenv-nvram is not set
 # CONFIG_PACKAGE_kmod-wdt-sp805 is not set
 # CONFIG_PACKAGE_kmod-zram is not set
 # end of Other modules
