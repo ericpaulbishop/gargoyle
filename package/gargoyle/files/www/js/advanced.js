@@ -163,7 +163,7 @@ function setWANContainerVisibility()
 function setModemNetworkVisibility()
 {
 	var wandhcp = uciOriginal.get('network','wan','proto');
-	if(wandhcp == 'dhcp')
+	if(wandhcp == 'dhcp' || wandhcp == 'pppoe')
 	{
 		loadChecked(['use_modem_network',uciOriginal,'network','modem','ipaddr',function(ip){return ip != ""}]);
 		loadValueFromVariable(['modem_network_ip',uciOriginal,'network','modem','ipaddr','192.168.0.2']);
