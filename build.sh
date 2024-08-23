@@ -27,8 +27,8 @@ set_version_variables()
 
 	#openwrt branch
 	branch_name="23.05"
-	branch_id="openwrt-22.05"
-	packages_branch="openwrt-22.05"
+	branch_id="openwrt-23.05"
+	packages_branch="openwrt-23.05"
 
 
 	# set precise commit in repo to use 
