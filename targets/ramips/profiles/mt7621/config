@@ -322,7 +322,8 @@ CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_asus_rt-ax53u="gargoyle-large
 CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_asus_rt-n56u-b1=y
 CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_asus_rt-n56u-b1="gargoyle-large"
 # CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_beeline_smartbox-flash is not set
-# CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_beeline_smartbox-giga is not set
+CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_beeline_smartbox-giga=y
+CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7621_DEVICE_beeline_smartbox-giga="gargoyle-large"
 # CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_beeline_smartbox-pro is not set
 # CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_beeline_smartbox-turbo is not set
 # CONFIG_TARGET_DEVICE_ramips_mt7621_DEVICE_beeline_smartbox-turbo-plus is not set
