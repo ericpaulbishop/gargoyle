@@ -73,6 +73,7 @@ CONFIG_TARGET_MULTI_PROFILE=y
 # CONFIG_TARGET_ramips_mt7620_DEVICE_comfast_cf-wr800n is not set
 # CONFIG_TARGET_ramips_mt7620_DEVICE_dlink_dch-m225 is not set
 # CONFIG_TARGET_ramips_mt7620_DEVICE_dlink_dir-510l is not set
+# CONFIG_TARGET_ramips_mt7620_DEVICE_dlink_dir-806a-b1 is not set
 # CONFIG_TARGET_ramips_mt7620_DEVICE_dlink_dir-810l is not set
 # CONFIG_TARGET_ramips_mt7620_DEVICE_dlink_dwr-116-a1 is not set
 # CONFIG_TARGET_ramips_mt7620_DEVICE_dlink_dwr-118-a1 is not set
@@ -86,6 +87,7 @@ CONFIG_TARGET_MULTI_PROFILE=y
 # CONFIG_TARGET_ramips_mt7620_DEVICE_domywifi_dm203 is not set
 # CONFIG_TARGET_ramips_mt7620_DEVICE_domywifi_dw22d is not set
 # CONFIG_TARGET_ramips_mt7620_DEVICE_dovado_tiny-ac is not set
+# CONFIG_TARGET_ramips_mt7620_DEVICE_edimax_br-6208ac-v2 is not set
 # CONFIG_TARGET_ramips_mt7620_DEVICE_edimax_br-6478ac-v2 is not set
 # CONFIG_TARGET_ramips_mt7620_DEVICE_edimax_ew-7476rpc is not set
 # CONFIG_TARGET_ramips_mt7620_DEVICE_edimax_ew-7478ac is not set
@@ -222,6 +224,7 @@ CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7620_DEVICE_comfast_cf-wr800n="gargoyle-v
 CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_dlink_dch-m225=y
 CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7620_DEVICE_dlink_dch-m225="gargoyle-vpn"
 # CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_dlink_dir-510l is not set
+# CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_dlink_dir-806a-b1 is not set
 CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_dlink_dir-810l=y
 CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7620_DEVICE_dlink_dir-810l="gargoyle-vpn"
 CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_dlink_dwr-116-a1=y
@@ -243,6 +246,7 @@ CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7620_DEVICE_dlink_dwr-922-e2="gargoyle-la
 # CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_domywifi_dw22d is not set
 CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_dovado_tiny-ac=y
 CONFIG_TARGET_DEVICE_PACKAGES_ramips_mt7620_DEVICE_dovado_tiny-ac="gargoyle-usb"
+# CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_edimax_br-6208ac-v2 is not set
 # CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_edimax_br-6478ac-v2 is not set
 # CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_edimax_ew-7476rpc is not set
 # CONFIG_TARGET_DEVICE_ramips_mt7620_DEVICE_edimax_ew-7478ac is not set
@@ -3116,6 +3120,7 @@ CONFIG_PACKAGE_vsftpd=m
 # CONFIG_PACKAGE_iwl3945-firmware is not set
 # CONFIG_PACKAGE_iwl4965-firmware is not set
 # CONFIG_PACKAGE_iwlwifi-firmware-ax200 is not set
+# CONFIG_PACKAGE_iwlwifi-firmware-ax201 is not set
 # CONFIG_PACKAGE_iwlwifi-firmware-ax210 is not set
 # CONFIG_PACKAGE_iwlwifi-firmware-iwl100 is not set
 # CONFIG_PACKAGE_iwlwifi-firmware-iwl1000 is not set
@@ -3229,6 +3234,7 @@ CONFIG_PACKAGE_kmod-scsi-core=m
 CONFIG_PACKAGE_kmod-crypto-aead=y
 CONFIG_PACKAGE_kmod-crypto-arc4=m
 # CONFIG_PACKAGE_kmod-crypto-authenc is not set
+# CONFIG_PACKAGE_kmod-crypto-blake2b is not set
 CONFIG_PACKAGE_kmod-crypto-cbc=m
 CONFIG_PACKAGE_kmod-crypto-ccm=y
 # CONFIG_PACKAGE_kmod-crypto-chacha20poly1305 is not set
@@ -3272,6 +3278,7 @@ CONFIG_PACKAGE_kmod-crypto-sha512=y
 CONFIG_PACKAGE_kmod-crypto-user=m
 # CONFIG_PACKAGE_kmod-crypto-xcbc is not set
 # CONFIG_PACKAGE_kmod-crypto-xts is not set
+# CONFIG_PACKAGE_kmod-crypto-xxhash is not set
 # CONFIG_PACKAGE_kmod-cryptodev is not set
 # end of Cryptographic API modules
 
@@ -3476,6 +3483,7 @@ CONFIG_PACKAGE_kmod-lib-crc32c=y
 # CONFIG_PACKAGE_kmod-lib-crc7 is not set
 # CONFIG_PACKAGE_kmod-lib-crc8 is not set
 # CONFIG_PACKAGE_kmod-lib-lz4 is not set
+# CONFIG_PACKAGE_kmod-lib-lz4hc is not set
 CONFIG_PACKAGE_kmod-lib-textsearch=y
 # CONFIG_PACKAGE_kmod-lib-zstd is not set
 CONFIG_PACKAGE_kmod-oid-registry=m
@@ -3658,6 +3666,12 @@ CONFIG_PACKAGE_kmod-phy-realtek=m
 # CONFIG_PACKAGE_kmod-phylink is not set
 # CONFIG_PACKAGE_kmod-qlcnic is not set
 # CONFIG_PACKAGE_kmod-r6040 is not set
+# CONFIG_PACKAGE_kmod-r8101 is not set
+# CONFIG_PACKAGE_kmod-r8125 is not set
+# CONFIG_PACKAGE_kmod-r8125-rss is not set
+# CONFIG_PACKAGE_kmod-r8126 is not set
+# CONFIG_PACKAGE_kmod-r8126-rss is not set
+# CONFIG_PACKAGE_kmod-r8168 is not set
 # CONFIG_PACKAGE_kmod-r8169 is not set
 # CONFIG_PACKAGE_kmod-sfc is not set
 # CONFIG_PACKAGE_kmod-sfc-falcon is not set
@@ -3833,6 +3847,7 @@ CONFIG_PACKAGE_kmod-sdhci-mt7620=m
 CONFIG_PACKAGE_kmod-tpm=m
 # CONFIG_PACKAGE_kmod-tpm-i2c-atmel is not set
 # CONFIG_PACKAGE_kmod-tpm-i2c-infineon is not set
+# CONFIG_PACKAGE_kmod-ubootenv-nvram is not set
 # CONFIG_PACKAGE_kmod-wdt-sp805 is not set
 # CONFIG_PACKAGE_kmod-zram is not set
 # end of Other modules

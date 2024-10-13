@@ -64,7 +64,7 @@
  		;;
  		VHT160|HE160)
  			if [ "$band" = "6g" ]; then
-@@ -322,6 +336,7 @@ mac80211_hostapd_setup_base() {
+@@ -323,6 +337,7 @@ mac80211_hostapd_setup_base() {
  
  		append base_cfg "vht_oper_chwidth=$vht_oper_chwidth" "$N"
  		append base_cfg "vht_oper_centr_freq_seg0_idx=$vht_center_seg0" "$N"
