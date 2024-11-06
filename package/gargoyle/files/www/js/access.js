@@ -173,7 +173,7 @@ function saveChanges()
 		{
 			is_default_key = uhttpd_key_md5.localeCompare("023ef078ceccc023ca7c2b521a6682fe") == 0;
 			is_default_crt = uhttpd_crt_md5.localeCompare("932613eda838a7d1df15f659abadb094") == 0;
-			if(is_default_key || is_default_crt)
+			if(is_default_key || is_default_crt || uhttpd_crt_md5 == '')
 			{ // generate and install a new private-key and self-signed certificate
 				// openssl and mbedtls are similar but not exactly the same in terms of command line options
 				// mbedtls x509 is not able to sign a cert, but req can generate a cert directly without needing to do a csr in the middle
@@ -186,12 +186,14 @@ function saveChanges()
 				else if(mbedtlsInstalled)
 				{
 					httpsCommands.push("mbedtls genpkey -algorithm rsa -out /etc/uhttpd.key -pkeyopt rsa_keygen_bits:2048");
-					httpsCommands.push("mbedtls req -new -x509 -key /etc/uhttpd.key -out /etc/uhttpd.crt -subj 'O=gargoyle-router.com,CN=Gargoyle Router Management Utility' -days 3065 -sha256");
+					httpsCommands.push("mbedtls req -new -x509v1 -key /etc/uhttpd.key -out /etc/uhttpd.crt -subj 'O=gargoyle-router.com,CN=Gargoyle Router Management Utility' -days 3065 -sha256");
 				}
 				
 				httpsCommands.push("chmod 640 uhttpd.key");
 				httpsCommands.push("rm /etc/uhttpd.csr");
 				httpsCommands.push("chmod 640 uhttpd.crt");
+				
+				restartUhttpd = true;
 			}
 		}
 
