@@ -868,20 +868,11 @@ static bool webmon_mt4(const struct sk_buff *skb, struct xt_action_param *par)
 	ipany src_ip;
 
 	/* linearize skb if necessary */
-	struct sk_buff *linear_skb;
-	int skb_copied;
-	if(skb_is_nonlinear(skb))
+	struct sk_buff *linear_skb = (struct sk_buff *)skb;
+	if(skb_is_nonlinear(linear_skb))
 	{
-		linear_skb = skb_copy(skb, GFP_ATOMIC);
-		skb_copied = 1;
+		if(skb_linearize(linear_skb)) return 0;
 	}
-	else
-	{
-		linear_skb = (struct sk_buff*)skb;
-		skb_copied = 0;
-	}
-
-	
 
 	/* ignore packets that are not TCP */
 	iph = (struct iphdr*)(skb_network_header(linear_skb));
@@ -1242,13 +1233,6 @@ static bool webmon_mt4(const struct sk_buff *skb, struct xt_action_param *par)
 			}
 		}
 	}
-	
-	/* free skb if we made a copy to linearize it */
-	if(skb_copied == 1)
-	{
-		kfree_skb(linear_skb);
-	}
-
 
 	/* printk("returning %d from webmon\n\n\n", test); */
 	return 0;
@@ -1265,20 +1249,11 @@ static bool webmon_mt6(const struct sk_buff *skb, struct xt_action_param *par)
 	ipany src_ip;
 
 	/* linearize skb if necessary */
-	struct sk_buff *linear_skb;
-	int skb_copied;
-	if(skb_is_nonlinear(skb))
+	struct sk_buff *linear_skb = (struct sk_buff *)skb;
+	if(skb_is_nonlinear(linear_skb))
 	{
-		linear_skb = skb_copy(skb, GFP_ATOMIC);
-		skb_copied = 1;
+		if(skb_linearize(linear_skb)) return 0;
 	}
-	else
-	{
-		linear_skb = (struct sk_buff*)skb;
-		skb_copied = 0;
-	}
-
-	
 
 	/* ignore packets that are not TCP */
 	iph = (struct ipv6hdr*)(skb_network_header(linear_skb));
@@ -1641,13 +1616,6 @@ static bool webmon_mt6(const struct sk_buff *skb, struct xt_action_param *par)
 			}
 		}
 	}
-	
-	/* free skb if we made a copy to linearize it */
-	if(skb_copied == 1)
-	{
-		kfree_skb(linear_skb);
-	}
-
 
 	/* printk("returning %d from webmon\n\n\n", test); */
 	return 0;

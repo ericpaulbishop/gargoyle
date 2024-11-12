@@ -213,8 +213,8 @@ int http_match(const struct xt_weburl_info* info, const unsigned char* packet_da
 		{
 			host_end_index++;
 		}
-		memcpy(host, host_match, host_end_index);
 		host_end_index = host_end_index < 625 ? host_end_index : 624; /* prevent overflow */
+		memcpy(host, host_match, host_end_index);
 		host[host_end_index] = '\0';
 
 		
@@ -326,6 +326,7 @@ int https_match(const struct xt_weburl_info* info, const unsigned char* packet_d
 	if (packet_length < 43)
 	{
 		/*printk("Packet less than 43 bytes, exiting\n");*/
+		free(host);
 		return test;
 	}
 	conttype = packet_data[0];
@@ -335,11 +336,13 @@ int https_match(const struct xt_weburl_info* info, const unsigned char* packet_d
 	if(conttype != 22)
 	{
 		/*printk("conttype not 22, exiting\n");*/
+		free(host);
 		return test;
 	}
 	if(hndshktype != 1)
 	{
 		/*printk("hndshktype not 1, exiting\n");*/
+		free(host);
 		return test;		//We aren't in a Client Hello
 	}
 
@@ -454,7 +457,6 @@ int https_match(const struct xt_weburl_info* info, const unsigned char* packet_d
 
 static bool weburl_mt4(const struct sk_buff *skb, struct xt_action_param *par)
 {
-
 	const struct xt_weburl_info *info = (const struct xt_weburl_info*)(par->matchinfo);
 
 	
@@ -462,20 +464,11 @@ static bool weburl_mt4(const struct sk_buff *skb, struct xt_action_param *par)
 	struct iphdr* iph;	
 
 	/* linearize skb if necessary */
-	struct sk_buff *linear_skb;
-	int skb_copied;
-	if(skb_is_nonlinear(skb))
+	struct sk_buff *linear_skb = (struct sk_buff *)skb;
+	if(skb_is_nonlinear(linear_skb))
 	{
-		linear_skb = skb_copy(skb, GFP_ATOMIC);
-		skb_copied = 1;
+		if(skb_linearize(linear_skb)) return test;
 	}
-	else
-	{
-		linear_skb = (struct sk_buff*)skb;
-		skb_copied = 0;
-	}
-
-	
 
 	/* ignore packets that are not TCP */
 	iph = (struct iphdr*)(skb_network_header(linear_skb));
@@ -502,13 +495,6 @@ static bool weburl_mt4(const struct sk_buff *skb, struct xt_action_param *par)
 			}
 		}
 	}
-	
-	/* free skb if we made a copy to linearize it */
-	if(skb_copied == 1)
-	{
-		kfree_skb(linear_skb);
-	}
-
 
 	/* printk("returning %d from weburl\n\n\n", test); */
 	return test;
@@ -524,20 +510,11 @@ static bool weburl_mt6(const struct sk_buff *skb, struct xt_action_param *par)
 	int ip6proto;
 
 	/* linearize skb if necessary */
-	struct sk_buff *linear_skb;
-	int skb_copied;
-	if(skb_is_nonlinear(skb))
+	struct sk_buff *linear_skb = (struct sk_buff *)skb;
+	if(skb_is_nonlinear(linear_skb))
 	{
-		linear_skb = skb_copy(skb, GFP_ATOMIC);
-		skb_copied = 1;
+		if(skb_linearize(linear_skb)) return test;
 	}
-	else
-	{
-		linear_skb = (struct sk_buff*)skb;
-		skb_copied = 0;
-	}
-
-	
 
 	/* ignore packets that are not TCP */
 	iph = (struct ipv6hdr*)(skb_network_header(linear_skb));
@@ -567,13 +544,6 @@ static bool weburl_mt6(const struct sk_buff *skb, struct xt_action_param *par)
 			}
 		}
 	}
-	
-	/* free skb if we made a copy to linearize it */
-	if(skb_copied == 1)
-	{
-		kfree_skb(linear_skb);
-	}
-
 
 	/* printk("returning %d from weburl\n\n\n", test); */
 	return test;
