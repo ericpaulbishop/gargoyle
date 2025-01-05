@@ -170,8 +170,7 @@ CONFIG_TARGET_MULTI_PROFILE=y
 # CONFIG_TARGET_ALL_PROFILES is not set
 CONFIG_TARGET_PER_DEVICE_ROOTFS=y
 # CONFIG_TARGET_DEVICE_ramips_rt305x_DEVICE_7links_px-4885-4m is not set
-CONFIG_TARGET_DEVICE_ramips_rt305x_DEVICE_7links_px-4885-8m=y
-CONFIG_TARGET_DEVICE_PACKAGES_ramips_rt305x_DEVICE_7links_px-4885-8m="gargoyle-usb"
+# CONFIG_TARGET_DEVICE_ramips_rt305x_DEVICE_7links_px-4885-8m is not set
 # CONFIG_TARGET_DEVICE_ramips_rt305x_DEVICE_8devices_carambola is not set
 # CONFIG_TARGET_DEVICE_ramips_rt305x_DEVICE_accton_wr6202 is not set
 # CONFIG_TARGET_DEVICE_ramips_rt305x_DEVICE_airlive_air3gii is not set
@@ -217,8 +216,7 @@ CONFIG_TARGET_DEVICE_PACKAGES_ramips_rt305x_DEVICE_7links_px-4885-8m="gargoyle-u
 CONFIG_TARGET_DEVICE_ramips_rt305x_DEVICE_fon_fonera-20n=y
 CONFIG_TARGET_DEVICE_PACKAGES_ramips_rt305x_DEVICE_fon_fonera-20n="gargoyle-usb"
 # CONFIG_TARGET_DEVICE_ramips_rt305x_DEVICE_hame_mpr-a1 is not set
-CONFIG_TARGET_DEVICE_ramips_rt305x_DEVICE_hame_mpr-a2=y
-CONFIG_TARGET_DEVICE_PACKAGES_ramips_rt305x_DEVICE_hame_mpr-a2="gargoyle-usb"
+# CONFIG_TARGET_DEVICE_ramips_rt305x_DEVICE_hame_mpr-a2 is not set
 # CONFIG_TARGET_DEVICE_ramips_rt305x_DEVICE_hauppauge_broadway is not set
 # CONFIG_TARGET_DEVICE_ramips_rt305x_DEVICE_hilink_hlk-rm04 is not set
 # CONFIG_TARGET_DEVICE_ramips_rt305x_DEVICE_hootoo_ht-tm02 is not set
@@ -233,8 +231,7 @@ CONFIG_TARGET_DEVICE_PACKAGES_ramips_rt305x_DEVICE_hame_mpr-a2="gargoyle-usb"
 # CONFIG_TARGET_DEVICE_ramips_rt305x_DEVICE_netgear_wnce2001 is not set
 # CONFIG_TARGET_DEVICE_ramips_rt305x_DEVICE_nexaira_bc2 is not set
 # CONFIG_TARGET_DEVICE_ramips_rt305x_DEVICE_nexx_wt1520-4m is not set
-CONFIG_TARGET_DEVICE_ramips_rt305x_DEVICE_nexx_wt1520-8m=y
-CONFIG_TARGET_DEVICE_PACKAGES_ramips_rt305x_DEVICE_nexx_wt1520-8m="gargoyle-usb"
+# CONFIG_TARGET_DEVICE_ramips_rt305x_DEVICE_nexx_wt1520-8m is not set
 # CONFIG_TARGET_DEVICE_ramips_rt305x_DEVICE_nixcore_x1-16m is not set
 # CONFIG_TARGET_DEVICE_ramips_rt305x_DEVICE_nixcore_x1-8m is not set
 # CONFIG_TARGET_DEVICE_ramips_rt305x_DEVICE_olimex_rt5350f-olinuxino is not set
@@ -269,10 +266,8 @@ CONFIG_TARGET_DEVICE_PACKAGES_ramips_rt305x_DEVICE_nexx_wt1520-8m="gargoyle-usb"
 # CONFIG_TARGET_DEVICE_ramips_rt305x_DEVICE_unbranded_xdx-rn502j is not set
 # CONFIG_TARGET_DEVICE_ramips_rt305x_DEVICE_upvel_ur-326n4g is not set
 # CONFIG_TARGET_DEVICE_ramips_rt305x_DEVICE_upvel_ur-336un is not set
-CONFIG_TARGET_DEVICE_ramips_rt305x_DEVICE_vocore_vocore-16m=y
-CONFIG_TARGET_DEVICE_PACKAGES_ramips_rt305x_DEVICE_vocore_vocore-16m="gargoyle-large"
-CONFIG_TARGET_DEVICE_ramips_rt305x_DEVICE_vocore_vocore-8m=y
-CONFIG_TARGET_DEVICE_PACKAGES_ramips_rt305x_DEVICE_vocore_vocore-8m="gargoyle-usb"
+# CONFIG_TARGET_DEVICE_ramips_rt305x_DEVICE_vocore_vocore-16m is not set
+# CONFIG_TARGET_DEVICE_ramips_rt305x_DEVICE_vocore_vocore-8m is not set
 # CONFIG_TARGET_DEVICE_ramips_rt305x_DEVICE_wansview_ncs601w is not set
 # CONFIG_TARGET_DEVICE_ramips_rt305x_DEVICE_wiznet_wizfi630a is not set
 # CONFIG_TARGET_DEVICE_ramips_rt305x_DEVICE_zorlik_zl5900v2 is not set
