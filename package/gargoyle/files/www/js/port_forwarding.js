@@ -829,8 +829,8 @@ function update_upnp()
 	if (!updateInProgress)
 	{
 		updateInProgress = true;
-		var commands="iptables -nL MINIUPNPD | grep ACCEPT"
-		var param = getParameterDefinition("commands", commands) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+		var commands=["iptables -nL MINIUPNPD | grep ACCEPT","ip6tables -nL MINIUPNPD | grep ACCEPT"]
+		var param = getParameterDefinition("commands", commands.join('\n')) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 
 		var stateChangeFunction = function(req)
 		{
@@ -846,13 +846,21 @@ function update_upnp()
 					for(i = 0; i < lines.length; i++)
 					{
 						var upnd = lines[i].split(/\s+/);
-						if (typeof(upnd[6]) != "undefined") {
-						var tableRow =[upnd[1],upnd[4],upnd[6].substr(4)];
-						tableData.push(tableRow);
-						upnpcnt = upnpcnt+1;
+						if (upnd[0] == 'ACCEPT' && typeof(upnd[6]) != "undefined")
+						{
+							// IPV4
+							var tableRow =[upnd[1],upnd[4],upnd[6].substr(4)];
+							tableData.push(tableRow);
+							upnpcnt = upnpcnt+1;
+						}
+						else if(upnd[0] == 'ACCEPT' && typeof(upnd[6]) == "undefined")
+						{
+							// IPV6
+							var tableRow =[upnd[1],upnd[3],upnd[5].substr(4)];
+							tableData.push(tableRow);
+							upnpcnt = upnpcnt+1;
 						}
 					}
-
 				}
 
 				//Always display at least on blank line

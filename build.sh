@@ -26,15 +26,15 @@ set_version_variables()
 {
 
 	#openwrt branch
-	branch_name="22.03"
-	branch_id="openwrt-22.03"
-	packages_branch="openwrt-22.03"
+	branch_name="23.05"
+	branch_id="openwrt-23.05"
+	packages_branch="openwrt-23.05"
 
 
 	# set precise commit in repo to use 
 	# you can set this to an alternate commit 
 	# or empty to checkout latest
-	openwrt_commit="f372b715d439d03d81755062d77f80eb4ce77e33"
+	openwrt_commit="1efcdb2446602c3b120b265c1d189039fdb9c0e7"
 	openwrt_abbrev_commit=$( echo "$openwrt_commit" | cut -b 1-7 )
 	
 
@@ -285,6 +285,24 @@ copy_buildinfo ()
 	#copy build config info
 	if [ -e "bin/targets/$owrt_tgt/$subtgt_arch/config.buildinfo" ] ; then
 		cp "bin/targets/$owrt_tgt/$subtgt_arch/config.buildinfo" "$top_dir/images/$tgt/$tgt-$dprof.buildinfo"
+	fi
+}
+
+copy_sha256sums ()
+{
+	local owrt_tgt="$1"
+	local subtgt_arch="$2"
+	local tgt="$3"
+	local dprof="$4"
+	
+	#copy sha256sums
+	if [ -e "bin/targets/$owrt_tgt/$subtgt_arch/sha256sums" ] ; then
+		cp "bin/targets/$owrt_tgt/$subtgt_arch/sha256sums" "$top_dir/images/$tgt/$tgt-$dprof.sha256sums"
+		sed -i "s/openwrt/gargoyle_$lower_short_gargoyle_version/g" "$top_dir/images/$tgt/$tgt-$dprof.sha256sums"
+		sed -i "s/config\.buildinfo/$tgt-$dprof.buildinfo/g" "$top_dir/images/$tgt/$tgt-$dprof.sha256sums"
+		sed -i "/version\.buildinfo/d" "$top_dir/images/$tgt/$tgt-$dprof.sha256sums"
+		sed -i "/gargoyle.*\.manifest/d" "$top_dir/images/$tgt/$tgt-$dprof.sha256sums"
+		sed -i "/feeds\.buildinfo/d" "$top_dir/images/$tgt/$tgt-$dprof.sha256sums"
 	fi
 }
 
@@ -794,6 +812,7 @@ for target in $targets ; do
 	fi
 
 	copy_buildinfo "$openwrt_target" "$subtarget_arch" "$target" "$default_profile"
+	copy_sha256sums "$openwrt_target" "$subtarget_arch" "$target" "$default_profile"
 
 	#if we didn't build anything, die horribly
 	if [ -z "$image_files" ] ; then
@@ -890,6 +909,7 @@ for target in $targets ; do
 		fi
 
 		copy_buildinfo "$openwrt_target" "$subtarget_arch" "$target" "$profile_name"
+		copy_sha256sums "$openwrt_target" "$subtarget_arch" "$target" "$profile_name"
 	
 		if [ "$distribution" = "true" ] ; then
 			mkdir -p "$top_dir/Distribution/Images/$target-$profile_name"

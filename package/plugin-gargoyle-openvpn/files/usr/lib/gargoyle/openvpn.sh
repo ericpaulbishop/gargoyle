@@ -1,6 +1,8 @@
 #!/bin/sh
 
-SSLVARIANT="openssl"
+SSLVARIANT="mbedtls"
+which $SSLVARIANT || SSLVARIANT="openssl"
+which $SSLVARIANT || echo "ERROR: no SSL library available"
 
 # global config directory
 OPENVPN_DIR="/etc/openvpn"
@@ -115,6 +117,8 @@ create_server_conf()
 	openvpn_redirect_gateway=$(load_def "${11}" "push \"redirect-gateway def1\"" "true")
 	openvpn_regenerate_cert="${12}"
 
+	openvpn_extra_subnets="${13}"
+
 	if [ -n "$openvpn_pool" ] ; then
 		openvpn_pool="ifconfig-pool $openvpn_pool"
 	fi
@@ -149,6 +153,7 @@ create_server_conf()
 		random_domain=$( random_string 15 )
 		cat << 'EOF' >vars
 set_var EASYRSA_BATCH "yes"
+set_var EASYRSA_SILENT "yes"
 set_var EASYRSA_RAND_SN "no"
 set_var EASYRSA_DN "org"
 set_var EASYRSA_KEY_SIZE 1024
@@ -162,7 +167,6 @@ cat << EOF >>vars
 set_var EASYRSA_CA_EXPIRE $EXPIRATION_MAX
 set_var EASYRSA_CERT_EXPIRE $EXPIRATION_MAX
 set_var EASYRSA_REQ_EMAIL '$name@$random_domain.com'
-set_var EASYRSA_REQ_CN '$name'
 set_var EASYRSA '$random_dir'
 set_var EASYRSA_PKI '$random_dir/keys'
 set_var EASYRSA_OPENSSL "$SSLVARIANT"
@@ -171,7 +175,7 @@ EOF
 		./easyrsa gen-dh
 		./easyrsa build-ca nopass
 		./easyrsa build-server-full server nopass
-		openvpn --genkey --secret ta.key
+		openvpn --genkey secret ta.key
 		mkdir -p ./keys/issued/ ./keys/certs_by_serial/
 		./easyrsa gen-crl
 		cp keys/issued/server.crt keys/private/server.key keys/ca.crt keys/private/ca.key keys/dh.pem keys/index.txt keys/index.txt.attr keys/serial keys/crl.pem ta.key "$OPENVPN_DIR"/
@@ -227,6 +231,13 @@ EOF
 		# save routes -- we need to update all route lines 
 		# once all client ccd files are in place on the server
 		echo "$openvpn_server_local_subnet_ip $openvpn_server_local_subnet_mask $openvpn_server_internal_ip" > "$random_dir/route_data_server"
+	fi
+	if [ -n "$openvpn_extra_subnets" ] ; then
+		for openvpn_extra_subnet in $openvpn_extra_subnets ; do
+			esubnet_ip=$(echo "$openvpn_extra_subnet" | cut -d '_' -f 1)
+			esubnet_mask=$(echo "$openvpn_extra_subnet" | cut -d '_' -f 2)
+			echo "$esubnet_ip $esubnet_mask $openvpn_server_internal_ip" >> "$random_dir/route_data_server"
+		done
 	fi
 
 	copy_if_diff "$random_dir/server.conf"        "$OPENVPN_DIR/server.conf"
@@ -289,6 +300,7 @@ create_allowed_client_conf()
 		random_domain=$( random_string 15 )
 		cat << 'EOF' >vars
 set_var EASYRSA_BATCH "yes"
+set_var EASYRSA_SILENT "yes"
 set_var EASYRSA_RAND_SN "no"
 set_var EASYRSA_DN "org"
 set_var EASYRSA_KEY_SIZE 1024
@@ -302,7 +314,6 @@ cat << EOF >>vars
 set_var EASYRSA_CA_EXPIRE $EXPIRATION_MAX
 set_var EASYRSA_CERT_EXPIRE $EXPIRATION_MAX
 set_var EASYRSA_REQ_EMAIL '$openvpn_client_id@$random_domain.com'
-set_var EASYRSA_REQ_CN '$openvpn_client_id'
 set_var EASYRSA '$random_dir'
 set_var EASYRSA_PKI '$random_dir/keys'
 set_var EASYRSA_OPENSSL "$SSLVARIANT"
@@ -358,10 +369,8 @@ client
 remote          $openvpn_client_remote $openvpn_port
 dev             tun
 proto           $openvpn_protocol
-status          current_status
 resolv-retry    infinite
 remote-cert-tls server
-topology        subnet
 verb            3
 
 data-ciphers    $openvpn_cipher
@@ -501,6 +510,7 @@ revoke_client_certificate()
 
 	cat << 'EOF' >vars
 set_var EASYRSA_BATCH "yes"
+set_var EASYRSA_SILENT "yes"
 set_var EASYRSA_RAND_SN "no"
 set_var EASYRSA_DN "org"
 set_var EASYRSA_KEY_SIZE 1024
@@ -552,6 +562,50 @@ add_client_to_userlist()
 	client_id="$1"
 	client_found=$(grep -w "^$client_id" "$OPENVPN_DIR/verified-userlist")
 	[ -z $client_found ] && echo $client_id >> "$OPENVPN_DIR/verified-userlist"
+}
+
+generate_crl()
+{
+	random_dir_num=$(random_string)
+	random_dir="/tmp/ovpn-client-${random_dir_num}"
+	mkdir -p "$random_dir"
+	cd "$random_dir"
+	cp -r "$EASY_RSA_PATH/"* .
+
+	cat << 'EOF' >vars
+set_var EASYRSA_BATCH "yes"
+set_var EASYRSA_SILENT "yes"
+set_var EASYRSA_RAND_SN "no"
+set_var EASYRSA_DN "org"
+set_var EASYRSA_KEY_SIZE 1024
+set_var EASYRSA_REQ_COUNTRY "??"
+set_var EASYRSA_REQ_PROVINCE "UnknownProvince"
+set_var EASYRSA_REQ_CITY "UnknownCity"
+set_var EASYRSA_REQ_ORG "UnknownOrg"
+set_var EASYRSA_REQ_OU "UnknownOrgUnit"
+EOF
+cat << EOF >>vars
+set_var EASYRSA_CA_EXPIRE $EXPIRATION_MAX
+set_var EASYRSA_CERT_EXPIRE $EXPIRATION_MAX
+set_var EASYRSA_REQ_EMAIL '$openvpn_client_id@$random_domain.com'
+set_var EASYRSA_REQ_CN '$openvpn_client_id'
+set_var EASYRSA '$random_dir'
+set_var EASYRSA_PKI '$random_dir/keys'
+set_var EASYRSA_OPENSSL "$SSLVARIANT"
+EOF
+	
+	./easyrsa init-pki
+	mkdir -p ./keys/issued/ ./keys/certs_by_serial/
+	cp "$OPENVPN_DIR/ca.crt" "$OPENVPN_DIR/dh.pem" "$OPENVPN_DIR/index.txt" "$OPENVPN_DIR/index.txt.attr" "$OPENVPN_DIR/serial" ./keys/
+	cp "$OPENVPN_DIR/server.crt" ./keys/issued/
+	cp "$OPENVPN_DIR/server.key" "$OPENVPN_DIR/ca.key" ./keys/private/
+
+	./easyrsa gen-crl
+
+	cp "keys/index.txt" "keys/index.txt.attr" "keys/serial" "keys/crl.pem" "$OPENVPN_DIR/"
+
+	cd /tmp
+	rm -rf "$random_dir"
 }
 
 generate_test_configuration()
@@ -609,7 +663,7 @@ regenerate_server_and_allowed_clients_from_uci()
 	. /lib/functions.sh
 	config_load "openvpn_gargoyle"
 	
-	server_vars="internal_ip internal_mask port proto cipher client_to_client duplicate_cn redirect_gateway subnet_access regenerate_credentials subnet_ip subnet_mask pool"
+	server_vars="internal_ip internal_mask port proto cipher client_to_client duplicate_cn redirect_gateway subnet_access regenerate_credentials subnet_ip subnet_mask pool extra_subnet"
 	for var in $server_vars ; do
 		config_get "$var" "server" "$var"
 	done
@@ -625,7 +679,8 @@ regenerate_server_and_allowed_clients_from_uci()
 				"$duplicate_cn"            \
 				"$pool"                    \
 				"$redirect_gateway"        \
-				"$regenerate_credentials"
+				"$regenerate_credentials"  \
+				"$extra_subnet"
 
 	server_regenerate_credentials="$regenerate_credentials"
 	config_foreach regenerate_allowed_client_from_uci "allowed_client"

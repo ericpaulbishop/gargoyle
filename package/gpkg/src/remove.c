@@ -332,6 +332,7 @@ void remove_individual_package(char* pkg_name, opkg_conf* conf, string_map* pack
 	char* link_root_name            = get_string_map_element(install_pkg_data, "Link-Destination");
 	char* link_root_path            = link_root_name != NULL ? get_string_map_element(conf->dest_names, install_root_name) : NULL;
 	char* control_postfix_list[]    = { "control", "list",  "linked", "conffiles", "prerm", "postrm", "preinst", "postinst", NULL };
+	list* pkg_alternatives			= get_string_map_element(install_pkg_data, "Alternatives");
 
 	char* info_dir                = dynamic_strcat(2, install_root_path, "/usr/lib/opkg/info");
 	char* list_file_name          = dynamic_strcat(4, info_dir, "/", pkg_name, ".list");
@@ -411,7 +412,13 @@ void remove_individual_package(char* pkg_name, opkg_conf* conf, string_map* pack
 
 	//call postrm
 	run_script_if_exists(install_root_path, link_root_path, pkg_name, "postrm", "remove" );
-
+	
+	// check and configure package alternatives
+	if(pkg_alternatives != NULL)
+	{
+		int warn = update_alternatives(pkg_alternatives, package_data, NULL, fs_terminated_install_root, pkg_name);
+	}
+	
 	
 	//remove control files (.control, .list, .linked, .conffiles, .prerm, .postrm, .preinst, .postinst )
 	int control_file_index;

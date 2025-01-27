@@ -32,7 +32,7 @@
  
  	if [ -n "$rusers" ]; then
  		local tuple oIFS="$IFS"
-@@ -243,10 +246,19 @@ default_postinst() {
+@@ -260,7 +263,16 @@ default_postinst() {
  	local filelist="/usr/lib/opkg/info/${pkgname}.list"
  	local ret=0
  
@@ -48,14 +48,9 @@
 +
 +	add_group_and_user "${pkg_control}"
  
--	if [ -f "$root/usr/lib/opkg/info/${pkgname}.postinst-pkg" ]; then
--		( . "$root/usr/lib/opkg/info/${pkgname}.postinst-pkg" )
-+	if [ -f "$pkg_postinst" ]; then
-+		( . "$pkg_postinst" )
- 		ret=$?
- 	fi
- 
-@@ -256,17 +268,17 @@ default_postinst() {
+ 	if [ -d "$root/rootfs-overlay" ]; then
+ 		cp -R $root/rootfs-overlay/. $root/
+@@ -268,17 +280,17 @@ default_postinst() {
  	fi
  
  	if [ -z "$root" ]; then
@@ -77,7 +72,15 @@
  				( [ -f "$i" ] && cd "$(dirname $i)" && . "$i" ) && rm -f "$i"
  			done
  			uci commit
-@@ -276,7 +288,7 @@ default_postinst() {
+@@ -287,13 +300,13 @@ default_postinst() {
+ 		rm -f /tmp/luci-indexcache
+ 	fi
+ 
+-	if [ -f "$root/usr/lib/opkg/info/${pkgname}.postinst-pkg" ]; then
+-		( . "$root/usr/lib/opkg/info/${pkgname}.postinst-pkg" )
++	if [ -f "$pkg_postinst" ]; then
++		( . "$pkg_postinst" )
+ 		ret=$?
  	fi
  
  	local shell="$(command -v bash)"

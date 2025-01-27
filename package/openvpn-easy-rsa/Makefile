@@ -9,11 +9,11 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=openvpn-gargoyle-easy-rsa
 
-PKG_VERSION:=3.0.8
-PKG_RELEASE:=4
+PKG_VERSION:=3.1.7
+PKG_RELEASE:=1
 PKG_SOURCE_URL:=https://codeload.github.com/OpenVPN/easy-rsa/tar.gz/v$(PKG_VERSION)?
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_HASH:=fd6b67d867c3b8afd53efa2ca015477f6658a02323e1799432083472ac0dd200
+PKG_HASH:=438206426324e6d34380d09da265b9ea1e2e2c0b301865dfef1ee89cb394602a
 
 # For git snapshots
 #PKG_SOURCE_PROTO:=git
@@ -35,15 +35,20 @@ define Package/openvpn-gargoyle-easy-rsa
   CATEGORY:=Network
   URL:=http://openvpn.net
   SUBMENU:=VPN
-  DEPENDS:=+openssl-util
+  DEPENDS:=+OPENVPN_GARGOYLE_EASYRSA_OPENSSL:openssl-util +OPENVPN_GARGOYLE_EASYRSA_MBEDTLS:mbedtls-clu
   PKGARCH:=all
+  PROVIDES:=openvpn-easy-rsa
 endef
 
 define Package/openvpn-gargoyle-easy-rsa/conffiles
 /etc/easy-rsa/vars
-/etc/easy-rsa/openssl-1.0.cnf
+/etc/easy-rsa/openssl-3.0.cnf
 /etc/easy-rsa/openssl-easyrsa.cnf
 /etc/profile.d/50-$(PKG_NAME).sh
+endef
+
+define Package/openvpn-gargoyle-easy-rsa/config
+  source "$(SOURCE)/Config.in"
 endef
 
 define Build/Configure
@@ -67,8 +72,8 @@ define Package/openvpn-gargoyle-easy-rsa/install
 	$(LN) ../lib/easy-rsa/easyrsa $(1)/usr/bin/easyrsa
 
 	$(INSTALL_DIR) $(1)/etc/easy-rsa
-	$(INSTALL_DATA) $(PKG_BUILD_DIR)/dist-staging/unix/EasyRSA-$(PKG_VERSION)/openssl-easyrsa.cnf $(1)/etc/easy-rsa/openssl-1.0.cnf
-	$(LN) openssl-1.0.cnf $(1)/etc/easy-rsa/openssl-easyrsa.cnf
+	$(INSTALL_DATA) $(PKG_BUILD_DIR)/dist-staging/unix/EasyRSA-$(PKG_VERSION)/openssl-easyrsa.cnf $(1)/etc/easy-rsa/openssl-3.0.cnf
+	$(LN) openssl-3.0.cnf $(1)/etc/easy-rsa/openssl-easyrsa.cnf
 	$(LN) ../../../etc/easy-rsa/openssl-easyrsa.cnf $(1)/usr/lib/easy-rsa/openssl-easyrsa.cnf
 	$(INSTALL_DATA) $(PKG_BUILD_DIR)/dist-staging/unix/EasyRSA-$(PKG_VERSION)/vars.example $(1)/etc/easy-rsa/vars
 	$(LN) ../../../etc/easy-rsa/vars $(1)/usr/lib/easy-rsa/vars

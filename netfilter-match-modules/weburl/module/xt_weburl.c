@@ -145,8 +145,8 @@ int http_match(const struct xt_weburl_info* info, const unsigned char* packet_da
 	int test = 0; 
 
 	/* printk("found a http web page request\n"); */
-	char path[625] = "";
-	char host[625] = "";
+	char* path;
+	char* host;
 	int path_start_index;
 	int path_end_index;
 	int last_header_index;
@@ -156,6 +156,8 @@ int http_match(const struct xt_weburl_info* info, const unsigned char* packet_da
 	char* test_prefixes[6];
 	int prefix_index;
 
+	path = (char*)malloc(625*sizeof(char));
+	host = (char*)malloc(625*sizeof(char));
 	/* get path portion of URL */
 	path_start_index = (int)(strstr((char*)packet_data, " ") - (char*)packet_data);
 	while( packet_data[path_start_index] == ' ')
@@ -211,8 +213,8 @@ int http_match(const struct xt_weburl_info* info, const unsigned char* packet_da
 		{
 			host_end_index++;
 		}
-		memcpy(host, host_match, host_end_index);
 		host_end_index = host_end_index < 625 ? host_end_index : 624; /* prevent overflow */
+		memcpy(host, host_match, host_end_index);
 		host[host_end_index] = '\0';
 
 		
@@ -246,7 +248,8 @@ int http_match(const struct xt_weburl_info* info, const unsigned char* packet_da
 			
 			for(prefix_index=0; test_prefixes[prefix_index] != NULL && test == 0; prefix_index++)
 			{
-				char test_url[1250];
+				char* test_url;
+				test_url = (char*)malloc(1250*sizeof(char));
 				test_url[0] = '\0';
 				strcat(test_url, test_prefixes[prefix_index]);
 				strcat(test_url, host);
@@ -262,13 +265,15 @@ int http_match(const struct xt_weburl_info* info, const unsigned char* packet_da
 				}
 				
 				/* printk("test_url = \"%s\", test=%d\n", test_url, test); */
+				free(test_url);
 			}
 			if(!test && strstr(host, "www.") == host)
 			{
 				char* www_host = ((char*)host+4);
 				for(prefix_index=0; test_prefixes[prefix_index] != NULL && test == 0; prefix_index++)
 				{
-					char test_url[1250];
+					char* test_url;
+					test_url = (char*)malloc(1250*sizeof(char));
 					test_url[0] = '\0';
 					strcat(test_url, test_prefixes[prefix_index]);
 					strcat(test_url, www_host);
@@ -284,6 +289,7 @@ int http_match(const struct xt_weburl_info* info, const unsigned char* packet_da
 					}
 				
 					/* printk("test_url = \"%s\", test=%d\n", test_url, test); */
+					free(test_url);
 				}
 			}
 			break;
@@ -291,6 +297,8 @@ int http_match(const struct xt_weburl_info* info, const unsigned char* packet_da
 	}		
 
 
+	free(path);
+	free(host);
 	/* 
 	 * If invert flag is set, return true if it didn't match 
 	 */
@@ -304,19 +312,21 @@ int https_match(const struct xt_weburl_info* info, const unsigned char* packet_d
 	int test = 0;
 
 	/* printk("found a https web page request\n"); */
-	char host[625] = "";
+	char* host;
 	char* test_prefixes[6];
 	int prefix_index, x, packet_limit;
 	unsigned short cslen, ext_type, ext_len, maxextlen;
 	unsigned char conttype, hndshktype, sidlen, cmplen;
-	unsigned char* packet_ptr;
+	const unsigned char* packet_ptr;
 
+	host = (char*)malloc(625*sizeof(char));
 	host[0] = '\0';
 	packet_ptr = packet_data;
 
 	if (packet_length < 43)
 	{
 		/*printk("Packet less than 43 bytes, exiting\n");*/
+		free(host);
 		return test;
 	}
 	conttype = packet_data[0];
@@ -326,11 +336,13 @@ int https_match(const struct xt_weburl_info* info, const unsigned char* packet_d
 	if(conttype != 22)
 	{
 		/*printk("conttype not 22, exiting\n");*/
+		free(host);
 		return test;
 	}
 	if(hndshktype != 1)
 	{
 		/*printk("hndshktype not 1, exiting\n");*/
+		free(host);
 		return test;		//We aren't in a Client Hello
 	}
 
@@ -402,7 +414,8 @@ int https_match(const struct xt_weburl_info* info, const unsigned char* packet_d
 
 			for(prefix_index=0; test_prefixes[prefix_index] != NULL && test == 0; prefix_index++)
 			{
-				char test_url[1250];
+				char* test_url;
+				test_url = (char*)malloc(1250*sizeof(char));
 				test_url[0] = '\0';
 				strcat(test_url, test_prefixes[prefix_index]);
 				strcat(test_url, host);
@@ -410,13 +423,15 @@ int https_match(const struct xt_weburl_info* info, const unsigned char* packet_d
 				test = do_match_test(info->match_type, info->test_str, test_url);
 
 				/* printk("test_url = \"%s\", test=%d\n", test_url, test); */
+				free(test_url);
 			}
 			if(!test && strstr(host, "www.") == host)
 			{
 				char* www_host = ((char*)host+4);
 				for(prefix_index=0; test_prefixes[prefix_index] != NULL && test == 0; prefix_index++)
 				{
-					char test_url[1250];
+					char* test_url;
+					test_url = (char*)malloc(1250*sizeof(char));
 					test_url[0] = '\0';
 					strcat(test_url, test_prefixes[prefix_index]);
 					strcat(test_url, www_host);
@@ -424,11 +439,13 @@ int https_match(const struct xt_weburl_info* info, const unsigned char* packet_d
 					test = do_match_test(info->match_type, info->test_str, test_url);
 
 					/* printk("test_url = \"%s\", test=%d\n", test_url, test); */
+					free(test_url);
 				}
 			}
 			break;
 	}
 
+	free(host);
 	/*
 	 * If invert flag is set, return true if it didn't match
 	 */
@@ -440,7 +457,6 @@ int https_match(const struct xt_weburl_info* info, const unsigned char* packet_d
 
 static bool weburl_mt4(const struct sk_buff *skb, struct xt_action_param *par)
 {
-
 	const struct xt_weburl_info *info = (const struct xt_weburl_info*)(par->matchinfo);
 
 	
@@ -448,23 +464,14 @@ static bool weburl_mt4(const struct sk_buff *skb, struct xt_action_param *par)
 	struct iphdr* iph;	
 
 	/* linearize skb if necessary */
-	struct sk_buff *linear_skb;
-	int skb_copied;
-	if(skb_is_nonlinear(skb))
+	struct sk_buff *linear_skb = (struct sk_buff *)skb;
+	if(skb_is_nonlinear(linear_skb))
 	{
-		linear_skb = skb_copy(skb, GFP_ATOMIC);
-		skb_copied = 1;
+		if(skb_linearize(linear_skb)) return test;
 	}
-	else
-	{
-		linear_skb = (struct sk_buff*)skb;
-		skb_copied = 0;
-	}
-
-	
 
 	/* ignore packets that are not TCP */
-	iph = (struct iphdr*)(skb_network_header(skb));
+	iph = (struct iphdr*)(skb_network_header(linear_skb));
 	if(iph->protocol == IPPROTO_TCP)
 	{
 		/* get payload */
@@ -488,13 +495,6 @@ static bool weburl_mt4(const struct sk_buff *skb, struct xt_action_param *par)
 			}
 		}
 	}
-	
-	/* free skb if we made a copy to linearize it */
-	if(skb_copied == 1)
-	{
-		kfree_skb(linear_skb);
-	}
-
 
 	/* printk("returning %d from weburl\n\n\n", test); */
 	return test;
@@ -502,38 +502,28 @@ static bool weburl_mt4(const struct sk_buff *skb, struct xt_action_param *par)
 
 static bool weburl_mt6(const struct sk_buff *skb, struct xt_action_param *par)
 {
-
 	const struct xt_weburl_info *info = (const struct xt_weburl_info*)(par->matchinfo);
 
-	
 	int test = 0;
-	struct ipv6hdr* iph;	
+	struct ipv6hdr* iph;
+	int thoff = 0;
+	int ip6proto;
 
 	/* linearize skb if necessary */
-	struct sk_buff *linear_skb;
-	int skb_copied;
-	if(skb_is_nonlinear(skb))
+	struct sk_buff *linear_skb = (struct sk_buff *)skb;
+	if(skb_is_nonlinear(linear_skb))
 	{
-		linear_skb = skb_copy(skb, GFP_ATOMIC);
-		skb_copied = 1;
+		if(skb_linearize(linear_skb)) return test;
 	}
-	else
-	{
-		linear_skb = (struct sk_buff*)skb;
-		skb_copied = 0;
-	}
-
-	
 
 	/* ignore packets that are not TCP */
-	iph = (struct ipv6hdr*)(skb_network_header(skb));
-	int thoff = 0;
-	int ip6proto = ipv6_find_hdr(skb, &thoff, -1, NULL, NULL);
+	iph = (struct ipv6hdr*)(skb_network_header(linear_skb));
+	ip6proto = ipv6_find_hdr(linear_skb, &thoff, -1, NULL, NULL);
 	if(ip6proto == IPPROTO_TCP)
 	{
 		/* get payload */
 		struct tcphdr* tcp_hdr;
-		tcp_hdr = skb_header_pointer(skb, thoff, sizeof(struct tcphdr), tcp_hdr);
+		tcp_hdr = skb_header_pointer(linear_skb, thoff, sizeof(struct tcphdr), tcp_hdr);
 		if(tcp_hdr != NULL)
 		{
 			unsigned short payload_offset 	= (tcp_hdr->doff*4) + thoff;
@@ -554,13 +544,6 @@ static bool weburl_mt6(const struct sk_buff *skb, struct xt_action_param *par)
 			}
 		}
 	}
-	
-	/* free skb if we made a copy to linearize it */
-	if(skb_copied == 1)
-	{
-		kfree_skb(linear_skb);
-	}
-
 
 	/* printk("returning %d from weburl\n\n\n", test); */
 	return test;

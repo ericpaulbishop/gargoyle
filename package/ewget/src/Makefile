@@ -3,10 +3,8 @@
 VERSION=1
 
 #for ssl, uncomment the (one and only one) ssl library to link with
-#USE_MATRIXSSL:=1
-#USE_CYASSL:=1
 #USE_MBEDTLS:=1
-USE_OPENSSL:=1
+#USE_OPENSSL:=1
 
 #uncomment to link dynamically to ericstools
 #USE_ERICSTOOLS:=1
@@ -56,39 +54,17 @@ SSL_OBJ_DYN:=
 SSL_OBJ_STATIC:=
 
 
-ifeq ($(USE_MBEDTLS), 1)
+ifeq ($(USE_MBEDTLS),1)
 	SSL_DEFS:= -DUSE_MBEDTLS -DHAVE_SSL
 	LIBS:=$(LIBS) -lmbedtls
-	USE_MATRIXSSL=
-	USE_CYASSL=
+	USE_MBEDTLS=1
 	USE_OPENSSL=
 endif
-ifeq ($(USE_CYASSL), 1)
-	SSL_DEFS:= -DUSE_CYASSL -DHAVE_SSL
-	ifeq ($(USE_CYASSL_INCLUDE_DIR), 1)
-		SSL_DEFS:=$(SSL_DEFS) -DUSE_CYASSL_INCLUDE_DIR
-	endif
-	LIBS:=$(LIBS) -lcyassl -lm
-	USE_MATRIXSSL=
-	USE_OPENSSL=
-	USE_MBEDTLS=
-endif
-ifeq ($(USE_MATRIXSSL), 1)
-	SSL_DEFS:= -DUSE_MATRIXSSL  -DHAVE_SSL 
-	LIBS:=$(LIBS) -lmatrixssl
-	SSL_OBJ_DYN=matrixssl_helper_dyn.o
-	SSL_OBJ_STATIC=matrixssl_helper_static.o
-	USE_CYASSL=
-	USE_OPENSSL=
-	USE_MBEDTLS=
-	
-endif
-ifeq ($(USE_OPENSSL), 1)
+ifeq ($(USE_OPENSSL),1)
 	SSL_DEFS:= -DUSE_OPENSSL -DHAVE_SSL
 	LIBS:=$(LIBS) -lcrypto -lssl
-	USE_MATRIXSSL=
-	USE_CYASSL=
 	USE_MBEDTLS=
+	USE_OPENSSL=1
 endif
 
 ifeq ($(USE_ERICSTOOLS), 1)

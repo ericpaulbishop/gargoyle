@@ -105,6 +105,8 @@ function resetData()
 		{
 			document.getElementById("wan_container").style.display = "none";
 		}
+		childTxt = (wan_port == "?" ? "-" : wan_port);
+		setChildText("wan_port_speed", childTxt);
 		childTxt = (currentWanIp == "" ? "-" : currentWanIp);
 		for(var x = 0; x < currentWanIp6.length; x++)
 		{

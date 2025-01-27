@@ -1,6 +1,6 @@
 				<div class="row form-group">
 					<label class="col-xs-5" id='add_host_label' for='add_host'><%~ HsNm %> <em>(<%~ dhcp.opt %>)</em></label>
-					<span class="col-xs-7"><input type='text' id='add_host' class='form-control' /></span>
+					<span class="col-xs-7"><input type='text' id='add_host' oninput='proofreadDHCPHostName(this)' class='form-control' /></span>
 				</div>
 				<div class="row form-group">
 					<label class="col-xs-5" id='add_mac_label' for='add_mac'>MAC</label>

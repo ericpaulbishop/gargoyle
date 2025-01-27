@@ -201,15 +201,19 @@ function resetData()
 	{
 		var section = sections[sectionIndex];
 		var domain = uciOriginal.get("ddns_gargoyle", section, "domain");
-		domain = domain == "" ? uciOriginal.get("ddns_gargoyle", section, "service_provider") : domain;
-		domain = domain.length > 20 ? domain.substr(0,17) + "..." : domain;
+		var testDomain = uciOriginal.get("ddns_gargoyle", section, "test_domain");
+		var provider = uciOriginal.get("ddns_gargoyle", section, "service_provider");
+		domain = domain == "" ? provider : domain;
+		domain = testDomain == "" ? domain : testDomain;
+
+		var providerMatch = provider.match(/(.*)_v6$/);
+		provider = providerMatch != null ? providerMatch[1] + " (IPv6)" : provider;
 
 		var lastDate = new Date();
 		if(updateTimes[section] != null)
 		{
 			lastDate.setTime(1000*updateTimes[section]);
 		}
-
 
 		var systemDateFormat = uciOriginal.get("gargoyle",  "global", "dateformat");
 		var twod = function(num) { var nstr = "" + num; nstr = nstr.length == 1 ? "0" + nstr : nstr; return nstr; }
@@ -224,14 +228,12 @@ function resetData()
 		lastUpdate = systemDateFormat == "hungary" ? m + "." + d + h : lastUpdate;
 		lastUpdate =  updateTimes[section] == null ? UI.never : lastUpdate;
 
-
-
 		var enabledCheckbox = createEnabledCheckbox();
 		enabledCheckbox.checked = uciOriginal.get("ddns_gargoyle", section, "enabled") == "1" ? true : false;
 		enabledCheckbox.id = section;
-		ddnsTableData.push( [domain, lastUpdate, enabledCheckbox, createEditButton(), createForceUpdateButton()]);
+		ddnsTableData.push( [domain, provider, lastUpdate, enabledCheckbox, createEditButton(), createForceUpdateButton()]);
 
-		var row = ddnsTableData[ddnsTableData.length-1][4];
+		var row = ddnsTableData[ddnsTableData.length-1][5];
 		setElementEnabled(row, enabledCheckbox.checked);
 		ddnsEnabledData.push(enabledCheckbox.checked);
  	}
@@ -277,13 +279,17 @@ function addDdnsService()
 
 
 		var domain = uci.get("ddns_gargoyle", section, "domain");
+		var testDomain = uci.get("ddns_gargoyle", section, "test_domain");
 		domain = domain == "" ? providerName : domain;
-		domain = domain.length > 20 ? domain.substr(0,17) + "..." : domain;
+		domain = testDomain == "" ? domain : testDomain;
+
+		var providerMatch = providerName.match(/(.*)_v6$/);
+		providerName = providerMatch != null ? providerMatch[1] + " (IPv6)" : providerName;
 
 		var enabledCheckbox = createEnabledCheckbox();
 		enabledCheckbox.checked = true;
 		enabledCheckbox.id = section;
-		var newTableRow =  [domain, UI.never, enabledCheckbox, createEditButton(), createForceUpdateButton()];
+		var newTableRow =  [domain, providerName, UI.never, enabledCheckbox, createEditButton(), createForceUpdateButton()];
 
 		var ddnsTable = document.getElementById('ddns_table_container').firstChild;
 		addTableRow(ddnsTable, newTableRow, true, false, removeServiceProviderCallback);
@@ -298,7 +304,7 @@ function addDdnsService()
 }
 function removeServiceProviderCallback(table, row)
 {
-	var section = row.childNodes[2].firstChild.id;
+	var section = row.childNodes[3].firstChild.id;
 	uci.removeSection("ddns_gargoyle", section);
 }
 
@@ -404,13 +410,20 @@ function proofreadServiceProvider()
 		{
 			domain = providerName;
 		}
+		if(document.getElementById("test_domain") != null)
+		{
+			var testDomain = document.getElementById("test_domain").value;
+			domain = testDomain == "" ? domain : testDomain;
+		}
 		var ipv6 = providerName.match(/(.*)_v6$/) != null ? "1" : "0";
 		var allServices = uci.getAllSectionsOfType("ddns_gargoyle", "service");
 		var domainMatches = false;
 		for(serviceIndex = 0; serviceIndex < allServices.length && domainMatches == false; serviceIndex++)
 		{
 			var testDomain = uci.get("ddns_gargoyle", allServices[serviceIndex], "domain");
+			var testDomainVar = uci.get("ddns_gargoyle", allServices[serviceIndex], "test_domain");
 			testDomain = testDomain == "" ? uci.get("ddns_gargoyle", allServices[serviceIndex], "service_provider") : testDomain;
+			testDomain = testDomainVar == "" ? testDomain : testDomainVar;
 			var testIpv6 = uci.get("ddns_gargoyle", allServices[serviceIndex], "ipv6");
 			testIpv6 = testIpv6 == "" ? "0" : testIpv6;
 			domainMatches = (testDomain == domain) && (ipv6 == testIpv6) ? true : false;
@@ -736,14 +749,15 @@ function createForceUpdateButton()
 
 function setRowEnabled()
 {
-	var enabled= this.checked ? "1" : "0";
+	var enabled= this.checked;
 	var enabledRow=this.parentNode.parentNode;
 	var enabledDomain = enabledRow.firstChild.firstChild.data;
 
-	var row = enabledRow.childNodes[4].firstChild;
+	var row = enabledRow.childNodes[5].firstChild;
 	setElementEnabled(row, enabled);
 
-	var section = enabledRow.childNodes[2].firstChild.id;
+	var section = enabledRow.childNodes[3].firstChild.id;
+	enabled = enabled ? "1" : "0";
 	uci.set("ddns_gargoyle", section, "enabled", enabled);
 	updatedSections.push(section);
 }
@@ -821,7 +835,7 @@ function forceUpdateForRow()
 	var sections = uci.getAllSections("ddns_gargoyle");
 	var updateDomain = updateRow.firstChild.firstChild.data;
 
-	var section = updateRow.childNodes[2].firstChild.id;
+	var section = updateRow.childNodes[3].firstChild.id;
 	var needsUpdate=false;
 	for(updatedIndex=0; updatedIndex < updatedSections.length && !needsUpdate; updatedIndex++)
 	{
@@ -865,6 +879,8 @@ function forceUpdateForRow()
 function editServiceTableRow(editRow, section, providerName, selectedDomain)
 {
 	var newDomain = document.getElementById("domain") != null ? document.getElementById("domain").value : providerName;
+	var testDomain = document.getElementById("test_domain")!= null ? document.getElementById("test_domain").value : "";
+	newDomain = testDomain == "" ? newDomain : testDomain;
 
 	var errors = proofreadServiceProvider();
 	if(errors.length == 1)
@@ -881,8 +897,7 @@ function editServiceTableRow(editRow, section, providerName, selectedDomain)
 	}
 	else
 	{
-		var truncatedDomain = newDomain.length > 20 ? newDomain.substr(0,17) + "..." : newDomain;
-		editRow.firstChild.firstChild.data = truncatedDomain;
+		editRow.firstChild.firstChild.data = newDomain;
 		setUciFromDocument(uci, "ddns_gargoyle", section, document);
 		updatedSections.push(section);
 		closeModalWindow('ddns_service_modal');
@@ -932,10 +947,12 @@ function editDDNSModal()
 {
 	editRow=this.parentNode.parentNode;
 	//load provider data for this row
-	var section = editRow.childNodes[2].firstChild.id;
+	var section = editRow.childNodes[3].firstChild.id;
 	var providerName = uci.get("ddns_gargoyle", section, "service_provider");
 	var selectedDomain = uci.get("ddns_gargoyle", section, "domain");
+	var testDomain = uci.get("ddns_gargoyle", section, "test_domain");
 	selectedDomain = selectedDomain == "" ? providerName : selectedDomain;
+	selectedDomain = testDomain == "" ? selectedDomain : testDomain;
 
 	modalButtons = [
 		{"title" : UI.CApplyChanges, "classes" : "btn btn-primary", "function" : function(){editServiceTableRow(editRow, section, providerName, selectedDomain);}},

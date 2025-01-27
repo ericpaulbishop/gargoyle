@@ -1,39 +1,39 @@
---- a/target/linux/bcm27xx/bcm2708/config-5.10
-+++ b/target/linux/bcm27xx/bcm2708/config-5.10
-@@ -354,6 +354,7 @@ CONFIG_USB_UAS=y
- CONFIG_USB_USBNET=y
+--- a/target/linux/bcm27xx/bcm2708/config-5.15
++++ b/target/linux/bcm27xx/bcm2708/config-5.15
+@@ -356,6 +356,7 @@ CONFIG_USB_USBNET=y
  CONFIG_USE_OF=y
+ CONFIG_VCHIQ_CDEV=y
  CONFIG_VFP=y
 +# CONFIG_VIDEO_BCM2835_UNICAM is not set
  CONFIG_VT=y
  CONFIG_VT_CONSOLE=y
  CONFIG_VT_CONSOLE_SLEEP=y
---- a/target/linux/bcm27xx/bcm2709/config-5.10
-+++ b/target/linux/bcm27xx/bcm2709/config-5.10
-@@ -449,6 +449,7 @@
- CONFIG_USE_OF=y
+--- a/target/linux/bcm27xx/bcm2709/config-5.15
++++ b/target/linux/bcm27xx/bcm2709/config-5.15
+@@ -452,6 +452,7 @@ CONFIG_USE_OF=y
+ CONFIG_VCHIQ_CDEV=y
  CONFIG_VFP=y
  CONFIG_VFPv3=y
 +# CONFIG_VIDEO_BCM2835_UNICAM is not set
  CONFIG_VT=y
  CONFIG_VT_CONSOLE=y
  CONFIG_VT_CONSOLE_SLEEP=y
---- a/target/linux/bcm27xx/bcm2710/config-5.10
-+++ b/target/linux/bcm27xx/bcm2710/config-5.10
-@@ -435,6 +435,7 @@
- CONFIG_USB_SUPPORT=y
+--- a/target/linux/bcm27xx/bcm2710/config-5.15
++++ b/target/linux/bcm27xx/bcm2710/config-5.15
+@@ -438,6 +438,7 @@ CONFIG_USB_SUPPORT=y
  CONFIG_USB_UAS=y
  CONFIG_USB_USBNET=y
+ CONFIG_VCHIQ_CDEV=y
 +# CONFIG_VIDEO_BCM2835_UNICAM is not set
  CONFIG_VMAP_STACK=y
  CONFIG_VT=y
  CONFIG_VT_CONSOLE=y
---- a/target/linux/bcm27xx/bcm2711/config-5.10
-+++ b/target/linux/bcm27xx/bcm2711/config-5.10
-@@ -449,6 +449,7 @@
- CONFIG_USB_XHCI_HCD=y
+--- a/target/linux/bcm27xx/bcm2711/config-5.15
++++ b/target/linux/bcm27xx/bcm2711/config-5.15
+@@ -450,6 +450,7 @@ CONFIG_USB_XHCI_HCD=y
  CONFIG_USB_XHCI_PCI=y
  CONFIG_USB_XHCI_PLATFORM=y
+ CONFIG_VCHIQ_CDEV=y
 +# CONFIG_VIDEO_BCM2835_UNICAM is not set
  CONFIG_VMAP_STACK=y
  CONFIG_VT=y

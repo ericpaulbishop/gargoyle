@@ -1,6 +1,6 @@
 --- a/include/kernel.mk
 +++ b/include/kernel.mk
-@@ -207,7 +207,7 @@
+@@ -208,7 +208,7 @@
      CATEGORY:=Kernel modules
      DESCRIPTION:=$(DESCRIPTION)
      EXTRA_DEPENDS:=kernel (=$(LINUX_VERSION)-$(LINUX_RELEASE)-$(LINUX_VERMAGIC))

@@ -13,8 +13,8 @@ You should always consult the wiki for up to date information on getting started
 The following prerequisites assume a 64bit Ubuntu system. Many devs use virtual machines, and they are perfectly fine for this kind of work.
 
 ```
-sudo apt-get install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs \
-git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo npm libelf-dev clang flex bison g++ g++-multilib python3-distutils rsync file wget
+sudo apt-get install build-essential asciidoc binutils bzip2 gawk gettext git libncurses-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs \
+git-core gcc-multilib p7zip p7zip-full msmtp libssl-dev texinfo npm libelf-dev clang flex bison g++ g++-multilib python3-distutils python3-dev rsync file wget
 ```
 
 **NOTE** Python is also required and needs to be in your path. Python 3 is recommended. For Ubuntu users, it is recommended to install `python-is-python3` to solve this issue automatically.

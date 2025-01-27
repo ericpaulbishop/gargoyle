@@ -9,20 +9,21 @@ include $(TOPDIR)/rules.mk
 
 PKG_NAME:=openvpn
 
-PKG_VERSION:=2.5.7
-PKG_RELEASE:=3
+PKG_VERSION:=2.5.8
+PKG_RELEASE:=5
 
 PKG_SOURCE_URL:=\
 	https://build.openvpn.net/downloads/releases/ \
 	https://swupdate.openvpn.net/community/releases/
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
-PKG_HASH:=313bca7e996a4f59ef9940dd87c6c4b9168064db9be6cabebd37cd65f13759ed
+PKG_HASH:=2bbd0026469902037ee6499b68283d5ab36c74e36cae3112082cfdf6c77a0c57
 
 PKG_MAINTAINER:=Magnus Kroken <mkroken@gmail.com>
 
 PKG_INSTALL:=1
 PKG_FIXUP:=autoreconf
 PKG_BUILD_PARALLEL:=1
+PKG_BUILD_FLAGS:=gc-sections
 PKG_LICENSE:=GPL-2.0
 PKG_CPE_ID:=cpe:/a:openvpn:openvpn
 
@@ -37,7 +38,7 @@ define Package/openvpn/Default
   MENU:=1
   DEPENDS:=+kmod-tun +OPENVPN_gargoyle_$(1)_ENABLE_LZO:liblzo +OPENVPN_gargoyle_$(1)_ENABLE_IPROUTE2:ip $(3)
   VARIANT:=$(1)
-  PROVIDES:=openvpn openvpn-crypto
+  PROVIDES:=openvpn openvpn-gargoyle openvpn-crypto
 endef
 
 Package/openvpn-gargoyle-openssl=$(call Package/openvpn/Default,openssl,OpenSSL,+PACKAGE_openvpn-gargoyle-openssl:libopenssl)
@@ -65,9 +66,6 @@ endif
 CONFIGURE_VARS += \
 	IPROUTE=/sbin/ip \
 	NETSTAT=/sbin/netstat
-
-TARGET_CFLAGS += -ffunction-sections -fdata-sections
-TARGET_LDFLAGS += -Wl,--gc-sections
 
 define Build/Configure
 	$(call Build/Configure/Default, \

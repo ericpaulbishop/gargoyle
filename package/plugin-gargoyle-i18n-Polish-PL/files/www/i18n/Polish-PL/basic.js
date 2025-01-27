@@ -79,6 +79,7 @@ basicS.optl="opcja";
 basicS.MISP="Operator";
 basicS.CustMAC="Użyj innego adresu MAC";
 basicS.CustMTU="Użyj innego MTU";
+basicS.CustVLAN="Użyj innego VLAN";
 basicS.LANSec="Sieć lokalna / LAN";
 basicS.DfltDNS="Domyślne serwery DNS od ISP";
 basicS.OpnSrvs="OpenDNS";

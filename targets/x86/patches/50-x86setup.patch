@@ -1,53 +1,58 @@
 --- /dev/null
 +++ b/package/base-files/files/etc/init.d/x86setup
-@@ -0,0 +1,44 @@
+@@ -0,0 +1,49 @@
 +#!/bin/sh /etc/rc.common
 +
 +START=15
 +
 +boot()
 +{
-+	eths=$(cat /proc/net/dev | grep eth | sed 's/^.*eth/eth/g' | sed 's/:.*$//g' | sort -r)
-+	num_eths=$(echo $eths | wc -w)
++	x86setup=$(uci -q get gargoyle.global.x86setup)
++	if [ -z "$x86setup" -o "$x86setup" = "0" ] ; then
++		eths=$(cat /proc/net/dev | grep eth | sed 's/^.*eth/eth/g' | sed 's/:.*$//g' | sort -r)
++		num_eths=$(echo $eths | wc -w)
 +
-+	wan_if_num=$(($num_eths-1))
-+	lan_ifs=""
-+	if_num=0
-+	for eth in $eths ; do
-+		if [ $if_num -gt 0 ] && [ $if_num = $wan_if_num ] ; then
-+			uci set network.wan="interface"
-+			uci set network.wan.device="$eth"
-+			uci set network.wan.proto="dhcp"
-+			uci set network.wan6.device="$eth"
-+			uci set network.wan6.proto="dhcpv6"
-+		else
-+			if [ $if_num = 0 ] ; then
-+				lan_ifs="$eth"
++		wan_if_num=$(($num_eths-1))
++		lan_ifs=""
++		if_num=0
++		for eth in $eths ; do
++			if [ $if_num -gt 0 ] && [ $if_num = $wan_if_num ] ; then
++				uci set network.wan="interface"
++				uci set network.wan.device="$eth"
++				uci set network.wan.proto="dhcp"
++				uci set network.wan6.device="$eth"
++				uci set network.wan6.proto="dhcpv6"
 +			else
-+				lan_ifs="$lan_ifs $eth"
++				if [ $if_num = 0 ] ; then
++					lan_ifs="$eth"
++				else
++					lan_ifs="$lan_ifs $eth"
++				fi
 +			fi
-+		fi
-+		if_num=$(($if_num+1))
-+	done
-+
-+	if [ -n "$lan_ifs" ] ; then
-+		uci set network.brlan_dev="device"
-+		uci set network.brlan_dev.name="br-lan"
-+		uci set network.brlan_dev.type="bridge"
-+		uci delete network.brlan_dev.ports
-+		for lan_if in $lan_ifs; do
-+			uci add_list network.brlan_dev.ports="$lan_if"
++			if_num=$(($if_num+1))
 +		done
-+		uci set network.lan="interface"
-+		uci set network.lan.device="br-lan"
++
++		if [ -n "$lan_ifs" ] ; then
++			uci set network.brlan_dev="device"
++			uci set network.brlan_dev.name="br-lan"
++			uci set network.brlan_dev.type="bridge"
++			uci delete network.brlan_dev.ports
++			for lan_if in $lan_ifs; do
++				uci add_list network.brlan_dev.ports="$lan_if"
++			done
++			uci set network.lan="interface"
++			uci set network.lan.device="br-lan"
++		fi
++		uci commit network
++		uci set gargoyle.global.x86setup=1
++		uci commit gargoyle
 +	fi
-+	uci commit network
 +	/etc/init.d/x86setup disable
 +	rm -rf /etc/init.d/x86setup
 +}
 --- a/package/base-files/Makefile
 +++ b/package/base-files/Makefile
-@@ -180,6 +180,7 @@ define Package/base-files/install
+@@ -214,6 +214,7 @@ define Package/base-files/install
  
  	chmod 0600 $(1)/etc/shadow
  	chmod 1777 $(1)/tmp

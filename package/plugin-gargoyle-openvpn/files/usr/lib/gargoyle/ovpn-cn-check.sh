@@ -21,7 +21,7 @@
 [ $# -eq 3 ] || { echo usage: ovpn-cn-check.sh userfile certificate_depth X509_NAME_oneline ; exit 255 ; }
 
 if [ $2 -eq 0 ] ; then
-	rgx=$(echo $3 | cut -f6 -d , | sed 's/ CN=//g')
+	rgx=$(echo $3 | grep -o 'CN=[^, ]*' | sed 's/CN=//g')
 	grep -qw "^$rgx" "$1" && logger -t ovpn-cn-check $rgx verified OK && exit 0
 	logger -t ovpn-cn-check $rgx not verified
 	exit 1

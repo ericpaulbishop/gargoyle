@@ -30,6 +30,13 @@ menuconfig USE_GARGOYLE_PROFILE_PKGS
 				help
 				  Choose basic packages and those required to support USB functionality (but no network sharing).
 
+			config GARGOYLE_VPN
+				tristate "Basic & VPN Functionality"
+				default m
+				select PACKAGE_gargoyle-vpn
+				help
+				  Choose basic packages and those required to support VPN functionality.
+
 			config GARGOYLE_LARGE
 				tristate "Full Functionality"
 				default m

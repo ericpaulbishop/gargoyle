@@ -38,3 +38,34 @@
  		EOF
  	fi
  
+@@ -234,14 +234,24 @@ generate_switch_vlans_ports() {
+ 		for role in $roles; do
+ 			json_select "$role"
+ 				json_get_vars ports
++				json_get_var rolelabel role
+ 			json_select ..
+ 
+-			uci -q batch <<-EOF
+-				add network switch_vlan
+-				set network.@switch_vlan[-1].device='$switch'
+-				set network.@switch_vlan[-1].vlan='$role'
+-				set network.@switch_vlan[-1].ports='$ports'
+-			EOF
++			if [ -z "$rolelabel" ] ; then
++				uci -q batch <<-EOF
++					add network switch_vlan
++					set network.@switch_vlan[-1].device='$switch'
++					set network.@switch_vlan[-1].vlan='$role'
++					set network.@switch_vlan[-1].ports='$ports'
++				EOF
++			else
++				uci -q batch <<-EOF
++					set network.switch_${rolelabel}_vlan='switch_vlan'
++					set network.switch_${rolelabel}_vlan.device='$switch'
++					set network.switch_${rolelabel}_vlan.vlan='$role'
++					set network.switch_${rolelabel}_vlan.ports='$ports'
++				EOF
++			fi
+ 		done
+ 
+ 		json_select ..

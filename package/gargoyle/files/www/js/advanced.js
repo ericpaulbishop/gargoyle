@@ -22,6 +22,8 @@ function resetData()
 	setUSteerCommsVisibility();
 	// WAN
 	setModemNetworkVisibility();
+	// NetworkOpts
+	setPktSteeringVisibility();
 
 	setGlobalVisibility();
 }
@@ -77,6 +79,13 @@ function saveChanges()
 		uci.removeSection('network','modem');
 	}
 
+	// NetworkOpts
+	if(num_cpus > 1)
+	{
+		var selPktSteerOpt = getSelectedValue('pktsteer_opt');
+		uci.set('network', 'globals', 'packet_steering', selPktSteerOpt);
+	}
+
 	var restartNetworkCommand = "\nsh /usr/lib/gargoyle/restart_network.sh;\n";
 	var regenerateCacheCommand = "\nrm -rf /tmp/cached_basic_vars ;\n/usr/lib/gargoyle/cache_basic_vars.sh >/dev/null 2>/dev/null\n";
 	var commands = uci.getScriptCommands(uciCompare);
@@ -96,6 +105,11 @@ function saveChanges()
 	if(commands.match(/network\.modem/))
 	{
 		// Modem network is being created/destroyed
+		shouldRestartNetwork = true;
+	}
+	if(commands.match(/packet_steering/))
+	{
+		// Packet steering option is being changed
 		shouldRestartNetwork = true;
 	}
 
@@ -125,6 +139,7 @@ function arrayMoveIdx(arr, fromIdx, toIdx)
 function setGlobalVisibility()
 {
 	var anyVis = 0;
+	anyVis += setNetOptContainerVisibility();
 	anyVis += setWirelessContainerVisibility();
 	anyVis += setLANContainerVisibility();
 	anyVis += setWANContainerVisibility();
@@ -148,7 +163,7 @@ function setWANContainerVisibility()
 function setModemNetworkVisibility()
 {
 	var wandhcp = uciOriginal.get('network','wan','proto');
-	if(wandhcp == 'dhcp')
+	if(wandhcp == 'dhcp' || wandhcp == 'pppoe')
 	{
 		loadChecked(['use_modem_network',uciOriginal,'network','modem','ipaddr',function(ip){return ip != ""}]);
 		loadValueFromVariable(['modem_network_ip',uciOriginal,'network','modem','ipaddr','192.168.0.2']);
@@ -216,6 +231,25 @@ function setWirelessCountryVisibility()
 	// If we already had a selection, set it again
 	selCountry = currentSel == "" ? selCountry : currentSel;
 	setSelectedValue('wireless_country',selCountry);
+}
+
+function setNetOptContainerVisibility()
+{
+	var retVal = 0;
+	var vis = 'none';
+
+	if(num_cpus > 1)
+	{
+		retVal = 1;
+		vis = 'block';
+	}
+	byId('netopt_container').style.display = vis;
+	return retVal;
+}
+
+function setPktSteeringVisibility()
+{
+	loadSelectedValueFromVariable(['pktsteer_opt',uciOriginal,'network','globals','packet_steering','0']);
 }
 
 function parseCountry(countryLines)

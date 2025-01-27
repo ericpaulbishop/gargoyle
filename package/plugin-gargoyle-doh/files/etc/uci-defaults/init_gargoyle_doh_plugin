@@ -1,0 +1,12 @@
+#!/bin/sh
+
+connection_menu_name="DNS over HTTPS"
+[ -x /usr/bin/i18n-menu ] && {
+	translation=$(i18n-menu gargoyle.display.connection_doh)
+	[ -n "$translation" ] && connection_menu_name="$translation"
+}
+uci set gargoyle.display.connection_doh="$connection_menu_name"
+uci set gargoyle.scripts.connection_doh="doh.sh"
+uci set gargoyle.connection.doh="215"
+
+uci commit

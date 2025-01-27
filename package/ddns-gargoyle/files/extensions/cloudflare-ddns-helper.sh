@@ -27,13 +27,14 @@ IPV4_REGEX="[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}"
 # IPv6       ( ( 0-9a-f  1-4char ":") min 1x) ( ( 0-9a-f  1-4char   )optional) ( (":" 0-9a-f 1-4char  ) min 1x)
 IPV6_REGEX="\(\([0-9A-Fa-f]\{1,4\}:\)\{1,\}\)\(\([0-9A-Fa-f]\{1,4\}\)\{0,1\}\)\(\(:[0-9A-Fa-f]\{1,4\}\)\{1,\}\)"
 
-if [ $# != 8 ] ; then
+if [ $# != 9 ] ; then
 	logger -t cloudflare-ddns-helper "Incorrect number of arguments supplied. Exiting"
 	echo "cloudflare-ddns-helper usage:"
 	echo -e "\tusername\tyour cloudflare email"
 	echo -e "\tapi_key\t\tyour cloudflare api key"
 	echo -e "\tdomain\t\tyourdomain.TLD"
 	echo -e "\thost\t\thostname"
+	echo -e "\ttest_domain\tDomain to use for checking remote IP"
 	echo -e "\tlocal_ip\tIP address to be sent to cloudflare"
 	echo -e "\tforce_update\t1 to force update of IP, 0 to exit if already matched"
 	echo -e "\tverbose\t\t0 for low output or 1 for verbose logging"
@@ -45,10 +46,11 @@ DOMAIN=$1
 USERNAME=$2
 API_KEY=$3
 HOST=$4
-LOCAL_IP=$5
-FORCE_UPDATE=$6
-VERBOSE=$7
-IPV6=$8
+TEST_DOMAIN=$5
+LOCAL_IP=$6
+FORCE_UPDATE=$7
+VERBOSE=$8
+IPV6=$9
 
 [ -z "$USERNAME" ] && {
 	logger -t cloudflare-ddns-helper "Invalid username"
@@ -68,7 +70,7 @@ IPV6=$8
 }
 
 [ $VERBOSE -eq  1 ] && logger -t cloudflare-ddns-helper "Username: $USERNAME, API KEY: $API_KEY"
-[ $VERBOSE -eq  1 ] && logger -t cloudflare-ddns-helper "Domain: $DOMAIN, Host: $HOST, Local IP: $LOCAL_IP"
+[ $VERBOSE -eq  1 ] && logger -t cloudflare-ddns-helper "Domain: $DOMAIN, Host: $HOST, Test Domain: $TEST_DOMAIN, Local IP: $LOCAL_IP"
 
 # Change this to APIv4 compliant format
 # domain = base domain e.g. example.com

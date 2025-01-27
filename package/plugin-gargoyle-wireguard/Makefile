@@ -46,6 +46,7 @@ endef
 define Package/plugin-gargoyle-wireguard/install
 	$(INSTALL_DIR) $(1)
 	$(CP) ./files/* $(1)/
+	chmod 755 $(1)/usr/lib/bwmon-gargoyle/bwmon-gargoyle.d/030-wireguard.bwmon
 endef
 
 define Package/plugin-gargoyle-wireguard/postinst

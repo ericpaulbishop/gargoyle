@@ -1,0 +1,8 @@
+				<div class="row form-group">
+					<label class="col-xs-5" id='openvpn_extra_subnet_ip_label' for='add_subnet_ip'><%~ SubIP %></label>
+					<span class="col-xs-7"><input type='text' id='openvpn_extra_subnet_ip' class='form-control' oninput='proofreadIp(this)' maxLength='35' /></span>
+				</div>
+				<div class="row form-group">
+					<label class="col-xs-5" id='openvpn_extra_subnet_mask_label' for='add_subnet_mask'><%~ SubM %></label>
+					<span class="col-xs-7"><input type='text' id='openvpn_extra_subnet_mask' class='form-control' oninput='proofreadMask(this)' maxLength='35' /></span>
+				</div>

@@ -148,10 +148,6 @@
 						<input type="checkbox" id="openvpn_server_cipher_5" value="AES-128-CBC">
 						<label for="openvpn_server_cipher_5" id="openvpn_server_cipher_5_label">AES-CBC 128bit</label>
 					</span>
-					<span class="col-xs-7 col-xs-offset-5">
-						<input type="checkbox" id="openvpn_server_cipher_6" value="BF-CBC">
-						<label for="openvpn_server_cipher_6" id="openvpn_server_cipher_6_label">BF-CBC</label>
-					</span>
 				</div>
 
 				<div id="openvpn_server_client_to_client_container" class="row form-group">
@@ -167,11 +163,25 @@
 				<div id="openvpn_server_subnet_access_container" class="row form-group">
 					<label class="col-xs-5" for='openvpn_server_subnet_access' id='openvpn_server_subnet_access_label'><%~ LSAc %>:</label>
 					<span class="col-xs-7">
-						<select class="form-control" id='openvpn_server_subnet_access'>
+						<select class="form-control" id='openvpn_server_subnet_access' onchange='setOpenvpnVisibility()'>
 							<option value='true'><%~ CtoH %></option>
 							<option value='false'><%~ CnoL %></option>
 						</select>
 					</span>
+				</div>
+
+				<div id='openvpn_server_extra_subnet_container' class="row form-group">
+					<label class="col-xs-offset-5 col-xs-7" id="openvpn_server_extra_subnet_add_label" style="text-decoration:underline"><p><%~ SASnetAdd %>:</p></label>
+					<div class="row form-group">
+						<div class="col-xs-offset-5 col-xs-7">
+							<button id='openvpn_server_extra_subnet_add' class='btn btn-default btn-add' onclick='addOvpnServerExtraSubnetsModal()'><%~ Add %></button>
+						</div>
+					</div>
+
+					<div class='col-xs-offset-5 col-xs-7'>
+						<div id="openvpn_server_extra_subnets_table_container" class="table table-responsive"></div>
+					</div>
+					<div class='col-xs-offset-5 col-xs-7'><em><%~ SASnetHlp %></em></div>
 				</div>
 
 				<div id="openvpn_server_duplicate_cn_container" class="row form-group">
@@ -357,10 +367,6 @@
 								<input type="checkbox" id="openvpn_client_cipher_5" value="AES-128-CBC" onchange="setClientVisibility(document);updateClientConfigTextFromControls();">
 								<label for="openvpn_client_cipher_5" id="openvpn_client_cipher_5_label">AES-CBC 128bit</label>
 							</span>
-							<span class="col-xs-7 col-xs-offset-5">
-								<input type="checkbox" id="openvpn_client_cipher_6" value="BF-CBC" onchange="setClientVisibility(document);updateClientConfigTextFromControls();">
-								<label for="openvpn_client_cipher_6" id="openvpn_client_cipher_6_label">BF-CBC</label>
-							</span>
 						</div>
 
 						<div id='openvpn_client_block_nonovpn_container' class="row form-group">
@@ -473,6 +479,22 @@
 		</div>
 	</div>
 </div>
+
+<div class="modal fade" tabindex="-1" role="dialog" id="openvpn_server_extra_subnet_modal" aria-hidden="true" aria-labelledby="openvpn_server_extra_subnet_modal_title">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3 id="openvpn_server_extra_subnet_modal_title" class="panel-title"><%~ SASnetAdd %></h3>
+			</div>
+			<div class="modal-body">
+				<%in templates/openvpn_additional_route_template %>
+			</div>
+			<div class="modal-footer" id="openvpn_server_extra_subnet_modal_button_container">
+			</div>
+		</div>
+	</div>
+</div>
+
 
 <script>
 	resetData()

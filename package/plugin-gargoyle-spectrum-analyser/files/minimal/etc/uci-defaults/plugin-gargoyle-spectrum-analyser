@@ -1,6 +1,0 @@
-#!/bin/sh
-
-uci set gargoyle.display.system_spectrum_analyser='Spectrum Analyser'
-uci set gargoyle.scripts.system_spectrum_analyser='spectrum_analyser.sh'
-uci set gargoyle.system.spectrum_analyser='355'
-uci commit

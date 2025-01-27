@@ -770,12 +770,17 @@ function setRemoteNames(selectedRemote)
 	for(ddi=0; ddi < definedDdns.length; ddi++)
 	{
 		var enabled = uciOriginal.get("ddns_gargoyle", definedDdns[ddi], "enabled")
-		var domain  = uciOriginal.get("ddns_gargoyle", definedDdns[ddi], "domain").replace("@",".")
+		var domain  = uciOriginal.get("ddns_gargoyle", definedDdns[ddi], "domain");
+		var testDomain = uciOriginal.get("ddns_gargoyle", definedDdns[ddi], "test_domain");
+		domain = testDomain == "" ? domain : testDomain;
 		if( (enabled != "0" && enabled != "false") && domain != "")
 		{
-			names.push(wgStr.DDNS+": " + domain)
-			values.push(domain)
-			selectedFound = selectedRemote == domain ? true : selectedFound
+			if(values.indexOf(domain) == -1)
+			{
+				names.push(wgStr.DDNS+": " + domain)
+				values.push(domain)
+				selectedFound = selectedRemote == domain ? true : selectedFound
+			}
 		}
 	}
 	selectedFound = (selectedRemote == currentWanIp) || selectedFound

@@ -26,7 +26,7 @@ int main(int argc, char** argv)
 	install_root                     = install_root == NULL ? strdup("root") : install_root;
 
 	char* link_root                  = get_string_map_element(parameters, "link-destination");
-	char* tmp_root                   = get_string_map_element(parameters, "tmp_dir");
+	char* tmp_root                   = get_string_map_element(parameters, "tmp-dir");
 	tmp_root                         = tmp_root == NULL ? strdup("/tmp") : tmp_root;
 	string_map* pkgs                 = get_string_map_element(parameters, "package-list");
 	

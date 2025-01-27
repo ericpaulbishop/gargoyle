@@ -56,6 +56,7 @@ define Build/Compile
 		CFLAGS="$(TARGET_CFLAGS) -I$(STAGING_DIR)/usr/include" \
 		LDFLAGS="$(TARGET_LDFLAGS) -L$(STAGING_DIR)/usr/lib" \
 		USE_OPENSSL="0" \
+		USE_MBEDTLS="0" \
 		STATIC_LIBS="0"
 endef
 

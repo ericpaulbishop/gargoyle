@@ -11,8 +11,10 @@ print_mac80211_channels_for_wifi_dev()
 	echo "nextChFreq = [];" >> "$out"
 	echo "nextChPwr  = [];" >> "$out"
 	mode=$(uci get wireless.$wifi_dev.band)
-	phyname=$(iwinfo nl80211 phyname $wifi_dev)
+	phyname=$(iwinfo nl80211 phyname $wifi_dev 2>&1)
 	[ "$phyname" = "Phy not found" ] && phyname="phy$dev_num"
+	# Check for wl naming
+	[ "$(iwinfo $phyname h 2>&1)" = "No such wireless device: $phyname" ] && phyname="wl$dev_num"
 
 	htpat="\bHT[0-9]\{2,3\}"
 	vhtpat="\bVHT[0-9]\{2,3\}\(+[0-9]\{2\}\)\?"
@@ -151,7 +153,7 @@ if [ -e /lib/wifi/broadcom.sh ] ; then
 	echo "var AwifiAC = false;" >> "$out_file"
 	echo "var AwifiAX = false;" >> "$out_file"
 	echo "var dualBandWireless=false;" >> "$out_file"
-elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" ] ; then
+elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" -o -e "/sys/class/ieee80211/wl0" ] ; then
 	echo 'var wirelessDriver="mac80211";' >> "$out_file"
 	echo 'var mac80211Channels = [];' >> "$out_file"
 	echo 'var mac80211ChFreqs = [];' >> "$out_file"
@@ -160,7 +162,7 @@ elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" ] ; then
 	echo "var nextCh=[];" >> "$out_file"
 	
 	#test for dual band
-	if [ "$(uci show wireless | grep wifi-device | wc -l)" = "2" ] && [ -e "/sys/class/ieee80211/phy1" ] && [ ! "$(uci get wireless.@wifi-device[0].band)" = "$(uci get wireless.@wifi-device[1].band)"  ] ; then
+	if [ "$(uci show wireless | grep wifi-device | wc -l)" = "2" ] && [ -e "/sys/class/ieee80211/phy1" -o -e "/sys/class/ieee80211/wl1" ] && [ ! "$(uci get wireless.@wifi-device[0].band)" = "$(uci get wireless.@wifi-device[1].band)"  ] ; then
 		echo "var dualBandWireless=true;" >> "$out_file"
 		dualband='true'
 	else

@@ -7,9 +7,9 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=nfs-kernel-server
-PKG_VERSION:=2.5.2
-PKG_RELEASE:=1
-PKG_HASH:=09c20d30322e957a6e9547fb5aa742b163c142cd36b244c2485ae0cc3d71d32d
+PKG_VERSION:=2.6.2
+PKG_RELEASE:=3
+PKG_HASH:=26d46448982252e9e2c8346d10cf13e1143e7089c866f53e25db3359f3e9493c
 
 PKG_SOURCE_URL:=@SF/nfs
 PKG_SOURCE:=nfs-utils-$(PKG_VERSION).tar.xz
@@ -32,7 +32,7 @@ define Package/nfs-kernel-server/Default
 	SECTION:=net
 	CATEGORY:=Network
 	SUBMENU:=Filesystem
-	DEPENDS:=+libwrap +libblkid +libuuid +libtirpc
+	DEPENDS:=+libblkid +libuuid +libtirpc
 	URL:=http://nfs.sourceforge.net/
 	MAINTAINER:=Peter Wagner <tripolar@gmx.at>
 endef
@@ -100,8 +100,11 @@ TARGET_CFLAGS += -Wno-error=implicit-function-declaration \
 		 -Wno-error=undef \
 		 -Wno-error=missing-include-dirs
 
-TARGET_LDFLAGS += -Wl,-rpath-link=$(STAGING_DIR)/usr/lib \
-		  -L$(STAGING_DIR)/usr/lib/libevent
+ifneq ($(CONFIG_USE_MUSL),)
+  TARGET_CFLAGS += -D_LARGEFILE64_SOURCE
+endif
+
+TARGET_LDFLAGS += -L$(STAGING_DIR)/usr/lib/libevent
 
 CONFIGURE_ARGS += \
 	--disable-caps \
@@ -150,6 +153,11 @@ HOST_CONFIGURE_VARS += \
 	ac_cv_header_nfsidmap_h=yes \
 	ac_cv_header_blkid_blkid_h=yes \
 	ac_cv_lib_resolv___res_querydomain=yes \
+	ac_cv_func_prctl=yes \
+	ac_cv_sizeof_size_t=0 \
+	ac_cv_func_getrpcbynumber=yes \
+	ac_cv_func_getrpcbynumber_r=yes \
+	enable_ipv6=no \
 	GSSGLUE_CFLAGS=" " \
 	GSSGLUE_LIBS=" " \
 	RPCSECGSS_CFLAGS=" " \
@@ -167,9 +175,8 @@ define Host/Install
 endef
 
 define Package/nfs-kernel-server/install
-	$(INSTALL_DIR) $(1)/etc/init.d $(1)/usr/sbin $(1)/etc/config
+	$(INSTALL_DIR) $(1)/etc/init.d $(1)/usr/sbin
 	$(INSTALL_DATA) ./files/nfsd.exports $(1)/etc/exports
-	$(INSTALL_DATA) ./files/nfsd.conf $(1)/etc/config/nfsd
 	$(INSTALL_BIN) ./files/nfsd.init $(1)/etc/init.d/nfsd
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/utils/statd/sm-notify $(1)/usr/sbin/
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/utils/statd/statd $(1)/usr/sbin/rpc.statd
@@ -209,4 +216,3 @@ $(eval $(call BuildPackage,nfs-utils))
 $(eval $(call BuildPackage,nfs-utils-libs))
 $(eval $(call BuildPackage,nfs-kernel-server))
 $(eval $(call BuildPackage,nfs-kernel-server-utils))
-

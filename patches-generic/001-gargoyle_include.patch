@@ -1,6 +1,6 @@
 --- a/Config.in
 +++ b/Config.in
-@@ -21,6 +21,8 @@ source "config/Config-build.in"
+@@ -29,6 +29,8 @@ source "config/Config-build.in"
  
  source "config/Config-devel.in"
  

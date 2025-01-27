@@ -17,14 +17,14 @@ if [ -e /tmp/hosts/odhcpd ] ; then
 fi
 
 echo "wlanLines = new Array();"
-iwinfo | awk '/^wlan/ { printf "wlanLines.push(\""$1" "} /ESSID:/ {gsub(/"/,"",$3); printf ""$3" "} /Access Point:/ {printf ""$3"\");" }'
+iwinfo | awk '/^(phy|wl)/ { printf "wlanLines.push(\""$1" "} /ESSID:/ {gsub(/"/,"",$3); printf ""$3" "} /Access Point:/ {printf ""$3"\");" }'
 
 echo "wifiLines = new Array();"
 echo "wifiClientLines = new Array();"
 if [ -e /lib/wifi/broadcom.sh ] ; then
 	echo "var wirelessDriver=\"broadcom\";"
 	wl assoclist | awk '{print "wifiLines.push(\""$0"\");"}'
-elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" ] ; then
+elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" -o "/sys/class/ieee80211/wl0" ] ; then
 	echo "var wirelessDriver=\"mac80211\";"
 	aps=$( iwinfo | grep ESSID | awk ' { print $1 ; } ' )
 	if [ -n "$aps" ] ; then

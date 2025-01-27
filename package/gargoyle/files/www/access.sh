@@ -26,6 +26,12 @@
 		else
 			echo "var opensslInstalled = false;"
 		fi
+		
+		if [ -e /usr/bin/mbedtls ] ; then
+			echo "var mbedtlsInstalled = true;"
+		else
+			echo "var mbedtlsInstalled = false;"
+		fi
 
 		echo "var authorizedKeyMap = new Object();"
 		if [ -e /etc/dropbear/authorized_keys ] ; then

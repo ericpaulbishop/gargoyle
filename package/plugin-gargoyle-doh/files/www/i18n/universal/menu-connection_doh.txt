@@ -1,0 +1,14 @@
+#fallback is the string the web UI will use when the target language is not present
+
+fallback=DNS over HTTPS
+EN=DNS over HTTPS
+FR=DNS sur HTTPS
+DE=DNS über HTTPS
+NO=DNS over HTTPS
+PL=DNS przez HTTPS
+BR=DNS sobre HTTPS
+RU=DNS через HTTPS
+ZH-CN=基于 HTTPS 的 DNS
+SK=DNS cez HTTPS
+ES=DNS sobre HTTPS
+CS=DNS přes HTTPS

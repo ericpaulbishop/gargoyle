@@ -10,4 +10,5 @@ spectrum.Channel="Channel";
 spectrum.Width="Width";
 spectrum.Mode="Mode";
 spectrum.Signal="Signal";
+spectrum.Encryption="Encryption";
 

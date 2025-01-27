@@ -64,6 +64,7 @@ bool is_unusable_overlayfs(void);
 char* ip6_mask(char* addr, long mask);
 char* ip6_combine_prefix_hostid(char* ip6, char* hostid);
 json_object* getInterfaceDump(void);
+json_object* getWirelessStatusDump(void);
 void get_ifstatus_ip6addrs(json_object* iface, list* ifstatus_ip6, list* ifstatus_mask6);
 void get_ifstatus_gateway(json_object* iface, char** ifstatus_gateway);
 void get_ifstatus_ipaddrs(json_object* iface, char** ifstatus_ip, char* ifstatus_mask);
@@ -904,6 +905,28 @@ json_object* getInterfaceDump(void)
 	return jobj;
 }
 
+json_object* getWirelessStatusDump(void)
+{
+	FILE *fp;
+	unsigned long read_length;
+	struct json_object* jobj;
+
+	fp = popen("ubus -S call network.wireless status", "r");
+	if (fp == NULL)
+	{
+		//printf("wireless status dump failed\n");
+		return NULL;
+	}
+
+	char* wifistatus = read_entire_file(fp, 100, &read_length);
+	jobj = json_tokener_parse(wifistatus);
+	free(wifistatus);
+
+	//printf("<!--\niwireless status dump:\n%s\n-->\n", json_object_to_json_string_ext(jobj, JSON_C_TO_STRING_SPACED | JSON_C_TO_STRING_PRETTY));
+
+	return jobj;
+}
+
 void get_ifstatus_ip6addrs(json_object* iface, list* ifstatus_ip6, list* ifstatus_mask6)
 {
 	struct json_object* tmpobj = NULL;
@@ -1007,6 +1030,8 @@ void print_interface_vars(char** ptr_lan_ip, char** ptr_wan_ip, list** ptr_lan_i
 	struct json_object* if_wan = NULL;
 	struct json_object* if_wan6 = NULL;
 	
+	struct json_object* wirelessstatus = getWirelessStatusDump();
+
 	struct json_object* interfaces_arr;
 	int ifacearrlen = 0;
 	json_object_object_get_ex(ifdump, "interface", &interfaces_arr);
@@ -1049,17 +1074,30 @@ void print_interface_vars(char** ptr_lan_ip, char** ptr_wan_ip, list** ptr_lan_i
 	int loaded_default_ifs = load_saved_default_interfaces( &default_lan_if, &default_wan_if, &default_wan_mac);
 	
 	// WIRELESS
-	list* wireless_ifs  = initialize_list();
-	list* wireless_uci = initialize_list();
-	
-	char** wireless_if_arr = load_interfaces_from_proc_file("/proc/net/wireless");
-	int wif_index;
-	for(wif_index = 0; wireless_if_arr[wif_index] != NULL; wif_index++)
+	list* wireless_ifs = initialize_list();
+	json_object_object_foreach(wirelessstatus, key, val)
 	{
-		push_list(wireless_ifs, (void*)strdup(wireless_if_arr[wif_index]));
+		struct json_object* interfaceArr = NULL;
+		struct json_object* ifnameobj = NULL;
+		struct json_object* tmpobj = NULL;
+		char* ifname = NULL;
+		int interfaceArrLen = 0;
+		json_object_object_get_ex(val, "interfaces", &interfaceArr);
+		if(interfaceArr != NULL)
+		{
+			interfaceArrLen = json_object_array_length(interfaceArr);
+			for(int idx = 0; idx < interfaceArrLen; idx++)
+			{
+				tmpobj = json_object_array_get_idx(interfaceArr, idx);
+				json_object_object_get_ex(tmpobj, "ifname", &ifnameobj);
+				ifname = json_object_get_string(ifnameobj);
+				push_list(wireless_ifs, (void*)strdup(ifname));
+			}
+		}
 	}
-	free_null_terminated_string_array(wireless_if_arr);
+	json_object_put(wirelessstatus);
 
+	list* wireless_uci = initialize_list();
 	struct uci_context *ctx = uci_alloc_context();
 	struct uci_context *state_ctx = uci_alloc_context();
 	struct uci_package *p = NULL;

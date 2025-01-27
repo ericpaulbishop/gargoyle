@@ -344,6 +344,14 @@ void do_print_info(opkg_conf* conf, string_map* parameters, char* install_root, 
 									{
 										sprintf(escape_var_buf, "Not Installed");
 									}
+									if(strcmp(var_name, "Alternatives") == 0)
+									{
+										unsigned long num_alts;
+										char** alts = (char**)get_list_values((list*)var_def,&num_alts);
+										char* combined_alts = join_strs(", ", alts, -1, 1, 0);
+										
+										escape_package_variable(combined_alts, var_name, format, escape_var_buf, 4096);
+									}
 									if(format == OUTPUT_JAVASCRIPT)
 									{
 										printf("pkg_info[\"%s\"][\"%s\"][\"%s\"] = \"%s\";\n", package_name, escape_ver_buf, var_name, escape_var_buf );

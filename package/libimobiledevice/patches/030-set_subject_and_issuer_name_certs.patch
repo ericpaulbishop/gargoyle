@@ -1,0 +1,35 @@
+--- a/common/userpref.c
++++ b/common/userpref.c
+@@ -871,6 +871,10 @@ userpref_error_t pair_record_generate_ke
+ 	/* set key validity */
+ 	mbedtls_x509write_crt_set_validity(&cert, notbefore, notafter);
+ 
++	/* set subject and issuer name */
++	mbedtls_x509write_crt_set_subject_name(&cert, (const char *)"CN=gargoyle.home.arpa,O=Gargoyle Router,C=US");
++	mbedtls_x509write_crt_set_issuer_name(&cert, (const char *)"CN=lantis.gargoyle.home.arpa,O=Lantis Project,C=AU");
++
+ 	/* sign root cert with root private key */
+ 	mbedtls_x509write_crt_set_issuer_key(&cert, &root_pkey);
+ 	mbedtls_x509write_crt_set_md_alg(&cert, MBEDTLS_MD_SHA1);
+@@ -930,6 +934,10 @@ userpref_error_t pair_record_generate_ke
+ 	/* set key validity */
+ 	mbedtls_x509write_crt_set_validity(&cert, notbefore, notafter);
+ 
++	/* set subject and issuer name */
++	mbedtls_x509write_crt_set_subject_name(&cert, (const char *)"CN=gargoyle.home.arpa,O=Gargoyle Router,C=US");
++        mbedtls_x509write_crt_set_issuer_name(&cert, (const char *)"CN=lantis.gargoyle.home.arpa,O=Lantis Project,C=AU");
++
+ 	/* sign host cert with root private key */
+ 	mbedtls_x509write_crt_set_issuer_key(&cert, &root_pkey);
+ 	mbedtls_x509write_crt_set_md_alg(&cert, MBEDTLS_MD_SHA1);
+@@ -990,6 +998,10 @@ userpref_error_t pair_record_generate_ke
+ 	/* set key validity */
+ 	mbedtls_x509write_crt_set_validity(&cert, notbefore, notafter);
+ 
++	/* set subject and issuer name */
++        mbedtls_x509write_crt_set_subject_name(&cert, (const char *)"CN=gargoyle.home.arpa,O=Gargoyle Router,C=US");
++        mbedtls_x509write_crt_set_issuer_name(&cert, (const char *)"CN=lantis.gargoyle.home.arpa,O=Lantis Project,C=AU");
++
+ 	/* sign device certificate with root private key */
+ 	mbedtls_x509write_crt_set_issuer_key(&cert, &root_pkey);
+ 	mbedtls_x509write_crt_set_md_alg(&cert, MBEDTLS_MD_SHA1);

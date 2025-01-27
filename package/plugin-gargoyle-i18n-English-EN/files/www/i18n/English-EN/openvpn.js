@@ -27,9 +27,12 @@ ovpnS.CredMC="Credentials Can Be Used By Multiple Clients";
 ovpnS.CUse="Clients Use VPN For";
 ovpnS.ATrff="All Client Traffic";
 ovpnS.HTrff="Only Traffic Destined for Hosts Behind VPN";
+ovpnS.SASnet="Advertised Additional Server Subnets";
+ovpnS.SASnetAdd="Add Additional Server Subnet";
+ovpnS.SASnetHlp="Let clients know about additional subnets for which the server acts as a gateway. Only available when LAN Subnet Access is allowed.";
 ovpnS.OSAC="OpenVPN Server: Allowed Clients";
 ovpnS.CClnt="Currently Configured Clients";
-ovpnS.ZipCred="After generating client configuration, click download to obtain zip file containing necessary credentials, and place in your client&lsquo;s OpenVPN configuration folder";
+ovpnS.ZipCred="After generating client configuration, click download to obtain zip (or .ovpn) file containing necessary credentials, and place in your client&lsquo;s OpenVPN configuration folder";
 ovpnS.CfgCred="Configure A New Client / Set of Credentials";
 ovpnS.ClntN="Client Name";
 ovpnS.ClntIP="Client Internal IP";
@@ -97,9 +100,14 @@ ovpnS.ClntIntIP="Specified Client Internal IP";
 ovpnS.OSubErr="is not in OpenVPN Subnet";
 ovpnS.AddCErr="Could not add client configuration.";
 ovpnS.UpCErr="Could not update client configuration.";
+ovpnS.AddESnetErr="Could not add additional subnet.";
+ovpnS.SubDup="Subnet duplicate detected, already defined as either the OpenVPN subnet, a Client Subnet, or an Additional Server Subnet."
 
 //openvpn_allowed_client_edit.sh
 ovpnS.EditOCS="Edit OpenVPN Client Settings";
+
+//openvpn_additional_route_template.sh
+ovpnS.EditES="Edit OpenVPN Server Extra Subnets";
 
 //openvpn_upload_client.sh (handled by shell scripts)
 ovpnS.uc_CA_f="Could not find CA file";

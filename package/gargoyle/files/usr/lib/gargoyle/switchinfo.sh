@@ -6,33 +6,13 @@
 #
 
 [ -e /usr/share/libubox/jshn.sh ] || exit 0
+[ -e /usr/lib/gargoyle/ethportinfo.sh ] || exit 0
 [ -e /etc/board.json ] || exit 0
 
 . /usr/share/libubox/jshn.sh
+. /usr/lib/gargoyle/ethportinfo.sh
 
 # ports.push(["LAN#","STATUS"]);
-
-convert_link_speed()
-{
-	linkspeed="$1"
-	linkspeed="${linkspeed%"${linkspeed##*[![:space:]]}"}"
-	case "$linkspeed" in
-		"link:down") STATUS="-";;
-		"link:up speed:1000baseT") STATUS="1Gbps";;
-		"link:up speed:100baseT") STATUS="100Mbps";;
-		"link:up speed:10baseT") STATUS="10Mbps";;
-		"10000") STATUS="10Gbps";;
-		"5000") STATUS="5Gbps";;
-		"2500") STATUS="2.5Gbps";;
-		"1000") STATUS="1Gbps";;
-		"100") STATUS="100Mbps";;
-		"10") STATUS="10Mbps";;
-		"0") STATUS="-";;
-		"1") STATUS=$(i18n conn);;
-		*) STATUS="?";;
-	esac
-	echo "$STATUS"
-}
 
 json_load_file "/etc/board.json"
 json_get_keys BOARDKEYS
@@ -58,9 +38,7 @@ if [ -n "$PORTSTEST" ]; then
 				[ -n "$PORTS" ] || exit 0
 				for PORT in $PORTS; do
 					json_get_var PORTNAME $PORT
-					LINK=$(cat /sys/class/net/$PORTNAME/carrier 2>/dev/null)
-					[ "$LINK" = "1" ] && LINK=$(cat /sys/class/net/$PORTNAME/speed 2>/dev/null)
-					STATUS=$(convert_link_speed "$LINK")
+					STATUS=$(get_status_speed "$PORTNAME")
 					echo "ports.push([\"LAN${PORTNAME:3}\",\"$STATUS\"]);"
 				done
 			json_select ..
@@ -108,12 +86,9 @@ elif [ -n "$LANTEST" ]; then
 	# Try just using ethX
 	lan_eths=$(uci get network.brlan_dev.ports)
 	for PORTNAME in $lan_eths; do
-		LINK=$(cat /sys/class/net/$PORTNAME/carrier 2>/dev/null)
-		[ "$LINK" = "1" ] && LINK=$(cat /sys/class/net/$PORTNAME/speed 2>/dev/null)
-		STATUS=$(convert_link_speed "$LINK")
+		STATUS=$(get_status_speed "$PORTNAME")
 		echo "ports.push([\"LAN${PORTNAME:3}\",\"$STATUS\"]);"
 	done
 fi
 
 exit 0
-
