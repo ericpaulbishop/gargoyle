@@ -319,7 +319,7 @@ for new_d in $new_module_dirs ; do
 		echo "  SUBMENU:=\$(NF_MENU)" >>../"$kernel_netfilter_mk"
 		echo "  TITLE:=$lower_name" >>../"$kernel_netfilter_mk"
 		echo "  KCONFIG:=\$(KCONFIG_XT_$upper_name)" >>../"$kernel_netfilter_mk"
-		echo "  FILES:=\$(LINUX_DIR)/net/netfilter/*$lower_name*.\$(LINUX_KMOD_SUFFIX)" >>../"$kernel_netfilter_mk"
+		echo "  FILES:=\$(LINUX_DIR)/net/netfilter/xt_$lower_name*.\$(LINUX_KMOD_SUFFIX)" >>../"$kernel_netfilter_mk"
 		echo "  AUTOLOAD:=\$(call AutoLoad,45,\$(notdir \$(IPT_$upper_name-m)))" >>../"$kernel_netfilter_mk"
 		if [ "$lower_name" = "layer7" ] ; then
 			echo "	DEPENDS:= +kmod-ipt-core +kmod-ipt-conntrack" >>../"$kernel_netfilter_mk"
