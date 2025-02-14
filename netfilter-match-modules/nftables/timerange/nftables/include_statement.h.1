@@ -1,0 +1,9 @@
+
+struct timerange_stmt {
+	uint32_t	flags;
+	const char*	hours;
+	const char*	weekdays;
+	const char*	weeklyranges;
+};
+
+extern struct stmt *timerange_stmt_alloc(const struct location *loc);
