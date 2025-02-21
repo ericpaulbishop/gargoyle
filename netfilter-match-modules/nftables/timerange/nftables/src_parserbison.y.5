@@ -2,15 +2,14 @@
 timerange_stmt		:	timerange_stmt_alloc	timerange_opts
 			;
 
-timerange_stmt_alloc	:	TIMERANGE		timerange_mode
+timerange_stmt_alloc	:	TIMERANGE		timerange_invert
 			{
 				$$ = timerange_stmt_alloc(&@$);
 				$$->timerange.flags = $2;
 			}
 			;
 
-timerange_mode		:	OUTSIDE		{ $$ = NFT_TIMERANGE_F_INV; }
-			|			WITHIN		{ $$ = 0; }
+timerange_invert		:	NOT		{ $$ = NFT_TIMERANGE_F_INV; }
 			|			/* empty */	{ $$ = 0; }
 			;
 
