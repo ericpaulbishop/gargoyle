@@ -1,0 +1,9 @@
+"weburl"		{ scanner_push_start_cond(yyscanner, SCANSTATE_STMT_WEBURL); return WEBURL; }
+<SCANSTATE_STMT_WEBURL>{
+	"!"						{ return NOT; }
+	"contains"				{ return CONTAINS; }
+	"contains-regex"		{ return CONTAINS_REGEX; }
+	"matches-exactly"		{ return MATCHES_EXACTLY; }
+	"domain-only"			{ return DOMAIN_ONLY; }
+	"path-only"				{ return PATH_ONLY; }
+}

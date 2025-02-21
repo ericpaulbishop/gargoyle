@@ -1,0 +1,13 @@
+
+static void netlink_gen_weburl_stmt(struct netlink_linearize_ctx *ctx,
+				    const struct stmt *stmt)
+{
+	struct nftnl_expr *nle;
+
+	nle = alloc_nft_expr("weburl");
+	nftnl_expr_set_u32(nle, NFTNL_EXPR_WEBURL_FLAGS, stmt->weburl.flags);
+	if (stmt->weburl.match != NULL)
+			nftnl_expr_set_str(nle, NFTNL_EXPR_WEBURL_MATCH, stmt->weburl.match);
+
+	nft_rule_add_expr(ctx, nle, &stmt->location);
+}

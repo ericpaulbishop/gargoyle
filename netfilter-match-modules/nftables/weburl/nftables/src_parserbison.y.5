@@ -1,0 +1,27 @@
+
+weburl_stmt		:	WEBURL	weburl_invert	weburl_match_part	weburl_match_type	string
+			{
+				uint32_t flags = 0;
+				$$ = weburl_stmt_alloc(&@$);
+				flags |= $2;
+				flags |= $3;
+				flags |= $4;
+				$$->weburl.match = $5;
+
+				$$->weburl.flags = flags;
+			}
+			;
+
+weburl_invert		:	NOT					{ $$ = NFT_WEBURL_F_INV; }
+			|			/* empty */			{ $$ = 0; }
+			;
+
+weburl_match_type		:	CONTAINS		{ $$ = NFT_WEBURL_F_MT_CONTAINS; }
+			|			CONTAINS_REGEX		{ $$ = NFT_WEBURL_F_MT_CONTAINSREGEX; }
+			|			MATCHES_EXACTLY		{ $$ = NFT_WEBURL_F_MT_MATCHESEXACTLY; }
+			;
+
+weburl_match_part		:	DOMAIN_ONLY		{ $$ = NFT_WEBURL_F_MP_DOMAINONLY; }
+			|			PATH_ONLY			{ $$ = NFT_WEBURL_F_MP_PATHONLY; }
+			|			/* empty */			{ $$ = NFT_WEBURL_F_MP_ALL; }
+			;

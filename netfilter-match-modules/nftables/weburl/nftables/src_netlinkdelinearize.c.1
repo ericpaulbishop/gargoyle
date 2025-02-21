@@ -1,0 +1,13 @@
+
+static void netlink_parse_weburl(struct netlink_parse_ctx *ctx,
+				 const struct location *loc,
+				 const struct nftnl_expr *expr)
+{
+	struct stmt *stmt;
+
+	stmt = weburl_stmt_alloc(loc);
+	stmt->weburl.flags = nftnl_expr_get_u32(expr, NFTNL_EXPR_WEBURL_FLAGS);
+	stmt->weburl.match = xstrdup(nftnl_expr_get_str(expr, NFTNL_EXPR_WEBURL_MATCH));
+
+	ctx->stmt = stmt;
+}
