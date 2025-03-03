@@ -14,19 +14,26 @@ var detected;
 var band;
 var plotdata = [];
 
-// Xband = [[channel #],[centre freq],[low freq],[high freq]]
-var gband = [
-				[1,2,3,4,5,6,7,8,9,10,11,12,13,14],
-				[2.412,2.417,2.422,2.427,2.432,2.437,2.442,2.447,2.452,2.457,2.462,2.467,2.472,2.484],
-				[2.401,2.406,2.411,2.416,2.421,2.426,2.431,2.436,2.441,2.446,2.451,2.456,2.461,2.473],
-				[2.423,2.428,2.433,2.438,2.443,2.448,2.453,2.458,2.463,2.468,2.473,2.478,2.483,2.495]
-			]
-var aband = [
-				[36,40,44,48,52,56,60,64,100,104,108,112,116,120,124,128,132,136,140,144,149,153,157,161,165],
-				[5.180,5.200,5.220,5.240,5.260,5.280,5.300,5.320,5.500,5.520,5.540,5.560,5.580,5.600,5.620,5.640,5.660,5.680,5.700,5.720,5.745,5.765,5.785,5.805,5.825],
-				[5.170,5.190,5.210,5.230,5.250,5.270,5.290,5.310,5.490,5.510,5.530,5.550,5.570,5.590,5.610,5.630,5.650,5.670,5.690,5.710,5.735,5.755,5.775,5.795,5.815],
-				[5.190,5.210,5.230,5.250,5.270,5.290,5.310,5.330,5.510,5.530,5.550,5.570,5.590,5.610,5.630,5.650,5.670,5.690,5.710,5.730,5.755,5.775,5.795,5.815,5.835]
-			]
+var bands = {
+	'2g': {
+		'channels': {
+			1: 2.412, 2: 2.417, 3: 2.422, 4: 2.427, 5: 2.432, 6: 2.437, 7: 2.442, 8: 2.447, 9: 2.452, 10: 2.457, 11: 2.462, 12: 2.467, 13: 2.472, 14:2.484,
+		},
+		'chanwidth': 0.022,
+	},
+	'5g': {
+		'channels': {
+			36: 5.18, 40: 5.2, 44: 5.22, 48: 5.24, 52: 5.26, 56: 5.28, 60: 5.3, 64: 5.32, 100: 5.5, 104: 5.52, 108: 5.54, 112: 5.56, 116: 5.58, 120: 5.6, 124: 5.62, 128: 5.64, 132: 5.66, 136: 5.68, 140: 5.7, 144: 5.72, 149: 5.745, 153: 5.765, 157: 5.785, 161: 5.805, 165: 5.825,
+		},
+		'chanwidth': 0.020,
+	},
+	'6g': {
+		'channels': {
+			1: 5.955, 5: 5.975, 9: 5.995, 13: 6.015, 17: 6.035, 21: 6.055, 25: 6.075, 29: 6.095, 33: 6.115, 37: 6.135, 41: 6.155, 45: 6.175, 49: 6.195, 53: 6.215, 57: 6.235, 61: 6.255, 65: 6.275, 69: 6.295, 73: 6.315, 77: 6.335, 81: 6.355, 85: 6.375, 89: 6.395, 93: 6.415, 97: 6.435, 101: 6.455, 105: 6.475, 109: 6.495, 113: 6.515, 117: 6.535, 121: 6.555, 125: 6.575, 129: 6.595, 133: 6.615, 137: 6.635, 141: 6.655, 145: 6.675, 149: 6.695, 153: 6.715, 157: 6.735, 161: 6.755, 165: 6.775, 169: 6.795, 173: 6.815, 177: 6.835, 181: 6.855, 185: 6.875, 189: 6.895, 193: 6.915, 197: 6.935, 201: 6.955, 205: 6.975, 209: 6.995, 213: 7.015, 217: 7.035, 221: 7.055, 225: 7.075, 229: 7.095, 233: 7.115,
+		},
+		'chanwidth': 0.020,
+	},
+};
 
 function initialiseAll()
 {
@@ -63,10 +70,15 @@ function initialisePlots()
 		freq_low = 2.4;		//technically 2.401, but 2.400 graphs better
 		freq_high = 2.5;		//technically 2.495, but 2.500 graphs better
 	}
-	else
+	else if(band == "5GHz")
 	{
 		freq_low = 5.165;	//technically 5.170, but 5.165 graphs better
 		freq_high = 5.840;	//technically 5.835, but 5.840 graphs better
+	}
+	else if(band == "6GHz")
+	{
+		freq_low = 5.940;	//technically 5.945, but 5.940 graphs better
+		freq_high = 7.130;	//technically 7.125, but 7.130 graphs better
 	}
 }
 
@@ -98,7 +110,11 @@ function parseInterfaces(lines)
 		}
 
 		var interfaceid = wlan[0];
-		if(wlan[1] == '5g')
+		if(wlan[1] == '6g')
+		{
+			var interfaceband = "6GHz";
+		}
+		else if(wlan[1] == '5g')
 		{
 			var interfaceband = "5GHz";
 		}
@@ -152,7 +168,7 @@ function parseWifiData(rawScanOutput)
 {
 	if((rawScanOutput != null) && (rawScanOutput.indexOf("\n") != 0) && (rawScanOutput.indexOf("\r") != 0) && (rawScanOutput.match(/command failed: Resource busy/g) == null))
 	{
-		var parsed = [ [],[],[],[],[],[],[],[],[],[],[] ];
+		var parsed = [ [],[],[],[],[],[],[],[],[],[],[],[] ];
 		var cells = rawScanOutput.split(/Cell [0-9]+ - /g);
 		cells.shift(); //get rid of anything before first AP data
 		
@@ -239,6 +255,7 @@ function parseWifiData(rawScanOutput)
 			cellLines = splitDoubleSpace(cellLines);
 			var htmode = 0;
 			var vhtmode = 0;
+			var hemode = 0;
 
 			var bssid = getCellValues("Address", cellLines).shift();
 			var ssid = getCellValues("ESSID", cellLines).shift();
@@ -263,6 +280,11 @@ function parseWifiData(rawScanOutput)
 				var vhtseg2 = getCellValues("Center Frequency 2", cellLines).shift();
 				vhtmode = 1;
 			}
+			if(getCellValues("HE Operation", cellLines).length > 0 || band == "6GHz")
+			{
+				// TODO
+				hemode = 1;
+			}
 
 			if (! secchannel)
 			{
@@ -286,7 +308,8 @@ function parseWifiData(rawScanOutput)
 				parsed[7].push(bssid);
 				parsed[8].push(htmode);
 				parsed[9].push(vhtmode);
-				parsed[10].push(encryption);
+				parsed[10].push(hemode);
+				parsed[11].push(encryption);
 			}
 		}
 		//check for duplicate bssid data and append _# if necessary
@@ -337,72 +360,73 @@ function generateGraphData(detected)
 		{
 			if(secondary == "no secondary")					//20mhz
 			{
-				plotdata[x*4] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(channel,2)};
-				plotdata[x*4+1] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(channel,2)+freqoffset)};
-				plotdata[x*4+2] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(channel,3)-freqoffset)};
-				plotdata[x*4+3] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(channel,3)};
+				plotdata[x*4] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData('2g',channel,'low')};
+				plotdata[x*4+1] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData('2g',channel,'low')+freqoffset)};
+				plotdata[x*4+2] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData('2g',channel,'high')-freqoffset)};
+				plotdata[x*4+3] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData('2g',channel,'high')};
 			}
 			else if(secondary == "above")						//40mhz
 			{
-				plotdata[x*4] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(channel,2)};
-				plotdata[x*4+1] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(channel,2)+freqoffset)};
-				plotdata[x*4+2] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData((channel-(-htoffset)),3)-freqoffset)};
-				plotdata[x*4+3] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData((channel-(-htoffset)),3)};
+				plotdata[x*4] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData('2g',channel,'low')};
+				plotdata[x*4+1] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData('2g',channel,'low')+freqoffset)};
+				plotdata[x*4+2] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData('2g',(channel-(-htoffset)),'high')-freqoffset)};
+				plotdata[x*4+3] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData('2g',(channel-(-htoffset)),'high')};
 			}
 			else if(secondary == "below")						//40mhz
 			{
-				plotdata[x*4] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData((channel-htoffset),2)};
-				plotdata[x*4+1] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData((channel-htoffset),2)+freqoffset)};
-				plotdata[x*4+2] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(channel,3)-freqoffset)};
-				plotdata[x*4+3] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(channel,3)};
+				plotdata[x*4] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData('2g',(channel-htoffset),'low')};
+				plotdata[x*4+1] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData('2g',(channel-htoffset),'low')+freqoffset)};
+				plotdata[x*4+2] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData('2g',channel,'high')-freqoffset)};
+				plotdata[x*4+3] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData('2g',channel,'high')};
 			}
 		}
-		else if(band == "5GHz")
+		else if(band == "5GHz" || band == "6GHz")
 		{
+			var bandcode = band == "5GHz" ? "5g" : "6g";
 			y = plotdata.length;	//set the loop variable to the next available point in the array
 			if(secondary == "no secondary")					//20mhz
 			{
-				plotdata[y] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(channel,2)};
-				plotdata[y+1] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(channel,2)+freqoffset)};
-				plotdata[y+2] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(channel,3)-freqoffset)};
-				plotdata[y+3] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(channel,3)};
+				plotdata[y] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(bandcode,channel,'low')};
+				plotdata[y+1] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(bandcode,channel,'low')+freqoffset)};
+				plotdata[y+2] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(bandcode,channel,'high')-freqoffset)};
+				plotdata[y+3] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(bandcode,channel,'high')};
 			}
 			else if(secondary == "above")
 			{
 				if(! vhtwidth)								//40mhz
 				{
-					plotdata[y] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(channel,2)};
-					plotdata[y+1] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(channel,2)+freqoffset)};
-					plotdata[y+2] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData((channel-(-htoffset)),3)-freqoffset)};
-					plotdata[y+3] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData((channel-(-htoffset)),3)};
+					plotdata[y] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(bandcode,channel,'low')};
+					plotdata[y+1] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(bandcode,channel,'low')+freqoffset)};
+					plotdata[y+2] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(bandcode,(channel-(-htoffset)),'high')-freqoffset)};
+					plotdata[y+3] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(bandcode,(channel-(-htoffset)),'high')};
 				}
 				else
 				{
 					if(! vhtseg2)							//80mhz
 					{
-						plotdata[y] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(vhtseg1-(0.5*vhtoffset),2)};
-						plotdata[y+1] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(vhtseg1-(0.5*vhtoffset),2)+freqoffset)};
-						plotdata[y+2] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData((vhtseg1-(-0.5*vhtoffset)),3)-freqoffset)};
-						plotdata[y+3] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData((vhtseg1-(-0.5*vhtoffset)),3)};
+						plotdata[y] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(bandcode,vhtseg1-(0.5*vhtoffset),'low')};
+						plotdata[y+1] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(bandcode,vhtseg1-(0.5*vhtoffset),'low')+freqoffset)};
+						plotdata[y+2] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(bandcode,(vhtseg1-(-0.5*vhtoffset)),'high')-freqoffset)};
+						plotdata[y+3] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(bandcode,(vhtseg1-(-0.5*vhtoffset)),'high')};
 					}
 					else if(Math.abs(vhtseg1 - vhtseg2) == 8)	//160mhz
 					{
-						plotdata[y] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(vhtseg2-(2+vhtoffset),2)};
-						plotdata[y+1] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(vhtseg2-(2+vhtoffset),2)+freqoffset)};
-						plotdata[y+2] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(vhtseg2-(-2-vhtoffset),3)-freqoffset)};
-						plotdata[y+3] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(vhtseg2-(-2-vhtoffset),3)};
+						plotdata[y] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(bandcode,vhtseg2-(2+vhtoffset),'low')};
+						plotdata[y+1] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(bandcode,vhtseg2-(2+vhtoffset),'low')+freqoffset)};
+						plotdata[y+2] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(bandcode,vhtseg2-(-2-vhtoffset),'high')-freqoffset)};
+						plotdata[y+3] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(bandcode,vhtseg2-(-2-vhtoffset),'high')};
 					}
 					else									//80+80mhz
 					{
-						plotdata[y] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData((vhtseg1-(0.5*vhtoffset)),2)};
-						plotdata[y+1] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData((vhtseg1-(0.5*vhtoffset)),2)+freqoffset)};
-						plotdata[y+2] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(((vhtseg1-(0.5*vhtoffset))-(-vhtoffset)),3)-freqoffset)};
-						plotdata[y+3] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(((vhtseg1-(0.5*vhtoffset))-(-vhtoffset)),3)};
-						plotdata[y+4] = {"bssid":BSSID, "ssid":SSID, "level":undefined, "freq":getfreqData(vhtseg1,3)};		//undefined point anywhere (yes, even on the moon) to disjoint the two parts of the graph
-						plotdata[y+5] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData((vhtseg2-(0.5*vhtoffset)),2)};
-						plotdata[y+6] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData((vhtseg2-(0.5*vhtoffset)),2)+freqoffset)};
-						plotdata[y+7] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(((vhtseg2-(0.5*vhtoffset))-(-vhtoffset)),3)-freqoffset)};
-						plotdata[y+8] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(((vhtseg2-(0.5*vhtoffset))-(-vhtoffset)),3)};
+						plotdata[y] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(bandcode,(vhtseg1-(0.5*vhtoffset)),'low')};
+						plotdata[y+1] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(bandcode,(vhtseg1-(0.5*vhtoffset)),'low')+freqoffset)};
+						plotdata[y+2] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(bandcode,((vhtseg1-(0.5*vhtoffset))-(-vhtoffset)),'high')-freqoffset)};
+						plotdata[y+3] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(bandcode,((vhtseg1-(0.5*vhtoffset))-(-vhtoffset)),'high')};
+						plotdata[y+4] = {"bssid":BSSID, "ssid":SSID, "level":undefined, "freq":getfreqData(bandcode,vhtseg1,'high')};		//undefined point anywhere (yes, even on the moon) to disjoint the two parts of the graph
+						plotdata[y+5] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(bandcode,(vhtseg2-(0.5*vhtoffset)),'low')};
+						plotdata[y+6] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(bandcode,(vhtseg2-(0.5*vhtoffset)),'low')+freqoffset)};
+						plotdata[y+7] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(bandcode,((vhtseg2-(0.5*vhtoffset))-(-vhtoffset)),'high')-freqoffset)};
+						plotdata[y+8] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(bandcode,((vhtseg2-(0.5*vhtoffset))-(-vhtoffset)),'high')};
 					}
 				}
 			}
@@ -410,38 +434,38 @@ function generateGraphData(detected)
 			{
 				if(! vhtwidth)								//40mhz
 				{
-					plotdata[y] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData((channel-htoffset),2)};
-					plotdata[y+1] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData((channel-htoffset),2)+freqoffset)};
-					plotdata[y+2] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(channel,3)-freqoffset)};
-					plotdata[y+3] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(channel,3)};
+					plotdata[y] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(bandcode,(channel-htoffset),'low')};
+					plotdata[y+1] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(bandcode,(channel-htoffset),'low')+freqoffset)};
+					plotdata[y+2] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(bandcode,channel,'high')-freqoffset)};
+					plotdata[y+3] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(bandcode,channel,'high')};
 				}
 				else
 				{
 					if(! vhtseg2)							//80mhz
 					{
-						plotdata[y] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(vhtseg1-(0.5*vhtoffset),2)};
-						plotdata[y+1] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(vhtseg1-(0.5*vhtoffset),2)+freqoffset)};
-						plotdata[y+2] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData((vhtseg1-(-0.5*vhtoffset)),3)-freqoffset)};
-						plotdata[y+3] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData((vhtseg1-(-0.5*vhtoffset)),3)};
+						plotdata[y] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(bandcode,vhtseg1-(0.5*vhtoffset),'low')};
+						plotdata[y+1] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(bandcode,vhtseg1-(0.5*vhtoffset),'low')+freqoffset)};
+						plotdata[y+2] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(bandcode,(vhtseg1-(-0.5*vhtoffset)),'high')-freqoffset)};
+						plotdata[y+3] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(bandcode,(vhtseg1-(-0.5*vhtoffset)),'high')};
 					}
 					else if(Math.abs(vhtseg1 - vhtseg2) == 8)	//160mhz
 					{
-						plotdata[y] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(vhtseg2-(2+vhtoffset),2)};
-						plotdata[y+1] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(vhtseg2-(2+vhtoffset),2)+freqoffset)};
-						plotdata[y+2] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(vhtseg2-(-2-vhtoffset),3)-freqoffset)};
-						plotdata[y+3] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(vhtseg2-(-2-vhtoffset),3)};
+						plotdata[y] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(bandcode,vhtseg2-(2+vhtoffset),'low')};
+						plotdata[y+1] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(bandcode,vhtseg2-(2+vhtoffset),'low')+freqoffset)};
+						plotdata[y+2] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(bandcode,vhtseg2-(-2-vhtoffset),'high')-freqoffset)};
+						plotdata[y+3] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(bandcode,vhtseg2-(-2-vhtoffset),'high')};
 					}
 					else									//80+80mhz. i believe this is the same above or below
 					{
-						plotdata[y] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData((vhtseg1-(0.5*vhtoffset)),2)};
-						plotdata[y+1] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData((vhtseg1-(0.5*vhtoffset)),2)+freqoffset)};
-						plotdata[y+2] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(((vhtseg1-(0.5*vhtoffset))-(-vhtoffset)),3)-freqoffset)};
-						plotdata[y+3] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(((vhtseg1-(0.5*vhtoffset))-(-vhtoffset)),3)};
-						plotdata[y+4] = {"bssid":BSSID, "ssid":SSID, "level":undefined, "freq":getfreqData(vhtseg1,3)};		//undefined point anywhere (yes, even on the moon) to disjoint the two parts of the graph
-						plotdata[y+5] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData((vhtseg2-(0.5*vhtoffset)),2)};
-						plotdata[y+6] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData((vhtseg2-(0.5*vhtoffset)),2)+freqoffset)};
-						plotdata[y+7] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(((vhtseg2-(0.5*vhtoffset))-(-vhtoffset)),3)-freqoffset)};
-						plotdata[y+8] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(((vhtseg2-(0.5*vhtoffset))-(-vhtoffset)),3)};
+						plotdata[y] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(bandcode,(vhtseg1-(0.5*vhtoffset)),'low')};
+						plotdata[y+1] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(bandcode,(vhtseg1-(0.5*vhtoffset)),'low')+freqoffset)};
+						plotdata[y+2] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(bandcode,((vhtseg1-(0.5*vhtoffset))-(-vhtoffset)),'high')-freqoffset)};
+						plotdata[y+3] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(bandcode,((vhtseg1-(0.5*vhtoffset))-(-vhtoffset)),'high')};
+						plotdata[y+4] = {"bssid":BSSID, "ssid":SSID, "level":undefined, "freq":getfreqData(bandcode,vhtseg1,'high')};		//undefined point anywhere (yes, even on the moon) to disjoint the two parts of the graph
+						plotdata[y+5] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(bandcode,(vhtseg2-(0.5*vhtoffset)),'low')};
+						plotdata[y+6] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(bandcode,(vhtseg2-(0.5*vhtoffset)),'low')+freqoffset)};
+						plotdata[y+7] = {"bssid":BSSID, "ssid":SSID, "level":level, "freq":(getfreqData(bandcode,((vhtseg2-(0.5*vhtoffset))-(-vhtoffset)),'high')-freqoffset)};
+						plotdata[y+8] = {"bssid":BSSID, "ssid":SSID, "level":"-100", "freq":getfreqData(bandcode,((vhtseg2-(0.5*vhtoffset))-(-vhtoffset)),'high')};
 					}
 				}
 			}
@@ -477,48 +501,52 @@ function generateTableData(detected)
 		var BSSID = detected[7][x].toUpperCase();
 		var htmode = detected[8][x];
 		var vhtmode = detected[9][x];
-		var encryption = detected[10][x];
+		var hemode = detected[10][x];
+		var encryption = detected[11][x];
 		
 		if(band == "2.4GHz")
 		{
 			if(secondary == "no secondary")					//20mhz
 			{
-				TableData.push([ SSID, BSSID, channel, "20MHz", (htmode)?"b,g,n":"b,g", encryption, level+"dBm" ]);
+				TableData.push([ SSID, BSSID, channel, "20MHz", ((htmode)?((hemode)?"g,n,ax":"b,g,n"):"b,g"), encryption, level+"dBm" ]);
 			}
 			else if(secondary == "above")						//40mhz
 			{
-				TableData.push([ SSID, BSSID, channel+"-"+(channel-(-htoffset)), "40MHz", "b,g,n", encryption, level+"dBm" ]);
+				TableData.push([ SSID, BSSID, channel+"-"+(channel-(-htoffset)), "40MHz", (hemode)?"g,n,ax":"b,g,n", encryption, level+"dBm" ]);
 			}
 			else if(secondary == "below")						//40mhz
 			{
-				TableData.push([ SSID, BSSID, channel+"-"+(channel-htoffset), "40MHz", "b,g,n", encryption, level+"dBm" ]);
+				TableData.push([ SSID, BSSID, channel+"-"+(channel-htoffset), "40MHz", (hemode)?"g,n,ax":"b,g,n", encryption, level+"dBm" ]);
 			}
 		}
-		else if(band == "5GHz")
+		else if(band == "5GHz" || band == "6GHz")
 		{
 			if(secondary == "no secondary")					//20mhz
 			{
-				TableData.push([ SSID, BSSID, channel, "20MHz", (htmode)?((vhtmode)?"a,n,ac":"a,n"):"a", encryption, level+"dBm" ]);
+				var modestr = band == "6GHz" ? "ax" : ((htmode)?((vhtmode)?((hemode)?"n,ac,ax":"a,n,ac"):"a,n"):"a");
+				TableData.push([ SSID, BSSID, channel, "20MHz", modestr, encryption, level+"dBm" ]);
 			}
 			else if(secondary == "above")
 			{
 				if(! vhtwidth)								//40mhz
 				{
-					TableData.push([ SSID, BSSID, channel+"-"+(channel-(-htoffset)), "40MHz", (vhtmode)?"a,n,ac":"a,n", encryption, level+"dBm" ]);
+					var modestr = band == "6GHz" ? "ax" : ((vhtmode)?((hemode)?"n,ac,ax":"a,n,ac"):"a,n");
+					TableData.push([ SSID, BSSID, channel+"-"+(channel-(-htoffset)), "40MHz", modestr, encryption, level+"dBm" ]);
 				}
 				else
 				{
+					var modestr = band == "6GHz" ? "ax" : ((hemode)?"n,ac,ax":"n,ac");
 					if(! vhtseg2)							//80mhz
 					{
-						TableData.push([ SSID, BSSID, (vhtseg1-(0.5*vhtoffset))+"-"+(vhtseg1-(-0.5*vhtoffset)), "80MHz", "n,ac", encryption, level+"dBm" ]);
+						TableData.push([ SSID, BSSID, (vhtseg1-(0.5*vhtoffset))+"-"+(vhtseg1-(-0.5*vhtoffset)), "80MHz", modestr, encryption, level+"dBm" ]);
 					}
 					else if(Math.abs(vhtseg1 - vhtseg2) == 8)	//160mhz
 					{
-						TableData.push([ SSID, BSSID, (vhtseg2-(2+vhtoffset))+"-"+(vhtseg2-(-2-vhtoffset)), "160MHz", "n,ac", encryption, level+"dBm" ]);
+						TableData.push([ SSID, BSSID, (vhtseg2-(2+vhtoffset))+"-"+(vhtseg2-(-2-vhtoffset)), "160MHz", modestr, encryption, level+"dBm" ]);
 					}
 					else									//80+80mhz
 					{
-						TableData.push([ SSID, BSSID, ((vhtseg1-(0.5*vhtoffset))+"-"+(vhtseg1-(-0.5*vhtoffset)))+","+((vhtseg2-(0.5*vhtoffset))+"-"+(vhtseg2-(-0.5*vhtoffset))), "80+80MHz", "n,ac", encryption, level+"dBm" ]);
+						TableData.push([ SSID, BSSID, ((vhtseg1-(0.5*vhtoffset))+"-"+(vhtseg1-(-0.5*vhtoffset)))+","+((vhtseg2-(0.5*vhtoffset))+"-"+(vhtseg2-(-0.5*vhtoffset))), "80+80MHz", modestr, encryption, level+"dBm" ]);
 					}
 				}
 			}
@@ -526,21 +554,22 @@ function generateTableData(detected)
 			{
 				if(! vhtwidth)								//40mhz
 				{
-					TableData.push([ SSID, BSSID, channel+"-"+(channel-htoffset), "40MHz", (vhtmode)?"a,n,ac":"a,n", encryption, level+"dBm" ]);
+					TableData.push([ SSID, BSSID, channel+"-"+(channel-htoffset), "40MHz", ((vhtmode)?((hemode)?"n,ac,ax":"a,n,ac"):"a,n"), encryption, level+"dBm" ]);
 				}
 				else
 				{
+					var modestr = band == "6GHz" ? "ax" : ((hemode)?"n,ac,ax":"n,ac");
 					if(! vhtseg2)							//80mhz
 					{
-						TableData.push([ SSID, BSSID, (vhtseg1-(0.5*vhtoffset))+"-"+(vhtseg1-(-0.5*vhtoffset)), "80MHz", "n,ac", encryption, level+"dBm" ]);
+						TableData.push([ SSID, BSSID, (vhtseg1-(0.5*vhtoffset))+"-"+(vhtseg1-(-0.5*vhtoffset)), "80MHz", modestr, encryption, level+"dBm" ]);
 					}
 					else if(Math.abs(vhtseg1 - vhtseg2) == 8)	//160mhz
 					{
-						TableData.push([ SSID, BSSID, (vhtseg2-(2+vhtoffset))+"-"+(vhtseg2-(-2-vhtoffset)), "160MHz", "n,ac", encryption, level+"dBm" ]);
+						TableData.push([ SSID, BSSID, (vhtseg2-(2+vhtoffset))+"-"+(vhtseg2-(-2-vhtoffset)), "160MHz", modestr, encryption, level+"dBm" ]);
 					}
 					else									//80+80mhz. i believe this is the same above or below
 					{
-						TableData.push([ SSID, BSSID, ((vhtseg1-(0.5*vhtoffset))+"-"+(vhtseg1-(-0.5*vhtoffset)))+","+((vhtseg2-(0.5*vhtoffset))+"-"+(vhtseg2-(-0.5*vhtoffset))), "80+80MHz", "n,ac", encryption, level+"dBm" ]);
+						TableData.push([ SSID, BSSID, ((vhtseg1-(0.5*vhtoffset))+"-"+(vhtseg1-(-0.5*vhtoffset)))+","+((vhtseg2-(0.5*vhtoffset))+"-"+(vhtseg2-(-0.5*vhtoffset))), "80+80MHz", modestr, encryption, level+"dBm" ]);
 					}
 				}
 			}
@@ -561,18 +590,23 @@ function generateTableData(detected)
 	document.getElementById("table-container-row").style.display="block";
 }
 
-function getfreqData(channel,info)
+function getfreqData(bandcode,channel,info)
 {
 	//info = 1, return centrefreq	info = 2, return lowfreq	info = 3, return highfreq
-	if(channel > 14)
+	var banddata = bands[bandcode];
+	var centrefreq = banddata.channels[channel];
+	var chanwidth = banddata.chanwidth;
+	if(info == 'centre')
 	{
-		a = aband[0].indexOf(parseInt(channel));
-		return aband[info][a];
+		return centrefreq;
 	}
-	else
+	else if(info == 'low')
 	{
-		a = gband[0].indexOf(parseInt(channel));
-		return gband[info][a];
+		return centrefreq - chanwidth / 2;
+	}
+	else if(info == 'high')
+	{
+		return centrefreq + chanwidth / 2;
 	}
 }
 
@@ -634,8 +668,8 @@ function plotall()
 	
 	xAxis = d3.svg.axis("xaxis")
 		.scale(xScale)
-		.tickValues(function(d) { if(band == "2.4GHz"){return gband[1];}else{return aband[1];} })
-		.tickFormat(function(d) { if(band == "2.4GHz"){a = gband[1].indexOf(d); return gband[0][a];}else{a = aband[1].indexOf(d); return aband[0][a];} }),
+		.tickValues(function(d) { if(band == "2.4GHz"){return Object.values(bands['2g'].channels);}else if(band == "5GHz"){return Object.values(bands['5g'].channels);}else if(band == "6GHz"){return Object.values(bands['6g'].channels);} })
+		.tickFormat(function(d) { if(band == "2.4GHz"){return Object.keys(bands['2g'].channels)[Object.values(bands['2g'].channels).indexOf(d)];}else if(band == "5GHz"){return Object.keys(bands['5g'].channels)[Object.values(bands['5g'].channels).indexOf(d)];}else if(band == "6GHz"){return Object.keys(bands['6g'].channels)[Object.values(bands['6g'].channels).indexOf(d)];} }),
   
 	yAxis = d3.svg.axis("yaxis")
 		.scale(yScale)
