@@ -164,7 +164,7 @@ function saveChanges()
 				uci.set("firewall", id, "target", "ACCEPT");
 				uci.set("firewall", id, "proto", protos[protoIndex]);
 				uci.set("firewall", id, "dest_ip", rowData[2]);
-				if(protos[protoIndex] != "icmp") uci.set("firewall", id, "dest_port", rowData[3]);
+				uci.set("firewall", id, "dest_port", rowData[3]);
 				enabledIndex = enabledIndex + (enabled ? 1 : 0);
 				disabledIndex = disabledIndex + (enabled ? 0 : 1);
 			}
@@ -730,15 +730,6 @@ function resetData()
 					}
 				}
 			}
-			else if(proto.toLowerCase() == "icmp")
-			{
-				checkbox = createInput('checkbox');
-				checkbox.checked = sectionType == "rule" ? true : false;
-				var nextTableRowData = [name, proto.toUpperCase(), destip, "-", checkbox, createEditButton(true,"open")];
-				singlePortTableData.push(nextTableRowData);
-				singlePortEnabledStatus.push(checkbox.checked);
-
-			}
 		}
 	}
 
@@ -994,18 +985,10 @@ function editPortFModal(isSingle, triggerEl)
 
 function proofreadOpenSingle(excludeRow)
 {
-	var addIds = ['addo_ip'];
-	var labelIds = ['addo_ip_label'];
-	var functions = [validateIP6Range];
-	var returnCodes = [0];
-	var addProtocol = document.getElementById('addo_prot').value;
-	if(addProtocol != "ICMP")
-	{
-		addIds.push('addo_dp');
-		labelIds.push('addo_dp_label');
-		functions.push(validateNumeric);
-		returnCodes.push(0);
-	}
+	var addIds = ['addo_dp', 'addo_ip'];
+	var labelIds = ['addo_dp_label', 'addo_ip_label'];
+	var functions = [validateNumeric, validateIP6Range];
+	var returnCodes = [0,0];
 	var visibilityIds = addIds;
 
 	var errors = proofreadFields(addIds, labelIds, functions, returnCodes, visibilityIds, document);
@@ -1015,6 +998,7 @@ function proofreadOpenSingle(excludeRow)
 		var portoTable = document.getElementById('porto_table_container').firstChild;
 		var currentPortoData = getTableDataArray(portoTable, true, false);
 		var addPort = document.getElementById('addo_dp').value;
+		var addProtocol = document.getElementById('addo_prot').value;
 		var addIP = document.getElementById('addo_ip').value;
 		addIP = ip6_canonical(addIP);
 		var rowDataIndex=0;
@@ -1128,34 +1112,27 @@ function addPortoRule()
 		currentPortoData = getTableDataArray(portoTable, true, false);
 		otherProto = values[1] == 'TCP' ? 'UDP' : 'TCP';
 		mergedWithExistingRule = false;
-		if(values[1] != "ICMP")
+		for (rowDataIndex in currentPortoData)
 		{
-			for (rowDataIndex in currentPortoData)
+			rowData = currentPortoData[rowDataIndex];
+
+			if( otherProto == rowData[1] &&  values[2] == rowData[2] && values[3] == rowData[3])
 			{
-				rowData = currentPortoData[rowDataIndex];
-
-				if( otherProto == rowData[1] &&  values[2] == rowData[2] && values[3] == rowData[3])
+				portoTable.rows[(rowDataIndex*1)+1].childNodes[1].firstChild.data = UI.both;
+				if(values[0] != '-' && rowData[0] == '-')
 				{
-					portoTable.rows[(rowDataIndex*1)+1].childNodes[1].firstChild.data = UI.both;
-					if(values[0] != '-' && rowData[0] == '-')
-					{
-						portoTable.rows[(rowDataIndex*1)+1].childNodes[0].firstChild.data = values[0];
-					}
-
-					table1Container = document.getElementById('porto_table_container');
-					if(table1Container.firstChild != null)
-					{
-						table1Container.removeChild(table1Container.firstChild);
-					}
-					table1Container.appendChild(portoTable);
-
-					mergedWithExistingRule = true;
+					portoTable.rows[(rowDataIndex*1)+1].childNodes[0].firstChild.data = values[0];
 				}
+
+				table1Container = document.getElementById('porto_table_container');
+				if(table1Container.firstChild != null)
+				{
+					table1Container.removeChild(table1Container.firstChild);
+				}
+				table1Container.appendChild(portoTable);
+
+				mergedWithExistingRule = true;
 			}
-		}
-		else
-		{
-			values[3] = "-";
 		}
 
 		if(!mergedWithExistingRule)
@@ -1287,14 +1264,13 @@ function editOpen(isSingle, editRow)
 	else
 	{
 		var r = isSingle ? "" : "r";
-		var proto = getSelectedValue( "addo" + r + "_prot", document );
 		//update document with new data
 		editRow.childNodes[0].firstChild.data = document.getElementById("addo" + r + "_desc").value;
-		editRow.childNodes[1].firstChild.data = proto;
+		editRow.childNodes[1].firstChild.data = getSelectedValue( "addo" + r + "_prot", document );
 		if(isSingle)
 		{
 			editRow.childNodes[2].firstChild.data = document.getElementById("addo_ip").value;
-			editRow.childNodes[3].firstChild.data = proto == "ICMP" ? "-" : document.getElementById("addo_dp").value;
+			editRow.childNodes[3].firstChild.data = document.getElementById("addo_dp").value;
 		}
 		else
 		{
