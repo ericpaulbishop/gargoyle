@@ -851,7 +851,7 @@ function testMail() {
 	
 	setControlsEnabled(false, true, email.testEmail);
 	var command = "mv /etc/msmtprc /tmp/msmtprc.tmp && ";
-	var body = 'echo -e "Subject: Gargoyle router TEST EMAIL\\r\\nFrom: '+data['sender']+'\\r\\nContent-Type: text/plain; charset=\'UTF-8\';\\r\\nThis is test email sent from Gargoyle router." | ';
+	var body = 'echo -e "Subject: Gargoyle router TEST EMAIL\\r\\nFrom: '+data['sender']+'\\r\\nContent-Type: text/plain; charset=\'UTF-8\';\\r\\n\\r\\nThis is test email sent from Gargoyle router." | ';
 	
     if (data['auth']) {
 		if(!data['encryption']){

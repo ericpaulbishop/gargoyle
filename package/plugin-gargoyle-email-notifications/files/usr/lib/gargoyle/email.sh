@@ -23,7 +23,7 @@ then
 fi
 
 #Email header
-echo -e "Subject: Gargoyle Router report - $(date)\r\nFrom: $(cat /etc/msmtprc | grep from | sed "s/ from //")\r\nContent-Type: text/html; charset='UTF-8';\r\n<html><body>" > /tmp/email-log.txt;
+echo -e "Subject: Gargoyle Router report - $(date)\r\nFrom: $(cat /etc/msmtprc | grep from | sed "s/ from //")\r\nContent-Type: text/html; charset='UTF-8';\r\n\r\n<html><body>" > /tmp/email-log.txt;
 
 if printf '%s' "$data" | egrep -q "0"
 then
