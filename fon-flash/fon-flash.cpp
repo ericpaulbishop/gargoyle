@@ -1231,7 +1231,7 @@ int main(int argc, char* argv[])
 	int num_files_expected = 0;
 	int num_files_found = 0;
 	
-	char c;	
+	int c;
 	while((c = getopt(argc, argv, "C:c:I:i:")) != -1)
 	{	
 		switch(c)
@@ -1341,7 +1341,7 @@ int main(int argc, char* argv[])
 {
 	char* iface = NULL;
 
-	char c;	
+	int c;
 	while((c = getopt(argc, argv, "I:i:")) != -1)
 	{	
 		switch(c)
