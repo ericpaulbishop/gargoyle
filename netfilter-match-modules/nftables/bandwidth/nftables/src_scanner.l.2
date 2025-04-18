@@ -1,0 +1,29 @@
+
+"bandwidth"			{ scanner_push_start_cond(yyscanner, SCANSTATE_STMT_BANDWIDTH); return BANDWIDTH; }
+<SCANSTATE_STMT_BANDWIDTH>{
+	"combined"					{ return COMBINED; }
+	"individual-src"			{ return INDIVIDUAL_SRC; }
+	"individual-dst"			{ return INDIVIDUAL_DST; }
+	"individual-local"			{ return INDIVIDUAL_LOCAL; }
+	"individual-remote"			{ return INDIVIDUAL_REMOTE; }
+	"monitor"					{ return MONITOR; }
+	"less-than"					{ return LESS_THAN; }
+	"greater-than"				{ return GREATER_THAN; }
+	"bcheck"					{ return BANDWIDTH_CHECK_NOSWAP; }
+	"bcheck-with-src-dst-swap"	{ return BANDWIDTH_CHECK_SWAP; }
+	"minute"					{ return MINUTE; }
+	"hour"						{ return HOUR; }
+	"day"						{ return DAY; }
+	"week"						{ return WEEK; }
+	"month"						{ return MONTH; }
+	"never"						{ return NEVER; }
+	"id"						{ return ID; }
+	"type"						{ return TYPE; }
+	"subnet"					{ return SUBNET; }
+	"subnet6"					{ return SUBNET6; }
+	"current-bandwidth"			{ return CURRENT_BANDWIDTH; }
+	"reset-interval"			{ return RESET_INTERVAL; }
+	"reset-time"				{ return RESET_TIME; }
+	"intervals-to-save"			{ return INTERVALS_TO_SAVE; }
+	"last-backup-time"			{ return LAST_BACKUP_TIME; }
+}

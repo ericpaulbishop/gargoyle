@@ -1,0 +1,26 @@
+
+static void netlink_parse_bandwidth(struct netlink_parse_ctx *ctx,
+				 const struct location *loc,
+				 const struct nftnl_expr *expr)
+{
+	struct stmt *stmt;
+
+	stmt = bandwidth_stmt_alloc(loc);
+	stmt->bandwidth.id = xstrdup(nftnl_expr_get_str(expr, NFTNL_EXPR_BANDWIDTH_ID));
+	stmt->bandwidth.cmp = nftnl_expr_get_u8(expr, NFTNL_EXPR_BANDWIDTH_CMP);
+	stmt->bandwidth.type = nftnl_expr_get_u8(expr, NFTNL_EXPR_BANDWIDTH_TYPE);
+	stmt->bandwidth.check_type = nftnl_expr_get_u8(expr, NFTNL_EXPR_BANDWIDTH_CHECKTYPE);
+	stmt->bandwidth.bandwidth_cutoff = nftnl_expr_get_u64(expr, NFTNL_EXPR_BANDWIDTH_BWCUTOFF);
+	stmt->bandwidth.current_bandwidth = nftnl_expr_get_u64(expr, NFTNL_EXPR_BANDWIDTH_CURRENTBW);
+	stmt->bandwidth.subnet = xstrdup(nftnl_expr_get_str(expr, NFTNL_EXPR_BANDWIDTH_SUBNET));
+	stmt->bandwidth.subnet6 = xstrdup(nftnl_expr_get_str(expr, NFTNL_EXPR_BANDWIDTH_SUBNET6));
+	stmt->bandwidth.reset_interval = nftnl_expr_get_u64(expr, NFTNL_EXPR_BANDWIDTH_RSTINTVL);
+	stmt->bandwidth.reset_is_constant_interval = nftnl_expr_get_u8(expr, NFTNL_EXPR_BANDWIDTH_RSTINTVLCONST);
+	stmt->bandwidth.reset_time = nftnl_expr_get_u64(expr, NFTNL_EXPR_BANDWIDTH_RSTTIME);
+	stmt->bandwidth.num_intervals_to_save = nftnl_expr_get_u32(expr, NFTNL_EXPR_BANDWIDTH_NUMINTVLSTOSAVE);
+	stmt->bandwidth.next_reset = nftnl_expr_get_u64(expr, NFTNL_EXPR_BANDWIDTH_NEXTRESET);
+	stmt->bandwidth.prev_reset = nftnl_expr_get_u64(expr, NFTNL_EXPR_BANDWIDTH_PREVRESET);
+	stmt->bandwidth.last_backup_time = nftnl_expr_get_u64(expr, NFTNL_EXPR_BANDWIDTH_LASTBACKUPTIME);
+
+	ctx->stmt = stmt;
+}

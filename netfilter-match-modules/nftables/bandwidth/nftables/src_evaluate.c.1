@@ -1,0 +1,92 @@
+
+static int stmt_evaluate_bandwidth(struct eval_ctx *ctx, struct stmt *stmt)
+{
+	struct proto_ctx *pctx = eval_proto_ctx(ctx);
+
+	switch (pctx->family) {
+	case NFPROTO_ARP:
+	case NFPROTO_BRIDGE:
+	case NFPROTO_NETDEV:
+		return stmt_error(ctx, stmt, "bandwidth is only supported for inet/ipv4/ipv6 table family");
+	}
+
+	if(strlen(stmt->bandwidth.id) == 0)
+	{
+		unsigned long id_num = 0;
+		srand(time(NULL));
+		id_num = rand();
+		if(stmt->bandwidth.id != NULL)
+			free(stmt->bandwidth.id);
+		stmt->bandwidth.id = malloc(BANDWIDTH_MAX_ID_LENGTH*sizeof(char));
+		if(stmt->bandwidth.id == NULL)
+			return stmt_error(ctx, stmt, "bandwidth id malloc failure");
+		sprintf(stmt->bandwidth.id, "%%lu", id_num);
+	}
+	if(strlen(stmt->bandwidth.id) > BANDWIDTH_MAX_ID_LENGTH)
+		return stmt_error(ctx, stmt, "ID must be less than %d characters", BANDWIDTH_MAX_ID_LENGTH);
+
+   // Handle defaults
+   if(stmt->bandwidth.type == 0) stmt->bandwidth.type = NFT_BANDWIDTH_TYPE_COMBINED;
+   if(stmt->bandwidth.check_type == 0) stmt->bandwidth.check_type = NFT_BANDWIDTH_CHECKTYPE_NOSWAP;
+   if(stmt->bandwidth.cmp == 0) stmt->bandwidth.cmp = NFT_BANDWIDTH_CMP_MONITOR;
+   if(stmt->bandwidth.reset_interval == 0) stmt->bandwidth.reset_interval = NFT_BANDWIDTH_RSTINTVL_NEVER;
+
+	if(stmt->bandwidth.type == NFT_BANDWIDTH_TYPE_INDIVIDUALLOCAL || stmt->bandwidth.type == NFT_BANDWIDTH_TYPE_INDIVIDUALREMOTE)
+	{
+		uint32_t subnetstrlen = strlen(stmt->bandwidth.subnet);
+		uint32_t subnet6strlen = strlen(stmt->bandwidth.subnet6);
+		if(pctx->family == NFPROTO_INET && (subnetstrlen == 0 || subnet6strlen == 0))
+			return stmt_error(ctx, stmt, "Type individual-local/individual-remote requires subnet and subnet6");
+		else if(pctx->family == NFPROTO_IPV4)
+		{
+			if(subnetstrlen == 0)
+				return stmt_error(ctx, stmt, "Type individual-local/individual-remote requires subnet");
+			else if(subnet6strlen > 0)
+				return stmt_error(ctx, stmt, "subnet6 is not supported in IPv4 table family");
+		}
+		else if(pctx->family == NFPROTO_IPV6)
+		{
+			if(subnet6strlen == 0)
+				return stmt_error(ctx, stmt, "Type individual-local/individual-remote requires subnet6");
+			else if(subnetstrlen > 0)
+				return stmt_error(ctx, stmt, "subnet is not supported in IPv6 table family");
+		}
+	}
+
+	if(stmt->bandwidth.reset_interval > 0)
+	{
+		stmt->bandwidth.reset_is_constant_interval = 0;
+		if(stmt->bandwidth.reset_interval != NFT_BANDWIDTH_RSTINTVL_MINUTE &&
+			stmt->bandwidth.reset_interval != NFT_BANDWIDTH_RSTINTVL_HOUR &&
+			stmt->bandwidth.reset_interval != NFT_BANDWIDTH_RSTINTVL_DAY &&
+			stmt->bandwidth.reset_interval != NFT_BANDWIDTH_RSTINTVL_WEEK &&
+			stmt->bandwidth.reset_interval != NFT_BANDWIDTH_RSTINTVL_MONTH &&
+			stmt->bandwidth.reset_interval != NFT_BANDWIDTH_RSTINTVL_NEVER)
+		{
+			stmt->bandwidth.reset_is_constant_interval = 1;
+		}
+	}
+
+	if(stmt->bandwidth.reset_interval > 0 && stmt->bandwidth.reset_time > 0)
+	{
+		if(
+			(stmt->bandwidth.reset_interval == NFT_BANDWIDTH_RSTINTVL_NEVER) ||
+			(stmt->bandwidth.reset_interval == NFT_BANDWIDTH_RSTINTVL_MONTH && stmt->bandwidth.reset_time >= 60*60*24*28) ||
+			(stmt->bandwidth.reset_interval == NFT_BANDWIDTH_RSTINTVL_WEEK && stmt->bandwidth.reset_time >= 60*60*24*7) ||
+			(stmt->bandwidth.reset_interval == NFT_BANDWIDTH_RSTINTVL_DAY && stmt->bandwidth.reset_time >= 60*60*24) ||
+			(stmt->bandwidth.reset_interval == NFT_BANDWIDTH_RSTINTVL_HOUR && stmt->bandwidth.reset_time >= 60*60) ||
+			(stmt->bandwidth.reset_interval == NFT_BANDWIDTH_RSTINTVL_MINUTE && stmt->bandwidth.reset_time >= 60)
+		)
+		{
+			return stmt_error(ctx, stmt, "reset-time is not in a valid range for this reset-interval");
+		}
+	}
+
+	if(stmt->bandwidth.reset_time > 0 && stmt->bandwidth.reset_interval == 0)
+		return stmt_error(ctx, stmt, "You must specify a reset-interval with reset-time");
+
+	if(stmt->bandwidth.type != NFT_BANDWIDTH_TYPE_COMBINED && stmt->bandwidth.current_bandwidth > 0)
+		return stmt_error(ctx, stmt, "You may only specify current-bandwidth for combined type. Use user-space library for setting bandwidth for individual types");
+
+	return 0;
+}

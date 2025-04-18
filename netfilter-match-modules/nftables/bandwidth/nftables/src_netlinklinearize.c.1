@@ -1,0 +1,28 @@
+
+static void netlink_gen_bandwidth_stmt(struct netlink_linearize_ctx *ctx,
+				    const struct stmt *stmt)
+{
+	struct nftnl_expr *nle;
+
+	nle = alloc_nft_expr("bandwidth");
+	if (stmt->bandwidth.id != NULL)
+		nftnl_expr_set_str(nle, NFTNL_EXPR_BANDWIDTH_ID, stmt->bandwidth.id);
+	nftnl_expr_set_u8(nle, NFTNL_EXPR_BANDWIDTH_CMP, stmt->bandwidth.cmp);
+	nftnl_expr_set_u8(nle, NFTNL_EXPR_BANDWIDTH_TYPE, stmt->bandwidth.type);
+	nftnl_expr_set_u8(nle, NFTNL_EXPR_BANDWIDTH_CHECKTYPE, stmt->bandwidth.check_type);
+	nftnl_expr_set_u64(nle, NFTNL_EXPR_BANDWIDTH_BWCUTOFF, stmt->bandwidth.bandwidth_cutoff);
+	nftnl_expr_set_u64(nle, NFTNL_EXPR_BANDWIDTH_CURRENTBW, stmt->bandwidth.current_bandwidth);
+	if (stmt->bandwidth.subnet != NULL)
+		nftnl_expr_set_str(nle, NFTNL_EXPR_BANDWIDTH_SUBNET, stmt->bandwidth.subnet);
+	if (stmt->bandwidth.subnet6 != NULL)
+		nftnl_expr_set_str(nle, NFTNL_EXPR_BANDWIDTH_SUBNET6, stmt->bandwidth.subnet6);
+	nftnl_expr_set_u64(nle, NFTNL_EXPR_BANDWIDTH_RSTINTVL, stmt->bandwidth.reset_interval);
+	nftnl_expr_set_u8(nle, NFTNL_EXPR_BANDWIDTH_RSTINTVLCONST, stmt->bandwidth.reset_is_constant_interval);
+	nftnl_expr_set_u64(nle, NFTNL_EXPR_BANDWIDTH_RSTTIME, stmt->bandwidth.reset_time);
+	nftnl_expr_set_u32(nle, NFTNL_EXPR_BANDWIDTH_NUMINTVLSTOSAVE, stmt->bandwidth.num_intervals_to_save);
+	nftnl_expr_set_u64(nle, NFTNL_EXPR_BANDWIDTH_NEXTRESET, stmt->bandwidth.next_reset);
+	nftnl_expr_set_u64(nle, NFTNL_EXPR_BANDWIDTH_PREVRESET, stmt->bandwidth.prev_reset);
+	nftnl_expr_set_u64(nle, NFTNL_EXPR_BANDWIDTH_LASTBACKUPTIME, stmt->bandwidth.last_backup_time);
+
+	nft_rule_add_expr(ctx, nle, &stmt->location);
+}

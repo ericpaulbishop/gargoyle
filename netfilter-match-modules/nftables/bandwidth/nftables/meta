@@ -1,0 +1,22 @@
+# file||copy||path
+# file||insert||before|after||offset||match string||path
+include_statement.h.1||insert||after||0||extern struct stmt \*reject_stmt_alloc||include/statement.h
+include_statement.h.2||insert||after||0||@STMT_REJECT:||include/statement.h
+include_statement.h.3||insert||after||0||STMT_REJECT,||include/statement.h
+include_statement.h.4||insert||after||0||struct reject_stmt	reject;||include/statement.h
+src_evaluate.c.1||insert||after||1||return stmt_evaluate_reject_family||src/evaluate.c
+src_evaluate.c.2||insert||after||0||return stmt_evaluate_reject\(||src/evaluate.c
+src_netlinkdelinearize.c.1||insert||before||2||static void netlink_parse_reject||src/netlink_delinearize.c
+src_netlinkdelinearize.c.2||insert||after||1||static const struct expr_handler netlink_parsers||src/netlink_delinearize.c
+src_netlinklinearize.c.1||insert||before||2||static void netlink_gen_reject_stmt||src/netlink_linearize.c
+src_netlinklinearize.c.2||insert||before||2||return netlink_gen_reject_stmt||src/netlink_linearize.c
+src_parserbison.y.1||insert||after||0||%token PERSISTENT||src/parser_bison.y
+src_parserbison.y.2||insert||after||0||}	reject_stmt reject_stmt_alloc||src/parser_bison.y
+src_parserbison.y.3||insert||after||0||PARSER_SC_STMT_REJECT||src/parser_bison.y
+src_parserbison.y.4||insert||after||0||reject_stmt	close_scope_reject||src/parser_bison.y
+src_parserbison.y.5||insert||before||2||nat_stmt_alloc	nat_stmt_args||src/parser_bison.y
+src_scanner.l.1||insert||after||0||%s SCANSTATE_STMT_REJECT||src/scanner.l
+src_scanner.l.2||insert||before||1||scanner_push_start_cond\(yyscanner, SCANSTATE_STMT_REJECT\)||src/scanner.l
+src_statement.c.1||insert||before||2||static void reject_stmt_print||src/statement.c
+include_linux_netfilter_nftables.h.1||insert||after||0||#define NFTA_REJECT_MAX||include/linux/netfilter/nf_tables.h
+include_parser.h.1||insert||after||0||PARSER_SC_STMT_REJECT||include/parser.h
