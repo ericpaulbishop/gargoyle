@@ -1,0 +1,21 @@
+
+struct bandwidth_stmt {
+	const char*	id;
+	uint8_t     cmp;
+	uint8_t     type;
+	uint8_t     check_type;
+	uint64_t	bandwidth_cutoff;
+	uint64_t	current_bandwidth;
+	const char*	subnet;
+	const char*	subnet6;
+	uint64_t	reset_interval;
+	uint8_t     reset_is_constant_interval;
+	uint64_t	reset_time;
+	uint64_t	next_reset;
+	uint64_t	prev_reset;
+	uint32_t	num_intervals_to_save;
+	uint64_t	last_backup_time;
+	uint32_t	minutes_west;
+};
+
+extern struct stmt *bandwidth_stmt_alloc(const struct location *loc);

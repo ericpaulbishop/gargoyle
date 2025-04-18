@@ -1,0 +1,15 @@
+
+static void netlink_parse_timerange(struct netlink_parse_ctx *ctx,
+				 const struct location *loc,
+				 const struct nftnl_expr *expr)
+{
+	struct stmt *stmt;
+
+	stmt = timerange_stmt_alloc(loc);
+	stmt->timerange.flags = nftnl_expr_get_u32(expr, NFTNL_EXPR_TIMERANGE_FLAGS);
+	stmt->timerange.hours = xstrdup(nftnl_expr_get_str(expr, NFTNL_EXPR_TIMERANGE_HOURS));
+	stmt->timerange.weekdays = xstrdup(nftnl_expr_get_str(expr, NFTNL_EXPR_TIMERANGE_WEEKDAYS));
+	stmt->timerange.weeklyranges = xstrdup(nftnl_expr_get_str(expr, NFTNL_EXPR_TIMERANGE_WEEKLYRANGES));
+
+	ctx->stmt = stmt;
+}

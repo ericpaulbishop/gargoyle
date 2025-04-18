@@ -1,0 +1,38 @@
+
+static void weburl_stmt_print(const struct stmt *stmt, struct output_ctx *octx)
+{
+	bool inv = stmt->weburl.flags & NFT_WEBURL_F_INV;
+
+	nft_print(octx, "weburl %s", inv ? "! " : "");
+	if(stmt->weburl.flags & NFT_WEBURL_F_MP_DOMAINONLY)
+		nft_print(octx, "domain-only ");
+	if(stmt->weburl.flags & NFT_WEBURL_F_MP_PATHONLY)
+		nft_print(octx, "path-only");
+	
+	if(stmt->weburl.flags & NFT_WEBURL_F_MT_CONTAINS)
+		nft_print(octx, "contains ");
+	if(stmt->weburl.flags & NFT_WEBURL_F_MT_CONTAINSREGEX)
+		nft_print(octx, "contains-regex ");
+	if(stmt->weburl.flags & NFT_WEBURL_F_MT_MATCHESEXACTLY)
+		nft_print(octx, "matches-exactly ");
+
+	if(stmt->weburl.match != NULL && strlen(stmt->weburl.match) > 0)
+		nft_print(octx, "%s ", stmt->weburl.match);
+}
+
+static void weburl_stmt_destroy(struct stmt *stmt)
+{
+	xfree(stmt->weburl.match);
+}
+
+static const struct stmt_ops weburl_stmt_ops = {
+	.type		= STMT_WEBURL,
+	.name		= "weburl",
+	.print		= weburl_stmt_print,
+	.destroy	= weburl_stmt_destroy,
+};
+
+struct stmt *weburl_stmt_alloc(const struct location *loc)
+{
+	return stmt_alloc(loc, &weburl_stmt_ops);
+}

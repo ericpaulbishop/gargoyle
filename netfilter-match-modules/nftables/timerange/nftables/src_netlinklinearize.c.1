@@ -1,0 +1,17 @@
+
+static void netlink_gen_timerange_stmt(struct netlink_linearize_ctx *ctx,
+				    const struct stmt *stmt)
+{
+	struct nftnl_expr *nle;
+
+	nle = alloc_nft_expr("timerange");
+	nftnl_expr_set_u32(nle, NFTNL_EXPR_TIMERANGE_FLAGS, stmt->timerange.flags);
+	if (stmt->timerange.hours != NULL)
+			nftnl_expr_set_str(nle, NFTNL_EXPR_TIMERANGE_HOURS, stmt->timerange.hours);
+	if (stmt->timerange.weekdays != NULL)
+			nftnl_expr_set_str(nle, NFTNL_EXPR_TIMERANGE_WEEKDAYS, stmt->timerange.weekdays);
+	if (stmt->timerange.weeklyranges != NULL)
+			nftnl_expr_set_str(nle, NFTNL_EXPR_TIMERANGE_WEEKLYRANGES, stmt->timerange.weeklyranges);
+
+	nft_rule_add_expr(ctx, nle, &stmt->location);
+}
