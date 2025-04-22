@@ -3,7 +3,7 @@ static void weburl_stmt_print(const struct stmt *stmt, struct output_ctx *octx)
 {
 	bool inv = stmt->weburl.flags & NFT_WEBURL_F_INV;
 
-	nft_print(octx, "weburl %s", inv ? "! " : "");
+	nft_print(octx, "weburl ");
 	if(stmt->weburl.flags & NFT_WEBURL_F_MP_DOMAINONLY)
 		nft_print(octx, "domain-only ");
 	if(stmt->weburl.flags & NFT_WEBURL_F_MP_PATHONLY)
@@ -17,7 +17,7 @@ static void weburl_stmt_print(const struct stmt *stmt, struct output_ctx *octx)
 		nft_print(octx, "matches-exactly ");
 
 	if(stmt->weburl.match != NULL && strlen(stmt->weburl.match) > 0)
-		nft_print(octx, "%s ", stmt->weburl.match);
+		nft_print(octx, "%%s%%s", inv ? "!= " : "", stmt->weburl.match);
 }
 
 static void weburl_stmt_destroy(struct stmt *stmt)

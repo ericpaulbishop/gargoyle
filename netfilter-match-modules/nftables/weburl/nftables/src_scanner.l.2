@@ -1,6 +1,6 @@
 "weburl"		{ scanner_push_start_cond(yyscanner, SCANSTATE_STMT_WEBURL); return WEBURL; }
 <SCANSTATE_STMT_WEBURL>{
-	"!"						{ return NOT; }
+	"!="						{ return NEQ; }
 	"contains"				{ return CONTAINS; }
 	"contains-regex"		{ return CONTAINS_REGEX; }
 	"matches-exactly"		{ return MATCHES_EXACTLY; }

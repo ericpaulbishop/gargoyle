@@ -1,5 +1,5 @@
 
-weburl_stmt		:	WEBURL	weburl_invert	weburl_match_part	weburl_match_type	string
+weburl_stmt		:	WEBURL	weburl_match_part	weburl_match_type	weburl_invert	string
 			{
 				uint32_t flags = 0;
 				$$ = weburl_stmt_alloc(&@$);
@@ -12,7 +12,7 @@ weburl_stmt		:	WEBURL	weburl_invert	weburl_match_part	weburl_match_type	string
 			}
 			;
 
-weburl_invert		:	NOT					{ $$ = NFT_WEBURL_F_INV; }
+weburl_invert		:	NEQ					{ $$ = NFT_WEBURL_F_INV; }
 			|			/* empty */			{ $$ = 0; }
 			;
 

@@ -122,10 +122,17 @@ nftnl_expr_weburl_snprintf(char *buf, size_t len,
 
 	if (e->flags & (1 << NFTNL_EXPR_WEBURL_FLAGS)) {
 		bool inv = weburl->flags & NFT_WEBURL_F_INV;
-		if(inv)
-		{
-			ret = snprintf(buf + offset, remain, "! ");
-			SNPRINTF_BUFFER_SIZE(ret, remain, offset);
+		if (e->flags & (1 << NFTNL_EXPR_WEBURL_FLAGS)) {
+			if(weburl->flags & NFT_WEBURL_F_MP_DOMAINONLY)
+			{
+				ret = snprintf(buf + offset, remain, "domain-only ");
+				SNPRINTF_BUFFER_SIZE(ret, remain, offset);
+			}
+			else if(weburl->flags & NFT_WEBURL_F_MP_PATHONLY)
+			{
+				ret = snprintf(buf + offset, remain, "path-only ");
+				SNPRINTF_BUFFER_SIZE(ret, remain, offset);
+			}
 		}
 
 		if(weburl->flags & NFT_WEBURL_F_MT_CONTAINS)
@@ -143,22 +150,16 @@ nftnl_expr_weburl_snprintf(char *buf, size_t len,
 			ret = snprintf(buf + offset, remain, "matches-exactly ");
 			SNPRINTF_BUFFER_SIZE(ret, remain, offset);
 		}
+
+		if(inv)
+		{
+			ret = snprintf(buf + offset, remain, "!= ");
+			SNPRINTF_BUFFER_SIZE(ret, remain, offset);
+		}
 	}
 	if (e->flags & (1 << NFTNL_EXPR_WEBURL_MATCH)) {
 		ret = snprintf(buf + offset, remain, "%s", weburl->match);
 		SNPRINTF_BUFFER_SIZE(ret, remain, offset);
-	}
-	if (e->flags & (1 << NFTNL_EXPR_WEBURL_FLAGS)) {
-		if(weburl->flags & NFT_WEBURL_F_MP_DOMAINONLY)
-		{
-			ret = snprintf(buf + offset, remain, " domain-only");
-			SNPRINTF_BUFFER_SIZE(ret, remain, offset);
-		}
-		else if(weburl->flags & NFT_WEBURL_F_MP_PATHONLY)
-		{
-			ret = snprintf(buf + offset, remain, " path-only");
-			SNPRINTF_BUFFER_SIZE(ret, remain, offset);
-		}
 	}
 
 	return offset;
