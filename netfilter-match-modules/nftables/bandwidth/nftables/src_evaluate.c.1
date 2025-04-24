@@ -23,7 +23,7 @@ static int stmt_evaluate_bandwidth(struct eval_ctx *ctx, struct stmt *stmt)
 		sprintf(stmt->bandwidth.id, "%%lu", id_num);
 	}
 	if(strlen(stmt->bandwidth.id) > BANDWIDTH_MAX_ID_LENGTH)
-		return stmt_error(ctx, stmt, "ID must be less than %d characters", BANDWIDTH_MAX_ID_LENGTH);
+		return stmt_error(ctx, stmt, "ID must be less than %%d characters", BANDWIDTH_MAX_ID_LENGTH);
 
    // Handle defaults
    if(stmt->bandwidth.type == 0) stmt->bandwidth.type = NFT_BANDWIDTH_TYPE_COMBINED;

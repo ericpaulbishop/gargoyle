@@ -4,15 +4,15 @@ static void webmon_stmt_print(const struct stmt *stmt, struct output_ctx *octx)
 	nft_print(octx, "webmon ");
 	if(stmt->webmon.flags & NFT_WEBMON_F_EXCLUDE || stmt->webmon.flags & NFT_WEBMON_F_INCLUDE)
 	{
-		nft_print(octx, "%s-ips ", (stmt->webmon.flags & NFT_WEBMON_F_EXCLUDE ? "exclude" : "include"));
+		nft_print(octx, "%%s-ips ", (stmt->webmon.flags & NFT_WEBMON_F_EXCLUDE ? "exclude" : "include"));
 		if(stmt->webmon.ips != NULL && strlen(stmt->webmon.ips) > 0)
 		{
-			nft_print(octx, "%s ", stmt->webmon.ips);
+			nft_print(octx, "%%s ", stmt->webmon.ips);
 		}
 	}
 
-	nft_print(octx, "max-domains %u ", stmt->webmon.max_domains);
-	nft_print(octx, "max-searches %u", stmt->webmon.max_searches);
+	nft_print(octx, "max-domains %%u ", stmt->webmon.max_domains);
+	nft_print(octx, "max-searches %%u", stmt->webmon.max_searches);
 }
 
 static void webmon_stmt_destroy(struct stmt *stmt)

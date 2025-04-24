@@ -15,7 +15,7 @@ static void bandwidth_stmt_print(const struct stmt *stmt, struct output_ctx *oct
 	}
 
 	if(stmt->bandwidth.id != NULL && strlen(stmt->bandwidth.id) > 0)
-		nft_print(octx, "id %s ",stmt->bandwidth.id);
+		nft_print(octx, "id %%s ",stmt->bandwidth.id);
 
 	if(stmt->bandwidth.cmp != NFT_BANDWIDTH_CMP_CHECK)
 	{
@@ -41,16 +41,16 @@ static void bandwidth_stmt_print(const struct stmt *stmt, struct output_ctx *oct
 		}
 
 		if(stmt->bandwidth.subnet != NULL && strlen(stmt->bandwidth.subnet) > 0)
-			nft_print(octx, "subnet %s ",stmt->bandwidth.subnet);
+			nft_print(octx, "subnet %%s ",stmt->bandwidth.subnet);
 		if(stmt->bandwidth.subnet6 != NULL && strlen(stmt->bandwidth.subnet6) > 0)
-			nft_print(octx, "subnet6 %s ",stmt->bandwidth.subnet6);
+			nft_print(octx, "subnet6 %%s ",stmt->bandwidth.subnet6);
 
 		if(stmt->bandwidth.cmp & (NFT_BANDWIDTH_CMP_LT || NFT_BANDWIDTH_CMP_GT))
 		{
 			if(stmt->bandwidth.cmp & NFT_BANDWIDTH_CMP_LT)
-				nft_print(octx, "less-than %u ", stmt->bandwidth.bandwidth_cutoff);
+				nft_print(octx, "less-than %%u ", stmt->bandwidth.bandwidth_cutoff);
 			else if(stmt->bandwidth.cmp & NFT_BANDWIDTH_CMP_GT)
-				nft_print(octx, "greater-than %u ", stmt->bandwidth.bandwidth_cutoff);
+				nft_print(octx, "greater-than %%u ", stmt->bandwidth.bandwidth_cutoff);
 		}
 
 		// Only print current-bandwidth for combined type. Others contain too much data and must be fetched using userspace util
@@ -65,11 +65,11 @@ static void bandwidth_stmt_print(const struct stmt *stmt, struct output_ctx *oct
 				nft_print(octx, "current-bandwidth 0 ");
 			}
 			else
-				nft_print(octx, "current-bandwidth %u ", stmt->bandwidth.current_bandwidth);
+				nft_print(octx, "current-bandwidth %%u ", stmt->bandwidth.current_bandwidth);
 		}
 
 		if(stmt->bandwidth.reset_is_constant_interval)
-			nft_print(octx, "reset-interval %u ", stmt->bandwidth.reset_interval);
+			nft_print(octx, "reset-interval %%u ", stmt->bandwidth.reset_interval);
 		else if(stmt->bandwidth.reset_interval != NFT_BANDWIDTH_RSTINTVL_NEVER)
 		{
 			nft_print(octx, "reset-interval ");
@@ -86,10 +86,10 @@ static void bandwidth_stmt_print(const struct stmt *stmt, struct output_ctx *oct
 		}
 
 		if(stmt->bandwidth.reset_time > 0)
-			nft_print(octx, "reset-time %u", stmt->bandwidth.reset_time);
+			nft_print(octx, "reset-time %%u", stmt->bandwidth.reset_time);
 
 		if(stmt->bandwidth.num_intervals_to_save > 0)
-			nft_print(octx, "num-intervals-to-save %u", stmt->bandwidth.num_intervals_to_save);
+			nft_print(octx, "num-intervals-to-save %%u", stmt->bandwidth.num_intervals_to_save);
 	}
 }
 
