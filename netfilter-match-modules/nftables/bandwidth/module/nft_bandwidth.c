@@ -73,6 +73,8 @@ typedef struct info_and_maps_struct
 	uint8_t info_family;
 	uint8_t other_info_family;
 	struct nft_bandwidth_info* other_info;
+
+	unsigned long ref_count;
 }info_and_maps;
 
 typedef struct history_struct
@@ -1551,8 +1553,8 @@ static bool bandwidth_mt6(struct nft_bandwidth_info *priv, const struct sk_buff 
 			{
 				for(x = 0; x < 16; x++)
 				{
-					tsrc_ip.s6_addr[x] = (src_ip.s6_addr[x] & priv->local_subnet6.s6_addr[x]);
-					tdst_ip.s6_addr[x] = (dst_ip.s6_addr[x] & priv->local_subnet6.s6_addr[x]);
+					tsrc_ip.s6_addr[x] = (src_ip.s6_addr[x] & priv->local_subnet6_mask.s6_addr[x]);
+					tdst_ip.s6_addr[x] = (dst_ip.s6_addr[x] & priv->local_subnet6_mask.s6_addr[x]);
 				}
 				if(memcmp(tsrc_ip.s6_addr,priv->local_subnet6.s6_addr,sizeof(unsigned char)*16) == 0)
 				{
@@ -1577,8 +1579,8 @@ static bool bandwidth_mt6(struct nft_bandwidth_info *priv, const struct sk_buff 
 			{
 				for(x = 0; x < 16; x++)
 				{
-					tsrc_ip.s6_addr[x] = (src_ip.s6_addr[x] & priv->local_subnet6.s6_addr[x]);
-					tdst_ip.s6_addr[x] = (dst_ip.s6_addr[x] & priv->local_subnet6.s6_addr[x]);
+					tsrc_ip.s6_addr[x] = (src_ip.s6_addr[x] & priv->local_subnet6_mask.s6_addr[x]);
+					tdst_ip.s6_addr[x] = (dst_ip.s6_addr[x] & priv->local_subnet6_mask.s6_addr[x]);
 				}
 				if(memcmp(tsrc_ip.s6_addr,priv->local_subnet6.s6_addr,sizeof(unsigned char)*16) != 0)
 				{
@@ -2943,6 +2945,10 @@ static int nft_bandwidth_init(const struct nft_ctx *ctx, const struct nft_expr *
 		priv->check_type = nla_get_u8(tb[NFTA_BANDWIDTH_CHECKTYPE]);
 		if(tb[NFTA_BANDWIDTH_SUBNET] != NULL) nla_strscpy(subnet, tb[NFTA_BANDWIDTH_SUBNET], BANDWIDTH_SUBNET_STR_SIZE);
 		if(tb[NFTA_BANDWIDTH_SUBNET6] != NULL) nla_strscpy(subnet6, tb[NFTA_BANDWIDTH_SUBNET6], BANDWIDTH_SUBNET_STR_SIZE);
+		memset(&priv->local_subnet, 0, sizeof(struct in_addr));
+		memset(&priv->local_subnet_mask, 0, sizeof(struct in_addr));
+		memset(&priv->local_subnet6, 0, sizeof(struct in6_addr));
+		memset(&priv->local_subnet6_mask, 0, sizeof(struct in6_addr));
 		parse_ips_and_ranges(subnet, priv);
 		parse_ips_and_ranges(subnet6, priv);
 		priv->cmp = nla_get_u8(tb[NFTA_BANDWIDTH_CMP]);
@@ -2966,6 +2972,8 @@ static int nft_bandwidth_init(const struct nft_ctx *ctx, const struct nft_expr *
 		master_priv->check_type                 = priv->check_type;
 		master_priv->local_subnet               = priv->local_subnet;
 		master_priv->local_subnet_mask          = priv->local_subnet_mask;
+		master_priv->local_subnet6               = priv->local_subnet6;
+		master_priv->local_subnet6_mask          = priv->local_subnet6_mask;
 		master_priv->cmp                        = priv->cmp;
 		master_priv->reset_is_constant_interval = priv->reset_is_constant_interval;
 		master_priv->reset_interval             = priv->reset_interval;
@@ -3001,10 +3009,11 @@ static int nft_bandwidth_init(const struct nft_ctx *ctx, const struct nft_expr *
 				#ifdef BANDWIDTH_DEBUG
 					printk("iam is not null during nft_bandwidth_init!\n");
 				#endif
-				// We can only have 1 in each family NFPROTO_IPV4/IPV6. NFPROTO_INET represents both, so conflicts in both cases
-				if(iam->info_family == family || iam->info_family == NFPROTO_INET || family == NFPROTO_INET)
+				// We can only have 1 in each family NFPROTO_IPV4/IPV6. NFPROTO_INET conflicts with both of these
+				// For NFPROTO_INET, we can have up to 2 of these
+				if((family != NFPROTO_INET && (iam->info_family == NFPROTO_INET || iam->info_family == family)) || (family == NFPROTO_INET && iam->info_family != NFPROTO_INET) || (family == NFPROTO_INET && iam->ref_count > 1))
 				{
-					printk("nft_bandwidth: error, \"%s\" is a duplicate id in this IP family\n", priv->id); 
+					printk("nft_bandwidth: error, \"%s\" is a duplicate id in this IP family, OR, id referenced more than twice in INET\n", priv->id); 
 					spin_unlock_bh(&bandwidth_lock);
 					up(&userspace_lock);
 					return -EINVAL;
@@ -3034,6 +3043,7 @@ static int nft_bandwidth_init(const struct nft_ctx *ctx, const struct nft_expr *
 				iam->other_info = master_priv;
 				iam->other_info_family = family;
 				master_priv->combined_bw = iam->info->combined_bw;
+				iam->ref_count += 1;
 			}
 			else
 			{
@@ -3079,6 +3089,7 @@ static int nft_bandwidth_init(const struct nft_ctx *ctx, const struct nft_expr *
 				iam->info_family = family;
 				iam->other_info = NULL;
 				iam->other_info_family = 0;
+				iam->ref_count = 1;
 			}
 
 			if(priv->reset_interval != BANDWIDTH_NEVER)
@@ -3174,7 +3185,7 @@ static int nft_bandwidth_dump(struct sk_buff *skb, const struct nft_expr *expr) 
 	subnet6str = kcalloc(BANDWIDTH_SUBNET_STR_SIZE,sizeof(char),GFP_ATOMIC);
 	if (subnetstr == NULL || subnet6str == NULL)
 		return -1;
-   subnettest = kcalloc(1,sizeof(struct in6_addr),GFP_ATOMIC);
+	subnettest = kcalloc(1,sizeof(struct in6_addr),GFP_ATOMIC);
 	if (subnettest == NULL)
 		return -1;
 
@@ -3191,14 +3202,9 @@ static int nft_bandwidth_dump(struct sk_buff *skb, const struct nft_expr *expr) 
 		retval = -1;
 	}
 
-   if(memcmp(&priv->local_subnet,subnettest,sizeof(struct in_addr)) != 0)
-   {
-       ret = snprintf(subnetstr, BANDWIDTH_SUBNET_STR_SIZE, "%pI4/%pI4", &priv->local_subnet, &priv->local_subnet_mask);
-   }
-   if(memcmp(&priv->local_subnet6,subnettest,sizeof(struct in6_addr)) != 0)
-   {
-       ret = snprintf(subnet6str, BANDWIDTH_SUBNET_STR_SIZE, "%pI6c/%pI6c", &priv->local_subnet6, &priv->local_subnet6_mask);
-   }
+	ret = snprintf(subnetstr, BANDWIDTH_SUBNET_STR_SIZE, "%pI4/%pI4", &priv->local_subnet, &priv->local_subnet_mask);
+	ret = snprintf(subnet6str, BANDWIDTH_SUBNET_STR_SIZE, "%pI6c/%pI6c", &priv->local_subnet6, &priv->local_subnet6_mask);
+
 	if (nla_put_string(skb, NFTA_BANDWIDTH_SUBNET, subnetstr))
 	{
        retval = -1;
@@ -3298,6 +3304,7 @@ static void nft_bandwidth_destroy(const struct nft_ctx *ctx, const struct nft_ex
 				#endif
 			}
 			other_priv = iam->other_info;
+			iam->ref_count -= 1;
 		}
 		
 		if(other_priv != NULL)
