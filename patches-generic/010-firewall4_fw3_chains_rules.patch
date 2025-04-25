@@ -1,0 +1,219 @@
+--- /dev/null
++++ b/package/network/config/firewall4/patches/001-firewall4_fw3_chains_rules.patch
+@@ -0,0 +1,216 @@
++--- a/root/usr/share/ucode/fw4.uc
+++++ b/root/usr/share/ucode/fw4.uc
++@@ -1945,7 +1945,10 @@ return {
++ 			flow_offloading: [ "bool", "0" ],
++ 			flow_offloading_hw: [ "bool", "0" ],
++ 
++-			auto_includes: [ "bool", "1" ]
+++			auto_includes: [ "bool", "1" ],
+++
+++			always_emit_nat_zones: [ "bool", "0" ],
+++			emit_user_rule_chains: [ "bool", "0" ]
++ 		});
++ 
++ 		if (defs.synflood_protect === null)
++@@ -2178,6 +2181,11 @@ return {
++ 		zone.related_subnets = related_subnets;
++ 		zone.related_physdevs = related_physdevs;
++ 
+++		if (this.state.defaults?.always_emit_nat_zones === true) {
+++			zone.dflags.snat = true;
+++			zone.dflags.dnat = true;
+++		}
+++
++ 		if (zone.masq || zone.masq6)
++ 			zone.dflags.snat = true;
++ 
++--- /dev/null
+++++ b/root/usr/share/firewall4/templates/chain-user-rule.uc
++@@ -0,0 +1,2 @@
+++chain {{ name }}_rule {
+++	}
++--- /dev/null
+++++ b/root/usr/share/firewall4/templates/jump-chain-user-rule.uc
++@@ -0,0 +1,3 @@
+++{%+ if (fw4.default_option("emit_user_rule_chains")): %}
+++		jump {{ name }}_rule comment {{ fw4.quote(`!fw4: Custom ${name} rule chain`, true) }}
+++{%+ endif %}
++--- a/root/usr/share/firewall4/templates/ruleset.uc
+++++ b/root/usr/share/firewall4/templates/ruleset.uc
++@@ -97,6 +97,7 @@ table inet fw4 {
++ 	chain input {
++ 		type filter hook input priority filter; policy {{ fw4.input_policy(true) }};
++ 
+++		{% include("jump-chain-user-rule.uc", { fw4, name: "input"}) %}
++ 		iifname "lo" accept comment "!fw4: Accept traffic from loopback"
++ 
++ {% fw4.includes('chain-prepend', 'input') %}
++@@ -122,6 +123,7 @@ table inet fw4 {
++ 	chain forward {
++ 		type filter hook forward priority filter; policy {{ fw4.forward_policy(true) }};
++ 
+++		{% include("jump-chain-user-rule.uc", { fw4, name: "forward"}) %}
++ {% if (length(flowtable_devices) > 0): %}
++ 		meta l4proto { tcp, udp } flow offload @ft;
++ {% endif %}
++@@ -145,6 +147,7 @@ table inet fw4 {
++ 	chain output {
++ 		type filter hook output priority filter; policy {{ fw4.output_policy(true) }};
++ 
+++		{% include("jump-chain-user-rule.uc", { fw4, name: "output"}) %}
++ 		oifname "lo" accept comment "!fw4: Accept traffic towards loopback"
++ 
++ {% fw4.includes('chain-prepend', 'output') %}
++@@ -175,6 +178,7 @@ table inet fw4 {
++ 
++ 	chain prerouting {
++ 		type filter hook prerouting priority filter; policy accept;
+++		{% include("jump-chain-user-rule.uc", { fw4, name: "prerouting"}) %}
++ {% for (let zone in fw4.zones()): %}
++ {%  if (zone.dflags.helper): %}
++ {%   for (let rule in zone.match_rules): %}
++@@ -215,6 +219,7 @@ table inet fw4 {
++ {% for (let zone in fw4.zones()): %}
++ 	chain input_{{ zone.name }} {
++ {%  fw4.includes('chain-prepend', `input_${zone.name}`) %}
+++		{% include("jump-chain-user-rule.uc", { fw4, name: `input_${zone.name}`}) %}
++ {%  for (let rule in fw4.rules(`input_${zone.name}`)): %}
++ 		{%+ include("rule.uc", { fw4, rule }) %}
++ {%  endfor %}
++@@ -227,6 +232,7 @@ table inet fw4 {
++ 
++ 	chain output_{{ zone.name }} {
++ {%  fw4.includes('chain-prepend', `output_${zone.name}`) %}
+++		{% include("jump-chain-user-rule.uc", { fw4, name: `output_${zone.name}`}) %}
++ {%  for (let rule in fw4.rules(`output_${zone.name}`)): %}
++ 		{%+ include("rule.uc", { fw4, rule }) %}
++ {%  endfor %}
++@@ -236,6 +242,7 @@ table inet fw4 {
++ 
++ 	chain forward_{{ zone.name }} {
++ {%  fw4.includes('chain-prepend', `forward_${zone.name}`) %}
+++		{% include("jump-chain-user-rule.uc", { fw4, name: `forward_${zone.name}`}) %}
++ {%  for (let rule in fw4.rules(`forward_${zone.name}`)): %}
++ 		{%+ include("rule.uc", { fw4, rule }) %}
++ {%  endfor %}
++@@ -287,6 +294,7 @@ table inet fw4 {
++ 	chain dstnat {
++ 		type nat hook prerouting priority dstnat; policy accept;
++ {% fw4.includes('chain-prepend', 'dstnat') %}
+++		{% include("jump-chain-user-rule.uc", { fw4, name: "dstnat" }) %}
++ {% for (let zone in fw4.zones()): %}
++ {%  if (zone.dflags.dnat): %}
++ {%   for (let rule in zone.match_rules): %}
++@@ -300,6 +308,7 @@ table inet fw4 {
++ 	chain srcnat {
++ 		type nat hook postrouting priority srcnat; policy accept;
++ {% fw4.includes('chain-prepend', 'srcnat') %}
+++		{% include("jump-chain-user-rule.uc", { fw4, name: "srcnat" }) %}
++ {% for (let redirect in fw4.redirects("srcnat")): %}
++ 		{%+ include("redirect.uc", { fw4, redirect }) %}
++ {% endfor %}
++@@ -317,6 +326,7 @@ table inet fw4 {
++ {%  if (zone.dflags.dnat): %}
++ 	chain dstnat_{{ zone.name }} {
++ {%   fw4.includes('chain-prepend', `dstnat_${zone.name}`) %}
+++		{% include("jump-chain-user-rule.uc", { fw4, name: `dstnat_${zone.name}` }) %}
++ {%   for (let redirect in fw4.redirects(`dstnat_${zone.name}`)): %}
++ 		{%+ include("redirect.uc", { fw4, redirect }) %}
++ {%   endfor %}
++@@ -327,6 +337,7 @@ table inet fw4 {
++ {%  if (zone.dflags.snat): %}
++ 	chain srcnat_{{ zone.name }} {
++ {%   fw4.includes('chain-prepend', `srcnat_${zone.name}`) %}
+++		{% include("jump-chain-user-rule.uc", { fw4, name: `srcnat_${zone.name}` }) %}
++ {%   for (let redirect in fw4.redirects(`srcnat_${zone.name}`)): %}
++ 		{%+ include("redirect.uc", { fw4, redirect }) %}
++ {%   endfor %}
++@@ -405,6 +416,7 @@ table inet fw4 {
++ 	chain mangle_prerouting {
++ 		type filter hook prerouting priority mangle; policy accept;
++ {% fw4.includes('chain-prepend', 'mangle_prerouting') %}
+++		{% include("jump-chain-user-rule.uc", { fw4, name: "mangle_prerouting" }) %}
++ {% for (let rule in fw4.rules("mangle_prerouting")): %}
++ 		{%+ include("rule.uc", { fw4, rule }) %}
++ {% endfor %}
++@@ -414,6 +426,7 @@ table inet fw4 {
++ 	chain mangle_postrouting {
++ 		type filter hook postrouting priority mangle; policy accept;
++ {% fw4.includes('chain-prepend', 'mangle_postrouting') %}
+++		{% include("jump-chain-user-rule.uc", { fw4, name: "mangle_postrouting" }) %}
++ {% for (let rule in fw4.rules("mangle_postrouting")): %}
++ 		{%+ include("rule.uc", { fw4, rule }) %}
++ {% endfor %}
++@@ -423,6 +436,7 @@ table inet fw4 {
++ 	chain mangle_input {
++ 		type filter hook input priority mangle; policy accept;
++ {% fw4.includes('chain-prepend', 'mangle_input') %}
+++		{% include("jump-chain-user-rule.uc", { fw4, name: "mangle_input" }) %}
++ {% for (let rule in fw4.rules("mangle_input")): %}
++ 		{%+ include("rule.uc", { fw4, rule }) %}
++ {% endfor %}
++@@ -432,6 +446,7 @@ table inet fw4 {
++ 	chain mangle_output {
++ 		type route hook output priority mangle; policy accept;
++ {% fw4.includes('chain-prepend', 'mangle_output') %}
+++		{% include("jump-chain-user-rule.uc", { fw4, name: "mangle_output" }) %}
++ {% for (let rule in fw4.rules("mangle_output")): %}
++ 		{%+ include("rule.uc", { fw4, rule }) %}
++ {% endfor %}
++@@ -441,6 +456,7 @@ table inet fw4 {
++ 	chain mangle_forward {
++ 		type filter hook forward priority mangle; policy accept;
++ {% fw4.includes('chain-prepend', 'mangle_forward') %}
+++		{% include("jump-chain-user-rule.uc", { fw4, name: "mangle_forward" }) %}
++ {% for (let rule in fw4.rules("mangle_forward")): %}
++ 		{%+ include("rule.uc", { fw4, rule }) %}
++ {% endfor %}
++@@ -454,6 +470,47 @@ table inet fw4 {
++ {% endfor %}
++ {% fw4.includes('chain-append', 'mangle_forward') %}
++ 	}
+++
+++{% if (fw4.default_option("emit_user_rule_chains")): %}
+++	#
+++	# User rule chains
+++	#
+++
+++	{%+ include("chain-user-rule.uc", { fw4, name: "input" }) %}
+++
+++	{%+ include("chain-user-rule.uc", { fw4, name: "output" }) %}
+++
+++	{%+ include("chain-user-rule.uc", { fw4, name: "forward" }) %}
+++
+++	{%+ include("chain-user-rule.uc", { fw4, name: "prerouting" }) %}
+++
+++	{%+ include("chain-user-rule.uc", { fw4, name: "dstnat" }) %}
+++
+++	{%+ include("chain-user-rule.uc", { fw4, name: "srcnat" }) %}
+++
+++{% for (let zone in fw4.zones()): %}
+++	{%+ include("chain-user-rule.uc", { fw4, name: `input_${zone.name}` }) %}
+++
+++	{%+ include("chain-user-rule.uc", { fw4, name: `output_${zone.name}` }) %}
+++
+++	{%+ include("chain-user-rule.uc", { fw4, name: `forward_${zone.name}` }) %}
+++
+++	{%+ include("chain-user-rule.uc", { fw4, name: `dstnat_${zone.name}` }) %}
+++
+++	{%+ include("chain-user-rule.uc", { fw4, name: `srcnat_${zone.name}` }) %}
+++
+++{%  endfor %}
+++	{%+ include("chain-user-rule.uc", { fw4, name: "mangle_prerouting" }) %}
+++
+++	{%+ include("chain-user-rule.uc", { fw4, name: "mangle_postrouting" }) %}
+++
+++	{%+ include("chain-user-rule.uc", { fw4, name: "mangle_input" }) %}
+++
+++	{%+ include("chain-user-rule.uc", { fw4, name: "mangle_output" }) %}
+++
+++	{%+ include("chain-user-rule.uc", { fw4, name: "mangle_forward" }) %}
+++{% endif %}
+++
++ {% fw4.includes('table-append') %}
++ }
++ {% fw4.includes('ruleset-append') %}
++
