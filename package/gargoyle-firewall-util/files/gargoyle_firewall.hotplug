@@ -19,7 +19,7 @@ if [ "$INTERFACE" = "wan" ]; then
 	fi
 
 	if [ "$ACTION" = "ifdown" ]; then
-		quota_chains_exist=$(iptables -t mangle -L combined_quotas 2>/dev/null)
+		quota_chains_exist=$(nft list table inet fw4 2>/dev/null | grep "chain mangle_combined_quotas")
 		if [ -n "$quota_chains_exist" ] ; then
 			backup_quotas
 		fi

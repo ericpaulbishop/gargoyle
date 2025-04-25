@@ -1,4 +1,4 @@
-/*  make_iptables_rules --	A tool to generate firewall rules from options in UCI config files
+/*  make_nftables_rules --	A tool to generate firewall rules from options in UCI config files
  *  				Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
  *
  *
@@ -49,7 +49,9 @@ list* parse_quoted_list(char* list_str, char quote_char, char escape_char, char 
 
 int truncate_if_starts_with(char* test_str, char* prefix);
 
-char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingress, char* target, char* target_options);
+char* invert_bitmask(const char* input);
+
+char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingress, char* target, char* target_options, char* family);
 int compute_multi_rules(char** def, list* multi_rules, char** single_check, int never_single, char* rule_prefix, char* test_prefix1, char* test_prefix2, int is_negation1, int is_negation2, int mask_byte_index, char* proto, int requires_proto, int quoted_args);
 
 int main(int argc, char **argv)
@@ -128,56 +130,33 @@ int main(int argc, char **argv)
 		string_map* def = get_rule_definition(package, section, family);
 		if(def !=  NULL)
 		{
-			char** rules = compute_rules(def, table, chain, 0, target, target_options);
-		
-			char* cmdarray[2];
-			int cmdcnt = 0;
-			if(safe_strcmp(family,"any") == 0 || safe_strcmp(family,"ipv4") == 0)
-			{
-				cmdarray[cmdcnt] = strdup("iptables");
-				cmdcnt += 1;
-			}
-			if(safe_strcmp(family,"any") == 0 || safe_strcmp(family,"ipv6") == 0)
-			{
-				cmdarray[cmdcnt] = strdup("ip6tables");
-				cmdcnt += 1;
-			}
-			int findex = 0;
-			for(findex = 0; findex < cmdcnt; findex++)
-			{
-				int rindex = 0;
-				for(rindex=0; rules[rindex] != NULL; rindex++)
-				{	
-					if(run_commands == 0)
-					{
-						printf("%s\n", dynamic_strcat(2, cmdarray[findex], rules[rindex]));
-					}
-					else
-					{
-						system(dynamic_strcat(2, cmdarray[findex], rules[rindex]));	
-					}
+			char** rules = compute_rules(def, table, chain, 0, target, target_options, family);
+
+			int rindex = 0;
+			for(rindex=0; rules[rindex] != NULL; rindex++)
+			{	
+				if(run_commands == 0)
+				{
+					printf("%s\n", dynamic_strcat(2, "nft", rules[rindex]));
+				}
+				else
+				{
+					system(dynamic_strcat(2, "nft", rules[rindex]));	
 				}
 			}
 		}
 		else
 		{
 			fprintf(stderr, "ERROR: Invalid package / section\n");
-
 		}
 	}
 	else if(!usage_printed)
 	{
 		fprintf(stderr, "USAGE: %s -p [PACKAGE] -s [SECTION] -t [TABLE] -c [CHAIN] -g [TARGET] [OPTIONS]\n       -o [TARGET_OPTIONS]\n       -f [ipv4|ipv6|any]\n       -i indicates that this rule applies to ingress packets\n       -r implies computed commands should be executed instead of just printed\n       -u print usage and exit\n\n", argv[0]);
-
 	}
 
-
-	
 	return 0;
 }
-
-
-
 
 /* 
  * Note we've currently maxed out out one whole byte of address space
@@ -185,15 +164,14 @@ int main(int argc, char **argv)
  * further dimensions, we will have to be greedy and take 
  * even more address space
  */
-char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingress, char* target, char* target_options)
+char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingress, char* target, char* target_options, char* family)
 {
 	list* multi_rules = initialize_list();
 	char* single_check = strdup("");
-	char* rule_prefix = dynamic_strcat(5, " -t ", table, " -A ", chain, " ");
+	char* rule_prefix = dynamic_strcat(5, " add rule ", table, " ", chain, " ");
 
 	target = strdup(target);
-	to_uppercase(target);
-
+	to_lowercase(target);
 
 	/* get timerange vars first */
 	char* active_hours = get_map_element(rule_def, "active_hours");
@@ -201,53 +179,52 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 	char* active_weekly_ranges  = get_map_element(rule_def, "active_weekly_ranges");
 	if(active_weekly_ranges != NULL)
 	{
-		char* tmp = dynamic_strcat(3, " -m timerange --weekly_ranges \"", active_weekly_ranges, "\" " );
+		char* tmp = dynamic_strcat(3, " timerange weekly-ranges \"", active_weekly_ranges, "\" " );
 		dcat_and_free(&single_check, &tmp, 1, 1);
 	}
 	else if(active_hours != NULL && active_weekdays != NULL)
 	{	
-		char* tmp = dynamic_strcat(5, " -m timerange --hours \"", active_hours, "\" --weekdays \"", active_weekdays, "\" " );
+		char* tmp = dynamic_strcat(5, " timerange hours \"", active_hours, "\" weekdays \"", active_weekdays, "\" " );
 		dcat_and_free(&single_check, &tmp, 1, 1);
 	}
 	else if(active_hours != NULL)
 	{
-		char* tmp = dynamic_strcat(3, " -m timerange --hours \"", active_hours, "\" " );
+		char* tmp = dynamic_strcat(3, " timerange hours \"", active_hours, "\" " );
 		dcat_and_free(&single_check, &tmp, 1, 1);
 	}
 	else if(active_weekdays != NULL)
 	{
-		char* tmp = dynamic_strcat(3, " -m timerange --weekdays \"", active_weekdays, "\" " );
+		char* tmp = dynamic_strcat(3, " timerange weekdays \"", active_weekdays, "\" " );
 		dcat_and_free(&single_check, &tmp, 1, 1);
 	}
-
 
 	/*
 	 * layer7 && ipp2p can not be negated.  To negate them
 	 * set a mark/connmark and negate that
 	 */
-	char* layer7_def = get_map_element(rule_def, "layer7");
+	// NOTE - Layer7 broken for nftables
+	/*char* layer7_def = get_map_element(rule_def, "layer7");
 	if(layer7_def != NULL)
 	{
 		char* tmp = dynamic_strcat(2, " -m layer7 --l7proto ", layer7_def );
 		dcat_and_free(&single_check, &tmp, 1, 1);
-	}
-	char* ipp2p_def = get_map_element(rule_def, "ipp2p");
+	}*/
+	// NOTE - ipP2P broken for nftables
+	/*char* ipp2p_def = get_map_element(rule_def, "ipp2p");
 	if(ipp2p_def != NULL)
 	{
 		char* tmp = dynamic_strcat(2, " -m ipp2p --", ipp2p_def );
 		dcat_and_free(&single_check, &tmp, 1, 1);
-	}
+	}*/
 	char* min_def = get_map_element(rule_def, "min_pkt_size");
 	char* max_def = get_map_element(rule_def, "max_pkt_size");
 	if(min_def != NULL && max_def != NULL)
 	{
 		min_def = min_def == NULL ? "0" : min_def;
 		max_def = max_def == NULL ? "3000" : max_def; //typical max transmission size is 1500, let's make default max 2x that
-		char* tmp = dynamic_strcat(5, " -m length --length ", min_def, ":", max_def, " " );
+		char* tmp = dynamic_strcat(5, " meta length ", min_def, "-", max_def, " " );
 		dcat_and_free(&single_check, &tmp, 1, 1);
 	}
-
-
 
 	/* make sure proto is lower case */
 	char* proto = get_map_element(rule_def, "proto");
@@ -255,7 +232,6 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 	{
 		proto = strdup("both");
 		set_map_element(rule_def, "proto", proto);
-
 	}
 	to_lowercase(proto);
 	if( safe_strcmp(proto, "udp") != 0 && safe_strcmp(proto, "tcp") != 0 && safe_strcmp(proto, "both") != 0 )
@@ -267,23 +243,19 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 	}
 	int include_proto = strcmp(proto, "both") == 0 ? 0 : 1;
 
-
 	/* parse multi rules */
 	int mask_byte_index = 0;
 	list* initial_mask_list = initialize_list();
 	list* final_mask_list = initialize_list();
 
-
-	
-	
 	/* url matches are a bit of a special case, handle them first */
 	/* we have to save this mask_byte_index specially, because it must be set separately, so it only gets set if packet is http request */
 	int url_mask_byte_index = mask_byte_index;
-	
+
 	char* url_match_vars[] = { "url_contains", "url_regex", "url_exact", "url_domain_contains", "url_domain_regex", "url_domain_exact" };
 	char* url_neg_match_vars[] = { "not_url_contains", "not_url_regex", "not_url_exact", "not_url_domain_contains", "not_url_domain_regex", "not_url_domain_exact" };
-	char* url_prefixes1[] = { " -m weburl ", " -m weburl ", " -m weburl ",  " -m weburl --domain_only ", " -m weburl --domain_only ", " -m weburl --domain_only " };
-	char* url_prefixes2[] = { " --contains ", " --contains_regex ", " --matches_exactly ",  " --contains ", " --contains_regex ", " --matches_exactly " };
+	char* url_prefixes1[] = { " weburl ", " weburl ", " weburl ",  " weburl domain-only ", " weburl domain-only ", " weburl domain-only " };
+	char* url_prefixes2[] = { " contains ", " contains-regex ", " matches-exactly ",  " contains ", " contains-regex ", " matches-exactly " };
 	list* url_lists[6];
 	int url_var_index=0;
 	int url_rule_count=0;
@@ -303,7 +275,6 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 		}
 	}
 	url_is_negated--;
-	
 
 	proto = url_rule_count > 0 ? "tcp" : proto;
 	int url_is_multi = url_rule_count <= 1 ? 0 : 1;
@@ -325,14 +296,13 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 	push_list(final_mask_list, (void*)&url_is_multi);
 	mask_byte_index++;
 
-
 	/* mark matches */
 	char** mark_def = get_map_element(rule_def, "mark");
 	int mark_is_negated = mark_def == NULL ? 1 : 0;
 	mark_def = mark_def == NULL ? get_map_element(rule_def, "not_mark") : mark_def;
 	mark_is_negated = mark_def == NULL ? 0 : mark_is_negated;
 	/* we can't do single negation with mark match, so always add seperate multi-match if mark is negated */
-	int mark_is_multi = compute_multi_rules(mark_def, multi_rules, &single_check, mark_is_negated, rule_prefix, " -m mark ", " --mark ", mark_is_negated, 0, mask_byte_index, proto, include_proto, 0) == 2;
+	int mark_is_multi = compute_multi_rules(mark_def, multi_rules, &single_check, mark_is_negated, rule_prefix, " meta mark ", "", mark_is_negated, 0, mask_byte_index, proto, include_proto, 0) == 2;
 	push_list(initial_mask_list, (void*)&mark_is_negated);
 	push_list(final_mask_list, (void*)&mark_is_multi);
 	mask_byte_index++;	
@@ -342,11 +312,10 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 	int connmark_is_negated = connmark_def == NULL ? 1 : 0;
 	connmark_def = connmark_def == NULL ? get_map_element(rule_def, "not_connmark") : connmark_def;
 	connmark_is_negated = connmark_def == NULL ? 0 : connmark_is_negated;
-	int connmark_is_multi = compute_multi_rules(connmark_def, multi_rules, &single_check, 0, rule_prefix, " -m connmark ", " --mark ", connmark_is_negated, 0, mask_byte_index, proto, include_proto, 0) == 2;
+	int connmark_is_multi = compute_multi_rules(connmark_def, multi_rules, &single_check, 0, rule_prefix, " ct mark ", "", connmark_is_negated, 0, mask_byte_index, proto, include_proto, 0) == 2;
 	push_list(initial_mask_list, (void*)&connmark_is_negated);
 	push_list(final_mask_list, (void*)&connmark_is_multi);
 	mask_byte_index++;	
-
 
 	/*
 	 * for ingress source = remote, destination = local 
@@ -366,8 +335,8 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 
 	char*** addr_defs[2] = { src_def, dst_def };
 	int addr_negated[2] = { src_is_negated, dst_is_negated };
-	char* addr_prefix1[2][3] = { { " -s ", " -m iprange ", " -m mac --mac-source " }, { " -d", "-m iprange ", NULL } };
-	char* addr_prefix2[2][3] = { {"", " --src-range ", "" }, { "", " --dst-range ", NULL } };
+	char* addr_prefix1[2][3] = { { " ip saddr ", " ip saddr ", " ether saddr " }, { " ip daddr", " ip daddr ", NULL } };
+	char* addr6_prefix1[2][3] = { { " ip6 saddr ", " ip6 saddr ", " ether saddr " }, { " ip6 daddr", " ip6 daddr ", NULL } };
 
 	int addr_index = 0;
 	int is_true = 1;
@@ -398,7 +367,7 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 				{
 					if(test_list[0] != NULL)
 					{
-						compute_multi_rules(test_list, multi_rules, &single_check, is_multi, rule_prefix, addr_prefix1[addr_index][test_list_index], addr_prefix2[addr_index][test_list_index],(is_negated && (test_list_index != 1)), (is_negated && (test_list_index == 1)), mask_byte_index, proto, include_proto, 0);
+						compute_multi_rules(test_list, multi_rules, &single_check, is_multi, rule_prefix, (safe_strcmp(family, "ipv6") == 0 ? addr6_prefix1[addr_index][test_list_index] : addr_prefix1[addr_index][test_list_index]), "",is_negated, 0, mask_byte_index, proto, include_proto, 0);
 					}
 				}
 			}
@@ -409,35 +378,30 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 		}
 	}
 
-
-
 	char** sport_def = get_map_element(rule_def, (is_ingress ? "remote_port" : "local_port"));
 	int sport_is_negated = sport_def == NULL ? 1 : 0;
 	sport_def = sport_def == NULL ? get_map_element(rule_def, (is_ingress ? "not_remote_port" : "not_local_port")) : sport_def;
 	sport_is_negated = sport_def == NULL ? 0 : sport_is_negated;
-	int sport_is_multi = compute_multi_rules(sport_def, multi_rules, &single_check, 0, rule_prefix, " --sport ", "", sport_is_negated, 0, mask_byte_index, proto, 1, 0) == 2;
+	int sport_is_multi = compute_multi_rules(sport_def, multi_rules, &single_check, 0, rule_prefix, " sport ", "", sport_is_negated, 0, mask_byte_index, proto, 1, 0) == 2;
 	push_list(initial_mask_list, (void*)&sport_is_negated);
 	push_list(final_mask_list, (void*)&sport_is_multi);
 	mask_byte_index++;
-
 
 	char** dport_def = get_map_element(rule_def, (is_ingress ? "local_port"  : "remote_port"));
 	int dport_is_negated = dport_def == NULL ? 1 : 0;
 	dport_def = dport_def == NULL ? get_map_element(rule_def, (is_ingress ? "not_local_port" : "not_remote_port")) : dport_def;
 	dport_is_negated = dport_def == NULL ? 0 : dport_is_negated;
-	int dport_is_multi = compute_multi_rules(dport_def, multi_rules, &single_check, 0, rule_prefix, " --dport ", "", dport_is_negated, 0, mask_byte_index, proto, 1, 0) == 2;
+	int dport_is_multi = compute_multi_rules(dport_def, multi_rules, &single_check, 0, rule_prefix, " dport ", "", dport_is_negated, 0, mask_byte_index, proto, 1, 0) == 2;
 	push_list(initial_mask_list, (void*)&dport_is_negated);
 	push_list(final_mask_list, (void*)&dport_is_multi);
 	mask_byte_index++;
 
 	list* all_rules = initialize_list();
 
-	
-	
 	//if no target_options specified, make sure it's an empty string, not null
 	target_options = (target_options == NULL) ? "" : target_options;
 	//if target_options is empty and we're rejecting and proto is tcp, set options to --reject-with tcp-reset instead of default
-	target_options = strlen(target_options) == 0 && (strcmp(proto, "tcp") == 0) && strcmp(target, "REJECT") == 0 ? " --reject-with tcp-reset " : target_options;
+	target_options = strlen(target_options) == 0 && (strcmp(proto, "tcp") == 0) && strcmp(target, "reject") == 0 ? " with tcp reset " : target_options;
 	if(multi_rules->length > 0)
 	{
 		if(strlen(single_check) > 0)
@@ -447,7 +411,6 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 			compute_multi_rules(dummy_multi, multi_rules, &single_check, 1, rule_prefix, " ", "", 0, 0, mask_byte_index, proto, requires_proto, 0);
 			mask_byte_index++;
 		}
-	
 
 		/*
 		printf("final mask length = %ld\n", final_mask_list->length);
@@ -476,7 +439,6 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 			{
 				*next_is_multi = 1;
 			}
-			
 
 			unsigned long next_mark_bit = 0x01000000 * (unsigned long)pow(2, next_mask_index) * (*next_is_multi);
 			final_match = final_match + next_mark_bit;
@@ -492,20 +454,22 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 			/* else it's last single_check mark which is never initialized to one */
 		}
 
-
 		if(initial_main_mark > 0)
 		{
 			//set main_mark unconditionally
 			char mark[12];
 			sprintf(mark, "0x%lX", initial_main_mark);
-			push_list(all_rules, dynamic_strcat(4, rule_prefix, " -j CONNMARK --set-mark ", mark, "/0xFF000000" ));
+			push_list(all_rules, dynamic_strcat(3, rule_prefix, " ct mark set ct mark \\& 0x00FFFFFF \\| ", mark ));
 		}
 		if(initial_url_mark > 0) //do url_mark second since because in order to set main mark we use full mask of 0xFF000000
 		{
 			//set proper mark if this is an http request
 			char mark[12];
+			char* inverted_mark = NULL;
 			sprintf(mark, "0x%lX", initial_url_mark);
-			push_list(all_rules, dynamic_strcat(5,  rule_prefix, " -p tcp  -m weburl --contains http -j CONNMARK --set-mark ", mark, "/", mark));
+			inverted_mark = invert_bitmask(mark);
+			push_list(all_rules, dynamic_strcat(5,  rule_prefix, " meta l4proto tcp weburl contains \"http\" ct mark set ct mark \\& ", inverted_mark, " \\| ", mark));
+			free(inverted_mark);
 		}
 		
 		//put all rules in place from multi_rules list
@@ -521,19 +485,19 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 		sprintf(final_match_str, "0x%lX", final_match);
 		
 		//if we're rejecting, no target options are specified, and no proto is specified add two rules: one for tcp with tcp-reject, and one for everything else
-		if(safe_strcmp(target, "REJECT") == 0 && safe_strcmp(target_options, "") == 0 && safe_strcmp(proto, "both"))
+		if(safe_strcmp(target, "reject") == 0 && safe_strcmp(target_options, "") == 0 && safe_strcmp(proto, "both"))
 		{
-			push_list(all_rules, dynamic_strcat(4, rule_prefix, " -p tcp -m connmark --mark ", final_match_str, "/0xFF000000 -j REJECT --reject-with tcp-reset"));
-			push_list(all_rules, dynamic_strcat(4, rule_prefix, " -m connmark --mark ", final_match_str, "/0xFF000000 -j REJECT"));
+			push_list(all_rules, dynamic_strcat(4, rule_prefix, " meta l4proto tcp ct mark \\& 0xFF000000 == ", final_match_str, " reject with tcp reset"));
+			push_list(all_rules, dynamic_strcat(4, rule_prefix, " ct mark \\& 0xFF000000 == ", final_match_str, " reject"));
 
 		}
 		else
 		{
-			char* final_proto = strstr(target_options, "tcp-reset") == NULL ? "" : " -p tcp ";
-			push_list(all_rules, dynamic_strcat(7, rule_prefix, final_proto, " -m connmark --mark ", final_match_str, "/0xFF000000 -j ", target, target_options ));
+			char* final_proto = strstr(target_options, "tcp reset") == NULL ? "" : " meta l4proto tcp ";
+			push_list(all_rules, dynamic_strcat(7, rule_prefix, final_proto, " ct mark \\& 0xFF000000 == ", final_match_str, " ", target, target_options ));
 		}
 		//if final mark does not match (i.e. we didn't reject), unconditionally reset mark to 0x0 with mask of 0xFF000000
-		push_list(all_rules, dynamic_strcat(2, rule_prefix,  " -j CONNMARK --set-mark 0x0/0xFF000000" ));
+		push_list(all_rules, dynamic_strcat(2, rule_prefix,  " ct mark set ct mark \\& 0x00FFFFFF \\| 0x0" ));
 	}
 	else
 	{
@@ -541,28 +505,28 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 		{	
 			if( dport_def == NULL && sport_def == NULL )
 			{
-				if(safe_strcmp(target, "REJECT") == 0 && safe_strcmp(target_options, "") == 0 )
+				if(safe_strcmp(target, "reject") == 0 && safe_strcmp(target_options, "") == 0 )
 				{
-					push_list(all_rules, dynamic_strcat(4, rule_prefix, " -p tcp ", single_check, " -j REJECT --reject-with tcp-reset"));
+					push_list(all_rules, dynamic_strcat(4, rule_prefix, " meta l4proto tcp ", single_check, " reject with tcp reset"));
 				}
-				push_list(all_rules, dynamic_strcat(5, rule_prefix, single_check, " -j ",target, target_options ));
+				push_list(all_rules, dynamic_strcat(5, rule_prefix, single_check, " ",target, target_options ));
 			}
 			else
 			{
-				if(safe_strcmp(target, "REJECT") == 0 && safe_strcmp(target_options, "") == 0 )
+				if(safe_strcmp(target, "reject") == 0 && safe_strcmp(target_options, "") == 0 )
 				{
-					push_list(all_rules, dynamic_strcat(4, rule_prefix, " -p tcp ", single_check, " -j REJECT --reject-with tcp-reset" ));
+					push_list(all_rules, dynamic_strcat(4, rule_prefix, " meta l4proto tcp ", single_check, " reject with tcp reset" ));
 				}
 				else
 				{
-					push_list(all_rules, dynamic_strcat(6, rule_prefix, " -p tcp ", single_check, " -j ", target, target_options ));
+					push_list(all_rules, dynamic_strcat(6, rule_prefix, " meta l4proto tcp ", single_check, " ", target, target_options ));
 				}
-				push_list(all_rules, dynamic_strcat(6, rule_prefix, " -p udp ", single_check, " -j ", target, target_options ));
+				push_list(all_rules, dynamic_strcat(6, rule_prefix, " meta l4proto udp ", single_check, " ", target, target_options ));
 			}
 		}
 		else
 		{
-			push_list(all_rules, dynamic_strcat(8, rule_prefix, " -p ", proto, " ", single_check, " -j ", target, target_options ));
+			push_list(all_rules, dynamic_strcat(8, rule_prefix, " meta l4proto ", proto, " ", single_check, " ", target, target_options ));
 		}
 	}
 
@@ -572,13 +536,12 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 	 * HTTP connections to persist but prevent connections to any websites but those
 	 * specified
 	 */
-	if(url_rule_count > 0 && safe_strcmp(target, "ACCEPT") == 0 && is_ingress == 0)
+	if(url_rule_count > 0 && safe_strcmp(target, "accept") == 0 && is_ingress == 0)
 	{
-		push_list(all_rules, dynamic_strcat(2, rule_prefix, " -p tcp -m weburl --contains  http -j CONNMARK --set-mark 0xFF000000/0xFF000000" ));
-		push_list(all_rules, dynamic_strcat(2, rule_prefix, " -p tcp --dport 80 -m connmark ! --mark 0xFF000000/0xFF000000 -j ACCEPT " ));
-		push_list(all_rules, dynamic_strcat(2, rule_prefix, " -p tcp --dport 443 -m connmark ! --mark 0xFF000000/0xFF000000 -j ACCEPT " ));
-		push_list(all_rules, dynamic_strcat(2, rule_prefix,  " -p tcp -m connmark --mark 0xFF000000/0xFF000000 -j REJECT --reject-with tcp-reset" ));
-		push_list(all_rules, dynamic_strcat(2, rule_prefix,  " -j CONNMARK --set-mark 0x0/0xFF000000" ));
+		push_list(all_rules, dynamic_strcat(2, rule_prefix, " meta l4proto tcp weburl contains \"http\" ct mark set ct mark \\& 0x00FFFFFF \\| 0xFF000000" ));
+		push_list(all_rules, dynamic_strcat(2, rule_prefix, " meta l4proto tcp dport {80,443} ct mark \\& 0xFF000000 != 0xFF000000 accept " ));
+		push_list(all_rules, dynamic_strcat(2, rule_prefix,  " meta l4proto tcp ct mark \\& 0xFF000000 == 0xFF000000 reject with tcp reset" ));
+		push_list(all_rules, dynamic_strcat(2, rule_prefix,  " ct mark set ct mark \\& 0x00FFFFFF \\| 0x0" ));
 	}
 
 	unsigned long num_rules;
@@ -586,7 +549,6 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 
 	return block_rule_list;
 }
-
 
 /* returns 0 if no rules found, 1 if one rule found AND included in single_check, otherwise 2 */
 int compute_multi_rules(char** def, list* multi_rules, char** single_check, int never_single, char* rule_prefix, char* test_prefix1, char* test_prefix2, int is_negation1, int is_negation2, int mask_byte_index, char* proto, int requires_proto, int quoted_args)
@@ -604,7 +566,8 @@ int compute_multi_rules(char** def, list* multi_rules, char** single_check, int 
 		if(num_rules == 1 && !never_single)
 		{
 			parse_type = 1;
-			char* tmp = dynamic_strcat(7, (is_negation1 ? " ! " : " "), test_prefix1, (is_negation2 ? " ! " : " "), test_prefix2, (quoted_args ? " \"" : " "), def[0], (quoted_args ? "\" " : " ") );
+			// URL: weburl ! contains \"blah blah\"
+			char* tmp = dynamic_strcat(7, test_prefix1, (is_negation1 ? " != " : " "), test_prefix2, (is_negation2 ? " != " : " "), (quoted_args ? " \"" : " "), def[0], (quoted_args ? "\" " : " ") );
 			dcat_and_free(&tmp, single_check, 1, 1 );
 		}
 		else
@@ -612,9 +575,11 @@ int compute_multi_rules(char** def, list* multi_rules, char** single_check, int 
 			parse_type = 2;
 			unsigned long mask = 0x01000000 * (unsigned long)pow(2, mask_byte_index);
 			char mask_str[12];
+			char* inverted_mask = NULL;
 			sprintf(mask_str, "0x%lX", mask);
-			char* connmark_part = dynamic_strcat(4, " -j CONNMARK --set-mark ", (is_negation ? "0x0" : mask_str), "/", mask_str);
-
+			inverted_mask = invert_bitmask(mask);
+			char* connmark_part = dynamic_strcat(4, " ct mark set ct mark \\& ", inverted_mask, " \\| ", (is_negation ? "0x0" : mask_str));
+			free(inverted_mask);
 
 			int rule_index =0;
 			for(rule_index=0; def[rule_index] != NULL; rule_index++)
@@ -624,8 +589,7 @@ int compute_multi_rules(char** def, list* multi_rules, char** single_check, int 
 				{
 					if(requires_proto)
 					{
-						push_list(multi_rules, dynamic_strcat(3, rule_prefix, " -p tcp ", common_part));
-						push_list(multi_rules, dynamic_strcat(3, rule_prefix, " -p udp ", common_part));
+						push_list(multi_rules, dynamic_strcat(3, rule_prefix, " meta l4proto {tcp,udp} ", common_part));
 					}
 					else
 					{
@@ -634,7 +598,7 @@ int compute_multi_rules(char** def, list* multi_rules, char** single_check, int 
 				}
 				else
 				{
-					push_list(multi_rules, dynamic_strcat(5, rule_prefix, " -p ", proto, " ", common_part));
+					push_list(multi_rules, dynamic_strcat(5, rule_prefix, " meta l4proto ", proto, " ", common_part));
 				}
 				free(common_part);
 			}
@@ -643,12 +607,6 @@ int compute_multi_rules(char** def, list* multi_rules, char** single_check, int 
 	}
 	return parse_type;
 }
-
-
-
-
-
-
 
 string_map* get_rule_definition(char* package, char* section, char* family)
 {
@@ -790,7 +748,6 @@ int parse_option(char* option_name, char* option_value, string_map* definition, 
 	return valid_option;
 }
 
-
 // this function dynamically allocates memory for
 // the option string, but since this program exits
 // almost immediately (after printing variable info)
@@ -826,9 +783,6 @@ char* get_option_value_string(struct uci_option* uopt)
 
 	return opt_str;
 }
-
-
-
 
 char*** parse_ips_and_macs(char* addr_str, char* family)
 {
@@ -903,8 +857,6 @@ char*** parse_ips_and_macs(char* addr_str, char* family)
 	return return_value;
 }
 
-
-
 char** parse_ports(char* port_str)
 {
 	unsigned long num_pieces;
@@ -921,7 +873,6 @@ char** parse_ports(char* port_str)
 	}
 	return ports;
 }
-
 
 /*
  * parses a list of marks/connmarks
@@ -983,7 +934,6 @@ char** parse_marks(char* list_str, unsigned long max_mask)
 	}
 	return marks;
 }
-
 
 /* 
  * parses list of quoted strings, ignoring escaped quote characters that are not themselves escaped 
@@ -1056,7 +1006,6 @@ list* parse_quoted_list(char* list_str, char quote_char, char escape_char, char 
 	return quoted_list;
 }
 
-
 int truncate_if_starts_with(char* test_str, char* prefix)
 {
 	int prefix_length = strlen(prefix);
@@ -1071,4 +1020,70 @@ int truncate_if_starts_with(char* test_str, char* prefix)
 		}
 	}
 	return matches;
+}
+
+// Accepts bitmask as either hex or decimal string (e.g. 0xFF00 or 65280) and returns the inverted bitmask in hex (0x00FF)
+char* invert_bitmask(const char* input)
+{
+    if (!input || *input == '\0')
+	{
+        return NULL;
+    }
+
+    uint32_t value = 0;
+    int num_bits = 0;
+    int is_hex = 0;
+
+    // Check if input starts with "0x" or "0X"
+    if (strncmp(input, "0x", 2) == 0 || strncmp(input, "0X", 2) == 0)
+	{
+        is_hex = 1;
+        const char* hex = input + 2;
+        size_t len = strlen(hex);
+        if (len > 8) return NULL; // max 32 bits (8 hex digits)
+
+        while (*hex)
+		{
+            char c = *hex++;
+            value <<= 4;
+            if (c >= '0' && c <= '9') value |= (c - '0');
+            else if (c >= 'a' && c <= 'f') value |= (c - 'a' + 10);
+            else if (c >= 'A' && c <= 'F') value |= (c - 'A' + 10);
+            else return NULL;
+        }
+
+        num_bits = len * 4; // each hex digit is 4 bits
+    }
+	else
+	{
+        // Parse as decimal
+        char* endptr = NULL;
+        unsigned long parsed = strtoul(input, &endptr, 10);
+        if (*endptr != '\0' || parsed > 0xFFFFFFFFUL)
+		{
+            return NULL; // invalid or too large for 32-bit
+        }
+        value = (uint32_t)parsed;
+
+        // Determine how many bits are needed to represent the value
+        for (int i = 31; i >= 0; i--)
+		{
+            if (value & (1U << i))
+			{
+                num_bits = i + 1;
+                break;
+            }
+        }
+        if (num_bits == 0) num_bits = 1; // handle value == 0
+    }
+
+    uint32_t mask = (num_bits == 32) ? 0xFFFFFFFF : ((1U << num_bits) - 1);
+    uint32_t inverted = ~value & mask;
+
+    // Allocate result string: "0x" + 8 hex digits + null terminator
+    char* result = malloc(2 + 8 + 1);
+    if (!result) return NULL;
+
+    sprintf(result, "0x%0*X", (num_bits + 3) / 4, inverted); // pad to full hex digits
+    return result;
 }
