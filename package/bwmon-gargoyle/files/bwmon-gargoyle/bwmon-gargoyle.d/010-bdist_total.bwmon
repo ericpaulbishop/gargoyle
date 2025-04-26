@@ -7,10 +7,10 @@
 backup_script_dir="/tmp/bw_backup"
 backup_script="$backup_script_dir/do_bw_backup.sh"
 tmp_cron="/tmp/tmp.cron"
-download_table=filter
+download_table="inet fw4"
 download_chain=bw_ingress
-upload_table=mangle
-upload_chain=bw_egress
+upload_table="inet fw4"
+upload_chain=mangle_bw_egress
 
 minute_s=60
 hour_s=3600
@@ -74,32 +74,26 @@ setup()
 
 	network_get_subnet lan_ip lan
 
-	iptables -t $download_table -N $download_chain
-	iptables -t $download_table -I INPUT $filter_insert_index  -i $bw_if -j $download_chain
-	iptables -t $download_table -I FORWARD $filter_insert_index -i $bw_if -j $download_chain
-	ip6tables -t $download_table -N $download_chain
-	ip6tables -t $download_table -I INPUT $filter_insert_index  -i $bw_if -j $download_chain
-	ip6tables -t $download_table -I FORWARD $filter_insert_index -i $bw_if -j $download_chain
+	nft add chain $download_table $download_chain
+	nft insert rule $download_table input iifname $bw_if jump $download_chain
+	nft insert rule $download_table forward iifname $bw_if jump $download_chain
 
-	iptables -t $upload_table -N $upload_chain
-	iptables -t $upload_table -A POSTROUTING -o $bw_if -j $upload_chain
-	ip6tables -t $upload_table -N $upload_chain
-	ip6tables -t $upload_table -A POSTROUTING -o $bw_if -j $upload_chain
+	nft add chain $upload_table $upload_chain
+	nft add rule $upload_table mangle_postrouting oifname $bw_if jump $upload_chain
 
 	# code to help filter out bogons on distribution monitors, 
 	# which make up really small amount of bandwidth, but screw up monitoring
+	nft add rule $upload_table $upload_chain ct mark set ct mark \& 0x00FFFFFF \| 0x0
+	nft add rule $upload_table $upload_chain ip saddr $lan_ip ct mark set ct mark \& 0xF0FFFFFF \| 0x0F000000
+	nft add rule $upload_table $upload_chain ip saddr $wan_ip ct mark set ct mark \& 0xF0FFFFFF \| 0x0F000000
+	nft add rule $upload_table $upload_chain ct mark \& 0x0F000000 == 0x0 return
+	nft add rule $upload_table $upload_chain ct mark set ct mark \& 0x00FFFFFF \| 0x0
 
-	iptables -t $upload_table -A $upload_chain                                    -j CONNMARK --set-mark 0x0/0xFF000000
-	iptables -t $upload_table -A $upload_chain -s $lan_ip                         -j CONNMARK --set-mark 0x0F000000/0xFF000000
-	iptables -t $upload_table -A $upload_chain -s $wan_ip                         -j CONNMARK --set-mark 0x0F000000/0xFF000000
-	iptables -t $upload_table -A $upload_chain -m connmark --mark 0x0/0x0F000000  -j RETURN
-	iptables -t $upload_table -A $upload_chain                                    -j CONNMARK --set-mark 0x0/0xFF000000
-
-	iptables -t $download_table -A $download_chain                                    -j CONNMARK --set-mark 0x0/0xFF000000
-	iptables -t $download_table -A $download_chain -d $lan_ip                         -j CONNMARK --set-mark 0x0F000000/0xFF000000
-	iptables -t $download_table -A $download_chain -d $wan_ip                         -j CONNMARK --set-mark 0x0F000000/0xFF000000
-	iptables -t $download_table -A $download_chain -m connmark --mark 0x0/0x0F000000  -j RETURN
-	iptables -t $download_table -A $download_chain                                    -j CONNMARK --set-mark 0x0/0xFF000000
+	nft add rule $download_table $download_chain ct mark set ct mark \& 0x00FFFFFF \| 0x0
+	nft add rule $download_table $download_chain ip daddr $lan_ip ct mark set ct mark \& 0xF0FFFFFF \| 0x0F000000
+	nft add rule $download_table $download_chain ip daddr $wan_ip ct mark set ct mark \& 0xF0FFFFFF \| 0x0F000000
+	nft add rule $download_table $download_chain ct mark \& 0x0F000000 == 0x0 return
+	nft add rule $download_table $download_chain ct mark set ct mark \& 0x00FFFFFF \| 0x0
 
 	custom_reset_time=$(uci get bwmon_gargoyle.custom_monitor.month_reset_day 2>/dev/null)
 	if [ -z "$custom_reset_time" ] ; then
@@ -115,12 +109,10 @@ setup()
 		bdist_interval=$(eval "echo \$bdist"$n"_interval")
 		bdist_num_intervals=$(eval "echo \$bdist"$n"_num_intervals")
 		bdist_reset_time=$(eval "echo \$bdist"$n"_reset_time")
-		if [ -n "$bdist_reset_time" ] ; then bdist_reset_time="--reset_time $bdist_reset_time" ; fi
+		if [ -n "$bdist_reset_time" ] ; then bdist_reset_time="reset-time $bdist_reset_time" ; fi
 		if [ -n "$lan_ip" ] ; then
-			iptables -t $download_table -A $download_chain -m bandwidth --id "bdist"$n"-download-$bdist_interval-$bdist_num_intervals" --type "individual_dst" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
-			ip6tables -t $download_table -A $download_chain -m bandwidth --id "bdist"$n"-download-$bdist_interval-$bdist_num_intervals" --type "individual_dst" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
-			iptables -t $upload_table   -A $upload_chain   -m bandwidth --id "bdist"$n"-upload-$bdist_interval-$bdist_num_intervals"   --type "individual_src" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
-			ip6tables -t $upload_table   -A $upload_chain   -m bandwidth --id "bdist"$n"-upload-$bdist_interval-$bdist_num_intervals"   --type "individual_src" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
+			nft add rule $download_table $download_chain bandwidth id \""bdist"$n"-download-$bdist_interval-$bdist_num_intervals"\" type individual-dst reset-interval $bdist_interval intervals-to-save $bdist_num_intervals $bdist_reset_time
+			nft add rule $upload_table $upload_chain bandwidth id \""bdist"$n"-upload-$bdist_interval-$bdist_num_intervals"\" type individual-src reset-interval $bdist_interval intervals-to-save $bdist_num_intervals $bdist_reset_time
 			ids="bdist"$n"-download-$bdist_interval-$bdist_num_intervals bdist"$n"-upload-$bdist_interval-$bdist_num_intervals" 
 		fi
 	else
@@ -137,18 +129,16 @@ setup()
 		total_interval=$(eval "echo \$total"$n"_interval")
 		total_num_intervals=$(eval "echo \$total"$n"_num_intervals")
 		total_reset_time=$(eval "echo \$total"$n"_reset_time")
-		if [ -n "$total_reset_time" ] ; then total_reset_time="--reset_time $total_reset_time" ; fi
+		if [ -n "$total_reset_time" ] ; then total_reset_time="reset-time $total_reset_time" ; fi
 
 		bdist_interval=$(eval "echo \$bdist"$n"_interval")
 		bdist_num_intervals=$(eval "echo \$bdist"$n"_num_intervals")
 		bdist_reset_time=$(eval "echo \$bdist"$n"_reset_time")
-		if [ -n "$bdist_reset_time" ] ; then bdist_reset_time="--reset_time $bdist_reset_time" ; fi
+		if [ -n "$bdist_reset_time" ] ; then bdist_reset_time="reset-time $bdist_reset_time" ; fi
 
 		if [ $n -lt 6 ] ; then
-			iptables -t $download_table -A $download_chain -m bandwidth --id "total"$n"-download-$total_interval-$total_num_intervals" --reset_interval $total_interval --intervals_to_save $total_num_intervals $total_reset_time
-			ip6tables -t $download_table -A $download_chain -m bandwidth --id "total"$n"-download-$total_interval-$total_num_intervals" --reset_interval $total_interval --intervals_to_save $total_num_intervals $total_reset_time
-			iptables -t $upload_table   -A $upload_chain   -m bandwidth --id "total"$n"-upload-$total_interval-$total_num_intervals"   --reset_interval $total_interval --intervals_to_save $total_num_intervals $total_reset_time
-			ip6tables -t $upload_table   -A $upload_chain   -m bandwidth --id "total"$n"-upload-$total_interval-$total_num_intervals"   --reset_interval $total_interval --intervals_to_save $total_num_intervals $total_reset_time
+			nft add rule $download_table $download_chain bandwidth id \""total"$n"-download-$total_interval-$total_num_intervals"\" reset-interval $total_interval intervals-to-save $total_num_intervals $total_reset_time
+			nft add rule $upload_table $upload_chain bandwidth id \""total"$n"-upload-$total_interval-$total_num_intervals"\" reset-interval $total_interval intervals-to-save $total_num_intervals $total_reset_time
 
 			next_ids="total"$n"-download-$total_interval-$total_num_intervals total"$n"-upload-$total_interval-$total_num_intervals"
 			if [ -z "$ids" ] ; then
@@ -159,10 +149,8 @@ setup()
 		fi
 
 		if [ -n "$lan_ip" ] ; then
-			iptables -t $download_table -A $download_chain -m bandwidth --id "bdist"$n"-download-$bdist_interval-$bdist_num_intervals" --type "individual_dst" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
-			ip6tables -t $download_table -A $download_chain -m bandwidth --id "bdist"$n"-download-$bdist_interval-$bdist_num_intervals" --type "individual_dst" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
-			iptables -t $upload_table   -A $upload_chain   -m bandwidth --id "bdist"$n"-upload-$bdist_interval-$bdist_num_intervals"   --type "individual_src" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
-			ip6tables -t $upload_table   -A $upload_chain   -m bandwidth --id "bdist"$n"-upload-$bdist_interval-$bdist_num_intervals"   --type "individual_src" --reset_interval $bdist_interval --intervals_to_save $bdist_num_intervals $bdist_reset_time
+			nft add rule $download_table $download_chain bandwidth id \""bdist"$n"-download-$bdist_interval-$bdist_num_intervals"\" type individual-dst reset-interval $bdist_interval intervals-to-save $bdist_num_intervals $bdist_reset_time
+			nft add rule $upload_table $upload_chain bandwidth id \""bdist"$n"-upload-$bdist_interval-$bdist_num_intervals"\" type individual-src reset-interval $bdist_interval intervals-to-save $bdist_num_intervals $bdist_reset_time
 			ids="$ids bdist"$n"-download-$bdist_interval-$bdist_num_intervals bdist"$n"-upload-$bdist_interval-$bdist_num_intervals" 
 		fi
 
@@ -194,11 +182,9 @@ setup()
 teardown()
 {
 	#check that we aren't already stopped before backing up data
-	have_up=$(iptables   -t "$upload_table"   -L "$upload_chain" 2>/dev/null)
-	have_down=$(iptables -t "$download_table" -L "$download_chain" 2>/dev/null)
-	have_up6=$(ip6tables   -t "$upload_table"   -L "$upload_chain" 2>/dev/null)
-	have_down6=$(ip6tables -t "$download_table" -L "$download_chain" 2>/dev/null)
-	if [ -n "$have_up" ] || [ -n "$have_down" ] || [ -n "$have_up6" ] || [ -n "$have_down6" ] ; then
+	have_up=$(nft list table $upload_table 2>/dev/null | grep "chain ${upload_chain}")
+	have_down=$(nft list table $download_table 2>/dev/null | grep "chain ${download_chain}")
+	if [ -n "$have_up" ] || [ -n "$have_down" ] ; then
 		sh "$backup_script" 2>/dev/null
 		rm -rf "$backup_script"
 
@@ -206,11 +192,11 @@ teardown()
 		grep -v "$backup_script" /etc/crontabs/root > "$tmp_cron"
 		update_cron
 	
-		if [ -n "$have_up" ] || [ -n "$have_up6" ] ; then
-			delete_chain_from_table $upload_table $upload_chain >/dev/null 2>&1
+		if [ -n "$have_up" ] ; then
+			delete_chain_from_table inet fw4 $upload_chain >/dev/null 2>&1
 		fi
-		if [ -n "$have_down" ] || [ -n "$have_down6" ] ; then
-			delete_chain_from_table $download_table $download_chain >/dev/null 2>&1
+		if [ -n "$have_down" ] ; then
+			delete_chain_from_table inet fw4 $download_chain >/dev/null 2>&1
 		fi
 	fi
 }
