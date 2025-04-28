@@ -355,7 +355,7 @@ nftnl_expr_bandwidth_snprintf(char *buf, size_t len,
 	if(e->flags & (1 << NFTNL_EXPR_BANDWIDTH_CMP) && e->flags & (1 << NFTNL_EXPR_BANDWIDTH_CHECKTYPE)) {
 		if(bandwidth->cmp == NFT_BANDWIDTH_CMP_CHECK && bandwidth->check_type != 0)
 		{
-			ret = snprintf(buf + offset, remain, "%s ", (bandwidth->check_type & NFT_BANDWIDTH_CHECKTYPE_NOSWAP ? "bcheck" : "bcheck-with-src-dst-swap"));
+			ret = snprintf(buf + offset, remain, "%s ", (bandwidth->check_type == NFT_BANDWIDTH_CHECKTYPE_NOSWAP ? "bcheck" : "bcheck-with-src-dst-swap"));
 			SNPRINTF_BUFFER_SIZE(ret, remain, offset);
 		}
 	}
@@ -385,16 +385,16 @@ nftnl_expr_bandwidth_snprintf(char *buf, size_t len,
 			ret = snprintf(buf + offset, remain, "subnet6 %s ", bandwidth->subnet6);
 		}
 
-		if(e->flags & (1 << NFTNL_EXPR_BANDWIDTH_BWCUTOFF) && bandwidth->cmp & (NFT_BANDWIDTH_CMP_LT || NFT_BANDWIDTH_CMP_GT))
+		if(e->flags & (1 << NFTNL_EXPR_BANDWIDTH_BWCUTOFF) && (bandwidth->cmp == NFT_BANDWIDTH_CMP_LT || bandwidth->cmp == NFT_BANDWIDTH_CMP_GT))
 		{
-			ret = snprintf(buf + offset, remain, "%s-than %lu ", (bandwidth->cmp & NFT_BANDWIDTH_CMP_LT ? "less" : "greater"), bandwidth->bandwidth_cutoff);
+			ret = snprintf(buf + offset, remain, "%s-than %lu ", (bandwidth->cmp == NFT_BANDWIDTH_CMP_LT ? "less" : "greater"), bandwidth->bandwidth_cutoff);
 			SNPRINTF_BUFFER_SIZE(ret, remain, offset);
 		}
 
 		if(e->flags & (1 << NFTNL_EXPR_BANDWIDTH_TYPE) &&
 			e->flags & (1 << NFTNL_EXPR_BANDWIDTH_RSTINTVL) &&
 			e->flags & (1 << NFTNL_EXPR_BANDWIDTH_NEXTRESET) &&
-			e->flags & (1 << NFTNL_EXPR_BANDWIDTH_CURRENTBW) && bandwidth->type & NFT_BANDWIDTH_TYPE_COMBINED)
+			e->flags & (1 << NFTNL_EXPR_BANDWIDTH_CURRENTBW) && bandwidth->type == NFT_BANDWIDTH_TYPE_COMBINED)
 		{
 			if(bandwidth->reset_interval != NFT_BANDWIDTH_RSTINTVL_NEVER && bandwidth->next_reset != 0 && bandwidth->next_reset < now)
 				ret = snprintf(buf + offset, remain, "current-bandwidth 0 ");
@@ -414,13 +414,13 @@ nftnl_expr_bandwidth_snprintf(char *buf, size_t len,
 			{
 				if(bandwidth->reset_interval == NFT_BANDWIDTH_RSTINTVL_MINUTE)
 					ret = snprintf(buf + offset, remain, "reset-interval minute ");
-				else if(bandwidth->reset_interval & NFT_BANDWIDTH_RSTINTVL_HOUR)
+				else if(bandwidth->reset_interval == NFT_BANDWIDTH_RSTINTVL_HOUR)
 					ret = snprintf(buf + offset, remain, "reset-interval hour ");
-				else if(bandwidth->reset_interval & NFT_BANDWIDTH_RSTINTVL_DAY)
+				else if(bandwidth->reset_interval == NFT_BANDWIDTH_RSTINTVL_DAY)
 					ret = snprintf(buf + offset, remain, "reset-interval day ");
-				else if(bandwidth->reset_interval & NFT_BANDWIDTH_RSTINTVL_WEEK)
+				else if(bandwidth->reset_interval == NFT_BANDWIDTH_RSTINTVL_WEEK)
 					ret = snprintf(buf + offset, remain, "reset-interval week ");
-				else if(bandwidth->reset_interval & NFT_BANDWIDTH_RSTINTVL_MONTH)
+				else if(bandwidth->reset_interval == NFT_BANDWIDTH_RSTINTVL_MONTH)
 					ret = snprintf(buf + offset, remain, "reset-interval month ");
 				SNPRINTF_BUFFER_SIZE(ret, remain, offset);
 			}

@@ -241,7 +241,7 @@ static void adjust_ip_for_backwards_time_shift(char* key, void* value)
 		bw_history* new_history = initialize_history(old_history->max_nodes);
 		if(new_history == NULL)
 		{
-			printk("xt_bandwidth: warning, kmalloc failure!\n");
+			printk("nft_bandwidth: warning, kmalloc failure!\n");
 			return;
 		}
 
@@ -343,7 +343,7 @@ static void check_for_backwards_time_shift(ktime_t now)
 	spin_lock_bh(&bandwidth_lock);
 	if(now < backwards_check && backwards_check != 0)
 	{
-		printk("xt_bandwidth: backwards time shift detected, adjusting\n");
+		printk("nft_bandwidth: backwards time shift detected, adjusting\n");
 
 		/* adjust */
 		down(&userspace_lock);
@@ -516,7 +516,7 @@ static void check_for_timezone_shift(ktime_t now, int already_locked)
 			
 			if(already_locked == 0) { down(&userspace_lock); }
 
-			printk("xt_bandwidth: timezone shift of %d minutes detected, adjusting\n", adj_minutes);
+			printk("nft_bandwidth: timezone shift of %d minutes detected, adjusting\n", adj_minutes);
 			printk("               old minutes west=%d, new minutes west=%d\n", old_minutes_west, local_minutes_west);
 			
 			/* this function is always called with absolute time, not time adjusted for timezone.  Correct that before adjusting */
@@ -1401,7 +1401,7 @@ static bool bandwidth_mt4(struct nft_bandwidth_info *priv, const struct sk_buff 
 
 	spin_unlock_bh(&bandwidth_lock);
 
-	return !match_found; // Invert the output as nftables expects us to BREAK if we DIDN'T match
+	return match_found;
 }
 
 static bool bandwidth_mt6(struct nft_bandwidth_info *priv, const struct sk_buff *skb)
@@ -1665,7 +1665,7 @@ static bool bandwidth_mt6(struct nft_bandwidth_info *priv, const struct sk_buff 
 
 	spin_unlock_bh(&bandwidth_lock);
 
-	return !match_found; // Invert the output as nftables expects us to BREAK if we DIDN'T match
+	return match_found;
 }
 
 /**********************

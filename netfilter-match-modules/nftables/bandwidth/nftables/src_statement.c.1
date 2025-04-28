@@ -7,9 +7,9 @@ static void bandwidth_stmt_print(const struct stmt *stmt, struct output_ctx *oct
 	{
 		if(stmt->bandwidth.check_type != 0)
 		{
-			if(stmt->bandwidth.check_type & NFT_BANDWIDTH_CHECKTYPE_NOSWAP)
+			if(stmt->bandwidth.check_type == NFT_BANDWIDTH_CHECKTYPE_NOSWAP)
 				nft_print(octx, "bcheck ");
-			else if(stmt->bandwidth.check_type & NFT_BANDWIDTH_CHECKTYPE_SWAP)
+			else if(stmt->bandwidth.check_type == NFT_BANDWIDTH_CHECKTYPE_SWAP)
 				nft_print(octx, "bcheck-with-src-dst-swap ");
 		}
 	}
@@ -40,21 +40,24 @@ static void bandwidth_stmt_print(const struct stmt *stmt, struct output_ctx *oct
 				nft_print(octx, "individual-remote ");
 		}
 
-		if(stmt->bandwidth.subnet != NULL && strlen(stmt->bandwidth.subnet) > 0)
-			nft_print(octx, "subnet %%s ",stmt->bandwidth.subnet);
-		if(stmt->bandwidth.subnet6 != NULL && strlen(stmt->bandwidth.subnet6) > 0)
-			nft_print(octx, "subnet6 %%s ",stmt->bandwidth.subnet6);
-
-		if(stmt->bandwidth.cmp & (NFT_BANDWIDTH_CMP_LT || NFT_BANDWIDTH_CMP_GT))
+		if(stmt->bandwidth.type == NFT_BANDWIDTH_TYPE_INDIVIDUALLOCAL || stmt->bandwidth.type == NFT_BANDWIDTH_TYPE_INDIVIDUALREMOTE)
 		{
-			if(stmt->bandwidth.cmp & NFT_BANDWIDTH_CMP_LT)
+			if(stmt->bandwidth.subnet != NULL && strlen(stmt->bandwidth.subnet) > 0)
+				nft_print(octx, "subnet %%s ",stmt->bandwidth.subnet);
+			if(stmt->bandwidth.subnet6 != NULL && strlen(stmt->bandwidth.subnet6) > 0)
+				nft_print(octx, "subnet6 %%s ",stmt->bandwidth.subnet6);
+		}
+
+		if(stmt->bandwidth.cmp == NFT_BANDWIDTH_CMP_LT || stmt->bandwidth.cmp == NFT_BANDWIDTH_CMP_GT)
+		{
+			if(stmt->bandwidth.cmp == NFT_BANDWIDTH_CMP_LT)
 				nft_print(octx, "less-than %%u ", stmt->bandwidth.bandwidth_cutoff);
-			else if(stmt->bandwidth.cmp & NFT_BANDWIDTH_CMP_GT)
+			else if(stmt->bandwidth.cmp == NFT_BANDWIDTH_CMP_GT)
 				nft_print(octx, "greater-than %%u ", stmt->bandwidth.bandwidth_cutoff);
 		}
 
 		// Only print current-bandwidth for combined type. Others contain too much data and must be fetched using userspace util
-		if(stmt->bandwidth.type & NFT_BANDWIDTH_TYPE_COMBINED)
+		if(stmt->bandwidth.type == NFT_BANDWIDTH_TYPE_COMBINED)
 		{
 			if(stmt->bandwidth.reset_interval != NFT_BANDWIDTH_RSTINTVL_NEVER && stmt->bandwidth.next_reset != 0 && stmt->bandwidth.next_reset < now)
 			{
@@ -86,10 +89,10 @@ static void bandwidth_stmt_print(const struct stmt *stmt, struct output_ctx *oct
 		}
 
 		if(stmt->bandwidth.reset_time > 0)
-			nft_print(octx, "reset-time %%u", stmt->bandwidth.reset_time);
+			nft_print(octx, "reset-time %%u ", stmt->bandwidth.reset_time);
 
 		if(stmt->bandwidth.num_intervals_to_save > 0)
-			nft_print(octx, "num-intervals-to-save %%u", stmt->bandwidth.num_intervals_to_save);
+			nft_print(octx, "intervals-to-save %%u", stmt->bandwidth.num_intervals_to_save);
 	}
 }
 

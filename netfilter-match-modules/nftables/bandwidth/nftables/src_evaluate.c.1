@@ -25,11 +25,11 @@ static int stmt_evaluate_bandwidth(struct eval_ctx *ctx, struct stmt *stmt)
 	if(strlen(stmt->bandwidth.id) > BANDWIDTH_MAX_ID_LENGTH)
 		return stmt_error(ctx, stmt, "ID must be less than %%d characters", BANDWIDTH_MAX_ID_LENGTH);
 
-   // Handle defaults
-   if(stmt->bandwidth.type == 0) stmt->bandwidth.type = NFT_BANDWIDTH_TYPE_COMBINED;
-   if(stmt->bandwidth.check_type == 0) stmt->bandwidth.check_type = NFT_BANDWIDTH_CHECKTYPE_NOSWAP;
-   if(stmt->bandwidth.cmp == 0) stmt->bandwidth.cmp = NFT_BANDWIDTH_CMP_MONITOR;
-   if(stmt->bandwidth.reset_interval == 0) stmt->bandwidth.reset_interval = NFT_BANDWIDTH_RSTINTVL_NEVER;
+	// Handle defaults
+	if(stmt->bandwidth.type == 0) stmt->bandwidth.type = NFT_BANDWIDTH_TYPE_COMBINED;
+	if(stmt->bandwidth.check_type == 0) stmt->bandwidth.check_type = NFT_BANDWIDTH_CHECKTYPE_NOSWAP;
+	if(stmt->bandwidth.cmp == 0) stmt->bandwidth.cmp = NFT_BANDWIDTH_CMP_MONITOR;
+	if(stmt->bandwidth.reset_interval == 0) stmt->bandwidth.reset_interval = NFT_BANDWIDTH_RSTINTVL_NEVER;
 
 	if(stmt->bandwidth.type == NFT_BANDWIDTH_TYPE_INDIVIDUALLOCAL || stmt->bandwidth.type == NFT_BANDWIDTH_TYPE_INDIVIDUALREMOTE)
 	{
