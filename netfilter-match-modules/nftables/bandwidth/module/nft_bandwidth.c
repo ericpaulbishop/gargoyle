@@ -365,25 +365,28 @@ static ktime_t shift_timezone_info_previous_reset;
 static info_and_maps* shift_timezone_iam = NULL;
 static void shift_timezone_of_ip(char* key, void* value)
 {
+	bw_history* history = (bw_history*)value;
+	int32_t timezone_adj;
+	ktime_t next_reset;
+	ktime_t previous_reset;
+
 	#ifdef BANDWIDTH_DEBUG
 		printk("shifting ip = %s\n", key);
 	#endif
 
-
-	bw_history* history = (bw_history*)value;
-	int32_t timezone_adj = (old_minutes_west-local_minutes_west)*60;
+	timezone_adj = (old_minutes_west-local_minutes_west)*60;
 	#ifdef BANDWIDTH_DEBUG
 		printk("  before jump:\n");
-		printk("    current time = %ld\n",  shift_timezone_current_time);
-		printk("    first_start  = %ld\n", history->first_start);
-		printk("    first_end    = %ld\n", history->first_end);
-		printk("    last_end     = %ld\n", history->last_end);
+		printk("    current time = %lld\n",  ktime_to_ns(shift_timezone_current_time));
+		printk("    first_start  = %lld\n", ktime_to_ns(history->first_start));
+		printk("    first_end    = %lld\n", ktime_to_ns(history->first_end));
+		printk("    last_end     = %lld\n", ktime_to_ns(history->last_end));
 		printk("\n");
 	#endif
 	
 	/* given time after shift, calculate next and previous reset times */
-	ktime_t next_reset = get_next_reset_time(shift_timezone_iam->info, shift_timezone_current_time, 0);
-	ktime_t previous_reset = get_nominal_previous_reset_time(shift_timezone_iam->info, next_reset);
+	next_reset = get_next_reset_time(shift_timezone_iam->info, shift_timezone_current_time, 0);
+	previous_reset = get_nominal_previous_reset_time(shift_timezone_iam->info, next_reset);
 	shift_timezone_iam->info->next_reset = next_reset;
 
 	/*if we're resetting on a constant interval, we can just adjust -- no need to worry about relationship to constant boundaries, e.g. end of day */
@@ -399,8 +402,6 @@ static void shift_timezone_of_ip(char* key, void* value)
 	}
 	else
 	{
-
-		
 		/* next reset will be the newly computed next_reset. */
 		int node_index=history->num_nodes - 1;
 		if(node_index > 0)
@@ -429,13 +430,12 @@ static void shift_timezone_of_ip(char* key, void* value)
 		}
 	}
 
-
 	#ifdef BANDWIDTH_DEBUG
 		printk("\n");
 		printk("  after jump:\n");
-		printk("    first_start = %ld\n", history->first_start);
-		printk("    first_end   = %ld\n", history->first_end);
-		printk("    last_end    = %ld\n", history->last_end);
+		printk("    first_start = %lld\n", ktime_to_ns(history->first_start));
+		printk("    first_end   = %lld\n", ktime_to_ns(history->first_end));
+		printk("    last_end    = %lld\n", ktime_to_ns(history->last_end));
 		printk("\n\n");
 	#endif
 
@@ -1075,6 +1075,9 @@ static ktime_t get_next_reset_time(struct nft_bandwidth_info *info, ktime_t now,
 
 static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, char* ip, uint64_t initial_bandwidth, uint32_t family)
 {
+	uint64_t* new_bw = NULL;
+	uint32_t* fam = NULL;
+
 	#ifdef BANDWIDTH_DEBUG
 		printk("initializing entry for ip: %s, bw=%lld\n", ip, initial_bandwidth);
 	#endif
@@ -1083,9 +1086,6 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, char* ip, uin
 		if(iam == NULL){ printk("error in initialization: iam is null!\n"); }
 	#endif
 
-
-	uint64_t* new_bw = NULL;
-	uint32_t* fam = NULL;
 	if(iam != NULL) /* should never happen, but let's be certain */
 	{
 		struct nft_bandwidth_info *info = iam->info;
@@ -1110,11 +1110,12 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, char* ip, uin
 			}
 			else
 			{
+				bw_history *new_history;
 				#ifdef BANDWIDTH_DEBUG
 					printk("  initializing entry for ip with history\n");
 				#endif
 
-				bw_history *new_history = initialize_history(info->num_intervals_to_save);
+				new_history = initialize_history(info->num_intervals_to_save);
 				if(new_history != NULL) /* check for kmalloc failure */
 				{
 					bw_history* old_history;
@@ -1159,15 +1160,18 @@ static uint64_t* initialize_map_entries_for_ip(info_and_maps* iam, char* ip, uin
 				}
 
 				#ifdef BANDWIDTH_DEBUG
-					uint64_t *test = (uint64_t*)get_string_map_element(ip_map, ip);
-					if(test == NULL)
+					if(1)
 					{
-						printk("  after initialization bw is null!\n");
-					}
-					else
-					{
-						printk("  after initialization bw is %lld\n", *new_bw);
-						printk("  after initialization test is %lld\n", *test);
+						uint64_t *test = (uint64_t*)get_string_map_element(ip_map, ip);
+						if(test == NULL)
+						{
+							printk("  after initialization bw is null!\n");
+						}
+						else
+						{
+							printk("  after initialization bw is %lld\n", *new_bw);
+							printk("  after initialization test is %lld\n", *test);
+						}
 					}
 				#endif
 			}
@@ -1269,7 +1273,6 @@ static bool bandwidth_mt4(struct nft_bandwidth_info *priv, const struct sk_buff 
 		}
 		if(ip_map != NULL) /* if this ip_map != NULL iam can never be NULL, so we don't need to check this */
 		{
-			
 			if(priv->combined_bw == NULL)
 			{
 				bws[0] = initialize_map_entries_for_ip(iam, "0.0.0.0", skb->len, family);
@@ -1496,7 +1499,6 @@ static bool bandwidth_mt6(struct nft_bandwidth_info *priv, const struct sk_buff 
 		}
 		if(ip_map != NULL) /* if this ip_map != NULL iam can never be NULL, so we don't need to check this */
 		{
-			
 			if(priv->combined_bw == NULL)
 			{
 				bws[0] = initialize_map_entries_for_ip(iam, "0.0.0.0", skb->len, NFPROTO_IPV4);
@@ -1734,13 +1736,12 @@ static char add_ip_block(uint32_t family,
 		}
 		if(history == NULL)
 		{
+			uint32_t block_length = (2*4) + (3*8) + (1*16);
+			uint64_t *bw;
+
 			#ifdef BANDWIDTH_DEBUG
 				printk("  no history map for ip, dumping latest value in history format\n" );
 			#endif
-
-
-			uint32_t block_length = (2*4) + (3*8) + (1*16);
-			uint64_t *bw;
 
 			if(*current_output_index + block_length > output_buffer_length)
 			{
@@ -2241,7 +2242,7 @@ static void parse_set_header(unsigned char* input_buffer, set_header* header)
 		printk("  next_ip_index     = %d\n", header->next_ip_index);
 		printk("  num_ips_in_buffer = %d\n", header->num_ips_in_buffer);
 		printk("  zero_unset_ips    = %d\n", header->zero_unset_ips);
-		printk("  last_backup       = %ld\n", header->last_backup);
+		printk("  last_backup       = %lld\n", ktime_to_ns(header->last_backup));
 		printk("  id                = %s\n", header->id);
 	#endif
 }
@@ -2301,7 +2302,7 @@ static void set_single_ip_data(unsigned char history_included, info_and_maps* ia
 
 
 			#ifdef BANDWIDTH_DEBUG
-				printk("setting history with first start = %ld, now = %ld\n", first_start, now);
+				printk("setting history with first start = %lld, now = %lld\n", ktime_to_ns(first_start), ktime_to_ns(now));
 			#endif
 
 
