@@ -15,7 +15,7 @@ static void bandwidth_stmt_print(const struct stmt *stmt, struct output_ctx *oct
 	}
 
 	if(stmt->bandwidth.id != NULL && strlen(stmt->bandwidth.id) > 0)
-		nft_print(octx, "id %%s ",stmt->bandwidth.id);
+		nft_print(octx, "id \"%%s\" ",stmt->bandwidth.id);
 
 	if(stmt->bandwidth.cmp != NFT_BANDWIDTH_CMP_CHECK)
 	{

@@ -1185,7 +1185,7 @@ static bool bandwidth_mt4(struct nft_bandwidth_info *priv, const struct sk_buff 
 {
 	ktime_t now;
 	int match_found;
-
+	struct nft_bandwidth_info *rule_priv = priv;
 	unsigned char is_check = priv->cmp == BANDWIDTH_CHECK ? 1 : 0;
 	unsigned char do_src_dst_swap = 0;
 	info_and_maps* iam = NULL;
@@ -1236,8 +1236,11 @@ static bool bandwidth_mt4(struct nft_bandwidth_info *priv, const struct sk_buff 
 		}
 		priv = check_iam->info;
 	}
-
-
+	else
+	{
+		// Fetch the master_priv which has everything up to date, instead of this impostor...
+		priv = rule_priv->non_const_self;
+	}
 
 	if(priv->reset_interval != BANDWIDTH_NEVER)
 	{
@@ -1411,7 +1414,7 @@ static bool bandwidth_mt6(struct nft_bandwidth_info *priv, const struct sk_buff 
 {
 	ktime_t now;
 	int match_found;
-
+	struct nft_bandwidth_info *rule_priv = priv;
 	unsigned char is_check = priv->cmp == BANDWIDTH_CHECK ? 1 : 0;
 	unsigned char do_src_dst_swap = 0;
 	info_and_maps* iam = NULL;
@@ -1462,8 +1465,11 @@ static bool bandwidth_mt6(struct nft_bandwidth_info *priv, const struct sk_buff 
 		}
 		priv = check_iam->info;
 	}
-
-
+	else
+	{
+		// Fetch the master_priv which has everything up to date, instead of this impostor...
+		priv = rule_priv->non_const_self;
+	}
 
 	if(priv->reset_interval != BANDWIDTH_NEVER)
 	{
@@ -3175,7 +3181,8 @@ static int nft_bandwidth_init(const struct nft_ctx *ctx, const struct nft_expr *
 }
 
 static int nft_bandwidth_dump(struct sk_buff *skb, const struct nft_expr *expr) {
-	const struct nft_bandwidth_info *priv = nft_expr_priv(expr);
+	const struct nft_bandwidth_info *rule_priv = nft_expr_priv(expr);
+	struct nft_bandwidth_info *priv = rule_priv->non_const_self;
 	int retval = 0;
 	char* subnetstr;
 	char* subnet6str;
@@ -3317,11 +3324,11 @@ static void nft_bandwidth_destroy(const struct nft_ctx *ctx, const struct nft_ex
 				#endif
 				//We need to copy priv to it
 				//current_bandwidth, next_reset, previous_reset, last_backup_time, combined_bw
-				other_priv->current_bandwidth          = priv->current_bandwidth;
-				other_priv->next_reset                 = priv->next_reset;
-				other_priv->previous_reset             = priv->previous_reset;
-				other_priv->last_backup_time           = priv->last_backup_time;
-				other_priv->combined_bw                = priv->combined_bw;
+				other_priv->current_bandwidth          = priv->non_const_self->current_bandwidth;
+				other_priv->next_reset                 = priv->non_const_self->next_reset;
+				other_priv->previous_reset             = priv->non_const_self->previous_reset;
+				other_priv->last_backup_time           = priv->non_const_self->last_backup_time;
+				other_priv->combined_bw                = priv->non_const_self->combined_bw;
 				
 				iam->info = other_priv;
 				iam->other_info = NULL;
