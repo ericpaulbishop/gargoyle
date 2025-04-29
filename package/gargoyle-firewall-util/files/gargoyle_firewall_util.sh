@@ -394,8 +394,8 @@ insert_restriction_rules()
 			config_get "family" "$section" "family"
 			[ -z "$family" ] && family="ipv4"
 
-			make_iptables_rules -p "$package_name" -s "$section" -t "$table" -c "$chain" -g "$target" -f "$family" $ingress
-			make_iptables_rules -p "$package_name" -s "$section" -t "$table" -c "$chain" -g "$target" -f "$family" $ingress -r
+			make_nftables_rules -p "$package_name" -s "$section" -t "$table" -c "$chain" -g "$target" -f "$family" $ingress
+			make_nftables_rules -p "$package_name" -s "$section" -t "$table" -c "$chain" -g "$target" -f "$family" $ingress -r
 
 			uci del "$package_name"."$section".connmark 2>/dev/null
 			uci del "$package_name"."$section".not_connmark	 2>/dev/null

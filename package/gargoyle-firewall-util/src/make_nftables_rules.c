@@ -726,7 +726,7 @@ int parse_option(char* option_name, char* option_value, string_map* definition, 
 		 * may be a quoted list of urls to block, so attempt to parse this
 		 * if no quotes found, match on unquoted expresssion
 		 * we don't need to de-escape quotes because when we define rule, 
-		 * we call iptables from system, and through the shell, which will de-escape quotes for us
+		 * we call nftables from system, and through the shell, which will de-escape quotes for us
 		 */
 		list* parsed_quoted = parse_quoted_list(option_value, '\"', '\\', 0);
 		list* old_parsed = get_map_element(definition, option_name);
