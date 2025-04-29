@@ -73,6 +73,11 @@ setup()
 	fi
 
 	network_get_subnet lan_ip lan
+	network_get_subnets6 lan6_ips lan
+	network_get_ipaddrs6 wan6_ips wan6
+	lan6_ipstr="$(echo "{$lan6_ips}" | sed 's/ /,/g')"
+	wan6_ipstr="$(echo "{$wan6_ips}" | sed 's/ /,/g')"
+
 
 	nft add chain $download_table $download_chain
 	nft insert rule $download_table input iifname $bw_if jump $download_chain
@@ -86,12 +91,16 @@ setup()
 	nft add rule $upload_table $upload_chain ct mark set ct mark \& 0x00FFFFFF \| 0x0
 	nft add rule $upload_table $upload_chain ip saddr $lan_ip ct mark set ct mark \& 0xF0FFFFFF \| 0x0F000000
 	nft add rule $upload_table $upload_chain ip saddr $wan_ip ct mark set ct mark \& 0xF0FFFFFF \| 0x0F000000
+	nft add rule $upload_table $upload_chain ip6 saddr $lan6_ipstr ct mark set ct mark \& 0xF0FFFFFF \| 0x0F000000
+	nft add rule $upload_table $upload_chain ip6 saddr $wan6_ipstr ct mark set ct mark \& 0xF0FFFFFF \| 0x0F000000
 	nft add rule $upload_table $upload_chain ct mark \& 0x0F000000 == 0x0 return
 	nft add rule $upload_table $upload_chain ct mark set ct mark \& 0x00FFFFFF \| 0x0
 
 	nft add rule $download_table $download_chain ct mark set ct mark \& 0x00FFFFFF \| 0x0
 	nft add rule $download_table $download_chain ip daddr $lan_ip ct mark set ct mark \& 0xF0FFFFFF \| 0x0F000000
 	nft add rule $download_table $download_chain ip daddr $wan_ip ct mark set ct mark \& 0xF0FFFFFF \| 0x0F000000
+	nft add rule $download_table $download_chain ip6 daddr $lan6_ipstr ct mark set ct mark \& 0xF0FFFFFF \| 0x0F000000
+	nft add rule $download_table $download_chain ip6 daddr $wan6_ipstr ct mark set ct mark \& 0xF0FFFFFF \| 0x0F000000
 	nft add rule $download_table $download_chain ct mark \& 0x0F000000 == 0x0 return
 	nft add rule $download_table $download_chain ct mark set ct mark \& 0x00FFFFFF \| 0x0
 
