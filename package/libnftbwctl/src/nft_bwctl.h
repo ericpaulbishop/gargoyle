@@ -49,12 +49,12 @@
 #define BANDWIDTH_SEMAPHORE_KEY 12699666
 
 /* possible reset intervals */
-#define BANDWIDTH_MINUTE		  (1 << 0)
-#define BANDWIDTH_HOUR			  (1 << 1)
-#define BANDWIDTH_DAY			  (1 << 2)
-#define BANDWIDTH_WEEK			  (1 << 3)
-#define BANDWIDTH_MONTH			  (1 << 4)
-#define BANDWIDTH_NEVER			  (1 << 5)
+#define BANDWIDTH_MINUTE		  80
+#define BANDWIDTH_HOUR			  81
+#define BANDWIDTH_DAY			  82
+#define BANDWIDTH_WEEK			  83
+#define BANDWIDTH_MONTH			  84
+#define BANDWIDTH_NEVER			  85
 
 
 #pragma pack(push, 1)
