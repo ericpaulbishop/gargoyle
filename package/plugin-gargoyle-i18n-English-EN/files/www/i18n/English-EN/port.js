@@ -41,6 +41,7 @@ prtS.UpErr="Could not update port forward.";
 prtS.Prot="Proto";
 prtS.LHst="LAN Host";
 prtS.Port="Port";
+prtS.EPort="External Port (IPv4)\nRemote Port (IPv6)";
 prtS.AORErr="Could not add port open rule.";
 prtS.DupOErr="Port(s) Within Range Is/Are Already Being Opened to this IP";
 prtS.CopOErr="Port Is Already Being Opened to this IP";

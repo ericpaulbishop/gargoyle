@@ -13,7 +13,7 @@
 <!--
 <%
 	upnp_config_enabled=$(uci get upnpd.config.enabled 2>/dev/null)
-	have_miniupnpd=$(gpkg list-installed miniupnpd-iptables 2>&1)
+	have_miniupnpd=$(gpkg list-installed miniupnpd-nftables 2>&1)
 	if [ -h /etc/rc.d/S94miniupnpd ] && [ -n "$upnp_config_enabled" ] && [ "$upnp_config_enabled" != "0" ] ; then
 		echo "var upnpdEnabled = true;"
 	else
