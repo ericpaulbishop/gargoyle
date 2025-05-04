@@ -1491,6 +1491,21 @@ int get_minutes_west(time_t now)
 	return minuteswest;
 }
 
+#ifndef SYS_settimeofday
+# ifdef __NR_settimeofday
+#  define SYS_settimeofday	__NR_settimeofday
+# elif defined(__NR_settimeofday_time32)
+#  define SYS_settimeofday	__NR_settimeofday_time32
+# endif
+#endif
+
+#ifndef SYS_gettimeofday
+# ifdef __NR_gettimeofday
+#  define SYS_gettimeofday	__NR_gettimeofday
+# elif defined(__NR_gettimeofday_time32)
+#  define SYS_gettimeofday	__NR_gettimeofday_time32
+# endif
+#endif
 
 void set_kernel_timezone(void)
 {
@@ -1505,8 +1520,18 @@ void set_kernel_timezone(void)
 
 	/* Get tv to pass to settimeofday(2) to be sure we avoid hour-sized warp */
 	/* (see gettimeofday(2) man page, or /usr/src/linux/kernel/time.c) */
-	gettimeofday(&tv, &old_tz);
-
+#ifdef SYS_gettimeofday
+	errno = 0;
+	syscall(SYS_gettimeofday, &tv, &old_tz);
+#else
+	gettimeofday(&tv, &new_tz);
+#endif
+	//printf("set_kernel_timezone: old minuteswest: %d, new minuteswest: %d\n", old_tz.tz_minuteswest, new_tz.tz_minuteswest);
 	/* set timezone */
-	settimeofday(&tv, &new_tz);
+#ifdef SYS_settimeofday
+	errno = 0;
+	syscall(SYS_settimeofday, NULL, &new_tz);
+#else
+	settimeofday(NULL, &new_tz);
+#endif
 }
