@@ -73,7 +73,7 @@ static bool timerange_mt(struct nft_timerange_info *priv, struct sk_buff *skb)
 	days_since_epoch = div_s64_rem(stamp_time,86400,&seconds_since_midnight); /* 86400 seconds per day */
 	weeks_since_epoch = div_s64_rem(4 + days_since_epoch,7,&weekday);      /* 1970-01-01 (time=0) was a Thursday (4). */
 
-	/*printk("time=%d, since midnight = %d, day=%d, minuteswest=%d\n", stamp_time, seconds_since_midnight, weekday, sys_tz.tz_minuteswest);*/
+	/*printk("time=%lld, since midnight = %d, day=%d, minuteswest=%d\n", ktime_to_ns(stamp_time), seconds_since_midnight, weekday, sys_tz.tz_minuteswest);*/
 
 	match_found = 0;
 	if(priv->type == HOURS)
