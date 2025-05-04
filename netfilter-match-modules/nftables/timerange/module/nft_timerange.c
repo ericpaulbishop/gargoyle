@@ -109,14 +109,14 @@ static bool timerange_mt(struct nft_timerange_info *priv, struct sk_buff *skb)
 		
 	}
 	
-	match_found = priv->invert == 0 ? match_found : !match_found;
-	return !match_found;
+	match_found ^= priv->invert;
+	return match_found;
 }
 
 static void nft_timerange_eval(const struct nft_expr *expr, struct nft_regs *regs, const struct nft_pktinfo *pkt) {
 	struct nft_timerange_info *priv = nft_expr_priv(expr);
 	struct sk_buff *skb = pkt->skb;
-	if(timerange_mt(priv, skb))
+	if(!timerange_mt(priv, skb))
 		regs->verdict.code = NFT_BREAK;
 }
 

@@ -9,7 +9,7 @@ timerange_stmt_alloc	:	TIMERANGE		timerange_invert
 			}
 			;
 
-timerange_invert		:	NOT		{ $$ = NFT_TIMERANGE_F_INV; }
+timerange_invert		:	NEQ		{ $$ = NFT_TIMERANGE_F_INV; }
 			|			/* empty */	{ $$ = 0; }
 			;
 

@@ -3,13 +3,13 @@ static void timerange_stmt_print(const struct stmt *stmt, struct output_ctx *oct
 {
 	bool inv = stmt->timerange.flags & NFT_TIMERANGE_F_INV;
 
-	nft_print(octx, "timerange%s", inv ? " ! " : "");
+	nft_print(octx, "timerange%%s", inv ? " != " : "");
 	if(stmt->timerange.hours != NULL && strlen(stmt->timerange.hours) > 0)
-		nft_print(octx, " hours %s", stmt->timerange.hours);
+		nft_print(octx, " hours \"%%s\"", stmt->timerange.hours);
 	if(stmt->timerange.weekdays != NULL && strlen(stmt->timerange.weekdays) > 0)
-		nft_print(octx, " weekdays %s", stmt->timerange.weekdays);
+		nft_print(octx, " weekdays \"%%s\"", stmt->timerange.weekdays);
 	if(stmt->timerange.weeklyranges != NULL && strlen(stmt->timerange.weeklyranges) > 0)
-		nft_print(octx, " weeklyranges %s", stmt->timerange.weeklyranges);
+		nft_print(octx, " weeklyranges \"%%s\"", stmt->timerange.weeklyranges);
 }
 
 static void timerange_stmt_destroy(struct stmt *stmt)

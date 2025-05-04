@@ -8,6 +8,7 @@
 
 #include <time.h>
 #include <sys/time.h>
+#include <sys/syscall.h>
 
 #include "internal.h"
 #include <libmnl/libmnl.h>
@@ -170,7 +171,7 @@ nftnl_expr_timerange_snprintf(char *buf, size_t len,
 		bool inv = timerange->flags & NFT_TIMERANGE_F_INV;
 		if(inv)
 		{
-			ret = snprintf(buf + offset, remain, "! ");
+			ret = snprintf(buf + offset, remain, "!= ");
 			SNPRINTF_BUFFER_SIZE(ret, remain, offset);
 		}
 	}
@@ -211,6 +212,22 @@ struct expr_ops expr_ops_timerange = {
 	.output	= nftnl_expr_timerange_snprintf,
 };
 
+#ifndef SYS_settimeofday
+# ifdef __NR_settimeofday
+#  define SYS_settimeofday	__NR_settimeofday
+# elif defined(__NR_settimeofday_time32)
+#  define SYS_settimeofday	__NR_settimeofday_time32
+# endif
+#endif
+
+#ifndef SYS_gettimeofday
+# ifdef __NR_gettimeofday
+#  define SYS_gettimeofday	__NR_gettimeofday
+# elif defined(__NR_gettimeofday_time32)
+#  define SYS_gettimeofday	__NR_gettimeofday_time32
+# endif
+#endif
+
 static void set_kernel_timezone(void)
 {
 	time_t now;
@@ -247,8 +264,18 @@ static void set_kernel_timezone(void)
 
 	/* Get tv to pass to settimeofday(2) to be sure we avoid hour-sized warp */
 	/* (see gettimeofday(2) man page, or /usr/src/linux/kernel/time.c) */
-	gettimeofday(&tv, &old_tz);
-
+#ifdef SYS_gettimeofday
+	errno = 0;
+	syscall(SYS_gettimeofday, &tv, &old_tz);
+#else
+	gettimeofday(&tv, &new_tz);
+#endif
+	//printf("set_kernel_timezone: old minuteswest: %d, new minuteswest: %d\n", old_tz.tz_minuteswest, new_tz.tz_minuteswest);
 	/* set timezone */
-	settimeofday(&tv, &new_tz);
+#ifdef SYS_settimeofday
+	errno = 0;
+	syscall(SYS_settimeofday, NULL, &new_tz);
+#else
+	settimeofday(NULL, &new_tz);
+#endif
 }
