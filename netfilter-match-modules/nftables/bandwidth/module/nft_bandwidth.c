@@ -2585,11 +2585,11 @@ static void nft_bandwidth_eval(const struct nft_expr *expr, struct nft_regs *reg
 	
 	switch (eth->h_proto) {
 	case htons(ETH_P_IP):
-		if(bandwidth_mt4(priv, skb))
+		if(!bandwidth_mt4(priv, skb))
 			regs->verdict.code = NFT_BREAK;
 		break;
 	case htons(ETH_P_IPV6):
-		if(bandwidth_mt6(priv, skb))
+		if(!bandwidth_mt6(priv, skb))
 			regs->verdict.code = NFT_BREAK;
 		break;
 	default:

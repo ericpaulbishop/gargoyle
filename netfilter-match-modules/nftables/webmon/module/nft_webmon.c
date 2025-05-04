@@ -1912,7 +1912,7 @@ static void nft_webmon_eval(const struct nft_expr *expr, struct nft_regs *regs, 
 		break;
 	}
 	
-	regs->verdict.code = NFT_CONTINUE;
+	regs->verdict.code = NFT_BREAK;
 }
 
 static int nft_webmon_init(const struct nft_ctx *ctx, const struct nft_expr *expr, const struct nlattr * const tb[]) {
