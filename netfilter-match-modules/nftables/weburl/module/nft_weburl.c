@@ -296,7 +296,7 @@ int http_match(const struct nft_weburl_info* priv, const unsigned char* packet_d
 	/* 
 	 * If invert flag is set, return true if it didn't match 
 	 */
-	test = priv->invert ? !test : test;
+	test ^= priv->invert;
 
 	return test;
 }
@@ -443,7 +443,7 @@ int https_match(const struct nft_weburl_info* priv, const unsigned char* packet_
 	/*
 	 * If invert flag is set, return true if it didn't match
 	 */
-	test = priv->invert ? !test : test;
+	test ^= priv->invert;
 
 	return test;
 }
@@ -485,7 +485,7 @@ static bool weburl_mt4(struct nft_weburl_info *priv, const struct sk_buff *skb)
 	}
 
 	/* printk("returning %d from weburl\n\n\n", test); */
-	return !test; // Invert the output as nftables expects us to BREAK if we DIDN'T match
+	return test;
 }
 
 static bool weburl_mt6(struct nft_weburl_info *priv, const struct sk_buff *skb)
@@ -532,7 +532,7 @@ static bool weburl_mt6(struct nft_weburl_info *priv, const struct sk_buff *skb)
 	}
 
 	/* printk("returning %d from weburl\n\n\n", test); */
-	return !test; // Invert the output as nftables expects us to BREAK if we DIDN'T match
+	return test;
 }
 
 static void nft_weburl_eval(const struct nft_expr *expr, struct nft_regs *regs, const struct nft_pktinfo *pkt) {
@@ -542,11 +542,11 @@ static void nft_weburl_eval(const struct nft_expr *expr, struct nft_regs *regs, 
 	
 	switch (eth->h_proto) {
 	case htons(ETH_P_IP):
-		if(weburl_mt4(priv, skb))
+		if(!weburl_mt4(priv, skb))
 			regs->verdict.code = NFT_BREAK;
 		break;
 	case htons(ETH_P_IPV6):
-		if(weburl_mt6(priv, skb))
+		if(!weburl_mt6(priv, skb))
 			regs->verdict.code = NFT_BREAK;
 		break;
 	default:
