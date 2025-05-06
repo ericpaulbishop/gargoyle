@@ -148,8 +148,6 @@ apply_all_rules()
 
 		load_all_config_options "$config_file_name" "$rule"
 
-		fam=$(eval echo $family)
-		[ -z "$fam" ] && fam="ipv4"
 		for option in $ALL_OPTION_VARIABLES ; do
 
 			option_value=$(eval echo \$$option)
@@ -160,11 +158,7 @@ apply_all_rules()
 							option_value="$wan_ip"
 						fi
 					fi
-					if [ "$fam" = "ipv4" ] ; then
-						match_str="$match_str ip saddr $option_value"
-					else
-						match_str="$match_str ip6 saddr $option_value"
-					fi
+					match_str="$match_str -s $option_value"
 				;;
 				destination)
 					if [ "$3" = "qos_ingress" ] ; then
@@ -172,38 +166,34 @@ apply_all_rules()
 							option_value="$wan_ip"
 						fi
 					fi
-					if [ "$fam" = "ipv4" ] ; then
-						match_str="$match_str ip daddr $option_value"
-					else
-						match_str="$match_str ip6 daddr $option_value"
-					fi
+					match_str="$match_str -d $option_value"
 				;;
 				srcport)
 					if [ -n $(echo $option_value | grep "-") ] ; then option_value="$(echo "$option_value" | sed -e 's,-,:,g')" ; fi
-					match_str="$match_str PPROTOO sport $option_value"
+					match_str="$match_str --sport $option_value"
 					need_proto="1"
 				;;
 				dstport)
 					if [ -n $(echo $option_value | grep "-") ] ; then option_value="$(echo "$option_value" | sed -e 's,-,:,g')" ; fi
-					match_str="$match_str PPROTOO dport $option_value"
+					match_str="$match_str --dport $option_value"
 					need_proto="1"
+
 				;;
 				layer7)
 					layer7_connmark=$(cat /etc/l7marker.marks 2>/dev/null | grep "$option_value" | awk '{ print $2 }')
 					layer7_mask=$(cat /etc/l7marker.marks 2>/dev/null | grep "$option_value" | awk '{ print $3 }')
 					if [ -n "$layer7_connmark" ] ; then
-						match_str="$match_str ct mark \& $layer7_mask = $layer7_connmark"
+						match_str="$match_str -m connmark --mark $layer7_connmark/$layer7_mask "
 					else
-						# There is no nftables layer7 module. This rule is fictional
-						match_str="$match_str layer7 l7proto $option_value"
+						match_str="$match_str -m layer7 --l7proto $option_value"
 					fi
 				;;
 				connbytes_kb)
-					match_str="$match_str ct bytes > $(($option_value*1024))"
+					match_str="$match_str -m connbytes --connbytes $(($option_value*1024)): --connbytes-dir both --connbytes-mode bytes"
 				;;
-				#family)
-				#	fam=$option_value
-				#;;
+				family)
+					fam=$option_value
+				;;
 			esac
 		done
 
@@ -211,8 +201,10 @@ apply_all_rules()
 		if [ -n "$min_pkt_size" ] || [ -n "$max_pkt_size" ] ; then
 			if [ -z "$min_pkt_size" ] ; then min_pkt_size=0 ; fi
 			if [ -z "$max_pkt_size" ] ; then max_pkt_size=1500 ; fi
-			match_str="$match_str meta length $min_pkt_size-$max_pkt_size"
+			match_str="$match_str -m length --length $min_pkt_size:$max_pkt_size"
 		fi
+
+		[ -z "$fam" ] && fam="ipv4"
 
 		if [ -n "$class" ] ; then
 			if [ -n "$proto" ] || [ -n "$match_str" ] ; then
@@ -221,23 +213,24 @@ apply_all_rules()
 				#We need to specify both udp and tcp if the user indicated a port
 				#and he did not indicate a protocol.
 				if [ -z "$proto" ] && [ -n "$need_proto" ] ; then
+
 					$echo_on
-					tcpstr="$(echo $match_str | sed 's/PPROTOO/tcp/g')"
-					ucpstr="$(echo $match_str | sed 's/PPROTOO/ucp/g')"
-					nft insert rule $table $chain $tcpstr meta mark set $next_mark
-					nft insert rule $table $chain $ucpstr meta mark set $next_mark
+					apply_xtables_rule "-t $table -I $chain -p tcp $match_str -j MARK --set-mark $next_mark" "$fam"
+					apply_xtables_rule "-t $table -I $chain -p udp $match_str -j MARK --set-mark $next_mark" "$fam"
 					$echo_off
 
 				else
+
  					#Otherwise just specify what the user requested (or nothing)
+
 					if [ -n "$proto" ] ; then
-						tmp_proto="meta l4proto $proto"
+						tmp_proto="-p $proto"
 					else
 						tmp_proto=""
 					fi
 
 					$echo_on
-					nft insert rule $table $chain $tmp_proto $match_str meta mark set $next_mark
+					apply_xtables_rule "-t $table -I $chain $tmp_proto $match_str -j MARK --set-mark $next_mark" "$fam"
 					$echo_off
 				fi
 
@@ -516,23 +509,23 @@ initialize_qos()
 		tc qdisc change dev $qos_interface $overhead root handle 1:0 hfsc default $def_upload_idx
 
 		# Set up egress chain
-		nft add chain inet fw4 mangle_qos_egress
-		nft add rule inet fw4 mangle_postrouting oifname "$qos_interface" jump mangle_qos_egress
+		apply_xtables_rule "-t mangle -N qos_egress" "any"
+		apply_xtables_rule "-t mangle -A POSTROUTING -o $qos_interface -j qos_egress" "any"
 
 		#Next the user entered rules.
 		$echo_off
-		apply_all_rules "upload_rule" "$class_mark_list" "mangle_qos_egress" "inet fw4"
+		apply_all_rules "upload_rule" "$class_mark_list" "qos_egress" "mangle"
 		$echo_on
 
 		#set default class mark first in case we don't match anything
-		nft insert rule inet fw4 mangle_qos_egress meta mark set "$def_upload_class"
+		apply_xtables_rule "-t mangle -I qos_egress -j MARK --set-mark $def_upload_class" "any"
 
 		#if we already set a mark in quota chain, we need to save that mark to the connmark, then return so it doesn't get over-written
-		nft insert rule inet fw4 mangle_qos_egress meta mark \& $upload_mask != 0x0 return
-		nft insert rule inet fw4 mangle_qos_egress meta mark \& $upload_mask != 0x0 ct mark set mark \& $upload_mask
+		apply_xtables_rule "-t mangle -I qos_egress -m mark ! --mark 0x0/$upload_mask -j RETURN" "any"
+		apply_xtables_rule "-t mangle -I qos_egress -m mark ! --mark 0x0/$upload_mask -j CONNMARK --save-mark --mask $upload_mask" "any"
 
 		# save current mark to connmark at end of chain
-		nft add rule inet fw4 mangle_qos_egress ct mark set mark \& $upload_mask
+		apply_xtables_rule "-t mangle -A qos_egress -j CONNMARK --save-mark --mask $upload_mask" "any"
 	fi
 
 
@@ -663,25 +656,25 @@ initialize_qos()
 		tc qdisc change dev $qos_ifb $overhead root handle 1:0 hfsc default $def_download_idx
 
 		# Create ingress chain
-		nft add chain inet fw4 mangle_qos_ingress
+		apply_xtables_rule "-t mangle -N qos_ingress" "any"
 
 		# Mark ingress in FORWARD and INPUT chains to make sure any DNAT (virt. server) is taken into account
-		nft add rule inet fw4 mangle_forward iifname $qos_interface jump mangle_qos_ingress
-		nft add rule inet fw4 mangle_input iifname $qos_interface jump mangle_qos_ingress
+		apply_xtables_rule "-t mangle -A FORWARD -i $qos_interface -j qos_ingress" "any"
+		apply_xtables_rule "-t mangle -A INPUT -i $qos_interface -j qos_ingress" "any"
 		# Clear MARKs before we get to Quotas/QoS. They have been restored by act_connmark
-		nft insert rule inet fw4 mangle_prerouting iifname $qos_interface meta mark set 0x0
+		apply_xtables_rule "-t mangle -I PREROUTING -i $qos_interface -j MARK --set-mark 0" "any"
 
 		#Now the rest of the user entered rules.
 		$echo_off
-		apply_all_rules "download_rule" "$class_mark_list" "mangle_qos_ingress" "inet fw4" "$download_mask"
+		apply_all_rules "download_rule" "$class_mark_list" "qos_ingress" "mangle" "$download_mask"
 		$echo_on
 
 		#set default class mark first in case we don't match anything
-		nft insert rule inet fw4 mangle_qos_ingress meta mark set "$def_download_class"
+		apply_xtables_rule "-t mangle -I qos_ingress -j MARK --set-mark $def_download_class" "any"
 
 		#If we already set a mark in quota chain, we need to save that mark to the connmark, then return so it doesn't get over-written
-		nft insert rule inet fw4 mangle_qos_ingress meta mark \& $download_mask != 0x0 return
-		nft insert rule inet fw4 mangle_qos_ingress meta mark \& $download_mask != 0x0 ct mark set mark \& $download_mask
+		apply_xtables_rule "-t mangle -I qos_ingress -m mark ! --mark 0x0/$download_mask -j RETURN" "any"
+		apply_xtables_rule "-t mangle -I qos_ingress -m mark ! --mark 0x0/$download_mask -j CONNMARK --save-mark --mask $download_mask" "any"
 
 		# Make sure all packets get sent through IFB
 		tc qdisc add dev $qos_interface handle ffff: ingress
@@ -689,7 +682,7 @@ initialize_qos()
 		tc filter add dev $qos_interface parent ffff: protocol ipv6 u32 match u8 0 0 action connmark action mirred egress redirect dev $qos_ifb flowid ffff:1
 
 		#save current mark to connmark at end of chain
-		nft add rule inet fw4 mangle_qos_ingress ct mark set mark \& $download_mask
+		apply_xtables_rule "-t mangle -A qos_ingress -j CONNMARK --save-mark --mask $download_mask" "any"
 
 		$echo_off
 	fi
@@ -731,10 +724,10 @@ initialize_qos()
 		
 		#Ping responses from the ping target never go to ingress QoS (so their MARK isn't overwritten).
 		if [ "$(ip_family $ptarget_ip)" == "ipv4" ] ; then
-			nft insert rule inet fw4 mangle_qos_ingress icmp type echo-reply ip saddr $target_ip return
+			apply_xtables_rule "-t mangle -I qos_ingress -p icmp --icmp-type 0 -s $ptarget_ip -j RETURN" "ipv4"
 		fi
 		if [ "$(ip_family $ptarget_ip)" == "ipv6" ] ; then
-			nft insert rule inet fw4 mangle_qos_ingress icmpv6 type echo-reply ip6 saddr $ptarget_ip return
+			apply_xtables_rule "-t mangle -I qos_ingress -p icmpv6 --icmpv6-type 129 -s $ptarget_ip -j RETURN" "ipv6"
 		fi
 		#Make a class to handle the replied ping requests from the ptarget.
 		tc class add dev $qos_ifb parent 1:1 classid 1:127 hfsc rt umax 106 dmax 10ms rate 4kbit
@@ -751,10 +744,10 @@ initialize_qos()
 
 		#Mark all ping requests from the router to the ptarget to the above special class overriding any other mark.
 		if [ "$(ip_family $wan_ip)" == "ipv4" ] && [ "$(ip_family $ptarget_ip)" == "ipv4" ] ; then
-			nft insert rule inet fw4 mangle_qos_egress icmp type echo-request ip saddr $wan_ip ip daddr $ptarget_ip meta mark set 127
+			apply_xtables_rule "-t mangle -I qos_egress -p icmp --icmp-type 8 -s $wan_ip -d $ptarget_ip -j MARK --set-mark 127" "ipv4"
 		fi
 		if [ "$(ip_family $wan_ip6)" == "ipv6" ] && [ "$(ip_family $ptarget_ip)" == "ipv6" ] ; then
-			nft insert rule inet fw4 mangle_qos_egress icmpv6 type echo-request ip6 saddr $wan_ip6 ip6 daddr $ptarget_ip meta mark set 127
+			apply_xtables_rule "-t mangle -I qos_egress -p icmpv6 --icmpv6-type 128 -s $wan_ip6 -d $ptarget_ip -j MARK --set-mark 127" "ipv6"
 		fi
 
 		#Start the monitor
@@ -838,13 +831,12 @@ stop()
 	done
 
 	# eliminate existing rules in mangle table
-	delete_chain_from_table inet fw4 mangle_qos_egress
-	delete_chain_from_table inet fw4 mangle_qos_ingress
+	delete_chain_from_table "mangle" "qos_egress"
+	delete_chain_from_table "mangle" "qos_ingress"
 	if [ -z "$qos_interface" ] ; then
 		define_interface
 	fi
-	rulehandle="$(nft -a list chain inet fw4 mangle_prerouting | grep "iifname "$qos_interface" meta mark set 0x0" | sed 's/.*handle //g')"
-	[ -n "$rulehandle" ] && nft delete rule inet fw4 mangle_prerouting handle $rulehandle
+	apply_xtables_rule "-t mangle -D PREROUTING -i $qos_interface -j MARK --set-mark 0" "any"
 
 	$echo_off
 }
@@ -903,13 +895,15 @@ show()
 	define_interface
 
 	echo "Egress configuration on $qos_interface"
-	nft list chain inet fw4 mangle_qos_egress 2>/dev/null
+	iptables -t mangle -vnL qos_egress 2>/dev/null
+	ip6tables -t mangle -vnL qos_egress 2>/dev/null
 	tc -s qdisc show dev $qos_interface
 	tc -s class show dev $qos_interface
 	tc -s filter show dev $qos_interface
 
 	echo "Ingress configuration in ifb0"
-	nft list chain inet fw4 mangle_qos_ingress 2>/dev/null
+	iptables -t mangle -vnL qos_ingress 2>/dev/null
+	ip6tables -t mangle -vnL qos_ingress 2>/dev/null
 	tc -s qdisc show dev $qos_ifb
 	tc -s class show dev $qos_ifb
 	tc -s filter show dev $qos_ifb
