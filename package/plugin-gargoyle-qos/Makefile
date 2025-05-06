@@ -45,7 +45,9 @@ endef
 
 define Package/plugin-gargoyle-qos/install
 	$(INSTALL_DIR) $(1)
-	$(CP) ./files/* $(1)/
+	$(CP) ./files/etc/* $(1)/etc
+	$(CP) ./files/www/* $(1)/www
+	$(CP) ./files/usr/lib/bwmon-gargoyle/bwmon-gargoyle.d/020-qos.bwmon $(1)/usr/lib/bwmon-gargoyle/bwmon-gargoyle.d/020-qos.bwmon
 	chmod 755 $(1)/usr/lib/bwmon-gargoyle/bwmon-gargoyle.d/020-qos.bwmon
 endef
 
