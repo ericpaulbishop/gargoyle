@@ -46,7 +46,15 @@ endef
 
 define Package/plugin-gargoyle-openvpn/install
 	$(INSTALL_DIR) $(1)
-	$(CP) ./files/* $(1)/
+	$(CP) ./files/etc/config/* $(1)/etc/config
+	$(CP) ./files/etc/hotplug.d/* $(1)/etc/hotplug.d
+	$(CP) ./files/etc/uci-defaults/* $(1)/etc/uci-defaults
+	$(CP) ./files/etc/openvpn.down $(1)/etc/openvpn.down
+	$(CP) ./files/etc/openvpn.up $(1)/etc/openvpn.up
+	$(CP) ./files/etc/openvpn.firewall $(1)/etc/openvpn.firewall
+	$(CP) ./files/www/* $(1)/www
+	$(CP) ./files/usr/lib/gargoyle/* $(1)/usr/lib/gargoyle
+	$(CP) ./files/usr/lib/bwmon-gargoyle/bwmon-gargoyle.d/040-openvpn.bwmon $(1)/usr/lib/bwmon-gargoyle/bwmon-gargoyle.d/040-openvpn.bwmon
 	chmod 755 $(1)/usr/lib/bwmon-gargoyle/bwmon-gargoyle.d/040-openvpn.bwmon
 endef
 

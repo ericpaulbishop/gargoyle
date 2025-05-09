@@ -36,11 +36,12 @@ set_block_nonovpn()
 		if [ "$do_block" = "1" ] || [ "$do_block" = "true" ] ; then
 			network_get_device wan_if lan || \
 				wan_if=$(uci -q get network.wan.ifname)
-			nft add chain inet fw4 block_non_openvpn
-			nft add rule inet fw4 block_non_openvpn ip daddr \{ 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16 \} accept
-			nft add rule inet fw4 block_non_openvpn ip6 daddr \{ fc00::/7 \} accept
-			nft add rule inet fw4 block_non_openvpn reject
-			nft insert rule inet fw4 forward_lan iifname "br-lan" oifname "$wan_if" jump block_non_openvpn
+			iptables -t filter -N block_non_openvpn
+			iptables -t filter -A block_non_openvpn -d 10.0.0.0/8     -j ACCEPT
+			iptables -t filter -A block_non_openvpn -d 172.16.0.0/12  -j ACCEPT
+			iptables -t filter -A block_non_openvpn -d 192.168.0.0/16 -j ACCEPT
+			iptables -t filter -A block_non_openvpn -j REJECT
+			iptables -t filter -I zone_lan_forward  -i br-lan -o "$wan_if" -j block_non_openvpn
 		fi
 	fi
 }

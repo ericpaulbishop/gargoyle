@@ -65,8 +65,8 @@ setup()
 		if [ -n "$local_openvpn_port" ] && [ -n "$openvpn_proto" ] && [ -n "$wan_if" ] && [ -n "$vpn_if" ] ; then
 			if [ "$bwmonenabled" = "1" ] ; then
 				# create openvpn bandwidth monitor chains
-				nft add chain inet fw4 mangle_openvpn_down_bw
-				nft add chain inet fw4 mangle_openvpn_up_bw
+				iptables -t mangle -N openvpn_down_bw
+				iptables -t mangle -N openvpn_up_bw
 
 				# add monitoring rules
 				for n in $mon_nums ; do
@@ -74,21 +74,21 @@ setup()
 						interval=$(eval "echo \$$res"$n"_interval")
 						num_intervals=$(eval "echo \$$res"$n"_num_intervals")
 						reset_time=$(eval "echo \$$res"$n"_reset_time")
-						if [ -n "$reset_time" ] ; then reset_time="reset-time $reset_time" ; fi
+						if [ -n "$reset_time" ] ; then reset_time="--reset_time $reset_time" ; fi
 	
-						nft add rule inet fw4 mangle_openvpn_down_bw bandwidth id \""openvpn-$res$n-download-$interval-$num_intervals"\" reset-interval $interval intervals-to-save $num_intervals $reset_time
-						nft add rule inet fw4 mangle_openvpn_up_bw bandwidth id \""openvpn-$res$n-upload-$interval-$num_intervals"\" reset-interval $interval intervals-to-save $num_intervals $reset_time
+						iptables -t mangle -A openvpn_down_bw  -m bandwidth --id "openvpn-$res$n-download-$interval-$num_intervals" --reset_interval $interval --intervals_to_save $num_intervals $reset_time
+						iptables -t mangle -A openvpn_up_bw    -m bandwidth --id "openvpn-$res$n-upload-$interval-$num_intervals"   --reset_interval $interval --intervals_to_save $num_intervals $reset_time
 					
 						next_ids="openvpn-$res$n-download-$interval-$num_intervals openvpn-$res$n-upload-$interval-$num_intervals"
 						if [ -z "$bw_ids" ] ; then bw_ids="$next_ids" ; else bw_ids="$bw_ids $next_ids" ; fi
 					done
 				done
 
-				nft insert rule inet fw4 mangle_forward iifname "$wan_if" oifname "$vpn_if" jump mangle_openvpn_down_bw
-				nft insert rule inet fw4 mangle_forward iifname "$vpn_if" oifname "$wan_if" jump mangle_openvpn_up_bw
+				iptables -t mangle -I FORWARD -i "$wan_if" -o "$vpn_if" -j openvpn_down_bw
+				iptables -t mangle -I FORWARD -i "$vpn_if" -o "$wan_if" -j openvpn_up_bw
 			
-				nft add rule inet fw4 mangle_input iifname "$wan_if" "$openvpn_proto" dport "$local_openvpn_port" jump mangle_openvpn_down_bw
-				nft add rule inet fw4 mangle_output oifname "$wan_if" "$openvpn_proto" sport "$local_openvpn_port" jump mangle_openvpn_up_bw
+				iptables -t mangle -A INPUT  -i "$wan_if" -p "$openvpn_proto" --dport "$local_openvpn_port" -j openvpn_down_bw
+				iptables -t mangle -A OUTPUT -o "$wan_if" -p "$openvpn_proto" --sport "$local_openvpn_port" -j openvpn_up_bw
 		
 		
 				# enable backups of bandwidth data 
@@ -132,11 +132,11 @@ teardown()
 		rm -rf "$backup_script"
 	fi
 
-	grep -v "$backup_script" /etc/crontabs/root | grep -v /usr/sbin/update_openvpn_nftset > "$tmp_cron"
+	grep -v "$backup_script" /etc/crontabs/root | grep -v /usr/sbin/update_openvpn_ipset > "$tmp_cron"
 	update_cron
 
-	delete_chain_from_table inet fw4 mangle_openvpn_down_bw
-	delete_chain_from_table inet fw4 mangle_openvpn_up_bw
+	delete_chain_from_table mangle openvpn_down_bw
+	delete_chain_from_table mangle openvpn_up_bw
 }
 
 RUN_MODE="$1"
