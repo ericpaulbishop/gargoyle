@@ -168,7 +168,7 @@ define Package/gargoyle-tor/install
 	$(INSTALL_DIR)  $(1)/etc/uci-defaults
 	$(INSTALL_BIN)  ./files/tor.ucidefaults                  $(1)/etc/uci-defaults/tor.ucidefaults
 	$(INSTALL_BIN)  ./files/tor.firewall                     $(1)/etc/tor.firewall
-	$(INSTALL_BIN)  ./files/update_tor_ipset                 $(1)/usr/sbin/update_tor_ipset
+	$(INSTALL_BIN)  ./files/update_tor_nftset                 $(1)/usr/sbin/update_tor_nftset
 endef
 
 Package/gargoyle-tor-basic/install = $(Package/gargoyle-tor/install)

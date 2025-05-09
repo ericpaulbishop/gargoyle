@@ -12,9 +12,9 @@ touch /tmp/tor.firewall.running
 
 clear_chains()
 {
-	delete_chain_from_table inet fw4 nat_tor_client
-	delete_chain_from_table inet fw4 tor_client
-	delete_chain_from_table inet fw4 tor_relay
+	delete_chain_from_table nat    tor_client
+	delete_chain_from_table filter tor_client
+	delete_chain_from_table filter tor_relay
 }
 
 initialize()
@@ -58,10 +58,14 @@ initialize()
 	
 	
 		# setup client mode firewall rules
-		nft add chain inet fw4 nat_tor_client
-		nft add chain inet fw4 tor_client
+		iptables -t nat    -N tor_client
+		iptables -t filter -N tor_client
+		ip6tables -t filter -N tor_client
 
 		if [ "$client_mode" = "3" ] || [ "$client_mode" = "2" ] ; then
+			#iptables -t nat -A tor_client -p udp --dport 53  -m string --hex-string '|056f6e696f6e00|' --algo bm -j REDIRECT --to-ports $dns_port
+			#iptables -t nat -A tor_client -p tcp --dport 53  -m string --hex-string '|056f6e696f6e00|' --algo bm -j REDIRECT --to-ports $dns_port
+			
 			uci del_list dhcp.@dnsmasq[0].rebind_domain='.onion'			
 			cur_onion_server=$( uci get dhcp.@dnsmasq[0].server | grep -o "\/.onion\/[0-9\.#]*" )
 			network_get_ipaddr client_listen_ip "$zone"
@@ -72,8 +76,9 @@ initialize()
 			uci add_list dhcp.@dnsmasq[0].server="/.onion/$client_listen_ip#$dns_port"
 			uci commit
 			/etc/init.d/dnsmasq restart
+			
 
-			nft add rule inet fw4 nat_tor_client tcp dport != 53 ip daddr $hidden_service_subnet/$hidden_service_mask_bits redirect to :$trans_port
+			iptables -t nat -A tor_client -p tcp ! --dport 53 -d $hidden_service_subnet/$hidden_service_mask_bits  -j REDIRECT --to-ports $trans_port 
 		fi
 
 		test_tor_active=""
@@ -83,12 +88,12 @@ initialize()
 				touch "$enabled_ip_file" 
 			fi
 		
-			nft delete set inet fw4 tor_active_ips4
-			nft add set inet fw4 tor_active_ips4 \{ type ipv4_addr\; \}
-			for ip in $(cat $enabled_ip_file) ; do nft add element inet fw4 tor_active_ips4 \{ $ip \} ; done
+			ipset --destroy tor_active_ips >/dev/null 2>&1
+			ipset --create  tor_active_ips iphash
+			for ip in $(cat $enabled_ip_file) ; do ipset --add tor_active_ips $ip ; done
 			
-			nft add rule inet fw4 nat_tor_client ip saddr @tor_active_ips4 return
-			test_tor_active=" ip saddr @tor_active_ips4 "
+			iptables -t nat -A tor_client -m set ! --match-set tor_active_ips src -j RETURN
+			test_tor_active=" -m set --match-set tor_active_ips src "
 		fi
 	
 	
@@ -96,37 +101,41 @@ initialize()
 		if [ "$client_mode" = "1" ] || [ "$client_mode" = "2" ] ; then
 	
 			# dns rules
-			nft add rule inet fw4 nat_tor_client meta nfproto ipv4 meta l4proto \{ tcp, udp \} th dport 53 redirect to :$dns_port
+			iptables -t nat -A tor_client -p udp   --dport 53 -j REDIRECT --to-ports $dns_port
+			iptables -t nat -A tor_client -p tcp   --dport 53 -j REDIRECT --to-ports $dns_port
 		
 			# don't redirect local addresses
 			if [ -n "$zone_mask" ] ; then
-				nft add rule inet fw4 nat_tor_client ip daddr $zone_mask return
-				nft add rule inet fw4 tor_client ip daddr $zone_mask return
+				iptables -t nat    -A tor_client -d $zone_mask -j RETURN
+				iptables -t filter -A tor_client -d $zone_mask -j RETURN
 			elif [ -n "$zone_ip" ] ; then
-				nft add rule inet fw4 nat_tor_client ip daddr $zone_ip return
-				nft add rule inet fw4 tor_client ip daddr $zone_ip return
+				iptables -t nat    -A tor_client -d $zone_ip -j RETURN
+				iptables -t filter -A tor_client -d $zone_ip -j RETURN
 			fi
 			
 			# redirect to tor transparent proxy
-			nft add rule inet fw4 nat_tor_client meta nfproto ipv4 tcp dport != 53 redirect to :$trans_port
+			iptables -t nat -A tor_client -p tcp ! --dport 53 -j REDIRECT --to-ports $trans_port 
 		
 			# block udp/icmp if requested
 			if [ "$block_unsupported_proto" = "1" ] ; then
-				nft add rule inet fw4 tor_client meta nfproto ipv4 meta l4proto tcp return
-				nft add rule inet fw4 tor_client meta nfproto ipv4 udp dport 53 return
-				nft add rule inet fw4 tor_client reject
-				nft insert rule inet fw4 forward_${zone} $test_tor_active jump tor_client
+				iptables -t filter -A tor_client -p tcp            -j RETURN 
+				iptables -t filter -A tor_client -p udp --dport 53 -j RETURN
+				iptables -t filter -A tor_client -j REJECT
+				iptables -t filter -I zone_${zone}_forward $test_tor_active -j tor_client
 			fi
 
 			# block ipv6 for all hosts (yes, even in mode 2) to prevent leakage
-			nft insert rule inet fw4 tor_client meta nfproto ipv6 reject
-			nft insert rule inet fw4 tor_client meta nfproto ipv6 meta l4proto tcp reject with tcp reset
-			nft add rule inet fw4 forward_rule meta nfproto ipv6 jump tor_client
+			ip6tables -t filter -A tor_client -p tcp -j REJECT --reject-with tcp-reset
+			ip6tables -t filter -A tor_client -j REJECT
+			ip6tables -t filter -A forwarding_rule -j tor_client
 			# block ipv6 dns
-			nft add rule inet fw4 output_rule meta nfproto ipv6 meta l4proto \{ tcp, udp \} th dport 53 jump tor_client
-			nft add rule inet fw4 input_rule meta nfproto ipv6 meta l4proto \{ tcp, udp \} th dport 53 jump tor_client
+			ip6tables -t filter -A output_rule -p tcp --dport 53 -j tor_client
+			ip6tables -t filter -A output_rule -p udp --dport 53 -j tor_client
+			ip6tables -t filter -A input_rule -p tcp --dport 53 -j tor_client
+			ip6tables -t filter -A input_rule -p udp --dport 53 -j tor_client
 		fi
-		nft insert rule inet fw4 dstnat_${zone} jump nat_tor_client
+		iptables -t nat -I zone_${zone}_prerouting -j tor_client
+		
 	fi
 	
 	
@@ -136,20 +145,23 @@ initialize()
 		relay_port=$(uci get tor.relay.relay_port)
 		obfsproxy_port=$(uci get tor.relay.obfsproxy_port)
 	
-		nft add chain inet fw4 tor_relay
-		nft insert rule inet fw4 tor_relay tcp dport $relay_port accept
+		iptables -t filter -N tor_relay
+		iptables -t filter -I tor_relay -p tcp --dport $relay_port -j ACCEPT
+		ip6tables -t filter -N tor_relay
+		ip6tables -t filter -I tor_relay -p tcp --dport $relay_port -j ACCEPT
 		if [ "$relay_mode" = "1" ] && [ -n "$obfsproxy_port" ] && [ "$obfsproxy_port" != "0" ] ; then
-			nft insert rule inet fw4 tor_relay meta nfproto ipv4 tcp dport $obfsproxy_port accept
-			#nft insert rule inet fw4 tor_relay meta nfproto ipv6 tcp dport $obfsproxy_port accept
+			iptables -t filter -I tor_relay -p tcp --dport $obfsproxy_port -j ACCEPT
+			#ip6tables -t filter -I tor_relay -p tcp --dport $obfsproxy_port -j ACCEPT
 		fi
-		nft insert rule inet fw4 input_${relay_zone}_rule jump tor_relay
+		iptables -t filter -I input_${relay_zone}_rule -j tor_relay
+		ip6tables -t filter -I input_${relay_zone}_rule -j tor_relay
 	fi
 	
 	if [ "$enabled" != "0" ]  && [ "$relay_mode$client_mode" != "00" ] ; then
 		# enable rebuilding tor_relays ipset
 		touch /etc/crontabs/root
-		grep -v /usr/sbin/update_tor_nftset > "$tmp_cron"
-		echo "* * * * * /usr/sbin/update_tor_nftset" >> "$tmp_cron"
+		grep -v /usr/sbin/update_tor_ipset > "$tmp_cron"
+		echo "* * * * * /usr/sbin/update_tor_ipset" >> "$tmp_cron"
 	
 		update_cron
 		
@@ -161,7 +173,7 @@ shutdown()
 {
 	touch /etc/crontabs/root
 
-	grep -v /usr/sbin/update_tor_nftset > "$tmp_cron"
+	grep -v /usr/sbin/update_tor_ipset > "$tmp_cron"
 	update_cron
 
 	clear_chains
