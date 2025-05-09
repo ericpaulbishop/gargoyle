@@ -45,7 +45,11 @@ endef
 
 define Package/plugin-gargoyle-wireguard/install
 	$(INSTALL_DIR) $(1)
-	$(CP) ./files/* $(1)/
+	$(CP) ./files/etc/config/* $(1)/etc/config
+	$(CP) ./files/etc/uci-defaults/* $(1)/etc/uci-defaults
+	$(CP) ./files/etc/wireguard.firewall $(1)/etc/wireguard.firewall
+	$(CP) ./files/www/* $(1)/www
+	$(CP) ./files/usr/lib/bwmon-gargoyle/bwmon-gargoyle.d/030-wireguard.bwmon $(1)/usr/lib/bwmon-gargoyle/bwmon-gargoyle.d/030-wireguard.bwmon
 	chmod 755 $(1)/usr/lib/bwmon-gargoyle/bwmon-gargoyle.d/030-wireguard.bwmon
 endef
 
