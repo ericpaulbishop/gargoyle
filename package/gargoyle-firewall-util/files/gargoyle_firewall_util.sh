@@ -17,19 +17,6 @@ quota_dn_mask="0x7f00"
 
 wan_if=""
 
-apply_xtables_rule()
-{
-	rule="$1"
-	family="${2:-ipv4}"
-
-	if [ "$family" = "ipv4" ] || [ "$family" = "any" ] ; then
-		iptables ${rule}
-	fi
-	if [ "$family" = "ipv6" ] || [ "$family" = "any" ] ; then
-		ip6tables ${rule}
-	fi
-}
-
 ip_family()
 {
 	ip="$1"

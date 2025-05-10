@@ -24,7 +24,7 @@ define Package/plugin-gargoyle-qos
 	CATEGORY:=Administration
 	SUBMENU:=Gargoyle Web Interface
 	TITLE:=QoS Support for Gargoyle
-	DEPENDS:=+qos-gargoyle +gargoyle +gargoyle-firewall-util
+	DEPENDS:=+qos-gargoyle gargoyle +gargoyle-firewall-util
 	MAINTAINER:=Eric Bishop
 	PKGARCH:=all
 endef
@@ -44,11 +44,12 @@ define Build/Compile
 endef
 
 define Package/plugin-gargoyle-qos/install
-	$(INSTALL_DIR) $(1)
+	$(INSTALL_DIR) $(1)/etc
+	$(INSTALL_DIR) $(1)/usr/lib/bwmon-gargoyle/bwmon-gargoyle.d
+	$(INSTALL_DIR) $(1)/www
 	$(CP) ./files/etc/* $(1)/etc
 	$(CP) ./files/www/* $(1)/www
-	$(CP) ./files/usr/lib/bwmon-gargoyle/bwmon-gargoyle.d/020-qos.bwmon $(1)/usr/lib/bwmon-gargoyle/bwmon-gargoyle.d/020-qos.bwmon
-	chmod 755 $(1)/usr/lib/bwmon-gargoyle/bwmon-gargoyle.d/020-qos.bwmon
+	$(INSTALL_BIN) ./files/usr/lib/bwmon-gargoyle/bwmon-gargoyle.d/020-qos.bwmon $(1)/usr/lib/bwmon-gargoyle/bwmon-gargoyle.d/020-qos.bwmon
 endef
 
 define Package/plugin-gargoyle-qos/postinst
