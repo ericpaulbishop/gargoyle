@@ -14,6 +14,6 @@ uci set gargoyle.display.status_wireguard_connections="$status_menu_name"
 
 uci set firewall.wireguard_include_file=include
 uci set firewall.wireguard_include_file.path='/etc/wireguard.firewall'
-uci set firewall.wireguard_include_file.reload='1'
+[ -z "$(command -v fw4)" ] && uci set firewall.wireguard_include_file.reload=1
 
 uci commit

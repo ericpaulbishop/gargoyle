@@ -61,7 +61,7 @@ upnpd() {
 	local external_iface external_iface6 external_zone external_ip internal_iface
 	local upload download log_output port config_file serial_number model_number
 	local use_stun stun_host stun_port uuid notify_interval presentation_url
-	local upnp_lease_file clean_ruleset_threshold clean_ruleset_interval
+	local upnp_lease_file upnp_lease_file6 clean_ruleset_threshold clean_ruleset_interval
 	local ipv6_disable
 
 	local enabled
@@ -87,6 +87,7 @@ upnpd() {
 	config_get notify_interval config notify_interval
 	config_get presentation_url config presentation_url
 	config_get upnp_lease_file config upnp_lease_file
+	config_get upnp_lease_file6 config upnp_lease_file6
 	config_get clean_ruleset_threshold config clean_ruleset_threshold
 	config_get clean_ruleset_interval config clean_ruleset_interval
 	config_get ipv6_disable config ipv6_disable 0
@@ -154,6 +155,7 @@ upnpd() {
 		}
 
 		[ -n "$upnp_lease_file" ] && touch "$upnp_lease_file" && echo "lease_file=$upnp_lease_file"
+		[ -n "$upnp_lease_file6" ] && touch "$upnp_lease_file6" && echo "lease_file6=$upnp_lease_file6"
 		[ -n "$presentation_url" ] && echo "presentation_url=$presentation_url"
 		[ -n "$notify_interval" ] && echo "notify_interval=$notify_interval"
 		[ -n "$clean_ruleset_threshold" ] && echo "clean_ruleset_threshold=$clean_ruleset_threshold"

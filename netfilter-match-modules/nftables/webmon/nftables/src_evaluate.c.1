@@ -1,0 +1,17 @@
+
+static int stmt_evaluate_webmon(struct eval_ctx *ctx, struct stmt *stmt)
+{
+	uint32_t bitmask = 0;
+	uint32_t testbits = 0;
+
+	bitmask = (NFT_WEBMON_F_EXCLUDE | NFT_WEBMON_F_INCLUDE);
+	testbits = stmt->webmon.flags & bitmask;
+	if((testbits & NFT_WEBMON_F_EXCLUDE) && (testbits & NFT_WEBMON_F_INCLUDE))
+		return stmt_error(ctx, stmt, "You may only specify either: include IPs, exclude IPs, or neither (to include all)");
+
+	if(stmt->webmon.max_domains <= 0)
+		return stmt_error(ctx, stmt, "Max Domains must be > 0. If not specified defaults to %%d", DEFAULT_NFT_WEBMON_MAX_DOMAINSEARCHES);
+	if(stmt->webmon.max_searches <= 0)
+		return stmt_error(ctx, stmt, "Max Searches must be > 0. If not specified defaults to %%d", DEFAULT_NFT_WEBMON_MAX_DOMAINSEARCHES);
+	return 0;
+}

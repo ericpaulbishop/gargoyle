@@ -1997,7 +1997,7 @@ function validateNetMask(mask)
 	return errorCode;
 }
 
-//this is for source/destination in iptables
+//this is for source/destination in nftables
 //netmask can optionally be specified with / after ip to indicate range
 function validateIpRange(range)
 {

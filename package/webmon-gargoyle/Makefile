@@ -23,15 +23,15 @@ define Package/webmon-gargoyle
 	SUBMENU:=Web
 	SECTION:=net
 	CATEGORY:=Network
-	TITLE:=Init scripts to setup and use iptables webmon module
+	TITLE:=Init scripts to setup and use nftables webmon module
 	URL:=http://www.gargoyle-router.com
-	DEPENDS:= +iptables-mod-webmon
+	DEPENDS:= +kmod-nft-webmon
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
 endef
 
 
 define Package/webmon-gargoyle/description
-  Init scripts to setup and use iptables webmon module
+  Init scripts to setup and use nftables webmon module
 endef
 
 

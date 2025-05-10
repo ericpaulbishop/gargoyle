@@ -1,0 +1,88 @@
+#!/bin/sh
+
+. /lib/functions/network.sh
+. /usr/lib/bwmon-gargoyle/functions.sh
+
+bwmonscript="/usr/lib/bwmon-gargoyle/bwmon-gargoyle.d/040-openvpn.bwmon"
+
+if [ -f /tmp/openvpn.firewall.running ] ; then
+	exit
+fi
+touch /tmp/openvpn.firewall.running
+
+shutdown()
+{
+	[ -e $bwmonscript ] && $bwmonscript "stop"
+}
+
+initialize()
+{
+	[ -e $bwmonscript ] && $bwmonscript "start"
+}
+
+set_block_nonovpn()
+{
+	enabled=$( uci get openvpn.custom_config.enabled 2>/dev/null )
+	client_enabled="false"
+	if [ "$enabled" = "1" ] ; then
+		client_enabled=$(uci get openvpn_gargoyle.@client[0].enabled 2>/dev/null)
+	fi
+	delete_chain_from_table filter block_non_openvpn
+	
+	if [ "$client_enabled" = "true" ] ; then
+		do_block=$(uci get openvpn_gargoyle.@client[0].block_non_openvpn 2>/dev/null)
+		
+		
+		if [ "$do_block" = "1" ] || [ "$do_block" = "true" ] ; then
+			network_get_device wan_if lan || \
+				wan_if=$(uci -q get network.wan.ifname)
+			iptables -t filter -N block_non_openvpn
+			iptables -t filter -A block_non_openvpn -d 10.0.0.0/8     -j ACCEPT
+			iptables -t filter -A block_non_openvpn -d 172.16.0.0/12  -j ACCEPT
+			iptables -t filter -A block_non_openvpn -d 192.168.0.0/16 -j ACCEPT
+			iptables -t filter -A block_non_openvpn -j REJECT
+			iptables -t filter -I zone_lan_forward  -i br-lan -o "$wan_if" -j block_non_openvpn
+		fi
+	fi
+}
+
+set_openvpn_cron_watchdog()
+{
+	enabled=$( uci get openvpn.custom_config.enabled 2>/dev/null )
+	touch /etc/crontabs/root
+	have_watchdog=$( grep "ifconfig.*tun.*init.*openvpn" /etc/crontabs/root )
+	if [ "$enabled" == "1" ] ; then
+		if [ -z "$have_watchdog" ] ; then
+			echo '* * * * * if [ -z "$(ifconfig | grep tun 2>/dev/null)" ] ; then logger "openvpn stopped, restarting" ; /etc/init.d/openvpn restart ; fi' >> /etc/crontabs/root
+		fi
+	else
+		if [ -n "$have_watchdog" ] ; then
+			cat /etc/crontabs/root | grep -v "ifconfig.*tun.*init.*openvpn" > "$tmp_cron"
+			mv "$tmp_cron" /etc/crontabs/root
+		fi
+	fi
+}
+
+
+
+
+RUN_MODE="$1"
+
+if [ "$RUN_MODE" != "start" ] && [ "$RUN_MODE" != "stop" ] && [ "$RUN_MODE" != "restart" ] && [ "$RUN_MODE" != "update_enabled" ] ; then
+	RUN_MODE="restart"
+fi
+
+if [ "$RUN_MODE" = "start" ] || [ "$RUN_MODE" = "restart" ] ; then
+	shutdown
+	initialize
+	set_block_nonovpn
+	set_openvpn_cron_watchdog
+elif [ "$RUN_MODE" = "stop" ] ; then
+	shutdown
+elif [ "$RUN_MODE" = "update_enabled" ] ; then
+	set_block_nonovpn
+	set_openvpn_cron_watchdog
+fi
+
+
+rm /tmp/openvpn.firewall.running

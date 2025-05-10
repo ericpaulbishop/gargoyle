@@ -4,7 +4,7 @@
 <%
 	tor_enabled=$(uci get tor.global.enabled 2>/dev/null)
 	tor_client_mode=$(uci get tor.client.client_mode 2>/dev/null)
-	tor_is_active=$(ipset --test tor_active_ips "$REMOTE_ADDR" 2>&1 | grep -v NOT)
+	tor_is_active=$(nft get element inet fw4 tor_active_ips4 \{ "$REMOTE_ADDR" \} 2>&1 | grep not)
 
 	echo "var torEnabled = \"$tor_enabled\";"
 	echo "var torClientMode = \"$tor_client_mode\";"

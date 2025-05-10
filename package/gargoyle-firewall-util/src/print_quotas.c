@@ -1,4 +1,4 @@
-/*  print_quotas --	Used to print quota data from iptables rules that use the "bandwidth" module
+/*  print_quotas --	Used to print quota data from nftables rules that use the "bandwidth" module
  *  			Originally designed for use with Gargoyle router firmware (gargoyle-router.com)
  *
  *
@@ -26,7 +26,7 @@
 
 #include <erics_tools.h>
 #include <uci.h>
-#include <ipt_bwctl.h>
+#include <nft_bwctl.h>
 #define malloc safe_malloc
 #define strdup safe_strdup
 

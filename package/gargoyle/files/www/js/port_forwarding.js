@@ -641,10 +641,10 @@ function resetData()
 		timerid = null;
 
 		var tableData = new Array();
-		var tableRow =['***','***********','***** '];
+		var tableRow =['***','***********','*****','*****'];
 		tableData.push(tableRow);
 
-		var columnNames= [prtS.Prot, prtS.LHst, prtS.Port ];
+		var columnNames= [prtS.Prot, prtS.LHst, prtS.Port, prtS.EPort ];
 		var upnpTable = createTable(columnNames, tableData, "upnp_table", false, false);
 		var tableContainer = document.getElementById('upnp_table_container');
 		if(tableContainer.firstChild != null)
@@ -829,7 +829,7 @@ function update_upnp()
 	if (!updateInProgress)
 	{
 		updateInProgress = true;
-		var commands=["iptables -nL MINIUPNPD | grep ACCEPT","ip6tables -nL MINIUPNPD | grep ACCEPT"]
+		var commands=['nft list chain inet fw4 upnp_prerouting 2>/dev/null | grep "dnat"','nft list chain inet fw4 upnp_forward 2>/dev/null | grep "nh,192,128"']
 		var param = getParameterDefinition("commands", commands.join('\n')) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 
 		var stateChangeFunction = function(req)
@@ -846,30 +846,43 @@ function update_upnp()
 					for(i = 0; i < lines.length; i++)
 					{
 						var upnd = lines[i].split(/\s+/);
-						if (upnd[0] == 'ACCEPT' && typeof(upnd[6]) != "undefined")
+						if(lines[i].indexOf('dnat') > -1)
 						{
-							// IPV4
-							var tableRow =[upnd[1],upnd[4],upnd[6].substr(4)];
-							tableData.push(tableRow);
-							upnpcnt = upnpcnt+1;
+							// IPv4
+							var upnpd = lines[i].match(/iif ".*" @nh,72,8 0x([0-9A-F]+) th dport ([0-9]+) dnat ip to ([0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}):([0-9]+)/i);
+							if(upnpd.length == 5)
+							{
+								var tableRow = [upnpd[1] == '6' ? 'TCP' : 'UDP', upnpd[3], upnpd[4], upnpd[2]];
+								tableData.push(tableRow);
+								upnpcnt = upnpcnt+1;
+							}
 						}
-						else if(upnd[0] == 'ACCEPT' && typeof(upnd[6]) == "undefined")
+						else if(lines[i].indexOf('@nh,192,128') > -1)
 						{
-							// IPV6
-							var tableRow =[upnd[1],upnd[3],upnd[5].substr(4)];
-							tableData.push(tableRow);
-							upnpcnt = upnpcnt+1;
+							// IPv6
+							var upnpd = lines[i].match(/iif ".*" th dport ([0-9]+) th sport ([0-9]+) @nh,192,128 0x([0-9A-F]+) @nh,64,128 0x0 @nh,48,8 0x([0-9A-F]+)/i);
+							if(upnpd.length == 5)
+							{
+								var ip6 = upnpd[3].match(/.{4}/g);
+								if(ip6.length == 8)
+								{
+									ip6 = ip6_canonical(ip6.join(':'));
+									var tableRow = [upnpd[4] == '6' ? 'TCP' : 'UDP', ip6, upnpd[1], upnpd[2]];
+									tableData.push(tableRow);
+									upnpcnt = upnpcnt+1;
+								}
+							}
 						}
 					}
 				}
 
 				//Always display at least on blank line
 				if (upnpcnt == 0 ) {
-					var tableRow =['***','***********','***** '];
+					var tableRow =['***','***********','*****','*****'];
 					tableData.push(tableRow);
 				}
 
-				var columnNames= [prtS.Prot, prtS.LHst, prtS.Port ];
+				var columnNames= [prtS.Prot, prtS.LHst, prtS.Port, prtS.EPort ];
 
 				var upnpTable = createTable(columnNames, tableData, "upnp_table", false, false);
 				var tableContainer = document.getElementById('upnp_table_container');
