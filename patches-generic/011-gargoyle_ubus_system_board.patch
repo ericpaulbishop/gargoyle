@@ -1,0 +1,77 @@
+--- /dev/null
++++ b/package/system/procd/patches/001-gargoyle_ubus_system_board.patch
+@@ -0,0 +1,74 @@
++--- a/system.c
+++++ b/system.c
++@@ -315,6 +315,71 @@ static int system_board(struct ubus_cont
++ 		fclose(f);
++ 	}
++ 
+++	if ((f = fopen("/etc/gargoyle_release", "r")) != NULL)
+++	{
+++		c = blobmsg_open_table(&b, "gargoyle");
+++
+++		while (fgets(line, sizeof(line), f))
+++		{
+++			char *dest;
+++			char ch;
+++
+++			key = line;
+++			val = strchr(line, '=');
+++			if (!val)
+++				continue;
+++
+++			*(val++) = 0;
+++
+++			if (!strcasecmp(key, "DISTRIB_ID"))
+++				key = "distribution";
+++			else if (!strcasecmp(key, "DISTRIB_RELEASE"))
+++				key = "version";
+++			else if (!strcasecmp(key, "DISTRIB_REVISION"))
+++				key = "revision";
+++			else if (!strcasecmp(key, "DISTRIB_TARGET"))
+++				key = "target";
+++			else if (!strcasecmp(key, "DISTRIB_PROFILE"))
+++				key = "profile";
+++			else if (!strcasecmp(key, "DISTRIB_DESCRIPTION"))
+++				key = "description";
+++			else
+++				continue;
+++
+++			dest = blobmsg_alloc_string_buffer(&b, key, strlen(val));
+++			if (!dest) {
+++				ERROR("Failed to allocate blob.\n");
+++				continue;
+++			}
+++
+++			while (val && (ch = *(val++)) != 0) {
+++				switch (ch) {
+++				case '\'':
+++				case '"':
+++					next = strchr(val, ch);
+++					if (next)
+++						*next = 0;
+++
+++					strcpy(dest, val);
+++
+++					if (next)
+++						val = next + 1;
+++
+++					dest += strlen(dest);
+++					break;
+++				case '\\':
+++					*(dest++) = *(val++);
+++					break;
+++				}
+++			}
+++			blobmsg_add_string_buffer(&b);
+++		}
+++
+++		blobmsg_close_array(&b, c);
+++
+++		fclose(f);
+++	}
+++
++ 	ubus_send_reply(ctx, req, b.head);
++ 
++ 	return UBUS_STATUS_OK;

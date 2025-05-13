@@ -55,6 +55,12 @@ define Build/Compile
 		LDFLAGS="$(TARGET_LDFLAGS) -L $(STAGING_DIR)/usr/lib" 
 endef
 
+# escape commas, backslashes, squotes, and ampersands for sed
+define sed_escape
+$(subst &,\&,$(subst $(comma),\$(comma),$(subst ','\'',$(subst \,\\,$(1)))))
+endef
+#'
+
 define Package/gargoyle/install
 	$(INSTALL_DIR) $(1)
 	$(CP) ./files/* $(1)/
@@ -75,6 +81,12 @@ define Package/gargoyle/install
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/gargoyle_header_footer $(1)/usr/bin
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/gargoyle_session_validator $(1)/usr/bin
 	$(SED) 's,%CURYEAR,$(shell date -u +%Y),g' $(1)/www/about.sh
+	$(SED) 's,%GV,$(call sed_escape,$(GARGOYLE_DISTRIB_RELEASE)),g' \
+		-e 's,%GR,$(call sed_escape,$(GARGOYLE_DISTRIB_REVISION)),g' \
+		-e 's,%GT,$(call sed_escape,$(GARGOYLE_DISTRIB_TARGET)),g' \
+		-e 's,%GP,$(call sed_escape,$(GARGOYLE_DISTRIB_PROFILE)),g' \
+		-e 's,%GD,$(call sed_escape,$(GARGOYLE_DISTRIB_DESCRIPTION)),g' \
+		$(1)/etc/gargoyle_release
 endef
 
 
