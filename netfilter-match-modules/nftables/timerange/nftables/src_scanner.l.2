@@ -1,0 +1,8 @@
+"timerange"			{ scanner_push_start_cond(yyscanner, SCANSTATE_STMT_TIMERANGE); return TIMERANGE; }
+<SCANSTATE_STMT_TIMERANGE>{
+	"!="		{ return NEQ; }
+	"hours"		{ return HOURS; }
+	"weekdays"		{ return WEEKDAYS; }
+	"weeklyranges"			{ return WEEKLYRANGES; }
+}
+

@@ -28,19 +28,19 @@
 		exit
 	fi
 
-	tor_is_active=$(ipset --test tor_active_ips $connect_ip 2>&1 | grep -v NOT)
+	tor_is_active=$(nft get element inet fw4 tor_active_ips4 \{ "$connect_ip" \} 2>&1 | grep not)
 	result=""
-	if [ -n "$tor_is_active" ] ; then
+	if [ -z "$tor_is_active" ] ; then
 		#currently active, remove ip from set
-		ipset --del tor_active_ips "$connect_ip"
+		nft delete element inet fw4 tor_active_ips4 \{ "$connect_ip" \}
 		result="success_disabled"
 	else
 		#currently disabled, add ip to set
-		ipset --add tor_active_ips "$connect_ip"
+		nft add element inet fw4 tor_active_ips4 \{ "$connect_ip" \}
 		result="success_enabled"
 	fi
 
-	ipset --list tor_active_ips 2>&1 | grep "\." > /tmp/tor.tmp.tmp
+	nft list set inet fw4 tor_active_ips4 2>&1 | grep "\." | sed 's/[^0-9,\.]//g;s/,$//g;s/,/\n/g' > /tmp/tor.tmp.tmp
 	mv /tmp/tor.tmp.tmp "$tor_ip_file"
 	
 	echo "$result"

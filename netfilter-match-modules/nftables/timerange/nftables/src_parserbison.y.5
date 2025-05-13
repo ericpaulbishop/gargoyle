@@ -1,0 +1,35 @@
+
+timerange_stmt		:	timerange_stmt_alloc	timerange_opts
+			;
+
+timerange_stmt_alloc	:	TIMERANGE		timerange_invert
+			{
+				$$ = timerange_stmt_alloc(&@$);
+				$$->timerange.flags = $2;
+			}
+			;
+
+timerange_invert		:	NEQ		{ $$ = NFT_TIMERANGE_F_INV; }
+			|			/* empty */	{ $$ = 0; }
+			;
+
+timerange_opts		:       timerange_opt
+			{
+				$<stmt>$	= $<stmt>0;
+			}
+			|	timerange_opts	timerange_opt
+			;
+
+timerange_opt		:       HOURS	string
+			{
+				$<stmt>0->timerange.hours = $2;
+			}
+			|	WEEKDAYS	string
+			{
+				$<stmt>0->timerange.weekdays = $2;
+			}
+			|	WEEKLYRANGES	string
+			{
+				$<stmt>0->timerange.weeklyranges = $2;
+			}
+			;

@@ -42,11 +42,11 @@ add_config()
 	if [ "$EXEMPT" == 1 ]
 	then
 		logger -t ADBLOCK Exempting some clients from ad blocking
-		FW1="iptables -t nat -I PREROUTING -m iprange ! --src-range $START_RANGE-$END_RANGE -p tcp --dport 53 -j REDIRECT --to-ports 53"
-		FW2="iptables -t nat -I PREROUTING -m iprange ! --src-range $START_RANGE-$END_RANGE -p udp --dport 53 -j REDIRECT --to-ports 53"
+		FW1="nft insert rule inet fw4 dstnat ip saddr != $START_RANGE-$END_RANGE tcp dport 53 redirect to :53"
+		FW2="nft insert rule inet fw4 dstnat ip saddr != $START_RANGE-$END_RANGE udp dport 53 redirect to :53"
 	else
-		FW1="iptables -t nat -I PREROUTING -p tcp --dport 53 -j REDIRECT --to-ports 53"
-		FW2="iptables -t nat -I PREROUTING -p udp --dport 53 -j REDIRECT --to-ports 53"
+		FW1="nft insert rule inet fw4 dstnat tcp dport 53 redirect to :53"
+		FW2="nft insert rule inet fw4 dstnat udp dport 53 redirect to :53"
 	fi
  
 	#Update DHCP config
@@ -63,8 +63,13 @@ add_config()
 		logger -t ADBLOCK Tor is enabled, discarding firewall rules
 	else
 		logger -t ADBLOCK Adding firewall rules
-		echo "$FW1" >> /etc/firewall.user
-		echo "$FW2" >> /etc/firewall.user
+		echo "$FW1" >> /etc/gargoyle_adblock.firewall
+		echo "$FW2" >> /etc/gargoyle_adblock.firewall
+		uci set firewall.gargoyle_adblock_include_file="include"
+		uci set firewall.gargoyle_adblock_include_file.type="script"
+		uci set firewall.gargoyle_adblock_include_file.path="/etc/gargoyle_adblock.firewall"
+		[ -z "$(command -v fw4)" ] && uci set firewall.gargoyle_adblock_include_file.reload=1
+		uci commit firewall
 	fi
 
 	# Modifying uHTTPd for transparent pixel support
@@ -87,7 +92,9 @@ remove_config()
 
 	# Remove firewall rules
 	logger -t ADBLOCK Removing firewall rules
-	sed -i '/--to-ports 53/d' /etc/firewall.user
+	rm /etc/gargoyle_adblock.firewall
+	uci delete firewall.gargoyle_adblock_include_file
+	uci commit firewall
 
 	# Remove pixel redirect
 	logger -t ADBLOCK Reverting uHTTPd error page

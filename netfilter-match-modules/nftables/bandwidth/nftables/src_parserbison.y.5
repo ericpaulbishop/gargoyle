@@ -1,0 +1,100 @@
+
+bandwidth_stmt		:	bandwidth_stmt_alloc	bandwidth_opts
+			;
+
+bandwidth_stmt_alloc	:	BANDWIDTH
+			{
+				$$ = bandwidth_stmt_alloc(&@$);
+			}
+			;
+
+bandwidth_type_opt		:	COMBINED	{ $$ = NFT_BANDWIDTH_TYPE_COMBINED; }
+			|	INDIVIDUAL_SRC		{ $$ = NFT_BANDWIDTH_TYPE_INDIVIDUALSRC; }
+			|	INDIVIDUAL_DST		{ $$ = NFT_BANDWIDTH_TYPE_INDIVIDUALDST; }
+			|	INDIVIDUAL_LOCAL	{ $$ = NFT_BANDWIDTH_TYPE_INDIVIDUALLOCAL; }
+			|	INDIVIDUAL_REMOTE	{ $$ = NFT_BANDWIDTH_TYPE_INDIVIDUALREMOTE; }
+			;
+
+bandwidth_cmp_type_opt		:	MONITOR
+			{
+				$<stmt>0->bandwidth.cmp = NFT_BANDWIDTH_CMP_MONITOR;
+			}
+			|	LESS_THAN	NUM
+			{
+				$<stmt>0->bandwidth.cmp = NFT_BANDWIDTH_CMP_LT;
+				$<stmt>0->bandwidth.bandwidth_cutoff = $2;
+			}
+			|	GREATER_THAN	NUM
+			{
+				$<stmt>0->bandwidth.cmp = NFT_BANDWIDTH_CMP_GT;
+				$<stmt>0->bandwidth.bandwidth_cutoff = $2;
+			}
+			;
+
+bandwidth_check_type_opt		:	BANDWIDTH_CHECK_NOSWAP
+			{
+				$<stmt>0->bandwidth.cmp = NFT_BANDWIDTH_CMP_CHECK;
+				$<stmt>0->bandwidth.check_type = NFT_BANDWIDTH_CHECKTYPE_NOSWAP;
+			}
+			|	BANDWIDTH_CHECK_SWAP
+			{
+				$<stmt>0->bandwidth.cmp = NFT_BANDWIDTH_CMP_CHECK;
+				$<stmt>0->bandwidth.check_type = NFT_BANDWIDTH_CHECKTYPE_SWAP;
+			}
+			;
+
+bandwidth_reset_interval_opt		:	MINUTE	{ $$ = NFT_BANDWIDTH_RSTINTVL_MINUTE; }
+			|	HOUR	{ $$ = NFT_BANDWIDTH_RSTINTVL_HOUR; }
+			|	DAY		{ $$ = NFT_BANDWIDTH_RSTINTVL_DAY; }
+			|	WEEK	{ $$ = NFT_BANDWIDTH_RSTINTVL_WEEK; }
+			|	MONTH	{ $$ = NFT_BANDWIDTH_RSTINTVL_MONTH; }
+			|	NEVER	{ $$ = NFT_BANDWIDTH_RSTINTVL_NEVER; }
+			|	NUM		{ $$ = $1; }
+			;
+
+bandwidth_opts		:       bandwidth_opt
+			{
+				$<stmt>$	= $<stmt>0;
+			}
+			|	bandwidth_opts	bandwidth_opt
+			;
+
+bandwidth_opt		:       ID	string
+			{
+				$<stmt>0->bandwidth.id = $2;
+			}
+			|	TYPE	bandwidth_type_opt
+			{
+				$<stmt>0->bandwidth.type = $2;
+			}
+			|	SUBNET	string
+			{
+				$<stmt>0->bandwidth.subnet = $2;
+			}
+			|	SUBNET6	string
+			{
+				$<stmt>0->bandwidth.subnet6 = $2;
+			}
+			|	bandwidth_cmp_type_opt
+			|	CURRENT_BANDWIDTH	NUM
+			{
+				$<stmt>0->bandwidth.current_bandwidth = $2;
+			}
+			|	RESET_INTERVAL	bandwidth_reset_interval_opt
+			{
+				$<stmt>0->bandwidth.reset_interval = $2;
+			}
+			|	RESET_TIME	NUM
+			{
+				$<stmt>0->bandwidth.reset_time = $2;
+			}
+			|	INTERVALS_TO_SAVE NUM
+			{
+				$<stmt>0->bandwidth.num_intervals_to_save = $2;
+			}
+			|	LAST_BACKUP_TIME	NUM
+			{
+				$<stmt>0->bandwidth.last_backup_time = $2;
+			}
+			|	bandwidth_check_type_opt
+			;

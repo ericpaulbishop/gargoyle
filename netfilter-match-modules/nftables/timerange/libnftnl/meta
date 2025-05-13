@@ -1,0 +1,8 @@
+# file||copy||path
+# file||insert||before|after||offset||match string||path
+include_libnftnl_expr.h.1||insert||after||0||int nftnl_expr_fprintf||include/libnftnl/expr.h
+include_linux_netfilter_timerange.h||copy||include/linux/netfilter/timerange.h
+src_exprops.c.1||insert||after||0||extern struct expr_ops expr_ops_reject;||src/expr_ops.c
+src_exprops.c.2||insert||after||0||&expr_ops_reject,||src/expr_ops.c
+src_expr_timerange.c||copy||src/expr/timerange.c
+include_linux_netfilter_nftables.h.1||insert||after||0||#define NFTA_REJECT_MAX||include/linux/netfilter/nf_tables.h
