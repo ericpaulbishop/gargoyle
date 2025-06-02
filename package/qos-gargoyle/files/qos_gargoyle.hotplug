@@ -3,8 +3,9 @@ if [ "$INTERFACE" = "wan" ] || [ "$INTERFACE" = "wan6" ] ; then
 	if [ -h /etc/rc.d/S50qos_gargoyle ] ; then
 		if [ "$ACTION" = "ifup" ] || [ "$ACTION" = ifupdate ]; then
 			[ "$ACTION" = ifupdate -a -z "$IFUPDATE_ADDRESSES" -a -z "$IFUPDATE_DATA" ] && exit 0
+			[ "$ACTION" = ifupdate ] && flag="ifupdate" || flag=""
 
-			/etc/init.d/qos_gargoyle start $DEVICE
+			/etc/init.d/qos_gargoyle start "$DEVICE" "$flag"
 		fi
 	fi
 
