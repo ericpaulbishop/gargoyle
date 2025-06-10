@@ -49,6 +49,12 @@
 
 	whichksmbd="$(which ksmbd.mountd)"
 	[ -n "$whichksmbd" ] && echo "var sambapkg=\"ksmbd\";" || echo "var sambapkg=\"samba\";"
+
+	wgiface="$(ls /sys/class/net | grep "wg")"
+	[ -n "$wgiface" ] && echo "var wireguardrunning=true;" || echo "var wireguardrunning=false;"
+	ovpniface="$(ls /sys/class/net | grep "tun")"
+	[ -n "$ovpniface" ] && echo "var openvpnrunning=true;" || echo "var openvpnrunning=false;"
+
 %>
 //-->
 </script>
@@ -100,6 +106,13 @@
 				<div id="cifs_workgroup_container" class="row form-group" style="margin-bottom:20px;">
 					<label class="col-xs-5" id="cifs_workgroup_label" for="cifs_workgroup"><%~ CFWkg %>:</label>
 					<span class="col-xs-7"><input id="cifs_workgroup" class="form-control" type="text" size='30'/></span>
+				</div>
+
+				<div id="cifs_vpn_container" class="row form-group" style="margin-bottom:20px;">
+					<span class="col-xs-12">
+						<input type='checkbox' id='cifs_vpn_access'/>
+						<label id='cifs_ovpn_access_label' for='cifs_ovpn_access'><%~ VPNCIFS %></label>
+					</span>
 				</div>
 
 				<span id="cifs_user_label" style="text-decoration:underline"><%~ CFUsr %>:</span>

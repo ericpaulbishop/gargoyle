@@ -21,9 +21,14 @@ smb_header() {
 		. /lib/functions/network.sh
 
 		for net in $SMBD_IFACE; do
-			network_is_up "$net" || continue
-			network_get_device device "$net"
-			printf "%s " "${device:-$net}"
+			device=""
+			if [[ "$net" == "tun*" ]] ; then
+				[ "$(cat /sys/class/net/$net/carrier 2>/dev/null)" = 1 ] && printf "%s " "${device:-$net}"
+			else
+				network_is_up "$net" || continue
+				network_get_device device "$net"
+				printf "%s " "${device:-$net}"
+			fi
 		done
 	)
 

@@ -8,6 +8,7 @@ usbSStr.Nomdsk="No mounted USB disks detected";
 usbSStr.WFTP="Allow Access to FTP From WAN";
 usbSStr.WpFTP="Allow Passive FTP From WAN on ports";
 usbSStr.CFWkg="CIFS Workgroup";
+usbSStr.VPNCIFS="Allow Access to CIFS from OpenVPN / WireGuard";
 usbSStr.CFUsr="CIFS / FTP Users";
 usbSStr.NewU="New User";
 usbSStr.AddU="Add User";
