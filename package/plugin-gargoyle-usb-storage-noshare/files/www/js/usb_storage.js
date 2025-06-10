@@ -281,6 +281,18 @@ function saveChanges()
 		uci.set("vsftpd", "global", "pasv_max_port", pasvMax)
 	}
 
+	if((openvpnrunning || wireguardrunning) && byId('cifs_vpn_access').checked)
+	{
+		var iface = ['lan'];
+		if(openvpnrunning) iface.push('tun0');
+		if(wireguardrunning) iface.push('wg0');
+		uci.set(sambapkg, 'global', 'interface', iface.join(' '));
+	}
+	else
+	{
+		uci.remove(sambapkg, 'global', 'interface');
+	}
+
 
 	var postCommands = [];
 	if(
@@ -500,6 +512,10 @@ function resetData()
 		//workgroup
 		var s =  uciOriginal.getAllSectionsOfType(sambapkg, "samba");
 		document.getElementById("cifs_workgroup").value = s.length > 0 ? uciOriginal.get(sambapkg, s.shift(), "workgroup") : "Workgroup";
+
+		//cifs vpn
+		var cifsiface = uciOriginal.get(sambapkg, 'global', 'interface');
+		byId('cifs_vpn_access').checked = cifsiface != "";
 
 		// wan access to FTP
 		var wanFtp = uciOriginal.get("firewall", ftpFirewallRule, "local_port") == "21"

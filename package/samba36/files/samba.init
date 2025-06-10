@@ -15,10 +15,14 @@ smb_header() {
 
 		local net
 		for net in $samba_iface; do
-			local device
-			network_is_up $net || continue
-			network_get_device device "$net"
-			echo -n "${device:-$net} "
+			device=""
+			if [[ "$net" == "tun*" ]] ; then
+				[ "$(cat /sys/class/net/$net/carrier 2>/dev/null)" = 1 ] && echo -n "${device:-$net} "
+			else
+				network_is_up "$net" || continue
+				network_get_device device "$net"
+				echo -n "${device:-$net} "
+			fi
 		done
 	)
 
