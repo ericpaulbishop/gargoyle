@@ -1,0 +1,12 @@
+
+"webmon"			{ scanner_push_start_cond(yyscanner, SCANSTATE_STMT_WEBMON); return WEBMON; }
+<SCANSTATE_STMT_WEBMON>{
+	"include-ips"		{ return INCLUDE_IPS; }
+	"exclude-ips"		{ return EXCLUDE_IPS; }
+	"max-domains"		{ return MAX_DOMAINS; }
+	"max-searches"		{ return MAX_SEARCHES; }
+	"domain-load-file"	{ return DOMAIN_LOAD_FILE; }
+	"search-load-file"	{ return SEARCH_LOAD_FILE; }
+	"clear-domain"		{ return CLEAR_DOMAIN; }
+	"clear-search"		{ return CLEAR_SEARCH; }
+}

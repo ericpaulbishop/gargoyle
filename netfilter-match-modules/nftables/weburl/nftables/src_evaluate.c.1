@@ -1,0 +1,18 @@
+
+static int stmt_evaluate_weburl(struct eval_ctx *ctx, struct stmt *stmt)
+{
+	uint32_t bitmask = 0;
+	uint32_t testbits = 0;
+
+	bitmask = (NFT_WEBURL_F_MT_CONTAINS | NFT_WEBURL_F_MT_CONTAINSREGEX | NFT_WEBURL_F_MT_MATCHESEXACTLY);
+	testbits = stmt->weburl.flags & bitmask;
+	if(!(testbits && !(testbits & (testbits - 1))))
+		return stmt_error(ctx, stmt, "You may only specify one string/pattern to match");
+
+	bitmask = (NFT_WEBURL_F_MP_ALL | NFT_WEBURL_F_MP_DOMAINONLY | NFT_WEBURL_F_MP_PATHONLY);
+	testbits = stmt->weburl.flags & bitmask;
+	if(!(testbits && !(testbits & (testbits - 1))))
+		return stmt_error(ctx, stmt, "You may only specify part of the url to match: domain-only, path-only or neither (to match the full url)");
+
+	return 0;
+}

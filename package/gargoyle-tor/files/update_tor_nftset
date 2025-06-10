@@ -1,0 +1,54 @@
+#!/bin/sh
+
+if [ -e /tmp/tor.check ] ; then
+	exit
+fi
+
+touch /tmp/tor.check
+
+tor_dir=$(uci get tor.global.data_dir)
+if [ -z "$tor_dir" ] ; then
+	tor_dir="/var/tor"
+fi
+cache_file="$tor_dir/cached-consensus"
+if [ ! -f "$cache_file" ] ; then
+	cache_file="$tor_dir/cached-microdesc-consensus"
+fi
+
+nft add set inet fw4 tor_relays4 \{ type ipv4_addr\; \}
+nft add set inet fw4 tor_relays6 \{ type ipv6_addr\; \}
+old_md5sum=""
+if [ -f /tmp/tor-consensus-md5 ] ; then
+	old_md5sum=$(cat  /tmp/tor-consensus-md5 )
+fi
+
+if [ -f "$cache_file" ] ; then
+	new_md5sum=$(md5sum "$cache_file" | awk ' { print $1 ; } ' )
+	if [ "$old_md5sum" != "$new_md5sum" ] ; then 
+		tor_ips=$(cat "$cache_file" | grep "^r " | awk ' { print $(NF-2) } ' | sort | uniq)
+		nft flush set inet fw4 tor_relays4
+		nft flush set inet fw4 tor_relays6
+		for tip in $tor_ips ; do
+			nft add element inet fw4 tor_relays4 \{ $tip \} 2>/dev/null
+			nft add element inet fw4 tor_relays6 \{ $tip \} 2>/dev/null
+		done
+		echo "$new_md5sum" > /tmp/tor-consensus-md5
+	fi
+fi
+
+
+tor_enabled=$(uci get tor.global.enabled 2>/dev/null)
+tor_client=$( uci get tor.client.client_mode 2>/dev/null)
+tor_relay=$(  uci get tor.relay.relay_mode 2>/dev/null)
+
+
+if [ $tor_enabled == "1" ] && [ "$tor_client$tor_relay" != "00" ] ; then
+	found_process=$(ps | grep "tor\.pid")
+	if [ -z "$found_process" ] ; then
+		logger "Tor seems to have died unexpectedly, restarting"
+		/etc/init.d/tor restart
+	fi
+fi
+
+rm -rf /tmp/tor.check
+

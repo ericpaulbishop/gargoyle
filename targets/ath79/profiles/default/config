@@ -886,14 +886,10 @@ CONFIG_MODULE_DEFAULT_dnsmasq=y
 CONFIG_DEFAULT_dropbear=y
 CONFIG_MODULE_DEFAULT_dropbear=y
 CONFIG_MODULE_DEFAULT_fconfig=y
-CONFIG_DEFAULT_firewall=y
-CONFIG_MODULE_DEFAULT_firewall=y
+CONFIG_DEFAULT_firewall4=y
+CONFIG_MODULE_DEFAULT_firewall4=y
 CONFIG_DEFAULT_fstools=y
 CONFIG_MODULE_DEFAULT_fstools=y
-CONFIG_DEFAULT_ip6tables-legacy=y
-CONFIG_MODULE_DEFAULT_ip6tables-legacy=y
-CONFIG_DEFAULT_iptables-legacy=y
-CONFIG_MODULE_DEFAULT_iptables-legacy=y
 CONFIG_DEFAULT_iwinfo=y
 CONFIG_MODULE_DEFAULT_iwinfo=y
 CONFIG_MODULE_DEFAULT_kmod-ath10k-ct=y
@@ -904,10 +900,10 @@ CONFIG_DEFAULT_kmod-gpio-button-hotplug=y
 CONFIG_MODULE_DEFAULT_kmod-gpio-button-hotplug=y
 CONFIG_MODULE_DEFAULT_kmod-gpio-cascade=y
 CONFIG_MODULE_DEFAULT_kmod-hwmon-lm75=y
-CONFIG_DEFAULT_kmod-ipt-offload=y
-CONFIG_MODULE_DEFAULT_kmod-ipt-offload=y
 CONFIG_MODULE_DEFAULT_kmod-leds-reset=y
 CONFIG_MODULE_DEFAULT_kmod-mux-gpio=y
+CONFIG_DEFAULT_kmod-nft-offload=y
+CONFIG_MODULE_DEFAULT_kmod-nft-offload=y
 CONFIG_MODULE_DEFAULT_kmod-owl-loader=y
 CONFIG_MODULE_DEFAULT_kmod-switch-rtl8366rb=y
 CONFIG_MODULE_DEFAULT_kmod-switch-rtl8366s=y
@@ -929,6 +925,8 @@ CONFIG_DEFAULT_mtd=y
 CONFIG_MODULE_DEFAULT_mtd=y
 CONFIG_DEFAULT_netifd=y
 CONFIG_MODULE_DEFAULT_netifd=y
+CONFIG_DEFAULT_nftables=y
+CONFIG_MODULE_DEFAULT_nftables=y
 CONFIG_MODULE_DEFAULT_nvram=y
 CONFIG_DEFAULT_odhcp6c=y
 CONFIG_MODULE_DEFAULT_odhcp6c=y
@@ -3291,8 +3289,8 @@ CONFIG_DROPBEAR_AGENTFORWARD=y
 # end of Configuration
 
 # CONFIG_PACKAGE_ead is not set
-CONFIG_PACKAGE_firewall=y
-# CONFIG_PACKAGE_firewall4 is not set
+# CONFIG_PACKAGE_firewall is not set
+CONFIG_PACKAGE_firewall4=y
 CONFIG_PACKAGE_fstools=y
 # CONFIG_FSTOOLS_OVL_MOUNT_FULL_ACCESS_TIME is not set
 # CONFIG_FSTOOLS_OVL_MOUNT_COMPRESS_ZLIB is not set
@@ -3698,7 +3696,7 @@ CONFIG_PACKAGE_kmod-crypto-cbc=m
 CONFIG_PACKAGE_kmod-crypto-ccm=y
 # CONFIG_PACKAGE_kmod-crypto-chacha20poly1305 is not set
 CONFIG_PACKAGE_kmod-crypto-cmac=y
-CONFIG_PACKAGE_kmod-crypto-crc32c=m
+CONFIG_PACKAGE_kmod-crypto-crc32c=y
 CONFIG_PACKAGE_kmod-crypto-ctr=y
 CONFIG_PACKAGE_kmod-crypto-cts=m
 # CONFIG_PACKAGE_kmod-crypto-deflate is not set
@@ -3937,7 +3935,7 @@ CONFIG_PACKAGE_kmod-asn1-decoder=y
 CONFIG_PACKAGE_kmod-lib-crc-ccitt=y
 # CONFIG_PACKAGE_kmod-lib-crc-itu-t is not set
 CONFIG_PACKAGE_kmod-lib-crc16=m
-CONFIG_PACKAGE_kmod-lib-crc32c=m
+CONFIG_PACKAGE_kmod-lib-crc32c=y
 # CONFIG_PACKAGE_kmod-lib-crc7 is not set
 # CONFIG_PACKAGE_kmod-lib-crc8 is not set
 # CONFIG_PACKAGE_kmod-lib-lz4 is not set
@@ -3985,13 +3983,13 @@ CONFIG_PACKAGE_kmod-nls-utf8=m
 #
 # CONFIG_PACKAGE_kmod-arptables is not set
 # CONFIG_PACKAGE_kmod-br-netfilter is not set
-CONFIG_PACKAGE_kmod-ebtables=y
-CONFIG_PACKAGE_kmod-ebtables-ipv4=y
-CONFIG_PACKAGE_kmod-ebtables-ipv6=y
+# CONFIG_PACKAGE_kmod-ebtables is not set
+# CONFIG_PACKAGE_kmod-ebtables-ipv4 is not set
+# CONFIG_PACKAGE_kmod-ebtables-ipv6 is not set
 # CONFIG_PACKAGE_kmod-ebtables-watchers is not set
-CONFIG_PACKAGE_kmod-ip6tables=y
+# CONFIG_PACKAGE_kmod-ip6tables is not set
 # CONFIG_PACKAGE_kmod-ip6tables-extra is not set
-CONFIG_PACKAGE_kmod-ipt-bandwidth=y
+# CONFIG_PACKAGE_kmod-ipt-bandwidth is not set
 # CONFIG_PACKAGE_kmod-ipt-checksum is not set
 # CONFIG_PACKAGE_kmod-ipt-cluster is not set
 # CONFIG_PACKAGE_kmod-ipt-clusterip is not set
@@ -4000,31 +3998,31 @@ CONFIG_PACKAGE_kmod-ipt-conntrack-extra=y
 # CONFIG_PACKAGE_kmod-ipt-conntrack-label is not set
 CONFIG_PACKAGE_kmod-ipt-core=y
 # CONFIG_PACKAGE_kmod-ipt-debug is not set
-CONFIG_PACKAGE_kmod-ipt-extra=y
-CONFIG_PACKAGE_kmod-ipt-filter=y
+# CONFIG_PACKAGE_kmod-ipt-extra is not set
+# CONFIG_PACKAGE_kmod-ipt-filter is not set
 # CONFIG_PACKAGE_kmod-ipt-hashlimit is not set
-CONFIG_PACKAGE_kmod-ipt-ipopt=y
-CONFIG_PACKAGE_kmod-ipt-iprange=y
+# CONFIG_PACKAGE_kmod-ipt-ipopt is not set
+# CONFIG_PACKAGE_kmod-ipt-iprange is not set
 # CONFIG_PACKAGE_kmod-ipt-ipsec is not set
-CONFIG_PACKAGE_kmod-ipt-ipset=y
+# CONFIG_PACKAGE_kmod-ipt-ipset is not set
 # CONFIG_PACKAGE_kmod-ipt-led is not set
-CONFIG_PACKAGE_kmod-ipt-nat=y
-CONFIG_PACKAGE_kmod-ipt-nat-extra=y
-CONFIG_PACKAGE_kmod-ipt-nat6=y
+# CONFIG_PACKAGE_kmod-ipt-nat is not set
+# CONFIG_PACKAGE_kmod-ipt-nat-extra is not set
+# CONFIG_PACKAGE_kmod-ipt-nat6 is not set
 # CONFIG_PACKAGE_kmod-ipt-nflog is not set
 # CONFIG_PACKAGE_kmod-ipt-nfqueue is not set
-CONFIG_PACKAGE_kmod-ipt-offload=y
+# CONFIG_PACKAGE_kmod-ipt-offload is not set
 # CONFIG_PACKAGE_kmod-ipt-physdev is not set
-CONFIG_PACKAGE_kmod-ipt-raw=y
-CONFIG_PACKAGE_kmod-ipt-raw6=m
+# CONFIG_PACKAGE_kmod-ipt-raw is not set
+# CONFIG_PACKAGE_kmod-ipt-raw6 is not set
 # CONFIG_PACKAGE_kmod-ipt-rpfilter is not set
 # CONFIG_PACKAGE_kmod-ipt-socket is not set
 # CONFIG_PACKAGE_kmod-ipt-tee is not set
-CONFIG_PACKAGE_kmod-ipt-timerange=y
+# CONFIG_PACKAGE_kmod-ipt-timerange is not set
 # CONFIG_PACKAGE_kmod-ipt-tproxy is not set
 # CONFIG_PACKAGE_kmod-ipt-u32 is not set
-CONFIG_PACKAGE_kmod-ipt-webmon=y
-CONFIG_PACKAGE_kmod-ipt-weburl=y
+# CONFIG_PACKAGE_kmod-ipt-webmon is not set
+# CONFIG_PACKAGE_kmod-ipt-weburl is not set
 CONFIG_PACKAGE_kmod-nf-conncount=y
 CONFIG_PACKAGE_kmod-nf-conntrack=y
 CONFIG_PACKAGE_kmod-nf-conntrack-netlink=m
@@ -4047,18 +4045,22 @@ CONFIG_PACKAGE_kmod-nfnetlink=y
 # CONFIG_PACKAGE_kmod-nfnetlink-log is not set
 # CONFIG_PACKAGE_kmod-nfnetlink-queue is not set
 # CONFIG_PACKAGE_kmod-nft-arp is not set
-# CONFIG_PACKAGE_kmod-nft-bridge is not set
+CONFIG_PACKAGE_kmod-nft-core=y
+CONFIG_PACKAGE_kmod-nft-bandwidth=y
+CONFIG_PACKAGE_kmod-nft-bridge=y
 # CONFIG_PACKAGE_kmod-nft-compat is not set
 # CONFIG_PACKAGE_kmod-nft-connlimit is not set
-# CONFIG_PACKAGE_kmod-nft-core is not set
 # CONFIG_PACKAGE_kmod-nft-dup-inet is not set
-# CONFIG_PACKAGE_kmod-nft-fib is not set
-# CONFIG_PACKAGE_kmod-nft-nat is not set
+CONFIG_PACKAGE_kmod-nft-fib=y
+CONFIG_PACKAGE_kmod-nft-nat=y
 # CONFIG_PACKAGE_kmod-nft-netdev is not set
-# CONFIG_PACKAGE_kmod-nft-offload is not set
+CONFIG_PACKAGE_kmod-nft-offload=y
 # CONFIG_PACKAGE_kmod-nft-queue is not set
 # CONFIG_PACKAGE_kmod-nft-socket is not set
+CONFIG_PACKAGE_kmod-nft-timerange=y
 # CONFIG_PACKAGE_kmod-nft-tproxy is not set
+CONFIG_PACKAGE_kmod-nft-webmon=y
+CONFIG_PACKAGE_kmod-nft-weburl=y
 # CONFIG_PACKAGE_kmod-nft-xfrm is not set
 # end of Netfilter Extensions
 
@@ -4627,7 +4629,7 @@ CONFIG_PACKAGE_ucode-mod-nl80211=y
 CONFIG_PACKAGE_ucode-mod-rtnl=y
 # CONFIG_PACKAGE_ucode-mod-struct is not set
 CONFIG_PACKAGE_ucode-mod-ubus=y
-# CONFIG_PACKAGE_ucode-mod-uci is not set
+CONFIG_PACKAGE_ucode-mod-uci=y
 CONFIG_PACKAGE_ucode-mod-uloop=y
 # end of ucode
 # end of Languages
@@ -4835,7 +4837,7 @@ CONFIG_PACKAGE_libusbmuxd=m
 # CONFIG_PACKAGE_alsa-lib is not set
 # CONFIG_PACKAGE_argp-standalone is not set
 # CONFIG_PACKAGE_glib2 is not set
-# CONFIG_PACKAGE_jansson is not set
+CONFIG_PACKAGE_jansson=y
 # CONFIG_PACKAGE_libaio is not set
 # CONFIG_PACKAGE_libasm is not set
 # CONFIG_PACKAGE_libaudit is not set
@@ -4943,7 +4945,7 @@ CONFIG_PACKAGE_libncurses=m
 CONFIG_PACKAGE_libnetfilter-conntrack=m
 # CONFIG_PACKAGE_libnettle is not set
 CONFIG_PACKAGE_libnfnetlink=m
-# CONFIG_PACKAGE_libnftnl is not set
+CONFIG_PACKAGE_libnftnl=y
 CONFIG_PACKAGE_libnghttp2=m
 # CONFIG_PACKAGE_libnl is not set
 # CONFIG_PACKAGE_libnl-cli is not set
@@ -5063,45 +5065,44 @@ CONFIG_PACKAGE_nfs-kernel-server-utils=m
 #
 # CONFIG_PACKAGE_arptables-legacy is not set
 # CONFIG_PACKAGE_arptables-nft is not set
-CONFIG_PACKAGE_ebtables-legacy=y
-# CONFIG_PACKAGE_ebtables-legacy-utils is not set
+# CONFIG_PACKAGE_ebtables-legacy is not set
 # CONFIG_PACKAGE_ebtables-nft is not set
 # CONFIG_PACKAGE_ip6tables-extra is not set
-CONFIG_PACKAGE_ip6tables-mod-nat=y
+# CONFIG_PACKAGE_ip6tables-mod-nat is not set
 # CONFIG_PACKAGE_ip6tables-nft is not set
-CONFIG_PACKAGE_ip6tables-zz-legacy=y
-CONFIG_PACKAGE_iptables-mod-bandwidth=y
+# CONFIG_PACKAGE_ip6tables-zz-legacy is not set
+# CONFIG_PACKAGE_iptables-mod-bandwidth is not set
 # CONFIG_PACKAGE_iptables-mod-checksum is not set
 # CONFIG_PACKAGE_iptables-mod-cluster is not set
 # CONFIG_PACKAGE_iptables-mod-clusterip is not set
-CONFIG_PACKAGE_iptables-mod-conntrack-extra=y
-CONFIG_PACKAGE_iptables-mod-extra=y
-CONFIG_PACKAGE_iptables-mod-filter=y
+# CONFIG_PACKAGE_iptables-mod-conntrack-extra is not set
+# CONFIG_PACKAGE_iptables-mod-extra is not set
+# CONFIG_PACKAGE_iptables-mod-filter is not set
 # CONFIG_PACKAGE_iptables-mod-hashlimit is not set
-CONFIG_PACKAGE_iptables-mod-ipopt=y
-CONFIG_PACKAGE_iptables-mod-iprange=y
+# CONFIG_PACKAGE_iptables-mod-ipopt is not set
+# CONFIG_PACKAGE_iptables-mod-iprange is not set
 # CONFIG_PACKAGE_iptables-mod-ipsec is not set
 # CONFIG_PACKAGE_iptables-mod-led is not set
-CONFIG_PACKAGE_iptables-mod-nat-extra=y
+# CONFIG_PACKAGE_iptables-mod-nat-extra is not set
 # CONFIG_PACKAGE_iptables-mod-nflog is not set
 # CONFIG_PACKAGE_iptables-mod-nfqueue is not set
 # CONFIG_PACKAGE_iptables-mod-physdev is not set
 # CONFIG_PACKAGE_iptables-mod-rpfilter is not set
 # CONFIG_PACKAGE_iptables-mod-socket is not set
 # CONFIG_PACKAGE_iptables-mod-tee is not set
-CONFIG_PACKAGE_iptables-mod-timerange=y
+# CONFIG_PACKAGE_iptables-mod-timerange is not set
 # CONFIG_PACKAGE_iptables-mod-tproxy is not set
 # CONFIG_PACKAGE_iptables-mod-trace is not set
 # CONFIG_PACKAGE_iptables-mod-u32 is not set
-CONFIG_PACKAGE_iptables-mod-webmon=y
-CONFIG_PACKAGE_iptables-mod-weburl=y
+# CONFIG_PACKAGE_iptables-mod-webmon is not set
+# CONFIG_PACKAGE_iptables-mod-weburl is not set
 # CONFIG_PACKAGE_iptables-nft is not set
-CONFIG_PACKAGE_iptables-zz-legacy=y
-CONFIG_PACKAGE_miniupnpd-iptables=m
-# CONFIG_PACKAGE_miniupnpd-nftables is not set
-# CONFIG_PACKAGE_nftables-json is not set
+# CONFIG_PACKAGE_iptables-zz-legacy is not set
+# CONFIG_PACKAGE_miniupnpd-iptables is not set
+CONFIG_PACKAGE_miniupnpd-nftables=m
+CONFIG_PACKAGE_nftables-json=y
 # CONFIG_PACKAGE_nftables-nojson is not set
-CONFIG_PACKAGE_xtables-legacy=y
+# CONFIG_PACKAGE_xtables-legacy is not set
 # CONFIG_PACKAGE_xtables-nft is not set
 # end of Firewall
 
@@ -5350,6 +5351,7 @@ CONFIG_PACKAGE_ewget=y
 CONFIG_EWGET_MBEDTLS=y
 # CONFIG_EWGET_OPENSSL is not set
 CONFIG_PACKAGE_gargoyle-firewall-util=y
+# CONFIG_PACKAGE_gargoyle-firewall-util-fw3 is not set
 CONFIG_PACKAGE_gargoyle-ip-query=y
 CONFIG_PACKAGE_gargoyle-tor=m
 # CONFIG_PACKAGE_gargoyle-tor-basic is not set
@@ -5357,12 +5359,13 @@ CONFIG_PACKAGE_gargoyle-tor=m
 # CONFIG_PACKAGE_gre is not set
 CONFIG_PACKAGE_https-dns-proxy-gargoyle=m
 # CONFIG_PACKAGE_ipip is not set
-CONFIG_PACKAGE_ipset=y
+# CONFIG_PACKAGE_ipset is not set
 # CONFIG_PACKAGE_ipset-dns is not set
 CONFIG_PACKAGE_iw=y
 # CONFIG_PACKAGE_iw-full is not set
-CONFIG_PACKAGE_libipset=y
-CONFIG_PACKAGE_libiptbwctl=y
+# CONFIG_PACKAGE_libipset is not set
+# CONFIG_PACKAGE_libiptbwctl is not set
+CONFIG_PACKAGE_libnftbwctl=y
 # CONFIG_PACKAGE_map is not set
 CONFIG_PACKAGE_obfsproxy-legacy=m
 CONFIG_PACKAGE_odhcp6c=y

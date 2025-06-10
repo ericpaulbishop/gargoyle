@@ -90,15 +90,18 @@ struct sockaddr_storage whereto;/* Who to ping */
 int datalen=64-8;   /* How much data */
 
 const char usage[] =
-"Gargoyle active congestion controller version 2.4\n\n"
+"Gargoyle active congestion controller version 2.5\n\n"
 "Usage:  qosmon [options] pingtime pingtarget bandwidth [pinglimit]\n" 
 "              pingtime   - The ping interval the monitor will use when active in ms.\n"
 "              pingtarget - The URL or IP address of the target host for the monitor.\n"
 "              bandwidth  - The maximum download speed the WAN link will support in kbps.\n"
 "              pinglimit  - Optional pinglimit to use for control, otherwise measured.\n"
 "              Options:\n"
-"                     -b  - Run in the background\n"
-"                     -a  - Add entitlement to pinglimt, enable auto ACTIVE/MINRTT mode switching.\n\n"
+"                     -b            - Run in the background\n"
+"                     -a            - Add entitlement to pinglimt, enable auto ACTIVE/MINRTT mode switching.\n\n"
+"                     -s            - Skip initial link measurement.\n\n"
+"                     -t <triptime> - Set initial ping time in ms (used with -s)\n\n"
+"                     -l <limit>    - Set initial fair link limit in kbps (used with -s).\n\n"
 "        SIGUSR1 can be used to reset the link bandwidth at anytime.\n";
 
 
@@ -793,18 +796,41 @@ int main(int argc, char *argv[])
     struct protoent *proto;
     float err;
     struct addrinfo* ainfo;
+    int skip_initial_measurement = 0;
+    int custom_triptime = -1;
+    int custom_bwlimit = -1;
 
 
     argc--, av++;
     while (argc > 0 && *av[0] == '-') {
-        while (*++av[0]) switch (*av[0]) {
-            case 'b':
-                pingflags |= BACKGROUND;
-                break;
+        while (*++av[0]) {
+            switch (*av[0]) {
+                case 'b':
+                    pingflags |= BACKGROUND;
+                    break;
 
-            case 'a':
-                pingflags |= ADDENTITLEMENT;
-                break;
+                case 'a':
+                    pingflags |= ADDENTITLEMENT;
+                    break;
+
+                case 's':
+                    skip_initial_measurement = 1;
+                    break;
+
+                case 't':
+                    if(argc > 1) {
+                        custom_triptime = atoi(*++av);
+                        argc--;
+                    }
+                    break;
+
+                case 'l':
+                    if(argc > 1) {
+                        custom_bwlimit = atoi(*++av);
+                        argc--;
+                    }
+                    break;
+            }
         }
         argc--, av++;
     }
@@ -989,6 +1015,20 @@ int main(int argc, char *argv[])
     //We will fix it later.
     rawfltime_max = period*1000;
 
+    //If we are skipping initial link unload + measure, set some reasonable defaults and push us
+    //straight into the IDLE state
+    if (skip_initial_measurement) {
+        int default_bw = DBW_UL * 0.9;
+        qstate = QMON_IDLE;
+        pingon = 0;
+        fil_triptime = (custom_triptime > 0) ? custom_triptime * 1000 : 20000; // Start with 20ms, it will update as needed
+        pinglimit = 2.0 * fil_triptime;
+        rawfltime_max = 2 * pinglimit;
+        saved_realtime_limit = saved_active_limit = new_dbw_ul = (custom_bwlimit > 0) ? custom_bwlimit * 1000 : default_bw;
+        tc_class_modify(new_dbw_ul);
+        //firstflg = 0; // We can't set this until after we have checked class counts below
+    }
+
     while (!sigterm) {
         int len = sizeof (packet);
         socklen_t fromlen = sizeof (from);
@@ -1053,7 +1093,10 @@ int main(int argc, char *argv[])
             qstate=QMON_CHK; 
             continue;
         }
-
+        else if(skip_initial_measurement) {
+            firstflg=0;
+        }
+        skip_initial_measurement=0; //Reset this now
  
         //Initialize or reinitialize the fair linklimit.
         if (resetbw) {

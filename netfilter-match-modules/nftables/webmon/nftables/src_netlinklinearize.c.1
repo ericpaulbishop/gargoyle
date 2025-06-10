@@ -1,0 +1,19 @@
+
+static void netlink_gen_webmon_stmt(struct netlink_linearize_ctx *ctx,
+				    const struct stmt *stmt)
+{
+	struct nftnl_expr *nle;
+
+	nle = alloc_nft_expr("webmon");
+	nftnl_expr_set_u32(nle, NFTNL_EXPR_WEBMON_FLAGS, stmt->webmon.flags);
+	nftnl_expr_set_u32(nle, NFTNL_EXPR_WEBMON_MAXDOMAINS, stmt->webmon.max_domains);
+	nftnl_expr_set_u32(nle, NFTNL_EXPR_WEBMON_MAXSEARCHES, stmt->webmon.max_searches);
+	if (stmt->webmon.ips != NULL)
+			nftnl_expr_set_str(nle, NFTNL_EXPR_WEBMON_IPS, stmt->webmon.ips);
+	if (stmt->webmon.domain_load_file != NULL)
+			nftnl_expr_set_str(nle, NFTNL_EXPR_WEBMON_DOMAINLOADFILE, stmt->webmon.domain_load_file);
+	if (stmt->webmon.search_load_file != NULL)
+			nftnl_expr_set_str(nle, NFTNL_EXPR_WEBMON_SEARCHLOADFILE, stmt->webmon.search_load_file);
+
+	nft_rule_add_expr(ctx, nle, &stmt->location);
+}

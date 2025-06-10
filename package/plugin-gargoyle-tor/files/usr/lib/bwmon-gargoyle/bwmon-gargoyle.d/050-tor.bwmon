@@ -79,29 +79,30 @@ setup()
 		if [ -n "$wan_if" ] ; then
 			
 			# create tor bandwidth monitor chains
-			iptables -t mangle -N tor_down_bw
-			iptables -t mangle -N tor_up_bw
+			nft add chain inet fw4 mangle_tor_down_bw
+			nft add chain inet fw4 mangle_tor_up_bw
 
 			# first, test if traffic is tor, otherwise return
 			# traffic is tor if it's to/from the router itself AND
 			# either to the ORPort/obfsproxy port OR to/from an IP that is a known relay
-			# an ipset of known relays, "tor_relays" is built by the /usr/sbin/tor_ipset command
-			/usr/sbin/update_tor_ipset
+			# an nftset of known relays, "tor_relays" is built by the /usr/sbin/tor_ipset command
+			/usr/sbin/update_tor_nftset
 			relay_port=$(uci get tor.relay.relay_port)
 			obfsproxy_port=$(uci get tor.relay.obfsproxy_port)
 			oport=""
 			rport=""
+			comma=""
 			if [ "$relay_mode" != "0" ] ; then rport="$relay_port" ; fi
-			if [ "$relay_mode" = "1" ] && [ -n "$obfsproxy_port" ] && [ "$obfsproxy_port" != "0" ] ; then oport="$obfsproxy_port" ; fi
+			if [ "$relay_mode" = "1" ] && [ -n "$obfsproxy_port" ] && [ "$obfsproxy_port" != "0" ] ; then
+				oport="$obfsproxy_port"
+				[ -n "$rport" ] && comma=","
+			fi
 
-			for p in $rport $oport ; do
-				iptables -t mangle -A tor_down_bw -p tcp --dport $p -j CONNMARK --set-mark 0xF0000000/0xF0000000
-				iptables -t mangle -A tor_up_bw   -p tcp --sport $p -j CONNMARK --set-mark 0xF0000000/0xF0000000
-			done
-			iptables -t mangle -A tor_down_bw -m set --match-set tor_relays src -j CONNMARK --set-mark 0xF0000000/0xF0000000
-			iptables -t mangle -A tor_up_bw   -m set --match-set tor_relays dst -j CONNMARK --set-mark 0xF0000000/0xF0000000
-			iptables -t mangle -A tor_down_bw -m connmark ! --mark 0xF0000000/0xF0000000 -j RETURN
-			iptables -t mangle -A tor_up_bw   -m connmark ! --mark 0xF0000000/0xF0000000 -j RETURN
+			nft add rule inet fw4 mangle_tor_down_bw tcp dport \{ $rport$comma$oport \} ct mark set ct mark \& 0x0FFFFFFF \| 0xF0000000
+			nft add rule inet fw4 mangle_tor_down_bw ip saddr @tor_relays ct mark set ct mark \& 0x0FFFFFFF \| 0xF0000000
+			nft add rule inet fw4 mangle_tor_up_bw ip daddr @tor_relays ct mark set ct mark \& 0x0FFFFFFF \| 0xF0000000
+			nft add rule inet fw4 mangle_tor_down_bw ct mark \& 0xF0000000 != 0xF0000000 return
+			nft add rule inet fw4 mangle_tor_up_bw ct mark \& 0xF0000000 != 0xF0000000 return
 
 
 			# add monitoring rules
@@ -110,10 +111,10 @@ setup()
 					interval=$(eval "echo \$$res"$n"_interval")
 					num_intervals=$(eval "echo \$$res"$n"_num_intervals")
 					reset_time=$(eval "echo \$$res"$n"_reset_time")
-					if [ -n "$reset_time" ] ; then reset_time="--reset_time $reset_time" ; fi
+					if [ -n "$reset_time" ] ; then reset_time="reset-time $reset_time" ; fi
 	
-					iptables -t mangle -A tor_down_bw  -m bandwidth --id "tor-$res$n-download-$interval-$num_intervals" --reset_interval $interval --intervals_to_save $num_intervals $reset_time
-					iptables -t mangle -A tor_up_bw    -m bandwidth --id "tor-$res$n-upload-$interval-$num_intervals"   --reset_interval $interval --intervals_to_save $num_intervals $reset_time
+					nft add rule inet fw4 mangle_tor_down_bw bandwidth id \""tor-$res$n-download-$interval-$num_intervals"\" reset-interval $interval intervals-to-save $num_intervals $reset_time
+					nft add rule inet fw4 mangle_tor_up_bw bandwidth id \""tor-$res$n-upload-$interval-$num_intervals"\" reset-interval $interval intervals-to-save $num_intervals $reset_time
 					
 					next_ids="tor-$res$n-download-$interval-$num_intervals tor-$res$n-upload-$interval-$num_intervals"
 					if [ -z "$bw_ids" ] ; then bw_ids="$next_ids" ; else bw_ids="$bw_ids $next_ids" ; fi
@@ -122,13 +123,13 @@ setup()
 
 
 			#clear connmark we set
-			iptables -t mangle -A tor_down_bw -j CONNMARK --set-mark 0x0/0xF0000000
-			iptables -t mangle -A tor_up_bw   -j CONNMARK --set-mark 0x0/0xF0000000
+			nft add rule inet fw4 mangle_tor_down_bw ct mark set ct mark \& 0x0FFFFFFF \| 0x0
+			nft add rule inet fw4 mangle_tor_up_bw ct mark set ct mark \& 0x0FFFFFFF \| 0x0
 
 
 			# create rules to jump to tor bandwidth chain
-			iptables -t mangle -A INPUT   -i $wan_if -p tcp -j tor_down_bw
-			iptables -t mangle -A OUTPUT  -o $wan_if -p tcp -j tor_up_bw
+			nft add rule inet fw4 mangle_input iifname $wan_if meta l4proto tcp jump mangle_tor_down_bw
+			nft add rule inet fw4 mangle_output oifname $wan_if meta l4proto tcp jump mangle_tor_down_bw
 
 		
 			# enable backups of bandwidth data
@@ -169,8 +170,8 @@ teardown()
 	grep -v "$backup_script" /etc/crontabs/root > "$tmp_cron"
 	update_cron
 	
-	delete_chain_from_table mangle tor_down_bw
-	delete_chain_from_table mangle tor_up_bw
+	delete_chain_from_table inet fw4 mangle_tor_down_bw
+	delete_chain_from_table inet fw4 mangle_tor_up_bw
 }
 
 RUN_MODE="$1"

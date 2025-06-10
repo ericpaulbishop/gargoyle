@@ -1,12 +1,15 @@
 #!/bin/sh
-if [ "$INTERFACE" = "wan" ]; then
+if [ "$INTERFACE" = "wan" ] || [ "$INTERFACE" = "wan6" ] ; then
 	if [ -h /etc/rc.d/S50qos_gargoyle ] ; then
-		if [ "$ACTION" = "ifup" ]; then
-      		/etc/init.d/qos_gargoyle start $DEVICE
+		if [ "$ACTION" = "ifup" ] || [ "$ACTION" = ifupdate ]; then
+			[ "$ACTION" = ifupdate -a -z "$IFUPDATE_ADDRESSES" -a -z "$IFUPDATE_DATA" ] && exit 0
+			[ "$ACTION" = ifupdate ] && flag="ifupdate" || flag=""
+
+			/etc/init.d/qos_gargoyle start "$DEVICE" "$flag"
 		fi
 	fi
 
 	if [ "$ACTION" = "ifdown" ]; then
-     		/etc/init.d/qos_gargoyle stop
+		/etc/init.d/qos_gargoyle stop
 	fi
 fi

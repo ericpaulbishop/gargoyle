@@ -717,6 +717,16 @@ for target in $targets ; do
 	
 		openwrt_target=$(get_target_from_config "./.config")
 		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$openwrt_abbrev_commit" "package/base-files/files/etc/banner" "."
+		#Set gargoyle official version parameter in gargoyle package
+		echo "OFFICIAL_VERSION:=$full_gargoyle_version" > .ver
+		echo "GARGOYLE_DISTRIB_RELEASE:=$short_gargoyle_version" >> .ver
+		echo "GARGOYLE_DISTRIB_REVISION:=$gargoyle_git_revision" >> .ver
+		echo "GARGOYLE_DISTRIB_TARGET:=$openwrt_target" >> .ver
+		echo "GARGOYLE_DISTRIB_PROFILE:=$profile_name" >> .ver
+		echo "GARGOYLE_DISTRIB_DESCRIPTION:=$full_gargoyle_version" >> .ver
+		cat .ver "$package_dir/gargoyle/Makefile" >.vermake
+		rm .ver
+		mv .vermake "$top_dir/$target-src/package/gargoyle/Makefile"
 
 		make $num_build_thread_str GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$default_profile"
 
@@ -739,6 +749,16 @@ for target in $targets ; do
 
 		openwrt_target=$(get_target_from_config "./.config")
 		create_gargoyle_banner "$openwrt_target" "$profile_name" "$build_date" "$short_gargoyle_version" "$gargoyle_git_revision" "$branch_name" "$openwrt_abbrev_commit" "package/base-files/files/etc/banner" "."
+		#Set gargoyle official version parameter in gargoyle package
+		echo "OFFICIAL_VERSION:=$full_gargoyle_version" > .ver
+		echo "GARGOYLE_DISTRIB_RELEASE:=$short_gargoyle_version" >> .ver
+		echo "GARGOYLE_DISTRIB_REVISION:=$gargoyle_git_revision" >> .ver
+		echo "GARGOYLE_DISTRIB_TARGET:=$openwrt_target" >> .ver
+		echo "GARGOYLE_DISTRIB_PROFILE:=$profile_name" >> .ver
+		echo "GARGOYLE_DISTRIB_DESCRIPTION:=$full_gargoyle_version" >> .ver
+		cat .ver "$package_dir/gargoyle/Makefile" >.vermake
+		rm .ver
+		mv .vermake "$top_dir/$target-src/package/gargoyle/Makefile"
 
 		make $num_build_thread_str V=s GARGOYLE_VERSION="$numeric_gargoyle_version" GARGOYLE_VERSION_NAME="$lower_short_gargoyle_version" GARGOYLE_PROFILE="$default_profile"
 

@@ -1,13 +1,14 @@
-if [ "$INTERFACE" = "wan" ]; then
-
+if [ "$INTERFACE" = "wan" ] || [ "$INTERFACE" = "wan6" ] || [ "$INTERFACE" = "wwan" ]; then
 	. /usr/lib/gargoyle_firewall_util/gargoyle_firewall_util.sh
 
-	if [ "$ACTION" = "ifup" ]; then
+	if [ "$ACTION" = "ifup" ] || [ "$ACTION" = ifupdate ]; then
+		[ "$ACTION" = ifupdate -a -z "$IFUPDATE_ADDRESSES" -a -z "$IFUPDATE_DATA" ] && exit 0
 
 		# previously we waited until firewall was up here, testing firewall.core.loaded in /var/state
-		# unfortunately that was removed in barrier breaker, but new firewall (fw3) loads very FAST as it's a binary
+		# unfortunately that was removed in barrier breaker, but new firewall (fw4) loads very FAST as it's ucode
 		# So... just wait 2 seconds
-		sleep 2	
+		sleep 2
+		logger -t gargoyle_firewall "Reloading gargoyle_firewall due to $ACTION of $INTERFACE ($DEVICE)"
 	
 		#Bring up the parts of the firewall that depend on device name and WAN IP address.
 		ifup_firewall
@@ -19,7 +20,7 @@ if [ "$INTERFACE" = "wan" ]; then
 	fi
 
 	if [ "$ACTION" = "ifdown" ]; then
-		quota_chains_exist=$(iptables -t mangle -L combined_quotas 2>/dev/null)
+		quota_chains_exist=$(nft list table inet fw4 2>/dev/null | grep "chain mangle_combined_quotas")
 		if [ -n "$quota_chains_exist" ] ; then
 			backup_quotas
 		fi
@@ -30,7 +31,9 @@ fi
 if [ "$INTERFACE" = "lan" ]; then
 	wan_exists=$(uci get network.wan 2>/dev/null)
 	if [ -z "$wan_exists" ] ; then
-		if [ "$ACTION" = "ifup" ]; then
+		if [ "$ACTION" = "ifup" ] || [ "$ACTION" = ifupdate ]; then
+			[ "$ACTION" = ifupdate -a -z "$IFUPDATE_ADDRESSES" -a -z "$IFUPDATE_DATA" ] && exit 0
+
 			/etc/init.d/bwmon_gargoyle restart
 		fi
 		if [ "$ACTION" = "ifdown" ]; then

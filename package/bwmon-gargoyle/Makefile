@@ -56,8 +56,10 @@ define Package/bwmon-gargoyle/install
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(INSTALL_DIR) $(1)/usr/lib
 	$(INSTALL_DIR) $(1)/usr/lib/bwmon-gargoyle
+	$(INSTALL_DIR) $(1)/usr/lib/bwmon-gargoyle/bwmon-gargoyle.d
 	
-	$(CP) ./files/bwmon-gargoyle/* $(1)/usr/lib/bwmon-gargoyle/
+	$(CP) ./files/bwmon-gargoyle/functions.sh $(1)/usr/lib/bwmon-gargoyle/
+	$(CP) ./files/bwmon-gargoyle/bwmon-gargoyle.d/*.bwmon $(1)/usr/lib/bwmon-gargoyle/bwmon-gargoyle.d/
 	chmod 755 $(1)/usr/lib/bwmon-gargoyle/bwmon-gargoyle.d/010-bdist_total.bwmon
 	
 	$(INSTALL_BIN) ./files/bwmond.config $(1)/etc/config/bwmon_gargoyle

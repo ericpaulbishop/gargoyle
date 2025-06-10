@@ -1,0 +1,59 @@
+
+webmon_stmt		:	webmon_stmt_alloc	webmon_opts
+			;
+
+webmon_stmt_alloc	:	WEBMON
+			{
+				uint32_t defaultdomainsearch = 300;
+				$$ = webmon_stmt_alloc(&@$);
+				$$->webmon.max_domains = defaultdomainsearch;
+				$$->webmon.max_searches = defaultdomainsearch;
+			}
+			;
+
+webmon_opts		:       webmon_opt
+			{
+				$<stmt>$	= $<stmt>0;
+			}
+			|	webmon_opts	webmon_opt
+			;
+
+webmon_opt		:       /* empty */
+			{
+				$<stmt>0->webmon.flags = 0;
+			}
+			|	EXCLUDE_IPS	string
+			{
+				$<stmt>0->webmon.flags |= NFT_WEBMON_F_EXCLUDE;
+				$<stmt>0->webmon.ips = $2;
+			}
+			|	INCLUDE_IPS	string
+			{
+				$<stmt>0->webmon.flags |= NFT_WEBMON_F_INCLUDE;
+				$<stmt>0->webmon.ips = $2;
+			}
+			|	MAX_DOMAINS	NUM
+			{
+				$<stmt>0->webmon.max_domains = $2;
+			}
+			|	MAX_SEARCHES	NUM
+			{
+				$<stmt>0->webmon.max_searches = $2;
+			}
+			|	SEARCH_LOAD_FILE	string
+			{
+				$<stmt>0->webmon.search_load_file = $2;
+			}
+			|	DOMAIN_LOAD_FILE	string
+			{
+				$<stmt>0->webmon.domain_load_file = $2;
+			}
+			|	CLEAR_SEARCH
+			{
+				$<stmt>0->webmon.flags |= NFT_WEBMON_F_CLEARSEARCH;
+			}
+			|	CLEAR_DOMAIN
+			{
+				$<stmt>0->webmon.flags |= NFT_WEBMON_F_CLEARDOMAIN;
+			}
+			;

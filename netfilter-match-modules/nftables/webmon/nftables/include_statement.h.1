@@ -1,0 +1,11 @@
+
+struct webmon_stmt {
+	uint32_t	flags;
+	uint32_t	max_domains;
+	uint32_t	max_searches;
+	const char*	ips;
+	const char*	domain_load_file;
+	const char*	search_load_file;
+};
+
+extern struct stmt *webmon_stmt_alloc(const struct location *loc);
