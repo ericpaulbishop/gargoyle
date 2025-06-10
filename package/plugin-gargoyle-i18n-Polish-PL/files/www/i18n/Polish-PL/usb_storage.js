@@ -8,6 +8,7 @@ usbSStr.Nomdsk="Nie wykryto żadnego zamontowanego nośnika USB";
 usbSStr.WFTP="Włącz zdalny dostęp do FTP z WAN";
 usbSStr.WpFTP="Zezwalaj na tryb pasywny z WAN na portach";
 usbSStr.CFWkg="Grupa robocza CIFS";
+usbSStr.VPNCIFS="Zezwalaj na dostęp do CIFS z OpenVPN / WireGuard";
 usbSStr.CFUsr="Użytkownicy CIFS/FTP";
 usbSStr.NewU="Nowy użytkownik";
 usbSStr.AddU="Dodaj użytkownika";

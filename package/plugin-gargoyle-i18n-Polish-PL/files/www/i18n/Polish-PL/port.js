@@ -41,6 +41,7 @@ prtS.UpErr="Nie można zaktualizować przekierowania portu.";
 prtS.Prot="Protokół";
 prtS.LHst="Urządzenie";
 prtS.Port="Port";
+prtS.EPort="Zewnętrzny port (IPv4)\nZdalny port (IPv6)";
 prtS.AORErr="Nie można dodać reguły otworzenia portu.";
 prtS.DupOErr="Port(y) w zakresie jest/są już otworzone dla tego IP";
 prtS.CopOErr="Port jest już otworzony dla tego IP";
