@@ -2,6 +2,8 @@ var wgStr = new Object();
 
 function resetData()
 {
+	uci = uciOriginal.clone();
+
 	serverEnabled = uciOriginal.get("wireguard_gargoyle","server","enabled");
 	clientEnabled = uciOriginal.get("wireguard_gargoyle","client","enabled");
 	serverEnabled = serverEnabled == "true" || serverEnabled == "1" ? true : false;
