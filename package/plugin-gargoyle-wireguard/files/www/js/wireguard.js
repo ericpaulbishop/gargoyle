@@ -380,6 +380,21 @@ function togglePass(name)
 	}
 }
 
+function toggleTunnelNameWarning()
+{
+	alertDiv = byId('warn_tunname_toolong');
+	name = byId('wireguard_allowed_client_name').value;
+	if(name.length > 12)
+	{
+		// Limit is 15 (wg- + 12 chars)
+		alertDiv.style.display = 'block';
+	}
+	else
+	{
+		alertDiv.style.display = 'none';
+	}
+}
+
 function generateKeyPair(section)
 {
 	commands = "mkdir -p /tmp/wireguard\ncd /tmp/wireguard\nwg genkey | tee ./privatekey | wg pubkey > ./publickey\ncat /tmp/wireguard/*";

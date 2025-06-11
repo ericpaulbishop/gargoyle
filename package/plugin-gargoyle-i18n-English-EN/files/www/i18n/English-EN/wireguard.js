@@ -30,6 +30,7 @@ wgStr.wgPubKey="Public Key";
 wgStr.rvel="Reveal";
 wgStr.keygen="Generate Keys";
 wgStr.ClntN="Client Name";
+wgStr.WarnTunName="Downloaded configuration file uses client name for the filename (e.g. wg-clientname.conf).<br>A long filename will not import to the WireGuard client configuration.<br>Linux (and Linux based systems): 15 characters limit<br>Windows: 32 characters limit<br>Choose a shorter client name or rename the .conf file before importing.";
 wgStr.IntIP="Internal IP\n(Routed Subnet)";
 wgStr.ClntCfg="Client Config (.conf)";
 wgStr.Dload="Download";
