@@ -719,7 +719,7 @@ function addAc()
 		var subnet = subnetIp != "" && subnetMask != "" ? subnetIp + "/" + subnetMask : ""
 		var pubkey       = document.getElementById("wireguard_allowed_client_pubkey").value
 	
-		var id = name.replace(/[\t\r\n ]+/g, "_").toLowerCase().replace(/[^a-z0-9_-]/g, "");
+		var id = name.replace(/[\t\r\n -]+/g, "_").toLowerCase().replace(/[^a-z0-9_]/g, "");
 		var idCount = 1;
 		var testId = id
 		while(uci.get("wireguard_gargoyle", testId) != "")
