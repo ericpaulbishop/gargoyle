@@ -30,6 +30,7 @@ wgStr.wgPubKey="Klucz publiczny";
 wgStr.rvel="pokaż";
 wgStr.keygen="Generuj klucze";
 wgStr.ClntN="Nazwa klienta";
+wgStr.WarnTunName="Pobrany plik konfiguracyjny używa nazwy klienta jako nazwy pliku (np. wg-clientname.conf).<br>Długa nazwa pliku nie zostanie zaimportowana do konfiguracji klienta WireGuard.<br>Linux (i systemy oparte na Linuksie): limit 15 znaków<br>Windows: limit 32 znaków<br>Wybierz krótszą nazwę klienta lub zmień nazwę pliku .conf przed zaimportowaniem.";
 wgStr.IntIP="Wewnętrzne IP\n(obsługiwana podsieć)";
 wgStr.ClntCfg="Konfiguracja klienta (.conf)";
 wgStr.Dload="Pobierz";
