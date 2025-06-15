@@ -366,18 +366,32 @@ function saveChanges()
 							var mac = document.getElementById("wifi_guest_mac_g").value;
 							if(mac == "")
 							{
+								var attempt = 0;
 								do
 								{
-									if(distribTarget.match(/mvebu/))
+									if(distribTarget.match(/mvebu/) && attempt < 10)
 									{
 										wmacIdx = wirelessIfs.indexOf(wifiDevG.replace("radio","wlan"));
 										ref = currentWirelessMacs[wmacIdx];
+										if(ref == undefined)
+										{
+											// Assume wifidevs will get currentLanMac + 1, 2... mark these conflicting
+											for(var wifIdx = 0; wifIdx < wirelessIfs.length; wifIdx++)
+											{
+												var lastDig = parseInt(currentLanMac.slice(-1),16);
+												lastDig = isNaN(lastDig) ? 0 : lastDig;
+												lastDig = ((lastDig + wifIdx + 1) % 16).toString(16);
+												macConflict.push(currentLanMac.slice(0,-1) + lastDig);
+											}
+											ref = currentLanMac;
+										}
 										mac = getRandomMacWithMask(true,true,ref,"fd:ff:ff:ff:ff:f0");
 									}
 									else
 									{
 										mac = getRandomMac(true,true);
 									}
+									attempt = attempt + 1;
 								} while(macConflict.join(",").toLowerCase().split(",").indexOf(mac.toLowerCase()) != -1);
 							}
 							macConflict.push(mac);
@@ -411,18 +425,32 @@ function saveChanges()
 					   	var mac = document.getElementById("wifi_guest_mac_a").value ;
 						if(mac == "")
 						{
+							var attempt = 0;
 							do
 							{
-								if(distribTarget.match(/mvebu/))
+								if(distribTarget.match(/mvebu/) && attempt < 10)
 								{
 									wmacIdx = wirelessIfs.indexOf(wifiDevA.replace("radio","wlan"));
 									ref = currentWirelessMacs[wmacIdx];
+									if(ref == undefined)
+									{
+										// Assume wifidevs will get currentLanMac + 1, 2... mark these conflicting
+										for(var wifIdx = 0; wifIdx < wirelessIfs.length; wifIdx++)
+										{
+											var lastDig = parseInt(currentLanMac.slice(-1),16);
+											lastDig = isNaN(lastDig) ? 0 : lastDig;
+											lastDig = ((lastDig + wifIdx + 1) % 16).toString(16);
+											macConflict.push(currentLanMac.slice(0,-1) + lastDig);
+										}
+										ref = currentLanMac;
+									}
 									mac = getRandomMacWithMask(true,true,ref,"fd:ff:ff:ff:ff:f0");
 								}
 								else
 								{
 									mac = getRandomMac(true,true);
 								}
+								attempt = attempt + 1;
 							} while(macConflict.join(",").toLowerCase().split(",").indexOf(mac.toLowerCase()) != -1);
 						}
 						macConflict.push(mac);
