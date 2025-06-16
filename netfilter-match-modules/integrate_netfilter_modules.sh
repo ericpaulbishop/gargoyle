@@ -237,6 +237,7 @@ EOF
 	echo '	tar xf $(PKG_SOURCE)' >>nf-patch-build/iptables-download-make
 	echo '	rm -rf *.bz2 *.xz' >>nf-patch-build/iptables-download-make
 	echo '	mv iptables* iptables' >>nf-patch-build/iptables-download-make
+	echo '	find iptables/ -name \*.rej -exec rm -f {} \;' >>nf-patch-build/iptables-download-make
 	echo '	$(SCRIPT_DIR)/patch-kernel.sh iptables $(TOPDIR)/package/network/utils/iptables/patches/' >>nf-patch-build/iptables-download-make
 	echo '	echo $(TOPDIR)/package/network/utils/iptables/patches/ > iptables-patch-dir' >>nf-patch-build/iptables-download-make
 	
@@ -269,6 +270,7 @@ EOF
 	echo '	tar xf $(PKG_SOURCE)' >>nf-patch-build/nftables-download-make
 	echo '	rm -rf *.bz2 *.xz' >>nf-patch-build/nftables-download-make
 	echo '	mv nftables* nftables' >>nf-patch-build/nftables-download-make
+	echo '	find nftables/ -name \*.rej -exec rm -f {} \;' >>nf-patch-build/nftables-download-make
 	echo '	mkdir -p $(TOPDIR)/package/network/utils/nftables/patches/' >>nf-patch-build/nftables-download-make
 	echo '	$(SCRIPT_DIR)/patch-kernel.sh nftables $(TOPDIR)/package/network/utils/nftables/patches/' >>nf-patch-build/nftables-download-make
 	echo '	echo $(TOPDIR)/package/network/utils/nftables/patches/ > nftables-patch-dir' >>nf-patch-build/nftables-download-make
@@ -302,6 +304,7 @@ EOF
 	echo '	tar xf $(PKG_SOURCE)' >>nf-patch-build/libnftnl-download-make
 	echo '	rm -rf *.bz2 *.xz' >>nf-patch-build/libnftnl-download-make
 	echo '	mv libnftnl* libnftnl' >>nf-patch-build/libnftnl-download-make
+	echo '	find libnftnl/ -name \*.rej -exec rm -f {} \;' >>nf-patch-build/libnftnl-download-make
 	echo '	mkdir -p $(TOPDIR)/package/libs/libnftnl/patches/' >>nf-patch-build/libnftnl-download-make
 	echo '	$(SCRIPT_DIR)/patch-kernel.sh libnftnl $(TOPDIR)/package/libs/libnftnl/patches/' >>nf-patch-build/libnftnl-download-make
 	echo '	echo $(TOPDIR)/package/libs/libnftnl/patches/ > libnftnl-patch-dir' >>nf-patch-build/libnftnl-download-make
