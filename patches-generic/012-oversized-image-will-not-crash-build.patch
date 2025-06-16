@@ -1,8 +1,8 @@
 --- a/include/image.mk
 +++ b/include/image.mk
-@@ -165,8 +165,11 @@ DTC_FLAGS += \
- DTCO_FLAGS += $(DTC_WARN_FLAGS)
- 
+@@ -193,8 +193,11 @@ DTC_FLAGS += \
+ # @param 2: Padding.
+ ##
  define Image/pad-to
 -	dd if=$(1) of=$(1).new bs=$(2) conv=sync
 -	mv $(1).new $(1)
