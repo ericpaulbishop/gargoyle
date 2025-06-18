@@ -1,6 +1,6 @@
 				<div id='wireguard_allowed_client_name_container' class="row form-group" >
 					<label class="col-xs-5" for='wireguard_allowed_client_name' id='wireguard_allowed_client_name_label'><%~ ClntN %>:</label>
-					<span class="col-xs-7"><input type='text' class="form-control" id='wireguard_allowed_client_name' size='30' /></span>
+					<span class="col-xs-7"><input type='text' class="form-control" id='wireguard_allowed_client_name' size='30' onchange='toggleTunnelNameWarning()' /></span>
 				</div>
 
 				<div id="warn_tunname_toolong" class="alert alert-warning" role="alert" style="display: none;"><%~ WarnTunName %></div>
