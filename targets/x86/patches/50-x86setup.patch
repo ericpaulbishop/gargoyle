@@ -52,7 +52,7 @@
 +}
 --- a/package/base-files/Makefile
 +++ b/package/base-files/Makefile
-@@ -214,6 +214,7 @@ define Package/base-files/install
+@@ -230,6 +230,7 @@ define Package/base-files/install
  
  	chmod 0600 $(1)/etc/shadow
  	chmod 1777 $(1)/tmp
