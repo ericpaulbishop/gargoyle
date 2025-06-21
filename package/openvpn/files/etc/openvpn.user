@@ -8,4 +8,3 @@
 #      <down>    down action is generated after the TUN/TAP device is closed
 #      <up>      up action is generated after the TUN/TAP device is opened
 # $INSTANCE  Name of the openvpn instance which went up or down
-
