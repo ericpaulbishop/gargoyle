@@ -2048,7 +2048,7 @@ static void nft_webmon_destroy(const struct nft_ctx *ctx, const struct nft_expr 
 	spin_unlock_bh(&webmon_lock);
 }
 
-static int nft_webmon_dump(struct sk_buff *skb, const struct nft_expr *expr) {
+static int nft_webmon_dump(struct sk_buff *skb, const struct nft_expr *expr, bool reset) {
 	const struct nft_webmon_info *priv = nft_expr_priv(expr);
 	int retval = 0;
 	u32 flags = 0;

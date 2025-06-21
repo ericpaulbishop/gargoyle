@@ -455,7 +455,7 @@ static void nftnl_expr_bandwidth_free(const struct nftnl_expr *e)
 struct expr_ops expr_ops_bandwidth = {
 	.name		= "bandwidth",
 	.alloc_len	= sizeof(struct nftnl_expr_bandwidth),
-	.max_attr	= NFTA_BANDWIDTH_MAX,
+	.nftnl_max_attr	= __NFTNL_EXPR_BANDWIDTH_MAX - 1,
 	.free		= nftnl_expr_bandwidth_free,
 	.set		= nftnl_expr_bandwidth_set,
 	.get		= nftnl_expr_bandwidth_get,

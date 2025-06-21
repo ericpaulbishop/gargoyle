@@ -14,9 +14,9 @@ static void timerange_stmt_print(const struct stmt *stmt, struct output_ctx *oct
 
 static void timerange_stmt_destroy(struct stmt *stmt)
 {
-	xfree(stmt->timerange.hours);
-	xfree(stmt->timerange.weekdays);
-	xfree(stmt->timerange.weeklyranges);
+	expr_free(stmt->timerange.hours);
+	expr_free(stmt->timerange.weekdays);
+	expr_free(stmt->timerange.weeklyranges);
 }
 
 static const struct stmt_ops timerange_stmt_ops = {

@@ -80,7 +80,7 @@ static ktime_t last_local_mw_update;
 
 
 static spinlock_t bandwidth_lock = __SPIN_LOCK_UNLOCKED(bandwidth_lock);
-DEFINE_SEMAPHORE(userspace_lock);
+DEFINE_SEMAPHORE(userspace_lock, 1);
 
 static string_map* id_map = NULL;
 

@@ -175,7 +175,7 @@ static void nftnl_expr_weburl_free(const struct nftnl_expr *e)
 struct expr_ops expr_ops_weburl = {
 	.name		= "weburl",
 	.alloc_len	= sizeof(struct nftnl_expr_weburl),
-	.max_attr	= NFTA_WEBURL_MAX,
+	.nftnl_max_attr	= __NFTNL_EXPR_WEBURL_MAX - 1,
 	.free		= nftnl_expr_weburl_free,
 	.set		= nftnl_expr_weburl_set,
 	.get		= nftnl_expr_weburl_get,

@@ -60,7 +60,7 @@ static ktime_t last_local_mw_update;
 
 
 static spinlock_t bandwidth_lock = __SPIN_LOCK_UNLOCKED(bandwidth_lock);
-DEFINE_SEMAPHORE(userspace_lock);
+DEFINE_SEMAPHORE(userspace_lock, 1);
 
 static string_map* id_map = NULL;
 
@@ -3180,7 +3180,7 @@ static int nft_bandwidth_init(const struct nft_ctx *ctx, const struct nft_expr *
 	return (valid_arg ? 0 : -EINVAL);
 }
 
-static int nft_bandwidth_dump(struct sk_buff *skb, const struct nft_expr *expr) {
+static int nft_bandwidth_dump(struct sk_buff *skb, const struct nft_expr *expr, bool reset) {
 	const struct nft_bandwidth_info *rule_priv = nft_expr_priv(expr);
 	struct nft_bandwidth_info *priv = rule_priv->non_const_self;
 	int retval = 0;

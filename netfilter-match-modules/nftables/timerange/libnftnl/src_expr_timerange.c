@@ -203,7 +203,7 @@ static void nftnl_expr_timerange_free(const struct nftnl_expr *e)
 struct expr_ops expr_ops_timerange = {
 	.name		= "timerange",
 	.alloc_len	= sizeof(struct nftnl_expr_timerange),
-	.max_attr	= NFTA_TIMERANGE_MAX,
+	.nftnl_max_attr	= __NFTNL_EXPR_TIMERANGE_MAX - 1,
 	.free		= nftnl_expr_timerange_free,
 	.set		= nftnl_expr_timerange_set,
 	.get		= nftnl_expr_timerange_get,

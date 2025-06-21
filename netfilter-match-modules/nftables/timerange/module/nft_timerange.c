@@ -729,7 +729,7 @@ PARSE_OUT:
 	return (valid_arg ? 0 : -EINVAL);
 }
 
-static int nft_timerange_dump(struct sk_buff *skb, const struct nft_expr *expr)
+static int nft_timerange_dump(struct sk_buff *skb, const struct nft_expr *expr, bool reset)
 {
 	const struct nft_timerange_info *priv = nft_expr_priv(expr);
 	int i;

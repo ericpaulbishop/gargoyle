@@ -313,7 +313,7 @@ static void nftnl_expr_webmon_free(const struct nftnl_expr *e)
 struct expr_ops expr_ops_webmon = {
 	.name		= "webmon",
 	.alloc_len	= sizeof(struct nftnl_expr_webmon),
-	.max_attr	= NFTA_WEBMON_MAX,
+	.nftnl_max_attr	= __NFTNL_EXPR_WEBMON_MAX - 1,
 	.free		= nftnl_expr_webmon_free,
 	.set		= nftnl_expr_webmon_set,
 	.get		= nftnl_expr_webmon_get,

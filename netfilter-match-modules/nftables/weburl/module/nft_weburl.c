@@ -610,7 +610,7 @@ PARSE_OUT:
 	return (valid_arg ? 0 : -EINVAL);
 }
 
-static int nft_weburl_dump(struct sk_buff *skb, const struct nft_expr *expr) {
+static int nft_weburl_dump(struct sk_buff *skb, const struct nft_expr *expr, bool reset) {
 	const struct nft_weburl_info *priv = nft_expr_priv(expr);
 	int retval = 0;
 	u32 flags = priv->invert ? NFT_WEBURL_F_INV : 0;

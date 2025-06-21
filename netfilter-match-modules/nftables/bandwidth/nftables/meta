@@ -17,6 +17,7 @@ src_parserbison.y.4||insert||after||0||reject_stmt	close_scope_reject||src/parse
 src_parserbison.y.5||insert||before||2||nat_stmt_alloc	nat_stmt_args||src/parser_bison.y
 src_scanner.l.1||insert||after||0||%s SCANSTATE_STMT_REJECT||src/scanner.l
 src_scanner.l.2||insert||before||1||scanner_push_start_cond\(yyscanner, SCANSTATE_STMT_REJECT\)||src/scanner.l
-src_statement.c.1||insert||before||2||static void reject_stmt_print||src/statement.c
+src_statement.c.1||insert||after||0||include <rule.h>||src/statement.c
+src_statement.c.2||insert||before||2||static void reject_stmt_print||src/statement.c
 include_linux_netfilter_nftables.h.1||insert||after||0||#define NFTA_REJECT_MAX||include/linux/netfilter/nf_tables.h
 include_parser.h.1||insert||after||0||PARSER_SC_STMT_REJECT||include/parser.h
