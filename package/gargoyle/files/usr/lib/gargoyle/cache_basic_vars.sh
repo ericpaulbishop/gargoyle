@@ -1,5 +1,69 @@
 #!/bin/sh
 
+. /usr/share/libubox/jshn.sh
+
+print_mac80211_capabs_for_wifi_dev()
+{
+	wifi_dev="$1"
+	dev_num="$2"
+	out="$3"
+
+	phyname=$(iwinfo nl80211 phyname $wifi_dev 2>&1)
+	[ "$phyname" = "Phy not found" ] && phyname="phy$dev_num"
+	# Check for wl naming
+	[ "$(iwinfo $phyname h 2>&1)" = "No such wireless device: $phyname" ] && phyname="wl$dev_num"
+	echo "phyRadio[\"$phyname\"] = \"$wifi_dev\";" >> "$out"
+	echo "radioPhy[\"$wifi_dev\"] = \"$phyname\";" >> "$out"
+	echo "phyCapab[\"$phyname\"] = [];" >> "$out"
+
+	json_load "$(cat /etc/board.json)"
+	json_select wlan || echo "/etc/board.json does not contain WLAN, cannot parse"
+	json_select "$phyname" && {
+		json_select info
+		json_select bands
+		json_get_keys radiobands
+		for b in $radiobands; do
+			json_select $b
+			echo "phyCapab[\"$phyname\"][\"$b\"] = [];" >> "$out"
+			json_get_var ht ht
+			json_get_var vht vht
+			json_get_var he he
+			json_get_var maxwidth max_width
+			echo "phyCapab[\"$phyname\"][\"$b\"][\"ht\"] = ${ht:-0};" >> "$out"
+			echo "phyCapab[\"$phyname\"][\"$b\"][\"vht\"] = ${vht:-0};" >> "$out"
+			echo "phyCapab[\"$phyname\"][\"$b\"][\"he\"] = ${he:-0};" >> "$out"
+			echo "phyCapab[\"$phyname\"][\"$b\"][\"max_width\"] = $maxwidth;" >> "$out"
+			json_select modes
+			json_get_keys modeidx
+			echo "phyCapab[\"$phyname\"][\"$b\"][\"modes\"] = [];" >> "$out"
+			for m in $modeidx; do
+				json_get_var modeval $m
+				echo "phyCapab[\"$phyname\"][\"$b\"][\"modes\"].push(\"$modeval\");" >> "$out"
+			done
+			json_select ..
+			json_select ..
+
+			echo "phyCapab[\"$phyname\"][\"$b\"][\"channels\"] = [];" >> "$out"
+			echo "phyCapab[\"$phyname\"][\"$b\"][\"freqs\"] = [];" >> "$out"
+			echo "phyCapab[\"$phyname\"][\"$b\"][\"pwrs\"] = [];" >> "$out"
+
+			echo "nextCh     = [];" >> "$out"
+			echo "nextChFreq = [];" >> "$out"
+			echo "nextChPwr  = [];" >> "$out"
+
+			# we are about to screen-scrape iw output, which the tool specifically says we should NOT do
+			# however, as far as I can tell there is no other way to get max txpower for each channel
+			# so... here it goes.
+			# If stuff gets FUBAR, take a look at iw output, and see if this god-awful expression still works
+			iw "$phyname" info 2>&1 | sed -e '/MHz/!d; /GI/d; /disabled/d; /radar detect /d; /Supported Channel Width/d; /STBC/d; /PPDU/d; /MCS/d; s/[:blank:]*\*[:blank:]*//g; s:[]()[]::g; s/\.0//g; s/ dBm.*//g;' | grep 'MHz' | awk ' { print "nextCh.push("$3"); nextChFreq["$3"] = \""$1"MHz\"; nextChPwr["$3"] = "$4";"   ; } ' >> "$out"
+
+			echo "phyCapab[\"$phyname\"][\"$b\"][\"channels\"] = nextCh ;"     >> "$out"
+			echo "phyCapab[\"$phyname\"][\"$b\"][\"freqs\"]  = nextChFreq ;" >> "$out"
+			echo "phyCapab[\"$phyname\"][\"$b\"][\"pws\"]   = nextChPwr ;"  >> "$out"
+		done
+	}
+}
+
 print_mac80211_channels_for_wifi_dev()
 {
 	wifi_dev="$1"
@@ -97,12 +161,11 @@ print_mac80211_channels_for_wifi_dev()
 	# however, as far as I can tell there is no other way to get max txpower for each channel
 	# so... here it goes.
 	# If stuff gets FUBAR, take a look at iw output, and see if this god-awful expression still works
-	iw "$phyname" info 2>&1 | sed -e '/MHz/!d; /GI/d; /disabled/d; /radar detect /d; /Supported Channel Width/d; /STBC/d; /PPDU/d; /MCS/d; s/[:blank:]*\*[:blank:]*//g; s:[]()[]::g; s/\..*$//g' | grep  -v 'MHz -' | awk ' { print "nextCh.push("$3"); nextChFreq["$3"] = \""$1"MHz\"; nextChPwr["$3"] = "$4";"   ; } ' >> "$out"
+	iw "$phyname" info 2>&1 | sed -e '/MHz/!d; /GI/d; /disabled/d; /radar detect /d; /Supported Channel Width/d; /STBC/d; /PPDU/d; /MCS/d; s/[:blank:]*\*[:blank:]*//g; s:[]()[]::g; s/\.0//g; s/ dBm.*//g;' | grep 'MHz' | awk ' { print "nextCh.push("$3"); nextChFreq["$3"] = \""$1"MHz\"; nextChPwr["$3"] = "$4";"   ; } ' >> "$out"
 
 	echo "mac80211Channels[\"$chId\"] = nextCh ;"     >> "$out"
 	echo "mac80211ChFreqs[\"$chId\"]  = nextChFreq ;" >> "$out"
 	echo "mac80211ChPwrs[\"$chId\"]   = nextChPwr ;"  >> "$out"
-
 }
 
 out_file="/var/cached_basic_vars"
@@ -144,6 +207,9 @@ echo "var isRamips = $ramips;" >> "$out_file"
 
 echo "var wifiDevG=uciWirelessDevs.length > 0 ? uciWirelessDevs[0] : \"\";" >> "$out_file"
 echo "var wifiDevA=\"\";" >> "$out_file"
+echo "var phyRadio=[];" >> "$out_file"
+echo "var radioPhy=[];" >> "$out_file"
+echo "var phyCapab=[];" >> "$out_file"
 
 if [ -e /lib/wifi/broadcom.sh ] ; then
 	echo "var wirelessDriver=\"broadcom\";" >> "$out_file"
@@ -153,7 +219,7 @@ if [ -e /lib/wifi/broadcom.sh ] ; then
 	echo "var AwifiAC = false;" >> "$out_file"
 	echo "var AwifiAX = false;" >> "$out_file"
 	echo "var dualBandWireless=false;" >> "$out_file"
-elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" -o -e "/sys/class/ieee80211/wl0" ] ; then
+elif [ -e /lib/wifi/mac80211.uc ] && [ -e "/sys/class/ieee80211/phy0" -o -e "/sys/class/ieee80211/wl0" ] ; then
 	echo 'var wirelessDriver="mac80211";' >> "$out_file"
 	echo 'var mac80211Channels = [];' >> "$out_file"
 	echo 'var mac80211ChFreqs = [];' >> "$out_file"
@@ -174,6 +240,7 @@ elif [ -e /lib/wifi/mac80211.sh ] && [ -e "/sys/class/ieee80211/phy0" -o -e "/sy
 	rnum=0;
 	for r in $radios ; do
 		print_mac80211_channels_for_wifi_dev "$r" "$rnum" "$out_file" "$dualband"
+		print_mac80211_capabs_for_wifi_dev "$r" "$rnum" "$out_file"
 		rnum=$(( $rnum+1 ))
 	done
 else
