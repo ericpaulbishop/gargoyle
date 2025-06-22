@@ -10,4 +10,6 @@ enum nft_weburl_attributes {
 
 #define NFTA_WEBURL_MAX (__NFTA_WEBURL_MAX - 1)
 
+#define WEBURL_TEXT_SIZE 1024
+
 #endif /* _WEBURL_H */

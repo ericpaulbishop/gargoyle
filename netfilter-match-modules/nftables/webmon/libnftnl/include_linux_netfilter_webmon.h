@@ -21,4 +21,6 @@ enum nft_timerange_attributes {
 
 #define NFTA_WEBMON_MAX (__NFTA_WEBMON_MAX - 1)
 
+#define WEBMON_TEXT_SIZE 1024
+
 #endif /* _WEBMON_H */

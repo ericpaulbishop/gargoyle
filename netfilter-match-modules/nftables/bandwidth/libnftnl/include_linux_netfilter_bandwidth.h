@@ -25,4 +25,7 @@ enum nft_bandwidth_attributes {
 
 #define NFTA_BANDWIDTH_MAX (__NFTA_BANDWIDTH_MAX - 1)
 
+#define BANDWIDTH_MAX_ID_LENGTH 50
+#define BANDWIDTH_SUBNET_STR_SIZE 128
+
 #endif /* _BANDWIDTH_H */
