@@ -8,22 +8,18 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libusbmuxd
-PKG_VERSION:=2.0.3
+PKG_VERSION:=2.1.0
 PKG_RELEASE:=1
-PKG_REV:=30e678d4e76a9f4f8a550c34457dab73909bdd92
 
-PKG_SOURCE_PROTO:=git
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=https://github.com/libimobiledevice/libusbmuxd.git
-PKG_MIRROR_HASH:=0de242d7740b58c4f8b3bd9deee772929344b76963b51fab3a7d07fda5289b2e
-PKG_SOURCE_VERSION:=$(PKG_REV)
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
+PKG_SOURCE_URL:=https://github.com/libimobiledevice/libusbmuxd/releases/download/$(PKG_VERSION)
+PKG_HASH:=c35bf68f8e248434957bd5b234c389b02206a06ecd9303a7fb931ed7a5636b16
 
-PKG_MAINTAINER:=Michael Gray <support@lantisproject.com>
+PKG_MAINTAINER:=Rosen Penev <rosenp@gmail.com>
 PKG_CPE_ID:=cpe:/a:libimobiledevice:libusbmuxd
 
 PKG_INSTALL:=1
 PKG_BUILD_PARALLEL:=1
-PKG_FIXUP:=autoreconf
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -46,7 +42,7 @@ define Package/libusbmuxd
   SECTION:=libs
   CATEGORY:=Libraries
   TITLE+= library
-  DEPENDS:=+libimobiledevice-glue +libplist +libpthread +libxml2 +zlib
+  DEPENDS:=+libplist +libimobiledevice-glue +libpthread +libxml2 +zlib
   PKG_LICENSE:=LGPL-2.1-or-later
   PKG_LICENSE_FILES:=COPYING
 endef
@@ -72,11 +68,6 @@ endef
 
 CONFIGURE_ARGS += \
 	--disable-static
-
-define Build/Prepare
-	echo "$(PKG_VERSION)" > $(PKG_BUILD_DIR)/.tarball-version
-	$(call Build/Prepare/Default)
-endef
 
 define Build/InstallDev
 	$(INSTALL_DIR) $(1)/usr/include

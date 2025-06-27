@@ -9,12 +9,12 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=msmtp
-PKG_VERSION:=1.8.19
-PKG_RELEASE:=$(AUTORELEASE)
+PKG_VERSION:=1.8.26
+PKG_RELEASE:=1
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.xz
 PKG_SOURCE_URL:=https://marlam.de/msmtp/releases
-PKG_HASH:=34a1e1981176874dbe4ee66ee0d9103c90989aa4dcdc4861e4de05ce7e44526b
+PKG_HASH:=6cfc488344cef189267e60aea481f00d4c7e2a59b53c6c659c520a4d121f66d8
 
 PKG_MAINTAINER:=
 PKG_LICENSE:=GPL-3.0-or-later
@@ -119,9 +119,6 @@ define Package/msmtp/install
 		$(1)/etc/msmtprc
 	$(INSTALL_DIR) $(1)/usr/bin
 	$(CP) $(PKG_INSTALL_DIR)/usr/bin/msmtp $(1)/usr/bin/
-	$(INSTALL_DIR) $(1)/usr/sbin $(1)/usr/lib
-	ln -sf ../bin/msmtp $(1)/usr/sbin/sendmail
-	ln -sf ../bin/msmtp $(1)/usr/lib/sendmail
 endef
 
 define Package/msmtp-mta/install
