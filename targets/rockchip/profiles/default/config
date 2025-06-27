@@ -3133,6 +3133,7 @@ CONFIG_PACKAGE_kmod-hwmon-core=y
 # CONFIG_PACKAGE_kmod-i2c-algo-pcf is not set
 # CONFIG_PACKAGE_kmod-i2c-core is not set
 # CONFIG_PACKAGE_kmod-i2c-designware-pci is not set
+# CONFIG_PACKAGE_kmod-i2c-designware-platform is not set
 # CONFIG_PACKAGE_kmod-i2c-gpio is not set
 # CONFIG_PACKAGE_kmod-i2c-mux is not set
 # CONFIG_PACKAGE_kmod-i2c-mux-gpio is not set
@@ -3395,6 +3396,7 @@ CONFIG_PACKAGE_kmod-nft-weburl=y
 # CONFIG_PACKAGE_kmod-e100 is not set
 # CONFIG_PACKAGE_kmod-e1000 is not set
 # CONFIG_PACKAGE_kmod-e1000e is not set
+# CONFIG_PACKAGE_kmod-enc28j60 is not set
 # CONFIG_PACKAGE_kmod-et131x is not set
 # CONFIG_PACKAGE_kmod-ethoc is not set
 # CONFIG_PACKAGE_kmod-fixed-phy is not set
@@ -3649,6 +3651,8 @@ CONFIG_PACKAGE_kmod-reed-solomon=y
 # CONFIG_PACKAGE_kmod-mmc-spi is not set
 # CONFIG_PACKAGE_kmod-spi-bitbang is not set
 # CONFIG_PACKAGE_kmod-spi-dev is not set
+# CONFIG_PACKAGE_kmod-spi-dw is not set
+# CONFIG_PACKAGE_kmod-spi-dw-mmio is not set
 # CONFIG_PACKAGE_kmod-spi-gpio is not set
 # end of SPI Support
 
@@ -4290,6 +4294,7 @@ CONFIG_PACKAGE_libe2p=y
 CONFIG_PACKAGE_libelf=y
 CONFIG_PACKAGE_libericstools=y
 CONFIG_PACKAGE_libev=m
+CONFIG_PACKAGE_libevdev=y
 CONFIG_PACKAGE_libevent2=y
 # CONFIG_PACKAGE_libevent2-core is not set
 # CONFIG_PACKAGE_libevent2-extra is not set
@@ -4368,6 +4373,7 @@ CONFIG_PACKAGE_libuci=y
 CONFIG_PACKAGE_libuclient=y
 CONFIG_PACKAGE_libucode=y
 CONFIG_PACKAGE_libudebug=y
+CONFIG_PACKAGE_libudev-zero=y
 # CONFIG_PACKAGE_libunistring is not set
 # CONFIG_PACKAGE_libunwind is not set
 CONFIG_PACKAGE_libusb-1.0=y
@@ -5018,6 +5024,7 @@ CONFIG_PACKAGE_mbedtls-clu=y
 # CONFIG_PACKAGE_omnia-mcutool is not set
 CONFIG_PACKAGE_openssl-util=m
 # CONFIG_PACKAGE_opkg-more is not set
+# CONFIG_PACKAGE_pciids is not set
 # CONFIG_PACKAGE_policycoreutils is not set
 # CONFIG_PACKAGE_prlimit is not set
 # CONFIG_PACKAGE_ravpower-mcu is not set
@@ -5042,6 +5049,8 @@ CONFIG_PACKAGE_usb-modeswitch=y
 # CONFIG_PACKAGE_usbgadget is not set
 # CONFIG_PACKAGE_usbgadget-acm is not set
 # CONFIG_PACKAGE_usbgadget-ncm is not set
+CONFIG_PACKAGE_usbids=y
+CONFIG_PACKAGE_usbutils=y
 # CONFIG_PACKAGE_uuidd is not set
 # CONFIG_PACKAGE_uuidgen is not set
 # CONFIG_PACKAGE_v4l-utils is not set
