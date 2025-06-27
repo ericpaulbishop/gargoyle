@@ -1,0 +1,17 @@
+if PACKAGE_usbmuxd
+
+comment "SSL support"
+
+choice
+	prompt "Selected SSL library"
+	default USBMUXD_MBEDTLS
+
+	config USBMUXD_MBEDTLS
+		bool "mbed TLS"
+
+	config USBMUXD_OPENSSL
+		bool "OpenSSL"
+
+endchoice
+
+endif

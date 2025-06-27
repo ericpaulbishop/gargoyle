@@ -33,7 +33,7 @@ define Package/usbmuxd
   SUBMENU:=libimobiledevice
   TITLE:=USB multiplexing daemon
   URL:=https://www.libimobiledevice.org/
-  DEPENDS:=+libusb-1.0 +libusbmuxd +libopenssl +libimobiledevice +usbutils
+  DEPENDS:=+libusb-1.0 +libusbmuxd +USBMUXD_MBEDTLS:libmbedtls +USBMUXD_OPENSSL:libopenssl +libimobiledevice +usbutils
 endef
 
 define Package/usbmuxd/description
