@@ -3,6 +3,7 @@
  *
  *
  *  Copyright © 2009 by Eric Bishop <eric@gargoyle-router.com>
+ *  Rewritten for nftables 2025 by Michael Gray <support@lantisproject.com>
  *
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
