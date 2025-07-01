@@ -17,9 +17,9 @@ static void webmon_stmt_print(const struct stmt *stmt, struct output_ctx *octx)
 
 static void webmon_stmt_destroy(struct stmt *stmt)
 {
-	expr_free(stmt->webmon.ips);
-	expr_free(stmt->webmon.domain_load_file);
-	expr_free(stmt->webmon.search_load_file);
+	free_const(stmt->webmon.ips);
+	free_const(stmt->webmon.domain_load_file);
+	free_const(stmt->webmon.search_load_file);
 }
 
 static const struct stmt_ops webmon_stmt_ops = {

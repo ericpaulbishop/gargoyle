@@ -98,9 +98,9 @@ static void bandwidth_stmt_print(const struct stmt *stmt, struct output_ctx *oct
 
 static void bandwidth_stmt_destroy(struct stmt *stmt)
 {
-	expr_free(stmt->bandwidth.id);
-	expr_free(stmt->bandwidth.subnet);
-	expr_free(stmt->bandwidth.subnet6);
+	free_const(stmt->bandwidth.id);
+	free_const(stmt->bandwidth.subnet);
+	free_const(stmt->bandwidth.subnet6);
 }
 
 static const struct stmt_ops bandwidth_stmt_ops = {
