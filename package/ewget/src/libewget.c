@@ -138,6 +138,7 @@ static void alarm_triggered(int sig);
 		#include <mbedtls/error.h>
 		#include <mbedtls/version.h>
 		#include <mbedtls/entropy.h>
+		#include <stdbool.h>
 		
 		#define AES_GCM_CIPHERS(v)                              \
 				MBEDTLS_TLS_##v##_WITH_AES_128_GCM_SHA256,      \
@@ -153,6 +154,13 @@ static void alarm_triggered(int sig);
 
 		static const int default_ciphersuites[] =
 		{
+			#ifdef MBEDTLS_SSL_PROTO_TLS1_3
+				MBEDTLS_TLS1_3_CHACHA20_POLY1305_SHA256,
+				MBEDTLS_TLS1_3_AES_256_GCM_SHA384,
+				MBEDTLS_TLS1_3_AES_128_GCM_SHA256,
+				MBEDTLS_TLS1_3_AES_128_CCM_SHA256,
+				MBEDTLS_TLS1_3_AES_128_CCM_8_SHA256,
+			#endif
 			MBEDTLS_TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
 			AES_GCM_CIPHERS(ECDHE_ECDSA),
 			MBEDTLS_TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,
@@ -1414,6 +1422,13 @@ static void* initialize_connection_https(char* host, int port, int family)
 			ssl = (SSL*)malloc(sizeof(SSL));
 			memset(ssl, 0, sizeof(SSL));
 			
+		#ifdef MBEDTLS_PSA_CRYPTO_C
+			static bool psa_init;
+
+			if (!psa_init && !psa_crypto_init())
+				psa_init = true;
+		#endif
+			
 			ctx = (SSL_CTX*)malloc(sizeof(SSL_CTX));
 			memset(ctx, 0, sizeof(SSL_CTX));
 			mbedtls_pk_init(&ctx->key);
@@ -1425,6 +1440,8 @@ static void* initialize_connection_https(char* host, int port, int family)
 				MBEDTLS_SSL_TRANSPORT_STREAM,
 				MBEDTLS_SSL_PRESET_DEFAULT );
 			
+			// Force TLS 1.2
+			mbedtls_ssl_conf_max_version(&(ctx->conf), MBEDTLS_SSL_MAJOR_VERSION_3, MBEDTLS_SSL_MINOR_VERSION_3);
 			mbedtls_ssl_conf_authmode(&(ctx->conf), MBEDTLS_SSL_VERIFY_NONE);
 			mbedtls_ssl_conf_rng(&(ctx->conf), ewget_urandom, NULL);
 			mbedtls_ssl_conf_own_cert(&(ctx->conf), &(ctx->ssl_client_cert), &(ctx->key)); 
