@@ -97,7 +97,7 @@
 
 	if [ -e "/lib/wifi/broadcom.sh" ] ; then
 		scan_brcm
-	elif [ -e "/lib/wifi/mac80211.sh" ] ; then
+	elif [ -e "/lib/wifi/mac80211.uc" ] ; then
 		scan_mac80211
 	fi
 
