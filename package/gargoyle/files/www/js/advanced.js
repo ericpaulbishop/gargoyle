@@ -249,7 +249,7 @@ function setNetOptContainerVisibility()
 
 function setPktSteeringVisibility()
 {
-	loadSelectedValueFromVariable(['pktsteer_opt',uciOriginal,'network','globals','packet_steering','0']);
+	loadSelectedValueFromVariable(['pktsteer_opt',uciOriginal,'network','globals','packet_steering','1']);
 }
 
 function parseCountry(countryLines)
