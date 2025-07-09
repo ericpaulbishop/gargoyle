@@ -89,18 +89,18 @@ setup()
 	# code to help filter out bogons on distribution monitors, 
 	# which make up really small amount of bandwidth, but screw up monitoring
 	nft add rule $upload_table $upload_chain ct mark set ct mark \& 0x00FFFFFF \| 0x0
-	nft add rule $upload_table $upload_chain ip saddr $lan_ip ct mark set ct mark \& 0xF0FFFFFF \| 0x0F000000
-	nft add rule $upload_table $upload_chain ip saddr $wan_ip ct mark set ct mark \& 0xF0FFFFFF \| 0x0F000000
-	nft add rule $upload_table $upload_chain ip6 saddr $lan6_ipstr ct mark set ct mark \& 0xF0FFFFFF \| 0x0F000000
-	nft add rule $upload_table $upload_chain ip6 saddr $wan6_ipstr ct mark set ct mark \& 0xF0FFFFFF \| 0x0F000000
+	[ -n "$lan_ip" ] && nft add rule $upload_table $upload_chain ip saddr $lan_ip ct mark set ct mark \& 0xF0FFFFFF \| 0x0F000000
+	[ -n "$wan_ip" ] && nft add rule $upload_table $upload_chain ip saddr $wan_ip ct mark set ct mark \& 0xF0FFFFFF \| 0x0F000000
+	[ "$lan6_ipstr" = "{}" ] || nft add rule $upload_table $upload_chain ip6 saddr $lan6_ipstr ct mark set ct mark \& 0xF0FFFFFF \| 0x0F000000
+	[ "$wan6_ipstr" = "{}" ] || nft add rule $upload_table $upload_chain ip6 saddr $wan6_ipstr ct mark set ct mark \& 0xF0FFFFFF \| 0x0F000000
 	nft add rule $upload_table $upload_chain ct mark \& 0x0F000000 == 0x0 return
 	nft add rule $upload_table $upload_chain ct mark set ct mark \& 0x00FFFFFF \| 0x0
 
 	nft add rule $download_table $download_chain ct mark set ct mark \& 0x00FFFFFF \| 0x0
-	nft add rule $download_table $download_chain ip daddr $lan_ip ct mark set ct mark \& 0xF0FFFFFF \| 0x0F000000
-	nft add rule $download_table $download_chain ip daddr $wan_ip ct mark set ct mark \& 0xF0FFFFFF \| 0x0F000000
-	nft add rule $download_table $download_chain ip6 daddr $lan6_ipstr ct mark set ct mark \& 0xF0FFFFFF \| 0x0F000000
-	nft add rule $download_table $download_chain ip6 daddr $wan6_ipstr ct mark set ct mark \& 0xF0FFFFFF \| 0x0F000000
+	[ -n "$lan_ip" ] && nft add rule $download_table $download_chain ip daddr $lan_ip ct mark set ct mark \& 0xF0FFFFFF \| 0x0F000000
+	[ -n "$wan_ip" ] && nft add rule $download_table $download_chain ip daddr $wan_ip ct mark set ct mark \& 0xF0FFFFFF \| 0x0F000000
+	[ "$lan6_ipstr" = "{}" ] || nft add rule $download_table $download_chain ip6 daddr $lan6_ipstr ct mark set ct mark \& 0xF0FFFFFF \| 0x0F000000
+	[ "$wan6_ipstr" = "{}" ] || nft add rule $download_table $download_chain ip6 daddr $wan6_ipstr ct mark set ct mark \& 0xF0FFFFFF \| 0x0F000000
 	nft add rule $download_table $download_chain ct mark \& 0x0F000000 == 0x0 return
 	nft add rule $download_table $download_chain ct mark set ct mark \& 0x00FFFFFF \| 0x0
 
