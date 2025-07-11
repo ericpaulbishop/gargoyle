@@ -17,7 +17,7 @@ static void weburl_stmt_print(const struct stmt *stmt, struct output_ctx *octx)
 		nft_print(octx, "matches-exactly ");
 
 	if(stmt->weburl.match != NULL && strlen(stmt->weburl.match) > 0)
-		nft_print(octx, "%%s%%s", inv ? "!= " : "", stmt->weburl.match);
+		nft_print(octx, "%%s\"%%s\"", inv ? "!= " : "", stmt->weburl.match);
 }
 
 static void weburl_stmt_destroy(struct stmt *stmt)

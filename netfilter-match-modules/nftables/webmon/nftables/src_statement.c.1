@@ -7,7 +7,7 @@ static void webmon_stmt_print(const struct stmt *stmt, struct output_ctx *octx)
 		nft_print(octx, "%%s-ips ", (stmt->webmon.flags & NFT_WEBMON_F_EXCLUDE ? "exclude" : "include"));
 		if(stmt->webmon.ips != NULL && strlen(stmt->webmon.ips) > 0)
 		{
-			nft_print(octx, "%%s ", stmt->webmon.ips);
+			nft_print(octx, "\"%%s\" ", stmt->webmon.ips);
 		}
 	}
 
