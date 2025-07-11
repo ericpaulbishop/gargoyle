@@ -41,7 +41,7 @@ start()
 	[ "$enabled" -gt 0 ] || return
 
 	network_get_device wan_if wan || \
-		wan_if=$(uci -q get network.wan.ifname)
+		wan_if=$(uci -q get network.wan.device)
 	if [ -n "$wan_if" ] ; then
 		#load save path, creating directory if necessary
 		if [ -z "$domain_save_path" ] ; then
