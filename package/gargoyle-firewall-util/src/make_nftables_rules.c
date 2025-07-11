@@ -179,22 +179,22 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 	char* active_weekly_ranges  = get_map_element(rule_def, "active_weekly_ranges");
 	if(active_weekly_ranges != NULL)
 	{
-		char* tmp = dynamic_strcat(3, " timerange weekly-ranges \"", active_weekly_ranges, "\" " );
+		char* tmp = dynamic_strcat(3, " timerange weekly-ranges \\\"", active_weekly_ranges, "\\\" " );
 		dcat_and_free(&single_check, &tmp, 1, 1);
 	}
 	else if(active_hours != NULL && active_weekdays != NULL)
 	{	
-		char* tmp = dynamic_strcat(5, " timerange hours \"", active_hours, "\" weekdays \"", active_weekdays, "\" " );
+		char* tmp = dynamic_strcat(5, " timerange hours \\\"", active_hours, "\\\" weekdays \\\"", active_weekdays, "\\\" " );
 		dcat_and_free(&single_check, &tmp, 1, 1);
 	}
 	else if(active_hours != NULL)
 	{
-		char* tmp = dynamic_strcat(3, " timerange hours \"", active_hours, "\" " );
+		char* tmp = dynamic_strcat(3, " timerange hours \\\"", active_hours, "\\\" " );
 		dcat_and_free(&single_check, &tmp, 1, 1);
 	}
 	else if(active_weekdays != NULL)
 	{
-		char* tmp = dynamic_strcat(3, " timerange weekdays \"", active_weekdays, "\" " );
+		char* tmp = dynamic_strcat(3, " timerange weekdays \\\"", active_weekdays, "\\\" " );
 		dcat_and_free(&single_check, &tmp, 1, 1);
 	}
 
@@ -468,7 +468,7 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 			char* inverted_mark = NULL;
 			sprintf(mark, "0x%lX", initial_url_mark);
 			inverted_mark = invert_bitmask(mark);
-			push_list(all_rules, dynamic_strcat(5,  rule_prefix, " meta l4proto tcp weburl contains \"http\" ct mark set ct mark \\& ", inverted_mark, " \\| ", mark));
+			push_list(all_rules, dynamic_strcat(5,  rule_prefix, " meta l4proto tcp weburl contains \\\"http\\\" ct mark set ct mark \\& ", inverted_mark, " \\| ", mark));
 			free(inverted_mark);
 		}
 		
@@ -538,7 +538,7 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 	 */
 	if(url_rule_count > 0 && safe_strcmp(target, "accept") == 0 && is_ingress == 0)
 	{
-		push_list(all_rules, dynamic_strcat(2, rule_prefix, " meta l4proto tcp weburl contains \"http\" ct mark set ct mark \\& 0x00FFFFFF \\| 0xFF000000" ));
+		push_list(all_rules, dynamic_strcat(2, rule_prefix, " meta l4proto tcp weburl contains \\\"http\\\" ct mark set ct mark \\& 0x00FFFFFF \\| 0xFF000000" ));
 		push_list(all_rules, dynamic_strcat(2, rule_prefix, " meta l4proto tcp dport {80,443} ct mark \\& 0xFF000000 != 0xFF000000 accept " ));
 		push_list(all_rules, dynamic_strcat(2, rule_prefix,  " meta l4proto tcp ct mark \\& 0xFF000000 == 0xFF000000 reject with tcp reset" ));
 		push_list(all_rules, dynamic_strcat(2, rule_prefix,  " ct mark set ct mark \\& 0x00FFFFFF \\| 0x0" ));
@@ -567,7 +567,7 @@ int compute_multi_rules(char** def, list* multi_rules, char** single_check, int 
 		{
 			parse_type = 1;
 			// URL: weburl ! contains \"blah blah\"
-			char* tmp = dynamic_strcat(7, test_prefix1, (is_negation1 ? " != " : " "), test_prefix2, (is_negation2 ? " != " : " "), (quoted_args ? " \"" : " "), def[0], (quoted_args ? "\" " : " ") );
+			char* tmp = dynamic_strcat(7, test_prefix1, (is_negation1 ? " != " : " "), test_prefix2, (is_negation2 ? " != " : " "), (quoted_args ? " \\\"" : " "), def[0], (quoted_args ? "\\\" " : " ") );
 			dcat_and_free(&tmp, single_check, 1, 1 );
 		}
 		else
@@ -577,14 +577,14 @@ int compute_multi_rules(char** def, list* multi_rules, char** single_check, int 
 			char mask_str[12];
 			char* inverted_mask = NULL;
 			sprintf(mask_str, "0x%lX", mask);
-			inverted_mask = invert_bitmask(mask);
+			inverted_mask = invert_bitmask(mask_str);
 			char* connmark_part = dynamic_strcat(4, " ct mark set ct mark \\& ", inverted_mask, " \\| ", (is_negation ? "0x0" : mask_str));
 			free(inverted_mask);
 
 			int rule_index =0;
 			for(rule_index=0; def[rule_index] != NULL; rule_index++)
 			{
-				char* common_part = dynamic_strcat(7, test_prefix1, " ", test_prefix2, (quoted_args ? " \"" : " "),  def[rule_index], (quoted_args ? "\" " : " "), connmark_part);
+				char* common_part = dynamic_strcat(7, test_prefix1, " ", test_prefix2, (quoted_args ? " \\\"" : " "),  def[rule_index], (quoted_args ? "\\\" " : " "), connmark_part);
 				if(strcmp(proto, "both") == 0)
 				{
 					if(requires_proto)
