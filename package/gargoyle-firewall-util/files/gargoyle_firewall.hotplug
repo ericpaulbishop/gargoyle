@@ -17,6 +17,11 @@ if [ "$INTERFACE" = "wan" ] || [ "$INTERFACE" = "wan6" ] || [ "$INTERFACE" = "ww
 		if [ -h /etc/rc.d/S55bwmon_gargoyle ] ; then
 			/etc/init.d/bwmon_gargoyle restart
 		fi
+
+		#Start up the web monitor
+		if [ -h /etc/rc.d/S85webmon_gargoyle ] ; then
+			/etc/init.d/webmon_gargoyle restart
+		fi
 	fi
 
 	if [ "$ACTION" = "ifdown" ]; then
@@ -35,9 +40,11 @@ if [ "$INTERFACE" = "lan" ]; then
 			[ "$ACTION" = ifupdate -a -z "$IFUPDATE_ADDRESSES" -a -z "$IFUPDATE_DATA" ] && exit 0
 
 			/etc/init.d/bwmon_gargoyle restart
+			/etc/init.d/webmon_gargoyle restart
 		fi
 		if [ "$ACTION" = "ifdown" ]; then
 			/etc/init.d/bwmon_gargoyle stop
+			/etc/init.d/webmon_gargoyle stop
 		fi
 	fi
 fi
