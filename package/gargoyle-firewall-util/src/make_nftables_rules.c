@@ -36,14 +36,14 @@
 
 /* these are indices don't change! */
 #define MATCH_IP_INDEX 0
-#define MATCH_IP_RANGE_INDEX 1
+#define MATCH_IP6_INDEX 1
 #define MATCH_MAC_INDEX 2
 
-string_map* get_rule_definition(char* config, char* section, char* family);
+string_map* get_rule_definition(char* config, char* section);
 char* get_option_value_string(struct uci_option* uopt);
-int parse_option(char* option_name, char* option_value, string_map* definition, char* family);
+int parse_option(char* option_name, char* option_value, string_map* definition);
 
-char*** parse_ips_and_macs(char* addr_str, char* family);
+char*** parse_ips_and_macs(char* addr_str);
 char** parse_ports(char* port_str);
 char** parse_marks(char* list_str, unsigned long max_mask);
 list* parse_quoted_list(char* list_str, char quote_char, char escape_char, char add_remainder_if_uneven_quotes);
@@ -52,7 +52,7 @@ int truncate_if_starts_with(char* test_str, char* prefix);
 
 char* invert_bitmask(const char* input);
 
-char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingress, char* target, char* target_options, char* family);
+char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingress, char* target, char* target_options);
 int compute_multi_rules(char** def, list* multi_rules, char** single_check, int never_single, char* rule_prefix, char* test_prefix1, char* test_prefix2, int is_negation1, int is_negation2, int mask_byte_index, char* proto, int requires_proto, int quoted_args);
 
 int main(int argc, char **argv)
@@ -64,11 +64,10 @@ int main(int argc, char **argv)
 	char* chain		= NULL;
 	char* target		= NULL;
 	char* target_options	= NULL;
-	char* family		= NULL;
 	int is_ingress		= 0;
 	int run_commands	= 0;
 	int usage_printed	= 0;
-	while((c = getopt(argc, argv, "P:p:S:s:T:t:C:c:G:g:O:o:F:f:IiRrUu")) != -1) //section, page, css includes, javascript includes, title, output interface variables
+	while((c = getopt(argc, argv, "P:p:S:s:T:t:C:c:G:g:O:o:IiRrUu")) != -1) //section, page, css includes, javascript includes, title, output interface variables
 	{
 		switch(c)
 		{
@@ -96,9 +95,6 @@ int main(int argc, char **argv)
 			case 'o':
 				target_options = strdup(optarg);
 				break;
-			case 'F':
-			case 'f':
-				family = strdup(optarg);
 			case 'I':
 			case 'i':
 				is_ingress = 1;
@@ -110,28 +106,18 @@ int main(int argc, char **argv)
 			case 'U':
 			case 'u':
 			default:
-				fprintf(stderr, "USAGE: %s -p [PACKAGE] -s [SECTION] -t [TABLE] -c [CHAIN] -g [TARGET] [OPTIONS]\n       -o [TARGET_OPTIONS]\n       -f [ipv4|ipv6|any]\n       -i indicates that this rule applies to ingress packets\n       -r implies computed commands should be executed instead of just printed\n       -u print usage and exit\n\n", argv[0]);
+				fprintf(stderr, "USAGE: %s -p [PACKAGE] -s [SECTION] -t [TABLE] -c [CHAIN] -g [TARGET] [OPTIONS]\n       -o [TARGET_OPTIONS]\n       -i indicates that this rule applies to ingress packets\n       -r implies computed commands should be executed instead of just printed\n       -u print usage and exit\n\n", argv[0]);
 				usage_printed = 1;
 				break;
 
 		}
 	}
-	if(family == NULL)
+	if(package != NULL && section != NULL && table != NULL && chain != NULL && target != NULL)
 	{
-		family = strdup("any");
-	}
-	else if(safe_strcmp(family, "ipv4") != 0 && safe_strcmp(family, "ipv6") != 0 && safe_strcmp(family, "any") != 0)
-	{
-		free(family);
-		family = NULL;
-		fprintf(stderr, "ERROR: Invalid IP family\n");
-	}
-	if(package != NULL && section != NULL && table != NULL && chain != NULL && target != NULL && family != NULL)
-	{
-		string_map* def = get_rule_definition(package, section, family);
+		string_map* def = get_rule_definition(package, section);
 		if(def !=  NULL)
 		{
-			char** rules = compute_rules(def, table, chain, 0, target, target_options, family);
+			char** rules = compute_rules(def, table, chain, 0, target, target_options);
 
 			int rindex = 0;
 			for(rindex=0; rules[rindex] != NULL; rindex++)
@@ -153,7 +139,7 @@ int main(int argc, char **argv)
 	}
 	else if(!usage_printed)
 	{
-		fprintf(stderr, "USAGE: %s -p [PACKAGE] -s [SECTION] -t [TABLE] -c [CHAIN] -g [TARGET] [OPTIONS]\n       -o [TARGET_OPTIONS]\n       -f [ipv4|ipv6|any]\n       -i indicates that this rule applies to ingress packets\n       -r implies computed commands should be executed instead of just printed\n       -u print usage and exit\n\n", argv[0]);
+		fprintf(stderr, "USAGE: %s -p [PACKAGE] -s [SECTION] -t [TABLE] -c [CHAIN] -g [TARGET] [OPTIONS]\n       -o [TARGET_OPTIONS]\n       -i indicates that this rule applies to ingress packets\n       -r implies computed commands should be executed instead of just printed\n       -u print usage and exit\n\n", argv[0]);
 	}
 
 	return 0;
@@ -165,7 +151,7 @@ int main(int argc, char **argv)
  * further dimensions, we will have to be greedy and take 
  * even more address space
  */
-char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingress, char* target, char* target_options, char* family)
+char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingress, char* target, char* target_options)
 {
 	list* multi_rules = initialize_list();
 	char* single_check = strdup("");
@@ -173,6 +159,31 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 
 	target = strdup(target);
 	to_lowercase(target);
+	
+	/* check family */
+	char* family = get_map_element(rule_def, "family");
+	if(family == NULL)
+	{
+		family = strdup("any");
+		set_map_element(rule_def, "family", family);
+	}
+	to_lowercase(family);
+	if(safe_strcmp(family, "ipv4") != 0 && safe_strcmp(family, "ipv6") != 0 && safe_strcmp(family, "any") != 0)
+	{
+		char* tmp;
+		tmp = set_map_element(rule_def, "family", strdup("any"));
+		free(tmp);
+		family = (char*)get_map_element(rule_def, "family");
+	}
+	
+	/* apply family prefix */
+	if(safe_strcmp(family, "any") != 0)
+	{
+		char* tmp;
+		tmp = dynamic_strcat(4, rule_prefix, "meta nfproto ", family, " ");
+		free(rule_prefix);
+		rule_prefix = tmp;
+	}
 
 	/* get timerange vars first */
 	char* active_hours = get_map_element(rule_def, "active_hours");
@@ -322,7 +333,7 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 	 * for ingress source = remote, destination = local 
 	 * for egress source = local, destination = remote
 	 *
-	 * addresses are a bit tricky, since we need to handle 3 different kinds of matches: ips, ip ranges and macs
+	 * addresses are a bit tricky, since we need to handle 3 different kinds of matches: ips, ip6s and macs
 	 */
 	char*** src_def = get_map_element(rule_def, (is_ingress ? "remote_addr" : "local_addr"));
 	char*** not_src_def = get_map_element(rule_def, (is_ingress ? "not_remote_addr" : "not_local_addr"));
@@ -336,8 +347,7 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 
 	char*** addr_defs[2] = { src_def, dst_def };
 	int addr_negated[2] = { src_is_negated, dst_is_negated };
-	char* addr_prefix1[2][3] = { { " ip saddr ", " ip saddr ", " ether saddr " }, { " ip daddr", " ip daddr ", NULL } };
-	char* addr6_prefix1[2][3] = { { " ip6 saddr ", " ip6 saddr ", " ether saddr " }, { " ip6 daddr", " ip6 daddr ", NULL } };
+	char* addr_prefix1[2][3] = { { " ip saddr ", " ip6 saddr ", " ether saddr " }, { " ip daddr", " ip6 daddr ", NULL } };
 
 	int addr_index = 0;
 	int is_true = 1;
@@ -368,7 +378,7 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 				{
 					if(test_list[0] != NULL)
 					{
-						compute_multi_rules(test_list, multi_rules, &single_check, is_multi, rule_prefix, (safe_strcmp(family, "ipv6") == 0 ? addr6_prefix1[addr_index][test_list_index] : addr_prefix1[addr_index][test_list_index]), "",is_negated, 0, mask_byte_index, proto, include_proto, 0);
+						compute_multi_rules(test_list, multi_rules, &single_check, is_multi, rule_prefix, addr_prefix1[addr_index][test_list_index], "",is_negated, 0, mask_byte_index, proto, include_proto, 0);
 					}
 				}
 			}
@@ -609,7 +619,7 @@ int compute_multi_rules(char** def, list* multi_rules, char** single_check, int 
 	return parse_type;
 }
 
-string_map* get_rule_definition(char* package, char* section, char* family)
+string_map* get_rule_definition(char* package, char* section)
 {
 	string_map* definition = NULL;
 	struct uci_context *ctx;
@@ -633,7 +643,7 @@ string_map* get_rule_definition(char* package, char* section, char* family)
 					char* option_name = strdup(e->name);
 					to_lowercase(option_name);
 					char* option_value = get_option_value_string(uci_to_option(e));
-					parse_option(option_name, option_value, definition, family);
+					parse_option(option_name, option_value, definition);
 					free(option_name);
 					free(option_value);
 				}
@@ -645,14 +655,15 @@ string_map* get_rule_definition(char* package, char* section, char* family)
 	return definition;
 }
 
-int parse_option(char* option_name, char* option_value, string_map* definition, char* family)
+int parse_option(char* option_name, char* option_value, string_map* definition)
 {
 	int valid_option = 0;
 	if(	safe_strcmp(option_name, "proto") == 0 ||
 		safe_strcmp(option_name, "layer7") == 0 ||
 		safe_strcmp(option_name, "ipp2p") == 0 ||
 		safe_strcmp(option_name, "max_pkt_size") == 0 || 
-		safe_strcmp(option_name, "min_pkt_size") ==0  
+		safe_strcmp(option_name, "min_pkt_size") ==0 ||
+		safe_strcmp(option_name, "family") ==0
 		)
 	{
 		valid_option = 1;
@@ -685,7 +696,7 @@ int parse_option(char* option_name, char* option_value, string_map* definition, 
 			safe_strcmp(option_name, "not_local_addr") == 0 
 		       		)
 	{
-		char*** parsed_addr = parse_ips_and_macs(option_value, family);
+		char*** parsed_addr = parse_ips_and_macs(option_value);
 		if(parsed_addr != NULL)
 		{
 			valid_option = 1;
@@ -785,12 +796,12 @@ char* get_option_value_string(struct uci_option* uopt)
 	return opt_str;
 }
 
-char*** parse_ips_and_macs(char* addr_str, char* family)
+char*** parse_ips_and_macs(char* addr_str)
 {
 	unsigned long num_pieces;
 	char** addr_parts = split_on_separators(addr_str, ",", 1, -1, 0, &num_pieces);
 	list* ip_list = initialize_list();
-	list* ip_range_list = initialize_list();
+	list* ip6_list = initialize_list();
 	list* mac_list = initialize_list();
 	
 	int ip_part_index;
@@ -807,54 +818,93 @@ char*** parse_ips_and_macs(char* addr_str, char* family)
 				push_list(mac_list, trim_flanking_whitespace(next_str));
 			}
 		}
-		
-		//if family is any, we don't want IP addresses
-		if(safe_strcmp(family, "any") != 0)
-		{
-			if(strchr(next_str, '-') != NULL)
-			{
-				char** range_parts = split_on_separators(next_str, "-", 1, 2, 1, &num_pieces);
-				char* start = trim_flanking_whitespace(range_parts[0]);
-				char* end = trim_flanking_whitespace(range_parts[1]);
-				
-				char start_ip[16];
-				char end_ip[16];
-				if((inet_pton(AF_INET6, start, start_ip) && inet_pton(AF_INET6, end, end_ip)) || (inet_pton(AF_INET, start, start_ip) && inet_pton(AF_INET, end, end_ip)))
-				{
-					push_list(ip_range_list, trim_flanking_whitespace(next_str));
-				}
 
-				free(start);
-				free(end);	
-				free(range_parts);
-			}
-			else
+		if(strchr(next_str, '-') != NULL)
+		{
+			char** range_parts = split_on_separators(next_str, "-", 1, 2, 1, &num_pieces);
+			char* start = trim_flanking_whitespace(range_parts[0]);
+			char* end = trim_flanking_whitespace(range_parts[1]);
+			
+			char start_ip[16];
+			char end_ip[16];
+			if(inet_pton(AF_INET6, start, start_ip) && inet_pton(AF_INET6, end, end_ip))
 			{
-				char parsed_ip[16];
-				if(inet_pton(AF_INET6, next_str, parsed_ip) || inet_pton(AF_INET, next_str, parsed_ip))
-				{
-					push_list(ip_list, trim_flanking_whitespace(next_str));
-				}
+				push_list(ip6_list, trim_flanking_whitespace(next_str));
+			}
+			else if(inet_pton(AF_INET, start, start_ip) && inet_pton(AF_INET, end, end_ip))
+			{
+				push_list(ip_list, trim_flanking_whitespace(next_str));
+			}
+
+			free(start);
+			free(end);
+			free(range_parts);
+		}
+		else
+		{
+			char parsed_ip[16];
+			if(inet_pton(AF_INET6, next_str, parsed_ip) == 1)
+			{
+				push_list(ip6_list, trim_flanking_whitespace(next_str));
+			}
+			else if(inet_pton(AF_INET, next_str, parsed_ip) == 1)
+			{
+				push_list(ip_list, trim_flanking_whitespace(next_str));
 			}
 		}
 		
 	}
 	free(addr_parts);
-	
-	unsigned long num1, num2, num3;
-	char*** return_value = (char***)malloc(3*sizeof(char**));
-	return_value[MATCH_IP_INDEX] = (char**)destroy_list(ip_list, DESTROY_MODE_RETURN_VALUES, &num1);
-	return_value[MATCH_IP_RANGE_INDEX] = (char**)destroy_list(ip_range_list, DESTROY_MODE_RETURN_VALUES, &num2);
-	return_value[MATCH_MAC_INDEX] = (char**)destroy_list(mac_list, DESTROY_MODE_RETURN_VALUES, &num3);
 
+	char*** return_value = (char***)malloc(3*sizeof(char**));
+
+	unsigned long num1, num2, num3;
+	char** ip_strs = (char**)destroy_list(ip_list, DESTROY_MODE_RETURN_VALUES, &num1);
+	char** ip6_strs = (char**)destroy_list(ip6_list, DESTROY_MODE_RETURN_VALUES, &num2);
+	char** mac_strs = (char**)destroy_list(mac_list, DESTROY_MODE_RETURN_VALUES, &num3);
+
+	char* match_ip_str = join_strs(",", ip_strs, -1, 1, 1);
+	char* match_ip6_str = join_strs(",", ip6_strs, -1, 1, 1);
+	char* match_mac_str = join_strs(",", mac_strs, -1, 1, 1);
+
+	if(num1 > 1)
+	{
+		char* tmp = dynamic_strcat(3, "{", match_ip_str, "}");
+		free(match_ip_str);
+		match_ip_str = tmp;
+	}
+	if(num2 > 1)
+	{
+		char* tmp = dynamic_strcat(3, "{", match_ip6_str, "}");
+		free(match_ip6_str);
+		match_ip6_str = tmp;
+	}
+	if(num3 > 1)
+	{
+		char* tmp = dynamic_strcat(3, "{", match_mac_str, "}");
+		free(match_mac_str);
+		match_mac_str = tmp;
+	}
+	
 	if(num1 + num2 + num3 == 0)
 	{
-		free(return_value[0]);
-		free(return_value[1]);
-		free(return_value[2]);
 		free(return_value);
 		return_value = NULL;
 	}
+	else
+	{
+		return_value[MATCH_IP_INDEX] = (char**)malloc(2*sizeof(char*));
+		return_value[MATCH_IP6_INDEX] = (char**)malloc(2*sizeof(char*));
+		return_value[MATCH_MAC_INDEX] = (char**)malloc(2*sizeof(char*));
+
+		return_value[MATCH_IP_INDEX][0] = match_ip_str;
+		return_value[MATCH_IP_INDEX][1] = NULL;
+		return_value[MATCH_IP6_INDEX][0] = match_ip6_str;
+		return_value[MATCH_IP6_INDEX][1] = NULL;
+		return_value[MATCH_MAC_INDEX][0] = match_mac_str;
+		return_value[MATCH_MAC_INDEX][1] = NULL;
+	}
+
 	return return_value;
 }
 
