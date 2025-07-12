@@ -27,7 +27,7 @@ set_block_nonovpn()
 	if [ "$enabled" = "1" ] ; then
 		client_enabled=$(uci get openvpn_gargoyle.@client[0].enabled 2>/dev/null)
 	fi
-	delete_chain_from_table filter block_non_openvpn
+	delete_chain_from_table inet fw4 block_non_openvpn
 	
 	if [ "$client_enabled" = "true" ] ; then
 		do_block=$(uci get openvpn_gargoyle.@client[0].block_non_openvpn 2>/dev/null)
