@@ -915,9 +915,9 @@ char** parse_ports(char* port_str)
 	for(port_index=0; ports[port_index] != NULL; port_index++)
 	{
 		char* dash_ptr;
-		while((dash_ptr=strchr(ports[port_index], '-')) != NULL)
+		while((dash_ptr=strchr(ports[port_index], ':')) != NULL)
 		{
-			dash_ptr[0] = ':';
+			dash_ptr[0] = '-';
 		}
 		trim_flanking_whitespace( ports[port_index] );
 	}

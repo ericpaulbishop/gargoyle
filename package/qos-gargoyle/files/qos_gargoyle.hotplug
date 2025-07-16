@@ -1,5 +1,5 @@
 #!/bin/sh
-if [ "$INTERFACE" = "wan" ] || [ "$INTERFACE" = "wan6" ] ; then
+if [ "$INTERFACE" = "wan" ] || [ "$INTERFACE" = "wan6" ] || [ "$INTERFACE" = "wan_6" ] ; then
 	if [ -h /etc/rc.d/S50qos_gargoyle ] ; then
 		if [ "$ACTION" = "ifup" ] || [ "$ACTION" = ifupdate ]; then
 			[ "$ACTION" = ifupdate -a -z "$IFUPDATE_ADDRESSES" -a -z "$IFUPDATE_DATA" ] && exit 0

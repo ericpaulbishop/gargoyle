@@ -261,9 +261,9 @@ insert_pf_loopback_rules()
 			dp_colon=$(echo $dp_dash | sed 's/\-/:/g')
 
 			if [ "$all_defined" = "1" ] && [ "$src" = "wan" ] && [ "$dest" = "lan" ]  ; then
-				nft add rule inet fw4 nat_pf_loopback_A $proto dport $sdp_dash dnat to $dest_ip:$dp_dash
+				nft add rule inet fw4 nat_pf_loopback_A $proto dport $sdp_dash dnat ip to $dest_ip:$dp_dash
 				nft add rule inet fw4 pf_loopback_B $proto dport $dp_dash ip daddr $dest_ip accept
-				nft add rule inet fw4 nat_pf_loopback_C $proto dport $dp_dash ip daddr $dest_ip saddr $lan_mask masquerade
+				nft add rule inet fw4 nat_pf_loopback_C $proto dport $dp_dash ip daddr $dest_ip ip saddr $lan_mask masquerade
 			fi
 		}
 
@@ -290,7 +290,7 @@ insert_dmz_rule()
 		fi
 		# echo "from_if = $from_if"
 		if [ -n "$to_ip" ] && [ -n "$from"  ] && [ -n "$from_if" ] ; then
-			nft add rule inet fw4 "dstnat_${from}" meta nfproto ipv4 iifname $from_if dnat to $to_ip
+			nft add rule inet fw4 "dstnat_${from}" meta nfproto ipv4 iifname $from_if dnat ip to $to_ip
 			nft insert rule inet fw4 "forward_${from}" ip daddr $to_ip accept
 		fi
 	}
@@ -639,7 +639,7 @@ add_adsl_modem_routes()
 	wan_proto=$(uci -q get network.wan.proto)
 	if [ "$wan_proto" = "pppoe" ] ; then
 		wan_dev=$(uci -q get network.wan.device) #not really the interface, but the device
-		nft add rule inet fw4 srcnat oifname $wan_dev mmasquerade
+		nft add rule inet fw4 srcnat oifname $wan_dev masquerade
 		nft add rule inet fw4 forward_rule oifname $wan_dev accept
 		/etc/ppp/ip-up.d/modemaccess.sh firewall $wan_dev
 	fi
