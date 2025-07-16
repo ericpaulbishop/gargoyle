@@ -179,12 +179,12 @@ apply_all_rules()
 					fi
 				;;
 				srcport)
-					if [ -n $(echo $option_value | grep "-") ] ; then option_value="$(echo "$option_value" | sed -e 's,-,:,g')" ; fi
+					if [ -n $(echo $option_value | grep ":") ] ; then option_value="$(echo "$option_value" | sed -e 's,:,-,g')" ; fi
 					match_str="$match_str PPROTOO sport $option_value"
 					need_proto="1"
 				;;
 				dstport)
-					if [ -n $(echo $option_value | grep "-") ] ; then option_value="$(echo "$option_value" | sed -e 's,-,:,g')" ; fi
+					if [ -n $(echo $option_value | grep ":") ] ; then option_value="$(echo "$option_value" | sed -e 's,:,-,g')" ; fi
 					match_str="$match_str PPROTOO dport $option_value"
 					need_proto="1"
 				;;
@@ -223,17 +223,19 @@ apply_all_rules()
 				if [ -z "$proto" ] && [ -n "$need_proto" ] ; then
 					$echo_on
 					tcpstr="$(echo $match_str | sed 's/PPROTOO/tcp/g')"
-					ucpstr="$(echo $match_str | sed 's/PPROTOO/ucp/g')"
+					udpstr="$(echo $match_str | sed 's/PPROTOO/udp/g')"
 					nft insert rule $table $chain $tcpstr meta mark set $next_mark
-					nft insert rule $table $chain $ucpstr meta mark set $next_mark
+					nft insert rule $table $chain $udpstr meta mark set $next_mark
 					$echo_off
 
 				else
  					#Otherwise just specify what the user requested (or nothing)
+					tmp_proto=""
 					if [ -n "$proto" ] ; then
 						tmp_proto="meta l4proto $proto"
-					else
-						tmp_proto=""
+					fi
+					if [ -n "$need_proto" ] ; then
+						match_str="$(echo $match_str | sed "s/PPROTOO/$proto/")"
 					fi
 
 					$echo_on
@@ -812,7 +814,8 @@ define_interface()
 	network_get_ipaddr wan_ip wan
 	network_get_ipaddr local_ip lan
 	#Determine wan6 ip from wan interface. Note that the pppoe case is untested and likely incorrect! Also attempt to only grab global addresses
-	network_get_ipaddr6 wan_ip6 wan6
+	network_find_wan6 iface6 && \
+		network_get_ipaddr6 wan_ip6 "$iface6"
 	network_get_ipaddr6 local_ip6 lan
 	[ -n "$local_ip6" ] && wan_ip6="$local_ip6"
 

@@ -1,4 +1,4 @@
-if [ "$INTERFACE" = "wan" ] || [ "$INTERFACE" = "wan6" ] || [ "$INTERFACE" = "wwan" ]; then
+if [ "$INTERFACE" = "wan" ] || [ "$INTERFACE" = "wan6" ] || [ "$INTERFACE" = "wan_6" ] || [ "$INTERFACE" = "wwan" ]; then
 	. /usr/lib/gargoyle_firewall_util/gargoyle_firewall_util.sh
 
 	if [ "$ACTION" = "ifup" ] || [ "$ACTION" = ifupdate ]; then

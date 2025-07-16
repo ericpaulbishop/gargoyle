@@ -56,7 +56,8 @@ setup()
 
 	network_get_subnet lan_ip lan
 	network_get_subnets6 lan6_ips lan
-	network_get_ipaddrs6 wan6_ips wan6
+	network_find_wan6 iface6 && \
+		network_get_ipaddrs6 wan6_ips "$iface6"
 	lan6_ipstr="$(echo "{$lan6_ips}" | sed 's/ /,/g')"
 	wan6_ipstr="$(echo "{$wan6_ips}" | sed 's/ /,/g')"
 
