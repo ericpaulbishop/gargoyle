@@ -777,7 +777,11 @@ static int xt_webmon_set_ctl(struct sock *sk, int cmd, sockptr_t arg, u_int32_t 
 					if(length == 4)
 					{
 						ktime_t time;
-						if(*split[1] == NFPROTO_IPV4)
+						long proto = 0;
+						int chk = 0;
+
+						chk = kstrtol(split[1], 10, &proto);
+						if(chk == 0 && proto == NFPROTO_IPV4)
 						{
 							int parsed_ip[4];
 							int valid_ip = sscanf(split[2], "%d.%d.%d.%d", parsed_ip, parsed_ip+1, parsed_ip+2, parsed_ip+3);
@@ -805,7 +809,7 @@ static int xt_webmon_set_ctl(struct sock *sk, int cmd, sockptr_t arg, u_int32_t 
 								}
 							}
 						}
-						else
+						else if(chk == 0 && proto == NFPROTO_IPV6)
 						{
 							uint16_t parsed_ip[8];
 							int valid_ip = sscanf(split[2], STRIP6, parsed_ip, parsed_ip+1, parsed_ip+2, parsed_ip+3, parsed_ip+4, parsed_ip+5, parsed_ip+6, parsed_ip+7);
