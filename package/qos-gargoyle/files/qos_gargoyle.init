@@ -733,7 +733,7 @@ initialize_qos()
 		
 		#Ping responses from the ping target never go to ingress QoS (so their MARK isn't overwritten).
 		if [ "$(ip_family $ptarget_ip)" == "ipv4" ] ; then
-			nft insert rule inet fw4 mangle_qos_ingress icmp type echo-reply ip saddr $target_ip return
+			nft insert rule inet fw4 mangle_qos_ingress icmp type echo-reply ip saddr $ptarget_ip return
 		fi
 		if [ "$(ip_family $ptarget_ip)" == "ipv6" ] ; then
 			nft insert rule inet fw4 mangle_qos_ingress icmpv6 type echo-reply ip6 saddr $ptarget_ip return
