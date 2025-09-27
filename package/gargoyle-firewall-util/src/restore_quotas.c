@@ -595,6 +595,7 @@ int main(int argc, char** argv)
 								else
 								{
 									free(ip6_list);
+									ip6_list = NULL;
 								}
 								
 								char* rule_end = strdup(" ct mark \\& 0x0F000000 == 0x0F000000 ");
