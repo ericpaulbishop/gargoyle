@@ -14,7 +14,9 @@ include /usr/lib/gargoyle_firewall_util
 
 config_file_name="qos_gargoyle"
 upload_mask="0x007F"
+upload_mask_inv="0xFFFFFF80"
 download_mask="0x7F00"
+download_mask_inv="0xFFFF80FF"
 qos_mark_file="/etc/qos_class_marks"
 
 bwmonscript="/usr/lib/bwmon-gargoyle/bwmon-gargoyle.d/020-qos.bwmon"
@@ -531,10 +533,10 @@ initialize_qos()
 
 		#if we already set a mark in quota chain, we need to save that mark to the connmark, then return so it doesn't get over-written
 		nft insert rule inet fw4 mangle_qos_egress meta mark \& $upload_mask != 0x0 return
-		nft insert rule inet fw4 mangle_qos_egress meta mark \& $upload_mask != 0x0 ct mark set mark \& $upload_mask
+		nft insert rule inet fw4 mangle_qos_egress meta mark \& $upload_mask != 0x0 ct mark set ct mark \& $upload_mask_inv \| mark \& $upload_mask
 
 		# save current mark to connmark at end of chain
-		nft add rule inet fw4 mangle_qos_egress ct mark set mark \& $upload_mask
+		nft add rule inet fw4 mangle_qos_egress ct mark set ct mark \& $upload_mask_inv \| mark \& $upload_mask
 	fi
 
 
@@ -683,7 +685,7 @@ initialize_qos()
 
 		#If we already set a mark in quota chain, we need to save that mark to the connmark, then return so it doesn't get over-written
 		nft insert rule inet fw4 mangle_qos_ingress meta mark \& $download_mask != 0x0 return
-		nft insert rule inet fw4 mangle_qos_ingress meta mark \& $download_mask != 0x0 ct mark set mark \& $download_mask
+		nft insert rule inet fw4 mangle_qos_ingress meta mark \& $download_mask != 0x0 ct mark set ct mark \& $download_mask_inv \| mark \& $download_mask
 
 		# Make sure all packets get sent through IFB
 		tc qdisc add dev $qos_interface handle ffff: ingress
@@ -691,7 +693,7 @@ initialize_qos()
 		tc filter add dev $qos_interface parent ffff: protocol ipv6 u32 match u8 0 0 action connmark action mirred egress redirect dev $qos_ifb flowid ffff:1
 
 		#save current mark to connmark at end of chain
-		nft add rule inet fw4 mangle_qos_ingress ct mark set mark \& $download_mask
+		nft add rule inet fw4 mangle_qos_ingress ct mark set ct mark \& $download_mask_inv \| mark \& $download_mask
 
 		$echo_off
 	fi

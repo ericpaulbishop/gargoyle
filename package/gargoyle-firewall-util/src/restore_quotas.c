@@ -45,7 +45,7 @@ uint32_t* ip_to_host_int(char* ip_str, int* family);
 uint32_t* ip_range_to_host_ints(char* ip_str, int* family);
 list* filter_group_from_list(list** orig_ip_list, char* ip_group_str);
 int get_ipstr_family(char* ip_str);
-char* invert_bitmask(const char* input);
+char* invert_bitmask(const char* input, int force_32bit);
 
 void delete_chain_from_table(char* family, char* table, char* delete_chain);
 void run_shell_command(char* command, int free_command_str);
@@ -95,7 +95,7 @@ int main(int argc, char** argv)
 			case 'M':
 			case 'm':
 				death_mask = strdup(optarg);
-				inverted_death_mask = invert_bitmask(death_mask);
+				inverted_death_mask = invert_bitmask(death_mask,1);
 				break;
 			case 'C':
 			case 'c':
@@ -849,8 +849,8 @@ int main(int argc, char** argv)
 		run_shell_command(dynamic_strcat(5, "nft add rule ", quota_family_table, " ", quota_chain_prefix, "ingress_quotas ct mark set ct mark \\& 0x00FFFFFF \\| 0x0 2>/dev/null"), 1);
 		run_shell_command(dynamic_strcat(5, "nft add rule ", quota_family_table, " ", quota_chain_prefix, "combined_quotas ct mark set ct mark \\& 0x00FFFFFF \\| 0x0 2>/dev/null"), 1);
 		run_shell_command(dynamic_strcat(7, "nft insert rule ", quota_family_table, " forward ct mark \\& ", death_mask, " == ", death_mark, " reject 2>/dev/null"), 1);
-		run_shell_command(dynamic_strcat(7, "nft add rule ", quota_family_table, " ", quota_chain_prefix, "combined_quotas oifname ", wan_if, " meta mark \\& 0x7f != 0x0 ct mark set mark \\& 0x7f 2>/dev/null"), 1);
-		run_shell_command(dynamic_strcat(7, "nft add rule ", quota_family_table, " ", quota_chain_prefix, "combined_quotas iifname ", wan_if, " meta mark \\& 0x7f00 != 0x0 ct mark set mark \\& 0x7f00 2>/dev/null"), 1);
+		run_shell_command(dynamic_strcat(7, "nft add rule ", quota_family_table, " ", quota_chain_prefix, "combined_quotas oifname ", wan_if, " meta mark \\& 0x7F != 0x0 ct mark set ct mark \\& 0xFFFFFF80 \\| mark \\& 0x7F 2>/dev/null"), 1);
+		run_shell_command(dynamic_strcat(7, "nft add rule ", quota_family_table, " ", quota_chain_prefix, "combined_quotas iifname ", wan_if, " meta mark \\& 0x7F00 != 0x0 ct mark set ct mark \\& 0xFFFF80FF \\| mark \\& 0x7F00 2>/dev/null"), 1);
 
 		free(quota_family_table);
 
@@ -1216,7 +1216,8 @@ int get_ipstr_family(char* ip_str)
 }
 
 // Accepts bitmask as either hex or decimal string (e.g. 0xFF00 or 65280) and returns the inverted bitmask in hex (0x00FF)
-char* invert_bitmask(const char* input)
+// If force_32bit is non-zero, output is always padded to 32bit (i.e. 0xFF00 -> 0xFFFF00FF)
+char* invert_bitmask(const char* input, int force_32bit)
 {
     if (!input || *input == '\0')
 	{
@@ -1270,6 +1271,7 @@ char* invert_bitmask(const char* input)
         if (num_bits == 0) num_bits = 1; // handle value == 0
     }
 
+    num_bits = force_32bit ? 32 : num_bits; // Force 32 bit output if requested
     uint32_t mask = (num_bits == 32) ? 0xFFFFFFFF : ((1U << num_bits) - 1);
     uint32_t inverted = ~value & mask;
 
