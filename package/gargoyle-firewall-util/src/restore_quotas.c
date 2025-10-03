@@ -124,6 +124,7 @@ int main(int argc, char** argv)
 	delete_chain_from_table(quota_family, quota_table, "mangle_combined_quotas");
 	delete_chain_from_table(quota_family, quota_table, "mangle_forward_quotas");
 	delete_chain_from_table(quota_family, quota_table, "nat_quota_redirects");
+	delete_chain_from_table(quota_family, quota_table, "mangle_quotaqos_prerouting");
 
 	if(wan_if == NULL)
 	{
@@ -262,6 +263,11 @@ int main(int argc, char** argv)
 		run_shell_command(dynamic_strcat(5, "nft add rule ", quota_family_table, " ", quota_chain_prefix, "egress_quotas ct mark set ct mark \\& 0x00FFFFFF \\| 0x0 2>/dev/null"), 1);
 		run_shell_command(dynamic_strcat(5, "nft add rule ", quota_family_table, " ", quota_chain_prefix, "ingress_quotas ct mark set ct mark \\& 0x00FFFFFF \\| 0x0 2>/dev/null"), 1);
 		run_shell_command(dynamic_strcat(5, "nft add rule ", quota_family_table, " ", quota_chain_prefix, "combined_quotas ct mark set ct mark \\& 0x00FFFFFF \\| 0x0 2>/dev/null"), 1);
+
+		// This rule is also created by qos_gargoyle. We don't care who makes it as long as someone does
+		run_shell_command(dynamic_strcat(5, "nft add chain ", quota_family_table, " ", quota_chain_prefix, "quotaqos_prerouting 2>/dev/null"), 1);
+		run_shell_command(dynamic_strcat(5, "nft add rule ", quota_family_table, " ", quota_chain_prefix, "quotaqos_prerouting meta mark set 0x0 2>/dev/null"), 1);
+		run_shell_command(dynamic_strcat(9, "nft insert rule ", quota_family_table, " ", quota_chain_prefix, "prerouting iifname ", wan_if, " jump ", quota_chain_prefix, "quotaqos_prerouting 2>/dev/null"), 1);
 
 		/* add rules */
 		char* set_death_mark = dynamic_strcat(5, " ct mark set ct mark \\& ", inverted_death_mask, " \\| ", death_mark, " ");

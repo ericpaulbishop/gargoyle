@@ -673,7 +673,9 @@ initialize_qos()
 		nft add rule inet fw4 mangle_forward iifname $qos_interface jump mangle_qos_ingress
 		nft add rule inet fw4 mangle_input iifname $qos_interface jump mangle_qos_ingress
 		# Clear MARKs before we get to Quotas/QoS. They have been restored by act_connmark
-		nft insert rule inet fw4 mangle_prerouting iifname $qos_interface meta mark set 0x0
+		nft add chain inet fw4 mangle_quotaqos_prerouting
+		nft add rule inet fw4 mangle_quotaqos_prerouting meta mark set 0x0
+		nft insert rule inet fw4 mangle_prerouting iifname $qos_interface jump mangle_quotaqos_prerouting
 
 		#Now the rest of the user entered rules.
 		$echo_off
@@ -887,11 +889,7 @@ stop()
 	# eliminate existing rules in mangle table
 	delete_chain_from_table inet fw4 mangle_qos_egress
 	delete_chain_from_table inet fw4 mangle_qos_ingress
-	if [ -z "$qos_interface" ] ; then
-		define_interface
-	fi
-	rulehandle="$(nft -a list chain inet fw4 mangle_prerouting | grep "iifname "$qos_interface" meta mark set 0x0" | sed 's/.*handle //g')"
-	[ -n "$rulehandle" ] && nft delete rule inet fw4 mangle_prerouting handle $rulehandle
+	delete_chain_from_table inet fw4 mangle_quotaqos_prerouting
 
 	$echo_off
 }
