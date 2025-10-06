@@ -243,12 +243,12 @@ int main(int argc, char** argv)
 		run_shell_command(dynamic_strcat(3, "nft insert rule ", quota_family_table, " dstnat_lan jump nat_quota_redirects 2>/dev/null"), 1);
 
 		char* no_death_mark_test = dynamic_strcat(3, " ct mark \\& ", death_mask, " == 0x0 ");
-		run_shell_command(dynamic_strcat(8, "nft insert rule ", quota_family_table, " input iifname ", wan_if, no_death_mark_test, " jump ", quota_chain_prefix, "combined_quotas  2>/dev/null"), 1); // position 2
-		run_shell_command(dynamic_strcat(8, "nft insert rule ", quota_family_table, " input iifname ", wan_if, no_death_mark_test, " jump ", quota_chain_prefix, "ingress_quotas  2>/dev/null"), 1); // position 1
-		run_shell_command(dynamic_strcat(8, "nft insert rule ", quota_family_table, " output oifname ", wan_if, no_death_mark_test, " jump ", quota_chain_prefix, "combined_quotas  2>/dev/null"), 1); // position 2
-		run_shell_command(dynamic_strcat(8, "nft insert rule ", quota_family_table, " output oifname ", wan_if, no_death_mark_test, " jump ", quota_chain_prefix, "egress_quotas  2>/dev/null"), 1); // position 1
+		run_shell_command(dynamic_strcat(10, "nft insert rule ", quota_family_table, " ", quota_chain_prefix, "input iifname ", wan_if, no_death_mark_test, " jump ", quota_chain_prefix, "combined_quotas  2>/dev/null"), 1); // position 2
+		run_shell_command(dynamic_strcat(10, "nft insert rule ", quota_family_table, " ", quota_chain_prefix, "input iifname ", wan_if, no_death_mark_test, " jump ", quota_chain_prefix, "ingress_quotas  2>/dev/null"), 1); // position 1
+		run_shell_command(dynamic_strcat(10, "nft insert rule ", quota_family_table, " ", quota_chain_prefix, "output oifname ", wan_if, no_death_mark_test, " jump ", quota_chain_prefix, "combined_quotas  2>/dev/null"), 1); // position 2
+		run_shell_command(dynamic_strcat(10, "nft insert rule ", quota_family_table, " ", quota_chain_prefix, "output oifname ", wan_if, no_death_mark_test, " jump ", quota_chain_prefix, "egress_quotas  2>/dev/null"), 1); // position 1
 
-		run_shell_command(dynamic_strcat(5, "nft insert rule ", quota_family_table, " forward jump ", quota_chain_prefix, "forward_quotas 2>/dev/null"), 1);
+		run_shell_command(dynamic_strcat(7, "nft insert rule ", quota_family_table, " ", quota_chain_prefix, "forward jump ", quota_chain_prefix, "forward_quotas 2>/dev/null"), 1);
 		run_shell_command(dynamic_strcat(10, "nft add rule ", quota_family_table, " ", quota_chain_prefix, "forward_quotas oifname ", wan_if, no_death_mark_test, " jump ", quota_chain_prefix, "egress_quotas 2>/dev/null"), 1);
 		run_shell_command(dynamic_strcat(10, "nft add rule ", quota_family_table, " ", quota_chain_prefix, "forward_quotas iifname ", wan_if, no_death_mark_test, " jump ", quota_chain_prefix, "ingress_quotas 2>/dev/null"), 1);
 		run_shell_command(dynamic_strcat(8, "nft add rule ", quota_family_table, " ", quota_chain_prefix, "forward_quotas iifname ", wan_if, no_death_mark_test, " ct mark set ct mark \\& 0xF0FFFFFF \\| 0x0F000000 2>/dev/null"), 1);
@@ -855,8 +855,8 @@ int main(int argc, char** argv)
 		run_shell_command(dynamic_strcat(5, "nft add rule ", quota_family_table, " ", quota_chain_prefix, "ingress_quotas ct mark set ct mark \\& 0x00FFFFFF \\| 0x0 2>/dev/null"), 1);
 		run_shell_command(dynamic_strcat(5, "nft add rule ", quota_family_table, " ", quota_chain_prefix, "combined_quotas ct mark set ct mark \\& 0x00FFFFFF \\| 0x0 2>/dev/null"), 1);
 		run_shell_command(dynamic_strcat(7, "nft insert rule ", quota_family_table, " forward ct mark \\& ", death_mask, " == ", death_mark, " reject 2>/dev/null"), 1);
-		run_shell_command(dynamic_strcat(7, "nft add rule ", quota_family_table, " ", quota_chain_prefix, "combined_quotas oifname ", wan_if, " meta mark \\& 0x7F != 0x0 ct mark set ct mark \\& 0xFFFFFF80 \\| mark \\& 0x7F 2>/dev/null"), 1);
-		run_shell_command(dynamic_strcat(7, "nft add rule ", quota_family_table, " ", quota_chain_prefix, "combined_quotas iifname ", wan_if, " meta mark \\& 0x7F00 != 0x0 ct mark set ct mark \\& 0xFFFF80FF \\| mark \\& 0x7F00 2>/dev/null"), 1);
+		run_shell_command(dynamic_strcat(7, "nft add rule ", quota_family_table, " ", quota_chain_prefix, "combined_quotas oifname ", wan_if, " ct mark set ct mark \\& 0xFFFFFF80 \\| mark \\& 0x7F 2>/dev/null"), 1);
+		run_shell_command(dynamic_strcat(7, "nft add rule ", quota_family_table, " ", quota_chain_prefix, "combined_quotas iifname ", wan_if, " ct mark set ct mark \\& 0xFFFF80FF \\| mark \\& 0x7F00 2>/dev/null"), 1);
 
 		free(quota_family_table);
 
