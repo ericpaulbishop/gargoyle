@@ -1611,6 +1611,8 @@ static bool webmon_mt6(struct nft_webmon_info *priv, const struct sk_buff *skb)
 							spin_unlock_bh(&webmon_lock);
 						}
 					}
+					free(domain);
+					free(domain_key);
 				}
 			}
 		}
