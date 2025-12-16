@@ -15,7 +15,7 @@ define Package/gargoyle-firewall-util-fw3
 	SECTION:=net
 	CATEGORY:=Network
 	TITLE:=A couple of shell script routines for firewall (fw3) initialization
-	DEPENDS:=+iptables-zz-legacy +ip6tables-zz-legacy +ebtables-legacy +kmod-ebtables-ipv4 +kmod-ebtables-ipv6 +libericstools +uci +libiptbwctl +iptables-mod-filter +iptables-mod-ipopt +iptables-mod-conntrack-extra +iptables-mod-nat-extra +iptables-mod-extra +iptables-mod-iprange +iptables-mod-bandwidth +iptables-mod-timerange +iptables-mod-weburl +kmod-tun +kmod-nf-nathelper +kmod-nf-nathelper-extra +ipset +kmod-ipt-ipset
+	DEPENDS:=+iptables-zz-legacy +ip6tables-zz-legacy +ebtables-legacy +kmod-ebtables-ipv4 +kmod-ebtables-ipv6 +libericstools +uci +libiptbwctl +iptables-mod-filter +iptables-mod-ipopt +iptables-mod-conntrack-extra +iptables-mod-nat-extra +iptables-mod-extra +iptables-mod-iprange +iptables-mod-bandwidth +iptables-mod-timerange +iptables-mod-weburl +kmod-tun +kmod-nf-nathelper +kmod-nf-nathelper-extra +ipset +kmod-ipt-ipset +kmod-nf-ipt6
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
 endef
 
