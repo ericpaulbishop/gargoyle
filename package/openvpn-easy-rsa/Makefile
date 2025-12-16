@@ -40,15 +40,19 @@ define Package/openvpn-gargoyle-easy-rsa
   PROVIDES:=openvpn-easy-rsa
 endef
 
+define Package/openvpn-gargoyle-easy-rsa/description
+  CLI utility to build and manage a PKI CA.
+endef
+
+define Package/openvpn-gargoyle-easy-rsa/config
+  source "$(SOURCE)/Config.in"
+endef
+
 define Package/openvpn-gargoyle-easy-rsa/conffiles
 /etc/easy-rsa/vars
 /etc/easy-rsa/openssl-3.0.cnf
 /etc/easy-rsa/openssl-easyrsa.cnf
 /etc/profile.d/50-$(PKG_NAME).sh
-endef
-
-define Package/openvpn-gargoyle-easy-rsa/config
-  source "$(SOURCE)/Config.in"
 endef
 
 define Build/Configure
