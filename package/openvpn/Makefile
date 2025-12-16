@@ -42,16 +42,16 @@ define Package/openvpn/Default
   PROVIDES:=openvpn openvpn-gargoyle openvpn-crypto
 endef
 
-Package/openvpn-gargoyle-openssl=$(call Package/openvpn/Default,openssl,OpenSSL,+PACKAGE_openvpn-gargoyle-openssl:libopenssl)
 Package/openvpn-gargoyle-mbedtls=$(call Package/openvpn/Default,mbedtls,mbedTLS,+PACKAGE_openvpn-gargoyle-mbedtls:libmbedtls)
+Package/openvpn-gargoyle-openssl=$(call Package/openvpn/Default,openssl,OpenSSL,+PACKAGE_openvpn-gargoyle-openssl:libopenssl)
 Package/openvpn-gargoyle-wolfssl=$(call Package/openvpn/Default,wolfssl,WolfSSL,+PACKAGE_openvpn-gargoyle-wolfssl:libwolfssl)
 
 define Package/openvpn/config/Default
 	source "$(SOURCE)/Config-$(1).in"
 endef
 
-Package/openvpn-gargoyle-openssl/config=$(call Package/openvpn/config/Default,openssl)
 Package/openvpn-gargoyle-mbedtls/config=$(call Package/openvpn/config/Default,mbedtls)
+Package/openvpn-gargoyle-openssl/config=$(call Package/openvpn/config/Default,openssl)
 Package/openvpn-gargoyle-wolfssl/config=$(call Package/openvpn/config/Default,wolfssl)
 
 ifeq ($(BUILD_VARIANT),mbedtls)
@@ -143,6 +143,6 @@ define Package/openvpn-gargoyle-$(BUILD_VARIANT)/install
 		$(1)/lib/upgrade/keep.d/openvpn
 endef
 
-$(eval $(call BuildPackage,openvpn-gargoyle-openssl))
 $(eval $(call BuildPackage,openvpn-gargoyle-mbedtls))
+$(eval $(call BuildPackage,openvpn-gargoyle-openssl))
 $(eval $(call BuildPackage,openvpn-gargoyle-wolfssl))
