@@ -22,14 +22,14 @@ endef
 
 define Package/plugin-gargoyle-email-notifications
 $(call Package/plugin-gargoyle-email-notifications/Default)
-	DEPENDS+=msmtp
+	DEPENDS+=+msmtp
 	TITLE+= (with SSL support)
 	VARIANT:=ssl
 endef
 
 define Package/plugin-gargoyle-email-notifications-nossl
 $(call Package/plugin-gargoyle-email-notifications/Default)
-	DEPENDS+=msmtp-nossl
+	DEPENDS+=+msmtp-nossl
 	TITLE+= (without SSL support)
 	VARIANT:=nossl
 endef
