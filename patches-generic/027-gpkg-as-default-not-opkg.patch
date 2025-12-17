@@ -1,0 +1,19 @@
+--- a/include/default-packages.mk
++++ b/include/default-packages.mk
+@@ -1,5 +1,5 @@
+ ifneq ($(CONFIG_USE_APK),)
+   DEFAULT_PACKAGES += apk-mbedtls
+ else
+-  DEFAULT_PACKAGES += opkg
++  DEFAULT_PACKAGES += gpkg
+ endif
+--- a/package/system/opkg/Makefile
++++ b/package/system/opkg/Makefile
+@@ -39,7 +39,6 @@
+   CATEGORY:=Base system
+   TITLE:=opkg package manager
+   DEPENDS:=+uclient-fetch +libpthread +libubox
+-  DEFAULT:=y if !USE_APK
+   URL:=$(PKG_SOURCE_URL)
+   MENU:=1
+ endef
