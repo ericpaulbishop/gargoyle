@@ -150,25 +150,25 @@ menuconfig USE_GARGOYLE_PROFILE_PKGS
 				default n
 				select PACKAGE_kmod-ath9k if (TARGET_rockchip||TARGET_x86)
 				select PACKAGE_kmod-ath9k-common if (TARGET_rockchip||TARGET_x86)
-				select PACKAGE_kmod-ath10k if PACKAGE_kmod-ath10k-ct
-				select PACKAGE_kmod-ath10k-ct-smallbuffers if PACKAGE_kmod-ath10k-ct
-				select PACKAGE_kmod-ath10k-smallbuffers if PACKAGE_kmod-ath10k-ct
-				select PACKAGE_ath10k-firmware-qca4019 if PACKAGE_ath10k-firmware-qca4019-ct
-				select PACKAGE_ath10k-firmware-qca4019-ct-full-htt if PACKAGE_ath10k-firmware-qca4019-ct
-				select PACKAGE_ath10k-firmware-qca4019-ct-htt if PACKAGE_ath10k-firmware-qca4019-ct
-				select PACKAGE_ath10k-firmware-qca9887 if PACKAGE_ath10k-firmware-qca9887-ct
-				select PACKAGE_ath10k-firmware-qca9887-ct-full-htt if PACKAGE_ath10k-firmware-qca9887-ct
-				select PACKAGE_ath10k-firmware-qca9888 if PACKAGE_ath10k-firmware-qca9888-ct
-				select PACKAGE_ath10k-firmware-qca9888-ct-full-htt if PACKAGE_ath10k-firmware-qca9888-ct
-				select PACKAGE_ath10k-firmware-qca9888-ct-htt if PACKAGE_ath10k-firmware-qca9888-ct
-				select PACKAGE_ath10k-firmware-qca988x if PACKAGE_ath10k-firmware-qca988x-ct
-				select PACKAGE_ath10k-firmware-qca988x-ct-full-htt if PACKAGE_ath10k-firmware-qca988x-ct
-				select PACKAGE_ath10k-firmware-qca9984 if PACKAGE_ath10k-firmware-qca9984-ct
-				select PACKAGE_ath10k-firmware-qca9984-ct-full-htt if PACKAGE_ath10k-firmware-qca9984-ct
-				select PACKAGE_ath10k-firmware-qca9984-ct-htt if PACKAGE_ath10k-firmware-qca9984-ct
-				select PACKAGE_ath10k-firmware-qca99x0 if PACKAGE_ath10k-firmware-qca99x0-ct
-				select PACKAGE_ath10k-firmware-qca99x0-ct-full-htt if PACKAGE_ath10k-firmware-qca99x0-ct
-				select PACKAGE_ath10k-firmware-qca99x0-ct-htt if PACKAGE_ath10k-firmware-qca99x0-ct
+				select PACKAGE_kmod-ath10k if MODULE_DEFAULT_kmod-ath10k-ct
+				select PACKAGE_kmod-ath10k-ct-smallbuffers if MODULE_DEFAULT_kmod-ath10k-ct
+				select PACKAGE_kmod-ath10k-smallbuffers if MODULE_DEFAULT_kmod-ath10k-ct
+				select PACKAGE_ath10k-firmware-qca4019 if MODULE_DEFAULT_ath10k-firmware-qca4019-ct
+				select PACKAGE_ath10k-firmware-qca4019-ct-full-htt if MODULE_DEFAULT_ath10k-firmware-qca4019-ct
+				select PACKAGE_ath10k-firmware-qca4019-ct-htt if MODULE_DEFAULT_ath10k-firmware-qca4019-ct
+				select PACKAGE_ath10k-firmware-qca9887 if MODULE_DEFAULT_ath10k-firmware-qca9887-ct
+				select PACKAGE_ath10k-firmware-qca9887-ct-full-htt if MODULE_DEFAULT_ath10k-firmware-qca9887-ct
+				select PACKAGE_ath10k-firmware-qca9888 if MODULE_DEFAULT_ath10k-firmware-qca9888-ct
+				select PACKAGE_ath10k-firmware-qca9888-ct-full-htt if MODULE_DEFAULT_ath10k-firmware-qca9888-ct
+				select PACKAGE_ath10k-firmware-qca9888-ct-htt if MODULE_DEFAULT_ath10k-firmware-qca9888-ct
+				select PACKAGE_ath10k-firmware-qca988x if MODULE_DEFAULT_ath10k-firmware-qca988x-ct
+				select PACKAGE_ath10k-firmware-qca988x-ct-full-htt if MODULE_DEFAULT_ath10k-firmware-qca988x-ct
+				select PACKAGE_ath10k-firmware-qca9984 if MODULE_DEFAULT_ath10k-firmware-qca9984-ct
+				select PACKAGE_ath10k-firmware-qca9984-ct-full-htt if MODULE_DEFAULT_ath10k-firmware-qca9984-ct
+				select PACKAGE_ath10k-firmware-qca9984-ct-htt if MODULE_DEFAULT_ath10k-firmware-qca9984-ct
+				select PACKAGE_ath10k-firmware-qca99x0 if MODULE_DEFAULT_ath10k-firmware-qca99x0-ct
+				select PACKAGE_ath10k-firmware-qca99x0-ct-full-htt if MODULE_DEFAULT_ath10k-firmware-qca99x0-ct
+				select PACKAGE_ath10k-firmware-qca99x0-ct-htt if MODULE_DEFAULT_ath10k-firmware-qca99x0-ct
 				help
 				  Optional extra WiFi support for some targets.
 
