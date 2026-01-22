@@ -1031,7 +1031,7 @@ function uploaded()
 	uploadFrame = document.getElementById("client_add_target");
 	uploadFrameDoc = (uploadFrame.contentDocument) ? uploadFrame.contentDocument : uploadFrame.contentWindow.document;
 
-	cfgcontents = uploadFrameDoc.getElementById("cfgcontents").innerText;
+	cfgcontents = uploadFrameDoc.getElementById("cfgcontents").innerHTML;
 	parseCfg(cfgcontents.split("\n"));
 }
 
@@ -1075,35 +1075,50 @@ function parseCfg(cfgdata)
 		var cfgdataidx = 0;		
 		for(cfgdataidx = interfaceStart+1; cfgdataidx <= interfaceStop; cfgdataidx++)
 		{
-			var lineParts = cfgdata[cfgdataidx].split(" = ");
-			if(lineParts[0] == "Address")
+			var lineParts = cfgdata[cfgdataidx].split("=");
+			if(lineParts.length > 1)
 			{
-				var subLineParts = lineParts[1].split("/");
-				document.getElementById("wireguard_client_ip").value = subLineParts[0];
-			}
-			else if(lineParts[0] == "PrivateKey")
-			{
-				document.getElementById("wireguard_client_privkey").value = lineParts[1];
-				setPubkeyFromPrivkey(lineParts[1],"wireguard_client_pubkey");
+				var key = lineParts[0].trim();
+				var val = lineParts.slice(1).join('=').trim();
+
+				if(key == "Address")
+				{
+					var subLineParts = val.split("/");
+					document.getElementById("wireguard_client_ip").value = subLineParts[0];
+				}
+				else if(key == "PrivateKey")
+				{
+					document.getElementById("wireguard_client_privkey").value = val;
+					setPubkeyFromPrivkey(val,"wireguard_client_pubkey");
+				}
 			}
 		}
 		// Do peer (server)
 		for(cfgdataidx = peerStart+1; cfgdataidx <= peerStop; cfgdataidx++)
 		{
-			var lineParts = cfgdata[cfgdataidx].split(" = ");
-			if(lineParts[0] == "AllowedIPs")
+			var lineParts = cfgdata[cfgdataidx].split("=");
+			if(lineParts.length > 1)
 			{
-				document.getElementById("wireguard_client_allowed_ips").value = lineParts[1];
-			}
-			else if(lineParts[0] == "Endpoint")
-			{
-				var subLineParts = lineParts[1].split(":");
-				document.getElementById("wireguard_client_server_host").value = subLineParts[0];
-				document.getElementById("wireguard_client_server_port").value = subLineParts[1];
-			}
-			else if(lineParts[0] == "PublicKey")
-			{
-				document.getElementById("wireguard_client_server_pubkey").value = lineParts[1];
+				var key = lineParts[0].trim();
+				var val = lineParts.slice(1).join('=').trim();
+
+				if(key == "AllowedIPs")
+				{
+					document.getElementById("wireguard_client_allowed_ips").value = lineParts[1];
+				}
+				else if(key == "Endpoint")
+				{
+					var subLineParts = val.split(":");
+					if(subLineParts.length > 1)
+					{
+						document.getElementById("wireguard_client_server_host").value = subLineParts[0];
+						document.getElementById("wireguard_client_server_port").value = subLineParts[1];
+					}
+				}
+				else if(key == "PublicKey")
+				{
+					document.getElementById("wireguard_client_server_pubkey").value = val;
+				}
 			}
 		}
 		wireguard_client_config_manual.checked = true;
