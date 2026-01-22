@@ -618,7 +618,7 @@ enforce_dhcp_assignments()
 				nft add element inet fw4 lease_mismatch_pairs \{ "$ip" . "$mac" : return \}
 			fi
 		done
-		nft insert rule inet fw4 forward_rule meta nfproto ipv4 jump lease_mismatch_check
+		nft insert rule inet fw4 forward_rule iifname br-lan meta nfproto ipv4 jump lease_mismatch_check
 		nft add rule inet fw4 lease_mismatch_check ip saddr != @lease_mismatch_ips ether saddr != @lease_mismatch_macs return
 		nft add rule inet fw4 lease_mismatch_check ip saddr . ether saddr vmap @lease_mismatch_pairs
 		nft add rule inet fw4 lease_mismatch_check reject
