@@ -83,13 +83,13 @@ static int nftnl_expr_timerange_cb(const struct nlattr *attr, void *data)
 		return MNL_CB_OK;
 
 	switch(type) {
-	case NFTNL_EXPR_TIMERANGE_FLAGS:
+	case NFTA_TIMERANGE_FLAGS:
 		if (mnl_attr_validate(attr, MNL_TYPE_U32) < 0)
 			abi_breakage();
 		break;
-	case NFTNL_EXPR_TIMERANGE_HOURS:
-	case NFTNL_EXPR_TIMERANGE_WEEKDAYS:
-	case NFTNL_EXPR_TIMERANGE_WEEKLYRANGES:
+	case NFTA_TIMERANGE_HOURS:
+	case NFTA_TIMERANGE_WEEKDAYS:
+	case NFTA_TIMERANGE_WEEKLYRANGES:
 		if (mnl_attr_validate(attr, MNL_TYPE_STRING) < 0)
 			abi_breakage();
 		break;
@@ -105,13 +105,13 @@ nftnl_expr_timerange_build(struct nlmsghdr *nlh, const struct nftnl_expr *e)
 	struct nftnl_expr_timerange *timerange = nftnl_expr_data(e);
 
 	if (e->flags & (1 << NFTNL_EXPR_TIMERANGE_FLAGS))
-		mnl_attr_put_u32(nlh, NFTNL_EXPR_TIMERANGE_FLAGS, htonl(timerange->flags));
+		mnl_attr_put_u32(nlh, NFTA_TIMERANGE_FLAGS, htonl(timerange->flags));
 	if (e->flags & (1 << NFTNL_EXPR_TIMERANGE_HOURS))
-		mnl_attr_put_strz(nlh, NFTNL_EXPR_TIMERANGE_HOURS, timerange->hours);
+		mnl_attr_put_strz(nlh, NFTA_TIMERANGE_HOURS, timerange->hours);
 	if (e->flags & (1 << NFTNL_EXPR_TIMERANGE_WEEKDAYS))
-		mnl_attr_put_strz(nlh, NFTNL_EXPR_TIMERANGE_WEEKDAYS, timerange->weekdays);
+		mnl_attr_put_strz(nlh, NFTA_TIMERANGE_WEEKDAYS, timerange->weekdays);
 	if (e->flags & (1 << NFTNL_EXPR_TIMERANGE_WEEKLYRANGES))
-		mnl_attr_put_strz(nlh, NFTNL_EXPR_TIMERANGE_WEEKLYRANGES, timerange->weeklyranges);
+		mnl_attr_put_strz(nlh, NFTA_TIMERANGE_WEEKLYRANGES, timerange->weeklyranges);
 
 	set_kernel_timezone();
 }
@@ -125,33 +125,33 @@ nftnl_expr_timerange_parse(struct nftnl_expr *e, struct nlattr *attr)
 	if (mnl_attr_parse_nested(attr, nftnl_expr_timerange_cb, tb) < 0)
 		return -1;
 
-	if (tb[NFTNL_EXPR_TIMERANGE_FLAGS]) {
-		timerange->flags = ntohl(mnl_attr_get_u32(tb[NFTNL_EXPR_TIMERANGE_FLAGS]));
+	if (tb[NFTA_TIMERANGE_FLAGS]) {
+		timerange->flags = ntohl(mnl_attr_get_u32(tb[NFTA_TIMERANGE_FLAGS]));
 		e->flags |= (1 << NFTNL_EXPR_TIMERANGE_FLAGS);
 	}
-	if (tb[NFTNL_EXPR_TIMERANGE_HOURS]) {
+	if (tb[NFTA_TIMERANGE_HOURS]) {
 		if (timerange->hours)
 			xfree(timerange->hours);
 
-		timerange->hours = strdup(mnl_attr_get_str(tb[NFTNL_EXPR_TIMERANGE_HOURS]));
+		timerange->hours = strdup(mnl_attr_get_str(tb[NFTA_TIMERANGE_HOURS]));
 		if (!timerange->hours)
 			return -1;
 		e->flags |= (1 << NFTNL_EXPR_TIMERANGE_HOURS);
 	}
-	if (tb[NFTNL_EXPR_TIMERANGE_WEEKDAYS]) {
+	if (tb[NFTA_TIMERANGE_WEEKDAYS]) {
 		if (timerange->weekdays)
 			xfree(timerange->weekdays);
 
-		timerange->weekdays = strdup(mnl_attr_get_str(tb[NFTNL_EXPR_TIMERANGE_WEEKDAYS]));
+		timerange->weekdays = strdup(mnl_attr_get_str(tb[NFTA_TIMERANGE_WEEKDAYS]));
 		if (!timerange->weekdays)
 			return -1;
 		e->flags |= (1 << NFTNL_EXPR_TIMERANGE_WEEKDAYS);
 	}
-	if (tb[NFTNL_EXPR_TIMERANGE_WEEKLYRANGES]) {
+	if (tb[NFTA_TIMERANGE_WEEKLYRANGES]) {
 		if (timerange->weeklyranges)
 			xfree(timerange->weeklyranges);
 
-		timerange->weeklyranges = strdup(mnl_attr_get_str(tb[NFTNL_EXPR_TIMERANGE_WEEKLYRANGES]));
+		timerange->weeklyranges = strdup(mnl_attr_get_str(tb[NFTA_TIMERANGE_WEEKLYRANGES]));
 		if (!timerange->weeklyranges)
 			return -1;
 		e->flags |= (1 << NFTNL_EXPR_TIMERANGE_WEEKLYRANGES);
@@ -200,10 +200,18 @@ static void nftnl_expr_timerange_free(const struct nftnl_expr *e)
 	xfree(timerange->weeklyranges);
 }
 
+static struct attr_policy timerange_attr_policy[__NFTNL_EXPR_TIMERANGE_MAX] = {
+	[NFTNL_EXPR_TIMERANGE_FLAGS] = { .maxlen = sizeof(uint32_t) },
+	[NFTNL_EXPR_TIMERANGE_HOURS]  = { .maxlen = TIMERANGE_TEXT_SIZE },
+	[NFTNL_EXPR_TIMERANGE_WEEKDAYS] = { .maxlen = TIMERANGE_TEXT_SIZE },
+	[NFTNL_EXPR_TIMERANGE_WEEKLYRANGES]  = { .maxlen = TIMERANGE_TEXT_SIZE },
+};
+
 struct expr_ops expr_ops_timerange = {
 	.name		= "timerange",
 	.alloc_len	= sizeof(struct nftnl_expr_timerange),
-	.max_attr	= NFTA_TIMERANGE_MAX,
+	.nftnl_max_attr	= __NFTNL_EXPR_TIMERANGE_MAX - 1,
+	.attr_policy	= timerange_attr_policy,
 	.free		= nftnl_expr_timerange_free,
 	.set		= nftnl_expr_timerange_set,
 	.get		= nftnl_expr_timerange_get,

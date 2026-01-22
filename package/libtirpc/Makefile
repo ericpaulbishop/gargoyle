@@ -1,16 +1,16 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libtirpc
-PKG_VERSION:=1.3.2
-PKG_RELEASE:=$(AUTORELEASE)
+PKG_VERSION:=1.3.4
+PKG_RELEASE:=1
 
 PKG_SOURCE_URL:=@SF/libtirpc
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
-PKG_HASH:=e24eb88b8ce7db3b7ca6eb80115dd1284abc5ec32a8deccfed2224fc2532b9fd
+PKG_HASH:=1e0b0c7231c5fa122e06c0609a76723664d068b0dba3b8219b63e6340b347860
 
-PKG_MAINTAINER:=Andy Walsh <andy.walsh44+github@gmail.com>
 PKG_LICENSE:=BSD-3-Clause
 PKG_LICENSE_FILES:=COPYING
+PKG_CPE_ID:=cpe:/a:libtirpc_project:libtirpc
 
 PKG_INSTALL:=1
 PKG_BUILD_PARALLEL:=1
@@ -28,7 +28,7 @@ define Package/libtirpc
 endef
 
 CONFIGURE_ARGS += --disable-gssapi
-HOST_CONFIGURE_ARGS += --disable-gssapi
+HOST_CONFIGURE_ARGS += --disable-gssapi --disable-shared
 
 ifeq ($(HOST_OS),Darwin)
 HOST_CONFIGURE_ARGS += --disable-symvers

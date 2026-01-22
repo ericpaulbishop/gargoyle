@@ -167,17 +167,17 @@ static int nftnl_expr_webmon_cb(const struct nlattr *attr, void *data)
 		return MNL_CB_OK;
 
 	switch(type) {
-	case NFTNL_EXPR_WEBMON_FLAGS:
-	case NFTNL_EXPR_WEBMON_MAXDOMAINS:
-	case NFTNL_EXPR_WEBMON_MAXSEARCHES:
+	case NFTA_WEBMON_FLAGS:
+	case NFTA_WEBMON_MAXDOMAINS:
+	case NFTA_WEBMON_MAXSEARCHES:
 		if (mnl_attr_validate(attr, MNL_TYPE_U32) < 0)
 			abi_breakage();
 		break;
-	case NFTNL_EXPR_WEBMON_IPS:
-	case NFTNL_EXPR_WEBMON_DOMAINLOADFILE:
-	case NFTNL_EXPR_WEBMON_SEARCHLOADFILE:
-	case NFTNL_EXPR_WEBMON_DOMAINLOADDATA:
-	case NFTNL_EXPR_WEBMON_SEARCHLOADDATA:
+	case NFTA_WEBMON_IPS:
+	case NFTA_WEBMON_DOMAINLOADFILE:
+	case NFTA_WEBMON_SEARCHLOADFILE:
+	case NFTA_WEBMON_DOMAINLOADDATA:
+	case NFTA_WEBMON_SEARCHLOADDATA:
 		if (mnl_attr_validate(attr, MNL_TYPE_STRING) < 0)
 			abi_breakage();
 		break;
@@ -193,32 +193,32 @@ nftnl_expr_webmon_build(struct nlmsghdr *nlh, const struct nftnl_expr *e)
 	struct nftnl_expr_webmon *webmon = nftnl_expr_data(e);
 
 	if (e->flags & (1 << NFTNL_EXPR_WEBMON_FLAGS))
-		mnl_attr_put_u32(nlh, NFTNL_EXPR_WEBMON_FLAGS, htonl(webmon->flags));
+		mnl_attr_put_u32(nlh, NFTA_WEBMON_FLAGS, htonl(webmon->flags));
 	if (e->flags & (1 << NFTNL_EXPR_WEBMON_MAXDOMAINS))
-		mnl_attr_put_u32(nlh, NFTNL_EXPR_WEBMON_MAXDOMAINS, htonl(webmon->max_domains));
+		mnl_attr_put_u32(nlh, NFTA_WEBMON_MAXDOMAINS, htonl(webmon->max_domains));
 	if (e->flags & (1 << NFTNL_EXPR_WEBMON_MAXSEARCHES))
-		mnl_attr_put_u32(nlh, NFTNL_EXPR_WEBMON_MAXSEARCHES, htonl(webmon->max_searches));
+		mnl_attr_put_u32(nlh, NFTA_WEBMON_MAXSEARCHES, htonl(webmon->max_searches));
 	if (e->flags & (1 << NFTNL_EXPR_WEBMON_IPS))
-		mnl_attr_put_strz(nlh, NFTNL_EXPR_WEBMON_IPS, webmon->ips);
+		mnl_attr_put_strz(nlh, NFTA_WEBMON_IPS, webmon->ips);
 	if (e->flags & (1 << NFTNL_EXPR_WEBMON_DOMAINLOADFILE))
-		mnl_attr_put_strz(nlh, NFTNL_EXPR_WEBMON_DOMAINLOADFILE, webmon->domain_load_file);
+		mnl_attr_put_strz(nlh, NFTA_WEBMON_DOMAINLOADFILE, webmon->domain_load_file);
 	if (e->flags & (1 << NFTNL_EXPR_WEBMON_SEARCHLOADFILE))
-		mnl_attr_put_strz(nlh, NFTNL_EXPR_WEBMON_SEARCHLOADFILE, webmon->search_load_file);
+		mnl_attr_put_strz(nlh, NFTA_WEBMON_SEARCHLOADFILE, webmon->search_load_file);
 
 	if(webmon->domain_load_file != NULL)
 	{
 		uint32_t data_len = 0;
 		char* domain_data = do_load(webmon->domain_load_file, webmon->max_domains, WEBMON_DOMAIN, &data_len);
-		mnl_attr_put(nlh, NFTNL_EXPR_WEBMON_DOMAINLOADDATA, data_len, domain_data);
-		mnl_attr_put_u32(nlh, NFTNL_EXPR_WEBMON_DOMAINLOADDATALEN, htonl(data_len));
+		mnl_attr_put(nlh, NFTA_WEBMON_DOMAINLOADDATA, data_len, domain_data);
+		mnl_attr_put_u32(nlh, NFTA_WEBMON_DOMAINLOADDATALEN, htonl(data_len));
 		if(domain_data != NULL) free(domain_data);
 	}
 	if(webmon->search_load_file != NULL)
 	{
 		uint32_t data_len = 0;
 		char* search_data = do_load(webmon->search_load_file, webmon->max_searches, WEBMON_SEARCH, &data_len);
-		mnl_attr_put_strz(nlh, NFTNL_EXPR_WEBMON_SEARCHLOADDATA, search_data);
-		mnl_attr_put_u32(nlh, NFTNL_EXPR_WEBMON_SEARCHLOADDATALEN, htonl(data_len));
+		mnl_attr_put_strz(nlh, NFTA_WEBMON_SEARCHLOADDATA, search_data);
+		mnl_attr_put_u32(nlh, NFTA_WEBMON_SEARCHLOADDATALEN, htonl(data_len));
 		if(search_data != NULL) free(search_data);
 	}
 }
@@ -234,15 +234,15 @@ nftnl_expr_webmon_parse(struct nftnl_expr *e, struct nlattr *attr)
 
 	if (tb[NFTA_WEBMON_FLAGS]) {
 		webmon->flags = ntohl(mnl_attr_get_u32(tb[NFTA_WEBMON_FLAGS]));
-		e->flags |= (1 << NFTA_WEBMON_FLAGS);
+		e->flags |= (1 << NFTNL_EXPR_WEBMON_FLAGS);
 	}
 	if (tb[NFTA_WEBMON_MAXDOMAINS]) {
 		webmon->max_domains = ntohl(mnl_attr_get_u32(tb[NFTA_WEBMON_MAXDOMAINS]));
-		e->flags |= (1 << NFTA_WEBMON_MAXDOMAINS);
+		e->flags |= (1 << NFTNL_EXPR_WEBMON_MAXDOMAINS);
 	}
 	if (tb[NFTA_WEBMON_MAXSEARCHES]) {
 		webmon->max_searches = ntohl(mnl_attr_get_u32(tb[NFTA_WEBMON_MAXSEARCHES]));
-		e->flags |= (1 << NFTA_WEBMON_MAXSEARCHES);
+		e->flags |= (1 << NFTNL_EXPR_WEBMON_MAXSEARCHES);
 	}
 	if (tb[NFTA_WEBMON_IPS]) {
 		if (webmon->ips)
@@ -251,7 +251,7 @@ nftnl_expr_webmon_parse(struct nftnl_expr *e, struct nlattr *attr)
 		webmon->ips = strdup(mnl_attr_get_str(tb[NFTA_WEBMON_IPS]));
 		if (!webmon->ips)
 			return -1;
-		e->flags |= (1 << NFTA_WEBMON_IPS);
+		e->flags |= (1 << NFTNL_EXPR_WEBMON_IPS);
 	}
 	if (tb[NFTA_WEBMON_DOMAINLOADFILE]) {
 		if (webmon->domain_load_file)
@@ -260,7 +260,7 @@ nftnl_expr_webmon_parse(struct nftnl_expr *e, struct nlattr *attr)
 		webmon->domain_load_file = strdup(mnl_attr_get_str(tb[NFTA_WEBMON_DOMAINLOADFILE]));
 		if (!webmon->domain_load_file)
 			return -1;
-		e->flags |= (1 << NFTA_WEBMON_DOMAINLOADFILE);
+		e->flags |= (1 << NFTNL_EXPR_WEBMON_DOMAINLOADFILE);
 	}
 	if (tb[NFTA_WEBMON_SEARCHLOADFILE]) {
 		if (webmon->search_load_file)
@@ -269,7 +269,7 @@ nftnl_expr_webmon_parse(struct nftnl_expr *e, struct nlattr *attr)
 		webmon->search_load_file = strdup(mnl_attr_get_str(tb[NFTA_WEBMON_SEARCHLOADFILE]));
 		if (!webmon->search_load_file)
 			return -1;
-		e->flags |= (1 << NFTA_WEBMON_SEARCHLOADFILE);
+		e->flags |= (1 << NFTNL_EXPR_WEBMON_SEARCHLOADFILE);
 	}
 
 	return 0;
@@ -310,10 +310,20 @@ static void nftnl_expr_webmon_free(const struct nftnl_expr *e)
 	xfree(webmon->search_load_file);
 }
 
+static struct attr_policy webmon_attr_policy[__NFTNL_EXPR_BANDWIDTH_MAX] = {
+	[NFTNL_EXPR_WEBMON_FLAGS] = { .maxlen = sizeof(uint32_t) },
+	[NFTNL_EXPR_WEBMON_MAXDOMAINS] = { .maxlen = sizeof(uint32_t) },
+	[NFTNL_EXPR_WEBMON_MAXSEARCHES]  = { .maxlen = sizeof(uint32_t) },
+	[NFTNL_EXPR_WEBMON_IPS] = { .maxlen = WEBMON_TEXT_SIZE },
+	[NFTNL_EXPR_WEBMON_DOMAINLOADFILE]  = { .maxlen = WEBMON_TEXT_SIZE	},
+	[NFTNL_EXPR_WEBMON_SEARCHLOADFILE]   = { .maxlen = WEBMON_TEXT_SIZE },
+};
+
 struct expr_ops expr_ops_webmon = {
 	.name		= "webmon",
 	.alloc_len	= sizeof(struct nftnl_expr_webmon),
-	.max_attr	= NFTA_WEBMON_MAX,
+	.nftnl_max_attr	= __NFTNL_EXPR_WEBMON_MAX - 1,
+	.attr_policy	= webmon_attr_policy,
 	.free		= nftnl_expr_webmon_free,
 	.set		= nftnl_expr_webmon_set,
 	.get		= nftnl_expr_webmon_get,

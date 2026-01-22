@@ -16,7 +16,7 @@ static int stmt_evaluate_bandwidth(struct eval_ctx *ctx, struct stmt *stmt)
 		srand(time(NULL));
 		id_num = rand();
 		if(stmt->bandwidth.id != NULL)
-			free(stmt->bandwidth.id);
+			free_const(stmt->bandwidth.id);
 		stmt->bandwidth.id = malloc(BANDWIDTH_MAX_ID_LENGTH*sizeof(char));
 		if(stmt->bandwidth.id == NULL)
 			return stmt_error(ctx, stmt, "bandwidth id malloc failure");

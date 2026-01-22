@@ -3,6 +3,7 @@
  *
  *
  *  Copyright © 2009 by Eric Bishop <eric@gargoyle-router.com>
+ *  Rewritten for nftables 2025 by Michael Gray <support@lantisproject.com>
  *
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -49,7 +50,7 @@ list* parse_quoted_list(char* list_str, char quote_char, char escape_char, char 
 
 int truncate_if_starts_with(char* test_str, char* prefix);
 
-char* invert_bitmask(const char* input);
+char* invert_bitmask(const char* input, int force_32bit);
 
 char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingress, char* target, char* target_options);
 int compute_multi_rules(char** def, list* multi_rules, char** single_check, int never_single, char* rule_prefix, char* test_prefix1, char* test_prefix2, int is_negation1, int is_negation2, int mask_byte_index, char* proto, int requires_proto, int quoted_args);
@@ -477,7 +478,7 @@ char** compute_rules(string_map *rule_def, char* table, char* chain, int is_ingr
 			char mark[12];
 			char* inverted_mark = NULL;
 			sprintf(mark, "0x%lX", initial_url_mark);
-			inverted_mark = invert_bitmask(mark);
+			inverted_mark = invert_bitmask(mark,1);
 			push_list(all_rules, dynamic_strcat(5,  rule_prefix, " meta l4proto tcp weburl contains \\\"http\\\" ct mark set ct mark \\& ", inverted_mark, " \\| ", mark));
 			free(inverted_mark);
 		}
@@ -587,7 +588,7 @@ int compute_multi_rules(char** def, list* multi_rules, char** single_check, int 
 			char mask_str[12];
 			char* inverted_mask = NULL;
 			sprintf(mask_str, "0x%lX", mask);
-			inverted_mask = invert_bitmask(mask_str);
+			inverted_mask = invert_bitmask(mask_str,1);
 			char* connmark_part = dynamic_strcat(4, " ct mark set ct mark \\& ", inverted_mask, " \\| ", (is_negation ? "0x0" : mask_str));
 			free(inverted_mask);
 
@@ -1073,7 +1074,8 @@ int truncate_if_starts_with(char* test_str, char* prefix)
 }
 
 // Accepts bitmask as either hex or decimal string (e.g. 0xFF00 or 65280) and returns the inverted bitmask in hex (0x00FF)
-char* invert_bitmask(const char* input)
+// If force_32bit is non-zero, output is always padded to 32bit (i.e. 0xFF00 -> 0xFFFF00FF)
+char* invert_bitmask(const char* input, int force_32bit)
 {
     if (!input || *input == '\0')
 	{
@@ -1127,6 +1129,7 @@ char* invert_bitmask(const char* input)
         if (num_bits == 0) num_bits = 1; // handle value == 0
     }
 
+    num_bits = force_32bit ? 32 : num_bits; // Force 32 bit output if requested
     uint32_t mask = (num_bits == 32) ? 0xFFFFFFFF : ((1U << num_bits) - 1);
     uint32_t inverted = ~value & mask;
 

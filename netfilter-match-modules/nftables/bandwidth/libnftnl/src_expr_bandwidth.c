@@ -168,31 +168,31 @@ static int nftnl_expr_bandwidth_cb(const struct nlattr *attr, void *data)
 		return MNL_CB_OK;
 
 	switch(type) {
-	case NFTNL_EXPR_BANDWIDTH_CMP:
-	case NFTNL_EXPR_BANDWIDTH_TYPE:
-	case NFTNL_EXPR_BANDWIDTH_CHECKTYPE:
-	case NFTNL_EXPR_BANDWIDTH_RSTINTVLCONST:
+	case NFTA_BANDWIDTH_CMP:
+	case NFTA_BANDWIDTH_TYPE:
+	case NFTA_BANDWIDTH_CHECKTYPE:
+	case NFTA_BANDWIDTH_RSTINTVLCONST:
 		if (mnl_attr_validate(attr, MNL_TYPE_U8) < 0)
 			abi_breakage();
 		break;
-	case NFTNL_EXPR_BANDWIDTH_NUMINTVLSTOSAVE:
-	case NFTNL_EXPR_BANDWIDTH_MINUTESWEST:
+	case NFTA_BANDWIDTH_NUMINTVLSTOSAVE:
+	case NFTA_BANDWIDTH_MINUTESWEST:
 		if (mnl_attr_validate(attr, MNL_TYPE_U32) < 0)
 			abi_breakage();
 		break;
-	case NFTNL_EXPR_BANDWIDTH_RSTINTVL:
-	case NFTNL_EXPR_BANDWIDTH_BWCUTOFF:
-	case NFTNL_EXPR_BANDWIDTH_CURRENTBW:
-   case NFTNL_EXPR_BANDWIDTH_RSTTIME:
-   case NFTNL_EXPR_BANDWIDTH_NEXTRESET:
-   case NFTNL_EXPR_BANDWIDTH_PREVRESET:
-	case NFTNL_EXPR_BANDWIDTH_LASTBACKUPTIME:
+	case NFTA_BANDWIDTH_RSTINTVL:
+	case NFTA_BANDWIDTH_BWCUTOFF:
+	case NFTA_BANDWIDTH_CURRENTBW:
+	case NFTA_BANDWIDTH_RSTTIME:
+	case NFTA_BANDWIDTH_NEXTRESET:
+	case NFTA_BANDWIDTH_PREVRESET:
+	case NFTA_BANDWIDTH_LASTBACKUPTIME:
 		if (mnl_attr_validate(attr, MNL_TYPE_U64) < 0)
 			abi_breakage();
 		break;
-	case NFTNL_EXPR_BANDWIDTH_ID:
-	case NFTNL_EXPR_BANDWIDTH_SUBNET:
-	case NFTNL_EXPR_BANDWIDTH_SUBNET6:
+	case NFTA_BANDWIDTH_ID:
+	case NFTA_BANDWIDTH_SUBNET:
+	case NFTA_BANDWIDTH_SUBNET6:
 		if (mnl_attr_validate(attr, MNL_TYPE_STRING) < 0)
 			abi_breakage();
 		break;
@@ -209,41 +209,41 @@ nftnl_expr_bandwidth_build(struct nlmsghdr *nlh, const struct nftnl_expr *e)
 	uint32_t minuteswest = 0;
 
 	if (e->flags & (1 << NFTNL_EXPR_BANDWIDTH_ID))
-		mnl_attr_put_strz(nlh, NFTNL_EXPR_BANDWIDTH_ID, bandwidth->id);
+		mnl_attr_put_strz(nlh, NFTA_BANDWIDTH_ID, bandwidth->id);
 	if (e->flags & (1 << NFTNL_EXPR_BANDWIDTH_CMP))
-		mnl_attr_put_u8(nlh, NFTNL_EXPR_BANDWIDTH_CMP, bandwidth->cmp);
+		mnl_attr_put_u8(nlh, NFTA_BANDWIDTH_CMP, bandwidth->cmp);
 	if (e->flags & (1 << NFTNL_EXPR_BANDWIDTH_TYPE))
-		mnl_attr_put_u8(nlh, NFTNL_EXPR_BANDWIDTH_TYPE, bandwidth->type);
+		mnl_attr_put_u8(nlh, NFTA_BANDWIDTH_TYPE, bandwidth->type);
 	if (e->flags & (1 << NFTNL_EXPR_BANDWIDTH_CHECKTYPE))
-		mnl_attr_put_u8(nlh, NFTNL_EXPR_BANDWIDTH_CHECKTYPE, bandwidth->check_type);
+		mnl_attr_put_u8(nlh, NFTA_BANDWIDTH_CHECKTYPE, bandwidth->check_type);
 	if (e->flags & (1 << NFTNL_EXPR_BANDWIDTH_BWCUTOFF))
-		mnl_attr_put_u64(nlh, NFTNL_EXPR_BANDWIDTH_BWCUTOFF, htobe64(bandwidth->bandwidth_cutoff));
+		mnl_attr_put_u64(nlh, NFTA_BANDWIDTH_BWCUTOFF, htobe64(bandwidth->bandwidth_cutoff));
 	if (e->flags & (1 << NFTNL_EXPR_BANDWIDTH_CURRENTBW))
-		mnl_attr_put_u64(nlh, NFTNL_EXPR_BANDWIDTH_CURRENTBW, htobe64(bandwidth->current_bandwidth));
+		mnl_attr_put_u64(nlh, NFTA_BANDWIDTH_CURRENTBW, htobe64(bandwidth->current_bandwidth));
 	if (e->flags & (1 << NFTNL_EXPR_BANDWIDTH_SUBNET))
-		mnl_attr_put_strz(nlh, NFTNL_EXPR_BANDWIDTH_SUBNET, bandwidth->subnet);
+		mnl_attr_put_strz(nlh, NFTA_BANDWIDTH_SUBNET, bandwidth->subnet);
 	if (e->flags & (1 << NFTNL_EXPR_BANDWIDTH_SUBNET6))
-		mnl_attr_put_strz(nlh, NFTNL_EXPR_BANDWIDTH_SUBNET6, bandwidth->subnet6);
+		mnl_attr_put_strz(nlh, NFTA_BANDWIDTH_SUBNET6, bandwidth->subnet6);
 	if (e->flags & (1 << NFTNL_EXPR_BANDWIDTH_RSTINTVL))
-		mnl_attr_put_u64(nlh, NFTNL_EXPR_BANDWIDTH_RSTINTVL, htobe64(bandwidth->reset_interval));
+		mnl_attr_put_u64(nlh, NFTA_BANDWIDTH_RSTINTVL, htobe64(bandwidth->reset_interval));
 	if (e->flags & (1 << NFTNL_EXPR_BANDWIDTH_RSTINTVLCONST))
-		mnl_attr_put_u8(nlh, NFTNL_EXPR_BANDWIDTH_RSTINTVLCONST, bandwidth->reset_is_constant_interval);
+		mnl_attr_put_u8(nlh, NFTA_BANDWIDTH_RSTINTVLCONST, bandwidth->reset_is_constant_interval);
 	if (e->flags & (1 << NFTNL_EXPR_BANDWIDTH_RSTTIME))
-		mnl_attr_put_u64(nlh, NFTNL_EXPR_BANDWIDTH_RSTTIME, htobe64(bandwidth->reset_time));
+		mnl_attr_put_u64(nlh, NFTA_BANDWIDTH_RSTTIME, htobe64(bandwidth->reset_time));
 	if (e->flags & (1 << NFTNL_EXPR_BANDWIDTH_NUMINTVLSTOSAVE))
-		mnl_attr_put_u32(nlh, NFTNL_EXPR_BANDWIDTH_NUMINTVLSTOSAVE, htonl(bandwidth->num_intervals_to_save));
+		mnl_attr_put_u32(nlh, NFTA_BANDWIDTH_NUMINTVLSTOSAVE, htonl(bandwidth->num_intervals_to_save));
 	if (e->flags & (1 << NFTNL_EXPR_BANDWIDTH_NEXTRESET))
-		mnl_attr_put_u64(nlh, NFTNL_EXPR_BANDWIDTH_NEXTRESET, htobe64(bandwidth->next_reset));
+		mnl_attr_put_u64(nlh, NFTA_BANDWIDTH_NEXTRESET, htobe64(bandwidth->next_reset));
 	if (e->flags & (1 << NFTNL_EXPR_BANDWIDTH_PREVRESET))
-		mnl_attr_put_u64(nlh, NFTNL_EXPR_BANDWIDTH_PREVRESET, htobe64(bandwidth->prev_reset));
+		mnl_attr_put_u64(nlh, NFTA_BANDWIDTH_PREVRESET, htobe64(bandwidth->prev_reset));
 	if (e->flags & (1 << NFTNL_EXPR_BANDWIDTH_LASTBACKUPTIME))
-		mnl_attr_put_u64(nlh, NFTNL_EXPR_BANDWIDTH_LASTBACKUPTIME, htobe64(bandwidth->last_backup_time));
+		mnl_attr_put_u64(nlh, NFTA_BANDWIDTH_LASTBACKUPTIME, htobe64(bandwidth->last_backup_time));
 
 	set_kernel_timezone();
 	minuteswest = get_minutes_west();
 
 	if (e->flags & (1 << NFTNL_EXPR_BANDWIDTH_MINUTESWEST))
-		mnl_attr_put_u32(nlh, NFTNL_EXPR_BANDWIDTH_MINUTESWEST, htonl(minuteswest));
+		mnl_attr_put_u32(nlh, NFTA_BANDWIDTH_MINUTESWEST, htonl(minuteswest));
 }
 
 static int
@@ -255,83 +255,83 @@ nftnl_expr_bandwidth_parse(struct nftnl_expr *e, struct nlattr *attr)
 	if (mnl_attr_parse_nested(attr, nftnl_expr_bandwidth_cb, tb) < 0)
 		return -1;
 
-	if (tb[NFTNL_EXPR_BANDWIDTH_ID]) {
+	if (tb[NFTA_BANDWIDTH_ID]) {
 		if (bandwidth->id)
 			xfree(bandwidth->id);
 
-		bandwidth->id = strdup(mnl_attr_get_str(tb[NFTNL_EXPR_BANDWIDTH_ID]));
+		bandwidth->id = strdup(mnl_attr_get_str(tb[NFTA_BANDWIDTH_ID]));
 		if (!bandwidth->id)
 			return -1;
 		e->flags |= (1 << NFTNL_EXPR_BANDWIDTH_ID);
 	}
-	if (tb[NFTNL_EXPR_BANDWIDTH_CMP]) {
-		bandwidth->cmp = mnl_attr_get_u8(tb[NFTNL_EXPR_BANDWIDTH_CMP]);
+	if (tb[NFTA_BANDWIDTH_CMP]) {
+		bandwidth->cmp = mnl_attr_get_u8(tb[NFTA_BANDWIDTH_CMP]);
 		e->flags |= (1 << NFTNL_EXPR_BANDWIDTH_CMP);
 	}
-	if (tb[NFTNL_EXPR_BANDWIDTH_TYPE]) {
-		bandwidth->type = mnl_attr_get_u8(tb[NFTNL_EXPR_BANDWIDTH_TYPE]);
+	if (tb[NFTA_BANDWIDTH_TYPE]) {
+		bandwidth->type = mnl_attr_get_u8(tb[NFTA_BANDWIDTH_TYPE]);
 		e->flags |= (1 << NFTNL_EXPR_BANDWIDTH_TYPE);
 	}
-	if (tb[NFTNL_EXPR_BANDWIDTH_CHECKTYPE]) {
-		bandwidth->check_type = mnl_attr_get_u8(tb[NFTNL_EXPR_BANDWIDTH_CHECKTYPE]);
+	if (tb[NFTA_BANDWIDTH_CHECKTYPE]) {
+		bandwidth->check_type = mnl_attr_get_u8(tb[NFTA_BANDWIDTH_CHECKTYPE]);
 		e->flags |= (1 << NFTNL_EXPR_BANDWIDTH_CHECKTYPE);
 	}
-	if (tb[NFTNL_EXPR_BANDWIDTH_BWCUTOFF]) {
-		bandwidth->bandwidth_cutoff = be64toh(mnl_attr_get_u64(tb[NFTNL_EXPR_BANDWIDTH_BWCUTOFF]));
+	if (tb[NFTA_BANDWIDTH_BWCUTOFF]) {
+		bandwidth->bandwidth_cutoff = be64toh(mnl_attr_get_u64(tb[NFTA_BANDWIDTH_BWCUTOFF]));
 		e->flags |= (1 << NFTNL_EXPR_BANDWIDTH_BWCUTOFF);
 	}
-	if (tb[NFTNL_EXPR_BANDWIDTH_CURRENTBW]) {
-		bandwidth->current_bandwidth = be64toh(mnl_attr_get_u64(tb[NFTNL_EXPR_BANDWIDTH_CURRENTBW]));
+	if (tb[NFTA_BANDWIDTH_CURRENTBW]) {
+		bandwidth->current_bandwidth = be64toh(mnl_attr_get_u64(tb[NFTA_BANDWIDTH_CURRENTBW]));
 		e->flags |= (1 << NFTNL_EXPR_BANDWIDTH_CURRENTBW);
 	}
-	if (tb[NFTNL_EXPR_BANDWIDTH_SUBNET]) {
+	if (tb[NFTA_BANDWIDTH_SUBNET]) {
 		if (bandwidth->subnet)
 			xfree(bandwidth->subnet);
 
-		bandwidth->subnet = strdup(mnl_attr_get_str(tb[NFTNL_EXPR_BANDWIDTH_SUBNET]));
+		bandwidth->subnet = strdup(mnl_attr_get_str(tb[NFTA_BANDWIDTH_SUBNET]));
 		if (!bandwidth->subnet)
 			return -1;
 		e->flags |= (1 << NFTNL_EXPR_BANDWIDTH_SUBNET);
 	}
-	if (tb[NFTNL_EXPR_BANDWIDTH_SUBNET6]) {
+	if (tb[NFTA_BANDWIDTH_SUBNET6]) {
 		if (bandwidth->subnet6)
 			xfree(bandwidth->subnet6);
 
-		bandwidth->subnet6 = strdup(mnl_attr_get_str(tb[NFTNL_EXPR_BANDWIDTH_SUBNET6]));
+		bandwidth->subnet6 = strdup(mnl_attr_get_str(tb[NFTA_BANDWIDTH_SUBNET6]));
 		if (!bandwidth->subnet6)
 			return -1;
 		e->flags |= (1 << NFTNL_EXPR_BANDWIDTH_SUBNET6);
 	}
-	if (tb[NFTNL_EXPR_BANDWIDTH_RSTINTVL]) {
-		bandwidth->reset_interval = be64toh(mnl_attr_get_u64(tb[NFTNL_EXPR_BANDWIDTH_RSTINTVL]));
+	if (tb[NFTA_BANDWIDTH_RSTINTVL]) {
+		bandwidth->reset_interval = be64toh(mnl_attr_get_u64(tb[NFTA_BANDWIDTH_RSTINTVL]));
 		e->flags |= (1 << NFTNL_EXPR_BANDWIDTH_RSTINTVL);
 	}
-	if (tb[NFTNL_EXPR_BANDWIDTH_RSTINTVLCONST]) {
-		bandwidth->reset_is_constant_interval = mnl_attr_get_u8(tb[NFTNL_EXPR_BANDWIDTH_RSTINTVLCONST]);
+	if (tb[NFTA_BANDWIDTH_RSTINTVLCONST]) {
+		bandwidth->reset_is_constant_interval = mnl_attr_get_u8(tb[NFTA_BANDWIDTH_RSTINTVLCONST]);
 		e->flags |= (1 << NFTNL_EXPR_BANDWIDTH_RSTINTVLCONST);
 	}
-	if (tb[NFTNL_EXPR_BANDWIDTH_RSTTIME]) {
-		bandwidth->reset_time = be64toh(mnl_attr_get_u64(tb[NFTNL_EXPR_BANDWIDTH_RSTTIME]));
+	if (tb[NFTA_BANDWIDTH_RSTTIME]) {
+		bandwidth->reset_time = be64toh(mnl_attr_get_u64(tb[NFTA_BANDWIDTH_RSTTIME]));
 		e->flags |= (1 << NFTNL_EXPR_BANDWIDTH_RSTTIME);
 	}
-	if (tb[NFTNL_EXPR_BANDWIDTH_NUMINTVLSTOSAVE]) {
-		bandwidth->num_intervals_to_save = ntohl(mnl_attr_get_u32(tb[NFTNL_EXPR_BANDWIDTH_NUMINTVLSTOSAVE]));
+	if (tb[NFTA_BANDWIDTH_NUMINTVLSTOSAVE]) {
+		bandwidth->num_intervals_to_save = ntohl(mnl_attr_get_u32(tb[NFTA_BANDWIDTH_NUMINTVLSTOSAVE]));
 		e->flags |= (1 << NFTNL_EXPR_BANDWIDTH_NUMINTVLSTOSAVE);
 	}
-	if (tb[NFTNL_EXPR_BANDWIDTH_NEXTRESET]) {
-		bandwidth->next_reset = be64toh(mnl_attr_get_u64(tb[NFTNL_EXPR_BANDWIDTH_NEXTRESET]));
+	if (tb[NFTA_BANDWIDTH_NEXTRESET]) {
+		bandwidth->next_reset = be64toh(mnl_attr_get_u64(tb[NFTA_BANDWIDTH_NEXTRESET]));
 		e->flags |= (1 << NFTNL_EXPR_BANDWIDTH_NEXTRESET);
 	}
-	if (tb[NFTNL_EXPR_BANDWIDTH_PREVRESET]) {
-		bandwidth->prev_reset = be64toh(mnl_attr_get_u64(tb[NFTNL_EXPR_BANDWIDTH_PREVRESET]));
+	if (tb[NFTA_BANDWIDTH_PREVRESET]) {
+		bandwidth->prev_reset = be64toh(mnl_attr_get_u64(tb[NFTA_BANDWIDTH_PREVRESET]));
 		e->flags |= (1 << NFTNL_EXPR_BANDWIDTH_PREVRESET);
 	}
-	if (tb[NFTNL_EXPR_BANDWIDTH_LASTBACKUPTIME]) {
-		bandwidth->last_backup_time = be64toh(mnl_attr_get_u64(tb[NFTNL_EXPR_BANDWIDTH_LASTBACKUPTIME]));
+	if (tb[NFTA_BANDWIDTH_LASTBACKUPTIME]) {
+		bandwidth->last_backup_time = be64toh(mnl_attr_get_u64(tb[NFTA_BANDWIDTH_LASTBACKUPTIME]));
 		e->flags |= (1 << NFTNL_EXPR_BANDWIDTH_LASTBACKUPTIME);
 	}
-	if (tb[NFTNL_EXPR_BANDWIDTH_MINUTESWEST]) {
-		bandwidth->minutes_west = ntohl(mnl_attr_get_u32(tb[NFTNL_EXPR_BANDWIDTH_MINUTESWEST]));
+	if (tb[NFTA_BANDWIDTH_MINUTESWEST]) {
+		bandwidth->minutes_west = ntohl(mnl_attr_get_u32(tb[NFTA_BANDWIDTH_MINUTESWEST]));
 		e->flags |= (1 << NFTNL_EXPR_BANDWIDTH_MINUTESWEST);
 	}
 
@@ -452,10 +452,30 @@ static void nftnl_expr_bandwidth_free(const struct nftnl_expr *e)
 	xfree(bandwidth->subnet6);
 }
 
+static struct attr_policy bandwidth_attr_policy[__NFTNL_EXPR_BANDWIDTH_MAX] = {
+	[NFTNL_EXPR_BANDWIDTH_ID] = { .maxlen = BANDWIDTH_MAX_ID_LENGTH },
+	[NFTNL_EXPR_BANDWIDTH_CMP] = { .maxlen = sizeof(uint8_t) },
+	[NFTNL_EXPR_BANDWIDTH_TYPE]  = { .maxlen = sizeof(uint8_t) },
+	[NFTNL_EXPR_BANDWIDTH_CHECKTYPE] = { .maxlen = sizeof(uint8_t) },
+	[NFTNL_EXPR_BANDWIDTH_BWCUTOFF]  = { .maxlen = sizeof(uint64_t) },
+	[NFTNL_EXPR_BANDWIDTH_CURRENTBW]   = { .maxlen = sizeof(uint64_t) },
+	[NFTNL_EXPR_BANDWIDTH_SUBNET] = { .maxlen = BANDWIDTH_SUBNET_STR_SIZE },
+	[NFTNL_EXPR_BANDWIDTH_SUBNET6] = { .maxlen = BANDWIDTH_SUBNET_STR_SIZE },
+	[NFTNL_EXPR_BANDWIDTH_RSTINTVL] = { .maxlen = sizeof(uint64_t) },
+	[NFTNL_EXPR_BANDWIDTH_RSTINTVLCONST] = { .maxlen = sizeof(uint8_t) },
+	[NFTNL_EXPR_BANDWIDTH_RSTTIME] = { .maxlen = sizeof(uint64_t) },
+	[NFTNL_EXPR_BANDWIDTH_NUMINTVLSTOSAVE] = { .maxlen = sizeof(uint32_t) },
+	[NFTNL_EXPR_BANDWIDTH_NEXTRESET] = { .maxlen = sizeof(uint64_t) },
+	[NFTNL_EXPR_BANDWIDTH_PREVRESET] = { .maxlen = sizeof(uint64_t) },
+	[NFTNL_EXPR_BANDWIDTH_LASTBACKUPTIME] = { .maxlen = sizeof(uint64_t) },
+	[NFTNL_EXPR_BANDWIDTH_MINUTESWEST] = { .maxlen = sizeof(uint32_t) },
+};
+
 struct expr_ops expr_ops_bandwidth = {
 	.name		= "bandwidth",
 	.alloc_len	= sizeof(struct nftnl_expr_bandwidth),
-	.max_attr	= NFTA_BANDWIDTH_MAX,
+	.nftnl_max_attr	= __NFTNL_EXPR_BANDWIDTH_MAX - 1,
+	.attr_policy	= bandwidth_attr_policy,
 	.free		= nftnl_expr_bandwidth_free,
 	.set		= nftnl_expr_bandwidth_set,
 	.get		= nftnl_expr_bandwidth_get,

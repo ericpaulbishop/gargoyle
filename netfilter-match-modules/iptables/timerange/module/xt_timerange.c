@@ -3,6 +3,7 @@
  *
  *
  *  Copyright © 2009-2010 by Eric Bishop <eric@gargoyle-router.com>
+ *  Rebuilt for xtables 2020 by Michael Gray <support@lantisproject.com>
  * 
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the

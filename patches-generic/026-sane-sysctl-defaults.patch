@@ -1,7 +1,8 @@
 --- a/package/base-files/files/etc/sysctl.conf
 +++ b/package/base-files/files/etc/sysctl.conf
-@@ -1,1 +1,6 @@
- # Defaults are configured in /etc/sysctl.d/* and can be customized in this file
+@@ -1,2 +1,7 @@
+ # User defined entries should be added to this file not to /etc/sysctl.d/* as
+ # that directory is not backed-up by default and will not survive a reimage
 +
 +net.ipv4.tcp_tw_reuse=1
 +net.ipv4.tcp_max_tw_buckets=8192

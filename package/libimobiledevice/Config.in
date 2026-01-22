@@ -1,0 +1,17 @@
+if PACKAGE_libimobiledevice
+
+comment "SSL support"
+
+choice
+	prompt "Selected SSL library"
+	default LIBIMOBILEDEVICE_MBEDTLS
+
+	config LIBIMOBILEDEVICE_MBEDTLS
+		bool "mbed TLS"
+
+	config LIBIMOBILEDEVICE_OPENSSL
+		bool "OpenSSL"
+
+endchoice
+
+endif

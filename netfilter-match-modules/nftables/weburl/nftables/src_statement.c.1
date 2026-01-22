@@ -22,7 +22,7 @@ static void weburl_stmt_print(const struct stmt *stmt, struct output_ctx *octx)
 
 static void weburl_stmt_destroy(struct stmt *stmt)
 {
-	xfree(stmt->weburl.match);
+	free_const(stmt->weburl.match);
 }
 
 static const struct stmt_ops weburl_stmt_ops = {

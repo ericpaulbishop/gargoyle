@@ -23,6 +23,8 @@ function saveChanges()
 		
 		var openvpnConfig = getSelectedValue("openvpn_config")
 		uci.set("openvpn", "custom_config", "", "openvpn")
+		uci.set("openvpn", "globals", "", "globals")
+		uci.set("openvpn", "globals", "autostart", "0")
 
 		configureFirewall = function(enabled,isServer,vpnPort,vpnProto)
 		{

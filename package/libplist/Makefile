@@ -8,22 +8,19 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libplist
-PKG_VERSION:=2.3.1
+PKG_VERSION:=2.4.0
 PKG_RELEASE:=1
-PKG_REV:=b3cf5bec39de69bf06c7813689f03cbe58f45ca9
 
-PKG_SOURCE_PROTO:=git
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=https://github.com/libimobiledevice/libplist.git
-PKG_MIRROR_HASH:=133d12c2d128b2c5dcf04f5b4e2e1564978e7fcd6cb043dda46f13405711bfdf
-PKG_SOURCE_VERSION:=$(PKG_REV)
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.bz2
+PKG_SOURCE_URL:=https://github.com/libimobiledevice/libplist/releases/download/$(PKG_VERSION)
+PKG_HASH:=3f5868ae15b117320c1ff5e71be53d29469d4696c4085f89db1975705781a7cd
 
-PKG_MAINTAINER:=Michael Gray <support@lantisproject.com>
+PKG_MAINTAINER:=Rosen Penev <rosenp@gmail.com>
 PKG_CPE_ID:=cpe:/a:libimobiledevice:libplist
 
 PKG_INSTALL:=1
 PKG_BUILD_PARALLEL:=1
-PKG_FIXUP:=autoreconf
+PKG_BUILD_FLAGS:=lto
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -70,12 +67,6 @@ CONFIGURE_ARGS += \
 	--disable-static \
 	--without-cython
 
-define Build/Prepare
-	echo "$(PKG_VERSION)" > $(PKG_BUILD_DIR)/.tarball-version
-	$(call Build/Prepare/Default)
-endef
-
-TARGET_CFLAGS += -flto
 TARGET_LDFLAGS += -Wl,--gc-sections
 
 define Build/InstallDev

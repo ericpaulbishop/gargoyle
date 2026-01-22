@@ -8,23 +8,21 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libimobiledevice
-PKG_VERSION:=1.3.1
 PKG_RELEASE:=1
-PKG_REV:=7f781eb61215c84bd0f79838fbcb5efd66121677
 
 PKG_SOURCE_PROTO:=git
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
 PKG_SOURCE_URL:=https://github.com/libimobiledevice/libimobiledevice.git
-PKG_MIRROR_HASH:=abd61ee358e09320d488042da9d7519f0cf2cc7c10d3c174881d0976b32260c1
-PKG_SOURCE_VERSION:=$(PKG_REV)
+PKG_SOURCE_DATE:=2024-05-20
+PKG_SOURCE_VERSION:=9ccc52222c287b35e41625cc282fb882544676c6
+PKG_MIRROR_HASH:=9d272d40515c5ba6be5fa22eb897724d8940a505163918120c005bbeed352475
 
 PKG_MAINTAINER:=Michael Gray <support@lantisproject.com>
 PKG_LICENSE:=LGPL-2.1-or-later
 PKG_LICENSE_FILES:=COPYING.LESSER
 
+PKG_FIXUP:=autoreconf
 PKG_INSTALL:=1
 PKG_BUILD_PARALLEL:=1
-PKG_FIXUP:=autoreconf
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -43,9 +41,13 @@ define Package/libimobiledevice
   $(call Package/libimobiledevice/Default)
   SECTION:=libs
   CATEGORY:=Libraries
-  DEPENDS:=+libimobiledevice-glue +libplist +libusbmuxd +libmbedtls
+  DEPENDS:=+libplist +libimobiledevice-glue +libusbmuxd +LIBIMOBILEDEVICE_MBEDTLS:libmbedtls +LIBIMOBILEDEVICE_OPENSSL:libopenssl
   LICENSE:=LGPL-2.1-or-later
   LICENSE_FILES:=COPYING.LESSER
+endef
+
+define Package/libimobiledevice/config
+  source "$(SOURCE)/Config.in"
 endef
 
 define Package/libimobiledevice/description
@@ -69,12 +71,9 @@ endef
 CONFIGURE_ARGS += \
 	--disable-static \
 	--without-cython \
-	--with-mbedtls
-
-define Build/Prepare
-	echo "$(PKG_VERSION)" > $(PKG_BUILD_DIR)/.tarball-version
-	$(call Build/Prepare/Default)
-endef
+	$(if $(CONFIG_LIBIMOBILEDEVICE_MBEDTLS),--with-mbedtls) \
+	$(if $(CONFIG_LIBIMOBILEDEVICE_OPENSSL),--with-openssl) \
+	PACKAGE_VERSION=$(PKG_VERSION)
 
 define Build/InstallDev
 	$(INSTALL_DIR) $(1)/usr/include

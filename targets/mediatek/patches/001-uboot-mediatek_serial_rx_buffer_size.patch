@@ -1,0 +1,12 @@
+--- a/package/boot/uboot-mediatek/Makefile
++++ b/package/boot/uboot-mediatek/Makefile
+@@ -911,7 +911,8 @@ UBOOT_CUSTOMIZE_CONFIG := \
+ 	--disable TOOLS_KWBIMAGE \
+ 	--disable TOOLS_LIBCRYPTO \
+ 	--disable TOOLS_MKEFICAPSULE \
+-	--enable SERIAL_RX_BUFFER
++	--enable SERIAL_RX_BUFFER \
++	--set-val SERIAL_RX_BUFFER_SIZE 256
+ 
+ ifdef CONFIG_TARGET_mediatek
+ UBOOT_MAKE_FLAGS += $(UBOOT_IMAGE:.fip=.bin)

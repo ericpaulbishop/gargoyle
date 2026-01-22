@@ -62,11 +62,11 @@ static int nftnl_expr_weburl_cb(const struct nlattr *attr, void *data)
 		return MNL_CB_OK;
 
 	switch(type) {
-	case NFTNL_EXPR_WEBURL_FLAGS:
+	case NFTA_WEBURL_FLAGS:
 		if (mnl_attr_validate(attr, MNL_TYPE_U32) < 0)
 			abi_breakage();
 		break;
-	case NFTNL_EXPR_WEBURL_MATCH:
+	case NFTA_WEBURL_MATCH:
 		if (mnl_attr_validate(attr, MNL_TYPE_STRING) < 0)
 			abi_breakage();
 		break;
@@ -82,9 +82,9 @@ nftnl_expr_weburl_build(struct nlmsghdr *nlh, const struct nftnl_expr *e)
 	struct nftnl_expr_weburl *weburl = nftnl_expr_data(e);
 
 	if (e->flags & (1 << NFTNL_EXPR_WEBURL_FLAGS))
-		mnl_attr_put_u32(nlh, NFTNL_EXPR_WEBURL_FLAGS, htonl(weburl->flags));
+		mnl_attr_put_u32(nlh, NFTA_WEBURL_FLAGS, htonl(weburl->flags));
 	if (e->flags & (1 << NFTNL_EXPR_WEBURL_MATCH))
-		mnl_attr_put_strz(nlh, NFTNL_EXPR_WEBURL_MATCH, weburl->match);
+		mnl_attr_put_strz(nlh, NFTA_WEBURL_MATCH, weburl->match);
 }
 
 static int
@@ -96,15 +96,15 @@ nftnl_expr_weburl_parse(struct nftnl_expr *e, struct nlattr *attr)
 	if (mnl_attr_parse_nested(attr, nftnl_expr_weburl_cb, tb) < 0)
 		return -1;
 
-	if (tb[NFTNL_EXPR_WEBURL_FLAGS]) {
-		weburl->flags = ntohl(mnl_attr_get_u32(tb[NFTNL_EXPR_WEBURL_FLAGS]));
+	if (tb[NFTA_WEBURL_FLAGS]) {
+		weburl->flags = ntohl(mnl_attr_get_u32(tb[NFTA_WEBURL_FLAGS]));
 		e->flags |= (1 << NFTNL_EXPR_WEBURL_FLAGS);
 	}
-	if (tb[NFTNL_EXPR_WEBURL_MATCH]) {
+	if (tb[NFTA_WEBURL_MATCH]) {
 		if (weburl->match)
 			xfree(weburl->match);
 
-		weburl->match = strdup(mnl_attr_get_str(tb[NFTNL_EXPR_WEBURL_MATCH]));
+		weburl->match = strdup(mnl_attr_get_str(tb[NFTA_WEBURL_MATCH]));
 		if (!weburl->match)
 			return -1;
 		e->flags |= (1 << NFTNL_EXPR_WEBURL_MATCH);
@@ -172,10 +172,16 @@ static void nftnl_expr_weburl_free(const struct nftnl_expr *e)
 	xfree(weburl->match);
 }
 
+static struct attr_policy weburl_attr_policy[__NFTNL_EXPR_BANDWIDTH_MAX] = {
+	[NFTNL_EXPR_WEBURL_FLAGS] = { .maxlen = sizeof(uint32_t) },
+	[NFTNL_EXPR_WEBURL_MATCH] = { .maxlen = WEBURL_TEXT_SIZE },
+};
+
 struct expr_ops expr_ops_weburl = {
 	.name		= "weburl",
 	.alloc_len	= sizeof(struct nftnl_expr_weburl),
-	.max_attr	= NFTA_WEBURL_MAX,
+	.nftnl_max_attr	= __NFTNL_EXPR_WEBURL_MAX - 1,
+	.attr_policy	= weburl_attr_policy,
 	.free		= nftnl_expr_weburl_free,
 	.set		= nftnl_expr_weburl_set,
 	.get		= nftnl_expr_weburl_get,

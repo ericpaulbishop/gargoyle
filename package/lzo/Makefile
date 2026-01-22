@@ -17,8 +17,8 @@ PKG_HASH:=c0f892943208266f9b6543b3ae308fab6284c5c90e627931446fb49b4221a072
 
 PKG_LICENSE:=GPL-2.0-or-later
 PKG_LICENSE_FILES:=COPYING
+PKG_CPE_ID:=cpe:/a:oberhumer:lzo
 
-PKG_BUILD_PARALLEL:=1
 CMAKE_BINARY_SUBDIR:=openwrt-build
 
 include $(INCLUDE_DIR)/package.mk
@@ -40,9 +40,7 @@ endef
 CMAKE_OPTIONS += \
 	-DENABLE_SHARED=ON \
 	-DENABLE_STATIC=ON \
-	\
-	-DBUILD_TESTING=OFF \
-	-DCMAKE_SKIP_INSTALL_RPATH=ON
+	-DBUILD_TESTING=OFF
 
 define Build/InstallDev
 	$(INSTALL_DIR) $(1)/usr/include $(1)/usr/lib $(1)/usr/lib/pkgconfig

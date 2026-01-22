@@ -5,6 +5,7 @@
  *
  *
  *  Copyright © 2009-2011 by Eric Bishop <eric@gargoyle-router.com>
+ *  Rebuilt for xtables and IPv6 2020 by Michael Gray <support@lantisproject.com>
  *
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -80,7 +81,7 @@ static ktime_t last_local_mw_update;
 
 
 static spinlock_t bandwidth_lock = __SPIN_LOCK_UNLOCKED(bandwidth_lock);
-DEFINE_SEMAPHORE(userspace_lock);
+DEFINE_SEMAPHORE(userspace_lock, 1);
 
 static string_map* id_map = NULL;
 

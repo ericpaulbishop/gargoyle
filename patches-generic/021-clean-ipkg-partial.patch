@@ -1,6 +1,6 @@
 --- a/include/rootfs.mk
 +++ b/include/rootfs.mk
-@@ -60,6 +60,14 @@
+@@ -69,6 +69,14 @@
    endef
  endif
  
@@ -17,7 +17,7 @@
  		$(call file_copy,$(2)/.,$(1)); \
 --- a/config/Config-build.in
 +++ b/config/Config-build.in
-@@ -107,6 +107,14 @@ menu "Global build settings"
+@@ -112,6 +112,14 @@ menu "Global build settings"
  		  This removes all ipkg/opkg status data files from the target directory
  		  before building the root filesystem.
  

@@ -12,4 +12,6 @@ enum nft_timerange_attributes {
 
 #define NFTA_TIMERANGE_MAX (__NFTA_TIMERANGE_MAX - 1)
 
+#define TIMERANGE_TEXT_SIZE 1024
+
 #endif /* _TIMERANGE_H */

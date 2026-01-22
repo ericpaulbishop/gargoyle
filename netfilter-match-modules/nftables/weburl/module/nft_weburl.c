@@ -4,7 +4,7 @@
  *
  *
  *  Copyright © 2009-2024 by Eric Bishop <eric@gargoyle-router.com>
- *  Rewritten for nftables by Michael Gray <support@lantisproject.com>
+ *  Rewritten for nftables 2025 by Michael Gray <support@lantisproject.com>
  * 
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -610,7 +610,7 @@ PARSE_OUT:
 	return (valid_arg ? 0 : -EINVAL);
 }
 
-static int nft_weburl_dump(struct sk_buff *skb, const struct nft_expr *expr) {
+static int nft_weburl_dump(struct sk_buff *skb, const struct nft_expr *expr, bool reset) {
 	const struct nft_weburl_info *priv = nft_expr_priv(expr);
 	int retval = 0;
 	u32 flags = priv->invert ? NFT_WEBURL_F_INV : 0;

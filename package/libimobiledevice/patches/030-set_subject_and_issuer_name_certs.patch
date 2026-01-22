@@ -1,6 +1,6 @@
 --- a/common/userpref.c
 +++ b/common/userpref.c
-@@ -871,6 +871,10 @@ userpref_error_t pair_record_generate_ke
+@@ -870,6 +870,10 @@ userpref_error_t pair_record_generate_ke
  	/* set key validity */
  	mbedtls_x509write_crt_set_validity(&cert, notbefore, notafter);
  
@@ -11,7 +11,7 @@
  	/* sign root cert with root private key */
  	mbedtls_x509write_crt_set_issuer_key(&cert, &root_pkey);
  	mbedtls_x509write_crt_set_md_alg(&cert, MBEDTLS_MD_SHA1);
-@@ -930,6 +934,10 @@ userpref_error_t pair_record_generate_ke
+@@ -929,6 +933,10 @@ userpref_error_t pair_record_generate_ke
  	/* set key validity */
  	mbedtls_x509write_crt_set_validity(&cert, notbefore, notafter);
  
@@ -22,7 +22,7 @@
  	/* sign host cert with root private key */
  	mbedtls_x509write_crt_set_issuer_key(&cert, &root_pkey);
  	mbedtls_x509write_crt_set_md_alg(&cert, MBEDTLS_MD_SHA1);
-@@ -990,6 +998,10 @@ userpref_error_t pair_record_generate_ke
+@@ -989,6 +997,10 @@ userpref_error_t pair_record_generate_ke
  	/* set key validity */
  	mbedtls_x509write_crt_set_validity(&cert, notbefore, notafter);
  

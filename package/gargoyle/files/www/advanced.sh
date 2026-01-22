@@ -106,6 +106,7 @@
 						<select class="form-control" id="pktsteer_opt">
 							<option value="0"><%~ Disabled %></option>
 							<option value="1"><%~ Enabled %></option>
+							<option value="2"><%~ Enabled (All CPUs) %></option>
 						</select>
 					</div>
 				</div>

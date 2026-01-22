@@ -4,7 +4,7 @@
  *
  *
  *  Copyright © 2008-2024 by Eric Bishop <eric@gargoyle-router.com>
- *  Rewritten for nftables by Michael Gray <support@lantisproject.com>
+ *  Rewritten for nftables 2025 by Michael Gray <support@lantisproject.com>
  * 
  *  This file is free software: you may copy, redistribute and/or modify it
  *  under the terms of the GNU General Public License as published by the
@@ -2050,7 +2050,7 @@ static void nft_webmon_destroy(const struct nft_ctx *ctx, const struct nft_expr 
 	spin_unlock_bh(&webmon_lock);
 }
 
-static int nft_webmon_dump(struct sk_buff *skb, const struct nft_expr *expr) {
+static int nft_webmon_dump(struct sk_buff *skb, const struct nft_expr *expr, bool reset) {
 	const struct nft_webmon_info *priv = nft_expr_priv(expr);
 	int retval = 0;
 	u32 flags = 0;

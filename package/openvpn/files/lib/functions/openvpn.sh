@@ -13,4 +13,3 @@ get_openvpn_option() {
 	export -n "$variable=$value"
 	return 0
 }
-
