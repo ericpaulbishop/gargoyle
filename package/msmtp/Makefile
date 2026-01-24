@@ -64,7 +64,7 @@ define Package/msmtp-nossl
 $(call Package/msmtp/Default)
   TITLE+= (without SSL support)
   VARIANT:=nossl
-  PROVIDES:=msmtp
+#  PROVIDES:=msmtp
 endef
 
 define Package/msmtp-nossl/description

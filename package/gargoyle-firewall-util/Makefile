@@ -15,7 +15,7 @@ define Package/gargoyle-firewall-util
 	SECTION:=net
 	CATEGORY:=Network
 	TITLE:=A couple of shell script routines for firewall (fw4) initialization
-	DEPENDS:=+nftables-json +libericstools +uci +libnftbwctl +kmod-nft-bandwidth +kmod-nft-timerange +kmod-nft-weburl +kmod-tun +kmod-nf-nathelper +kmod-nf-nathelper-extra
+	DEPENDS:=+nftables-json +libericstools +uci +libnftbwctl +kmod-nft-bandwidth +kmod-nft-timerange +kmod-nft-weburl +kmod-tun +kmod-nf-nathelper +kmod-nf-nathelper-extra +kmod-nf-conntrack-netlink +kmod-nft-bridge
 	MAINTAINER:=Eric Bishop <eric@gargoyle-router.com>
 endef
 

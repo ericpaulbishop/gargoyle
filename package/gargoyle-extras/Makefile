@@ -23,9 +23,10 @@ endef
 define Package/gargoyle-extra-usb-ethernet
 	$(call Package/gargoyle-extras/Default)
 	TITLE+= USB ethernet drivers
-	DEPENDS:=+kmod-usb-net +kmod-usb-net-aqc111 \
+	DEPENDS:=+kmod-usb-net-aqc111 \
 		+kmod-usb-net-asix +kmod-usb-net-asix-ax88179 \
-		+kmod-usb-net-rtl8150 +kmod-usb-net-rtl8152
+		+kmod-usb-net-rtl8150 +kmod-usb-net-rtl8152 \
+		+TARGET_bcm27xx_bcm2712:kmod-usb-net-lan78xx
 endef
 
 define Package/gargoyle-extra-usb-ethernet/description

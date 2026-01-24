@@ -7,9 +7,17 @@
 menuconfig USE_GARGOYLE_PROFILE_PKGS
 	bool "Gargoyle packages choice shortcut"
 	default y
+	select BUILD_PATENTED
+	select CLEAN_IPKG_PARTIAL
+	select KERNEL_PROC_STRIPPED
 	select BUSYBOX_CUSTOM
 	select BUSYBOX_CONFIG_ARPING
 	select BUSYBOX_CONFIG_SHA1SUM
+	select BUSYBOX_CONFIG_BUNZIP2
+	select BUSYBOX_CONFIG_BZCAT
+	select BUSYBOX_CONFIG_FEATURE_COMPRESS_USAGE
+	select BUSYBOX_CONFIG_FEATURE_PREFER_IPV4_ADDRESS
+	select BUSYBOX_CONFIG_FEATURE_SUID
 	select PACKAGE_gargoyle
 	select PACKAGE_gargoyle-i18n
 	select PACKAGE_plugin-gargoyle-i18n-English-EN
@@ -18,27 +26,31 @@ menuconfig USE_GARGOYLE_PROFILE_PKGS
 		menu "Standard Gargoyle package sets"
 			config GARGOYLE_BASIC
 				tristate "Basic Packages"
-				default m
+				default m if !(TARGET_bcm27xx||TARGET_x86)
+				default n
 				select PACKAGE_gargoyle-basic
 				help
 				  Choose basic packages, the minimum required for Gargoyle.
 
 			config GARGOYLE_USB
 				tristate "Basic & USB Functionality"
-				default m
+				default m if !(TARGET_bcm27xx||TARGET_x86)
+				default n
 				select PACKAGE_gargoyle-usb
 				help
 				  Choose basic packages and those required to support USB functionality (but no network sharing).
 
 			config GARGOYLE_VPN
 				tristate "Basic & VPN Functionality"
-				default m
+				default m if !(TARGET_bcm27xx||TARGET_x86)
+				default n
 				select PACKAGE_gargoyle-vpn
 				help
 				  Choose basic packages and those required to support VPN functionality.
 
 			config GARGOYLE_LARGE
 				tristate "Full Functionality"
+				default y if (TARGET_bcm27xx||TARGET_x86)
 				default m
 				select PACKAGE_gargoyle-large
 				help
@@ -47,6 +59,7 @@ menuconfig USE_GARGOYLE_PROFILE_PKGS
 
 		config GARGOYLE_LANGUAGE_PKGS
 			tristate "Language translation packages"
+			default y if TARGET_bcm27xx
 			default m
 			select PACKAGE_plugin-gargoyle-i18n-Arabic-AR
 			select PACKAGE_plugin-gargoyle-i18n-Czech-CS
@@ -60,7 +73,7 @@ menuconfig USE_GARGOYLE_PROFILE_PKGS
 			select PACKAGE_plugin-gargoyle-i18n-Slovak-SK
 			select PACKAGE_plugin-gargoyle-i18n-Spanish-ES
 			help
-				Plugins for languages other than English
+			  Plugins for languages other than English
 
 		config GARGOYLE_THEME_PKGS
 			tristate "Display theme packages"
@@ -75,9 +88,18 @@ menuconfig USE_GARGOYLE_PROFILE_PKGS
 			select PACKAGE_plugin-gargoyle-theme-light
 			select PACKAGE_plugin-gargoyle-theme-xeye
 			help
-				Plugins for alternative display themes
+			  Plugins for alternative display themes
 
 		menu "Extra Gargoyle package sets"
+			config GARGOYLE_EXTRA_UTILITIES
+				tristate "Utility packages"
+				default m
+				select PACKAGE_opkg
+				select PACKAGE_resolveip
+				select PACKAGE_swap-utils
+				help
+				  Utility packages.
+
 			config GARGOYLE_EXTRA_USB_ETHERNET
 				tristate "USB to Ethernet Drivers"
 				default y if TARGET_bcm27xx
@@ -86,17 +108,87 @@ menuconfig USE_GARGOYLE_PROFILE_PKGS
 				help
 				  Drivers for Acquantia, Asix and Realtek based USB2/USB3 to Ethernet adapters.
 
+			config GARGOYLE_EXTRA_ETHERNET_STD
+				tristate "Additional Ethernet Drivers"
+				default y if (TARGET_bcm27xx_bcm2712||TARGET_x86_64)
+				default n
+				select PACKAGE_kmod-3c59x if TARGET_x86_64
+				select PACKAGE_kmod-8139too if TARGET_x86_64
+				select PACKAGE_kmod-e100 if TARGET_x86_64
+				select PACKAGE_kmod-natsemi if TARGET_x86_64
+				select PACKAGE_kmod-ne2k-pci if TARGET_x86_64
+				select PACKAGE_kmod-pcnet32 if TARGET_x86_64
+				select PACKAGE_kmod-r8169 if TARGET_bcm27xx_bcm2712
+				select PACKAGE_kmod-sis900 if TARGET_x86_64
+				select PACKAGE_kmod-via-rhine if TARGET_x86_64
+				select PACKAGE_kmod-via-velocity if TARGET_x86_64
+				help
+				  Drivers for additional ethernet adapters.
+
+			config GARGOYLE_EXTRA_ETHERNET_OPT
+				tristate "Optional Ethernet Drivers"
+				default m if (TARGET_x86_generic||TARGET_x86_64)
+				default n
+				select PACKAGE_kmod-bnx2x if TARGET_x86_64
+				select PACKAGE_kmod-mlx4-core if TARGET_x86_64
+				select PACKAGE_kmod-mlx5-core if TARGET_x86_64
+				select PACKAGE_kmod-r8101
+				select PACKAGE_kmod-r8125 if TARGET_x86_64
+				select PACKAGE_kmod-r8125-rss if TARGET_x86_64
+				select PACKAGE_kmod-r8126 if TARGET_x86_64
+				select PACKAGE_kmod-r8126-rss if TARGET_x86_64
+				select PACKAGE_kmod-r8127 if TARGET_x86_64
+				select PACKAGE_kmod-r8127-rss if TARGET_x86_64
+				select PACKAGE_kmod-r8168
+				select PACKAGE_kmod-r8168-rss
+				help
+				  Drivers for additional optional ethernet adapters.
+
+			config GARGOYLE_EXTRA_WIFI_SUPPORT
+				tristate "Optional extra WiFi support"
+				default m if (TARGET_ath79||TARGET_ipq40xx||TARGET_ipq806x||TARGET_rockchip||TARGET_x86)
+				default n
+				select PACKAGE_kmod-ath9k if (TARGET_rockchip||TARGET_x86)
+				select PACKAGE_kmod-ath9k-common if (TARGET_rockchip||TARGET_x86)
+				select PACKAGE_kmod-ath10k if MODULE_DEFAULT_kmod-ath10k-ct
+				select PACKAGE_kmod-ath10k-ct-smallbuffers if MODULE_DEFAULT_kmod-ath10k-ct
+				select PACKAGE_kmod-ath10k-smallbuffers if MODULE_DEFAULT_kmod-ath10k-ct
+				select PACKAGE_ath10k-firmware-qca4019 if MODULE_DEFAULT_ath10k-firmware-qca4019-ct
+				select PACKAGE_ath10k-firmware-qca4019-ct-full-htt if MODULE_DEFAULT_ath10k-firmware-qca4019-ct
+				select PACKAGE_ath10k-firmware-qca4019-ct-htt if MODULE_DEFAULT_ath10k-firmware-qca4019-ct
+				select PACKAGE_ath10k-firmware-qca9887 if MODULE_DEFAULT_ath10k-firmware-qca9887-ct
+				select PACKAGE_ath10k-firmware-qca9887-ct-full-htt if MODULE_DEFAULT_ath10k-firmware-qca9887-ct
+				select PACKAGE_ath10k-firmware-qca9888 if MODULE_DEFAULT_ath10k-firmware-qca9888-ct
+				select PACKAGE_ath10k-firmware-qca9888-ct-full-htt if MODULE_DEFAULT_ath10k-firmware-qca9888-ct
+				select PACKAGE_ath10k-firmware-qca9888-ct-htt if MODULE_DEFAULT_ath10k-firmware-qca9888-ct
+				select PACKAGE_ath10k-firmware-qca988x if MODULE_DEFAULT_ath10k-firmware-qca988x-ct
+				select PACKAGE_ath10k-firmware-qca988x-ct-full-htt if MODULE_DEFAULT_ath10k-firmware-qca988x-ct
+				select PACKAGE_ath10k-firmware-qca9984 if MODULE_DEFAULT_ath10k-firmware-qca9984-ct
+				select PACKAGE_ath10k-firmware-qca9984-ct-full-htt if MODULE_DEFAULT_ath10k-firmware-qca9984-ct
+				select PACKAGE_ath10k-firmware-qca9984-ct-htt if MODULE_DEFAULT_ath10k-firmware-qca9984-ct
+				select PACKAGE_ath10k-firmware-qca99x0 if MODULE_DEFAULT_ath10k-firmware-qca99x0-ct
+				select PACKAGE_ath10k-firmware-qca99x0-ct-full-htt if MODULE_DEFAULT_ath10k-firmware-qca99x0-ct
+				select PACKAGE_ath10k-firmware-qca99x0-ct-htt if MODULE_DEFAULT_ath10k-firmware-qca99x0-ct
+				help
+				  Optional extra WiFi support for some targets.
+
+			config GARGOYLE_EXTRA_DIAGS
+				tristate "Diagnostics support"
+				default y if (TARGET_bcm27xx||TARGET_ipq806x||TARGET_mediatek||TARGET_rockchip||TARGET_x86_generic||TARGET_x86_64)
+				default m
+				select PACKAGE_plugin-gargoyle-diagnostics
+				help
+				  Diagnostic support packages
+
 		endmenu
 
 		config GARGOYLE_OTHER_PKGS
 			tristate "Other Gargoyle plugins"
 			default m
-			select PACKAGE_msmtp
-			select PACKAGE_msmtp-nossl
 			select PACKAGE_plugin-gargoyle-adblock
 			select PACKAGE_plugin-gargoyle-cron
 			select PACKAGE_plugin-gargoyle-ddns-cloudflare
-			select PACKAGE_plugin-gargoyle-diagnostics
+			select PACKAGE_plugin-gargoyle-doh
 			select PACKAGE_plugin-gargoyle-email-notifications
 			select PACKAGE_plugin-gargoyle-email-notifications-nossl
 			select PACKAGE_plugin-gargoyle-initd
@@ -107,13 +199,13 @@ menuconfig USE_GARGOYLE_PROFILE_PKGS
 			select PACKAGE_plugin-gargoyle-spectrum-analyser
 			select PACKAGE_plugin-gargoyle-spectrum-analyser-minimal
 			select PACKAGE_plugin-gargoyle-stamgr
+			select PACKAGE_plugin-gargoyle-tor
 			select PACKAGE_plugin-gargoyle-upnp
 			select PACKAGE_plugin-gargoyle-webshell
 			select PACKAGE_plugin-gargoyle-wifi-schedule
-			select PACKAGE_resolveip
 			select PACKAGE_ksmbd-server if !GARGOYLE_SMB_KSMBD
 			select PACKAGE_samba36-server if !GARGOYLE_SMB_SAMBA
 			help
-				Other plugin packages
+			  Other plugin packages
 
 	endif
