@@ -65,6 +65,8 @@ CONFIG_TARGET_MULTI_PROFILE=y
 # CONFIG_TARGET_rockchip_armv8_DEVICE_friendlyarm_nanopi-r5s is not set
 # CONFIG_TARGET_rockchip_armv8_DEVICE_friendlyarm_nanopi-r6c is not set
 # CONFIG_TARGET_rockchip_armv8_DEVICE_friendlyarm_nanopi-r6s is not set
+# CONFIG_TARGET_rockchip_armv8_DEVICE_linkease_easepi-r1 is not set
+# CONFIG_TARGET_rockchip_armv8_DEVICE_lunzn_fastrhino-r66s is not set
 # CONFIG_TARGET_rockchip_armv8_DEVICE_pine64_rock64 is not set
 # CONFIG_TARGET_rockchip_armv8_DEVICE_pine64_rockpro64 is not set
 # CONFIG_TARGET_rockchip_armv8_DEVICE_radxa_cm3-io is not set
@@ -72,6 +74,8 @@ CONFIG_TARGET_MULTI_PROFILE=y
 # CONFIG_TARGET_rockchip_armv8_DEVICE_radxa_rock-3a is not set
 # CONFIG_TARGET_rockchip_armv8_DEVICE_radxa_rock-3b is not set
 # CONFIG_TARGET_rockchip_armv8_DEVICE_radxa_rock-3c is not set
+# CONFIG_TARGET_rockchip_armv8_DEVICE_radxa_rock-4c-plus is not set
+# CONFIG_TARGET_rockchip_armv8_DEVICE_radxa_rock-4se is not set
 # CONFIG_TARGET_rockchip_armv8_DEVICE_radxa_rock-5a is not set
 # CONFIG_TARGET_rockchip_armv8_DEVICE_radxa_rock-5b is not set
 # CONFIG_TARGET_rockchip_armv8_DEVICE_radxa_rock-pi-4a is not set
@@ -103,6 +107,8 @@ CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_friendlyarm_nanopi-r4s=y
 # CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_friendlyarm_nanopi-r5s is not set
 # CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_friendlyarm_nanopi-r6c is not set
 # CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_friendlyarm_nanopi-r6s is not set
+# CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_linkease_easepi-r1 is not set
+# CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_lunzn_fastrhino-r66s is not set
 # CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_pine64_rock64 is not set
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_pine64_rockpro64=y
 # CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_radxa_cm3-io is not set
@@ -110,6 +116,8 @@ CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_pine64_rockpro64=y
 # CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_radxa_rock-3a is not set
 # CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_radxa_rock-3b is not set
 # CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_radxa_rock-3c is not set
+# CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_radxa_rock-4c-plus is not set
+# CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_radxa_rock-4se is not set
 # CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_radxa_rock-5a is not set
 # CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_radxa_rock-5b is not set
 CONFIG_TARGET_DEVICE_rockchip_armv8_DEVICE_radxa_rock-pi-4a=y
@@ -4084,6 +4092,7 @@ CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_RSA_ENABLED=y
 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED=y
 # CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA_ENABLED is not set
 # CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_RSA_ENABLED is not set
+# CONFIG_MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED is not set
 
 #
 # Curves - unselect old or less-used curves to reduce binary size

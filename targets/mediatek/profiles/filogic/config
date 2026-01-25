@@ -70,6 +70,7 @@ CONFIG_TARGET_MULTI_PROFILE=y
 # CONFIG_TARGET_mediatek_filogic_DEVICE_asus_rt-ax52 is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_asus_rt-ax59u is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_asus_tuf-ax4200 is not set
+# CONFIG_TARGET_mediatek_filogic_DEVICE_asus_tuf-ax4200q is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_arcadyan_mozart is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_asus_tuf-ax6000 is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_bananapi_bpi-r3 is not set
@@ -86,26 +87,35 @@ CONFIG_TARGET_MULTI_PROFILE=y
 # CONFIG_TARGET_mediatek_filogic_DEVICE_cudy_ap3000-v1 is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_cudy_m3000-v1 is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_cudy_re3000-v1 is not set
+# CONFIG_TARGET_mediatek_filogic_DEVICE_cudy_tr3000-256mb-v1 is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_cudy_tr3000-v1 is not set
+# CONFIG_TARGET_mediatek_filogic_DEVICE_cudy_tr3000-v1-ubootmod is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_cudy_wr3000-v1 is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_cudy_wr3000e-v1 is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_cudy_wr3000s-v1 is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_cudy_wr3000h-v1 is not set
+# CONFIG_TARGET_mediatek_filogic_DEVICE_cudy_wr3000p-v1 is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_dlink_aquila-pro-ai-m30-a1 is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_dlink_aquila-pro-ai-m60-a1 is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_edgecore_eap111 is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_gatonetworks_gdsp is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_glinet_gl-mt2500 is not set
+# CONFIG_TARGET_mediatek_filogic_DEVICE_glinet_gl-mt2500-airoha is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_glinet_gl-mt3000 is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_glinet_gl-mt6000 is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_glinet_gl-x3000 is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_glinet_gl-xe3000 is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_h3c_magic-nx30-pro is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_huasifei_wh3000 is not set
+# CONFIG_TARGET_mediatek_filogic_DEVICE_huasifei_wh3000-pro is not set
+# CONFIG_TARGET_mediatek_filogic_DEVICE_iptime_ax3000q is not set
+# CONFIG_TARGET_mediatek_filogic_DEVICE_iptime_ax3000sm is not set
+# CONFIG_TARGET_mediatek_filogic_DEVICE_iptime_ax7800m-6e is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_jcg_q30-pro is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_jdcloud_re-cp-03 is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_keenetic_kn-3811 is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_keenetic_kn-3911 is not set
+# CONFIG_TARGET_mediatek_filogic_DEVICE_konka_komi-a31 is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_mediatek_mt7981-rfb is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_mediatek_mt7986a-rfb-nand is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_mediatek_mt7986b-rfb is not set
@@ -118,12 +128,14 @@ CONFIG_TARGET_MULTI_PROFILE=y
 # CONFIG_TARGET_mediatek_filogic_DEVICE_netis_nx31 is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_nokia_ea0326gmp is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_openembed_som7981 is not set
+# CONFIG_TARGET_mediatek_filogic_DEVICE_openfi_6c is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_openwrt_one is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_qihoo_360t7 is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_routerich_ax3000 is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_routerich_ax3000-ubootmod is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_routerich_ax3000-v1 is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_ruijie_rg-x60-pro is not set
+# CONFIG_TARGET_mediatek_filogic_DEVICE_totolink_x6000r is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_tplink_archer-ax80-v1 is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_tplink_re6000xd is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_tplink_tl-xdr4288 is not set
@@ -133,6 +145,7 @@ CONFIG_TARGET_MULTI_PROFILE=y
 # CONFIG_TARGET_mediatek_filogic_DEVICE_ubnt_unifi-6-plus is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_unielec_u7981-01-emmc is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_unielec_u7981-01-nand is not set
+# CONFIG_TARGET_mediatek_filogic_DEVICE_wavlink_wl-wn536ax6-a is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_wavlink_wl-wn586x3 is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_wavlink_wl-wn573hx3 is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_xiaomi_mi-router-ax3000t is not set
@@ -143,6 +156,7 @@ CONFIG_TARGET_MULTI_PROFILE=y
 # CONFIG_TARGET_mediatek_filogic_DEVICE_xiaomi_redmi-router-ax6000-ubootmod is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_yuncore_ax835 is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_zbtlink_zbt-z8102ax is not set
+# CONFIG_TARGET_mediatek_filogic_DEVICE_zbtlink_zbt-z8102ax-v2 is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_zbtlink_zbt-z8103ax is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_zyxel_ex5601-t0-stock is not set
 # CONFIG_TARGET_mediatek_filogic_DEVICE_zyxel_ex5601-t0-ubootmod is not set
@@ -174,6 +188,7 @@ CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_asus_rt-ax59u=y
 CONFIG_TARGET_DEVICE_PACKAGES_mediatek_filogic_DEVICE_asus_rt-ax59u="gargoyle-large"
 CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_asus_tuf-ax4200=y
 CONFIG_TARGET_DEVICE_PACKAGES_mediatek_filogic_DEVICE_asus_tuf-ax4200="gargoyle-large"
+# CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_asus_tuf-ax4200q is not set
 CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_asus_tuf-ax6000=y
 CONFIG_TARGET_DEVICE_PACKAGES_mediatek_filogic_DEVICE_asus_tuf-ax6000="gargoyle-large"
 CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_bananapi_bpi-r3=y
@@ -196,15 +211,19 @@ CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_cudy_tr3000-256mb-v1=y
 CONFIG_TARGET_DEVICE_PACKAGES_mediatek_filogic_DEVICE_cudy_tr3000-256mb-v1="gargoyle-large"
 CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_cudy_tr3000-v1=y
 CONFIG_TARGET_DEVICE_PACKAGES_mediatek_filogic_DEVICE_cudy_tr3000-v1="gargoyle-large"
+# CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_cudy_tr3000-v1-ubootmod is not set
 CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_cudy_wr3000-v1=y
 CONFIG_TARGET_DEVICE_PACKAGES_mediatek_filogic_DEVICE_cudy_wr3000-v1="gargoyle-vpn"
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_cudy_wr3000e-v1 is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_cudy_wr3000h-v1 is not set
+# CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_cudy_wr3000p-v1 is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_cudy_wr3000s-v1 is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_dlink_aquila-pro-ai-m30-a1 is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_dlink_aquila-pro-ai-m60-a1 is not set
+# CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_konka_komi-a31 is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_edgecore_eap111 is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_gatonetworks_gdsp is not set
+# CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_glinet_gl-mt2500-airoha is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_glinet_gl-mt2500 is not set
 CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_glinet_gl-mt3000=y
 CONFIG_TARGET_DEVICE_PACKAGES_mediatek_filogic_DEVICE_glinet_gl-mt3000="gargoyle-large"
@@ -214,6 +233,10 @@ CONFIG_TARGET_DEVICE_PACKAGES_mediatek_filogic_DEVICE_glinet_gl-mt6000="gargoyle
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_glinet_gl-xe3000 is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_h3c_magic-nx30-pro is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_huasifei_wh3000 is not set
+# CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_huasifei_wh3000-pro is not set
+# CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_iptime_ax3000q is not set
+# CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_iptime_ax3000sm is not set
+# CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_iptime_ax7800m-6e is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_jcg_q30-pro is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_jdcloud_re-cp-03 is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_keenetic_kn-3811 is not set
@@ -231,12 +254,14 @@ CONFIG_TARGET_DEVICE_PACKAGES_mediatek_filogic_DEVICE_netgear_wax220="gargoyle-v
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_netis_nx31 is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_nokia_ea0326gmp is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_openembed_som7981 is not set
+# CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_openfi_6c is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_openwrt_one is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_qihoo_360t7 is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_routerich_ax3000 is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_routerich_ax3000-ubootmod is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_routerich_ax3000-v1 is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_ruijie_rg-x60-pro is not set
+# CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_totolink_x6000r is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_tplink_archer-ax80-v1 is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_tplink_re6000xd is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_tplink_tl-xdr4288 is not set
@@ -246,6 +271,7 @@ CONFIG_TARGET_DEVICE_PACKAGES_mediatek_filogic_DEVICE_netgear_wax220="gargoyle-v
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_ubnt_unifi-6-plus is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_unielec_u7981-01-emmc is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_unielec_u7981-01-nand is not set
+# CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_wavlink_wl-wn536ax6-a is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_wavlink_wl-wn586x3 is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_xiaomi_mi-router-ax3000t is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_xiaomi_mi-router-ax3000t-ubootmod is not set
@@ -257,6 +283,7 @@ CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_xiaomi_redmi-router-ax6000-stock=y
 CONFIG_TARGET_DEVICE_PACKAGES_mediatek_filogic_DEVICE_xiaomi_redmi-router-ax6000-stock="gargoyle-large"
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_yuncore_ax835 is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_zbtlink_zbt-z8102ax is not set
+# CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_zbtlink_zbt-z8102ax-v2 is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_zbtlink_zbt-z8103ax is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_zyxel_ex5601-t0-ubootmod is not set
 # CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_zyxel_ex5601-t0-stock is not set
@@ -4274,6 +4301,7 @@ CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_RSA_ENABLED=y
 CONFIG_MBEDTLS_KEY_EXCHANGE_ECDHE_ECDSA_ENABLED=y
 # CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_ECDSA_ENABLED is not set
 # CONFIG_MBEDTLS_KEY_EXCHANGE_ECDH_RSA_ENABLED is not set
+# CONFIG_MBEDTLS_KEY_EXCHANGE_ECJPAKE_ENABLED is not set
 
 #
 # Curves - unselect old or less-used curves to reduce binary size
