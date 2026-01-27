@@ -2436,7 +2436,7 @@ function resetData()
 				Awifi_vals.push('11anac');
 				Awifi_names.push('A+N+AC');
 			}
-			else if(AwifiN)
+			if(AwifiN)
 			{
 				Awifi_vals.push('11an');
 				Awifi_names.push('A+N');
