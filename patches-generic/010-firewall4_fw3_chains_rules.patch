@@ -15,7 +15,7 @@
 + 		});
 + 
 + 		if (defs.synflood_protect === null)
-+@@ -2208,6 +2208,11 @@ return {
++@@ -2205,6 +2208,11 @@ return {
 + 		zone.related_subnets = related_subnets;
 + 		zone.related_physdevs = related_physdevs;
 + 
