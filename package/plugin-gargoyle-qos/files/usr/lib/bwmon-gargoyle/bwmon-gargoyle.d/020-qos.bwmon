@@ -7,9 +7,11 @@
 backup_script_dir="/tmp/bw_backup"
 backup_script="$backup_script_dir/do_qos_bw_backup.sh"
 tmp_cron="/tmp/tmp.cron"
-download_table="inet fw4"
+bw_table_type=inet
+bw_table_name=bwmon
+download_table="$bw_table_type $bw_table_name"
 download_chain=qos_ingress_bw
-upload_table="inet fw4"
+upload_table="$bw_table_type $bw_table_name"
 upload_chain=mangle_qos_egress_bw
 
 minute_s=60
@@ -61,6 +63,7 @@ setup()
 	lan6_ipstr="$(echo "{$lan6_ips}" | sed 's/ /,/g')"
 	wan6_ipstr="$(echo "{$wan6_ips}" | sed 's/ /,/g')"
 
+	establish_table_base_chains $bw_table_type $bw_table_name
 	nft add chain $download_table $download_chain
 	nft insert rule $download_table input iifname $bw_if jump $download_chain
 	nft insert rule $download_table forward iifname $bw_if jump $download_chain
@@ -182,10 +185,10 @@ teardown()
 		update_cron
 	
 		if [ -n "$have_up" ] ; then
-			delete_chain_from_table inet fw4 $upload_chain >/dev/null 2>&1
+			delete_chain_from_table $bw_table_type $bw_table_name $upload_chain >/dev/null 2>&1
 		fi
 		if [ -n "$have_down" ] ; then
-			delete_chain_from_table inet fw4 $download_chain >/dev/null 2>&1
+			delete_chain_from_table $bw_table_type $bw_table_name $download_chain >/dev/null 2>&1
 		fi
 	fi
 }

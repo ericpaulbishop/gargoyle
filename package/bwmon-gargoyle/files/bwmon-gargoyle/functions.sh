@@ -46,3 +46,37 @@ update_cron()
 		fi
 	fi
 }
+
+establish_table()
+{
+	tabtype="$1"
+	tabname="$2"
+
+	nft add table $tabtype $tabname
+}
+
+establish_base_chains()
+{
+	tabtype="$1"
+	tabname="$2"
+
+	# Need to hook BEFORE filter input and forward
+	# Default ACCEPT and let the fw4 base chains do the rest of the work, we are just observers
+	nft add chain $tabtype $tabname input \{ type filter hook input priority filter - 1\; policy accept\; \}
+	nft add chain $tabtype $tabname forward \{ type filter hook forward priority filter - 1\; policy accept\; \}
+	# Need to hook AFTER mangle_postrouting
+	nft add chain $tabtype $tabname mangle_postrouting \{ type filter hook postrouting priority mangle + 1\; policy accept\; \}
+	# Need to hook BEFORE mangle forward, input and output
+	nft add chain $tabtype $tabname mangle_forward \{ type filter hook forward priority mangle - 1\; policy accept\; \}
+	nft add chain $tabtype $tabname mangle_input \{ type filter hook input priority mangle - 1\; policy accept\; \}
+	nft add chain $tabtype $tabname mangle_output \{ type filter hook output priority mangle - 1\; policy accept\; \}
+}
+
+establish_table_base_chains()
+{
+	tabtype="$1"
+	tabname="$2"
+
+	establish_table $tabtype $tabname
+	establish_base_chains $tabtype $tabname
+}

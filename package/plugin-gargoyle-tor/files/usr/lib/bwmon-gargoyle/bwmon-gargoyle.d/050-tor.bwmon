@@ -9,6 +9,12 @@
 backup_script_dir="/tmp/bw_backup"
 backup_script="$backup_script_dir/do_tor_bw_backup.sh"
 tmp_cron="/tmp/tmp.tor.cron"
+bw_table_type=inet
+bw_table_name=bwmon
+download_table="$bw_table_type $bw_table_name"
+download_chain=mangle_tor_down_bw
+upload_table="$bw_table_type $bw_table_name"
+upload_chain=mangle_tor_up_bw
 
 
 minute_s=60
@@ -79,8 +85,9 @@ setup()
 		if [ -n "$wan_if" ] ; then
 			
 			# create tor bandwidth monitor chains
-			nft add chain inet fw4 mangle_tor_down_bw
-			nft add chain inet fw4 mangle_tor_up_bw
+			establish_table_base_chains $bw_table_type $bw_table_name
+			nft add chain $download_table $download_chain
+			nft add chain $upload_table $upload_chain
 
 			# first, test if traffic is tor, otherwise return
 			# traffic is tor if it's to/from the router itself AND
@@ -98,11 +105,11 @@ setup()
 				[ -n "$rport" ] && comma=","
 			fi
 
-			nft add rule inet fw4 mangle_tor_down_bw tcp dport \{ $rport$comma$oport \} ct mark set ct mark \& 0x0FFFFFFF \| 0xF0000000
-			nft add rule inet fw4 mangle_tor_down_bw ip saddr @tor_relays ct mark set ct mark \& 0x0FFFFFFF \| 0xF0000000
-			nft add rule inet fw4 mangle_tor_up_bw ip daddr @tor_relays ct mark set ct mark \& 0x0FFFFFFF \| 0xF0000000
-			nft add rule inet fw4 mangle_tor_down_bw ct mark \& 0xF0000000 != 0xF0000000 return
-			nft add rule inet fw4 mangle_tor_up_bw ct mark \& 0xF0000000 != 0xF0000000 return
+			nft add rule $download_table $download_chain tcp dport \{ $rport$comma$oport \} ct mark set ct mark \& 0x0FFFFFFF \| 0xF0000000
+			nft add rule $download_table $download_chain ip saddr @tor_relays ct mark set ct mark \& 0x0FFFFFFF \| 0xF0000000
+			nft add rule $upload_table $upload_chain ip daddr @tor_relays ct mark set ct mark \& 0x0FFFFFFF \| 0xF0000000
+			nft add rule $download_table $download_chain ct mark \& 0xF0000000 != 0xF0000000 return
+			nft add rule $upload_table $upload_chain ct mark \& 0xF0000000 != 0xF0000000 return
 
 
 			# add monitoring rules
@@ -113,8 +120,8 @@ setup()
 					reset_time=$(eval "echo \$$res"$n"_reset_time")
 					if [ -n "$reset_time" ] ; then reset_time="reset-time $reset_time" ; fi
 	
-					nft add rule inet fw4 mangle_tor_down_bw bandwidth id \""tor-$res$n-download-$interval-$num_intervals"\" reset-interval $interval intervals-to-save $num_intervals $reset_time
-					nft add rule inet fw4 mangle_tor_up_bw bandwidth id \""tor-$res$n-upload-$interval-$num_intervals"\" reset-interval $interval intervals-to-save $num_intervals $reset_time
+					nft add rule $download_table $download_chain bandwidth id \""tor-$res$n-download-$interval-$num_intervals"\" reset-interval $interval intervals-to-save $num_intervals $reset_time
+					nft add rule $upload_table $upload_chain bandwidth id \""tor-$res$n-upload-$interval-$num_intervals"\" reset-interval $interval intervals-to-save $num_intervals $reset_time
 					
 					next_ids="tor-$res$n-download-$interval-$num_intervals tor-$res$n-upload-$interval-$num_intervals"
 					if [ -z "$bw_ids" ] ; then bw_ids="$next_ids" ; else bw_ids="$bw_ids $next_ids" ; fi
@@ -123,13 +130,13 @@ setup()
 
 
 			#clear connmark we set
-			nft add rule inet fw4 mangle_tor_down_bw ct mark set ct mark \& 0x0FFFFFFF \| 0x0
-			nft add rule inet fw4 mangle_tor_up_bw ct mark set ct mark \& 0x0FFFFFFF \| 0x0
+			nft add rule $download_table $download_chain ct mark set ct mark \& 0x0FFFFFFF \| 0x0
+			nft add rule $upload_table $upload_chain ct mark set ct mark \& 0x0FFFFFFF \| 0x0
 
 
 			# create rules to jump to tor bandwidth chain
-			nft add rule inet fw4 mangle_input iifname $wan_if meta l4proto tcp jump mangle_tor_down_bw
-			nft add rule inet fw4 mangle_output oifname $wan_if meta l4proto tcp jump mangle_tor_down_bw
+			nft add rule $download_table mangle_input iifname $wan_if meta l4proto tcp jump $download_chain
+			nft add rule $upload_table mangle_output oifname $wan_if meta l4proto tcp jump $upload_chain
 
 		
 			# enable backups of bandwidth data
@@ -170,8 +177,8 @@ teardown()
 	grep -v "$backup_script" /etc/crontabs/root > "$tmp_cron"
 	update_cron
 	
-	delete_chain_from_table inet fw4 mangle_tor_down_bw
-	delete_chain_from_table inet fw4 mangle_tor_up_bw
+	delete_chain_from_table $bw_table_type $bw_table_name $download_chain
+	delete_chain_from_table $bw_table_type $bw_table_name $upload_chain
 }
 
 RUN_MODE="$1"
