@@ -1424,7 +1424,7 @@ void print_histories(FILE* out, char* id, ip_bw_history* histories, unsigned lon
 					}
 					else
 					{
-						fprintf(out, "%s,%s,%ld,%ld,%lld\n", id, ip_str, start, end, (unsigned long long int)bw );
+						fprintf(out, "%s,%s,%lld,%lld,%lld\n", id, ip_str, start, end, (unsigned long long int)bw );
 					}
 				
 	
