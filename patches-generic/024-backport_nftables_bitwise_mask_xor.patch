@@ -1561,7 +1561,7 @@
 + 	return &nft_bitwise_fast_ops;
 --- /dev/null
 +++ b/target/linux/generic/backport-6.6/799-v6.13-02-netfilter-bitwise-add-support-and-or-xor-directly.patch
-@@ -0,0 +1,294 @@
+@@ -0,0 +1,292 @@
 +From b0ccf4f53d968e794a4ea579d5135cc1aaf1a53f Mon Sep 17 00:00:00 2001
 +From: Jeremy Sowden <jeremy@azazel.net>
 +Date: Thu, 14 Nov 2024 22:08:13 +0100
@@ -1579,8 +1579,6 @@
 +- EINVAL if NFTA_BITWISE_SREG2 is used with fast version.
 +- Allow _AND,_OR,_XOR with _DATA != sizeof(u32)
 +- Dump _SREG2 or _DATA with _AND,_OR,_XOR
-+
-+Lantis has made a mod to this patch to save backporting the updated nft_parse_register_load function
 +
 +Signed-off-by: Jeremy Sowden <jeremy@azazel.net>
 +Signed-off-by: Pablo Neira Ayuso <pablo@netfilter.org>
@@ -1770,7 +1768,7 @@
 ++		if (err < 0)
 ++			return err;
 ++	} else {
-++		err = nft_parse_register_load(tb[NFTA_BITWISE_SREG2], /* Lantis modded here to save another backport */
+++		err = nft_parse_register_load(ctx, tb[NFTA_BITWISE_SREG2],
 ++					      &priv->sreg2, priv->len);
 ++		if (err < 0)
 ++			return err;
