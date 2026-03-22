@@ -3638,6 +3638,7 @@ CONFIG_PACKAGE_kmod-phy-ax88796b=m
 # CONFIG_PACKAGE_kmod-phy-marvell-10g is not set
 # CONFIG_PACKAGE_kmod-phy-micrel is not set
 # CONFIG_PACKAGE_kmod-phy-microchip is not set
+# CONFIG_PACKAGE_kmod-phy-motorcomm is not set
 # CONFIG_PACKAGE_kmod-phy-qca83xx is not set
 # CONFIG_PACKAGE_kmod-phy-realtek is not set
 # CONFIG_PACKAGE_kmod-phy-smsc is not set

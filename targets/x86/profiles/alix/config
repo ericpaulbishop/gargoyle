@@ -3402,6 +3402,7 @@ CONFIG_PACKAGE_kmod-phy-ax88796b=m
 # CONFIG_PACKAGE_kmod-phy-marvell-10g is not set
 # CONFIG_PACKAGE_kmod-phy-micrel is not set
 # CONFIG_PACKAGE_kmod-phy-microchip is not set
+# CONFIG_PACKAGE_kmod-phy-motorcomm is not set
 # CONFIG_PACKAGE_kmod-phy-qca83xx is not set
 CONFIG_PACKAGE_kmod-phy-realtek=y
 # CONFIG_PACKAGE_kmod-phy-smsc is not set
@@ -3585,6 +3586,7 @@ CONFIG_PACKAGE_kmod-reed-solomon=y
 # CONFIG_PACKAGE_kmod-tpm-i2c-atmel is not set
 # CONFIG_PACKAGE_kmod-tpm-i2c-infineon is not set
 # CONFIG_PACKAGE_kmod-tpm-tis is not set
+# CONFIG_PACKAGE_kmod-tpm-tis-spi is not set
 # CONFIG_PACKAGE_kmod-ubootenv-nvram is not set
 # CONFIG_PACKAGE_kmod-w83627hf-wdt is not set
 # CONFIG_PACKAGE_kmod-wdt-sp805 is not set
