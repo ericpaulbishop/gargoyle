@@ -237,7 +237,8 @@ static time_t get_next_node_start_time(		time_t current_start_time,
 	{
 		while(next + reset_time <=  current_start_time)
 		{
-			struct tm* curr = localtime(&current_start_time);
+			struct tm* curr = localtime(&next);
+			time_t prev = next;
 			curr->tm_isdst = -1;
 			if(reset_interval == BANDWIDTH_MINUTE)
 			{
@@ -284,6 +285,18 @@ static time_t get_next_node_start_time(		time_t current_start_time,
 				curr->tm_mday = 1;
 				curr->tm_mon  = curr->tm_mon+1;
 				next = mktime(curr);
+			}
+
+			if(next <= prev)
+			{
+				// At DST boundaries mktime() might return the same time as "next" doesn't exist. Force forward time progression.
+				switch(reset_interval) {
+					case BANDWIDTH_MINUTE: next = prev + 60; break;
+					case BANDWIDTH_HOUR:   next = prev + 3600; break;
+					case BANDWIDTH_DAY:    next = prev + 86400; break;
+					case BANDWIDTH_WEEK:   next = prev + 86400; break; // fallback 1 day
+					case BANDWIDTH_MONTH:  next = prev + 86400; break; // fallback 1 day
+				}
 			}
 		}
 		next = next + reset_time; 
