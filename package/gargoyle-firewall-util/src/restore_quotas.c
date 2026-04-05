@@ -643,7 +643,7 @@ int main(int argc, char** argv)
 									ip_test = dcat_and_free(&subnet_test, &ip_test, 1, 1);
 									subnet_test = dynamic_strcat(3, " ip6 saddr ", local_subnet6, " ");
 									ip6_test = dcat_and_free(&subnet_test, &ip6_test, 1, 1);
-									applies_to = strdup("individual_src");
+									applies_to = strdup("individual-src");
 								}
 								else if(strcmp(types[type_index], "ingress_limit") == 0)
 								{
@@ -651,11 +651,11 @@ int main(int argc, char** argv)
 									ip_test = dcat_and_free(&subnet_test, &ip_test, 1, 1);
 									subnet_test = dynamic_strcat(3, " ip6 daddr ", local_subnet6, " ");
 									ip6_test = dcat_and_free(&subnet_test, &ip6_test, 1, 1);
-									applies_to = strdup("individual_dst");
+									applies_to = strdup("individual-dst");
 								}
 								else if(strcmp(types[type_index], "combined_limit") == 0)
 								{
-									applies_to = strdup("individual_local");
+									applies_to = strdup("individual-local");
 								}
 									
 								char *subnet_option = strdup(" subnet \\\"");
