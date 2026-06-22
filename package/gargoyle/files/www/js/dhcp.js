@@ -66,6 +66,7 @@ function saveChanges()
 		tableData = getTableDataArray(staticIpTable, true, false);
 		for(hostIdx = 0; hostIdx < tableData.length; hostIdx++)
 		{
+			if(tableData[hostIdx][1] == "" || tableData[hostIdx][1] == "-") { continue; }
 			cfgid = "static_host_" + (hostIdx+1);
 			uci.set("dhcp",cfgid,"","host");
 			hostname = tableData[hostIdx][0];
@@ -170,6 +171,7 @@ function resetData()
 		hostSection = hostSections[secIndex];
 		host = uciOriginal.get("dhcp",hostSection,"name");
 		mac = uciOriginal.get("dhcp",hostSection,"mac");
+		if(mac == "") { continue; }
 		ipv4 = uciOriginal.get("dhcp",hostSection,"ip");
 		hostid = uciOriginal.get("dhcp",hostSection,"hostid");
 		ipv6 = hostid == "" ? "" : ("00000000" + hostid).slice(-8).replace(/([0-9a-f]{4})([0-9a-f]{4})/i,"::$1:$2");
