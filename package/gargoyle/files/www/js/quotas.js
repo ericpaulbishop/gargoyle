@@ -1295,6 +1295,7 @@ function editQuotaModal()
 
 	modalButtons = [
 		{"title" : UI.CApplyChanges, "classes" : "btn btn-primary", "function" : function(){editQuota(editRow,editId);}},
+		{"title" : quotasStr.ResetUsage, "classes" : "btn btn-warning", "function" : function(){resetQuotaUsage(editId);}},
 		"defaultDiscard"
 	];
 
@@ -1304,4 +1305,23 @@ function editQuotaModal()
 
 	modalPrepare('quotas_modal', quotasStr.ESection, modalElements, modalButtons);
 	openModalWindow('quotas_modal');
+}
+
+// Reset one quota's accumulated usage to zero (calls the backend reset script).
+function resetQuotaUsage(id)
+{
+	if(!confirm(quotasStr.ResetConfirm)) { return; }
+	var cmd = "sh /usr/lib/gargoyle/reset_quota.sh \"" + id + "\"";
+	var param = getParameterDefinition("commands", cmd) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+	setControlsEnabled(false, true);
+	runAjax("POST", "utility/run_commands.sh", param, function(req)
+	{
+		if(req.readyState == 4)
+		{
+			setControlsEnabled(true);
+			closeModalWindow('quotas_modal');
+			//reload to show the zeroed usage
+			window.location.href = window.location.href;
+		}
+	});
 }

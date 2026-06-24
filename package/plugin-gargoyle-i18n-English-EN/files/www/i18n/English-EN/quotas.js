@@ -74,3 +74,5 @@ quotasStr.SetQuota="Set Quota Usage";
 quotasStr.Up="Up";
 quotasStr.Down="Down";
 quotasStr.Total="Total";
+quotasStr.ResetUsage="Reset Usage Now";
+quotasStr.ResetConfirm="Reset this quota usage to zero now?";
