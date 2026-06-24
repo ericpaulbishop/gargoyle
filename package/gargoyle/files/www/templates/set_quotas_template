@@ -1,4 +1,8 @@
 <div class="row form-group">
+	<span class="col-xs-12"><em style="color:#555">Sets the data <b>used so far</b> (the running meter), not the limit. Tick a box, enter a value &mdash; use <b>0</b> to reset.</em></span>
+</div>
+
+<div class="row form-group">
 	<span class="col-xs-5">
 		<input type="checkbox" id="use_set_up" onclick="enableAssociatedField(this,'set_up','')">
 		<label id="use_set_up_label" for='use_set_up'><%~ Up %>:</label>

@@ -918,7 +918,8 @@ function setDocumentLimit(bytes, textId, unitSelectId)
 		if(pb.match(new RegExp(UI.TBy))) { unit = UI.TB; multiple = 1024*1024*1024*1024; };
 		setSelectedValue(unitSelectId, unit, document);
 		var adjustedVal = truncateDecimal(bytes/multiple);
-		textEl.value = adjustedVal;
+		// strip trailing zeros for display (5.000 -> 5, 2.500 -> 2.5)
+		textEl.value = String(parseFloat(adjustedVal));
 	}
 }
 function setDocumentSpeed(kbytes, textId, unitSelectId)
@@ -936,7 +937,8 @@ function setDocumentSpeed(kbytes, textId, unitSelectId)
 	{
 		var pb = parseKbytesPerSecond(kbytes);
 		var splitParsed = pb.split(/[\t ]+/);
-		textEl.value = splitParsed[0];
+		// strip trailing zeros for display (5.000 -> 5, 2.500 -> 2.5)
+		textEl.value = String(parseFloat(splitParsed[0]));
 		switch (splitParsed[1])
 		{
 		case UI.KBs:
