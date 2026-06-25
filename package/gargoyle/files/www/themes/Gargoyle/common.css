@@ -153,10 +153,6 @@ nav>li.active>a
 {
 	margin-bottom: 30px
 }
-#content
-{
-	-webkit-overflow-scrolling: touch
-}
 .contributer
 {
 	font-size: 115%;
@@ -1187,7 +1183,6 @@ td.share_user_table_column_2
 	z-index: 1050;
 	overflow-x: hidden;
 	overflow-y: auto;
-	-webkit-overflow-scrolling: touch;
 	outline: 0;
 	background-color: rgba(0,0,0,0.75);
 }
@@ -1304,4 +1299,8 @@ td.share_user_table_column_2
 {
 	display: block;
 	opacity: 1;
+}
+select,select.form-control
+{
+	display: inline-block;
 }
