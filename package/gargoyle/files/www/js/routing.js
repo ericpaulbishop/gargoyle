@@ -120,9 +120,11 @@ function resetData()
 		iface= rLine[7] == lanIface ? iface + " (LAN)" : iface;
 		if(iface != "")
 		{
-			mask = (rLine[0] == "default" && rLine[2] == "0.0.0.0") ? "" : "/" + rLine[2];
+			var destination = (rLine[0] == "default" || (rLine[0] == "0.0.0.0" && rLine[2] == "0.0.0.0")) ? "default" : rLine[0];
+			var gateway = rLine[1] == "0.0.0.0" ? "*" : rLine[1];
+			mask = (destination == "default") ? "" : "/" + rLine[2];
 			mask = mask == "/255.255.255.255" ? "" : mask;
-			r.push(rLine[0] + mask, iface, rLine[1],  rLine[4]);
+			r.push(destination + mask, iface, gateway, rLine[4]);
 			activeRouteTableData.push(r);
 		}
 	}
