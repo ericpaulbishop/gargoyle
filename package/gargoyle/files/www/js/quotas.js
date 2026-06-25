@@ -918,7 +918,7 @@ function setDocumentLimit(bytes, textId, unitSelectId)
 		if(pb.match(new RegExp(UI.TBy))) { unit = UI.TB; multiple = 1024*1024*1024*1024; };
 		setSelectedValue(unitSelectId, unit, document);
 		var adjustedVal = truncateDecimal(bytes/multiple);
-		// strip trailing zeros for display (5.000 -> 5, 2.500 -> 2.5)
+		// truncateDecimal pads to 3dp for table alignment; strip that padding for input fields
 		textEl.value = String(parseFloat(adjustedVal));
 	}
 }
@@ -937,7 +937,7 @@ function setDocumentSpeed(kbytes, textId, unitSelectId)
 	{
 		var pb = parseKbytesPerSecond(kbytes);
 		var splitParsed = pb.split(/[\t ]+/);
-		// strip trailing zeros for display (5.000 -> 5, 2.500 -> 2.5)
+		// strip truncateDecimal's 3dp padding for input fields
 		textEl.value = String(parseFloat(splitParsed[0]));
 		switch (splitParsed[1])
 		{
@@ -1307,11 +1307,20 @@ function editQuotaModal()
 	openModalWindow('quotas_modal');
 }
 
-// Reset one quota's accumulated usage to zero (calls the backend reset script).
 function resetQuotaUsage(id)
 {
 	if(!confirm(quotasStr.ResetConfirm)) { return; }
-	var cmd = "sh /usr/lib/gargoyle/reset_quota.sh \"" + id + "\"";
+	var buildResetCmd = function(quotaId)
+	{
+		var f = "/tmp/" + quotaId + ".bw";
+		return [
+			"bw_get -i " + quotaId + " -f " + f,
+			"awk 'BEGIN{FS=OFS=\"\\t\"} NR==1{print;next} NF{$NF=0} 1' " + f + " > " + f + ".z && mv " + f + ".z " + f,
+			"bw_set -i " + quotaId + " -f " + f,
+			"rm -f " + f
+		].join("\n");
+	};
+	var cmd = [id + "_egress", id + "_ingress", id + "_combined"].map(buildResetCmd).join("\n");
 	var param = getParameterDefinition("commands", cmd) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
 	setControlsEnabled(false, true);
 	runAjax("POST", "utility/run_commands.sh", param, function(req)
@@ -1320,7 +1329,6 @@ function resetQuotaUsage(id)
 		{
 			setControlsEnabled(true);
 			closeModalWindow('quotas_modal');
-			//reload to show the zeroed usage
 			window.location.href = window.location.href;
 		}
 	});
