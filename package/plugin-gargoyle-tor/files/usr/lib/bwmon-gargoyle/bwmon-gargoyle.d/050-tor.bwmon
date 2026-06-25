@@ -105,9 +105,11 @@ setup()
 				[ -n "$rport" ] && comma=","
 			fi
 
-			nft add rule $download_table $download_chain tcp dport \{ $rport$comma$oport \} ct mark set ct mark \& 0x0FFFFFFF \| 0xF0000000
-			nft add rule $download_table $download_chain ip saddr @tor_relays ct mark set ct mark \& 0x0FFFFFFF \| 0xF0000000
-			nft add rule $upload_table $upload_chain ip daddr @tor_relays ct mark set ct mark \& 0x0FFFFFFF \| 0xF0000000
+			if [ -n "$rport" ] || [ -n "$oport" ] ; then
+				nft add rule $download_table $download_chain tcp dport \{ $rport$comma$oport \} ct mark set ct mark \& 0x0FFFFFFF \| 0xF0000000
+			fi
+			nft add rule $download_table $download_chain ip saddr @tor_relays4 ct mark set ct mark \& 0x0FFFFFFF \| 0xF0000000
+			nft add rule $upload_table $upload_chain ip daddr @tor_relays4 ct mark set ct mark \& 0x0FFFFFFF \| 0xF0000000
 			nft add rule $download_table $download_chain ct mark \& 0xF0000000 != 0xF0000000 return
 			nft add rule $upload_table $upload_chain ct mark \& 0xF0000000 != 0xF0000000 return
 
