@@ -121,7 +121,6 @@ legend
 	line-height: 25px;
 	padding-top:5px;
 	display: block;
-	float: left;
 	text-decoration: underline;
 	font-weight:bold;
 	width: 100%;
@@ -186,6 +185,12 @@ li.sidebar-header span#garg_host
 li.sidebar-item 
 {
 	line-height: 40px;
+}
+li.sidebar-item::after
+{
+	content: "";
+	display: block;
+	clear: both;
 }
 li.sidebar-item a 
 {
@@ -279,7 +284,6 @@ ul.sidebar li a
 {
 	color: #121660;
 	display: block;
-	float: left;
 	text-decoration: none;
 	width: 100%;
 	font-size: 20px;
