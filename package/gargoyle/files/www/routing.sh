@@ -22,8 +22,8 @@
 	echo "var wanIface=\"$wan_iface\";"
 	echo "var routingData = new Array();"
 	echo "var routing6Data = new Array();"
-	route | awk ' {print "routingData.push(\""$0"\");"};'
-	route -A inet6 | sed 's/%[0-9]\{2\}//g' | grep -v '^fe80:*' | grep -v '^ff00::/8*' | awk ' {print "routing6Data.push(\""$0"\");"};'
+	route -n | awk ' {print "routingData.push(\""$0"\");"};'
+	route -n -A inet6 | sed 's/%[0-9]\{2\}//g' | grep -v '^fe80:*' | grep -v '^ff00::/8*' | awk ' {print "routing6Data.push(\""$0"\");"};'
 %>
 
 //-->
