@@ -1321,7 +1321,7 @@ function resetQuotaUsage(id)
 			"bw_get -i " + quotaId + " -f " + f + " >/dev/null 2>&1",
 			"awk 'BEGIN{FS=OFS=\"\\t\"} NR==1{print;next} NF{$NF=0} 1' " + f + " > " + f + ".z 2>/dev/null && mv " + f + ".z " + f + " 2>/dev/null",
 			"bw_set -i " + quotaId + " -f " + f + " >/dev/null 2>&1",
-			"rm -f " + f
+			"rm -f " + f + " " + f + ".z"
 		].join("\n");
 	};
 	var cmd = [id + "_egress", id + "_ingress", id + "_combined"].map(buildResetCmd).join("\n");
