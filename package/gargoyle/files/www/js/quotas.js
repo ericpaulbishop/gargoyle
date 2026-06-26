@@ -1313,10 +1313,14 @@ function resetQuotaUsage(id)
 	var buildResetCmd = function(quotaId)
 	{
 		var f = "/tmp/" + quotaId + ".bw";
+		// Suppress errors: a never-saved quota (or a firewall race) has no counter
+		// file, so bw_get/awk/bw_set would otherwise spew to the console.
+		// Note: only stderr is silenced on the awk line; its "> .z" stdout redirect
+		// must be preserved or the counter file would be wiped instead of zeroed.
 		return [
-			"bw_get -i " + quotaId + " -f " + f,
-			"awk 'BEGIN{FS=OFS=\"\\t\"} NR==1{print;next} NF{$NF=0} 1' " + f + " > " + f + ".z && mv " + f + ".z " + f,
-			"bw_set -i " + quotaId + " -f " + f,
+			"bw_get -i " + quotaId + " -f " + f + " >/dev/null 2>&1",
+			"awk 'BEGIN{FS=OFS=\"\\t\"} NR==1{print;next} NF{$NF=0} 1' " + f + " > " + f + ".z 2>/dev/null && mv " + f + ".z " + f + " 2>/dev/null",
+			"bw_set -i " + quotaId + " -f " + f + " >/dev/null 2>&1",
 			"rm -f " + f
 		].join("\n");
 	};
@@ -1329,7 +1333,9 @@ function resetQuotaUsage(id)
 		{
 			setControlsEnabled(true);
 			closeModalWindow('quotas_modal');
-			window.location.href = window.location.href;
+			// No page reload: this page does not display live usage, and a reload
+			// would discard any unsaved edits in the quota form. Just confirm.
+			alert(quotasStr.ResetDone);
 		}
 	});
 }
