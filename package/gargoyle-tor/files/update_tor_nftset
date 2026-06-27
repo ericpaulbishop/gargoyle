@@ -15,8 +15,8 @@ if [ ! -f "$cache_file" ] ; then
 	cache_file="$tor_dir/cached-microdesc-consensus"
 fi
 
-nft add set inet fw4 tor_relays4 \{ type ipv4_addr\; \}
-nft add set inet fw4 tor_relays6 \{ type ipv6_addr\; \}
+nft add set inet fw4 tor_relays4 \{ type ipv4_addr\; \} 2>/dev/null
+nft add set inet fw4 tor_relays6 \{ type ipv6_addr\; \} 2>/dev/null
 old_md5sum=""
 if [ -f /tmp/tor-consensus-md5 ] ; then
 	old_md5sum=$(cat  /tmp/tor-consensus-md5 )
