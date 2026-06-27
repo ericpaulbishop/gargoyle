@@ -918,7 +918,8 @@ function setDocumentLimit(bytes, textId, unitSelectId)
 		if(pb.match(new RegExp(UI.TBy))) { unit = UI.TB; multiple = 1024*1024*1024*1024; };
 		setSelectedValue(unitSelectId, unit, document);
 		var adjustedVal = truncateDecimal(bytes/multiple);
-		textEl.value = adjustedVal;
+		// truncateDecimal pads to 3dp for table alignment; strip that padding for input fields
+		textEl.value = String(parseFloat(adjustedVal));
 	}
 }
 function setDocumentSpeed(kbytes, textId, unitSelectId)
@@ -936,7 +937,8 @@ function setDocumentSpeed(kbytes, textId, unitSelectId)
 	{
 		var pb = parseKbytesPerSecond(kbytes);
 		var splitParsed = pb.split(/[\t ]+/);
-		textEl.value = splitParsed[0];
+		// strip truncateDecimal's 3dp padding for input fields
+		textEl.value = String(parseFloat(splitParsed[0]));
 		switch (splitParsed[1])
 		{
 		case UI.KBs:
@@ -1293,6 +1295,7 @@ function editQuotaModal()
 
 	modalButtons = [
 		{"title" : UI.CApplyChanges, "classes" : "btn btn-primary", "function" : function(){editQuota(editRow,editId);}},
+		{"title" : quotasStr.ResetUsage, "classes" : "btn btn-warning", "function" : function(){resetQuotaUsage(editId);}},
 		"defaultDiscard"
 	];
 
@@ -1302,4 +1305,37 @@ function editQuotaModal()
 
 	modalPrepare('quotas_modal', quotasStr.ESection, modalElements, modalButtons);
 	openModalWindow('quotas_modal');
+}
+
+function resetQuotaUsage(id)
+{
+	if(!confirm(quotasStr.ResetConfirm)) { return; }
+	var buildResetCmd = function(quotaId)
+	{
+		var f = "/tmp/" + quotaId + ".bw";
+		// Suppress errors: a never-saved quota (or a firewall race) has no counter
+		// file, so bw_get/awk/bw_set would otherwise spew to the console.
+		// Note: only stderr is silenced on the awk line; its "> .z" stdout redirect
+		// must be preserved or the counter file would be wiped instead of zeroed.
+		return [
+			"bw_get -i " + quotaId + " -f " + f + " >/dev/null 2>&1",
+			"awk 'BEGIN{FS=OFS=\"\\t\"} NR==1{print;next} NF{$NF=0} 1' " + f + " > " + f + ".z 2>/dev/null && mv " + f + ".z " + f + " 2>/dev/null",
+			"bw_set -i " + quotaId + " -f " + f + " >/dev/null 2>&1",
+			"rm -f " + f + " " + f + ".z"
+		].join("\n");
+	};
+	var cmd = [id + "_egress", id + "_ingress", id + "_combined"].map(buildResetCmd).join("\n");
+	var param = getParameterDefinition("commands", cmd) + "&" + getParameterDefinition("hash", document.cookie.replace(/^.*hash=/,"").replace(/[\t ;]+.*$/, ""));
+	setControlsEnabled(false, true);
+	runAjax("POST", "utility/run_commands.sh", param, function(req)
+	{
+		if(req.readyState == 4)
+		{
+			setControlsEnabled(true);
+			closeModalWindow('quotas_modal');
+			// No page reload: this page does not display live usage, and a reload
+			// would discard any unsaved edits in the quota form. Just confirm.
+			alert(quotasStr.ResetDone);
+		}
+	});
 }

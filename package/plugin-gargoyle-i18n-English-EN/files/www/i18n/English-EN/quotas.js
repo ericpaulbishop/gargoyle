@@ -74,3 +74,7 @@ quotasStr.SetQuota="Set Quota Usage";
 quotasStr.Up="Up";
 quotasStr.Down="Down";
 quotasStr.Total="Total";
+quotasStr.ResetUsage="Reset Usage Now";
+quotasStr.ResetConfirm="Reset this quota usage to zero now?";
+quotasStr.ResetDone="Quota usage has been reset to zero.";
+quotasStr.SetQuotaHint="Sets the data <b>used so far</b> (the running meter, not the limit). Tick a box, enter a value, use <b>0</b> to reset.";
