@@ -15,8 +15,8 @@ if [ ! -f "$cache_file" ] ; then
 	cache_file="$tor_dir/cached-microdesc-consensus"
 fi
 
-nft add set inet fw4 tor_relays4 \{ type ipv4_addr\; \} 2>/dev/null
-nft add set inet fw4 tor_relays6 \{ type ipv6_addr\; \} 2>/dev/null
+nft add set inet bwmon tor_relays4 \{ type ipv4_addr\; \} 2>/dev/null
+nft add set inet bwmon tor_relays6 \{ type ipv6_addr\; \} 2>/dev/null
 old_md5sum=""
 if [ -f /tmp/tor-consensus-md5 ] ; then
 	old_md5sum=$(cat  /tmp/tor-consensus-md5 )
@@ -28,12 +28,12 @@ if [ -f "$cache_file" ] ; then
 		tor_ips=$(cat "$cache_file" | grep "^r " | awk ' { print $(NF-2) } ' | sort | uniq)
 		# batch all relay IPs into one nft -f - call (avoids ~10k fork/exec per update)
 		{
-			printf "flush set inet fw4 tor_relays4\n"
-			printf "flush set inet fw4 tor_relays6\n"
+			printf "flush set inet bwmon tor_relays4\n"
+			printf "flush set inet bwmon tor_relays6\n"
 			for tip in $tor_ips ; do
 				case "$tip" in
-					*:*) printf "add element inet fw4 tor_relays6 { %s }\n" "$tip" ;;
-					*)   printf "add element inet fw4 tor_relays4 { %s }\n" "$tip" ;;
+					*:*) printf "add element inet bwmon tor_relays6 { %s }\n" "$tip" ;;
+					*)   printf "add element inet bwmon tor_relays4 { %s }\n" "$tip" ;;
 				esac
 			done
 		} | nft -f -
