@@ -74,3 +74,7 @@ quotasStr.SetQuota="Ustaw użycie limitu";
 quotasStr.Up="Wysyłanie";
 quotasStr.Down="Pobieranie";
 quotasStr.Total="Łącznie";
+quotasStr.ResetUsage="Wyzeruj licznik użycia";
+quotasStr.ResetConfirm="Czy na pewno wyzerować licznik użycia dla tego limitu?";
+quotasStr.ResetDone="Licznik użycia został wyzerowany.";
+quotasStr.SetQuotaHint="Ustawia ilość danych <b>wykorzystanych do tej pory</b> (bieżący licznik, a nie limit). Zaznacz pole, wpisz wartość, użyj <b>0</b>, aby wyzerować licznik.";
