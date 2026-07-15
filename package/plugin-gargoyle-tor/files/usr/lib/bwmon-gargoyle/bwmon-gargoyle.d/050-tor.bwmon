@@ -181,6 +181,10 @@ teardown()
 	
 	delete_chain_from_table $bw_table_type $bw_table_name $download_chain
 	delete_chain_from_table $bw_table_type $bw_table_name $upload_chain
+
+	nft delete set $bw_table_type $bw_table_name tor_relays4 2>/dev/null
+	nft delete set $bw_table_type $bw_table_name tor_relays6 2>/dev/null
+	rm -f /tmp/tor-consensus-md5
 }
 
 RUN_MODE="$1"

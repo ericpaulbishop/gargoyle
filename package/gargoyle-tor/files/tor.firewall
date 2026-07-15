@@ -88,7 +88,7 @@ initialize()
 			nft add set inet fw4 tor_active_ips4 \{ type ipv4_addr\; \}
 			for ip in $(cat $enabled_ip_file) ; do nft add element inet fw4 tor_active_ips4 \{ $ip \} ; done
 			
-			nft add rule inet fw4 nat_tor_client ip saddr @tor_active_ips4 return
+			nft add rule inet fw4 nat_tor_client ip saddr != @tor_active_ips4 return
 			test_tor_active=" ip saddr @tor_active_ips4 "
 		fi
 	
