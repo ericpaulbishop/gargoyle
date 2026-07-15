@@ -19,6 +19,8 @@
 				<h3 class="panel-title"><%~ CSect %></h3>
 			</div>
 			<div class="panel-body">
+				<p><span class="contributer">Michael Gray:</span> <%~ MGray %></p>
+
 				<p><span class="contributer">Eric Bishop (<a href="http://gargoyle-router.com">gargoyle-router.com</a>):</span> <%~ EBishop %></p>
 
 				<p><span class="contributer">Paul Bixel:</span> <%~ PBixel %></p>
@@ -37,7 +39,6 @@
 
 				<p><span class="contributer">FRiC (<a href="http://ivoidwarranties.blogspot.com">ivoidwarranties.blogspot.com</a>):</span> <%~ FRiC %></p>
 				
-				<p><span class="contributer">Michael Gray:</span> <%~ MGray %></p>
 
 				<p><%~ logo %> (<a href="http://manfred-klein.ina-mar.com">manfred-klein.ina-mar.com</a>).</p>
 
