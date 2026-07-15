@@ -4,6 +4,7 @@
 . /usr/lib/bwmon-gargoyle/functions.sh
 
 bwmonscript="/usr/lib/bwmon-gargoyle/bwmon-gargoyle.d/050-tor.bwmon"
+tmp_cron="/tmp/tmp.tor.cron"
 
 if [ -f /tmp/tor.firewall.running ] ; then
 	exit
@@ -83,7 +84,7 @@ initialize()
 				touch "$enabled_ip_file" 
 			fi
 		
-			nft delete set inet fw4 tor_active_ips4
+			nft delete set inet fw4 tor_active_ips4 2>/dev/null
 			nft add set inet fw4 tor_active_ips4 \{ type ipv4_addr\; \}
 			for ip in $(cat $enabled_ip_file) ; do nft add element inet fw4 tor_active_ips4 \{ $ip \} ; done
 			
@@ -146,9 +147,9 @@ initialize()
 	fi
 	
 	if [ "$enabled" != "0" ]  && [ "$relay_mode$client_mode" != "00" ] ; then
-		# enable rebuilding tor_relays ipset
+		# enable rebuilding tor_relays nftset
 		touch /etc/crontabs/root
-		grep -v /usr/sbin/update_tor_nftset > "$tmp_cron"
+		grep -v /usr/sbin/update_tor_nftset /etc/crontabs/root > "$tmp_cron"
 		echo "* * * * * /usr/sbin/update_tor_nftset" >> "$tmp_cron"
 	
 		update_cron
@@ -161,7 +162,7 @@ shutdown()
 {
 	touch /etc/crontabs/root
 
-	grep -v /usr/sbin/update_tor_nftset > "$tmp_cron"
+	grep -v /usr/sbin/update_tor_nftset /etc/crontabs/root > "$tmp_cron"
 	update_cron
 
 	clear_chains
@@ -185,4 +186,3 @@ elif [ "$RUN_MODE" = "stop" ] ; then
 fi
 
 rm /tmp/tor.firewall.running
-
