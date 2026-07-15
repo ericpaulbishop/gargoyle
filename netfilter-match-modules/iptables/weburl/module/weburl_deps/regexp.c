@@ -162,6 +162,16 @@ void regerror(char * s)
 #define	WORST		0	/* Worst case. */
 
 /*
+ * Bound on match-time work: regmatch() visits at most this many program nodes
+ * per regexec() call before failing closed (returning "no match").  This caps
+ * the backtracking matcher so a pathological pattern -- e.g. (a|.)* or (.+)*
+ * against a crafted subject -- cannot spin for effectively unbounded CPU in
+ * softirq context.  The limit is generous relative to any legitimate URL and
+ * pattern; adjust if a real workload is ever found to approach it.
+ */
+#define	REGEXP_MAX_MATCH_STEPS	1000000UL
+
+/*
  * Global work variables for regcomp().
  */
 struct match_globals {
@@ -174,6 +184,7 @@ int regnpar;		/* () count. */
 char regdummy;
 char *regcode;		/* Code-emit pointer; &regdummy = don't. */
 long regsize;		/* Code size. */
+unsigned long steps;	/* regmatch() node-visit budget counter. */
 };
 
 /*
@@ -754,6 +765,11 @@ regexec(regexp *prog, char *string)
 	/* Mark beginning of line for ^ . */
 	g.regbol = string;
 
+	/* Reset the match-cost budget for this call.  The counter lives across
+	 * every regtry() attempt below, so it bounds the total work spent on one
+	 * regexec(), not just a single anchor position. */
+	g.steps = 0;
+
 	/* Simplest case:  anchored match need be tried only once. */
 	if (prog->reganch)
 		return(regtry(&g, prog, string));
@@ -827,6 +843,12 @@ regmatch(struct match_globals *g, char *prog)
 		fprintf(stderr, "%s(\n", regprop(scan));
 #endif
 	while (scan != NULL) {
+		/* Charge one unit of the match-cost budget per node visited.  This
+		 * covers both the loop over "ordinary" nodes and every recursive
+		 * regmatch() call, so a pattern that backtracks catastrophically
+		 * fails closed here instead of running effectively forever. */
+		if (++g->steps > REGEXP_MAX_MATCH_STEPS)
+			return(0);
 #ifdef DEBUG
 		if (regnarrate)
 			fprintf(stderr, "%s...\n", regprop(scan));
