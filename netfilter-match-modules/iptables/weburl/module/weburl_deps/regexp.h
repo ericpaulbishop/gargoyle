@@ -35,7 +35,6 @@ typedef struct regexp {
 
 regexp * regcomp(char *exp, int *patternsize);
 int regexec(regexp *prog, char *string);
-void regsub(regexp *prog, char *source, char *dest);
 void regerror(char *s);
 
 #endif
