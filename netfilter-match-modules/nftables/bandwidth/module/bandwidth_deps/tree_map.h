@@ -213,6 +213,10 @@ void* get_string_map_element(string_map* map, const char* key)
 void* get_string_map_element_with_hashed_key(string_map* map, unsigned long hashed_key)
 {
 	void* return_value;
+	if(map == NULL)
+	{
+		return NULL;
+	}
 	/* printk("doing lookup for key = %lu\n", hashed_key); */
 	return_value =  get_long_map_element( &(map->lm), hashed_key);
 	if(return_value != NULL && map->store_keys)
@@ -278,6 +282,16 @@ void* remove_string_map_element(string_map* map, const char* key)
 char** get_string_map_keys(string_map* map, unsigned long* num_keys_returned)
 {
 	char** str_keys;
+	if(map == NULL)
+	{
+		*num_keys_returned = 0;
+		str_keys = (char**)malloc(sizeof(char*));
+		if(str_keys != NULL)
+		{
+			str_keys[0] = NULL;
+		}
+		return str_keys;
+	}
 	str_keys = (char**)malloc((map->num_elements+1)*sizeof(char*));
 	if(str_keys == NULL) /* deal with malloc failure */
 	{
@@ -1078,6 +1092,11 @@ static void rotate_left (long_map_node** parent)
 static unsigned long sdbm_string_hash(const char *key)
 {
 	unsigned long hashed_key = 0;
+
+	if(key == NULL)
+	{
+		return hashed_key;
+	}
 
 	int index = 0;
 	unsigned int nextch;
