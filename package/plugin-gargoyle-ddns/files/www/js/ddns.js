@@ -19,17 +19,19 @@ function saveChanges()
 
 	//completely re-build config data
 	deleteCommands = [];
+	diffBase = uciOriginal.clone();
 	sections = uciOriginal.getAllSections("ddns_gargoyle");
 	for(sectionIndex=0; sectionIndex < sections.length; sectionIndex++)
 	{
 		deleteCommands.push("uci del ddns_gargoyle." + sections[sectionIndex]);
+		diffBase.removeSection("ddns_gargoyle", sections[sectionIndex]);
 	}
 	deleteCommands.push("uci commit");
 
 
 
 
-	createCommands = uci.getScriptCommands(new UCIContainer());
+	createCommands = uci.getScriptCommands(diffBase);
 	testCommands = ["/etc/init.d/ddns_gargoyle stop", "/etc/init.d/ddns_gargoyle test_config"];
 
 
