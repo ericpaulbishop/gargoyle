@@ -36,7 +36,7 @@ function saveChanges()
 		gargLogoHostname.replaceChild( document.createTextNode(idtS.DevNm+": " + hostname), gargLogoHostname.firstChild );
 
 
-		var commands = uci.getScriptCommands(uciOriginal) + "\necho \"" + hostname + "\" > /proc/sys/kernel/hostname \n" + (havePrinterScript ? "\nsh /usr/lib/gargoyle/configure_printer.sh\n" : "")
+		var commands = uci.getScriptCommands(uciOriginal) + "\necho '" + hostname + "' > /proc/sys/kernel/hostname \n" + (havePrinterScript ? "\nsh /usr/lib/gargoyle/configure_printer.sh\n" : "")
 
 
 		//document.getElementById("output").value = commands;
@@ -58,17 +58,29 @@ function saveChanges()
 	}
 }
 
+// Hostname is specifically limited to not contain any subdomains and is therefore a single DNS Label
+function validateHostName(hostname)
+{
+	if(hostname == null) { return 1; }
+	return hostname.match(/^[A-Za-z0-9]([A-Za-z0-9\-]{0,61}[A-Za-z0-9])?$/) ? 0 : 1;
+}
+// Domain is validated as dot separated DNS Labels
+function validateDomain(domain)
+{
+	if(domain == null) { return 1; }
+	return domain.match(/^[A-Za-z0-9]([A-Za-z0-9\-]{0,61}[A-Za-z0-9])?(\.[A-Za-z0-9]([A-Za-z0-9\-]{0,61}[A-Za-z0-9])?)*$/) ? 0 : 1;
+}
+
 function proofreadAll()
 {
-	var notEmpty = function(text){ return validateLengthRange(text,1,999); }
 	var errors;
 	if(!isBridge(uciOriginal))
 	{
-		errors = proofreadFields( ["hostname", "domain"], ["hostname_label", "domain_label"], [notEmpty, notEmpty], [0,0], ["hostname", "domain"]);
+		errors = proofreadFields( ["hostname", "domain"], ["hostname_label", "domain_label"], [validateHostName, validateDomain], [0,0], ["hostname", "domain"]);
 	}
 	else
 	{
-		errors = proofreadFields( ["hostname"], ["hostname_label"], [notEmpty], [0], ["hostname"]);
+		errors = proofreadFields( ["hostname"], ["hostname_label"], [validateHostName], [0], ["hostname"]);
 	}
 	return errors;
 }
