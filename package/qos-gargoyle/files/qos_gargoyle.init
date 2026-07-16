@@ -181,12 +181,12 @@ apply_all_rules()
 					fi
 				;;
 				srcport)
-					if [ -n $(echo $option_value | grep ":") ] ; then option_value="$(echo "$option_value" | sed -e 's,:,-,g')" ; fi
+					if echo "$option_value" | grep -q ":" ; then option_value="$(echo "$option_value" | sed -e 's,:,-,g')" ; fi
 					match_str="$match_str PPROTOO sport $option_value"
 					need_proto="1"
 				;;
 				dstport)
-					if [ -n $(echo $option_value | grep ":") ] ; then option_value="$(echo "$option_value" | sed -e 's,:,-,g')" ; fi
+					if echo "$option_value" | grep -q ":" ; then option_value="$(echo "$option_value" | sed -e 's,:,-,g')" ; fi
 					match_str="$match_str PPROTOO dport $option_value"
 					need_proto="1"
 				;;

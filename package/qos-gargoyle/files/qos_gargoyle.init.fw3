@@ -169,12 +169,12 @@ apply_all_rules()
 					match_str="$match_str -d $option_value"
 				;;
 				srcport)
-					if [ -n $(echo $option_value | grep "-") ] ; then option_value="$(echo "$option_value" | sed -e 's,-,:,g')" ; fi
+					if echo "$option_value" | grep -q "-" ; then option_value="$(echo "$option_value" | sed -e 's,-,:,g')" ; fi
 					match_str="$match_str --sport $option_value"
 					need_proto="1"
 				;;
 				dstport)
-					if [ -n $(echo $option_value | grep "-") ] ; then option_value="$(echo "$option_value" | sed -e 's,-,:,g')" ; fi
+					if echo "$option_value" | grep -q "-" ; then option_value="$(echo "$option_value" | sed -e 's,-,:,g')" ; fi
 					match_str="$match_str --dport $option_value"
 					need_proto="1"
 
@@ -532,7 +532,7 @@ initialize_qos()
 
 	#Only if both upload and download QoS are enabled can we enable Gargoyle active QoS monitor
 	if [ $total_download_bandwidth -eq 0 ] || [ $total_upload_bandwidth -eq 0 ] ; then
-		qos_monenabled = "false" ;
+		qos_monenabled="false" ;
 	fi
 
 	if [ $total_download_bandwidth -ge 0 ] ; then
